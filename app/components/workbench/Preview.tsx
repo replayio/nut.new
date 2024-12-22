@@ -4,8 +4,15 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PortDropdown } from './PortDropdown';
 import { ScreenshotSelector } from './ScreenshotSelector';
+import { assert, saveReplayRecording } from './Recording';
 
 type ResizeSide = 'left' | 'right' | null;
+
+enum RecordingState {
+  CreateRecording = 'create-recording',
+  SaveRecording = 'save-recording',
+  ViewRecording = 'view-recording',
+}
 
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -22,6 +29,8 @@ export const Preview = memo(() => {
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+
+  const [recordingState, setRecordingState] = useState<RecordingState>(RecordingState.CreateRecording);
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
@@ -213,6 +222,16 @@ export const Preview = memo(() => {
     </div>
   );
 
+  const beginSaveRecording = () => {
+    assert(recordingState === RecordingState.CreateRecording);
+    setRecordingState(RecordingState.SaveRecording);
+
+    assert(iframeRef.current);
+    saveReplayRecording(iframeRef.current).then(() => {
+      setRecordingState(RecordingState.ViewRecording);
+    });
+  };
+
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col relative">
       {isPortDropdownOpen && (
@@ -221,9 +240,15 @@ export const Preview = memo(() => {
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
         <IconButton
-          icon="i-ph:selection"
-          onClick={() => setIsSelectionMode(!isSelectionMode)}
-          className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
+          icon="i-ph:record-fill"
+          onClick={() => {
+            if (recordingState == RecordingState.CreateRecording) {
+              beginSaveRecording();
+            }
+          }}
+          style={{
+            color: recordingState == RecordingState.CreateRecording ? 'red' : '',
+          }}
         />
         <div
           className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive

@@ -11,6 +11,7 @@ interface BaseIconButtonProps {
   title?: string;
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  style?: React.CSSProperties;
 }
 
 type IconButtonWithoutChildrenProps = {
@@ -39,6 +40,7 @@ export const IconButton = memo(
         title,
         onClick,
         children,
+        style,
       }: IconButtonProps,
       ref: ForwardedRef<HTMLButtonElement>,
     ) => {
@@ -61,6 +63,7 @@ export const IconButton = memo(
 
             onClick?.(event);
           }}
+          style={style}
         >
           {children ? children : <div className={classNames(icon, getIconSize(size), iconClassName)}></div>}
         </button>
