@@ -50,30 +50,71 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
   iframe.contentWindow.postMessage("recording-data-request", "*");
 
-  window.addEventListener("message", (event) => {
-    if (event.data?.source == "recording-data-response") {
-      const decoder = new TextDecoder();
-      const jsonString = decoder.decode(event.data.buffer);
-      const data = JSON.parse(jsonString);
-
-      console.log("ParentReceivedResponse", data);
-    }
+  const data = await new Promise((resolve) => {
+    window.addEventListener("message", (event) => {
+      if (event.data?.source == "recording-data-response") {
+        const decoder = new TextDecoder();
+        const jsonString = decoder.decode(event.data.buffer);
+        const data = JSON.parse(jsonString) as RerecordData;
+        resolve(data);
+      }
+    });
   });
-
-  const data: RerecordData = {
-    locationHref: iframe.src,
-    documentUrl: iframe.src,
-    resources: [],
-    interactions: [],
-  };
 
   console.log("RerecordData", data);
 }
 
 function addRecordingMessageHandler() {
-  window.addEventListener("message", (event) => {
+  let resources: RerecordResource[] = [];
+
+  async function addResource(url: string) {
+    const response = await fetch(url);
+    const body = await response.text();
+
+    resources.push({
+      url,
+      requestBodyBase64: "",
+      responseBodyBase64: btoa(body),
+      responseStatus: response.status,
+      responseHeaders: Object.fromEntries(response.headers.entries()),
+    });
+  }
+
+  async function getRerecordData(): Promise<RerecordData> {
+    const promises: Promise<void>[] = [];
+    promises.push(addResource(window.location.href));
+
+    // Find all script elements and add their sources to resources
+    const scriptElements = document.getElementsByTagName('script');
+    for (const script of scriptElements) {
+      if (script.src) {
+        promises.push(addResource(script.src));
+      }
+    }
+
+    // Find all stylesheet links and add them to resources
+    const linkElements = document.getElementsByTagName('link');
+    for (const link of linkElements) {
+      if (link.rel === 'stylesheet' && link.href) {
+        promises.push(addResource(link.href));
+      }
+    }
+
+    await Promise.all(promises);
+
+    const data: RerecordData = {
+      locationHref: window.location.href,
+      documentUrl: window.location.href,
+      resources,
+      interactions: [],
+    };
+
+    return data;
+  }
+
+  window.addEventListener("message", async (event) => {
     if (event.data == "recording-data-request") {
-      const data = { data: 42 };
+      const data = await getRerecordData();
 
       const encoder = new TextEncoder();
       const serializedData = encoder.encode(JSON.stringify(data));
