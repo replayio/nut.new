@@ -80,10 +80,34 @@ function addRecordingMessageHandler() {
     return btoa(str);
   }
 
-  async function addResource(url: string) {
-    const response = await fetch(url);
+  function getScriptImports(text: string) {
+    // TODO: This should use a real parser.
+    const imports: string[] = [];
+    const lines = text.split("\n");
+    lines.forEach((line, index) => {
+      const match = line.match(/^import.*?['"]([^'")]+)/);
+      if (match) {
+        imports.push(match[1]);
+      }
+      if (line == "import {") {
+        for (let i = index + 1; i < lines.length; i++) {
+          const match = lines[i].match(/} from ['"]([^'")]+)/);
+          if (match) {
+            imports.push(match[1]);
+            break;
+          }
+        }
+      }
+    });
+    return imports;
+  }
+
+  async function addResource(path: string) {
+    const response = await fetch(path);
     const text = await response.text();
     const responseHeaders = Object.fromEntries(response.headers.entries());
+
+    const url = (new URL(path, window.location.href)).href;
 
     if (!resources.has(url)) {
       resources.set(url, {
@@ -95,25 +119,33 @@ function addRecordingMessageHandler() {
       });
     }
 
-    if (responseHeaders["content-type"] == "text/html") {
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, "text/html");
-        const scriptElements = doc.getElementsByTagName('script');
-        for (const script of scriptElements) {
-          if (script.src) {
-            await addResource(script.src);
-          }
-        }
-      } catch (e) {
-        console.error("AddResourceError", e);
+    if (responseHeaders["content-type"] == "application/javascript") {
+      const imports = getScriptImports(text);
+      for (const path of imports) {
+        await addResource(path);
       }
     }
   }
 
+  async function addDocumentResource() {
+    const headHTML = document.head.innerHTML;
+    const bodyHTML = document.body.innerHTML;
+    const documentBody = `<html><head>${headHTML}</head><body>${bodyHTML}</body></html>`;
+
+    const url = window.location.href;
+    resources.set(url, {
+      url,
+      requestBodyBase64: "",
+      responseBodyBase64: stringToBase64(documentBody),
+      responseStatus: 200,
+      responseHeaders: { "content-type": "text/html" },
+    });
+  }
+
   async function getRerecordData(): Promise<RerecordData> {
     const promises: Promise<void>[] = [];
-    promises.push(addResource(window.location.href));
+
+    promises.push(addDocumentResource());
 
     // Find all script elements and add their sources to resources
     const scriptElements = document.getElementsByTagName('script');
@@ -157,11 +189,11 @@ function addRecordingMessageHandler() {
 }
 
 export function injectRecordingMessageHandler(content: string) {
-  const bodyTag = content.indexOf("<body>");
-  assert(bodyTag != -1, "No <body> tag found");
+  const headTag = content.indexOf("<head>");
+  assert(headTag != -1, "No <head> tag found");
 
-  const bodyStart = bodyTag + 6;
+  const headEnd = headTag + 6;
 
   const text = `<script>(${addRecordingMessageHandler})()</script>`;
-  return content.slice(0, bodyStart) + text + content.slice(bodyStart);
+  return content.slice(0, headEnd) + text + content.slice(headEnd);
 }
