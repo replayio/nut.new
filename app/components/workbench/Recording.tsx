@@ -40,6 +40,21 @@ export interface RerecordInteraction {
   key?: string;
 }
 
+interface IndexedDBAccess {
+  kind: "get" | "put" | "add";
+  key?: any;
+  item?: any;
+  storeName: string;
+  databaseName: string;
+  databaseVersion: number;
+}
+
+interface LocalStorageAccess {
+  kind: "get" | "set";
+  key: string;
+  value?: string;
+}
+
 interface RerecordData {
   // Contents of window.location.href.
   locationHref: string;
@@ -52,6 +67,12 @@ interface RerecordData {
 
   // All user interactions made.
   interactions: RerecordInteraction[];
+
+  // All indexedDB accesses made.
+  indexedDBAccesses?: IndexedDBAccess[];
+
+  // All localStorage accesses made.
+  localStorageAccesses?: LocalStorageAccess[];
 }
 
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
@@ -75,6 +96,9 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
 function addRecordingMessageHandler() {
   const resources: Map<string, RerecordResource> = new Map();
   const interactions: RerecordInteraction[] = [];
+  const indexedDBAccesses: IndexedDBAccess[] = [];
+  const localStorageAccesses: LocalStorageAccess[] = [];
+
   const startTime = Date.now();
 
   function stringToBase64(inputString: string) {
@@ -180,6 +204,8 @@ function addRecordingMessageHandler() {
       documentUrl: window.location.href,
       resources: Array.from(resources.values()),
       interactions,
+      indexedDBAccesses,
+      localStorageAccesses,
     };
 
     return data;
@@ -262,7 +288,7 @@ function addRecordingMessageHandler() {
         ...getMouseEventData(event)
       });
     }
-  });
+  }, { capture: true, passive: true });
 
   window.addEventListener("dblclick", (event) => {
     if (event.target) {
@@ -272,7 +298,7 @@ function addRecordingMessageHandler() {
         ...getMouseEventData(event)
       });
     }
-  });
+  }, { capture: true, passive: true });
 
   window.addEventListener("keydown", (event) => {
     if (event.key) {
@@ -282,7 +308,180 @@ function addRecordingMessageHandler() {
         ...getKeyboardEventData(event)
       });
     }
-  });
+  }, { capture: true, passive: true });
+
+  function onInterceptedOperation(name: string) {
+    console.log(`InterceptedOperation ${name}`);
+  }
+
+  function interceptProperty(
+    obj: object,
+    prop: string,
+    interceptor: (basevalue: any) => any
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+    assert(descriptor?.get, "Property must have a getter");
+
+    let interceptValue: any;
+    Object.defineProperty(obj, prop, {
+      ...descriptor,
+      get() {
+        onInterceptedOperation(`Getter:${prop}`);
+        if (!interceptValue) {
+          const baseValue = (descriptor?.get as any).call(obj);
+          interceptValue = interceptor(baseValue);
+        }
+        return interceptValue;
+      },
+    });
+  }
+
+  const IDBFactoryMethods = {
+    _name: "IDBFactory",
+    open: (v: any) => createFunctionProxy(v, "open"),
+  };
+
+  const IDBOpenDBRequestMethods = {
+    _name: "IDBOpenDBRequest",
+    result: createProxy,
+  };
+
+  const IDBDatabaseMethods = {
+    _name: "IDBDatabase",
+    transaction: (v: any) => createFunctionProxy(v, "transaction"),
+  };
+
+  const IDBTransactionMethods = {
+    _name: "IDBTransaction",
+    objectStore: (v: any) => createFunctionProxy(v, "objectStore"),
+  };
+
+  function pushIndexedDBAccess(
+    request: IDBRequest,
+    kind: IndexedDBAccess["kind"],
+    key: any,
+    item: any
+  ) {
+    indexedDBAccesses.push({
+      kind,
+      key,
+      item,
+      storeName: (request.source as any).name,
+      databaseName: (request.transaction as any).db.name,
+      databaseVersion: (request.transaction as any).db.version,
+    });
+  }
+
+  // Map "get" requests to their keys.
+  const getRequestKeys: Map<IDBRequest, any> = new Map();
+
+  const IDBObjectStoreMethods = {
+    _name: "IDBObjectStore",
+    get: (v: any) =>
+      createFunctionProxy(v, "get", (request, key) => {
+        // Wait to add the request until the value is known.
+        getRequestKeys.set(request, key);
+        return createProxy(request);
+      }),
+    put: (v: any) =>
+      createFunctionProxy(v, "put", (request, item, key) => {
+        pushIndexedDBAccess(request, "put", key, item);
+        return createProxy(request);
+      }),
+    add: (v: any) =>
+      createFunctionProxy(v, "add", (request, item, key) => {
+        pushIndexedDBAccess(request, "add", key, item);
+        return createProxy(request);
+      }),
+  };
+
+  const IDBRequestMethods = {
+    _name: "IDBRequest",
+    result: (value: any, target: any) => {
+      const key = getRequestKeys.get(target);
+      if (key) {
+        pushIndexedDBAccess(target, "get", key, value);
+      }
+      return value;
+    },
+  };
+
+  function pushLocalStorageAccess(
+    kind: LocalStorageAccess["kind"],
+    key: string,
+    value?: string
+  ) {
+    localStorageAccesses.push({ kind, key, value });
+  }
+
+  const StorageMethods = {
+    _name: "Storage",
+    getItem: (v: any) =>
+      createFunctionProxy(v, "getItem", (value: string, key: string) => {
+        pushLocalStorageAccess("get", key, value);
+        return value;
+      }),
+    setItem: (v: any) =>
+      createFunctionProxy(v, "setItem", (_rv: undefined, key: string) => {
+        pushLocalStorageAccess("set", key);
+      }),
+  };
+
+  function createProxy(obj: any) {
+    let methods;
+    if (obj instanceof IDBFactory) {
+      methods = IDBFactoryMethods;
+    } else if (obj instanceof IDBOpenDBRequest) {
+      methods = IDBOpenDBRequestMethods;
+    } else if (obj instanceof IDBDatabase) {
+      methods = IDBDatabaseMethods;
+    } else if (obj instanceof IDBTransaction) {
+      methods = IDBTransactionMethods;
+    } else if (obj instanceof IDBObjectStore) {
+      methods = IDBObjectStoreMethods;
+    } else if (obj instanceof IDBRequest) {
+      methods = IDBRequestMethods;
+    } else if (obj instanceof Storage) {
+      methods = StorageMethods;
+    }
+    assert(methods, "Unknown object for createProxy");
+    const name = methods._name;
+
+    return new Proxy(obj, {
+      get(target, prop) {
+        onInterceptedOperation(`ProxyGetter:${name}.${String(prop)}`);
+        let value = target[prop];
+        if (typeof value === "function") {
+          value = value.bind(target);
+        }
+        if (methods[prop]) {
+          value = methods[prop](value, target);
+        }
+        return value;
+      },
+
+      set(target, prop, value) {
+        onInterceptedOperation(`ProxySetter:${name}.${String(prop)}`);
+        target[prop] = value;
+        return true;
+      },
+    });
+  }
+
+  function createFunctionProxy(
+    fn: any,
+    name: string,
+    handler?: (v: any, ...args: any[]) => any
+  ) {
+    return (...args: any[]) => {
+      onInterceptedOperation(`FunctionCall:${name}`);
+      const v = fn(...args);
+      return handler ? handler(v, ...args) : createProxy(v);
+    };
+  }
+
+  interceptProperty(window, "indexedDB", createProxy);
+  interceptProperty(window, "localStorage", createProxy);
 }
 
 export function injectRecordingMessageHandler(content: string) {
