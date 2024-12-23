@@ -14,22 +14,30 @@ interface RerecordResource {
   responseHeaders: Record<string, string>;
 }
 
-interface RerecordInteraction {
-  kind: "click";
+enum RerecordInteractionKind {
+  Click = "click",
+  DblClick = "dblclick",
+  KeyDown = "keydown",
+}
+
+export interface RerecordInteraction {
+  kind: RerecordInteractionKind;
 
   // Elapsed time when the interaction occurred.
   time: number;
 
-  // Selector of the element clicked.
+  // Selector of the element associated with the interaction.
   selector: string;
 
-  // Dimensions of the element clicked.
-  width: number;
-  height: number;
+  // For mouse interactions, dimensions and position within the
+  // element where the event occurred.
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
 
-  // Position within the element which was clicked.
-  x: number;
-  y: number;
+  // For keydown interactions, the key pressed.
+  key?: string;
 }
 
 interface RerecordData {
@@ -66,6 +74,8 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
 
 function addRecordingMessageHandler() {
   const resources: Map<string, RerecordResource> = new Map();
+  const interactions: RerecordInteraction[] = [];
+  const startTime = Date.now();
 
   function stringToBase64(inputString: string) {
     if (typeof inputString !== "string") {
@@ -169,7 +179,7 @@ function addRecordingMessageHandler() {
       locationHref: window.location.href,
       documentUrl: window.location.href,
       resources: Array.from(resources.values()),
-      interactions: [],
+      interactions,
     };
 
     return data;
@@ -186,6 +196,93 @@ function addRecordingMessageHandler() {
       window.parent.postMessage({ source: "recording-data-response", buffer }, "*", [buffer]);
     }
   });
+
+  // Evaluated function to find the selector and associated data.
+  function getMouseEventData(event: MouseEvent) {
+    assert(event.target);
+    const target = event.target as Element;
+    const selector = computeSelector(target);
+    const rect = target.getBoundingClientRect();
+    return {
+      selector,
+      width: rect.width,
+      height: rect.height,
+      x: event.clientX - rect.x,
+      y: event.clientY - rect.y,
+    };
+  }
+
+  function getKeyboardEventData(event: KeyboardEvent) {
+    assert(event.target);
+    const target = event.target as Element;
+    const selector = computeSelector(target);
+    return {
+      selector,
+      key: event.key,
+    };
+  }
+
+  function computeSelector(target: Element): string {
+    // Build a unique selector by walking up the DOM tree
+    const path: string[] = [];
+    let current: Element | null = target;
+
+    while (current) {
+      // If element has an ID, use it as it's the most specific
+      if (current.id) {
+        path.unshift(`#${current.id}`);
+        break;
+      }
+
+      // Get the element's tag name
+      let selector = current.tagName.toLowerCase();
+
+      // Add nth-child if there are siblings
+      const parent = current.parentElement;
+      if (parent) {
+        const siblings = Array.from(parent.children);
+        const index = siblings.indexOf(current) + 1;
+        if (siblings.filter(el => el.tagName === current!.tagName).length > 1) {
+          selector += `:nth-child(${index})`;
+        }
+      }
+
+      path.unshift(selector);
+      current = current.parentElement;
+    }
+
+    return path.join(" > ");
+  }
+
+  window.addEventListener("click", (event) => {
+    if (event.target) {
+      interactions.push({
+        kind: RerecordInteractionKind.Click,
+        time: Date.now() - startTime,
+        ...getMouseEventData(event)
+      });
+    }
+  });
+
+  window.addEventListener("dblclick", (event) => {
+    if (event.target) {
+      interactions.push({
+        kind: RerecordInteractionKind.DblClick,
+        time: Date.now() - startTime,
+        ...getMouseEventData(event)
+      });
+    }
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key) {
+      interactions.push({
+        kind: RerecordInteractionKind.KeyDown,
+        time: Date.now() - startTime,
+        ...getKeyboardEventData(event)
+      });
+    }
+  });
 }
 
 export function injectRecordingMessageHandler(content: string) {
@@ -194,6 +291,6 @@ export function injectRecordingMessageHandler(content: string) {
 
   const headEnd = headTag + 6;
 
-  const text = `<script>(${addRecordingMessageHandler})()</script>`;
+  const text = `<script>${assert} (${addRecordingMessageHandler})()</script>`;
   return content.slice(0, headEnd) + text + content.slice(headEnd);
 }
