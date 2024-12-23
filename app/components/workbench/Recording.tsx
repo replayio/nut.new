@@ -61,23 +61,54 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
     });
   });
 
-  console.log("RerecordData", data);
+  console.log("RerecordData", JSON.stringify(data));
 }
 
 function addRecordingMessageHandler() {
-  let resources: RerecordResource[] = [];
+  const resources: Map<string, RerecordResource> = new Map();
+
+  function stringToBase64(inputString: string) {
+    if (typeof inputString !== "string") {
+        throw new TypeError("Input must be a string.");
+    }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(inputString);
+    let str = "";
+    for (const byte of data) {
+      str += String.fromCharCode(byte);
+    }
+    return btoa(str);
+  }
 
   async function addResource(url: string) {
     const response = await fetch(url);
-    const body = await response.text();
+    const text = await response.text();
+    const responseHeaders = Object.fromEntries(response.headers.entries());
 
-    resources.push({
-      url,
-      requestBodyBase64: "",
-      responseBodyBase64: btoa(body),
-      responseStatus: response.status,
-      responseHeaders: Object.fromEntries(response.headers.entries()),
-    });
+    if (!resources.has(url)) {
+      resources.set(url, {
+        url,
+        requestBodyBase64: "",
+        responseBodyBase64: stringToBase64(text),
+        responseStatus: response.status,
+        responseHeaders,
+      });
+    }
+
+    if (responseHeaders["content-type"] == "text/html") {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+        const scriptElements = doc.getElementsByTagName('script');
+        for (const script of scriptElements) {
+          if (script.src) {
+            await addResource(script.src);
+          }
+        }
+      } catch (e) {
+        console.error("AddResourceError", e);
+      }
+    }
   }
 
   async function getRerecordData(): Promise<RerecordData> {
@@ -105,7 +136,7 @@ function addRecordingMessageHandler() {
     const data: RerecordData = {
       locationHref: window.location.href,
       documentUrl: window.location.href,
-      resources,
+      resources: Array.from(resources.values()),
       interactions: [],
     };
 
