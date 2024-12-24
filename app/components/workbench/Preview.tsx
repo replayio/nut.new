@@ -9,12 +9,6 @@ import { assert } from './ReplayProtocolClient';
 
 type ResizeSide = 'left' | 'right' | null;
 
-enum RecordingState {
-  CreateRecording = 'create-recording',
-  SaveRecording = 'save-recording',
-  ViewRecording = 'view-recording',
-}
-
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +25,13 @@ export const Preview = memo(() => {
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
-  const [recordingState, setRecordingState] = useState<RecordingState>(RecordingState.CreateRecording);
+  // Once a recording has been saved, the preview can no longer be interacted with.
+  // Reloading the preview or regenerating it after code changes will reset this.
+  const [recordingSaved, setRecordingSaved] = useState(false);
+
+  // The ID of the recording that was created. If a recording has been saved but
+  // no ID is set, the recording is still being created.
+  const [recordingId, setRecordingId] = useState<string | undefined>();
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
@@ -224,12 +224,12 @@ export const Preview = memo(() => {
   );
 
   const beginSaveRecording = () => {
-    assert(recordingState === RecordingState.CreateRecording);
-    setRecordingState(RecordingState.SaveRecording);
+    assert(!recordingSaved);
+    setRecordingSaved(true);
 
     assert(iframeRef.current);
-    saveReplayRecording(iframeRef.current).then(() => {
-      setRecordingState(RecordingState.ViewRecording);
+    saveReplayRecording(iframeRef.current).then((id) => {
+      setRecordingId(id);
     });
   };
 
@@ -240,17 +240,20 @@ export const Preview = memo(() => {
       )}
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-        <IconButton
-          icon="i-ph:record-fill"
-          onClick={() => {
-            if (recordingState == RecordingState.CreateRecording) {
-              beginSaveRecording();
-            }
-          }}
-          style={{
-            color: recordingState == RecordingState.CreateRecording ? 'red' : '',
-          }}
-        />
+        {!recordingSaved && (
+          <IconButton
+            icon="i-ph:record-fill"
+            onClick={beginSaveRecording}
+            style={{ color: 'red' }}
+          />
+        )}
+        {recordingSaved && (
+          <IconButton
+            icon="i-ph:selection"
+            onClick={() => setIsSelectionMode(!isSelectionMode)}
+            className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
+          />
+        )}
         <div
           className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive
         focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive"
@@ -324,6 +327,7 @@ export const Preview = memo(() => {
               />
               <ScreenshotSelector
                 isSelectionMode={isSelectionMode}
+                recordingSaved={recordingSaved}
                 setIsSelectionMode={setIsSelectionMode}
                 containerRef={iframeRef}
               />

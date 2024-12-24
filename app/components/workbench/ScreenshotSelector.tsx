@@ -3,12 +3,13 @@ import { toast } from 'react-toastify';
 
 interface ScreenshotSelectorProps {
   isSelectionMode: boolean;
+  recordingSaved: boolean;
   setIsSelectionMode: (mode: boolean) => void;
   containerRef: React.RefObject<HTMLElement>;
 }
 
 export const ScreenshotSelector = memo(
-  ({ isSelectionMode, setIsSelectionMode, containerRef }: ScreenshotSelectorProps) => {
+  ({ isSelectionMode, recordingSaved, setIsSelectionMode, containerRef }: ScreenshotSelectorProps) => {
     const [isCapturing, setIsCapturing] = useState(false);
     const [selectionStart, setSelectionStart] = useState<{ x: number; y: number } | null>(null);
     const [selectionEnd, setSelectionEnd] = useState<{ x: number; y: number } | null>(null);
@@ -252,7 +253,17 @@ export const ScreenshotSelector = memo(
     );
 
     if (!isSelectionMode) {
-      return null;
+      if (recordingSaved) {
+        // Draw an overlay to prevent interactions with the iframe.
+        return (
+          <div
+            className="absolute inset-0"
+            onClick={(event) => event.preventDefault()}
+          />
+        );
+      } else {
+        return null;
+      }
     }
 
     return (

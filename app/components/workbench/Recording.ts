@@ -108,7 +108,10 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
       name: "rerecordGenerate",
       params: {
         rerecordData: data,
-        apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9", // FIXME
+        // FIXME the backend should not require an API key for this command.
+        // For now we use an API key used in Replay's devtools (which is public
+        // but probably shouldn't be).
+        apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9",
       },
     },
     sessionId,
@@ -118,6 +121,7 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
 
   const recordingId = (rerecordRval as any).rval.rerecordedRecordingId as string;
   console.log("CreatedRecording", recordingId);
+  return recordingId;
 }
 
 function addRecordingMessageHandler() {
