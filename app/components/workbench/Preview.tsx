@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PortDropdown } from './PortDropdown';
-import { ScreenshotSelector } from './ScreenshotSelector';
+import { PointSelector } from './PointSelector';
 import { saveReplayRecording } from './Recording';
 import { assert } from './ReplayProtocolClient';
 
@@ -24,7 +24,7 @@ export const Preview = memo(() => {
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-
+  const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
   // Once a recording has been saved, the preview can no longer be interacted with.
   // Reloading the preview or regenerating it after code changes will reset this.
   const [recordingSaved, setRecordingSaved] = useState(false);
@@ -249,7 +249,7 @@ export const Preview = memo(() => {
         )}
         {recordingSaved && (
           <IconButton
-            icon="i-ph:selection"
+            icon="i-ph:cursor-click"
             onClick={() => setIsSelectionMode(!isSelectionMode)}
             className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
           />
@@ -325,10 +325,12 @@ export const Preview = memo(() => {
                 src={iframeUrl}
                 allowFullScreen
               />
-              <ScreenshotSelector
+              <PointSelector
                 isSelectionMode={isSelectionMode}
                 recordingSaved={recordingSaved}
                 setIsSelectionMode={setIsSelectionMode}
+                selectionPoint={selectionPoint}
+                setSelectionPoint={setSelectionPoint}
                 containerRef={iframeRef}
               />
             </>

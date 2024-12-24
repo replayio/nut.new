@@ -1,103 +1,45 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'react-toastify';
+import { memo, useCallback, useState } from 'react';
 
-interface ScreenshotSelectorProps {
+interface PointSelectorProps {
   isSelectionMode: boolean;
   setIsSelectionMode: (mode: boolean) => void;
+  selectionPoint: { x: number; y: number } | null;
+  setSelectionPoint: (point: { x: number; y: number } | null) => void;
+  recordingSaved: boolean;
   containerRef: React.RefObject<HTMLElement>;
 }
 
-export const ScreenshotSelector = memo(
-  ({ isSelectionMode, setIsSelectionMode, containerRef }: ScreenshotSelectorProps) => {
+export const PointSelector = memo(
+  (props: PointSelectorProps) => {
+    const {
+      isSelectionMode,
+      recordingSaved,
+      setIsSelectionMode,
+      selectionPoint,
+      setSelectionPoint,
+      containerRef,
+    } = props;
+
     const [isCapturing, setIsCapturing] = useState(false);
-    const [selectionStart, setSelectionStart] = useState<{ x: number; y: number } | null>(null);
-    const [selectionEnd, setSelectionEnd] = useState<{ x: number; y: number } | null>(null);
-    const mediaStreamRef = useRef<MediaStream | null>(null);
-    const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    useEffect(() => {
-      // Cleanup function to stop all tracks when component unmounts
-      return () => {
-        if (videoRef.current) {
-          videoRef.current.pause();
-          videoRef.current.srcObject = null;
-          videoRef.current.remove();
-          videoRef.current = null;
-        }
+    const handleSelectionClick = useCallback(async (event: React.MouseEvent) => {
+      debugger;
 
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-          mediaStreamRef.current = null;
-        }
-      };
-    }, []);
+      event.preventDefault();
+      event.stopPropagation();
 
-    const initializeStream = async () => {
-      if (!mediaStreamRef.current) {
-        try {
-          const stream = await navigator.mediaDevices.getDisplayMedia({
-            audio: false,
-            video: {
-              displaySurface: 'window',
-              preferCurrentTab: true,
-              surfaceSwitching: 'include',
-              systemAudio: 'exclude',
-            },
-          } as MediaStreamConstraints);
-
-          // Add handler for when sharing stops
-          stream.addEventListener('inactive', () => {
-            if (videoRef.current) {
-              videoRef.current.pause();
-              videoRef.current.srcObject = null;
-              videoRef.current.remove();
-              videoRef.current = null;
-            }
-
-            if (mediaStreamRef.current) {
-              mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-              mediaStreamRef.current = null;
-            }
-
-            setIsSelectionMode(false);
-            setSelectionStart(null);
-            setSelectionEnd(null);
-            setIsCapturing(false);
-          });
-
-          mediaStreamRef.current = stream;
-
-          // Initialize video element if needed
-          if (!videoRef.current) {
-            const video = document.createElement('video');
-            video.style.opacity = '0';
-            video.style.position = 'fixed';
-            video.style.pointerEvents = 'none';
-            video.style.zIndex = '-1';
-            document.body.appendChild(video);
-            videoRef.current = video;
-          }
-
-          // Set up video with the stream
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        } catch (error) {
-          console.error('Failed to initialize stream:', error);
-          setIsSelectionMode(false);
-          toast.error('Failed to initialize screen capture');
-        }
-      }
-
-      return mediaStreamRef.current;
-    };
-
-    const handleCopySelection = useCallback(async () => {
-      if (!isSelectionMode || !selectionStart || !selectionEnd || !containerRef.current) {
+      if (!isSelectionMode || !containerRef.current) {
         return;
       }
 
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      setSelectionPoint({ x, y });
+ 
       setIsCapturing(true);
 
+      /*
       try {
         const stream = await initializeStream();
 
@@ -214,58 +156,43 @@ export const ScreenshotSelector = memo(
         setSelectionEnd(null);
         setIsSelectionMode(false); // Turn off selection mode after capture
       }
-    }, [isSelectionMode, selectionStart, selectionEnd, containerRef, setIsSelectionMode]);
+      */
 
-    const handleSelectionStart = useCallback(
-      (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!isSelectionMode) {
-          return;
-        }
-
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        setSelectionStart({ x, y });
-        setSelectionEnd({ x, y });
-      },
-      [isSelectionMode],
-    );
-
-    const handleSelectionMove = useCallback(
-      (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!isSelectionMode || !selectionStart) {
-          return;
-        }
-
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        setSelectionEnd({ x, y });
-      },
-      [isSelectionMode, selectionStart],
-    );
+      setIsCapturing(false);
+      setIsSelectionMode(false); // Turn off selection mode after capture
+    }, [isSelectionMode, containerRef, setIsSelectionMode]);
 
     if (!isSelectionMode) {
-      return null;
+      if (recordingSaved) {
+        // Draw an overlay to prevent interactions with the iframe
+        // and to show the last point the user clicked (if there is one).
+        return (
+          <div
+            className="absolute inset-0"
+            onClick={(event) => event.preventDefault()}
+          >
+            { selectionPoint && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${selectionPoint.x-8}px`,
+                  top: `${selectionPoint.y-12}px`,
+                }}
+              >
+                &#10060;
+              </div>
+            )}
+          </div>
+        );
+      } else {
+        return null;
+      }
     }
 
     return (
       <div
-        className="absolute inset-0 cursor-crosshair"
-        onMouseDown={handleSelectionStart}
-        onMouseMove={handleSelectionMove}
-        onMouseUp={handleCopySelection}
-        onMouseLeave={() => {
-          if (selectionStart) {
-            setSelectionStart(null);
-          }
-        }}
+        className="absolute inset-0"
+        onClick={handleSelectionClick}
         style={{
           backgroundColor: isCapturing ? 'transparent' : 'rgba(0, 0, 0, 0.1)',
           userSelect: 'none',
@@ -276,17 +203,6 @@ export const ScreenshotSelector = memo(
           transition: 'opacity 0.1s ease-in-out',
         }}
       >
-        {selectionStart && selectionEnd && !isCapturing && (
-          <div
-            className="absolute border-2 border-blue-500 bg-blue-200 bg-opacity-20"
-            style={{
-              left: Math.min(selectionStart.x, selectionEnd.x),
-              top: Math.min(selectionStart.y, selectionEnd.y),
-              width: Math.abs(selectionEnd.x - selectionStart.x),
-              height: Math.abs(selectionEnd.y - selectionStart.y),
-            }}
-          />
-        )}
       </div>
     );
   },
