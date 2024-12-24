@@ -116,6 +116,8 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
 
   console.log("RerecordRval", rerecordRval);
 
+  const recordingId = (rerecordRval as any).rval.rerecordedRecordingId as string;
+  console.log("CreatedRecording", recordingId);
 }
 
 function addRecordingMessageHandler() {
