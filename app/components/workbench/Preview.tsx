@@ -4,7 +4,8 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PortDropdown } from './PortDropdown';
 import { ScreenshotSelector } from './ScreenshotSelector';
-import { assert, saveReplayRecording } from './Recording';
+import { saveReplayRecording } from './Recording';
+import { assert } from './ReplayProtocolClient';
 
 type ResizeSide = 'left' | 'right' | null;
 

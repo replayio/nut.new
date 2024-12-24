@@ -1,10 +1,6 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
-export function assert(condition: any, message: string = "Assertion failed!"): asserts condition {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
+import { assert, ProtocolClient } from "./ReplayProtocolClient";
 
 interface RerecordResource {
   url: string;
@@ -91,6 +87,35 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   });
 
   console.log("RerecordData", JSON.stringify(data));
+
+  const client = new ProtocolClient();
+  await client.initialize();
+
+  // Create a session for an arbitrary recording. We need this as experimental
+  // commands are on a session and we need a recording to get a session.
+  // TODO: Clean up the Replay backend to eliminate this requirement.
+  const sessionRval = await client.sendCommand({
+    method: "Recording.createSession",
+    params: {
+      recordingId: "aadd51ec-3bb4-47cc-a7f0-070bc4f3f18f",
+    },
+  });
+  const sessionId = (sessionRval as { sessionId: string }).sessionId;
+
+  const rerecordRval = await client.sendCommand({
+    method: "Session.experimentalCommand",
+    params: {
+      name: "rerecordGenerate",
+      params: {
+        rerecordData: data,
+        apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9", // FIXME
+      },
+    },
+    sessionId,
+  });
+
+  console.log("RerecordRval", rerecordRval);
+
 }
 
 function addRecordingMessageHandler() {
