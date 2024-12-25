@@ -73,7 +73,7 @@ interface RerecordData {
 
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
-  iframe.contentWindow.postMessage("recording-data-request", "*");
+  iframe.contentWindow.postMessage({ source: "recording-data-request" }, "*");
 
   const data = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
@@ -122,6 +122,21 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   const recordingId = (rerecordRval as any).rval.rerecordedRecordingId as string;
   console.log("CreatedRecording", recordingId);
   return recordingId;
+}
+
+export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }) {
+  assert(iframe.contentWindow);
+  iframe.contentWindow.postMessage({ source: "mouse-data-request", position }, "*");
+
+  const mouseData = await new Promise((resolve) => {
+    window.addEventListener("message", (event) => {
+      if (event.data?.source == "mouse-data-response") {
+        resolve(event.data.mouseData);
+      }
+    });
+  });
+
+  return mouseData;
 }
 
 function addRecordingMessageHandler() {
@@ -243,14 +258,34 @@ function addRecordingMessageHandler() {
   }
 
   window.addEventListener("message", async (event) => {
-    if (event.data == "recording-data-request") {
-      const data = await getRerecordData();
+    switch (event.data?.source) {
+      case "recording-data-request": {
+        const data = await getRerecordData();
 
-      const encoder = new TextEncoder();
-      const serializedData = encoder.encode(JSON.stringify(data));
-      const buffer = serializedData.buffer;      
+        const encoder = new TextEncoder();
+        const serializedData = encoder.encode(JSON.stringify(data));
+        const buffer = serializedData.buffer;
 
-      window.parent.postMessage({ source: "recording-data-response", buffer }, "*", [buffer]);
+        window.parent.postMessage({ source: "recording-data-response", buffer }, "*", [buffer]);
+        break;
+      }
+      case "mouse-data-request": {
+        const { x, y } = event.data.position;
+        const element = document.elementFromPoint(x, y);
+        assert(element);
+
+        const selector = computeSelector(element);
+        const rect = element.getBoundingClientRect();
+        const mouseData = {
+          selector,
+          width: rect.width,
+          height: rect.height,
+          x: x - rect.x,
+          y: y - rect.y,
+        };
+        window.parent.postMessage({ source: "mouse-data-response", mouseData }, "*");
+        break;
+      }
     }
   });
 

@@ -1,4 +1,5 @@
 import { memo, useCallback, useState } from 'react';
+import { getMouseData } from './Recording';
 
 interface PointSelectorProps {
   isSelectionMode: boolean;
@@ -6,7 +7,7 @@ interface PointSelectorProps {
   selectionPoint: { x: number; y: number } | null;
   setSelectionPoint: (point: { x: number; y: number } | null) => void;
   recordingSaved: boolean;
-  containerRef: React.RefObject<HTMLElement>;
+  containerRef: React.RefObject<HTMLIFrameElement>;
 }
 
 export const PointSelector = memo(
@@ -23,8 +24,6 @@ export const PointSelector = memo(
     const [isCapturing, setIsCapturing] = useState(false);
 
     const handleSelectionClick = useCallback(async (event: React.MouseEvent) => {
-      debugger;
-
       event.preventDefault();
       event.stopPropagation();
 
@@ -38,6 +37,9 @@ export const PointSelector = memo(
       setSelectionPoint({ x, y });
  
       setIsCapturing(true);
+
+      const mouseData = await getMouseData(containerRef.current, { x, y });
+      console.log("MouseData", mouseData);
 
       /*
       try {
