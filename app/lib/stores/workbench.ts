@@ -339,7 +339,7 @@ export class WorkbenchStore {
     return artifacts[id];
   }
 
-  async downloadZip() {
+  async generateZip() {
     const zip = new JSZip();
     const files = this.files.get();
 
@@ -374,6 +374,11 @@ export class WorkbenchStore {
 
     // Generate the zip file and save it
     const content = await zip.generateAsync({ type: 'blob' });
+    return { content, uniqueProjectName };
+  }
+
+  async downloadZip() {
+    const { content, uniqueProjectName } = await this.generateZip();
     saveAs(content, `${uniqueProjectName}.zip`);
   }
 

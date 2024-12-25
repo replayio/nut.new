@@ -7,7 +7,7 @@ interface AssistantMessageProps {
   annotations?: JSONValue[];
 }
 
-export const AssistantMessage = memo(({ content, annotations }: AssistantMessageProps) => {
+export function getAnnotationsTokensUsage(annotations: JSONValue[] | undefined) {
   const filteredAnnotations = (annotations?.filter(
     (annotation: JSONValue) => annotation && typeof annotation === 'object' && Object.keys(annotation).includes('type'),
   ) || []) as { type: string; value: any }[];
@@ -17,6 +17,12 @@ export const AssistantMessage = memo(({ content, annotations }: AssistantMessage
     promptTokens: number;
     totalTokens: number;
   } = filteredAnnotations.find((annotation) => annotation.type === 'usage')?.value;
+
+  return usage;
+}
+
+export const AssistantMessage = memo(({ content, annotations }: AssistantMessageProps) => {
+  const usage = getAnnotationsTokensUsage(annotations);
 
   return (
     <div className="overflow-hidden w-full">

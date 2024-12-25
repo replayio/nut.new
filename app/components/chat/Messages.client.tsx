@@ -1,19 +1,32 @@
 import type { Message } from 'ai';
 import React from 'react';
 import { classNames } from '~/utils/classNames';
-import { AssistantMessage } from './AssistantMessage';
+import { AssistantMessage, getAnnotationsTokensUsage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 import { useLocation } from '@remix-run/react';
 import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
+import { assert } from "~/components/workbench/ReplayProtocolClient";
 
 interface MessagesProps {
   id?: string;
   className?: string;
   isStreaming?: boolean;
   messages?: Message[];
+}
+
+interface ProjectBenchmark {
+  content: Blob;
+  uniqueProjectName: string;
+  input: string;
+}
+
+const gProjectBenchmarksByMessageId = new Map<string, ProjectBenchmark>();
+
+export function saveProjectBenchmark(messageId: string, benchmark: ProjectBenchmark) {
+  gProjectBenchmarksByMessageId.set(messageId, benchmark);
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
@@ -38,6 +51,22 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     } catch (error) {
       toast.error('Failed to fork chat: ' + (error as Error).message);
     }
+  };
+
+  const handleSaveBenchmarkProblem = (benchmark: ProjectBenchmark) => {
+    console.log("Save benchmark problem", benchmark);
+  };
+
+  const getLastMessageProjectBenchmark = (index: number) => {
+    // The message index is for the model response, and the project
+    // benchmark will be associated with the last message present when
+    // the user prompt was sent to the model. So look back two messages
+    // for the benchmark to use.
+    if (index < 2) {
+      return null;
+    }
+    const previousMessage = messages[index - 2];
+    return gProjectBenchmarksByMessageId.get(previousMessage.id);
   };
 
   return (
@@ -96,6 +125,24 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                         )}
                       />
                     </WithTooltip>
+
+                    {getAnnotationsTokensUsage(message.annotations) &&
+                     getLastMessageProjectBenchmark(index) && (
+                      <WithTooltip tooltip="Save benchmark problem">
+                        <button
+                          onClick={() => {
+                            const benchmark = getLastMessageProjectBenchmark(index);
+                            assert(benchmark);
+                            handleSaveBenchmarkProblem(benchmark);
+                          }}
+                          key="i-ph:export"
+                          className={classNames(
+                            'i-ph:export',
+                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                          )}
+                        />
+                      </WithTooltip>
+                    )}
                   </div>
                 )}
               </div>
