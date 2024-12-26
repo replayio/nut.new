@@ -1,6 +1,6 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
-import { assert, ProtocolClient } from "./ReplayProtocolClient";
+import { assert, sendCommandDedicatedClient, stringToBase64 } from "./ReplayProtocolClient";
 
 interface RerecordResource {
   url: string;
@@ -88,22 +88,8 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
 
   console.log("RerecordData", JSON.stringify(data));
 
-  const client = new ProtocolClient();
-  await client.initialize();
-
-  // Create a session for an arbitrary recording. We need this as experimental
-  // commands are on a session and we need a recording to get a session.
-  // TODO: Clean up the Replay backend to eliminate this requirement.
-  const sessionRval = await client.sendCommand({
-    method: "Recording.createSession",
-    params: {
-      recordingId: "aadd51ec-3bb4-47cc-a7f0-070bc4f3f18f",
-    },
-  });
-  const sessionId = (sessionRval as { sessionId: string }).sessionId;
-
-  const rerecordRval = await client.sendCommand({
-    method: "Session.experimentalCommand",
+  const rerecordRval = await sendCommandDedicatedClient({
+    method: "Recording.globalExperimentalCommand",
     params: {
       name: "rerecordGenerate",
       params: {
@@ -114,7 +100,6 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
         apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9",
       },
     },
-    sessionId,
   });
 
   console.log("RerecordRval", rerecordRval);
@@ -146,19 +131,6 @@ function addRecordingMessageHandler() {
   const localStorageAccesses: LocalStorageAccess[] = [];
 
   const startTime = Date.now();
-
-  function stringToBase64(inputString: string) {
-    if (typeof inputString !== "string") {
-        throw new TypeError("Input must be a string.");
-    }
-    const encoder = new TextEncoder();
-    const data = encoder.encode(inputString);
-    let str = "";
-    for (const byte of data) {
-      str += String.fromCharCode(byte);
-    }
-    return btoa(str);
-  }
 
   function getScriptImports(text: string) {
     // TODO: This should use a real parser.
@@ -556,6 +528,6 @@ export function injectRecordingMessageHandler(content: string) {
 
   const headEnd = headTag + 6;
 
-  const text = `<script>${assert} (${addRecordingMessageHandler})()</script>`;
+  const text = `<script>${assert} ${stringToBase64} (${addRecordingMessageHandler})()</script>`;
   return content.slice(0, headEnd) + text + content.slice(headEnd);
 }

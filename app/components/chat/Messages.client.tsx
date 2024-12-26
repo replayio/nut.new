@@ -8,7 +8,7 @@ import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
-import { assert } from "~/components/workbench/ReplayProtocolClient";
+import { assert, sendCommandDedicatedClient } from "~/components/workbench/ReplayProtocolClient";
 import ReactModal from 'react-modal';
 
 ReactModal.setAppElement('#root');
@@ -24,8 +24,10 @@ interface MessagesProps {
 // from the user and any associated Replay data to accomplish a task. Together
 // this information is enough that the model should be able to generate a
 // suitable fix.
+//
+// Must be JSON serializable.
 interface ProjectPrompt {
-  content: Blob;
+  content: string; // base64 encoded
   uniqueProjectName: string;
   input: string;
 }
@@ -40,9 +42,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, isStreaming = false, messages = [] } = props;
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState<ProjectPrompt | null>(null);
+  const [currentProjectPrompt, setCurrentProjectPrompt] = useState<ProjectPrompt | null>(null);
   const [formData, setFormData] = useState({
-    promptId: '',
+    title: '',
+    description: '',
     name: '',
     email: ''
   });
@@ -68,24 +71,51 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   };
 
   const handleSaveProblem = (prompt: ProjectPrompt) => {
-    setCurrentPrompt(prompt);
+    setCurrentProjectPrompt(prompt);
     setIsModalOpen(true);
     setFormData({
-      promptId: '',
+      title: '',
+      description: '',
       name: '',
-      email: ''
+      email: '',
     });
   };
 
-  const handleSubmitProblem = (e: React.MouseEvent) => {
+  const handleSubmitProblem = async (e: React.MouseEvent) => {
     // Add validation here
-    if (!formData.promptId || !formData.name || !formData.email) {
-      toast.error('Please fill in all fields');
+    if (!formData.title) {
+      toast.error('Please fill in title field');
       return;
     }
-    
-    console.log("SubmitProblem", formData);
+
     setIsModalOpen(false);
+
+    console.log("SubmitProblem", formData);
+
+    assert(currentProjectPrompt);
+
+    try {
+      const rval = await sendCommandDedicatedClient({
+        method: "Recording.globalExperimentalCommand",
+        params: {
+          name: "submitBoltProblem",
+          params: {
+            problem: {
+              title: formData.title,
+              description: formData.description,
+              name: formData.name,
+              email: formData.email,
+              prompt: currentProjectPrompt,
+            },
+          },
+        },
+      });
+      console.log("SubmitProblemRval", rval);
+      toast.success("Problem submitted");
+    } catch (error) {
+      console.error("Error submitting problem", error);
+      toast.error("Failed to submit problem");
+    }
   }
 
   const getLastMessageProjectPrompt = (index: number) => {
@@ -204,11 +234,19 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         <div className="text-center">Problems are publicly visible and are used to improve AI performance.</div>
         <div style={{ marginTop: "10px" }}>
           <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
-            <div className="flex items-center">Prompt ID:</div>
+            <div className="flex items-center">Title:</div>
             <input type="text"
-              name="promptId"
+              name="title"
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-              value={formData.promptId}
+              value={formData.title}
+              onChange={handleInputChange}
+            />
+
+            <div className="flex items-center">Description:</div>
+            <input type="text"
+              name="description"
+              className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
+              value={formData.description}
               onChange={handleInputChange}
             />
 

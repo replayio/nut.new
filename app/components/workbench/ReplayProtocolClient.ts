@@ -6,6 +6,19 @@ export function assert(condition: any, message: string = "Assertion failed!"): a
   }
 }
 
+export function stringToBase64(inputString: string) {
+  if (typeof inputString !== "string") {
+      throw new TypeError("Input must be a string.");
+  }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(inputString);
+  let str = "";
+  for (const byte of data) {
+    str += String.fromCharCode(byte);
+  }
+  return btoa(str);
+}
+
 function logDebug(msg: string, tags: Record<string, any> = {}) {
   console.log(msg, JSON.stringify(tags));
 }
@@ -149,4 +162,17 @@ export class ProtocolClient {
     logDebug("Socket opened");
     this.openDeferred.resolve();
   };
+}
+
+// Send a single command with a one-use protocol client.
+export async function sendCommandDedicatedClient(args: { method: string; params: any }) {
+  const client = new ProtocolClient();
+  await client.initialize();
+  try {
+    const rval = await client.sendCommand(args);
+    client.close();
+    return rval;
+  } finally {
+    client.close();
+  }
 }

@@ -320,7 +320,9 @@ export const ChatImpl = memo(
       // the user message is added.
       const lastMessage = messages[messages.length - 1];
       const { content, uniqueProjectName } = await workbenchStore.generateZip();
-      saveProjectPrompt(lastMessage.id, { content, uniqueProjectName, input: _input });
+      const buf = await content.arrayBuffer();
+      const contentBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      saveProjectPrompt(lastMessage.id, { content: contentBase64, uniqueProjectName, input: _input });
     };
 
     /**
