@@ -1,6 +1,6 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
-import { assert, sendCommandDedicatedClient, stringToBase64 } from "./ReplayProtocolClient";
+import { assert, sendCommandDedicatedClient, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
 
 interface RerecordResource {
   url: string;
@@ -98,6 +98,8 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
         // For now we use an API key used in Replay's devtools (which is public
         // but probably shouldn't be).
         apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9",
+        // FIXME the backend currently requires this but shouldn't.
+        recordingId: "dummy-recording-id",
       },
     },
   });
@@ -528,6 +530,6 @@ export function injectRecordingMessageHandler(content: string) {
 
   const headEnd = headTag + 6;
 
-  const text = `<script>${assert} ${stringToBase64} (${addRecordingMessageHandler})()</script>`;
+  const text = `<script>${assert} ${stringToBase64} ${uint8ArrayToBase64} (${addRecordingMessageHandler})()</script>`;
   return content.slice(0, headEnd) + text + content.slice(headEnd);
 }
