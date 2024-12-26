@@ -22,7 +22,7 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import type { ProviderInfo } from '~/types/model';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
-import { saveProjectBenchmark } from './Messages.client';
+import { saveProjectPrompt } from './Messages.client';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -320,7 +320,7 @@ export const ChatImpl = memo(
       // the user message is added.
       const lastMessage = messages[messages.length - 1];
       const { content, uniqueProjectName } = await workbenchStore.generateZip();
-      saveProjectBenchmark(lastMessage.id, { content, uniqueProjectName, input: _input });
+      saveProjectPrompt(lastMessage.id, { content, uniqueProjectName, input: _input });
     };
 
     /**
