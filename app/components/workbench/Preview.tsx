@@ -63,21 +63,46 @@ export const Preview = memo(() => {
     setIframeUrl(baseUrl);
   }, [activePreview]);
 
+  // Trim any long base URL from the start of the provided URL.
+  const displayUrl = (url: string) => {
+    if (!activePreview) {
+      return url;
+    }
+
+    const { baseUrl } = activePreview;
+
+    if (url.startsWith(baseUrl)) {
+      const trimmedUrl = url.slice(baseUrl.length);
+      if (trimmedUrl.startsWith('/')) {
+        return trimmedUrl;
+      }
+      return "/" + trimmedUrl;
+    }
+
+    return url;
+  }
+
   const validateUrl = useCallback(
     (value: string) => {
       if (!activePreview) {
-        return false;
+        return null;
       }
 
       const { baseUrl } = activePreview;
 
       if (value === baseUrl) {
-        return true;
+        return value;
       } else if (value.startsWith(baseUrl)) {
-        return ['/', '?', '#'].includes(value.charAt(baseUrl.length));
+        if (['/', '?', '#'].includes(value.charAt(baseUrl.length))) {
+          return value;
+        }
       }
 
-      return false;
+      if (value.startsWith('/')) {
+        return baseUrl + value;
+      }
+
+      return null;
     },
     [activePreview],
   );
@@ -263,13 +288,14 @@ export const Preview = memo(() => {
             ref={inputRef}
             className="w-full bg-transparent outline-none"
             type="text"
-            value={url}
+            value={displayUrl(url)}
             onChange={(event) => {
               setUrl(event.target.value);
             }}
             onKeyDown={(event) => {
-              if (event.key === 'Enter' && validateUrl(url)) {
-                setIframeUrl(url);
+              let newUrl;
+              if (event.key === 'Enter' && (newUrl = validateUrl(url))) {
+                setIframeUrl(newUrl);
 
                 if (inputRef.current) {
                   inputRef.current.blur();
