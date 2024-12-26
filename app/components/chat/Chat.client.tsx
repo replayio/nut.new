@@ -23,6 +23,7 @@ import type { ProviderInfo } from '~/types/model';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectPrompt } from './Messages.client';
+import { uint8ArrayToBase64 } from '../workbench/ReplayProtocolClient';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -321,7 +322,7 @@ export const ChatImpl = memo(
       const lastMessage = messages[messages.length - 1];
       const { content, uniqueProjectName } = await workbenchStore.generateZip();
       const buf = await content.arrayBuffer();
-      const contentBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const contentBase64 = uint8ArrayToBase64(new Uint8Array(buf));
       saveProjectPrompt(lastMessage.id, { content: contentBase64, uniqueProjectName, input: _input });
     };
 

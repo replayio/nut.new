@@ -49,6 +49,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     name: '',
     email: ''
   });
+  const [problemId, setProblemId] = useState<string | null>(null);
 
   const handleRewind = (messageId: string) => {
     const searchParams = new URLSearchParams(location.search);
@@ -79,6 +80,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       name: '',
       email: '',
     });
+    setProblemId(null);
   };
 
   const handleSubmitProblem = async (e: React.MouseEvent) => {
@@ -88,14 +90,14 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       return;
     }
 
-    setIsModalOpen(false);
+    toast.info("Submitting problem...");
 
     console.log("SubmitProblem", formData);
 
     assert(currentProjectPrompt);
 
     try {
-      const rval = await sendCommandDedicatedClient({
+      const rv = await sendCommandDedicatedClient({
         method: "Recording.globalExperimentalCommand",
         params: {
           name: "submitBoltProblem",
@@ -110,8 +112,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           },
         },
       });
-      console.log("SubmitProblemRval", rval);
-      toast.success("Problem submitted");
+      console.log("SubmitProblemRval", rv);
+      setProblemId((rv as any).rval.problemId);
     } catch (error) {
       console.error("Error submitting problem", error);
       toast.error("Failed to submit problem");
@@ -230,47 +232,69 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 max-w-2xl w-full z-50"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-40"
       >
-        <div className="text-center">Save prompts as new problems when the AI's results are unsatisfactory.</div>
-        <div className="text-center">Problems are publicly visible and are used to improve AI performance.</div>
-        <div style={{ marginTop: "10px" }}>
-          <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
-            <div className="flex items-center">Title:</div>
-            <input type="text"
-              name="title"
-              className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-              value={formData.title}
-              onChange={handleInputChange}
-            />
+        {problemId && (
+          <>
+            <div className="text-center mb-2">Problem Submitted: {problemId}</div>
+            <div className="text-center">
+              <a 
+                href={`https://bolt.replay.com/problem/${problemId}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:text-blue-600 underline"
+              >
+                View Problem
+              </a>
+              <div className="flex justify-center gap-2 mt-4">
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+              </div>
+            </div>
+          </>
+        )}
+        {!problemId && (
+          <>
+            <div className="text-center">Save prompts as new problems when AI results are unsatisfactory.</div>
+            <div className="text-center">Problems are publicly visible and are used to improve AI performance.</div>
+            <div style={{ marginTop: "10px" }}>
+              <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
+                <div className="flex items-center">Title:</div>
+                <input type="text"
+                  name="title"
+                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                />
 
-            <div className="flex items-center">Description:</div>
-            <input type="text"
-              name="description"
-              className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-              value={formData.description}
-              onChange={handleInputChange}
-            />
+                <div className="flex items-center">Description:</div>
+                <input type="text"
+                  name="description"
+                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                />
 
-            <div className="flex items-center">Name:</div>
-            <input type="text"
-              name="name"
-              className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
+                <div className="flex items-center">Name (optional):</div>
+                <input type="text"
+                  name="name"
+                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                />
 
-            <div className="flex items-center">Email:</div>
-            <input type="text"
-              name="email"
-              className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="flex justify-center gap-2 mt-4">
-            <button onClick={handleSubmitProblem} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
-            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-          </div>
-        </div>
+                <div className="flex items-center">Email (optional):</div>
+                <input type="text"
+                  name="email"
+                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="flex justify-center gap-2 mt-4">
+                <button onClick={handleSubmitProblem} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+              </div>
+            </div>
+          </>
+        )}
       </ReactModal>
     </>
   );
