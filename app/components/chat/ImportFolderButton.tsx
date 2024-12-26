@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { MAX_FILES, isBinaryFile, shouldIncludeFile } from '~/utils/fileUtils';
-import { createChatFromFolder } from '~/utils/folderImport';
+import { createChatFromFolder, getFileArtifacts } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
 
 interface ImportFolderButtonProps {
@@ -73,7 +73,8 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
         toast.info(`Skipping ${binaryFilePaths.length} binary files`);
       }
 
-      const messages = await createChatFromFolder(textFiles, binaryFilePaths, folderName);
+      const textFileArtifacts = await getFileArtifacts(textFiles);
+      const messages = await createChatFromFolder(textFileArtifacts, binaryFilePaths, folderName);
 
       if (importChat) {
         await importChat(folderName, [...messages]);

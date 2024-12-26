@@ -2,14 +2,15 @@ import type { Message } from 'ai';
 import { generateId } from './fileUtils';
 import { detectProjectCommands, createCommandsMessage } from './projectCommands';
 
-export const createChatFromFolder = async (
-  files: File[],
-  binaryFiles: string[],
-  folderName: string,
-): Promise<Message[]> => {
-  const fileArtifacts = await Promise.all(
+export interface FileArtifact {
+  content: string;
+  path: string;
+}
+
+export async function getFileArtifacts(files: File[]): Promise<FileArtifact[]> {
+  return Promise.all(
     files.map(async (file) => {
-      return new Promise<{ content: string; path: string }>((resolve, reject) => {
+      return new Promise<FileArtifact>((resolve, reject) => {
         const reader = new FileReader();
 
         reader.onload = () => {
@@ -25,7 +26,13 @@ export const createChatFromFolder = async (
       });
     }),
   );
+}
 
+export const createChatFromFolder = async (
+  fileArtifacts: FileArtifact[],
+  binaryFiles: string[],
+  folderName: string,
+): Promise<Message[]> => {
   const commands = await detectProjectCommands(fileArtifacts);
   const commandsMessage = createCommandsMessage(commands);
 

@@ -32,6 +32,14 @@ interface ProjectPrompt {
   input: string;
 }
 
+export interface BoltProblem {
+  title: string;
+  description: string;
+  name: string;
+  email: string;
+  prompt: ProjectPrompt;
+}
+
 const gProjectPromptsByMessageId = new Map<string, ProjectPrompt>();
 
 export function saveProjectPrompt(messageId: string, prompt: ProjectPrompt) {
@@ -96,20 +104,20 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
 
     assert(currentProjectPrompt);
 
+    const problem: BoltProblem = {
+      title: formData.title,
+      description: formData.description,
+      name: formData.name,
+      email: formData.email,
+      prompt: currentProjectPrompt,
+    };
+
     try {
       const rv = await sendCommandDedicatedClient({
         method: "Recording.globalExperimentalCommand",
         params: {
           name: "submitBoltProblem",
-          params: {
-            problem: {
-              title: formData.title,
-              description: formData.description,
-              name: formData.name,
-              email: formData.email,
-              prompt: currentProjectPrompt,
-            },
-          },
+          params: { problem },
         },
       });
       console.log("SubmitProblemRval", rv);
