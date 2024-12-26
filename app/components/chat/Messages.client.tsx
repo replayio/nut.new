@@ -70,10 +70,22 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const handleSaveProblem = (prompt: ProjectPrompt) => {
     setCurrentPrompt(prompt);
     setIsModalOpen(true);
+    setFormData({
+      promptId: '',
+      name: '',
+      email: ''
+    });
   };
 
-  const handleSubmitProblem = () => {
-    console.log("SubmitProblem");
+  const handleSubmitProblem = (e: React.MouseEvent) => {
+    // Add validation here
+    if (!formData.promptId || !formData.name || !formData.email) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
+    console.log("SubmitProblem", formData);
+    setIsModalOpen(false);
   }
 
   const getLastMessageProjectPrompt = (index: number) => {
@@ -171,19 +183,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                           />
                         </WithTooltip>
                       )}
-
-                      <WithTooltip tooltip="Save benchmark problem">
-                        <button
-                          onClick={() => {
-                            setIsModalOpen(true);
-                          }}
-                          key="i-ph:export"
-                          className={classNames(
-                            'i-ph:export',
-                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                          )}
-                        />
-                      </WithTooltip>
                     </div>
                   )}
                 </div>
@@ -203,7 +202,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       >
         <div className="text-center">Save prompts as new problems when the AI's results are unsatisfactory.</div>
         <div className="text-center">Problems are publicly visible and are used to improve AI performance.</div>
-        <form onSubmit={handleSubmitProblem} style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: "10px" }}>
           <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
             <div className="flex items-center">Prompt ID:</div>
             <input type="text"
@@ -211,7 +210,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
               value={formData.promptId}
               onChange={handleInputChange}
-              required={true}
             />
 
             <div className="flex items-center">Name:</div>
@@ -220,7 +218,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
               value={formData.name}
               onChange={handleInputChange}
-              required={true}
             />
 
             <div className="flex items-center">Email:</div>
@@ -229,14 +226,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
               value={formData.email}
               onChange={handleInputChange}
-              required={true}
             />
           </div>
           <div className="flex justify-center gap-2 mt-4">
-            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+            <button onClick={handleSubmitProblem} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
+            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
           </div>
-        </form>
+        </div>
       </ReactModal>
     </>
   );
