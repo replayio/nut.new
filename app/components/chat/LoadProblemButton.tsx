@@ -49,17 +49,20 @@ export const LoadProblemButton: React.FC<LoadProblemButtonProps> = ({ className,
 
     const fileArtifacts: FileArtifact[] = [];
     for (const [key, object] of Object.entries(zip.files)) {
+      if (object.dir) continue;
       fileArtifacts.push({
         content: await object.async('text'),
         path: key,
       });
     }
 
+    const folderName = problem.prompt.uniqueProjectName;
+
     try {
-      const messages = await createChatFromFolder(fileArtifacts, [], problem.prompt.uniqueProjectName);
+      const messages = await createChatFromFolder(fileArtifacts, [], folderName);
 
       if (importChat) {
-        await importChat(problem.prompt.uniqueProjectName, [...messages]);
+        await importChat(folderName, [...messages]);
       }
 
       logStore.logSystem('Problem loaded successfully', {
