@@ -73,11 +73,18 @@ interface RerecordData {
 
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
-  iframe.contentWindow.postMessage({ source: "recording-data-request" }, "*");
+  const key = Math.random().toString();
+  iframe.contentWindow.postMessage({ source: "recording-data-request", key }, "*");
 
   const data = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
       if (event.data?.source == "recording-data-response") {
+        // Use the key in case there are multiple Bolt windows with different iframes.
+        if (event.data.key != key) {
+          console.log("SaveReplayRecordingWrongKey", event.data.key, key);
+          return;
+        }
+
         const decoder = new TextDecoder();
         const jsonString = decoder.decode(event.data.buffer);
         const data = JSON.parse(jsonString) as RerecordData;
@@ -162,16 +169,17 @@ function addRecordingMessageHandler() {
     const responseHeaders = Object.fromEntries(response.headers.entries());
 
     const url = (new URL(path, window.location.href)).href;
-
-    if (!resources.has(url)) {
-      resources.set(url, {
-        url,
-        requestBodyBase64: "",
-        responseBodyBase64: stringToBase64(text),
-        responseStatus: response.status,
-        responseHeaders,
-      });
+    if (resources.has(url)) {
+      return;
     }
+
+    resources.set(url, {
+      url,
+      requestBodyBase64: "",
+      responseBodyBase64: stringToBase64(text),
+      responseStatus: response.status,
+      responseHeaders,
+    });
 
     if (responseHeaders["content-type"] == "application/javascript") {
       const imports = getScriptImports(text);
@@ -179,27 +187,21 @@ function addRecordingMessageHandler() {
         await addResource(path);
       }
     }
-  }
 
-  async function addDocumentResource() {
-    const headHTML = document.head.innerHTML;
-    const bodyHTML = document.body.innerHTML;
-    const documentBody = `<html><head>${headHTML}</head><body>${bodyHTML}</body></html>`;
-
-    const url = window.location.href;
-    resources.set(url, {
-      url,
-      requestBodyBase64: "",
-      responseBodyBase64: stringToBase64(documentBody),
-      responseStatus: 200,
-      responseHeaders: { "content-type": "text/html" },
-    });
+    if (responseHeaders["content-type"] == "text/html") {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, "text/html");
+      const scripts = doc.querySelectorAll("script");
+      for (const script of scripts) {
+        await addResource(script.src);
+      }
+    }
   }
 
   async function getRerecordData(): Promise<RerecordData> {
     const promises: Promise<void>[] = [];
 
-    promises.push(addDocumentResource());
+    promises.push(addResource(window.location.href));
 
     // Find all script elements and add their sources to resources
     const scriptElements = document.getElementsByTagName('script');
@@ -240,7 +242,10 @@ function addRecordingMessageHandler() {
         const serializedData = encoder.encode(JSON.stringify(data));
         const buffer = serializedData.buffer;
 
-        window.parent.postMessage({ source: "recording-data-response", buffer }, "*", [buffer]);
+        const key = event.data.key;
+        assert(typeof key == "string", "Expected key to be a string");
+
+        window.parent.postMessage({ source: "recording-data-response", key, buffer }, "*", [buffer]);
         break;
       }
       case "mouse-data-request": {
