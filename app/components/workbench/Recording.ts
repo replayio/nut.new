@@ -138,6 +138,12 @@ function addRecordingMessageHandler() {
   const indexedDBAccesses: IndexedDBAccess[] = [];
   const localStorageAccesses: LocalStorageAccess[] = [];
 
+  // Promises which will resolve when all resources have been added.
+  const promises: Promise<void>[] = [];
+
+  // Set of URLs which are currently being fetched.
+  const pendingFetches = new Set<string>();
+
   const startTime = Date.now();
 
   function getScriptImports(text: string) {
@@ -145,11 +151,15 @@ function addRecordingMessageHandler() {
     const imports: string[] = [];
     const lines = text.split("\n");
     lines.forEach((line, index) => {
-      const match = line.match(/^import.*?['"]([^'")]+)/);
+      let match = line.match(/^import.*?['"]([^'")]+)/);
       if (match) {
         imports.push(match[1]);
       }
-      if (line == "import {") {
+      match = line.match(/^export.*?from ['"]([^'")]+)/);
+      if (match) {
+        imports.push(match[1]);
+      }
+      if (line == "import {" || line == "export {") {
         for (let i = index + 1; i < lines.length; i++) {
           const match = lines[i].match(/} from ['"]([^'")]+)/);
           if (match) {
@@ -175,7 +185,10 @@ function addRecordingMessageHandler() {
   }
 
   async function fetchAndAddResource(path: string) {
+    pendingFetches.add(path);
     const response = await fetch(path);
+    pendingFetches.delete(path);
+
     const text = await response.text();
     const responseHeaders = Object.fromEntries(response.headers.entries());
 
@@ -194,15 +207,13 @@ function addRecordingMessageHandler() {
 
     const contentType = responseHeaders["content-type"];
 
-    console.log("ResourceContents", url, contentType, text);
-
     // MIME types that can contain JS.
     const JavaScriptMimeTypes = ["application/javascript", "text/javascript", "text/html"];
 
     if (JavaScriptMimeTypes.includes(contentType)) {
       const imports = getScriptImports(text);
       for (const path of imports) {
-        await fetchAndAddResource(path);
+        promises.push(fetchAndAddResource(path));
       }
     }
 
@@ -211,14 +222,12 @@ function addRecordingMessageHandler() {
       const doc = parser.parseFromString(text, "text/html");
       const scripts = doc.querySelectorAll("script");
       for (const script of scripts) {
-        await fetchAndAddResource(script.src);
+        promises.push(fetchAndAddResource(script.src));
       }
     }
   }
 
   async function getRerecordData(): Promise<RerecordData> {
-    const promises: Promise<void>[] = [];
-
     // For now we only deal with cases where there is a single HTML page whose
     // contents are expected to be filled in by the client code. We do this to
     // avoid difficulties in exactly emulating the webcontainer's behavior when
@@ -258,11 +267,26 @@ function addRecordingMessageHandler() {
       }
     }
 
+    // React needs a root element to mount into.
+    htmlContents += "<div id='root'></div>";
+
     htmlContents += "</body></html>";
 
     addTextResource(window.location.href, htmlContents);
 
-    await Promise.all(promises);
+    const interval = setInterval(() => {
+      console.log("PendingFetches", pendingFetches.size, pendingFetches);
+    }, 1000);
+
+    while (true) {
+      const length = promises.length;
+      await Promise.all(promises);
+      if (promises.length == length) {
+        break;
+      }
+    }
+
+    clearInterval(interval);
 
     const data: RerecordData = {
       locationHref: window.location.href,
