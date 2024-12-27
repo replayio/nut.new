@@ -71,20 +71,19 @@ interface RerecordData {
   localStorageAccesses?: LocalStorageAccess[];
 }
 
+// This is in place to workaround some insane behavior where messages are being
+// sent by iframes running older versions of the recording data logic, even after
+// quitting and restarting the entire browser. Maybe related to webcontainers?
+const RecordingDataVersion = 1;
+
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
-  const key = Math.random().toString();
-  iframe.contentWindow.postMessage({ source: "recording-data-request", key }, "*");
+  iframe.contentWindow.postMessage({ source: "recording-data-request" }, "*");
 
   const data = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
-      if (event.data?.source == "recording-data-response") {
-        // Use the key in case there are multiple Bolt windows with different iframes.
-        if (event.data.key != key) {
-          console.log("SaveReplayRecordingWrongKey", event.data.key, key);
-          return;
-        }
-
+      if (event.data?.source == "recording-data-response" &&
+          event.data?.version == RecordingDataVersion) {
         const decoder = new TextDecoder();
         const jsonString = decoder.decode(event.data.buffer);
         const data = JSON.parse(jsonString) as RerecordData;
@@ -181,14 +180,21 @@ function addRecordingMessageHandler() {
       responseHeaders,
     });
 
-    if (responseHeaders["content-type"] == "application/javascript") {
+    const contentType = responseHeaders["content-type"];
+
+    console.log("ResourceContents", url, contentType, text);
+
+    // MIME types that can contain JS.
+    const JavaScriptMimeTypes = ["application/javascript", "text/javascript", "text/html"];
+
+    if (JavaScriptMimeTypes.includes(contentType)) {
       const imports = getScriptImports(text);
       for (const path of imports) {
         await addResource(path);
       }
     }
 
-    if (responseHeaders["content-type"] == "text/html") {
+    if (contentType == "text/html") {
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, "text/html");
       const scripts = doc.querySelectorAll("script");
@@ -242,10 +248,7 @@ function addRecordingMessageHandler() {
         const serializedData = encoder.encode(JSON.stringify(data));
         const buffer = serializedData.buffer;
 
-        const key = event.data.key;
-        assert(typeof key == "string", "Expected key to be a string");
-
-        window.parent.postMessage({ source: "recording-data-response", key, buffer }, "*", [buffer]);
+        window.parent.postMessage({ source: "recording-data-response", buffer, version: RecordingDataVersion }, "*", [buffer]);
         break;
       }
       case "mouse-data-request": {
@@ -535,6 +538,15 @@ export function injectRecordingMessageHandler(content: string) {
 
   const headEnd = headTag + 6;
 
-  const text = `<script>${assert} ${stringToBase64} ${uint8ArrayToBase64} (${addRecordingMessageHandler})()</script>`;
+  const text = `
+    <script>
+      ${assert}
+      ${stringToBase64}
+      ${uint8ArrayToBase64}
+      const RecordingDataVersion = ${RecordingDataVersion};
+      (${addRecordingMessageHandler})()
+    </script>
+  `;
+
   return content.slice(0, headEnd) + text + content.slice(headEnd);
 }
