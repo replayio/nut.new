@@ -174,7 +174,9 @@ function addRecordingMessageHandler() {
 
   function addTextResource(path: string, text: string) {
     const url = (new URL(path, window.location.href)).href;
-    assert(!resources.has(url), "Resource already exists");
+    if (resources.has(url)) {
+      return;
+    }
     resources.set(url, {
       url,
       requestBodyBase64: "",
@@ -186,7 +188,7 @@ function addRecordingMessageHandler() {
 
   async function fetchAndAddResource(path: string) {
     pendingFetches.add(path);
-    const response = await fetch(path);
+    const response = await baseFetch(path);
     pendingFetches.delete(path);
 
     const text = await response.text();
@@ -233,6 +235,9 @@ function addRecordingMessageHandler() {
     // avoid difficulties in exactly emulating the webcontainer's behavior when
     // generating the recording.
     let htmlContents = "<html><body>";
+
+    // Vite needs this to be set for the react plugin to work.
+    htmlContents += "<script>window.__vite_plugin_react_preamble_installed__ = true;</script>";
 
     // Find all script elements and add them to the document.
     const scriptElements = document.getElementsByTagName('script');
@@ -536,6 +541,31 @@ function addRecordingMessageHandler() {
       }),
   };
 
+  // Map Response to the triggering URL before redirects.
+  const responseToURL = new WeakMap<Response, string>();
+
+  const ResponseMethods = {
+    _name: "Response",
+    json: (v: any, response: Response) =>
+      createFunctionProxy(v, "json", async (promise: Promise<any>) => {
+        const json = await promise;
+        const url = responseToURL.get(response);
+        if (url) {
+          addTextResource(url, JSON.stringify(json));
+        }
+        return json;
+      }),
+    text: (v: any, response: Response) =>
+      createFunctionProxy(v, "text", async (promise: Promise<any>) => {
+        const text = await promise;
+        const url = responseToURL.get(response);
+        if (url) {
+          addTextResource(url, text);
+        }
+        return text;
+      }),
+  };
+
   function createProxy(obj: any) {
     let methods;
     if (obj instanceof IDBFactory) {
@@ -552,6 +582,8 @@ function addRecordingMessageHandler() {
       methods = IDBRequestMethods;
     } else if (obj instanceof Storage) {
       methods = StorageMethods;
+    } else if (obj instanceof Response) {
+      methods = ResponseMethods;
     }
     assert(methods, "Unknown object for createProxy");
     const name = methods._name;
@@ -591,6 +623,14 @@ function addRecordingMessageHandler() {
 
   interceptProperty(window, "indexedDB", createProxy);
   interceptProperty(window, "localStorage", createProxy);
+
+  const baseFetch = window.fetch;
+  window.fetch = async (info, options) => {
+    const rv = await baseFetch(info, options);
+    const url = info instanceof Request ? info.url : info.toString();
+    responseToURL.set(rv, url);
+    return createProxy(rv);
+  };
 }
 
 export function injectRecordingMessageHandler(content: string) {
