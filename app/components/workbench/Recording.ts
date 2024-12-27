@@ -74,7 +74,7 @@ interface RerecordData {
 // This is in place to workaround some insane behavior where messages are being
 // sent by iframes running older versions of the recording data logic, even after
 // quitting and restarting the entire browser. Maybe related to webcontainers?
-const RecordingDataVersion = 1;
+const RecordingDataVersion = 2;
 
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
@@ -162,7 +162,19 @@ function addRecordingMessageHandler() {
     return imports;
   }
 
-  async function addResource(path: string) {
+  function addTextResource(path: string, text: string) {
+    const url = (new URL(path, window.location.href)).href;
+    assert(!resources.has(url), "Resource already exists");
+    resources.set(url, {
+      url,
+      requestBodyBase64: "",
+      responseBodyBase64: stringToBase64(text),
+      responseStatus: 200,
+      responseHeaders: {},
+    });
+  }
+
+  async function fetchAndAddResource(path: string) {
     const response = await fetch(path);
     const text = await response.text();
     const responseHeaders = Object.fromEntries(response.headers.entries());
@@ -190,7 +202,7 @@ function addRecordingMessageHandler() {
     if (JavaScriptMimeTypes.includes(contentType)) {
       const imports = getScriptImports(text);
       for (const path of imports) {
-        await addResource(path);
+        await fetchAndAddResource(path);
       }
     }
 
@@ -199,7 +211,7 @@ function addRecordingMessageHandler() {
       const doc = parser.parseFromString(text, "text/html");
       const scripts = doc.querySelectorAll("script");
       for (const script of scripts) {
-        await addResource(script.src);
+        await fetchAndAddResource(script.src);
       }
     }
   }
@@ -207,23 +219,48 @@ function addRecordingMessageHandler() {
   async function getRerecordData(): Promise<RerecordData> {
     const promises: Promise<void>[] = [];
 
-    promises.push(addResource(window.location.href));
+    // For now we only deal with cases where there is a single HTML page whose
+    // contents are expected to be filled in by the client code. We do this to
+    // avoid difficulties in exactly emulating the webcontainer's behavior when
+    // generating the recording.
+    let htmlContents = "<html><body>";
 
-    // Find all script elements and add their sources to resources
+    // Find all script elements and add them to the document.
     const scriptElements = document.getElementsByTagName('script');
-    for (const script of scriptElements) {
-      if (script.src) {
-        promises.push(addResource(script.src));
+    [...scriptElements].forEach((script, index) => {
+      let src = script.src;
+      if (src) {
+        promises.push(fetchAndAddResource(src));
+      } else {
+        assert(script.textContent, "Script element has no src and no text content");
+        const path = `script-${index}.js`;
+        addTextResource(path, script.textContent);
       }
+      const { origin } = new URL(window.location.href);
+      if (src.startsWith(origin)) {
+        src = src.slice(origin.length);
+      }
+      htmlContents += `<script src="${src}" type="${script.type}"></script>`;
+    });
+
+    // Find all inline styles and add them to the document.
+    const cssElements = document.getElementsByTagName('style');
+    for (const style of cssElements) {
+      htmlContents += `<style>${style.textContent}</style>`;
     }
 
-    // Find all stylesheet links and add them to resources
+    // Find all stylesheet links and add them to the document.
     const linkElements = document.getElementsByTagName('link');
     for (const link of linkElements) {
       if (link.rel === 'stylesheet' && link.href) {
-        promises.push(addResource(link.href));
+        promises.push(fetchAndAddResource(link.href));
+        htmlContents += `<link rel="stylesheet" href="${link.href}">`;
       }
     }
+
+    htmlContents += "</body></html>";
+
+    addTextResource(window.location.href, htmlContents);
 
     await Promise.all(promises);
 
