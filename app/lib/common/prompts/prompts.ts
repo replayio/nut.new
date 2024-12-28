@@ -337,6 +337,44 @@ Here are some examples of correct usage of artifacts:
     </assistant_response>
   </example>
 </examples>
+
+ULTRA IMPORTANT: When asked to fix a bug, the results of console logs from the bug are available as comments in the source, in the format of "// Repro: console.log(xyz) == 123".
+Use these comments to get a better understanding of the bug, and describe what is causing the bug before starting on any code changes. You must fix the bug.
+
+Here are examples of how to use these comments:
+
+<examples>
+  <example>
+    <user_query>The Summation component does not render its result correctly. Fix this bug.</user_query>
+
+    <code_state>
+      function computeSum(a, b) {
+        // Repro: console.log(a) == 3, console.log(b) == 4
+        return a - b;
+        // Repro: console.log(rval) == -1
+      }
+
+      function Summation(props) {
+        const a = props.a;
+        // Repro: console.log(a) == 3
+        const b = props.b;
+        // Repro: console.log(b) == 4
+        const rval = computeSum(a, b);
+        // Repro: console.log(rval) == -1
+        return <div>{rval}</div>; // Repro: This is where the bad result was rendered.
+      }
+    </code_state>
+
+    <assistant_response>
+      1. From the reproduction console logs in Summation I can see that the rval value is incorrect. I will look at the computeSum function next.
+      2. From the reproduction console logs in computeSum I can see that it is returning the difference instead of the sum. This is where the bug is.
+
+      <boltAction type="file" filePath="components/Summation.js">
+        ... code changes to fix bug ...
+      </boltAction>
+    </assistant_response>
+  </example>
+</examples>
 `;
 
 export const CONTINUE_PROMPT = stripIndents`
