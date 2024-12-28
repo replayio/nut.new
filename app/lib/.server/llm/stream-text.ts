@@ -200,6 +200,10 @@ export async function streamText(props: {
     systemPrompt = `${systemPrompt}\n\n ${codeContext}`;
   }
 
+  const coreMessages = convertToCoreMessages(processedMessages as any);
+
+  console.log("QueryModel", JSON.stringify({ systemPrompt, coreMessages }));
+
   return _streamText({
     model: provider.getModelInstance({
       model: currentModel,
@@ -209,7 +213,7 @@ export async function streamText(props: {
     }),
     system: systemPrompt,
     maxTokens: dynamicMaxTokens,
-    messages: convertToCoreMessages(processedMessages as any),
+    messages: coreMessages,
     ...options,
   });
 }

@@ -53,7 +53,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason, usage }) => {
-        console.log('usage', usage);
+        console.log("QueryModelFinished", usage, content);
 
         if (usage) {
           cumulativeUsage.completionTokens += usage.completionTokens || 0;
