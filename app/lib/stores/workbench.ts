@@ -188,6 +188,10 @@ export class WorkbenchStore {
     this.unsavedFiles.set(newUnsavedFiles);
   }
 
+  async saveFileContents(filePath: string, contents: string) {
+    await this.#filesStore.saveFile(filePath, contents);
+  }
+
   async saveCurrentDocument() {
     const currentDocument = this.currentDocument.get();
 

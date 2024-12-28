@@ -93,7 +93,8 @@ export class FilesStore {
       const oldContent = this.getFile(filePath)?.content;
 
       if (!oldContent) {
-        unreachable('Expected content to be defined');
+        console.log("CurrentFiles", JSON.stringify(Object.keys(this.files.get())));
+        unreachable(`Cannot save unknown file ${filePath}`);
       }
 
       await webcontainer.fs.writeFile(relativePath, content);

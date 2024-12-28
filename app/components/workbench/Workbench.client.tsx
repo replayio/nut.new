@@ -120,6 +120,49 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
     }
   }, []);
 
+  const handleApplyChanges = useCallback(async () => {
+    try {
+      // Open file picker and get file handle
+      const [fileHandle] = await (window as any).showOpenFilePicker({
+        types: [
+          {
+            description: 'Text Files',
+            accept: {
+              'text/*': ['.txt', '.js', '.ts', '.jsx', '.tsx', '.json', '.html', '.css']
+            }
+          }
+        ]
+      });
+
+      const changesFile = await fileHandle.getFile();
+      const changesContent = await changesFile.text();
+
+      let path = "";
+      let contents = "";
+
+      async function saveCurrentFile() {
+        if (path) {
+          await workbenchStore.saveFileContents("/home/project/src/" + path, contents);
+        }
+      }
+
+      for (const line of changesContent.split("\n")) {
+        const match = /^FILE (.*)/.exec(line);
+        if (match) {
+          await saveCurrentFile();
+          path = match[1];
+          continue;
+        }
+        contents += line + "\n";
+      }
+
+      await saveCurrentFile();
+    } catch (error) {
+      console.error('Error applying changes:', error);
+      toast.error('Failed to apply changes');
+    }
+  }, []);
+
   return (
     chatStarted && (
       <motion.div
@@ -146,6 +189,13 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                 <div className="ml-auto" />
                 {selectedView === 'code' && (
                   <div className="flex overflow-y-auto">
+                    <PanelHeaderButton
+                      className="mr-1 text-sm"
+                      onClick={handleApplyChanges}
+                    >
+                      <div className="i-ph:code" />
+                      Apply Changes
+                    </PanelHeaderButton>
                     <PanelHeaderButton
                       className="mr-1 text-sm"
                       onClick={() => {

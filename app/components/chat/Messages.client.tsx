@@ -244,14 +244,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           <>
             <div className="text-center mb-2">Problem Submitted: {problemId}</div>
             <div className="text-center">
-              <a 
-                href={`https://bolt.replay.com/problem/${problemId}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:text-blue-600 underline"
-              >
-                View Problem
-              </a>
               <div className="flex justify-center gap-2 mt-4">
                 <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
               </div>
