@@ -644,8 +644,7 @@ export function injectRecordingMessageHandler(content: string) {
       ${assert}
       ${stringToBase64}
       ${uint8ArrayToBase64}
-      const RecordingDataVersion = ${RecordingDataVersion};
-      (${addRecordingMessageHandler})()
+      (${addRecordingMessageHandler.toString().replace("RecordingDataVersion", `${RecordingDataVersion}`)})()
     </script>
   `;
 

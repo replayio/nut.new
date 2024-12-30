@@ -338,8 +338,8 @@ Here are some examples of correct usage of artifacts:
   </example>
 </examples>
 
-ULTRA IMPORTANT: When asked to fix a bug, the results of console logs from the bug are available as comments in the source, in the format of "// Repro: console.log(xyz) == 123".
-Use these comments to get a better understanding of the bug, and describe what is causing the bug before starting on any code changes. You must fix the bug.
+ULTRA IMPORTANT: When asked to fix a bug, the results of console logs from the bug are available as comments in the source, in the format of "// Repro:Name console.log(xyz) == 123".
+Use these comments to get a better understanding of the bug and how data flows through the code, and describe what is causing the bug before starting on any code changes. You must fix the bug.
 
 Here are examples of how to use these comments:
 
@@ -349,25 +349,31 @@ Here are examples of how to use these comments:
 
     <code_state>
       function computeSum(a, b) {
-        // Repro: console.log(a) == 3, console.log(b) == 4
-        return a - b;
-        // Repro: console.log(rval) == -1
+        return a + b;
+        // Repro:computeSum console.log(rval) == NaN, console.log(a) == 3, console.log(b) == undefined
       }
 
       function Summation(props) {
         const a = props.a;
-        // Repro: console.log(a) == 3
         const b = props.b;
-        // Repro: console.log(b) == 4
         const rval = computeSum(a, b);
-        // Repro: console.log(rval) == -1
-        return <div>{rval}</div>; // Repro: This is where the bad result was rendered.
+        return <div>{rval}</div>; // Repro:Summation console.log(rval) == NaN
+      }
+
+      function createSummation(a) {
+        return <Summation a={3} b={undefined} />; // Repro:createSummation undefined value used by computeSum.
+      }
+
+      function main() {
+        createSummation(3); // Repro:main 3 value used by computeSum.
       }
     </code_state>
 
     <assistant_response>
-      1. From the reproduction console logs in Summation I can see that the rval value is incorrect. I will look at the computeSum function next.
-      2. From the reproduction console logs in computeSum I can see that it is returning the difference instead of the sum. This is where the bug is.
+      1. From Repro:Summation I can see that the NaN value was produced at Repro:computeSum.
+      2. From Repro:computeSum I can see that a is 3 and b is undefined. The latter is incorrect, it was produced at Repro:createSummation.
+
+      I will fix this by not passing undefined to the Summation component in createSummation.
 
       <boltAction type="file" filePath="components/Summation.js">
         ... code changes to fix bug ...
@@ -375,6 +381,8 @@ Here are examples of how to use these comments:
     </assistant_response>
   </example>
 </examples>
+
+ULTRA IMPORTANT: NEVER add any logging. It is your responsibility to use the Repro console log comments to understand the bug. The user is not going to do this for you.
 `;
 
 export const CONTINUE_PROMPT = stripIndents`

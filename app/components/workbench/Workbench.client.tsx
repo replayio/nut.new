@@ -151,6 +151,7 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
         if (match) {
           await saveCurrentFile();
           path = match[1];
+          contents = "";
           continue;
         }
         contents += line + "\n";
