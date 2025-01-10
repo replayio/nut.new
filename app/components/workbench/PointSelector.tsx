@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from 'react';
-import { getMouseData } from './Recording';
+import { getMouseData } from '~/lib/replay/Recording';
 
 interface PointSelectorProps {
   isSelectionMode: boolean;

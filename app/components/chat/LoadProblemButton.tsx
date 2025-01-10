@@ -3,7 +3,7 @@ import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { createChatFromFolder, type FileArtifact } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
-import { sendCommandDedicatedClient } from '../workbench/ReplayProtocolClient';
+import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from './Messages.client';
 import JSZip from 'jszip';
 

@@ -8,7 +8,7 @@ import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
-import { assert, sendCommandDedicatedClient } from "~/components/workbench/ReplayProtocolClient";
+import { assert, sendCommandDedicatedClient } from "~/lib/replay/ReplayProtocolClient";
 import ReactModal from 'react-modal';
 
 ReactModal.setAppElement('#root');

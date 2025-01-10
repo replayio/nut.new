@@ -25,7 +25,7 @@ import { BinaryContent } from './BinaryContent';
 import { getTheme, reconfigureTheme } from './cm-theme';
 import { indentKeyBinding } from './indent';
 import { getLanguage } from './languages';
-import { removeRecordingMessageHandler } from '~/components/workbench/Recording';
+import { removeRecordingMessageHandler } from '~/lib/replay/Recording';
 
 const logger = createScopedLogger('CodeMirrorEditor');
 

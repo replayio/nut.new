@@ -23,7 +23,7 @@ import type { ProviderInfo } from '~/types/model';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectPrompt } from './Messages.client';
-import { uint8ArrayToBase64 } from '../workbench/ReplayProtocolClient';
+import { uint8ArrayToBase64 } from '~/lib/replay/ReplayProtocolClient';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',

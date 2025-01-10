@@ -17,7 +17,7 @@ import { extractRelativePath } from '~/utils/diff';
 import { description } from '~/lib/persistence';
 import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
-import { removeRecordingMessageHandler } from '~/components/workbench/Recording';
+import { removeRecordingMessageHandler } from '~/lib/replay/Recording';
 
 export interface ArtifactState {
   id: string;

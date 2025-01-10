@@ -6,7 +6,7 @@ import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
 import type { BoltShell } from '~/utils/shell';
-import { injectRecordingMessageHandler } from '~/components/workbench/Recording';
+import { injectRecordingMessageHandler } from '~/lib/replay/Recording';
 
 const logger = createScopedLogger('ActionRunner');
 
