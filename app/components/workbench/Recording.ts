@@ -71,10 +71,10 @@ interface RerecordData {
   localStorageAccesses?: LocalStorageAccess[];
 }
 
-// This is in place to workaround some insane behavior where messages are being
-// sent by iframes running older versions of the recording data logic, even after
-// quitting and restarting the entire browser. Maybe related to webcontainers?
-const RecordingDataVersion = 2;
+// Our message event listener can trigger on messages from iframes we don't expect.
+// This is a unique ID for the last time we injected the recording message handler
+// logic into an iframe. We will ignore messages from other injected handlers.
+let gLastMessageHandlerId = "";
 
 export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   assert(iframe.contentWindow);
@@ -83,7 +83,7 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
   const data = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
       if (event.data?.source == "recording-data-response" &&
-          event.data?.version == RecordingDataVersion) {
+          event.data?.messageHandlerId == gLastMessageHandlerId) {
         const decoder = new TextDecoder();
         const jsonString = decoder.decode(event.data.buffer);
         const data = JSON.parse(jsonString) as RerecordData;
@@ -123,7 +123,8 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 
   const mouseData = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
-      if (event.data?.source == "mouse-data-response") {
+      if (event.data?.source == "mouse-data-response" &&
+          event.data?.messageHandlerId == gLastMessageHandlerId) {
         resolve(event.data.mouseData);
       }
     });
@@ -132,45 +133,14 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
   return mouseData;
 }
 
-function addRecordingMessageHandler() {
+// Add handlers to the current iframe's window.
+function addRecordingMessageHandler(messageHandlerId: string) {
   const resources: Map<string, RerecordResource> = new Map();
   const interactions: RerecordInteraction[] = [];
   const indexedDBAccesses: IndexedDBAccess[] = [];
   const localStorageAccesses: LocalStorageAccess[] = [];
 
-  // Promises which will resolve when all resources have been added.
-  const promises: Promise<void>[] = [];
-
-  // Set of URLs which are currently being fetched.
-  const pendingFetches = new Set<string>();
-
   const startTime = Date.now();
-
-  function getScriptImports(text: string) {
-    // TODO: This should use a real parser.
-    const imports: string[] = [];
-    const lines = text.split("\n");
-    lines.forEach((line, index) => {
-      let match = line.match(/^import.*?['"]([^'")]+)/);
-      if (match) {
-        imports.push(match[1]);
-      }
-      match = line.match(/^export.*?from ['"]([^'")]+)/);
-      if (match) {
-        imports.push(match[1]);
-      }
-      if (line == "import {" || line == "export {") {
-        for (let i = index + 1; i < lines.length; i++) {
-          const match = lines[i].match(/} from ['"]([^'")]+)/);
-          if (match) {
-            imports.push(match[1]);
-            break;
-          }
-        }
-      }
-    });
-    return imports;
-  }
 
   function addTextResource(path: string, text: string) {
     const url = (new URL(path, window.location.href)).href;
@@ -186,114 +156,8 @@ function addRecordingMessageHandler() {
     });
   }
 
-  async function fetchAndAddResource(path: string) {
-    pendingFetches.add(path);
-    const response = await baseFetch(path);
-    pendingFetches.delete(path);
-
-    const text = await response.text();
-    const responseHeaders = Object.fromEntries(response.headers.entries());
-
-    const url = (new URL(path, window.location.href)).href;
-    if (resources.has(url)) {
-      return;
-    }
-
-    resources.set(url, {
-      url,
-      requestBodyBase64: "",
-      responseBodyBase64: stringToBase64(text),
-      responseStatus: response.status,
-      responseHeaders,
-    });
-
-    const contentType = responseHeaders["content-type"];
-
-    // MIME types that can contain JS.
-    const JavaScriptMimeTypes = ["application/javascript", "text/javascript", "text/html"];
-
-    if (JavaScriptMimeTypes.includes(contentType)) {
-      const imports = getScriptImports(text);
-      for (const path of imports) {
-        promises.push(fetchAndAddResource(path));
-      }
-    }
-
-    if (contentType == "text/html") {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, "text/html");
-      const scripts = doc.querySelectorAll("script");
-      for (const script of scripts) {
-        promises.push(fetchAndAddResource(script.src));
-      }
-    }
-  }
-
   async function getRerecordData(): Promise<RerecordData> {
-    // For now we only deal with cases where there is a single HTML page whose
-    // contents are expected to be filled in by the client code. We do this to
-    // avoid difficulties in exactly emulating the webcontainer's behavior when
-    // generating the recording.
-    let htmlContents = "<html><body>";
-
-    // Vite needs this to be set for the react plugin to work.
-    htmlContents += "<script>window.__vite_plugin_react_preamble_installed__ = true;</script>";
-
-    // Find all script elements and add them to the document.
-    const scriptElements = document.getElementsByTagName('script');
-    [...scriptElements].forEach((script, index) => {
-      let src = script.src;
-      if (src) {
-        promises.push(fetchAndAddResource(src));
-      } else {
-        assert(script.textContent, "Script element has no src and no text content");
-        const path = `script-${index}.js`;
-        addTextResource(path, script.textContent);
-      }
-      const { origin } = new URL(window.location.href);
-      if (src.startsWith(origin)) {
-        src = src.slice(origin.length);
-      }
-      htmlContents += `<script src="${src}" type="${script.type}"></script>`;
-    });
-
-    // Find all inline styles and add them to the document.
-    const cssElements = document.getElementsByTagName('style');
-    for (const style of cssElements) {
-      htmlContents += `<style>${style.textContent}</style>`;
-    }
-
-    // Find all stylesheet links and add them to the document.
-    const linkElements = document.getElementsByTagName('link');
-    for (const link of linkElements) {
-      if (link.rel === 'stylesheet' && link.href) {
-        promises.push(fetchAndAddResource(link.href));
-        htmlContents += `<link rel="stylesheet" href="${link.href}">`;
-      }
-    }
-
-    // React needs a root element to mount into.
-    htmlContents += "<div id='root'></div>";
-
-    htmlContents += "</body></html>";
-
-    addTextResource(window.location.href, htmlContents);
-
-    const interval = setInterval(() => {
-      console.log("PendingFetches", pendingFetches.size, pendingFetches);
-    }, 1000);
-
-    while (true) {
-      const length = promises.length;
-      await Promise.all(promises);
-      if (promises.length == length) {
-        break;
-      }
-    }
-
-    clearInterval(interval);
-
-    const data: RerecordData = {
+    return {
       locationHref: window.location.href,
       documentUrl: window.location.href,
       resources: Array.from(resources.values()),
@@ -301,8 +165,6 @@ function addRecordingMessageHandler() {
       indexedDBAccesses,
       localStorageAccesses,
     };
-
-    return data;
   }
 
   window.addEventListener("message", async (event) => {
@@ -314,7 +176,7 @@ function addRecordingMessageHandler() {
         const serializedData = encoder.encode(JSON.stringify(data));
         const buffer = serializedData.buffer;
 
-        window.parent.postMessage({ source: "recording-data-response", buffer, version: RecordingDataVersion }, "*", [buffer]);
+        window.parent.postMessage({ source: "recording-data-response", buffer, messageHandlerId }, "*", [buffer]);
         break;
       }
       case "mouse-data-request": {
@@ -331,7 +193,7 @@ function addRecordingMessageHandler() {
           x: x - rect.x,
           y: y - rect.y,
         };
-        window.parent.postMessage({ source: "mouse-data-response", mouseData }, "*");
+        window.parent.postMessage({ source: "mouse-data-response", mouseData, messageHandlerId }, "*");
         break;
       }
     }
@@ -639,12 +501,14 @@ export function injectRecordingMessageHandler(content: string) {
 
   const headEnd = headTag + 6;
 
+  gLastMessageHandlerId = Math.random().toString(36).substring(2, 15);
+
   const text = `
     <script>
       ${assert}
       ${stringToBase64}
       ${uint8ArrayToBase64}
-      (${addRecordingMessageHandler.toString().replace("RecordingDataVersion", `${RecordingDataVersion}`)})()
+      (${addRecordingMessageHandler})("${gLastMessageHandlerId}")
     </script>
   `;
 
