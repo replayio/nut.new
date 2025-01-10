@@ -1,8 +1,8 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
-import { assert, sendCommandDedicatedClient, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
+import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
 
-interface RerecordResource {
+export interface SimulationResource {
   url: string;
   requestBodyBase64: string;
   responseBodyBase64: string;
@@ -10,14 +10,14 @@ interface RerecordResource {
   responseHeaders: Record<string, string>;
 }
 
-enum RerecordInteractionKind {
+enum SimulationInteractionKind {
   Click = "click",
   DblClick = "dblclick",
   KeyDown = "keydown",
 }
 
-export interface RerecordInteraction {
-  kind: RerecordInteractionKind;
+export interface SimulationInteraction {
+  kind: SimulationInteractionKind;
 
   // Elapsed time when the interaction occurred.
   time: number;
@@ -51,7 +51,7 @@ interface LocalStorageAccess {
   value?: string;
 }
 
-interface RerecordData {
+export interface SimulationData {
   // Contents of window.location.href.
   locationHref: string;
 
@@ -59,10 +59,10 @@ interface RerecordData {
   documentUrl: string;
 
   // All resources accessed.
-  resources: RerecordResource[];
+  resources: SimulationResource[];
 
   // All user interactions made.
-  interactions: RerecordInteraction[];
+  interactions: SimulationInteraction[];
 
   // All indexedDB accesses made.
   indexedDBAccesses?: IndexedDBAccess[];
@@ -76,7 +76,7 @@ interface RerecordData {
 // logic into an iframe. We will ignore messages from other injected handlers.
 let gLastMessageHandlerId = "";
 
-export async function saveReplayRecording(iframe: HTMLIFrameElement) {
+export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   assert(iframe.contentWindow);
   iframe.contentWindow.postMessage({ source: "recording-data-request" }, "*");
 
@@ -86,38 +86,25 @@ export async function saveReplayRecording(iframe: HTMLIFrameElement) {
           event.data?.messageHandlerId == gLastMessageHandlerId) {
         const decoder = new TextDecoder();
         const jsonString = decoder.decode(event.data.buffer);
-        const data = JSON.parse(jsonString) as RerecordData;
+        const data = JSON.parse(jsonString) as SimulationData;
         resolve(data);
       }
     });
   });
 
-  console.log("RerecordData", JSON.stringify(data));
-
-  const rerecordRval = await sendCommandDedicatedClient({
-    method: "Recording.globalExperimentalCommand",
-    params: {
-      name: "rerecordGenerate",
-      params: {
-        rerecordData: data,
-        // FIXME the backend should not require an API key for this command.
-        // For now we use an API key used in Replay's devtools (which is public
-        // but probably shouldn't be).
-        apiKey: "rwk_b6mnJ00rI4pzlwkYmggmmmV1TVQXA0AUktRHoo4vGl9",
-        // FIXME the backend currently requires this but shouldn't.
-        recordingId: "dummy-recording-id",
-      },
-    },
-  });
-
-  console.log("RerecordRval", rerecordRval);
-
-  const recordingId = (rerecordRval as any).rval.rerecordedRecordingId as string;
-  console.log("CreatedRecording", recordingId);
-  return recordingId;
+  console.log("SimulationData", JSON.stringify(data));
+  return data as SimulationData;
 }
 
-export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }) {
+export interface MouseData {
+  selector: string;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
+
+export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }): Promise<MouseData> {
   assert(iframe.contentWindow);
   iframe.contentWindow.postMessage({ source: "mouse-data-request", position }, "*");
 
@@ -130,13 +117,13 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
     });
   });
 
-  return mouseData;
+  return mouseData as MouseData;
 }
 
 // Add handlers to the current iframe's window.
 function addRecordingMessageHandler(messageHandlerId: string) {
-  const resources: Map<string, RerecordResource> = new Map();
-  const interactions: RerecordInteraction[] = [];
+  const resources: Map<string, SimulationResource> = new Map();
+  const interactions: SimulationInteraction[] = [];
   const indexedDBAccesses: IndexedDBAccess[] = [];
   const localStorageAccesses: LocalStorageAccess[] = [];
 
@@ -156,7 +143,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     });
   }
 
-  async function getRerecordData(): Promise<RerecordData> {
+  async function getSimulationData(): Promise<SimulationData> {
     return {
       locationHref: window.location.href,
       documentUrl: window.location.href,
@@ -170,7 +157,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("message", async (event) => {
     switch (event.data?.source) {
       case "recording-data-request": {
-        const data = await getRerecordData();
+        const data = await getSimulationData();
 
         const encoder = new TextEncoder();
         const serializedData = encoder.encode(JSON.stringify(data));
@@ -186,7 +173,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
         const selector = computeSelector(element);
         const rect = element.getBoundingClientRect();
-        const mouseData = {
+        const mouseData: MouseData = {
           selector,
           width: rect.width,
           height: rect.height,
@@ -259,7 +246,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("click", (event) => {
     if (event.target) {
       interactions.push({
-        kind: RerecordInteractionKind.Click,
+        kind: SimulationInteractionKind.Click,
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -269,7 +256,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("dblclick", (event) => {
     if (event.target) {
       interactions.push({
-        kind: RerecordInteractionKind.DblClick,
+        kind: SimulationInteractionKind.DblClick,
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -279,7 +266,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("keydown", (event) => {
     if (event.key) {
       interactions.push({
-        kind: RerecordInteractionKind.KeyDown,
+        kind: SimulationInteractionKind.KeyDown,
         time: Date.now() - startTime,
         ...getKeyboardEventData(event)
       });

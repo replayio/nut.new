@@ -1,20 +1,24 @@
 import { memo, useCallback, useState } from 'react';
-import { getMouseData } from '~/lib/replay/Recording';
+import { getMouseData, type MouseData } from '~/lib/replay/Recording';
 
 interface PointSelectorProps {
   isSelectionMode: boolean;
   setIsSelectionMode: (mode: boolean) => void;
   selectionPoint: { x: number; y: number } | null;
   setSelectionPoint: (point: { x: number; y: number } | null) => void;
-  recordingSaved: boolean;
   containerRef: React.RefObject<HTMLIFrameElement>;
+}
+
+let gCurrentMouseData: MouseData | undefined;
+
+export function getCurrentMouseData() {
+  return gCurrentMouseData;
 }
 
 export const PointSelector = memo(
   (props: PointSelectorProps) => {
     const {
       isSelectionMode,
-      recordingSaved,
       setIsSelectionMode,
       selectionPoint,
       setSelectionPoint,
@@ -22,6 +26,9 @@ export const PointSelector = memo(
     } = props;
 
     const [isCapturing, setIsCapturing] = useState(false);
+    const [mouseData, setMouseData] = useState<MouseData | undefined>(undefined);
+
+    gCurrentMouseData = mouseData;
 
     const handleSelectionClick = useCallback(async (event: React.MouseEvent) => {
       event.preventDefault();
@@ -40,31 +47,30 @@ export const PointSelector = memo(
 
       const mouseData = await getMouseData(containerRef.current, { x, y });
       console.log("MouseData", mouseData);
+      setMouseData(mouseData);
 
       setIsCapturing(false);
       setIsSelectionMode(false); // Turn off selection mode after capture
     }, [isSelectionMode, containerRef, setIsSelectionMode]);
 
     if (!isSelectionMode) {
-      if (recordingSaved) {
+      if (selectionPoint) {
         // Draw an overlay to prevent interactions with the iframe
-        // and to show the last point the user clicked (if there is one).
+        // and to show the last point the user clicked.
         return (
           <div
             className="absolute inset-0"
             onClick={(event) => event.preventDefault()}
           >
-            { selectionPoint && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: `${selectionPoint.x-8}px`,
-                  top: `${selectionPoint.y-12}px`,
-                }}
-              >
-                &#10060;
-              </div>
-            )}
+            <div
+              style={{
+                position: 'absolute',
+                left: `${selectionPoint.x-8}px`,
+                top: `${selectionPoint.y-12}px`,
+              }}
+            >
+              &#10060;
+            </div>
           </div>
         );
       } else {

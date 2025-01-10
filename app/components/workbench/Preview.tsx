@@ -4,10 +4,16 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PortDropdown } from './PortDropdown';
 import { PointSelector } from './PointSelector';
-import { saveReplayRecording } from '~/lib/replay/Recording';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 type ResizeSide = 'left' | 'right' | null;
+
+let gCurrentIFrame: HTMLIFrameElement | undefined;
+
+export function getCurrentIFrame() {
+  assert(gCurrentIFrame);
+  return gCurrentIFrame;
+}
 
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -25,13 +31,6 @@ export const Preview = memo(() => {
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
-  // Once a recording has been saved, the preview can no longer be interacted with.
-  // Reloading the preview or regenerating it after code changes will reset this.
-  const [recordingSaved, setRecordingSaved] = useState(false);
-
-  // The ID of the recording that was created. If a recording has been saved but
-  // no ID is set, the recording is still being created.
-  const [recordingId, setRecordingId] = useState<string | undefined>();
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
@@ -49,6 +48,8 @@ export const Preview = memo(() => {
 
   // Define the scaling factor
   const SCALING_FACTOR = 2; // Adjust this value to increase/decrease sensitivity
+
+  gCurrentIFrame = iframeRef.current ?? undefined;
 
   useEffect(() => {
     if (!activePreview) {
@@ -248,16 +249,6 @@ export const Preview = memo(() => {
     </div>
   );
 
-  const beginSaveRecording = () => {
-    assert(!recordingSaved);
-    setRecordingSaved(true);
-
-    assert(iframeRef.current);
-    saveReplayRecording(iframeRef.current).then((id) => {
-      setRecordingId(id);
-    });
-  };
-
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col relative">
       {isPortDropdownOpen && (
@@ -265,20 +256,11 @@ export const Preview = memo(() => {
       )}
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-        {!recordingSaved && (
-          <IconButton
-            icon="i-ph:record-fill"
-            onClick={beginSaveRecording}
-            style={{ color: 'red' }}
-          />
-        )}
-        {recordingSaved && (
-          <IconButton
-            icon="i-ph:cursor-click"
-            onClick={() => setIsSelectionMode(!isSelectionMode)}
-            className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
-          />
-        )}
+        <IconButton
+          icon="i-ph:cursor-click"
+          onClick={() => setIsSelectionMode(!isSelectionMode)}
+          className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
+        />
         <div
           className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive
         focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive"
@@ -353,7 +335,6 @@ export const Preview = memo(() => {
               />
               <PointSelector
                 isSelectionMode={isSelectionMode}
-                recordingSaved={recordingSaved}
                 setIsSelectionMode={setIsSelectionMode}
                 selectionPoint={selectionPoint}
                 setSelectionPoint={setSelectionPoint}
