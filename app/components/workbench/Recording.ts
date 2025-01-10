@@ -495,6 +495,14 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   };
 }
 
+const RecordingMessageHandlerScriptPrefix = `
+    <script>
+      ${assert}
+      ${stringToBase64}
+      ${uint8ArrayToBase64}
+      (${addRecordingMessageHandler})
+`;
+
 export function injectRecordingMessageHandler(content: string) {
   const headTag = content.indexOf("<head>");
   assert(headTag != -1, "No <head> tag found");
@@ -503,14 +511,24 @@ export function injectRecordingMessageHandler(content: string) {
 
   gLastMessageHandlerId = Math.random().toString(36).substring(2, 15);
 
-  const text = `
-    <script>
-      ${assert}
-      ${stringToBase64}
-      ${uint8ArrayToBase64}
-      (${addRecordingMessageHandler})("${gLastMessageHandlerId}")
-    </script>
-  `;
+  const text = `${RecordingMessageHandlerScriptPrefix}("${gLastMessageHandlerId}")</script>`;
 
   return content.slice(0, headEnd) + text + content.slice(headEnd);
+}
+
+export function removeRecordingMessageHandler(content: string) {
+  const index = content.indexOf(RecordingMessageHandlerScriptPrefix);
+  if (index == -1) {
+    return content;
+  }
+  const prefix = content.substring(0, index);
+
+  const suffixStart = index + RecordingMessageHandlerScriptPrefix.length;
+
+  const closeScriptTag = "</script>";
+  const closeScriptIndex = content.indexOf(closeScriptTag, suffixStart);
+  assert(closeScriptIndex != -1, "No </script> tag found");
+  const suffix = content.substring(closeScriptIndex + closeScriptTag.length);
+
+  return prefix + suffix;
 }
