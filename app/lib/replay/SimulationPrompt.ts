@@ -2,8 +2,9 @@
 
 // Currently the simulation prompt is sent from the server.
 
-import { getIFrameSimulationData, type SimulationData, type MouseData } from './Recording';
+import { type SimulationData, type MouseData } from './Recording';
 import { sendCommandDedicatedClient } from './ReplayProtocolClient';
+import { type ChatFileChange } from '~/utils/chatStreamController';
 
 // Data supplied by the client for a simulation prompt, separate from the chat input.
 export interface SimulationPromptClientData {
@@ -12,12 +13,7 @@ export interface SimulationPromptClientData {
   mouseData?: MouseData;
 }
 
-interface FileChange {
-  path: string;
-  content: string;
-}
-
-interface ChatMessage {
+export interface SimulationChatMessage {
   role: "user" | "assistant";
   content: string;
 }
@@ -27,7 +23,7 @@ interface SimulationPrompt {
   simulationData: SimulationData;
   repositoryContents: string; // base64 encoded zip file
   userPrompt: string;
-  chatHistory: ChatMessage[];
+  chatHistory: SimulationChatMessage[];
   mouseData?: MouseData;
   anthropicAPIKey: string;
 }
@@ -35,10 +31,15 @@ interface SimulationPrompt {
 // Result format for the simulationPrompt command.
 interface SimulationPromptResult {
   message: string;
-  fileChanges: FileChange[];
+  fileChanges: ChatFileChange[];
 }
 
-export async function performSimulationPrompt(simulationClientData: SimulationPromptClientData, userPrompt: string, chatHistory: ChatMessage[], anthropicAPIKey: string): Promise<SimulationPromptResult> {
+export async function performSimulationPrompt(
+  simulationClientData: SimulationPromptClientData,
+  userPrompt: string,
+  chatHistory: SimulationChatMessage[],
+  anthropicAPIKey: string,
+): Promise<SimulationPromptResult> {
   const { simulationData, repositoryContents, mouseData } = simulationClientData;
 
   const prompt: SimulationPrompt = {

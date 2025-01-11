@@ -49,7 +49,7 @@ interface BaseChatProps {
   setProvider?: (provider: ProviderInfo) => void;
   providerList?: ProviderInfo[];
   handleStop?: () => void;
-  sendMessage?: (event: React.UIEvent, messageInput?: string) => void;
+  sendMessage?: (event: React.UIEvent, messageInput?: string, simulation?: boolean) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   enhancePrompt?: () => void;
   importChat?: (description: string, messages: Message[]) => Promise<void>;
@@ -209,9 +209,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
-    const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
+    const handleSendMessage = (event: React.UIEvent, messageInput?: string, simulation?: boolean) => {
       if (sendMessage) {
-        sendMessage(event, messageInput);
+        sendMessage(event, messageInput, simulation);
 
         if (recognition) {
           recognition.abort(); // Stop current recognition
@@ -402,7 +402,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <textarea
                     ref={textareaRef}
                     className={classNames(
-                      'w-full pl-4 pt-4 pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+                      'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
                       'transition-all duration-200',
                       'hover:border-bolt-elements-focus',
                     )}
@@ -471,21 +471,35 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   />
                   <ClientOnly>
                     {() => (
-                      <SendButton
-                        show={input.length > 0 || isStreaming || uploadedFiles.length > 0}
-                        isStreaming={isStreaming}
-                        disabled={!providerList || providerList.length === 0}
-                        onClick={(event) => {
-                          if (isStreaming) {
-                            handleStop?.();
-                            return;
-                          }
+                      <>
+                        <SendButton
+                          show={input.length > 0 || isStreaming || uploadedFiles.length > 0}
+                          simulation={false}
+                          isStreaming={isStreaming}
+                          disabled={!providerList || providerList.length === 0}
+                          onClick={(event) => {
+                            if (isStreaming) {
+                              handleStop?.();
+                              return;
+                            }
 
-                          if (input.length > 0 || uploadedFiles.length > 0) {
-                            handleSendMessage?.(event);
-                          }
-                        }}
-                      />
+                            if (input.length > 0 || uploadedFiles.length > 0) {
+                              handleSendMessage?.(event);
+                            }
+                          }}
+                        />
+                        <SendButton
+                          show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
+                          simulation={true}
+                          isStreaming={isStreaming}
+                          disabled={!providerList || providerList.length === 0}
+                          onClick={(event) => {
+                            if (input.length > 0 || uploadedFiles.length > 0) {
+                              handleSendMessage?.(event, undefined, true);
+                            }
+                          }}
+                        />
+                      </>
                     )}
                   </ClientOnly>
                   <div className="flex justify-between items-center text-sm p-4 pt-2">

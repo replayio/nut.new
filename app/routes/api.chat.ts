@@ -5,6 +5,9 @@ import { CONTINUE_PROMPT } from '~/lib/common/prompts/prompts';
 import { streamText, type Messages, type StreamingOptions } from '~/lib/.server/llm/stream-text';
 import SwitchableStream from '~/lib/.server/llm/switchable-stream';
 import type { IProviderSetting } from '~/types/model';
+import { type SimulationChatMessage, type SimulationPromptClientData, performSimulationPrompt } from '~/lib/replay/SimulationPrompt';
+import { ChatStreamController } from '~/utils/chatStreamController';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
@@ -28,12 +31,44 @@ function parseCookies(cookieHeader: string): Record<string, string> {
   return cookies;
 }
 
+function extractMessageContent(baseContent: any): string {
+  let content = baseContent;
+
+  if (content && typeof content == "object" && content.length) {
+    assert(content.length == 1, "Expected a single message");
+    content = content[0];
+  }
+
+  if (content && typeof content == "object") {
+    assert(content.type == "text", `Expected "text" for type property, got ${content.type}`);
+    content = content.text;
+  }
+
+  assert(typeof content == "string", `Expected string type, got ${typeof content}`);
+
+  while (true) {
+    const artifactIndex = content.indexOf("<boltArtifact");
+    if (artifactIndex == -1) {
+      break;
+    }
+    const closeTag = "</boltArtifact>"
+    const artifactEnd = content.indexOf(closeTag, artifactIndex);
+    assert(artifactEnd != -1, "Unterminated <boltArtifact> tag");
+    content = content.slice(0, artifactIndex) + content.slice(artifactEnd + closeTag.length);
+  }
+
+  return content;
+}
+
 async function chatAction({ context, request }: ActionFunctionArgs) {
-  const { messages, files, promptId } = await request.json<{
+  const { messages, files, promptId, simulationClientData } = await request.json<{
     messages: Messages;
     files: any;
     promptId?: string;
+    simulationClientData?: SimulationPromptClientData;
   }>();
+
+  console.log("SimulationClientData", simulationClientData);
 
   const cookieHeader = request.headers.get('Cookie');
   const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
@@ -50,6 +85,52 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
   };
 
   try {
+    if (simulationClientData) {
+      const chatHistory: SimulationChatMessage[] = [];
+      for (const { role, content } of messages) {
+        chatHistory.push({ role, content: extractMessageContent(content) });
+      }
+      const lastHistoryMessage = chatHistory.pop();
+      assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
+      const userPrompt = lastHistoryMessage.content;
+
+      const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+      if (!anthropicApiKey) {
+        throw new Error("Anthropic API key is not set");
+      }
+
+      const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
+
+      const resultStream = new ReadableStream({
+        async start(controller) {
+          const chatController = new ChatStreamController(controller);
+
+          chatController.writeText(message + "\n");
+          chatController.writeFileChanges("Update Files", fileChanges);
+
+          /*
+          chatController.writeText("Hello World\n");
+          chatController.writeText("Hello World 2\n");
+          chatController.writeText("Hello\n World 3\n");
+          chatController.writeFileChanges("Rewrite Files", [{filePath: "src/services/llm.ts", contents: "FILE_CONTENTS_FIXME" }]);
+          chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
+          */
+
+          controller.close();
+          setTimeout(() => stream.close(), 1000);
+        },
+      });
+
+      stream.switchSource(resultStream);
+
+      return new Response(stream.readable, {
+        status: 200,
+        headers: {
+          contentType: 'text/plain; charset=utf-8',
+        },
+      });
+    }
+
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason, usage }) => {

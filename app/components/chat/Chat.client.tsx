@@ -245,7 +245,7 @@ export const ChatImpl = memo(
       setChatStarted(true);
     };
 
-    const sendMessage = async (_event: React.UIEvent, messageInput?: string) => {
+    const sendMessage = async (_event: React.UIEvent, messageInput?: string, simulation?: boolean) => {
       const _input = messageInput || input;
 
       if (_input.length === 0 || isLoading) {
@@ -261,15 +261,19 @@ export const ChatImpl = memo(
        */
       await workbenchStore.saveAllFiles();
 
-      const simulationData = await getIFrameSimulationData(getCurrentIFrame());
-      const mouseData = getCurrentMouseData();
       const { contentBase64, uniqueProjectName } = await workbenchStore.generateZipBase64();
 
-      const simulationClientData: SimulationPromptClientData = {
-        simulationData: simulationData,
-        repositoryContents: contentBase64,
-        mouseData: mouseData,
-      };
+      let simulationClientData: SimulationPromptClientData | undefined;
+      if (simulation) {
+        const simulationData = await getIFrameSimulationData(getCurrentIFrame());
+        const mouseData = getCurrentMouseData();
+
+        simulationClientData = {
+          simulationData: simulationData,
+          repositoryContents: contentBase64,
+          mouseData: mouseData,
+        };
+      }
   
       const fileModifications = workbenchStore.getFileModifcations();
 
