@@ -68,6 +68,9 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     simulationClientData?: SimulationPromptClientData;
   }>();
 
+  let finished: (v?: any) => void;
+  context.cloudflare.ctx.waitUntil(new Promise((resolve) => finished = resolve));
+
   console.log("SimulationClientData", simulationClientData);
 
   const cookieHeader = request.headers.get('Cookie');
@@ -85,7 +88,8 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
   };
 
   try {
-    if (simulationClientData) {
+    if (/*simulationClientData*/true) {
+      /*
       const chatHistory: SimulationChatMessage[] = [];
       for (const { role, content } of messages) {
         chatHistory.push({ role, content: extractMessageContent(content) });
@@ -100,24 +104,25 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       }
 
       const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
+      */
 
       const resultStream = new ReadableStream({
         async start(controller) {
           const chatController = new ChatStreamController(controller);
 
+          /*
           chatController.writeText(message + "\n");
           chatController.writeFileChanges("Update Files", fileChanges);
+          */
 
-          /*
           chatController.writeText("Hello World\n");
           chatController.writeText("Hello World 2\n");
           chatController.writeText("Hello\n World 3\n");
           chatController.writeFileChanges("Rewrite Files", [{filePath: "src/services/llm.ts", contents: "FILE_CONTENTS_FIXME" }]);
           chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
-          */
 
           controller.close();
-          setTimeout(() => stream.close(), 1000);
+          setTimeout(() => { stream.close(); finished(); }, 1000);
         },
       });
 

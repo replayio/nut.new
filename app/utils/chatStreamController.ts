@@ -10,13 +10,16 @@ export interface ChatFileChange {
 
 export class ChatStreamController {
   private controller: ReadableStreamDefaultController;
+  private encoder: TextEncoder;
 
   constructor(controller: ReadableStreamDefaultController) {
     this.controller = controller;
+    this.encoder = new TextEncoder();
   }
 
   writeText(text: string) {
-    this.controller.enqueue(`0:${JSON.stringify(text)}\n`);
+    const data = this.encoder.encode(`0:${JSON.stringify(text)}\n`);
+    this.controller.enqueue(data);
   }
 
   writeFileChanges(title: string, fileChanges: ChatFileChange[]) {
@@ -29,6 +32,7 @@ export class ChatStreamController {
   }
 
   writeAnnotation(type: string, value: any) {
-    this.controller.enqueue(`8:[{"type":"${type}","value":${JSON.stringify(value)}}]\n`);
+    const data = this.encoder.encode(`8:[{"type":"${type}","value":${JSON.stringify(value)}}]\n`);
+    this.controller.enqueue(data);
   }
 }
