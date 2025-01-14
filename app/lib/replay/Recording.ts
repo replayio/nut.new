@@ -4,10 +4,11 @@ import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClie
 
 export interface SimulationResource {
   url: string;
-  requestBodyBase64: string;
-  responseBodyBase64: string;
-  responseStatus: number;
-  responseHeaders: Record<string, string>;
+  requestBodyBase64?: string;
+  responseBodyBase64?: string;
+  responseStatus?: number;
+  responseHeaders?: Record<string, string>;
+  error?: string;
 }
 
 enum SimulationInteractionKind {
@@ -122,7 +123,7 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 
 // Add handlers to the current iframe's window.
 function addRecordingMessageHandler(messageHandlerId: string) {
-  const resources: Map<string, SimulationResource> = new Map();
+  const resources: SimulationResource[] = [];
   const interactions: SimulationInteraction[] = [];
   const indexedDBAccesses: IndexedDBAccess[] = [];
   const localStorageAccesses: LocalStorageAccess[] = [];
@@ -131,10 +132,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   function addTextResource(path: string, text: string) {
     const url = (new URL(path, window.location.href)).href;
-    if (resources.has(url)) {
-      return;
-    }
-    resources.set(url, {
+    resources.push({
       url,
       requestBodyBase64: "",
       responseBodyBase64: stringToBase64(text),
@@ -147,7 +145,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     return {
       locationHref: window.location.href,
       documentUrl: window.location.href,
-      resources: Array.from(resources.values()),
+      resources,
       interactions,
       indexedDBAccesses,
       localStorageAccesses,
@@ -475,10 +473,18 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   const baseFetch = window.fetch;
   window.fetch = async (info, options) => {
-    const rv = await baseFetch(info, options);
     const url = info instanceof Request ? info.url : info.toString();
-    responseToURL.set(rv, url);
-    return createProxy(rv);
+    try {
+      const rv = await baseFetch(info, options);
+      responseToURL.set(rv, url);
+      return createProxy(rv);
+    } catch (error) {
+      resources.push({
+        url,
+        error: String(error),
+      });
+      throw error;
+    }
   };
 }
 
