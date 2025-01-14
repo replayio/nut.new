@@ -145,13 +145,12 @@ function extractPropertiesFromMessage(message: Message): { model: string; provid
 export async function getStreamTextArguments(props: {
   messages: Messages;
   env: Env;
-  options?: StreamingOptions;
   apiKeys?: Record<string, string>;
   files?: FileMap;
   providerSettings?: Record<string, IProviderSetting>;
   promptId?: string;
 }) {
-  const { messages, env: serverEnv, options, apiKeys, files, providerSettings, promptId } = props;
+  const { messages, env: serverEnv, apiKeys, files, providerSettings, promptId } = props;
 
   // console.log({serverEnv});
 
@@ -212,7 +211,6 @@ export async function getStreamTextArguments(props: {
     system: systemPrompt,
     maxTokens: dynamicMaxTokens,
     messages: coreMessages,
-    ...options,
   };
 }
 
@@ -226,5 +224,5 @@ export async function streamText(props: {
   promptId?: string;
 }) {
   const args = await getStreamTextArguments(props);
-  return _streamText(args);
+  return _streamText({ ...args, ...props.options });
 }

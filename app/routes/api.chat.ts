@@ -3,6 +3,8 @@ import type { IProviderSetting } from '~/types/model';
 import { type SimulationChatMessage, type SimulationPromptClientData, performSimulationPrompt } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { getStreamTextArguments, type Messages } from '~/lib/.server/llm/stream-text';
+import { chatAnthropic } from '~/lib/.server/llm/chat-anthropic';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
@@ -57,7 +59,7 @@ function extractMessageContent(baseContent: any): string {
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
   const { messages, files, promptId, simulationClientData } = await request.json<{
-    messages: any;
+    messages: Messages;
     files: any;
     promptId?: string;
     simulationClientData?: SimulationPromptClientData;
@@ -68,63 +70,75 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
   console.log("SimulationClientData", simulationClientData);
 
-  const cookieHeader = request.headers.get('Cookie');
-  const providerSettings: Record<string, IProviderSetting> = JSON.parse(
-    parseCookies(cookieHeader || '').providers || '{}',
-  );
-
-  const cumulativeUsage = {
-    completionTokens: 0,
-    promptTokens: 0,
-    totalTokens: 0,
-  };
-
   try {
-    if (/*simulationClientData*/true) {
-      /*
-      const chatHistory: SimulationChatMessage[] = [];
-      for (const { role, content } of messages) {
-        chatHistory.push({ role, content: extractMessageContent(content) });
-      }
-      const lastHistoryMessage = chatHistory.pop();
-      assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
-      const userPrompt = lastHistoryMessage.content;
+    const { system, messages: coreMessages } = await getStreamTextArguments({
+      messages,
+      env: context.cloudflare.env,
+      apiKeys: {},
+      files,
+      providerSettings: undefined,
+      promptId,
+    });
 
-      const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-      if (!anthropicApiKey) {
-        throw new Error("Anthropic API key is not set");
-      }
+    console.log("PROMPTS", system, JSON.stringify(coreMessages, null, 2));
 
-      const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
-      */
-
-      const resultStream = new ReadableStream({
-        async start(controller) {
-          const chatController = new ChatStreamController(controller);
-
-          /*
-          chatController.writeText(message + "\n");
-          chatController.writeFileChanges("Update Files", fileChanges);
-          */
-
-          chatController.writeText("Hello World\n");
-          chatController.writeText("Hello World 2\n");
-          chatController.writeText("Hello\n World 3\n");
-          chatController.writeFileChanges("Rewrite Files", [{filePath: "src/services/llm.ts", contents: "FILE_CONTENTS_FIXME" }]);
-          chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
-
-          controller.close();
-          setTimeout(finished, 1000);
-        },
-      });
-
-      return new Response(resultStream, {
-        status: 200,
-        headers: {
-          contentType: 'text/plain; charset=utf-8',
-        },
-      });
+    /*
+    const chatHistory: SimulationChatMessage[] = [];
+    for (const { role, content } of messages) {
+      chatHistory.push({ role, content: extractMessageContent(content) });
     }
+    const lastHistoryMessage = chatHistory.pop();
+    assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
+    const userPrompt = lastHistoryMessage.content;
+
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+      throw new Error("Anthropic API key is not set");
+    }
+
+    const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
+    */
+
+    const anthropicApiKey = context.cloudflare.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+      throw new Error("Anthropic API key is not set");
+    }
+
+    const resultStream = new ReadableStream({
+      async start(controller) {
+        const chatController = new ChatStreamController(controller);
+
+        /*
+        chatController.writeText(message + "\n");
+        chatController.writeFileChanges("Update Files", fileChanges);
+        */
+
+        /*
+        chatController.writeText("Hello World\n");
+        chatController.writeText("Hello World 2\n");
+        chatController.writeText("Hello\n World 3\n");
+        chatController.writeFileChanges("Rewrite Files", [{filePath: "src/services/llm.ts", contents: "FILE_CONTENTS_FIXME" }]);
+        chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
+        */
+
+        try {
+          await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+        } catch (error: any) {
+          console.error(error);
+          chatController.writeText("Error: " + error.message);
+        }
+
+        controller.close();
+        setTimeout(finished, 1000);
+      },
+    });
+
+    return new Response(resultStream, {
+      status: 200,
+      headers: {
+        contentType: 'text/plain; charset=utf-8',
+      },
+    });
   } catch (error: any) {
     console.error(error);
 

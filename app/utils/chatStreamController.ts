@@ -35,4 +35,8 @@ export class ChatStreamController {
     const data = this.encoder.encode(`8:[{"type":"${type}","value":${JSON.stringify(value)}}]\n`);
     this.controller.enqueue(data);
   }
+
+  writeUsage({ completionTokens, promptTokens }: { completionTokens: number, promptTokens: number }) {
+    this.writeAnnotation("usage", { completionTokens, promptTokens, totalTokens: completionTokens + promptTokens });
+  }
 }
