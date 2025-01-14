@@ -1,9 +1,4 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { createDataStream } from 'ai';
-import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '~/lib/.server/llm/constants';
-import { CONTINUE_PROMPT } from '~/lib/common/prompts/prompts';
-import { streamText, type Messages, type StreamingOptions } from '~/lib/.server/llm/stream-text';
-import SwitchableStream from '~/lib/.server/llm/switchable-stream';
 import type { IProviderSetting } from '~/types/model';
 import { type SimulationChatMessage, type SimulationPromptClientData, performSimulationPrompt } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
@@ -62,7 +57,7 @@ function extractMessageContent(baseContent: any): string {
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
   const { messages, files, promptId, simulationClientData } = await request.json<{
-    messages: Messages;
+    messages: any;
     files: any;
     promptId?: string;
     simulationClientData?: SimulationPromptClientData;
@@ -74,12 +69,9 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
   console.log("SimulationClientData", simulationClientData);
 
   const cookieHeader = request.headers.get('Cookie');
-  const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
   const providerSettings: Record<string, IProviderSetting> = JSON.parse(
     parseCookies(cookieHeader || '').providers || '{}',
   );
-
-  const stream = new SwitchableStream();
 
   const cumulativeUsage = {
     completionTokens: 0,
@@ -122,94 +114,17 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
 
           controller.close();
-          setTimeout(() => { stream.close(); finished(); }, 1000);
+          setTimeout(finished, 1000);
         },
       });
 
-      stream.switchSource(resultStream);
-
-      return new Response(stream.readable, {
+      return new Response(resultStream, {
         status: 200,
         headers: {
           contentType: 'text/plain; charset=utf-8',
         },
       });
     }
-
-    const options: StreamingOptions = {
-      toolChoice: 'none',
-      onFinish: async ({ text: content, finishReason, usage }) => {
-        console.log("QueryModelFinished", usage, content);
-
-        if (usage) {
-          cumulativeUsage.completionTokens += usage.completionTokens || 0;
-          cumulativeUsage.promptTokens += usage.promptTokens || 0;
-          cumulativeUsage.totalTokens += usage.totalTokens || 0;
-        }
-
-        if (finishReason !== 'length') {
-          return stream
-            .switchSource(
-              createDataStream({
-                async execute(dataStream) {
-                  dataStream.writeMessageAnnotation({
-                    type: 'usage',
-                    value: {
-                      completionTokens: cumulativeUsage.completionTokens,
-                      promptTokens: cumulativeUsage.promptTokens,
-                      totalTokens: cumulativeUsage.totalTokens,
-                    },
-                  });
-                },
-                onError: (error: any) => `Custom error: ${error.message}`,
-              }),
-            )
-            .then(() => stream.close());
-        }
-
-        if (stream.switches >= MAX_RESPONSE_SEGMENTS) {
-          throw Error('Cannot continue message: Maximum segments reached');
-        }
-
-        const switchesLeft = MAX_RESPONSE_SEGMENTS - stream.switches;
-
-        console.log(`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`);
-
-        messages.push({ role: 'assistant', content });
-        messages.push({ role: 'user', content: CONTINUE_PROMPT });
-
-        const result = await streamText({
-          messages,
-          env: context.cloudflare.env,
-          options,
-          apiKeys,
-          files,
-          providerSettings,
-          promptId,
-        });
-
-        return stream.switchSource(result.toDataStream());
-      },
-    };
-
-    const result = await streamText({
-      messages,
-      env: context.cloudflare.env,
-      options,
-      apiKeys,
-      files,
-      providerSettings,
-      promptId,
-    });
-
-    stream.switchSource(result.toDataStream());
-
-    return new Response(stream.readable, {
-      status: 200,
-      headers: {
-        contentType: 'text/plain; charset=utf-8',
-      },
-    });
   } catch (error: any) {
     console.error(error);
 
