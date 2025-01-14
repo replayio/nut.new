@@ -9,7 +9,6 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { MODEL_LIST, PROVIDER_LIST, initializeModelList } from '~/utils/constants';
 import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { APIKeyManager } from './APIKeyManager';
@@ -25,7 +24,6 @@ import GitCloneButton from './GitCloneButton';
 import FilePreview from './FilePreview';
 import { ModelSelector } from '~/components/chat/ModelSelector';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
-import type { IProviderSetting, ProviderInfo } from '~/types/model';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
 
@@ -43,11 +41,6 @@ interface BaseChatProps {
   enhancingPrompt?: boolean;
   promptEnhanced?: boolean;
   input?: string;
-  model?: string;
-  setModel?: (model: string) => void;
-  provider?: ProviderInfo;
-  setProvider?: (provider: ProviderInfo) => void;
-  providerList?: ProviderInfo[];
   handleStop?: () => void;
   sendMessage?: (event: React.UIEvent, messageInput?: string, simulation?: boolean) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -69,11 +62,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       showChat = true,
       chatStarted = false,
       isStreaming = false,
-      model,
-      setModel,
-      provider,
-      setProvider,
-      providerList,
       input = '',
       enhancingPrompt,
       handleInputChange,
@@ -93,22 +81,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     ref,
   ) => {
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
-    const [apiKeys, setApiKeys] = useState<Record<string, string>>(() => {
-      const savedKeys = Cookies.get('apiKeys');
-
-      if (savedKeys) {
-        try {
-          return JSON.parse(savedKeys);
-        } catch (error) {
-          console.error('Failed to parse API keys from cookies:', error);
-          return {};
-        }
-      }
-
-      return {};
-    });
-    const [modelList, setModelList] = useState(MODEL_LIST);
-    const [isModelSettingsCollapsed, setIsModelSettingsCollapsed] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
@@ -119,50 +91,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     useEffect(() => {
       // Load API keys from cookies on component mount
-
-      let parsedApiKeys: Record<string, string> | undefined = {};
-
-      try {
-        const storedApiKeys = Cookies.get('apiKeys');
-
-        if (storedApiKeys) {
-          const parsedKeys = JSON.parse(storedApiKeys);
-
-          if (typeof parsedKeys === 'object' && parsedKeys !== null) {
-            setApiKeys(parsedKeys);
-            parsedApiKeys = parsedKeys;
-          }
-        }
-      } catch (error) {
-        console.error('Error loading API keys from cookies:', error);
-
-        // Clear invalid cookie data
-        Cookies.remove('apiKeys');
-      }
-
-      let providerSettings: Record<string, IProviderSetting> | undefined = undefined;
-
-      try {
-        const savedProviderSettings = Cookies.get('providers');
-
-        if (savedProviderSettings) {
-          const parsedProviderSettings = JSON.parse(savedProviderSettings);
-
-          if (typeof parsedProviderSettings === 'object' && parsedProviderSettings !== null) {
-            providerSettings = parsedProviderSettings;
-          }
-        }
-      } catch (error) {
-        console.error('Error loading Provider Settings from cookies:', error);
-
-        // Clear invalid cookie data
-        Cookies.remove('providers');
-      }
-
-      initializeModelList({ apiKeys: parsedApiKeys, providerSettings }).then((modelList) => {
-        console.log('Model List: ', modelList);
-        setModelList(modelList);
-      });
 
       if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -351,31 +279,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <rect className={classNames(styles.PromptEffectLine)} pathLength="100" strokeLinecap="round"></rect>
                   <rect className={classNames(styles.PromptShine)} x="48" y="24" width="70" height="1"></rect>
                 </svg>
-                <div>
-                  <div className={isModelSettingsCollapsed ? 'hidden' : ''}>
-                    <ModelSelector
-                      key={provider?.name + ':' + modelList.length}
-                      model={model}
-                      setModel={setModel}
-                      modelList={modelList}
-                      provider={provider}
-                      setProvider={setProvider}
-                      providerList={providerList || (PROVIDER_LIST as ProviderInfo[])}
-                      apiKeys={apiKeys}
-                    />
-                    {(providerList || []).length > 0 && provider && (
-                      <APIKeyManager
-                        provider={provider}
-                        apiKey={apiKeys[provider.name] || ''}
-                        setApiKey={(key) => {
-                          const newApiKeys = { ...apiKeys, [provider.name]: key };
-                          setApiKeys(newApiKeys);
-                          Cookies.set('apiKeys', JSON.stringify(newApiKeys));
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
                 <FilePreview
                   files={uploadedFiles}
                   imageDataList={imageDataList}
@@ -476,7 +379,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           show={input.length > 0 || isStreaming || uploadedFiles.length > 0}
                           simulation={false}
                           isStreaming={isStreaming}
-                          disabled={!providerList || providerList.length === 0}
                           onClick={(event) => {
                             if (isStreaming) {
                               handleStop?.();
@@ -492,7 +394,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
                           simulation={true}
                           isStreaming={isStreaming}
-                          disabled={!providerList || providerList.length === 0}
                           onClick={(event) => {
                             if (input.length > 0 || uploadedFiles.length > 0) {
                               handleSendMessage?.(event, undefined, true);
@@ -530,20 +431,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         disabled={isStreaming}
                       />
                       {chatStarted && <ClientOnly>{() => <ExportChatButton exportChat={exportChat} />}</ClientOnly>}
-                      <IconButton
-                        title="Model Settings"
-                        className={classNames('transition-all flex items-center gap-1', {
-                          'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent':
-                            isModelSettingsCollapsed,
-                          'bg-bolt-elements-item-backgroundDefault text-bolt-elements-item-contentDefault':
-                            !isModelSettingsCollapsed,
-                        })}
-                        onClick={() => setIsModelSettingsCollapsed(!isModelSettingsCollapsed)}
-                        disabled={!providerList || providerList.length === 0}
-                      >
-                        <div className={`i-ph:caret-${isModelSettingsCollapsed ? 'right' : 'down'} text-lg`} />
-                        {isModelSettingsCollapsed ? <span className="text-xs">{model}</span> : <span />}
-                      </IconButton>
                     </div>
                     {input.length > 3 ? (
                       <div className="text-xs text-bolt-elements-textTertiary">
