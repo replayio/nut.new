@@ -6,6 +6,16 @@ export function assert(condition: any, message: string = "Assertion failed!"): a
   }
 }
 
+export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason?: any) => void } {
+  let resolve: (value: T) => void;
+  let reject: (reason?: any) => void;
+  const promise = new Promise<T>((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+  return { promise, resolve: resolve!, reject: reject! };
+}
+
 export function uint8ArrayToBase64(data: Uint8Array) {
   let str = "";
   for (const byte of data) {

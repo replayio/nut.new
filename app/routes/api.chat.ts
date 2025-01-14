@@ -1,5 +1,4 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import type { IProviderSetting } from '~/types/model';
 import { type SimulationChatMessage, type SimulationPromptClientData, performSimulationPrompt } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
@@ -8,24 +7,6 @@ import { chatAnthropic } from '~/lib/.server/llm/chat-anthropic';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
-}
-
-function parseCookies(cookieHeader: string): Record<string, string> {
-  const cookies: Record<string, string> = {};
-
-  const items = cookieHeader.split(';').map((cookie) => cookie.trim());
-
-  items.forEach((item) => {
-    const [name, ...rest] = item.split('=');
-
-    if (name && rest) {
-      const decodedName = decodeURIComponent(name.trim());
-      const decodedValue = decodeURIComponent(rest.join('=').trim());
-      cookies[decodedName] = decodedValue;
-    }
-  });
-
-  return cookies;
 }
 
 function extractMessageContent(baseContent: any): string {
@@ -80,25 +61,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       promptId,
     });
 
-    console.log("PROMPTS", system, JSON.stringify(coreMessages, null, 2));
-
-    /*
-    const chatHistory: SimulationChatMessage[] = [];
-    for (const { role, content } of messages) {
-      chatHistory.push({ role, content: extractMessageContent(content) });
-    }
-    const lastHistoryMessage = chatHistory.pop();
-    assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
-    const userPrompt = lastHistoryMessage.content;
-
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicApiKey) {
-      throw new Error("Anthropic API key is not set");
-    }
-
-    const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
-    */
-
     const anthropicApiKey = context.cloudflare.env.ANTHROPIC_API_KEY;
     if (!anthropicApiKey) {
       throw new Error("Anthropic API key is not set");
@@ -109,11 +71,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         const chatController = new ChatStreamController(controller);
 
         /*
-        chatController.writeText(message + "\n");
-        chatController.writeFileChanges("Update Files", fileChanges);
-        */
-
-        /*
         chatController.writeText("Hello World\n");
         chatController.writeText("Hello World 2\n");
         chatController.writeText("Hello\n World 3\n");
@@ -122,7 +79,22 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         */
 
         try {
-          await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+          if (simulationClientData) {
+            const chatHistory: SimulationChatMessage[] = [];
+            for (const { role, content } of messages) {
+              chatHistory.push({ role, content: extractMessageContent(content) });
+            }
+            const lastHistoryMessage = chatHistory.pop();
+            assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
+            const userPrompt = lastHistoryMessage.content;
+
+            const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
+
+            chatController.writeText(message + "\n");
+            chatController.writeFileChanges("Update Files", fileChanges);
+          } else {
+            await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+          }
         } catch (error: any) {
           console.error(error);
           chatController.writeText("Error: " + error.message);
