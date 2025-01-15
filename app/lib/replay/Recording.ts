@@ -4,7 +4,7 @@ import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClie
 
 export interface SimulationResource {
   url: string;
-  requestBodyBase64?: string;
+  requestBodyBase64: string;
   responseBodyBase64?: string;
   responseStatus?: number;
   responseHeaders?: Record<string, string>;
@@ -130,14 +130,19 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   const startTime = Date.now();
 
-  function addTextResource(path: string, text: string) {
-    const url = (new URL(path, window.location.href)).href;
+  interface RequestInfo {
+    url: string;
+    requestBody: string;
+  }
+
+  function addTextResource(info: RequestInfo, text: string, responseHeaders: Record<string, string>) {
+    const url = (new URL(info.url, window.location.href)).href;
     resources.push({
       url,
-      requestBodyBase64: "",
+      requestBodyBase64: stringToBase64(info.requestBody),
       responseBodyBase64: stringToBase64(text),
       responseStatus: 200,
-      responseHeaders: {},
+      responseHeaders,
     });
   }
 
@@ -388,26 +393,34 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       }),
   };
 
-  // Map Response to the triggering URL before redirects.
-  const responseToURL = new WeakMap<Response, string>();
+  // Map Response to the info associated with the original request (before redirects).
+  const responseToRequestInfo = new WeakMap<Response, RequestInfo>();
+
+  function convertHeaders(headers: Headers) {
+    const result: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
+  }
 
   const ResponseMethods = {
     _name: "Response",
     json: (v: any, response: Response) =>
       createFunctionProxy(v, "json", async (promise: Promise<any>) => {
         const json = await promise;
-        const url = responseToURL.get(response);
-        if (url) {
-          addTextResource(url, JSON.stringify(json));
+        const requestInfo = responseToRequestInfo.get(response);
+        if (requestInfo) {
+          addTextResource(requestInfo, JSON.stringify(json), convertHeaders(response.headers));
         }
         return json;
       }),
     text: (v: any, response: Response) =>
       createFunctionProxy(v, "text", async (promise: Promise<any>) => {
         const text = await promise;
-        const url = responseToURL.get(response);
-        if (url) {
-          addTextResource(url, text);
+        const requestInfo = responseToRequestInfo.get(response);
+        if (requestInfo) {
+          addTextResource(requestInfo, text, convertHeaders(response.headers));
         }
         return text;
       }),
@@ -474,13 +487,16 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   const baseFetch = window.fetch;
   window.fetch = async (info, options) => {
     const url = info instanceof Request ? info.url : info.toString();
+    const requestBody = (typeof options?.body == "string") ? options.body : "";
+    const requestInfo: RequestInfo = { url, requestBody };
     try {
       const rv = await baseFetch(info, options);
-      responseToURL.set(rv, url);
+      responseToRequestInfo.set(rv, requestInfo);
       return createProxy(rv);
     } catch (error) {
       resources.push({
         url,
+        requestBodyBase64: stringToBase64(requestBody),
         error: String(error),
       });
       throw error;
