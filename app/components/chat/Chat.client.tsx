@@ -246,7 +246,7 @@ export const ChatImpl = memo(
        */
       await workbenchStore.saveAllFiles();
 
-      const { contentBase64, uniqueProjectName } = await workbenchStore.generateZipBase64();
+      const { contentBase64 } = await workbenchStore.generateZipBase64();
 
       let simulationClientData: SimulationPromptClientData | undefined;
       if (simulation) {

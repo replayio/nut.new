@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { assert, sendCommandDedicatedClient } from "~/lib/replay/ReplayProtocolClient";
 import { useState } from "react";
+import { workbenchStore } from "~/lib/stores/workbench";
 
 ReactModal.setAppElement('#root');
 
@@ -12,9 +13,7 @@ ReactModal.setAppElement('#root');
 //
 // Must be JSON serializable.
 interface ProjectPrompt {
-  content: string; // base64 encoded
-  uniqueProjectName: string;
-  input: string;
+  content: string; // base64 encoded zip file
 }
 
 export interface BoltProblem {
@@ -28,7 +27,6 @@ export interface BoltProblem {
 
 export function SaveProblem() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentProjectPrompt, setCurrentProjectPrompt] = useState<ProjectPrompt | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -37,12 +35,7 @@ export function SaveProblem() {
   });
   const [problemId, setProblemId] = useState<string | null>(null);
 
-  const saveCurrentProblem = () => {
-    console.log('saveCurrentProblem');
-  };
-
-  const handleSaveProblem = (prompt: ProjectPrompt) => {
-    setCurrentProjectPrompt(prompt);
+  const handleSaveProblem = () => {
     setIsModalOpen(true);
     setFormData({
       title: '',
@@ -61,9 +54,7 @@ export function SaveProblem() {
     }));
   };
 
-  const handleSubmitProblem = async (e: React.MouseEvent) => {
-    toast.error("SubmitProblem NYI");
-    /*
+  const handleSubmitProblem = async () => {
     // Add validation here
     if (!formData.title) {
       toast.error('Please fill in title field');
@@ -74,7 +65,9 @@ export function SaveProblem() {
 
     console.log("SubmitProblem", formData);
 
-    assert(currentProjectPrompt);
+    await workbenchStore.saveAllFiles();
+    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    const prompt: ProjectPrompt = { content: contentBase64 };
 
     const problem: BoltProblem = {
       version: 1,
@@ -82,7 +75,7 @@ export function SaveProblem() {
       description: formData.description,
       name: formData.name,
       email: formData.email,
-      prompt: currentProjectPrompt,
+      prompt,
     };
 
     try {
@@ -99,7 +92,6 @@ export function SaveProblem() {
       console.error("Error submitting problem", error);
       toast.error("Failed to submit problem");
     }
-    */
   }
 
   return (
@@ -107,7 +99,7 @@ export function SaveProblem() {
       <a
         href="#"
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={saveCurrentProblem}
+        onClick={handleSaveProblem}
       >
         Save Problem
       </a>

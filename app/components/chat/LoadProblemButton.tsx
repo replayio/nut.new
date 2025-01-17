@@ -56,13 +56,11 @@ export const LoadProblemButton: React.FC<LoadProblemButtonProps> = ({ className,
       });
     }
 
-    const folderName = problem.prompt.uniqueProjectName;
-
     try {
-      const messages = await createChatFromFolder(fileArtifacts, [], folderName);
+      const messages = await createChatFromFolder(fileArtifacts, [], "problem");
 
       if (importChat) {
-        await importChat(folderName, [...messages]);
+        await importChat("Imported problem", [...messages]);
       }
 
       logStore.logSystem('Problem loaded successfully', {
