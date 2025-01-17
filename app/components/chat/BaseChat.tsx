@@ -377,7 +377,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       <>
                         <SendButton
                           show={input.length > 0 || isStreaming || uploadedFiles.length > 0}
-                          simulation={false}
+                          fixBug={false}
                           isStreaming={isStreaming}
                           onClick={(event) => {
                             if (isStreaming) {
@@ -392,7 +392,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                         <SendButton
                           show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
-                          simulation={true}
+                          fixBug={true}
                           isStreaming={isStreaming}
                           onClick={(event) => {
                             if (input.length > 0 || uploadedFiles.length > 0) {
@@ -407,21 +407,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <div className="flex gap-1 items-center">
                       <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
                         <div className="i-ph:paperclip text-xl"></div>
-                      </IconButton>
-                      <IconButton
-                        title="Enhance prompt"
-                        disabled={input.length === 0 || enhancingPrompt}
-                        className={classNames('transition-all', enhancingPrompt ? 'opacity-100' : '')}
-                        onClick={() => {
-                          enhancePrompt?.();
-                          toast.success('Prompt enhanced!');
-                        }}
-                      >
-                        {enhancingPrompt ? (
-                          <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl animate-spin"></div>
-                        ) : (
-                          <div className="i-bolt:stars text-xl"></div>
-                        )}
                       </IconButton>
 
                       <SpeechRecognitionButton

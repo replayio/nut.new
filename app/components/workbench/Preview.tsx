@@ -127,6 +127,8 @@ export const Preview = memo(() => {
     if (iframeRef.current) {
       iframeRef.current.src = iframeRef.current.src;
     }
+    setIsSelectionMode(false);
+    setSelectionPoint(null);
   };
 
   const toggleFullscreen = async () => {
@@ -257,8 +259,9 @@ export const Preview = memo(() => {
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
         <IconButton
-          icon="i-ph:cursor-click"
-          onClick={() => setIsSelectionMode(!isSelectionMode)}
+          icon="i-ph:bug-beetle"
+          title="Point to Bug"
+          onClick={() => { setSelectionPoint(null); setIsSelectionMode(!isSelectionMode); }}
           className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
         />
         <div
