@@ -3,7 +3,7 @@ import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { createChatFromFolder, type FileArtifact } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
-import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
+import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from '~/components/sidebar/SaveProblem';
 import JSZip from 'jszip';
 
@@ -12,7 +12,7 @@ interface LoadProblemButtonProps {
   importChat?: (description: string, messages: Message[]) => Promise<void>;
 }
 
-export async function loadProblem(problemId: string) {
+export async function loadProblem(problemId: string, importChat: (description: string, messages: Message[]) => Promise<void>) {
   let problem: BoltProblem | null = null;
   try {
     const rv = await sendCommandDedicatedClient({
@@ -23,7 +23,7 @@ export async function loadProblem(problemId: string) {
       },
     });
     console.log("FetchProblemRval", rv);
-    problem = (rv as any).rval.problem;
+    problem = (rv as { rval: BoltProblem }).rval;
   } catch (error) {
     console.error("Error fetching problem", error);
     toast.error("Failed to fetch problem");
@@ -33,10 +33,11 @@ export async function loadProblem(problemId: string) {
     return;
   }
 
-  console.log("Problem", problem);
+  const problemContents = problem.prompt.content;
+  const problemTitle = problem.title;
 
   const zip = new JSZip();
-  await zip.loadAsync(problem.prompt.content, { base64: true });
+  await zip.loadAsync(problemContents, { base64: true });
 
   const fileArtifacts: FileArtifact[] = [];
   for (const [key, object] of Object.entries(zip.files)) {
@@ -49,14 +50,13 @@ export async function loadProblem(problemId: string) {
 
   try {
     const messages = await createChatFromFolder(fileArtifacts, [], "problem");
+    await importChat(`Problem: ${problemTitle}`, [...messages]);
 
     logStore.logSystem('Problem loaded successfully', {
       problemId,
       textFileCount: fileArtifacts.length,
     });
     toast.success('Problem loaded successfully');
-
-    return messages;
   } catch (error) {
     logStore.logError('Failed to load problem', error);
     console.error('Failed to load problem:', error);
@@ -74,12 +74,8 @@ export const LoadProblemButton: React.FC<LoadProblemButtonProps> = ({ className,
 
     const problemId = (document.getElementById('problem-input') as HTMLInputElement)?.value;
 
-    const messages = await loadProblem(problemId);
-
-    if (importChat) {
-      await importChat("Imported problem", messages ?? []);
-    }
-
+    assert(importChat, "importChat is required");
+    await loadProblem(problemId, importChat);
     setIsLoading(false);
   };
 

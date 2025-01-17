@@ -40,6 +40,24 @@ export function useChatHistory() {
   const [ready, setReady] = useState<boolean>(false);
   const [urlId, setUrlId] = useState<string | undefined>();
 
+  const importChat = async (description: string, messages: Message[]) => {
+    if (!db) {
+      return;
+    }
+
+    try {
+      const newId = await createChatFromMessages(db, description, messages);
+      window.location.href = `/chat/${newId}`;
+      toast.success('Chat imported successfully');
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error('Failed to import chat: ' + error.message);
+      } else {
+        toast.error('Failed to import chat');
+      }
+    }
+  };
+
   useEffect(() => {
     if (!db) {
       setReady(true);
@@ -77,7 +95,7 @@ export function useChatHistory() {
           toast.error(error.message);
         });
     } else if (problemId) {
-      loadProblem(problemId).then(() => setReady(true));
+      loadProblem(problemId, importChat).then(() => setReady(true));
     }
   }, []);
 
@@ -128,23 +146,7 @@ export function useChatHistory() {
         console.log(error);
       }
     },
-    importChat: async (description: string, messages: Message[]) => {
-      if (!db) {
-        return;
-      }
-
-      try {
-        const newId = await createChatFromMessages(db, description, messages);
-        window.location.href = `/chat/${newId}`;
-        toast.success('Chat imported successfully');
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error('Failed to import chat: ' + error.message);
-        } else {
-          toast.error('Failed to import chat');
-        }
-      }
-    },
+    importChat,
     exportChat: async (id = urlId) => {
       if (!db || !id) {
         return;
