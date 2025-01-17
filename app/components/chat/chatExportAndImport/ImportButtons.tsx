@@ -1,7 +1,6 @@
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { ImportFolderButton } from '~/components/chat/ImportFolderButton';
-import { LoadProblemButton } from '~/components/chat/LoadProblemButton';
 
 type ChatData = {
   messages?: Message[]; // Standard Bolt format
@@ -69,10 +68,6 @@ export function ImportButtons(importChat: ((description: string, messages: Messa
             Import Chat
           </button>
           <ImportFolderButton
-            importChat={importChat}
-            className="px-4 py-2 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 transition-all flex items-center gap-2"
-          />
-          <LoadProblemButton
             importChat={importChat}
             className="px-4 py-2 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 transition-all flex items-center gap-2"
           />
