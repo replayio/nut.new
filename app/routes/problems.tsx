@@ -10,9 +10,9 @@ import { useState } from 'react';
 
 interface BoltProblemDescription {
   id: string;
-  name: string;
+  title: string;
   description: string;
-  time: number;
+  timestamp: number;
 }
 
 const toastAnimation = cssTransition({
@@ -95,10 +95,10 @@ function ProblemsPage() {
                   key={problem.id}
                   className="p-4 rounded-lg bg-bolt-elements-background-depth-2"
                 >
-                  <h2 className="text-xl font-semibold mb-2">{problem.name}</h2>
+                  <h2 className="text-xl font-semibold mb-2">{problem.title}</h2>
                   <p className="text-gray-300 mb-2">{problem.description}</p>
                   <p className="text-sm text-gray-400">
-                    Time: {problem.time}ms
+                    Time: {problem.timestamp}ms
                   </p>
                 </div>
               ))}

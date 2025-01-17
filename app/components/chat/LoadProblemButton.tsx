@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { createChatFromFolder, type FileArtifact } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
 import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import type { BoltProblem } from './Messages.client';
+import type { BoltProblem } from '~/components/sidebar/SaveProblem';
 import JSZip from 'jszip';
 
 interface LoadProblemButtonProps {

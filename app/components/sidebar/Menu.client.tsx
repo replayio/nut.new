@@ -11,6 +11,8 @@ import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
+import ReactModal from 'react-modal';
+import { SaveProblem } from './SaveProblem';
 
 const menuVariants = {
   closed: {
@@ -135,12 +137,7 @@ export const Menu = () => {
           >
             Problems
           </a>
-          <a
-            href="/problems"
-            className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-          >
-            Save Problem
-          </a>
+          <SaveProblem />
           <a
             href="/about"
             className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
@@ -227,6 +224,7 @@ export const Menu = () => {
         </div>
       </div>
       <SettingsWindow open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SaveProblem />
     </motion.div>
   );
 };
