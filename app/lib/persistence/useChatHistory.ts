@@ -14,6 +14,7 @@ import {
   duplicateChat,
   createChatFromMessages,
 } from './db';
+import { loadProblem } from '~/components/chat/LoadProblemButton';
 
 export interface ChatHistoryItem {
   id: string;
@@ -32,7 +33,7 @@ export const description = atom<string | undefined>(undefined);
 
 export function useChatHistory() {
   const navigate = useNavigate();
-  const { id: mixedId } = useLoaderData<{ id?: string }>() ?? {};
+  const { id: mixedId, problemId } = useLoaderData<{ id?: string, problemId?: string }>() ?? {};
   const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
@@ -75,11 +76,13 @@ export function useChatHistory() {
           logStore.logError('Failed to load chat messages', error);
           toast.error(error.message);
         });
+    } else if (problemId) {
+      loadProblem(problemId).then(() => setReady(true));
     }
   }, []);
 
   return {
-    ready: !mixedId || ready,
+    ready: ready || (!mixedId && !problemId),
     initialMessages,
     storeMessageHistory: async (messages: Message[]) => {
       if (!db || messages.length === 0) {

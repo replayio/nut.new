@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 
 interface BoltProblemDescription {
-  id: string;
+  problemId: string;
   title: string;
   description: string;
   timestamp: number;
@@ -87,20 +87,21 @@ function ProblemsPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
           ) : problems.length === 0 ? (
-            <div className="text-center text-gray-400">No problems found</div>
+            <div className="text-center text-gray-600">No problems found</div>
           ) : (
             <div className="grid gap-4">
               {problems.map((problem) => (
-                <div
-                  key={problem.id}
-                  className="p-4 rounded-lg bg-bolt-elements-background-depth-2"
+                <a
+                  href={`/problem/${problem.problemId}`}
+                  key={problem.problemId}
+                  className="p-4 rounded-lg bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-colors cursor-pointer"
                 >
                   <h2 className="text-xl font-semibold mb-2">{problem.title}</h2>
-                  <p className="text-gray-300 mb-2">{problem.description}</p>
-                  <p className="text-sm text-gray-400">
-                    Time: {problem.timestamp}ms
+                  <p className="text-gray-700 mb-2">{problem.description}</p>
+                  <p className="text-sm text-gray-600">
+                    Time: {new Date(problem.timestamp).toLocaleString()}
                   </p>
-                </div>
+                </a>
               ))}
             </div>
           )}
