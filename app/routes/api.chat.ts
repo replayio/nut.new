@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { type SimulationChatMessage, type SimulationPromptClientData, performSimulationPrompt } from '~/lib/replay/SimulationPrompt';
+import { type SimulationPromptClientData, getSimulationPromptRecording } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type Messages } from '~/lib/.server/llm/stream-text';
@@ -78,26 +78,23 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
         */
 
-        try {
-          if (simulationClientData) {
-            const chatHistory: SimulationChatMessage[] = [];
-            for (const { role, content } of messages) {
-              chatHistory.push({ role, content: extractMessageContent(content) });
-            }
-            const lastHistoryMessage = chatHistory.pop();
-            assert(lastHistoryMessage?.role == "user", "Last message in chat history must be a user message");
-            const userPrompt = lastHistoryMessage.content;
-
-            const { message, fileChanges } = await performSimulationPrompt(simulationClientData, userPrompt, chatHistory, anthropicApiKey);
-
-            chatController.writeText(message + "\n");
-            chatController.writeFileChanges("Update Files", fileChanges);
-          } else {
-            await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+        let recordingId: string | undefined;
+        if (simulationClientData) {
+          try {
+            const { simulationData, repositoryContents } = simulationClientData;
+            recordingId = await getSimulationPromptRecording(simulationData, repositoryContents);
+            chatController.writeText(`[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`);
+          } catch (e) {
+            console.error(e);
+            chatController.writeText("Error creating recording.");
           }
-        } catch (error: any) {
-          console.error(error);
-          chatController.writeText("Error: " + error.message);
+        }
+
+        try {
+          await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+        } catch (e) {
+          console.error(e);
+          chatController.writeText("Error chatting with Anthropic.");
         }
 
         controller.close();

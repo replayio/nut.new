@@ -1,4 +1,5 @@
-// Core logic for prompting the AI developer with the repository state and simulation data.
+// Core logic for using simulation data from remote recording to enhance
+// the AI developer prompt.
 
 // Currently the simulation prompt is sent from the server.
 
@@ -13,51 +14,26 @@ export interface SimulationPromptClientData {
   mouseData?: MouseData;
 }
 
-export interface SimulationChatMessage {
-  role: "user" | "assistant";
-  content: string;
+interface RerecordGenerateParams {
+  rerecordData: SimulationData;
+  repositoryContents: string;
 }
 
-// Params format for the simulationPrompt command.
-interface SimulationPrompt {
-  simulationData: SimulationData;
-  repositoryContents: string; // base64 encoded zip file
-  userPrompt: string;
-  chatHistory: SimulationChatMessage[];
-  mouseData?: MouseData;
-  anthropicAPIKey: string;
-}
-
-// Result format for the simulationPrompt command.
-interface SimulationPromptResult {
-  message: string;
-  fileChanges: ChatFileChange[];
-}
-
-export async function performSimulationPrompt(
-  simulationClientData: SimulationPromptClientData,
-  userPrompt: string,
-  chatHistory: SimulationChatMessage[],
-  anthropicAPIKey: string,
-): Promise<SimulationPromptResult> {
-  const { simulationData, repositoryContents, mouseData } = simulationClientData;
-
-  const prompt: SimulationPrompt = {
-    simulationData,
+export async function getSimulationPromptRecording(
+  simulationData: SimulationData,
+  repositoryContents: string
+): Promise<string> {
+  const params: RerecordGenerateParams = {
+    rerecordData: simulationData,
     repositoryContents,
-    userPrompt,
-    chatHistory,
-    mouseData,
-    anthropicAPIKey,
   };
-
-  const simulationRval = await sendCommandDedicatedClient({
+  const rv = await sendCommandDedicatedClient({
     method: "Recording.globalExperimentalCommand",
     params: {
-      name: "simulationPrompt",
-      params: prompt,
+      name: "rerecordGenerate",
+      params,
     },
   });
 
-  return (simulationRval as { rval: SimulationPromptResult }).rval;
+  return (rv as { rval: { rerecordedRecordingId: string } }).rval.rerecordedRecordingId;
 }
