@@ -6,7 +6,7 @@ import { useStore } from '@nanostores/react';
 import type { CreateMessage, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useAnimate } from 'framer-motion';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useMessageParser, usePromptEnhancer, useShortcuts, useSnapScroll } from '~/lib/hooks';
 import { description, useChatHistory } from '~/lib/persistence';
@@ -111,6 +111,24 @@ interface ChatProps {
 
 let gNumAborts = 0;
 
+interface InjectedMessage {
+  message: Message;
+  previousId: string;
+}
+
+function handleInjectMessages(baseMessages: Message[], injectedMessages: InjectedMessage[]) {
+  const messages = [];
+  for (const message of baseMessages) {
+    messages.push(message);
+    for (const injectedMessage of injectedMessages) {
+      if (injectedMessage.previousId === message.id) {
+        messages.push(injectedMessage.message);
+      }
+    }
+  }
+  return messages;
+}
+
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
@@ -120,7 +138,7 @@ export const ChatImpl = memo(
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
-    const [trailingMessages, setTrailingMessages] = useState<Message[]>([]);
+    const [injectedMessages, setInjectedMessages] = useState<InjectedMessage[]>([]);
     const [simulationLoading, setSimulationLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const { promptId } = useSettings();
@@ -129,7 +147,7 @@ export const ChatImpl = memo(
 
     const [animationScope, animate] = useAnimate();
 
-    const { messages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
+    const { messages: baseMessages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
       api: '/api/chat',
       body: {
         files,
@@ -145,6 +163,10 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
+    const messages = useMemo(() => {
+      return handleInjectMessages(baseMessages, injectedMessages);
+    }, [baseMessages, injectedMessages]);
 
     useEffect(() => {
       const prompt = searchParams.get('prompt');
@@ -297,7 +319,7 @@ export const ChatImpl = memo(
         }
 
         console.log("RecordingMessage", recordingMessage);
-        setTrailingMessages([...trailingMessages, recordingMessage]);
+        setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
 
         if (recordingId) {
           const info = await getEnhancedPrompt(recordingId, contentBase64);
@@ -309,7 +331,7 @@ export const ChatImpl = memo(
           simulationEnhancedPrompt = info.enhancedPrompt;
 
           console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
-          setTrailingMessages([...trailingMessages, info.enhancedPromptMessage]);
+          setInjectedMessages([...injectedMessages, { message: info.enhancedPromptMessage, previousId: messages[messages.length - 1].id }]);
         }
       }
   
@@ -403,7 +425,7 @@ export const ChatImpl = memo(
         description={description}
         importChat={importChat}
         exportChat={exportChat}
-        messages={[...messages, ...trailingMessages].map((message, i) => {
+        messages={messages.map((message, i) => {
           if (message.role === 'user') {
             return message;
           }
