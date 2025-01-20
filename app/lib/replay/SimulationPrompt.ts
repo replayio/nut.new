@@ -1,18 +1,9 @@
-// Core logic for using simulation data from remote recording to enhance
+// Core logic for using simulation data from a remote recording to enhance
 // the AI developer prompt.
-
-// Currently the simulation prompt is sent from the server.
 
 import { type SimulationData, type MouseData } from './Recording';
 import { assert, ProtocolClient, sendCommandDedicatedClient } from './ReplayProtocolClient';
 import JSZip from 'jszip';
-
-// Data supplied by the client for a simulation prompt, separate from the chat input.
-export interface SimulationPromptClientData {
-  simulationData: SimulationData;
-  repositoryContents: string; // base64 encoded zip file
-  mouseData?: MouseData;
-}
 
 interface RerecordGenerateParams {
   rerecordData: SimulationData;

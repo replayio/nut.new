@@ -3,7 +3,7 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import { useStore } from '@nanostores/react';
-import type { Message } from 'ai';
+import type { CreateMessage, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useAnimate } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
@@ -22,10 +22,11 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectContents } from './Messages.client';
-import type { SimulationPromptClientData } from '~/lib/replay/SimulationPrompt';
-import { getIFrameSimulationData } from '~/lib/replay/Recording';
+import { getSimulationRecording, getSimulationEnhancedPrompt } from '~/lib/replay/SimulationPrompt';
+import { getIFrameSimulationData, type SimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '../workbench/Preview';
 import { getCurrentMouseData } from '../workbench/PointSelector';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -107,6 +108,8 @@ interface ChatProps {
   exportChat: () => void;
   description?: string;
 }
+
+let gNumAborts = 0;
 
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
@@ -198,6 +201,7 @@ export const ChatImpl = memo(
 
     const abort = () => {
       stop();
+      gNumAborts++;
       chatStore.setKey('aborted', true);
       workbenchStore.abortAllActions();
     };
@@ -230,8 +234,55 @@ export const ChatImpl = memo(
       setChatStarted(true);
     };
 
+    const createRecording = async (simulationData: SimulationData, repositoryContents: string) => {
+      let recordingId, message;
+      try {
+        recordingId = await getSimulationRecording(simulationData, repositoryContents);
+        message = `[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`;
+      } catch (e) {
+        console.error("Error creating recording", e);
+        message = "Error creating recording.";
+      }
+
+      const recordingMessage: CreateMessage = {
+        role: 'assistant',
+        content: [
+          {
+            type: 'text',
+            text: message,
+          },
+        ] as any, // Type assertion to bypass compiler check
+      };
+
+      return { recordingId, recordingMessage };
+    };
+
+    const getEnhancedPrompt = async (recordingId: string, repositoryContents: string) => {
+      let enhancedPrompt, message;
+      try {
+        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, repositoryContents);
+        message = `Explanation of the bug: ${enhancedPrompt}`;
+      } catch (e) {
+        console.error("Error enhancing prompt", e);
+        message = "Error enhancing prompt.";
+      }
+
+      const enhancedPromptMessage: CreateMessage = {
+        role: 'assistant',
+        content: [
+          {
+            type: 'text',
+            text: message,
+          },
+        ] as any, // Type assertion to bypass compiler check
+      };
+
+      return { enhancedPrompt, enhancedPromptMessage };
+    }
+
     const sendMessage = async (_event: React.UIEvent, messageInput?: string, simulation?: boolean) => {
       const _input = messageInput || input;
+      const numAbortsAtStart = gNumAborts;
 
       if (_input.length === 0 || isLoading) {
         return;
@@ -248,16 +299,28 @@ export const ChatImpl = memo(
 
       const { contentBase64 } = await workbenchStore.generateZipBase64();
 
-      let simulationClientData: SimulationPromptClientData | undefined;
+      let simulationEnhancedPrompt: string | undefined;
+
       if (simulation) {
         const simulationData = await getIFrameSimulationData(getCurrentIFrame());
-        const mouseData = getCurrentMouseData();
+        const { recordingId, recordingMessage } = await createRecording(simulationData, contentBase64);
 
-        simulationClientData = {
-          simulationData: simulationData,
-          repositoryContents: contentBase64,
-          mouseData: mouseData,
-        };
+        if (numAbortsAtStart != gNumAborts) {
+          return;
+        }
+
+        append(recordingMessage);
+
+        if (recordingId) {
+          const info = await getEnhancedPrompt(recordingId, contentBase64);
+
+          if (numAbortsAtStart != gNumAborts) {
+            return;
+          }
+  
+          simulationEnhancedPrompt = info.enhancedPrompt;
+          append(info.enhancedPromptMessage);
+        }
       }
   
       const fileModifications = workbenchStore.getFileModifcations();
@@ -266,47 +329,26 @@ export const ChatImpl = memo(
 
       runAnimation();
 
-      if (fileModifications !== undefined) {
-        /**
-         * If we have file modifications we append a new user message manually since we have to prefix
-         * the user input with the file modifications and we don't want the new user input to appear
-         * in the prompt. Using `append` is almost the same as `handleSubmit` except that we have to
-         * manually reset the input and we'd have to manually pass in file attachments. However, those
-         * aren't relevant here.
-         */
-        append({
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: _input,
-            },
-            ...imageDataList.map((imageData) => ({
-              type: 'image',
-              image: imageData,
-            })),
-          ] as any, // Type assertion to bypass compiler check
-        });
+      append({
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: _input,
+          },
+          ...imageDataList.map((imageData) => ({
+            type: 'image',
+            image: imageData,
+          })),
+        ] as any, // Type assertion to bypass compiler check
+      }, { body: { simulationEnhancedPrompt } });
 
+      if (fileModifications !== undefined) {
         /**
          * After sending a new message we reset all modifications since the model
          * should now be aware of all the changes.
          */
         workbenchStore.resetAllFileModifications();
-      } else {
-        append({
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: _input,
-            },
-            ...imageDataList.map((imageData) => ({
-              type: 'image',
-              image: imageData,
-            })),
-          ] as any, // Type assertion to bypass compiler check
-        }, { body: { simulationClientData } });
       }
 
       setInput('');

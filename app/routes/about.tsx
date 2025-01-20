@@ -11,7 +11,11 @@ function AboutPage() {
         <BackgroundRays />
         <Header />
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div>Hello World! About Page</div>
+        <div>
+          Nut is an open source fork of Bolt.new designed to help you more easily fix bugs
+          and make improvements to your app which AI developers struggle with. We want to be better
+          at cracking tough nuts, so to speak.
+        </div>
       </div>
     </TooltipProvider>
   );

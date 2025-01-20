@@ -1,5 +1,4 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { type SimulationPromptClientData, getSimulationEnhancedPrompt, getSimulationRecording } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type Messages } from '~/lib/.server/llm/stream-text';
@@ -16,17 +15,17 @@ Focus specifically on fixing this bug. Do not guess about other problems.
 `;
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
-  const { messages, files, promptId, simulationClientData } = await request.json<{
+  const { messages, files, promptId, simulationEnhancedPrompt } = await request.json<{
     messages: Messages;
     files: any;
     promptId?: string;
-    simulationClientData?: SimulationPromptClientData;
+    simulationEnhancedPrompt?: string;
   }>();
 
   let finished: (v?: any) => void;
   context.cloudflare.ctx.waitUntil(new Promise((resolve) => finished = resolve));
 
-  console.log("SimulationClientData", simulationClientData);
+  console.log("SimulationEnhancedPrompt", simulationEnhancedPrompt);
 
   try {
     const { system, messages: coreMessages } = await getStreamTextArguments({
@@ -47,37 +46,13 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       async start(controller) {
         const chatController = new ChatStreamController(controller);
 
-        let recordingId: string | undefined;
-        if (simulationClientData) {
-          try {
-            const { simulationData, repositoryContents } = simulationClientData;
-            recordingId = await getSimulationRecording(simulationData, repositoryContents);
-            chatController.writeText(`[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`);
-          } catch (e) {
-            console.error("Error creating recording", e);
-            chatController.writeText("Error creating recording.");
-          }
-        }
-
-        let enhancedPrompt: string | undefined;
-        if (recordingId) {
-          try {
-            assert(simulationClientData, "SimulationClientData is required");
-            enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, simulationClientData.repositoryContents);
-            chatController.writeText(`Enhanced prompt: ${enhancedPrompt}\n\n`);
-          } catch (e) {
-            console.error("Error enhancing prompt", e);
-            chatController.writeText("Error enhancing prompt.");
-          }
-        }
-
-        if (enhancedPrompt) {
+        if (simulationEnhancedPrompt) {
           const lastMessage = coreMessages[coreMessages.length - 1];
           assert(lastMessage.role == "user", "Last message must be a user message");
           assert(lastMessage.content.length > 0, "Last message must have content");
           const lastContent = lastMessage.content[0];
           assert(typeof lastContent == "object" && lastContent.type == "text", "Last message content must be text");
-          lastContent.text += `\n\n${EnhancedPromptPrefix}\n\n${enhancedPrompt}`;
+          lastContent.text += `\n\n${EnhancedPromptPrefix}\n\n${simulationEnhancedPrompt}`;
         }
 
         try {
