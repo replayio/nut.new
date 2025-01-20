@@ -120,6 +120,8 @@ export const ChatImpl = memo(
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
+    const [trailingMessages, setTrailingMessages] = useState<Message[]>([]);
+    const [simulationLoading, setSimulationLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const { promptId } = useSettings();
 
@@ -140,20 +142,10 @@ export const ChatImpl = memo(
           'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
         );
       },
-      onFinish: (message, response) => {
-        const usage = response.usage;
-
-        if (usage) {
-          console.log('Token usage:', usage);
-
-          // You can now use the usage data as needed
-        }
-
-        logger.debug('Finished streaming');
-      },
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
@@ -204,6 +196,7 @@ export const ChatImpl = memo(
       gNumAborts++;
       chatStore.setKey('aborted', true);
       workbenchStore.abortAllActions();
+      setSimulationLoading(false);
     };
 
     useEffect(() => {
@@ -244,14 +237,10 @@ export const ChatImpl = memo(
         message = "Error creating recording.";
       }
 
-      const recordingMessage: CreateMessage = {
+      const recordingMessage: Message = {
+        id: `create-recording-${messages.length}`,
         role: 'assistant',
-        content: [
-          {
-            type: 'text',
-            text: message,
-          },
-        ] as any, // Type assertion to bypass compiler check
+        content: message,
       };
 
       return { recordingId, recordingMessage };
@@ -267,14 +256,10 @@ export const ChatImpl = memo(
         message = "Error enhancing prompt.";
       }
 
-      const enhancedPromptMessage: CreateMessage = {
+      const enhancedPromptMessage: Message = {
+        id: `enhanced-prompt-${messages.length}`,
         role: 'assistant',
-        content: [
-          {
-            type: 'text',
-            text: message,
-          },
-        ] as any, // Type assertion to bypass compiler check
+        content: message,
       };
 
       return { enhancedPrompt, enhancedPromptMessage };
@@ -287,6 +272,8 @@ export const ChatImpl = memo(
       if (_input.length === 0 || isLoading) {
         return;
       }
+
+      setSimulationLoading(true);
 
       /**
        * @note (delm) Usually saving files shouldn't take long but it may take longer if there
@@ -309,7 +296,8 @@ export const ChatImpl = memo(
           return;
         }
 
-        append(recordingMessage);
+        console.log("RecordingMessage", recordingMessage);
+        setTrailingMessages([...trailingMessages, recordingMessage]);
 
         if (recordingId) {
           const info = await getEnhancedPrompt(recordingId, contentBase64);
@@ -319,7 +307,9 @@ export const ChatImpl = memo(
           }
   
           simulationEnhancedPrompt = info.enhancedPrompt;
-          append(info.enhancedPromptMessage);
+
+          console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
+          setTrailingMessages([...trailingMessages, info.enhancedPromptMessage]);
         }
       }
   
@@ -328,6 +318,8 @@ export const ChatImpl = memo(
       chatStore.setKey('aborted', false);
 
       runAnimation();
+
+      setSimulationLoading(false);
 
       append({
         role: 'user',
@@ -397,7 +389,7 @@ export const ChatImpl = memo(
         input={input}
         showChat={showChat}
         chatStarted={chatStarted}
-        isStreaming={isLoading}
+        isStreaming={isLoading || simulationLoading}
         enhancingPrompt={enhancingPrompt}
         promptEnhanced={promptEnhanced}
         sendMessage={sendMessage}
@@ -411,7 +403,7 @@ export const ChatImpl = memo(
         description={description}
         importChat={importChat}
         exportChat={exportChat}
-        messages={messages.map((message, i) => {
+        messages={[...messages, ...trailingMessages].map((message, i) => {
           if (message.role === 'user') {
             return message;
           }
