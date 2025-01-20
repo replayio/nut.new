@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { type SimulationPromptClientData, getSimulationPromptRecording } from '~/lib/replay/SimulationPrompt';
+import { type SimulationPromptClientData, getSimulationEnhancedPrompt, getSimulationRecording } from '~/lib/replay/SimulationPrompt';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type Messages } from '~/lib/.server/llm/stream-text';
@@ -7,35 +7,6 @@ import { chatAnthropic } from '~/lib/.server/llm/chat-anthropic';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
-}
-
-function extractMessageContent(baseContent: any): string {
-  let content = baseContent;
-
-  if (content && typeof content == "object" && content.length) {
-    assert(content.length == 1, "Expected a single message");
-    content = content[0];
-  }
-
-  if (content && typeof content == "object") {
-    assert(content.type == "text", `Expected "text" for type property, got ${content.type}`);
-    content = content.text;
-  }
-
-  assert(typeof content == "string", `Expected string type, got ${typeof content}`);
-
-  while (true) {
-    const artifactIndex = content.indexOf("<boltArtifact");
-    if (artifactIndex == -1) {
-      break;
-    }
-    const closeTag = "</boltArtifact>"
-    const artifactEnd = content.indexOf(closeTag, artifactIndex);
-    assert(artifactEnd != -1, "Unterminated <boltArtifact> tag");
-    content = content.slice(0, artifactIndex) + content.slice(artifactEnd + closeTag.length);
-  }
-
-  return content;
 }
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
@@ -70,24 +41,22 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       async start(controller) {
         const chatController = new ChatStreamController(controller);
 
-        /*
-        chatController.writeText("Hello World\n");
-        chatController.writeText("Hello World 2\n");
-        chatController.writeText("Hello\n World 3\n");
-        chatController.writeFileChanges("Rewrite Files", [{filePath: "src/services/llm.ts", contents: "FILE_CONTENTS_FIXME" }]);
-        chatController.writeAnnotation("usage", { completionTokens: 10, promptTokens: 20, totalTokens: 30 });
-        */
-
         let recordingId: string | undefined;
         if (simulationClientData) {
           try {
             const { simulationData, repositoryContents } = simulationClientData;
-            recordingId = await getSimulationPromptRecording(simulationData, repositoryContents);
+            recordingId = await getSimulationRecording(simulationData, repositoryContents);
             chatController.writeText(`[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`);
           } catch (e) {
             console.error(e);
             chatController.writeText("Error creating recording.");
           }
+        }
+
+        let enhancedPrompt: string | undefined;
+        if (recordingId) {
+          enhancedPrompt = await getSimulationEnhancedPrompt(recordingId);
+          chatController.writeText(`Enhanced prompt: ${enhancedPrompt}\n\n`);
         }
 
         try {

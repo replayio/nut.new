@@ -4,8 +4,7 @@
 // Currently the simulation prompt is sent from the server.
 
 import { type SimulationData, type MouseData } from './Recording';
-import { sendCommandDedicatedClient } from './ReplayProtocolClient';
-import { type ChatFileChange } from '~/utils/chatStreamController';
+import { ProtocolClient, sendCommandDedicatedClient } from './ReplayProtocolClient';
 
 // Data supplied by the client for a simulation prompt, separate from the chat input.
 export interface SimulationPromptClientData {
@@ -19,7 +18,7 @@ interface RerecordGenerateParams {
   repositoryContents: string;
 }
 
-export async function getSimulationPromptRecording(
+export async function getSimulationRecording(
   simulationData: SimulationData,
   repositoryContents: string
 ): Promise<string> {
@@ -36,4 +35,27 @@ export async function getSimulationPromptRecording(
   });
 
   return (rv as { rval: { rerecordedRecordingId: string } }).rval.rerecordedRecordingId;
+}
+
+export async function getSimulationEnhancedPrompt(recordingId: string): Promise<string> {
+  const client = new ProtocolClient();
+  await client.initialize();
+  try {
+    const createSessionRval = await client.sendCommand({ method: "Recording.createSession", params: { recordingId } });
+    const sessionId = (createSessionRval as { sessionId: string }).sessionId;
+
+    const rval = await client.sendCommand({
+      method: "Session.experimentalCommand",
+      params: {
+        name: "analyzeExecutionPoint",
+        params: {},
+      },
+      sessionId,
+    });
+
+    console.log("analyzeExecutionPointRval", rval);
+  } finally {
+    client.close();
+  }
+  return "";
 }
