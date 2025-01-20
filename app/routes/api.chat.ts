@@ -9,6 +9,12 @@ export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
 }
 
+// Directions given to the LLM when we have an enhanced prompt describing the bug to fix.
+const EnhancedPromptPrefix = `
+ULTRA IMPORTANT: Below is a detailed description of the bug.
+Focus specifically on fixing this bug. Do not guess about other problems.
+`;
+
 async function chatAction({ context, request }: ActionFunctionArgs) {
   const { messages, files, promptId, simulationClientData } = await request.json<{
     messages: Messages;
@@ -48,15 +54,30 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             recordingId = await getSimulationRecording(simulationData, repositoryContents);
             chatController.writeText(`[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`);
           } catch (e) {
-            console.error(e);
+            console.error("Error creating recording", e);
             chatController.writeText("Error creating recording.");
           }
         }
 
         let enhancedPrompt: string | undefined;
         if (recordingId) {
-          enhancedPrompt = await getSimulationEnhancedPrompt(recordingId);
-          chatController.writeText(`Enhanced prompt: ${enhancedPrompt}\n\n`);
+          try {
+            assert(simulationClientData, "SimulationClientData is required");
+            enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, simulationClientData.repositoryContents);
+            chatController.writeText(`Enhanced prompt: ${enhancedPrompt}\n\n`);
+          } catch (e) {
+            console.error("Error enhancing prompt", e);
+            chatController.writeText("Error enhancing prompt.");
+          }
+        }
+
+        if (enhancedPrompt) {
+          const lastMessage = coreMessages[coreMessages.length - 1];
+          assert(lastMessage.role == "user", "Last message must be a user message");
+          assert(lastMessage.content.length > 0, "Last message must have content");
+          const lastContent = lastMessage.content[0];
+          assert(typeof lastContent == "object" && lastContent.type == "text", "Last message content must be text");
+          lastContent.text += `\n\n${EnhancedPromptPrefix}\n\n${enhancedPrompt}`;
         }
 
         try {
