@@ -8,17 +8,24 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
 import { WORK_DIR } from '~/utils/constants';
+import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 
 const highlighterOptions = {
   langs: ['shell'],
   themes: ['light-plus', 'dark-plus'],
 };
 
-const shellHighlighter: HighlighterGeneric<BundledLanguage, BundledTheme> =
-  import.meta.hot?.data.shellHighlighter ?? (await createHighlighter(highlighterOptions));
+const shellHighlighter = createAsyncSuspenseValue(async () => {
+  const shellHighlighterPromise: Promise<HighlighterGeneric<BundledLanguage, BundledTheme>> =
+    import.meta.hot?.data.shellHighlighterPromise ?? createHighlighter(highlighterOptions);
+  if (import.meta.hot) {
+    import.meta.hot.data.shellHighlighterPromise = shellHighlighterPromise;
+  }
+  return shellHighlighterPromise;
+});
 
-if (import.meta.hot) {
-  import.meta.hot.data.shellHighlighter = shellHighlighter;
+if (typeof document !== 'undefined') {
+  shellHighlighter.preload();
 }
 
 interface ArtifactProps {
@@ -134,7 +141,7 @@ function ShellCodeBlock({ classsName, code }: ShellCodeBlockProps) {
     <div
       className={classNames('text-xs', classsName)}
       dangerouslySetInnerHTML={{
-        __html: shellHighlighter.codeToHtml(code, {
+        __html: shellHighlighter.read().codeToHtml(code, {
           lang: 'shell',
           theme: 'dark-plus',
         }),

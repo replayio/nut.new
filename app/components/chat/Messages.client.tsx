@@ -1,5 +1,5 @@
 import type { Message } from 'ai';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { classNames } from '~/utils/classNames';
 import { AssistantMessage, getAnnotationsTokensUsage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
@@ -8,7 +8,7 @@ import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
-import { assert, sendCommandDedicatedClient } from "~/lib/replay/ReplayProtocolClient";
+import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
 
 interface MessagesProps {
   id?: string;
@@ -64,35 +64,42 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   'mt-4': !isFirst,
                 })}
               >
-                {isUserMessage && (
-                  <div className="flex items-center justify-center w-[34px] h-[34px] overflow-hidden bg-white text-gray-600 rounded-full shrink-0 self-start">
-                    <div className="i-ph:user-fill text-xl"></div>
-                  </div>
-                )}
-                <div className="grid grid-col-1 w-full">
-                  {isUserMessage ? (
-                    <UserMessage content={content} />
-                  ) : (
-                    <AssistantMessage content={content} annotations={message.annotations} />
+                <Suspense
+                  fallback={
+                    // TODO: this fallback could be improved
+                    <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+                  }
+                >
+                  {isUserMessage && (
+                    <div className="flex items-center justify-center w-[34px] h-[34px] overflow-hidden bg-white text-gray-600 rounded-full shrink-0 self-start">
+                      <div className="i-ph:user-fill text-xl"></div>
+                    </div>
                   )}
-                </div>
-                {!isUserMessage && messageId && getLastMessageProjectContents(index) && EnableRewindButton && (
-                  <div className="flex gap-2 flex-col lg:flex-row">
-                    <WithTooltip tooltip="Rewind to this message">
-                      <button
-                        onClick={() => {
-                          const contents = getLastMessageProjectContents(index);
-                          assert(contents);
-                        }}
-                        key="i-ph:arrow-u-up-left"
-                        className={classNames(
-                          'i-ph:arrow-u-up-left',
-                          'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                        )}
-                      />
-                    </WithTooltip>
+                  <div className="grid grid-col-1 w-full">
+                    {isUserMessage ? (
+                      <UserMessage content={content} />
+                    ) : (
+                      <AssistantMessage content={content} annotations={message.annotations} />
+                    )}
                   </div>
-                )}
+                  {!isUserMessage && messageId && getLastMessageProjectContents(index) && EnableRewindButton && (
+                    <div className="flex gap-2 flex-col lg:flex-row">
+                      <WithTooltip tooltip="Rewind to this message">
+                        <button
+                          onClick={() => {
+                            const contents = getLastMessageProjectContents(index);
+                            assert(contents);
+                          }}
+                          key="i-ph:arrow-u-up-left"
+                          className={classNames(
+                            'i-ph:arrow-u-up-left',
+                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                          )}
+                        />
+                      </WithTooltip>
+                    </div>
+                  )}
+                </Suspense>
               </div>
             );
           })
