@@ -22,7 +22,7 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectContents } from './Messages.client';
-import { getSimulationRecording, getSimulationEnhancedPrompt } from '~/lib/replay/SimulationPrompt';
+import { getSimulationRecording, getSimulationEnhancedPrompt, SimulationEnhancedPromptMode } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData, type SimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '../workbench/Preview';
 import { getCurrentMouseData } from '../workbench/PointSelector';
@@ -280,11 +280,21 @@ export const ChatImpl = memo(
       return { recordingId, recordingMessage };
     };
 
-    const getEnhancedPrompt = async (recordingId: string, repositoryContents: string) => {
+    const getEnhancedPromptMode = async (input: string) => {
+      const data = await fetch("/api/enhanced-prompt-mode", {
+        method: "POST",
+        body: JSON.stringify({ input }),
+      });
+      const { mode } = (await data.json()) as { mode: SimulationEnhancedPromptMode };
+      console.log("EnhancedPromptMode", input, mode);
+      return mode;
+    };
+
+    const getEnhancedPrompt = async (recordingId: string, repositoryContents: string, mode: SimulationEnhancedPromptMode) => {
       let enhancedPrompt, message;
       try {
         const mouseData = getCurrentMouseData();
-        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, repositoryContents, mouseData);
+        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, repositoryContents, mouseData, mode);
         message = `Explanation of the bug:\n\n${enhancedPrompt}`;
       } catch (e) {
         console.error("Error enhancing prompt", e);
@@ -335,8 +345,12 @@ export const ChatImpl = memo(
       let simulationEnhancedPrompt: string | undefined;
 
       if (simulation) {
+        const enhancedPromptModePromise = getEnhancedPromptMode(_input);
+
         const simulationData = await getIFrameSimulationData(getCurrentIFrame());
         const { recordingId, recordingMessage } = await createRecording(simulationData, contentBase64);
+
+        const enhancedPromptMode = await enhancedPromptModePromise;
 
         if (numAbortsAtStart != gNumAborts) {
           return;
@@ -346,7 +360,7 @@ export const ChatImpl = memo(
         setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
 
         if (recordingId) {
-          const info = await getEnhancedPrompt(recordingId, contentBase64);
+          const info = await getEnhancedPrompt(recordingId, contentBase64, enhancedPromptMode);
 
           if (numAbortsAtStart != gNumAborts) {
             return;

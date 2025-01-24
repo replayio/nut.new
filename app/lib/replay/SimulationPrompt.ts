@@ -230,10 +230,16 @@ async function enhancePromptFromFailureData(
   return prompt;
 }
 
+export enum SimulationEnhancedPromptMode {
+  Error = "Error",
+  Styling = "Styling",
+}
+
 export async function getSimulationEnhancedPrompt(
   recordingId: string,
   repositoryContents: string,
-  mouseData: MouseData | undefined
+  mouseData: MouseData | undefined,
+  mode: SimulationEnhancedPromptMode
 ): Promise<string> {
   const client = new ProtocolClient();
   await client.initialize();
@@ -245,7 +251,7 @@ export async function getSimulationEnhancedPrompt(
       method: "Session.experimentalCommand",
       params: {
         name: "analyzeExecutionPoint",
-        params: { mouseData },
+        params: { mouseData, mode },
       },
       sessionId,
     }) as { rval: ExecutionDataAnalysisResult };
