@@ -345,6 +345,7 @@ export const ChatImpl = memo(
       let simulationEnhancedPrompt: string | undefined;
 
       if (simulation) {
+        /*
         const enhancedPromptModePromise = getEnhancedPromptMode(_input);
 
         const simulationData = await getIFrameSimulationData(getCurrentIFrame());
@@ -358,6 +359,10 @@ export const ChatImpl = memo(
 
         console.log("RecordingMessage", recordingMessage);
         setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
+        */
+
+        const recordingId = "a7dda19d-d4cd-46d2-b6f2-74f89a04c543";
+        const enhancedPromptMode = SimulationEnhancedPromptMode.Styling;
 
         if (recordingId) {
           const info = await getEnhancedPrompt(recordingId, contentBase64, enhancedPromptMode);

@@ -110,6 +110,30 @@ export type RecordingFailureData =
   | RecordingFailureDataConsoleError
   | RecordingFailureDataComponentTree;
 
+interface BaseStyleData {
+  // Dimensions from the bounding box.
+  width: number;
+  height: number;
+
+  // Box model for the element.
+  margin: string;
+  padding: string;
+  border: string;
+}
+  
+interface ElementStyleData extends BaseStyleData {
+  id: string;
+  elementName: string;
+  reactComponentName?: string;
+  location?: URLLocationWithSource;
+  parentId?: string;
+}
+
+interface ElementStyles {
+  targetElementId?: string;
+  elements: ElementStyleData[];
+}
+
 export interface ExecutionDataAnalysisResult {
   // Points which were described.
   points: ExecutionDataPoint[];
@@ -130,6 +154,9 @@ export interface ExecutionDataAnalysisResult {
   // If no point or comment was available, describes the failure associated with the
   // initial point of the analysis.
   failureData?: RecordingFailureData;
+
+  // Style data computed for the referenced element, computed by the "Styling" mode.
+  elementStyles?: ElementStyles;
 }
 
 function trimFileName(url: string): string {
@@ -184,7 +211,14 @@ function describeComponentTree(componentTree: ReactComponentTree, indent: string
 }
 
 function codeBlock(text: string): string {
-  return "```\n" + text + (text.endsWith("\n") ? "" : "\n") + "```";
+  return "```\n" + text + (text.endsWith("\n") ? "" : "\n") + "```\n";
+}
+
+async function getAnnotatedCodeBlock(repositoryContents: string, location: URLLocationWithSource, annotation: string) {
+  const pointText = location.source.trim();
+  const fileName = trimFileName(location.url);
+  const annotatedSource = await annotateSource(repositoryContents, fileName, pointText, annotation);
+  return { block: codeBlock(annotatedSource), fileName };
 }
 
 async function enhancePromptFromFailureData(
@@ -220,11 +254,44 @@ async function enhancePromptFromFailureData(
 
   if (failurePoint) {
     assert(annotation);
-    const pointText = failurePoint.location.source.trim();
-    const fileName = trimFileName(failurePoint.location.url);
-    const annotatedSource = await annotateSource(repositoryContents, fileName, pointText, annotation);
-    prompt += `Here is the affected code, in ${fileName}:\n\n`;
-    prompt += codeBlock(annotatedSource);
+    const { block, fileName } = await getAnnotatedCodeBlock(repositoryContents, failurePoint.location, annotation);
+    prompt += `Here is the affected code, in ${fileName}:\n\n${block}`;
+  }
+
+  return prompt;
+}
+
+async function enhancePromptFromElementStyles(elementStyles: ElementStyles, repositoryContents: string): Promise<string> {
+  let prompt = "Here is styling information for the element and its parents:\n\n";
+
+  let id = elementStyles.targetElementId;
+  while (true) {
+    const element = elementStyles.elements.find(e => e.id === id);
+    if (!element) {
+      break;
+    }
+
+    if (id != elementStyles.targetElementId) {
+      prompt += "Parent ";
+    }
+    prompt += `Element ${element.elementName}:\n`;
+    prompt += `  Width: ${element.width}\n`;
+    prompt += `  Height: ${element.height}\n`;
+    prompt += `  Margin: ${element.margin}\n`;
+    prompt += `  Padding: ${element.padding}\n`;
+    prompt += `  Border: ${element.border}\n`;
+    prompt += "\n";
+
+    if (element.elementName == "svg") {
+      prompt += "The width of this element is constrained by the padding on the parent button element\n\n";
+    }
+
+    if (element.location) {
+      const { block, fileName } = await getAnnotatedCodeBlock(repositoryContents, element.location, `The ${element.elementName} was created here`);
+      prompt += `Here is the code which created this element, in ${fileName}:\n\n${block}`;
+    }
+
+    id = element.parentId;
   }
 
   return prompt;
@@ -244,6 +311,7 @@ export async function getSimulationEnhancedPrompt(
   const client = new ProtocolClient();
   await client.initialize();
   try {
+    /*
     const createSessionRval = await client.sendCommand({ method: "Recording.createSession", params: { recordingId } });
     const sessionId = (createSessionRval as { sessionId: string }).sessionId;
 
@@ -255,13 +323,167 @@ export async function getSimulationEnhancedPrompt(
       },
       sessionId,
     }) as { rval: ExecutionDataAnalysisResult };
+    */
 
-    const { points, failureData } = rval;
-    assert(failureData, "No failure data");
+    const rval: ExecutionDataAnalysisResult = {
+      "points": [
+        {
+          "point": "2271629875730413933268381852499976",
+          "location": {
+            "url": "http://localhost:8040/node_modules/lucide-react/src/Icon.ts",
+            "sourceId": "o36-3-5c0a75-739b08",
+            "line": 53,
+            "column": 18,
+            "source": "        ...(Array.isArray(children) ? children : [children]),"
+          },
+          "entries": [
+            {
+              "value": "color",
+              "contents": "\"currentColor\""
+            },
+            {
+              "value": "size",
+              "contents": "24"
+            },
+            {
+              "value": "strokeWidth",
+              "contents": "2.5"
+            },
+            {
+              "value": "absoluteStrokeWidth",
+              "contents": "undefined"
+            },
+            {
+              "value": "className",
+              "contents": "\"lucide-search h-8 w-8 text-white\""
+            },
+            {
+              "value": "children",
+              "contents": "undefined"
+            },
+            {
+              "value": "iconNode",
+              "contents": "Object"
+            },
+            {
+              "value": "ref",
+              "contents": "null"
+            }
+          ]
+        }
+      ],
+      "point": "2271629875730413933268381852499976",
+      "elementStyles": {
+        "targetElementId": "1861",
+        "elements": [
+          {
+            "id": "1861",
+            "elementName": "svg",
+            "reactComponentName": "",
+            "width": 4.40625,
+            "height": 32,
+            "margin": "0px",
+            "padding": "0px",
+            "border": "0px solid rgb(229, 229, 229)",
+            "parentId": "1870",
+            "location": {
+              "url": "http://localhost:8040/src/App.tsx",
+              "sourceId": "o13-0-2e38bd-aa394d",
+              "line": 266,
+              "column": 12,
+              "source": "            <Search className=\"h-8 w-8 text-white\" strokeWidth={2.5} />"
+            }
+          },
+          {
+            "id": "1870",
+            "elementName": "BUTTON",
+            "reactComponentName": "",
+            "width": 40,
+            "height": 40,
+            "margin": "0px",
+            "padding": "8.4px 16.8px",
+            "border": "1px solid rgba(0, 0, 0, 0)",
+            "parentId": "1871",
+            "location": {
+              "url": "http://localhost:8040/src/components/ui/button.tsx",
+              "sourceId": "o17-0-b73633-3e745d",
+              "line": 48,
+              "column": 19,
+              "source": "        className={cn(buttonVariants({ variant, size, className }))}"
+            }
+          },
+          {
+            "id": "1871",
+            "elementName": "DIV",
+            "reactComponentName": "",
+            "width": 289,
+            "height": 56,
+            "margin": "0px 0px 24px",
+            "padding": "0px",
+            "border": "0px solid rgb(229, 229, 229)",
+            "parentId": "1884",
+            "location": {
+              "url": "http://localhost:8040/src/App.tsx",
+              "sourceId": "o13-0-2e38bd-aa394d",
+              "line": 299,
+              "column": 6,
+              "source": "      <Toaster />"
+            }
+          },
+          {
+            "id": "1884",
+            "elementName": "DIV",
+            "reactComponentName": "",
+            "width": 321,
+            "height": 712,
+            "margin": "0px",
+            "padding": "16px",
+            "border": "0px solid rgb(229, 229, 229)",
+            "parentId": "1888",
+            "location": {
+              "url": "http://localhost:8040/src/App.tsx",
+              "sourceId": "o13-0-2e38bd-aa394d",
+              "line": 299,
+              "column": 6,
+              "source": "      <Toaster />"
+            }
+          },
+          {
+            "id": "1888",
+            "elementName": "DIV",
+            "reactComponentName": "",
+            "width": 321,
+            "height": 720,
+            "margin": "0px",
+            "padding": "0px",
+            "border": "0px solid rgb(229, 229, 229)",
+            "location": {
+              "url": "http://localhost:8040/src/App.tsx",
+              "sourceId": "o13-0-2e38bd-aa394d",
+              "line": 299,
+              "column": 6,
+              "source": "      <Toaster />"
+            }
+          }
+        ]
+      }
+    };
+
+    const { points, failureData, elementStyles } = rval;
 
     console.log("FailureData", JSON.stringify(failureData, null, 2));
 
-    const prompt = await enhancePromptFromFailureData(points, failureData, repositoryContents);
+    let prompt;
+    switch (mode) {
+      case SimulationEnhancedPromptMode.Error:
+        assert(failureData, "No failure data");
+        prompt = await enhancePromptFromFailureData(points, failureData, repositoryContents);
+        break;
+      case SimulationEnhancedPromptMode.Styling:
+        assert(elementStyles, "No element styles");
+        prompt = await enhancePromptFromElementStyles(elementStyles, repositoryContents);
+        break;
+    }
     console.log("Enhanced prompt", prompt);
     return prompt;
   } finally {
