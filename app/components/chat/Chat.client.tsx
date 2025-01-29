@@ -281,13 +281,13 @@ export const ChatImpl = memo(
       return { recordingId, recordingMessage };
     };
 
-    const getEnhancedPrompt = async (recordingId: string) => {
+    const getEnhancedPrompt = async (recordingId: string, userMessage: string) => {
       let enhancedPrompt, message;
       try {
         const mouseData = getCurrentMouseData();
         console.log("MouseData", mouseData);
 
-        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, messages);
+        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, messages, userMessage);
         message = `Explanation of the bug:\n\n${enhancedPrompt}`;
       } catch (e) {
         console.error("Error enhancing prompt", e);
@@ -349,7 +349,7 @@ export const ChatImpl = memo(
         setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
 
         if (recordingId) {
-          const info = await getEnhancedPrompt(recordingId);
+          const info = await getEnhancedPrompt(recordingId, _input);
 
           if (numAbortsAtStart != gNumAborts) {
             return;

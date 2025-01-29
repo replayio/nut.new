@@ -2,7 +2,6 @@
 
 import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
 import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationData, UserInteraction } from "./SimulationData";
-import { UserInteractionKind } from "./SimulationData";
 
 // Our message event listener can trigger on messages from iframes we don't expect.
 // This is a unique ID for the last time we injected the recording message handler
@@ -209,7 +208,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("click", (event) => {
     if (event.target) {
       interactions.push({
-        kind: UserInteractionKind.Click,
+        kind: "click",
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -219,7 +218,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("dblclick", (event) => {
     if (event.target) {
       interactions.push({
-        kind: UserInteractionKind.DblClick,
+        kind: "dblclick",
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -229,7 +228,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("keydown", (event) => {
     if (event.key) {
       interactions.push({
-        kind: UserInteractionKind.KeyDown,
+        kind: "keydown",
         time: Date.now() - startTime,
         ...getKeyboardEventData(event)
       });

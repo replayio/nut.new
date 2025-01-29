@@ -41,11 +41,7 @@ interface SimulationPacketResource {
   resource: NetworkResource;
 }
 
-export enum UserInteractionKind {
-  Click = "click",
-  DblClick = "dblclick",
-  KeyDown = "keydown",
-}
+export type UserInteractionKind = "click" | "dblclick" | "keydown";
 
 export interface UserInteraction {
   kind: UserInteractionKind;

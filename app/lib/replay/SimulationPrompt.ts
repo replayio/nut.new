@@ -47,14 +47,16 @@ type ProtocolMessage = {
   contents: string;
 };
 
-async function buildProtocolMessages(chatMessages: Message[]): Promise<ProtocolMessage[]> {
-  console.log("BuildChatMessages", chatMessages);
-  throw new Error("NYI");
-}
+const SystemPrompt = `
+The following user message describes a bug or other problem on the page which needs to be fixed.
+You must respond with a useful explanation that will help the user understand the source of the problem.
+Do not describe the specific fix needed.
+`;
 
 export async function getSimulationEnhancedPrompt(
   recordingId: string,
-  chatMessages: Message[]
+  chatMessages: Message[],
+  userMessage: string
 ): Promise<string> {
   const client = new ProtocolClient();
   await client.initialize();
@@ -66,7 +68,18 @@ export async function getSimulationEnhancedPrompt(
       params: { chatId, recordingId },
     });
 
-    const messages = await buildProtocolMessages(chatMessages);
+    const messages = [
+      {
+        role: "system",
+        type: "text",
+        content: SystemPrompt,
+      },
+      {
+        role: "user",
+        type: "text",
+        content: userMessage,
+      },
+    ];
 
     let response: string = "";
     const removeListener = client.listenForMessage("Nut.chatResponsePart", ({ message }: { message: ProtocolMessage }) => {
