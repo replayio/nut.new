@@ -20,14 +20,7 @@ export async function getSimulationRecording(
       contents: repositoryContents,
     };
 
-    const recordingPromise = new Promise<string>((resolve) => {
-      const removeListener = client.listenForMessage("Nut.recordingCreated", ({ recordingId }: { recordingId: string }) => {
-        removeListener();
-        resolve(recordingId);
-      });
-    });
-
-    await client.sendCommand({
+    const { recordingId } = await client.sendCommand({
       method: "Nut.addSimulation",
       params: {
         chatId,
@@ -36,9 +29,13 @@ export async function getSimulationRecording(
         completeData: true,
         saveRecording: true,
       },
-    });
+    }) as { recordingId: string | undefined };
 
-    return await recordingPromise;
+    if (!recordingId) {
+      throw new Error("Expected recording ID in result");
+    }
+
+    return recordingId;
   } finally {
     client.close();
   }
