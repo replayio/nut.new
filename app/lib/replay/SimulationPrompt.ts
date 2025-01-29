@@ -13,7 +13,7 @@ export async function getSimulationRecording(
   const client = new ProtocolClient();
   await client.initialize();
   try {
-    const { chatId } = await client.sendCommand({ method: "Nut.createChat", params: {} }) as { chatId: string };
+    const { chatId } = await client.sendCommand({ method: "Nut.startChat", params: {} }) as { chatId: string };
 
     const repositoryContentsPacket = {
       kind: "repositoryContents",
@@ -62,7 +62,7 @@ export async function getSimulationEnhancedPrompt(
   const client = new ProtocolClient();
   await client.initialize();
   try {
-    const { chatId } = await client.sendCommand({ method: "Nut.createChat", params: {} }) as { chatId: string };
+    const { chatId } = await client.sendCommand({ method: "Nut.startChat", params: {} }) as { chatId: string };
 
     await client.sendCommand({
       method: "Nut.addRecording",
