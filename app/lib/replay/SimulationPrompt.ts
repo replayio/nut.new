@@ -44,7 +44,7 @@ export async function getSimulationRecording(
 type ProtocolMessage = {
   role: "user" | "assistant" | "system";
   type: "text";
-  contents: string;
+  content: string;
 };
 
 const SystemPrompt = `
@@ -83,7 +83,8 @@ export async function getSimulationEnhancedPrompt(
 
     let response: string = "";
     const removeListener = client.listenForMessage("Nut.chatResponsePart", ({ message }: { message: ProtocolMessage }) => {
-      response += message.contents;
+      console.log("ChatResponsePart", message);
+      response += message.content;
     });
 
     const responseId = "<response-id>";
