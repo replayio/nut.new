@@ -1,76 +1,8 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
 import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
-
-export interface SimulationResource {
-  url: string;
-  requestBodyBase64: string;
-  responseBodyBase64?: string;
-  responseStatus?: number;
-  responseHeaders?: Record<string, string>;
-  error?: string;
-}
-
-enum SimulationInteractionKind {
-  Click = "click",
-  DblClick = "dblclick",
-  KeyDown = "keydown",
-}
-
-export interface SimulationInteraction {
-  kind: SimulationInteractionKind;
-
-  // Elapsed time when the interaction occurred.
-  time: number;
-
-  // Selector of the element associated with the interaction.
-  selector: string;
-
-  // For mouse interactions, dimensions and position within the
-  // element where the event occurred.
-  width?: number;
-  height?: number;
-  x?: number;
-  y?: number;
-
-  // For keydown interactions, the key pressed.
-  key?: string;
-}
-
-interface IndexedDBAccess {
-  kind: "get" | "put" | "add";
-  key?: any;
-  item?: any;
-  storeName: string;
-  databaseName: string;
-  databaseVersion: number;
-}
-
-interface LocalStorageAccess {
-  kind: "get" | "set";
-  key: string;
-  value?: string;
-}
-
-export interface SimulationData {
-  // Contents of window.location.href.
-  locationHref: string;
-
-  // URL of the main document.
-  documentUrl: string;
-
-  // All resources accessed.
-  resources: SimulationResource[];
-
-  // All user interactions made.
-  interactions: SimulationInteraction[];
-
-  // All indexedDB accesses made.
-  indexedDBAccesses?: IndexedDBAccess[];
-
-  // All localStorage accesses made.
-  localStorageAccesses?: LocalStorageAccess[];
-}
+import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationData, UserInteraction } from "./SimulationData";
+import { UserInteractionKind } from "./SimulationData";
 
 // Our message event listener can trigger on messages from iframes we don't expect.
 // This is a unique ID for the last time we injected the recording message handler
@@ -123,8 +55,8 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 
 // Add handlers to the current iframe's window.
 function addRecordingMessageHandler(messageHandlerId: string) {
-  const resources: SimulationResource[] = [];
-  const interactions: SimulationInteraction[] = [];
+  const resources: NetworkResource[] = [];
+  const interactions: UserInteraction[] = [];
   const indexedDBAccesses: IndexedDBAccess[] = [];
   const localStorageAccesses: LocalStorageAccess[] = [];
 
@@ -147,14 +79,42 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   async function getSimulationData(): Promise<SimulationData> {
-    return {
-      locationHref: window.location.href,
-      documentUrl: window.location.href,
-      resources,
-      interactions,
-      indexedDBAccesses,
-      localStorageAccesses,
-    };
+    const data: SimulationData = [];
+
+    data.push({
+      kind: "locationHref",
+      href: window.location.href,
+    });
+    data.push({
+      kind: "documentURL",
+      url: window.location.href,
+    });
+    for (const resource of resources) {
+      data.push({
+        kind: "resource",
+        resource,
+      });
+    }
+    for (const interaction of interactions) {
+      data.push({
+        kind: "interaction",
+        interaction,
+      });
+    }
+    for (const indexedDBAccess of indexedDBAccesses) {
+      data.push({
+        kind: "indexedDB",
+        access: indexedDBAccess,
+      });
+    }
+    for (const localStorageAccess of localStorageAccesses) {
+      data.push({
+        kind: "localStorage",
+        access: localStorageAccess,
+      });
+    }
+
+    return data;
   }
 
   window.addEventListener("message", async (event) => {
@@ -249,7 +209,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("click", (event) => {
     if (event.target) {
       interactions.push({
-        kind: SimulationInteractionKind.Click,
+        kind: UserInteractionKind.Click,
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -259,7 +219,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("dblclick", (event) => {
     if (event.target) {
       interactions.push({
-        kind: SimulationInteractionKind.DblClick,
+        kind: UserInteractionKind.DblClick,
         time: Date.now() - startTime,
         ...getMouseEventData(event)
       });
@@ -269,7 +229,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   window.addEventListener("keydown", (event) => {
     if (event.key) {
       interactions.push({
-        kind: SimulationInteractionKind.KeyDown,
+        kind: UserInteractionKind.KeyDown,
         time: Date.now() - startTime,
         ...getKeyboardEventData(event)
       });
