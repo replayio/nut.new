@@ -8,14 +8,19 @@ import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationDa
 // logic into an iframe. We will ignore messages from other injected handlers.
 let gLastMessageHandlerId = "";
 
+let gMessageCount = 0;
+
 export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
+  const messageId = `message-${gMessageCount++}`;
+
   assert(iframe.contentWindow);
-  iframe.contentWindow.postMessage({ source: "recording-data-request" }, "*");
+  iframe.contentWindow.postMessage({ source: "recording-data-request", messageId }, "*");
 
   const data = await new Promise((resolve) => {
     window.addEventListener("message", (event) => {
       if (event.data?.source == "recording-data-response" &&
-          event.data?.messageHandlerId == gLastMessageHandlerId) {
+          event.data?.messageHandlerId == gLastMessageHandlerId &&
+          event.data?.messageId == messageId) {
         const decoder = new TextDecoder();
         const jsonString = decoder.decode(event.data.buffer);
         const data = JSON.parse(jsonString) as SimulationData;
@@ -54,21 +59,35 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 
 // Add handlers to the current iframe's window.
 function addRecordingMessageHandler(messageHandlerId: string) {
-  const resources: NetworkResource[] = [];
-  const interactions: UserInteraction[] = [];
-  const indexedDBAccesses: IndexedDBAccess[] = [];
-  const localStorageAccesses: LocalStorageAccess[] = [];
+  const simulationData: SimulationData = [];
+  let numSimulationPacketsSent = 0;
 
   const startTime = Date.now();
+
+  simulationData.push({
+    kind: "locationHref",
+    href: window.location.href,
+  });
+  simulationData.push({
+    kind: "documentURL",
+    url: window.location.href,
+  });
 
   interface RequestInfo {
     url: string;
     requestBody: string;
   }
 
+  function addNetworkResource(resource: NetworkResource) {
+    simulationData.push({
+      kind: "resource",
+      resource,
+    });
+  }
+
   function addTextResource(info: RequestInfo, text: string, responseHeaders: Record<string, string>) {
     const url = (new URL(info.url, window.location.href)).href;
-    resources.push({
+    addNetworkResource({
       url,
       requestBodyBase64: stringToBase64(info.requestBody),
       responseBodyBase64: stringToBase64(text),
@@ -77,55 +96,45 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     });
   }
 
+  function addInteraction(interaction: UserInteraction) {
+    simulationData.push({
+      kind: "interaction",
+      interaction,
+    });
+  }
+
+  function addIndexedDBAccess(access: IndexedDBAccess) {
+    simulationData.push({
+      kind: "indexedDB",
+      access,
+    });
+  }
+
+  function addLocalStorageAccess(access: LocalStorageAccess) {
+    simulationData.push({
+      kind: "localStorage",
+      access,
+    });
+  }
+
   async function getSimulationData(): Promise<SimulationData> {
-    const data: SimulationData = [];
-
-    data.push({
-      kind: "locationHref",
-      href: window.location.href,
-    });
-    data.push({
-      kind: "documentURL",
-      url: window.location.href,
-    });
-    for (const resource of resources) {
-      data.push({
-        kind: "resource",
-        resource,
-      });
-    }
-    for (const interaction of interactions) {
-      data.push({
-        kind: "interaction",
-        interaction,
-      });
-    }
-    for (const indexedDBAccess of indexedDBAccesses) {
-      data.push({
-        kind: "indexedDB",
-        access: indexedDBAccess,
-      });
-    }
-    for (const localStorageAccess of localStorageAccesses) {
-      data.push({
-        kind: "localStorage",
-        access: localStorageAccess,
-      });
-    }
-
+    console.log("GetSimulationData", simulationData.length, numSimulationPacketsSent);
+    const data = simulationData.slice(numSimulationPacketsSent);
+    numSimulationPacketsSent = simulationData.length;
     return data;
   }
 
   window.addEventListener("message", async (event) => {
     switch (event.data?.source) {
       case "recording-data-request": {
+        const messageId = event.data.messageId;
         const data = await getSimulationData();
 
         const encoder = new TextEncoder();
         const serializedData = encoder.encode(JSON.stringify(data));
         const buffer = serializedData.buffer;
 
-        window.parent.postMessage({ source: "recording-data-response", buffer, messageHandlerId }, "*", [buffer]);
+        window.parent.postMessage({ source: "recording-data-response", buffer, messageHandlerId, messageId }, "*", [buffer]);
         break;
       }
       case "mouse-data-request": {
@@ -207,7 +216,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   window.addEventListener("click", (event) => {
     if (event.target) {
-      interactions.push({
+      addInteraction({
         kind: "click",
         time: Date.now() - startTime,
         ...getMouseEventData(event)
@@ -217,7 +226,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   window.addEventListener("dblclick", (event) => {
     if (event.target) {
-      interactions.push({
+      addInteraction({
         kind: "dblclick",
         time: Date.now() - startTime,
         ...getMouseEventData(event)
@@ -227,7 +236,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   window.addEventListener("keydown", (event) => {
     if (event.key) {
-      interactions.push({
+      addInteraction({
         kind: "keydown",
         time: Date.now() - startTime,
         ...getKeyboardEventData(event)
@@ -287,7 +296,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     key: any,
     item: any
   ) {
-    indexedDBAccesses.push({
+    addIndexedDBAccess({
       kind,
       key,
       item,
@@ -336,7 +345,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     key: string,
     value?: string
   ) {
-    localStorageAccesses.push({ kind, key, value });
+    addLocalStorageAccess({ kind, key, value });
   }
 
   const StorageMethods = {
@@ -453,7 +462,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       responseToRequestInfo.set(rv, requestInfo);
       return createProxy(rv);
     } catch (error) {
-      resources.push({
+      addNetworkResource({
         url,
         requestBodyBase64: stringToBase64(requestBody),
         error: String(error),

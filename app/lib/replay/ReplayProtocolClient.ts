@@ -2,6 +2,7 @@ const replayWsServer = "wss://dispatch.replay.io";
 
 export function assert(condition: any, message: string = "Assertion failed!"): asserts condition {
   if (!condition) {
+    debugger;
     throw new Error(message);
   }
 }

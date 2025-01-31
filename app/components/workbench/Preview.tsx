@@ -4,14 +4,12 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PortDropdown } from './PortDropdown';
 import { PointSelector } from './PointSelector';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 type ResizeSide = 'left' | 'right' | null;
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
 export function getCurrentIFrame() {
-  assert(gCurrentIFrame);
   return gCurrentIFrame;
 }
 
