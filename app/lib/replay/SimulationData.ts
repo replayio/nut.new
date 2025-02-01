@@ -153,7 +153,7 @@ interface SimulationPacketLocalStorage {
   access: LocalStorageAccess;
 }
 
-export type SimulationPacket =
+type SimulationPacketBase =
   | SimulationPacketServerURL
   | SimulationPacketRepositoryContents
   | SimulationPacketLocationHref
@@ -164,4 +164,5 @@ export type SimulationPacket =
   | SimulationPacketIndexedDB
   | SimulationPacketLocalStorage;
 
+export type SimulationPacket = SimulationPacketBase & { time?: string };
 export type SimulationData = SimulationPacket[];

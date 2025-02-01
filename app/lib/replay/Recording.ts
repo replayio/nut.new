@@ -1,7 +1,8 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
+import { getLastFileWriteTime } from "../runtime/action-runner";
 import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
-import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationData, UserInteraction } from "./SimulationData";
+import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationData, SimulationPacket, UserInteraction } from "./SimulationData";
 
 // Our message event listener can trigger on messages from iframes we don't expect.
 // This is a unique ID for the last time we injected the recording message handler
@@ -62,13 +63,18 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   const simulationData: SimulationData = [];
   let numSimulationPacketsSent = 0;
 
+  function pushSimulationData(packet: SimulationPacket) {
+    packet.time = new Date().toISOString();
+    simulationData.push(packet);
+  }
+
   const startTime = Date.now();
 
-  simulationData.push({
+  pushSimulationData({
     kind: "locationHref",
     href: window.location.href,
   });
-  simulationData.push({
+  pushSimulationData({
     kind: "documentURL",
     url: window.location.href,
   });
@@ -79,7 +85,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   function addNetworkResource(resource: NetworkResource) {
-    simulationData.push({
+    pushSimulationData({
       kind: "resource",
       resource,
     });
@@ -97,21 +103,21 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   function addInteraction(interaction: UserInteraction) {
-    simulationData.push({
+    pushSimulationData({
       kind: "interaction",
       interaction,
     });
   }
 
   function addIndexedDBAccess(access: IndexedDBAccess) {
-    simulationData.push({
+    pushSimulationData({
       kind: "indexedDB",
       access,
     });
   }
 
   function addLocalStorageAccess(access: LocalStorageAccess) {
-    simulationData.push({
+    pushSimulationData({
       kind: "localStorage",
       access,
     });

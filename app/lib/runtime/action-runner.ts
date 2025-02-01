@@ -64,6 +64,12 @@ class ActionCommandError extends Error {
   }
 }
 
+let gLastFileWriteTime = new Date().toISOString();
+
+export function getLastFileWriteTime() {
+  return gLastFileWriteTime;
+}
+
 export class ActionRunner {
   #webcontainer: Promise<WebContainer>;
   #currentExecutionPromise: Promise<void> = Promise.resolve();
@@ -299,6 +305,7 @@ export class ActionRunner {
         content = injectRecordingMessageHandler(action.content);
       }
       await webcontainer.fs.writeFile(relativePath, content);
+      gLastFileWriteTime = new Date().toISOString();
       logger.debug(`File written ${relativePath}`);
     } catch (error) {
       logger.error('Failed to write file\n\n', error);

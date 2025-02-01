@@ -2,10 +2,11 @@
 // the AI developer prompt.
 
 import type { Message } from 'ai';
-import type { SimulationData } from './SimulationData';
+import type { SimulationData, SimulationPacket } from './SimulationData';
 import { SimulationDataVersion } from './SimulationData';
 import { assert, ProtocolClient } from './ReplayProtocolClient';
 import type { MouseData } from './Recording';
+import { getLastFileWriteTime } from '../runtime/action-runner';
 
 interface ChatState {
   client: ProtocolClient;
@@ -14,6 +15,8 @@ interface ChatState {
 }
 
 let gChatState: ChatState | undefined;
+
+const gAllSimulationData: SimulationData = [];
 
 export async function simulationStartChat(repositoryContents: string) {
   if (gChatState) {
@@ -27,10 +30,12 @@ export async function simulationStartChat(repositoryContents: string) {
   const { chatId } = await client.sendCommand({ method: "Nut.startChat", params: {} }) as { chatId: string };
   gChatState = { client, chatId };
 
-  const repositoryContentsPacket = {
+  const repositoryContentsPacket: SimulationPacket = {
     kind: "repositoryContents",
     contents: repositoryContents,
+    time: getLastFileWriteTime(),
   };
+  gAllSimulationData.push(repositoryContentsPacket);
 
   gChatState.addSimulationPromise = client.sendCommand({
     method: "Nut.addSimulation",
@@ -51,10 +56,14 @@ export async function simulationAddData(data: SimulationData) {
     method: "Nut.addSimulationData",
     params: { chatId: gChatState.chatId, simulationData: data },
   });
+
+  gAllSimulationData.push(...data);
 }
 
 export async function getSimulationRecording(): Promise<string> {
   assert(gChatState, "Chat not started");
+
+  console.log("FinishSimulation", new Date().toISOString(), JSON.stringify(gAllSimulationData));
 
   gChatState.client.sendCommand({
     method: "Nut.finishSimulationData",
