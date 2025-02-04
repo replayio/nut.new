@@ -1,6 +1,7 @@
 import { WebContainer } from '@webcontainer/api';
 import { WORK_DIR_NAME } from '~/utils/constants';
 import { cleanStackTrace } from '~/utils/stacktrace';
+import { recordingMessageHandlerScript } from '../replay/Recording';
 
 interface WebContainerContext {
   loaded: boolean;
@@ -30,6 +31,7 @@ if (!import.meta.env.SSR) {
         });
       })
       .then(async (webcontainer) => {
+        await webcontainer.setPreviewScript(recordingMessageHandlerScript);
         webcontainerContext.loaded = true;
 
         const { workbenchStore } = await import('~/lib/stores/workbench');
