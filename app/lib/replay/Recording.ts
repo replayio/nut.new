@@ -59,7 +59,6 @@ export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promis
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(new Uint8Array(buffer));
-  console.log('SimulationData', jsonString);
 
   return JSON.parse(jsonString) as SimulationData;
 }

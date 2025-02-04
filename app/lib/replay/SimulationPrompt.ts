@@ -8,7 +8,7 @@ import { assert, ProtocolClient } from './ReplayProtocolClient';
 import type { MouseData } from './Recording';
 
 export async function getSimulationRecording(
-  simulationData: SimulationData,
+  interactionData: SimulationData,
   repositoryContents: string
 ): Promise<string> {
   const client = new ProtocolClient();
@@ -21,12 +21,16 @@ export async function getSimulationRecording(
       contents: repositoryContents,
     };
 
+    const simulationData = [repositoryContentsPacket, ...interactionData];
+
+    console.log("SimulationData", JSON.stringify(simulationData));
+
     const { recordingId } = await client.sendCommand({
       method: "Nut.addSimulation",
       params: {
         chatId,
         version: SimulationDataVersion,
-        simulationData: [repositoryContentsPacket, ...simulationData],
+        simulationData,
         completeData: true,
         saveRecording: true,
       },
