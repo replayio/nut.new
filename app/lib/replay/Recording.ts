@@ -103,6 +103,14 @@ function addRecordingMessageHandler() {
   async function getSimulationData(): Promise<SimulationData> {
     const data: SimulationData = [];
 
+    /*
+     * for now we only store the viewport size at the time of the simulation data request
+     * we don't deal with resizes during lifetime of the app
+     */
+    data.push({
+      kind: 'viewport',
+      size: { width: window.innerWidth, height: window.innerHeight },
+    });
     data.push({
       kind: 'locationHref',
       href: window.location.href,

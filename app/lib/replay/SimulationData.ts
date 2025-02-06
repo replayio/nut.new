@@ -1,29 +1,35 @@
 // Data structures for simulation.
 
-export const SimulationDataVersion = "0.1";
+export const SimulationDataVersion = '0.1';
 
 // Simulation data specifying the server URL to connect to for static resources.
 interface SimulationPacketServerURL {
-  kind: "serverURL";
+  kind: 'serverURL';
   url: string;
 }
 
 // Simulation data specifying the contents of the repository to set up a dev server
 // for static resources.
 interface SimulationPacketRepositoryContents {
-  kind: "repositoryContents";
+  kind: 'repositoryContents';
   contents: string; // base64 encoded zip of the repository.
+}
+
+// Simulation data specifying the viewport size
+interface SimulationPacketViewport {
+  kind: 'viewport';
+  size: { width: number; height: number };
 }
 
 // Simulation data specifying the contents of window.location.href.
 interface SimulationPacketLocationHref {
-  kind: "locationHref";
+  kind: 'locationHref';
   href: string;
 }
 
 // Simulation data specifying the URL of the main document.
 interface SimulationPacketDocumentURL {
-  kind: "documentURL";
+  kind: 'documentURL';
   url: string;
 }
 
@@ -37,11 +43,11 @@ export interface NetworkResource {
 }
 
 interface SimulationPacketResource {
-  kind: "resource";
+  kind: 'resource';
   resource: NetworkResource;
 }
 
-export type UserInteractionKind = "click" | "dblclick" | "keydown";
+export type UserInteractionKind = 'click' | 'dblclick' | 'keydown';
 
 export interface UserInteraction {
   kind: UserInteractionKind;
@@ -64,25 +70,25 @@ export interface UserInteraction {
 }
 
 interface SimulationPacketInteraction {
-  kind: "interaction";
+  kind: 'interaction';
   interaction: UserInteraction;
 }
 
 export interface WebSocketCreate {
-  kind: "create";
+  kind: 'create';
   socketId: number;
   url: string;
 }
 
 interface WebSocketClose {
-  kind: "close";
+  kind: 'close';
   socketId: number;
   code: number;
   reason: string;
 }
 
 export interface WebSocketSend {
-  kind: "send";
+  kind: 'send';
   socketId: number;
   binary: boolean;
   text?: string;
@@ -90,14 +96,14 @@ export interface WebSocketSend {
 }
 
 interface WebSocketConnected {
-  kind: "connected";
+  kind: 'connected';
   socketId: number;
   subprotocol: string;
   extensions: string;
 }
 
 export interface WebSocketNewMessage {
-  kind: "newMessage";
+  kind: 'newMessage';
   socketId: number;
   binary: boolean;
   text?: string;
@@ -105,12 +111,12 @@ export interface WebSocketNewMessage {
 }
 
 interface WebSocketOnError {
-  kind: "onError";
+  kind: 'onError';
   socketId: number;
 }
 
 interface WebSocketOnClose {
-  kind: "onClose";
+  kind: 'onClose';
   socketId: number;
 }
 
@@ -124,12 +130,12 @@ export type WebSocketEvent =
   | WebSocketOnClose;
 
 interface SimulationPacketWebSocket {
-  kind: "websocket";
+  kind: 'websocket';
   event: WebSocketEvent;
 }
 
 export interface IndexedDBAccess {
-  kind: "get" | "put" | "add";
+  kind: 'get' | 'put' | 'add';
   key?: any;
   item?: any;
   storeName: string;
@@ -138,24 +144,25 @@ export interface IndexedDBAccess {
 }
 
 interface SimulationPacketIndexedDB {
-  kind: "indexedDB";
+  kind: 'indexedDB';
   access: IndexedDBAccess;
 }
 
 export interface LocalStorageAccess {
-  kind: "get" | "set";
+  kind: 'get' | 'set';
   key: string;
   value?: string;
 }
 
 interface SimulationPacketLocalStorage {
-  kind: "localStorage";
+  kind: 'localStorage';
   access: LocalStorageAccess;
 }
 
 export type SimulationPacket =
   | SimulationPacketServerURL
   | SimulationPacketRepositoryContents
+  | SimulationPacketViewport
   | SimulationPacketLocationHref
   | SimulationPacketDocumentURL
   | SimulationPacketResource
