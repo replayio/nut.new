@@ -18,7 +18,7 @@ interface SimulationPacketRepositoryContents {
 // Simulation data specifying the viewport size
 interface SimulationPacketViewport {
   kind: 'viewport';
-  size: { width: number; height: number };
+  size: ViewportSize;
 }
 
 // Simulation data specifying the contents of window.location.href.
@@ -141,6 +141,11 @@ export interface IndexedDBAccess {
   storeName: string;
   databaseName: string;
   databaseVersion: number;
+}
+
+export interface ViewportSize {
+  width: number;
+  height: number;
 }
 
 interface SimulationPacketIndexedDB {
