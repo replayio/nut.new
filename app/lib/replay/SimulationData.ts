@@ -47,7 +47,7 @@ interface SimulationPacketResource {
   resource: NetworkResource;
 }
 
-export type UserInteractionKind = 'click' | 'dblclick' | 'keydown';
+export type UserInteractionKind = 'click' | 'pointermove' | 'keydown';
 
 export interface UserInteraction {
   kind: UserInteractionKind;
@@ -64,6 +64,8 @@ export interface UserInteraction {
   height?: number;
   x?: number;
   y?: number;
+  button?: number;
+  clickCount?: number;
 
   // For keydown interactions, the key pressed.
   key?: string;

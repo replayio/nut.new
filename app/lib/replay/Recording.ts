@@ -89,6 +89,10 @@ function addRecordingMessageHandler() {
     requestBody: string;
   }
 
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+  }
+
   function addTextResource(info: RequestInfo, text: string, responseHeaders: Record<string, string>) {
     const url = new URL(info.url, window.location.href).href;
     resources.push({
@@ -190,7 +194,7 @@ function addRecordingMessageHandler() {
   });
 
   // Evaluated function to find the selector and associated data.
-  function getMouseEventData(event: MouseEvent) {
+  function getMouseEventTargetData(event: MouseEvent) {
     assert(event.target);
 
     const target = event.target as Element;
@@ -201,12 +205,19 @@ function addRecordingMessageHandler() {
       selector,
       width: rect.width,
       height: rect.height,
-      x: event.clientX - rect.x,
-      y: event.clientY - rect.y,
+
+      /*
+       * at times `event.clientX` and `event.clientY` can be slighly off in relation to the element's position
+       * it's possible that this position might lie outside the element's bounds
+       * the difference likely comes from a subpixel rounding or hit target calculation in the browser
+       * it's possible that we should account for `event.width` and `event.height` here but clamping the values to the bounds of the element should be good enough
+       */
+      x: clamp(event.clientX - rect.x, 0, rect.width),
+      y: clamp(event.clientY - rect.y, 0, rect.height),
     };
   }
 
-  function getKeyboardEventData(event: KeyboardEvent) {
+  function getKeyboardEventTargetData(event: KeyboardEvent) {
     assert(event.target);
 
     const target = event.target as Element;
@@ -257,7 +268,9 @@ function addRecordingMessageHandler() {
         interactions.push({
           kind: 'click',
           time: Date.now() - startTime,
-          ...getMouseEventData(event),
+          ...getMouseEventTargetData(event),
+          ...(event.button && { button: event.button }),
+          clickCount: event.detail,
         });
       }
     },
@@ -265,13 +278,13 @@ function addRecordingMessageHandler() {
   );
 
   window.addEventListener(
-    'dblclick',
+    'pointermove',
     (event) => {
       if (event.target) {
         interactions.push({
-          kind: 'dblclick',
+          kind: 'pointermove',
           time: Date.now() - startTime,
-          ...getMouseEventData(event),
+          ...getMouseEventTargetData(event),
         });
       }
     },
@@ -285,7 +298,7 @@ function addRecordingMessageHandler() {
         interactions.push({
           kind: 'keydown',
           time: Date.now() - startTime,
-          ...getKeyboardEventData(event),
+          ...getKeyboardEventTargetData(event),
         });
       }
     },
