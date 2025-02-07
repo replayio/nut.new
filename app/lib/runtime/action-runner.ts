@@ -6,7 +6,6 @@ import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
 import type { BoltShell } from '~/utils/shell';
-import { injectRecordingMessageHandler } from '~/lib/replay/Recording';
 
 const logger = createScopedLogger('ActionRunner');
 
@@ -300,11 +299,7 @@ export class ActionRunner {
     }
 
     try {
-      let content = action.content;
-      if (relativePath == "../../index.html") {
-        content = injectRecordingMessageHandler(action.content);
-      }
-      await webcontainer.fs.writeFile(relativePath, content);
+      await webcontainer.fs.writeFile(relativePath, action.content);
       gLastFileWriteTime = new Date().toISOString();
       logger.debug(`File written ${relativePath}`);
     } catch (error) {

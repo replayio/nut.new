@@ -17,7 +17,6 @@ import { extractRelativePath } from '~/utils/diff';
 import { description } from '~/lib/persistence';
 import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
-import { removeRecordingMessageHandler } from '~/lib/replay/Recording';
 import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
 
@@ -385,7 +384,7 @@ export class WorkbenchStore {
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent?.type === 'file' && !dirent.isBinary) {
         const relativePath = extractRelativePath(filePath);
-        const content = removeRecordingMessageHandler(dirent.content);
+        const content = dirent.content;
 
         // split the path into segments
         const pathSegments = relativePath.split('/');

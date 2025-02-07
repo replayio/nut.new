@@ -1,37 +1,70 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
 import { getLastFileWriteTime } from "../runtime/action-runner";
-import { assert, stringToBase64, uint8ArrayToBase64 } from "./ReplayProtocolClient";
-import type { IndexedDBAccess, LocalStorageAccess, NetworkResource, SimulationData, SimulationPacket, UserInteraction } from "./SimulationData";
+import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
+import type {
+  IndexedDBAccess,
+  LocalStorageAccess,
+  NetworkResource,
+  SimulationData,
+  SimulationPacket,
+  UserInteraction,
+} from './SimulationData';
 
-// Our message event listener can trigger on messages from iframes we don't expect.
-// This is a unique ID for the last time we injected the recording message handler
-// logic into an iframe. We will ignore messages from other injected handlers.
-let gLastMessageHandlerId = "";
+type Compute<T> = { [K in keyof T]: T[K] } & unknown;
+
+type RequestMap = {
+  'recording-data': {
+    payload: unknown;
+    response: ArrayBufferLike;
+  };
+  'mouse-data': {
+    payload: { x: number; y: number };
+    response: MouseData;
+  };
+};
+
+type Request = {
+  [K in keyof RequestMap]: Compute<
+    { request: K } & (undefined extends RequestMap[K]['payload']
+      ? { payload?: RequestMap[K]['payload'] }
+      : { payload: RequestMap[K]['payload'] })
+  >;
+}[keyof RequestMap];
+
+let lastRequestId = 0;
+
+function sendIframeRequest<K extends keyof RequestMap>(
+  iframe: HTMLIFrameElement,
+  request: Extract<Request, { request: K }>,
+) {
+  assert(iframe.contentWindow);
+
+  const target = iframe.contentWindow;
+  const requestId = ++lastRequestId;
+  target.postMessage({ id: requestId, request, source: '@@replay-nut' }, '*');
+
+  return new Promise<RequestMap[K]['response']>((resolve) => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.source !== '@@replay-nut' || event.source !== target || event.data?.id !== requestId) {
+        return;
+      }
+
+      window.removeEventListener('message', handler);
+      resolve(event.data.response);
+    };
+    window.addEventListener('message', handler);
+  });
+}
 
 let gMessageCount = 0;
 
 export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
-  const messageId = `message-${gMessageCount++}`;
+  const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(new Uint8Array(buffer));
 
-  assert(iframe.contentWindow);
-  iframe.contentWindow.postMessage({ source: "recording-data-request", messageId }, "*");
-
-  const data = await new Promise((resolve) => {
-    window.addEventListener("message", (event) => {
-      if (event.data?.source == "recording-data-response" &&
-          event.data?.messageHandlerId == gLastMessageHandlerId &&
-          event.data?.messageId == messageId) {
-        const decoder = new TextDecoder();
-        const jsonString = decoder.decode(event.data.buffer);
-        const data = JSON.parse(jsonString) as SimulationData;
-        resolve(data);
-      }
-    });
-  });
-
-  console.log("SimulationData", JSON.stringify(data));
-  return data as SimulationData;
+  return JSON.parse(jsonString) as SimulationData;
 }
 
 export interface MouseData {
@@ -43,19 +76,7 @@ export interface MouseData {
 }
 
 export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }): Promise<MouseData> {
-  assert(iframe.contentWindow);
-  iframe.contentWindow.postMessage({ source: "mouse-data-request", position }, "*");
-
-  const mouseData = await new Promise((resolve) => {
-    window.addEventListener("message", (event) => {
-      if (event.data?.source == "mouse-data-response" &&
-          event.data?.messageHandlerId == gLastMessageHandlerId) {
-        resolve(event.data.mouseData);
-      }
-    });
-  });
-
-  return mouseData as MouseData;
+  return sendIframeRequest(iframe, { request: 'mouse-data', payload: position });
 }
 
 // Add handlers to the current iframe's window.
@@ -71,6 +92,10 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   const startTime = Date.now();
 
   pushSimulationData({
+    kind: 'viewport',
+    size: { width: window.innerWidth, height: window.innerHeight },
+  });
+  pushSimulationData({
     kind: "locationHref",
     href: window.location.href,
   });
@@ -82,6 +107,10 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   interface RequestInfo {
     url: string;
     requestBody: string;
+  }
+
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
   }
 
   function addNetworkResource(resource: NetworkResource) {
@@ -130,58 +159,78 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     return data;
   }
 
-  window.addEventListener("message", async (event) => {
-    switch (event.data?.source) {
-      case "recording-data-request": {
-        const messageId = event.data.messageId;
+  async function handleRequest<T extends Request>({
+    request,
+    payload,
+  }: Request): Promise<RequestMap[T['request']]['response']> {
+    switch (request) {
+      case 'recording-data': {
         const data = await getSimulationData();
 
         const encoder = new TextEncoder();
         const serializedData = encoder.encode(JSON.stringify(data));
         const buffer = serializedData.buffer;
 
-        window.parent.postMessage({ source: "recording-data-response", buffer, messageHandlerId, messageId }, "*", [buffer]);
-        break;
+        return buffer;
       }
-      case "mouse-data-request": {
-        const { x, y } = event.data.position;
+      case 'mouse-data': {
+        const { x, y } = payload;
         const element = document.elementFromPoint(x, y);
         assert(element);
 
         const selector = computeSelector(element);
         const rect = element.getBoundingClientRect();
-        const mouseData: MouseData = {
+
+        return {
           selector,
           width: rect.width,
           height: rect.height,
           x: x - rect.x,
           y: y - rect.y,
         };
-        window.parent.postMessage({ source: "mouse-data-response", mouseData, messageHandlerId }, "*");
-        break;
       }
     }
+  }
+
+  window.addEventListener('message', async (event) => {
+    if (event.data?.source !== '@@replay-nut') {
+      return;
+    }
+
+    const response = await handleRequest(event.data.request);
+    window.parent.postMessage({ id: event.data.id, response, source: '@@replay-nut' }, '*');
   });
 
   // Evaluated function to find the selector and associated data.
-  function getMouseEventData(event: MouseEvent) {
+  function getMouseEventTargetData(event: MouseEvent) {
     assert(event.target);
+
     const target = event.target as Element;
     const selector = computeSelector(target);
     const rect = target.getBoundingClientRect();
+
     return {
       selector,
       width: rect.width,
       height: rect.height,
-      x: event.clientX - rect.x,
-      y: event.clientY - rect.y,
+
+      /*
+       * at times `event.clientX` and `event.clientY` can be slighly off in relation to the element's position
+       * it's possible that this position might lie outside the element's bounds
+       * the difference likely comes from a subpixel rounding or hit target calculation in the browser
+       * it's possible that we should account for `event.width` and `event.height` here but clamping the values to the bounds of the element should be good enough
+       */
+      x: clamp(event.clientX - rect.x, 0, rect.width),
+      y: clamp(event.clientY - rect.y, 0, rect.height),
     };
   }
 
-  function getKeyboardEventData(event: KeyboardEvent) {
+  function getKeyboardEventTargetData(event: KeyboardEvent) {
     assert(event.target);
+
     const target = event.target as Element;
     const selector = computeSelector(target);
+
     return {
       selector,
       key: event.key,
@@ -208,7 +257,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       if (parent) {
         const siblings = Array.from(parent.children);
         const index = siblings.indexOf(current) + 1;
-        if (siblings.filter(el => el.tagName === current!.tagName).length > 1) {
+        if (siblings.filter((el) => el.tagName === current!.tagName).length > 1) {
           selector += `:nth-child(${index})`;
         }
       }
@@ -217,50 +266,60 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       current = current.parentElement;
     }
 
-    return path.join(" > ");
+    return path.join(' > ');
   }
 
-  window.addEventListener("click", (event) => {
-    if (event.target) {
-      addInteraction({
-        kind: "click",
-        time: Date.now() - startTime,
-        ...getMouseEventData(event)
-      });
-    }
-  }, { capture: true, passive: true });
+  window.addEventListener(
+    'click',
+    (event) => {
+      if (event.target) {
+        addInteraction({
+          kind: 'click',
+          time: Date.now() - startTime,
+          ...getMouseEventTargetData(event),
+          ...(event.button && { button: event.button }),
+          clickCount: event.detail,
+        });
+      }
+    },
+    { capture: true, passive: true },
+  );
 
-  window.addEventListener("dblclick", (event) => {
-    if (event.target) {
-      addInteraction({
-        kind: "dblclick",
-        time: Date.now() - startTime,
-        ...getMouseEventData(event)
-      });
-    }
-  }, { capture: true, passive: true });
+  window.addEventListener(
+    'pointermove',
+    (event) => {
+      if (event.target) {
+        addInteraction({
+          kind: 'pointermove',
+          time: Date.now() - startTime,
+          ...getMouseEventTargetData(event),
+        });
+      }
+    },
+    { capture: true, passive: true },
+  );
 
-  window.addEventListener("keydown", (event) => {
-    if (event.key) {
-      addInteraction({
-        kind: "keydown",
-        time: Date.now() - startTime,
-        ...getKeyboardEventData(event)
-      });
-    }
-  }, { capture: true, passive: true });
+  window.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key) {
+        addInteraction({
+          kind: 'keydown',
+          time: Date.now() - startTime,
+          ...getKeyboardEventTargetData(event),
+        });
+      }
+    },
+    { capture: true, passive: true },
+  );
 
   function onInterceptedOperation(name: string) {
     console.log(`InterceptedOperation ${name}`);
   }
 
-  function interceptProperty(
-    obj: object,
-    prop: string,
-    interceptor: (basevalue: any) => any
-  ) {
+  function interceptProperty(obj: object, prop: string, interceptor: (basevalue: any) => any) {
     const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-    assert(descriptor?.get, "Property must have a getter");
+    assert(descriptor?.get, 'Property must have a getter');
 
     let interceptValue: any;
     Object.defineProperty(obj, prop, {
@@ -277,31 +336,26 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   const IDBFactoryMethods = {
-    _name: "IDBFactory",
-    open: (v: any) => createFunctionProxy(v, "open"),
+    _name: 'IDBFactory',
+    open: (v: any) => createFunctionProxy(v, 'open'),
   };
 
   const IDBOpenDBRequestMethods = {
-    _name: "IDBOpenDBRequest",
+    _name: 'IDBOpenDBRequest',
     result: createProxy,
   };
 
   const IDBDatabaseMethods = {
-    _name: "IDBDatabase",
-    transaction: (v: any) => createFunctionProxy(v, "transaction"),
+    _name: 'IDBDatabase',
+    transaction: (v: any) => createFunctionProxy(v, 'transaction'),
   };
 
   const IDBTransactionMethods = {
-    _name: "IDBTransaction",
-    objectStore: (v: any) => createFunctionProxy(v, "objectStore"),
+    _name: 'IDBTransaction',
+    objectStore: (v: any) => createFunctionProxy(v, 'objectStore'),
   };
 
-  function pushIndexedDBAccess(
-    request: IDBRequest,
-    kind: IndexedDBAccess["kind"],
-    key: any,
-    item: any
-  ) {
+  function pushIndexedDBAccess(request: IDBRequest, kind: IndexedDBAccess['kind'], key: any, item: any) {
     addIndexedDBAccess({
       kind,
       key,
@@ -316,54 +370,50 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   const getRequestKeys: Map<IDBRequest, any> = new Map();
 
   const IDBObjectStoreMethods = {
-    _name: "IDBObjectStore",
+    _name: 'IDBObjectStore',
     get: (v: any) =>
-      createFunctionProxy(v, "get", (request, key) => {
+      createFunctionProxy(v, 'get', (request, key) => {
         // Wait to add the request until the value is known.
         getRequestKeys.set(request, key);
         return createProxy(request);
       }),
     put: (v: any) =>
-      createFunctionProxy(v, "put", (request, item, key) => {
-        pushIndexedDBAccess(request, "put", key, item);
+      createFunctionProxy(v, 'put', (request, item, key) => {
+        pushIndexedDBAccess(request, 'put', key, item);
         return createProxy(request);
       }),
     add: (v: any) =>
-      createFunctionProxy(v, "add", (request, item, key) => {
-        pushIndexedDBAccess(request, "add", key, item);
+      createFunctionProxy(v, 'add', (request, item, key) => {
+        pushIndexedDBAccess(request, 'add', key, item);
         return createProxy(request);
       }),
   };
 
   const IDBRequestMethods = {
-    _name: "IDBRequest",
+    _name: 'IDBRequest',
     result: (value: any, target: any) => {
       const key = getRequestKeys.get(target);
       if (key) {
-        pushIndexedDBAccess(target, "get", key, value);
+        pushIndexedDBAccess(target, 'get', key, value);
       }
       return value;
     },
   };
 
-  function pushLocalStorageAccess(
-    kind: LocalStorageAccess["kind"],
-    key: string,
-    value?: string
-  ) {
+  function pushLocalStorageAccess(kind: LocalStorageAccess['kind'], key: string, value?: string) {
     addLocalStorageAccess({ kind, key, value });
   }
 
   const StorageMethods = {
-    _name: "Storage",
+    _name: 'Storage',
     getItem: (v: any) =>
-      createFunctionProxy(v, "getItem", (value: string, key: string) => {
-        pushLocalStorageAccess("get", key, value);
+      createFunctionProxy(v, 'getItem', (value: string, key: string) => {
+        pushLocalStorageAccess('get', key, value);
         return value;
       }),
     setItem: (v: any) =>
-      createFunctionProxy(v, "setItem", (_rv: undefined, key: string) => {
-        pushLocalStorageAccess("set", key);
+      createFunctionProxy(v, 'setItem', (_rv: undefined, key: string) => {
+        pushLocalStorageAccess('set', key);
       }),
   };
 
@@ -379,9 +429,9 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   const ResponseMethods = {
-    _name: "Response",
+    _name: 'Response',
     json: (v: any, response: Response) =>
-      createFunctionProxy(v, "json", async (promise: Promise<any>) => {
+      createFunctionProxy(v, 'json', async (promise: Promise<any>) => {
         const json = await promise;
         const requestInfo = responseToRequestInfo.get(response);
         if (requestInfo) {
@@ -390,7 +440,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
         return json;
       }),
     text: (v: any, response: Response) =>
-      createFunctionProxy(v, "text", async (promise: Promise<any>) => {
+      createFunctionProxy(v, 'text', async (promise: Promise<any>) => {
         const text = await promise;
         const requestInfo = responseToRequestInfo.get(response);
         if (requestInfo) {
@@ -419,14 +469,14 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     } else if (obj instanceof Response) {
       methods = ResponseMethods;
     }
-    assert(methods, "Unknown object for createProxy");
+    assert(methods, 'Unknown object for createProxy');
     const name = methods._name;
 
     return new Proxy(obj, {
       get(target, prop) {
         onInterceptedOperation(`ProxyGetter:${name}.${String(prop)}`);
         let value = target[prop];
-        if (typeof value === "function") {
+        if (typeof value === 'function') {
           value = value.bind(target);
         }
         if (methods[prop]) {
@@ -443,11 +493,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     });
   }
 
-  function createFunctionProxy(
-    fn: any,
-    name: string,
-    handler?: (v: any, ...args: any[]) => any
-  ) {
+  function createFunctionProxy(fn: any, name: string, handler?: (v: any, ...args: any[]) => any) {
     return (...args: any[]) => {
       onInterceptedOperation(`FunctionCall:${name}`);
       const v = fn(...args);
@@ -455,13 +501,13 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     };
   }
 
-  interceptProperty(window, "indexedDB", createProxy);
-  interceptProperty(window, "localStorage", createProxy);
+  interceptProperty(window, 'indexedDB', createProxy);
+  interceptProperty(window, 'localStorage', createProxy);
 
   const baseFetch = window.fetch;
   window.fetch = async (info, options) => {
     const url = info instanceof Request ? info.url : info.toString();
-    const requestBody = (typeof options?.body == "string") ? options.body : "";
+    const requestBody = typeof options?.body == 'string' ? options.body : '';
     const requestInfo: RequestInfo = { url, requestBody };
     try {
       const rv = await baseFetch(info, options);
@@ -478,40 +524,9 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   };
 }
 
-const RecordingMessageHandlerScriptPrefix = `
-    <script>
+export const recordingMessageHandlerScript = `
       ${assert}
       ${stringToBase64}
       ${uint8ArrayToBase64}
-      (${addRecordingMessageHandler})
+      (${addRecordingMessageHandler})()
 `;
-
-export function injectRecordingMessageHandler(content: string) {
-  const headTag = content.indexOf("<head>");
-  assert(headTag != -1, "No <head> tag found");
-
-  const headEnd = headTag + 6;
-
-  gLastMessageHandlerId = Math.random().toString(36).substring(2, 15);
-
-  const text = `${RecordingMessageHandlerScriptPrefix}("${gLastMessageHandlerId}")</script>`;
-
-  return content.slice(0, headEnd) + text + content.slice(headEnd);
-}
-
-export function removeRecordingMessageHandler(content: string) {
-  const index = content.indexOf(RecordingMessageHandlerScriptPrefix);
-  if (index == -1) {
-    return content;
-  }
-  const prefix = content.substring(0, index);
-
-  const suffixStart = index + RecordingMessageHandlerScriptPrefix.length;
-
-  const closeScriptTag = "</script>";
-  const closeScriptIndex = content.indexOf(closeScriptTag, suffixStart);
-  assert(closeScriptIndex != -1, "No </script> tag found");
-  const suffix = content.substring(closeScriptIndex + closeScriptTag.length);
-
-  return prefix + suffix;
-}

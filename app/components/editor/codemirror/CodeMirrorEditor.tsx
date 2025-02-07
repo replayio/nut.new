@@ -25,7 +25,6 @@ import { BinaryContent } from './BinaryContent';
 import { getTheme, reconfigureTheme } from './cm-theme';
 import { indentKeyBinding } from './indent';
 import { getLanguage } from './languages';
-import { removeRecordingMessageHandler } from '~/lib/replay/Recording';
 
 const logger = createScopedLogger('CodeMirrorEditor');
 
@@ -276,7 +275,6 @@ function newEditorState(
   onFileSaveRef: MutableRefObject<OnSaveCallback | undefined>,
   extensions: Extension[],
 ) {
-  content = removeRecordingMessageHandler(content);
   return EditorState.create({
     doc: content,
     extensions: [
@@ -383,7 +381,7 @@ function setEditorDocument(
   autoFocus: boolean,
   doc: TextEditorDocument,
 ) {
-  const content = removeRecordingMessageHandler(doc.value);
+  const content = doc.value;
 
   if (content !== view.state.doc.toString()) {
     view.dispatch({

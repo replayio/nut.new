@@ -63,7 +63,7 @@ export async function simulationAddData(data: SimulationData) {
 export async function getSimulationRecording(): Promise<string> {
   assert(gChatState, "Chat not started");
 
-  console.log("FinishSimulation", new Date().toISOString(), JSON.stringify(gAllSimulationData));
+  console.log("SimulationData", new Date().toISOString(), JSON.stringify(gAllSimulationData));
 
   gChatState.client.sendCommand({
     method: "Nut.finishSimulationData",
