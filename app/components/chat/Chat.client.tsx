@@ -369,7 +369,11 @@ export const ChatImpl = memo(
         gLockSimulationData = true;
         try {
           await flushSimulationData();
-          const { recordingId, recordingMessage } = await createRecording();
+
+          const createRecordingPromise = createRecording();
+          const enhancedPromptPromise = getEnhancedPrompt(_input);
+
+          const { recordingId, recordingMessage } = await createRecordingPromise;
 
           if (numAbortsAtStart != gNumAborts) {
             return;
@@ -379,7 +383,7 @@ export const ChatImpl = memo(
           setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
 
           if (recordingId) {
-            const info = await getEnhancedPrompt(_input);
+            const info = await enhancedPromptPromise;
 
             if (numAbortsAtStart != gNumAborts) {
               return;

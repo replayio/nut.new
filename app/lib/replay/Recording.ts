@@ -1,6 +1,5 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
-import { getLastFileWriteTime } from "../runtime/action-runner";
 import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
 import type {
   IndexedDBAccess,

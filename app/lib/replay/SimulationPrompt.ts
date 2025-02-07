@@ -11,7 +11,7 @@ import { getLastFileWriteTime } from '../runtime/action-runner';
 interface ChatState {
   client: ProtocolClient;
   chatId: string;
-  addSimulationPromise?: Promise<{ recordingId: string | undefined }>;
+  simulationFinished?: boolean;
 }
 
 let gChatState: ChatState | undefined;
@@ -27,6 +27,8 @@ export async function simulationStartChat(repositoryContents: string) {
   const client = new ProtocolClient();
   await client.initialize();
 
+  await client.sendCommand({ method: "Recording.globalExperimentalCommand", params: { name: "enableOperatorPods" } });
+
   const { chatId } = await client.sendCommand({ method: "Nut.startChat", params: {} }) as { chatId: string };
   gChatState = { client, chatId };
 
@@ -37,7 +39,7 @@ export async function simulationStartChat(repositoryContents: string) {
   };
   gAllSimulationData.push(repositoryContentsPacket);
 
-  gChatState.addSimulationPromise = client.sendCommand({
+  await client.sendCommand({
     method: "Nut.addSimulation",
     params: {
       chatId,
@@ -46,7 +48,7 @@ export async function simulationStartChat(repositoryContents: string) {
       completeData: false,
       saveRecording: true,
     },
-  }) as Promise<{ recordingId: string | undefined }>;
+  });
 }
 
 export async function simulationAddData(data: SimulationData) {
@@ -65,13 +67,13 @@ export async function getSimulationRecording(): Promise<string> {
 
   console.log("SimulationData", new Date().toISOString(), JSON.stringify(gAllSimulationData));
 
-  gChatState.client.sendCommand({
+  gChatState.simulationFinished = true;
+
+  const { recordingId } = await gChatState.client.sendCommand({
     method: "Nut.finishSimulationData",
     params: { chatId: gChatState.chatId },
-  });
+  }) as { recordingId: string | undefined };
 
-  assert(gChatState.addSimulationPromise, "Add simulation promise not set");
-  const { recordingId } = await gChatState.addSimulationPromise;
   assert(recordingId, "Recording ID not set");
   return recordingId;
 }
@@ -94,6 +96,7 @@ export async function getSimulationEnhancedPrompt(
   mouseData: MouseData | undefined
 ): Promise<string> {
   assert(gChatState, "Chat not started");
+  assert(gChatState.simulationFinished, "Simulation not finished");
 
   let system = SystemPrompt;
   if (mouseData) {
