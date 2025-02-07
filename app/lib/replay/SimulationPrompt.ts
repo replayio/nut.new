@@ -44,6 +44,8 @@ class ChatManager {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
       assert(this.client, "Chat has been destroyed");
+
+      await this.client.initialize();
       await this.client.sendCommand({
         method: "Recording.globalExperimentalCommand",
         params: { name: "enableOperatorPods" },
@@ -80,6 +82,8 @@ class ChatManager {
 
   async addPageData(data: SimulationData) {
     assert(this.client, "Chat has been destroyed");
+    assert(this.repositoryContents, "Expected repository contents");
+
     this.pageData.push(...data);
 
     // If page data comes in while we are waiting for the chat to finish
@@ -90,14 +94,8 @@ class ChatManager {
 
     const chatId = await this.chatIdPromise;
     await this.client.sendCommand({
-      method: "Nut.addSimulation",
-      params: {
-        chatId,
-        version: SimulationDataVersion,
-        simulationData: data,
-        completeData: false,
-        saveRecording: true,
-      },
+      method: "Nut.addSimulationData",
+      params: { chatId, simulationData: data },
     });
   }
 
