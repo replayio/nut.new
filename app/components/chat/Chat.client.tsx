@@ -22,9 +22,8 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectContents } from './Messages.client';
-import { simulationStartChat, getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData } from '~/lib/replay/SimulationPrompt';
+import { getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData, simulationRepositoryUpdated } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
-import type { SimulationData } from '~/lib/replay/SimulationData';
 import { getCurrentIFrame } from '../workbench/Preview';
 import { getCurrentMouseData } from '../workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
@@ -37,6 +36,17 @@ const toastAnimation = cssTransition({
 });
 
 const logger = createScopedLogger('Chat');
+
+// Debounce things after file writes to avoid creating a bunch of chats.
+let gResetChatFileWrittenTimeout: NodeJS.Timeout | undefined;
+
+export function resetChatFileWritten() {
+  clearTimeout(gResetChatFileWrittenTimeout);
+  gResetChatFileWrittenTimeout = setTimeout(async () => {
+    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    await simulationRepositoryUpdated(contentBase64);
+  }, 500);
+}
 
 async function flushSimulationData() {
   console.log("FlushSimulationData");
@@ -51,12 +61,6 @@ async function flushSimulationData() {
   }
 
   console.log("HaveSimulationData", simulationData.length);
-
-  // Start a new simulation chat if we are seeing the start of the data.
-  if (simulationData.some(data => data.kind == "locationHref")) {
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
-    await simulationStartChat(contentBase64);
-  }
 
   // Add the simulation data to the chat.
   await simulationAddData(simulationData);
@@ -398,7 +402,7 @@ export const ChatImpl = memo(
           gLockSimulationData = false;
         }
       }
-  
+
       const fileModifications = workbenchStore.getFileModifcations();
 
       chatStore.setKey('aborted', false);

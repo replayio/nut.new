@@ -6,6 +6,7 @@ import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
 import type { BoltShell } from '~/utils/shell';
+import { resetChatFileWritten } from '~/components/chat/Chat.client';
 
 const logger = createScopedLogger('ActionRunner');
 
@@ -61,12 +62,6 @@ class ActionCommandError extends Error {
   get header() {
     return this._header;
   }
-}
-
-let gLastFileWriteTime = new Date().toISOString();
-
-export function getLastFileWriteTime() {
-  return gLastFileWriteTime;
 }
 
 export class ActionRunner {
@@ -300,7 +295,7 @@ export class ActionRunner {
 
     try {
       await webcontainer.fs.writeFile(relativePath, action.content);
-      gLastFileWriteTime = new Date().toISOString();
+      resetChatFileWritten();
       logger.debug(`File written ${relativePath}`);
     } catch (error) {
       logger.error('Failed to write file\n\n', error);
