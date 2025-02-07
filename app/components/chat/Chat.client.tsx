@@ -388,7 +388,7 @@ export const ChatImpl = memo(
             if (numAbortsAtStart != gNumAborts) {
               return;
             }
-    
+
             simulationEnhancedPrompt = info.enhancedPrompt;
 
             console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
