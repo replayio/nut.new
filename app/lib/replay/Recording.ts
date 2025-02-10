@@ -6,6 +6,7 @@ import type {
   LocalStorageAccess,
   NetworkResource,
   SimulationData,
+  SimulationPacket,
   UserInteraction,
 } from './SimulationData';
 
@@ -55,6 +56,8 @@ function sendIframeRequest<K extends keyof RequestMap>(
   });
 }
 
+let gMessageCount = 0;
+
 export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
   const decoder = new TextDecoder();
@@ -76,13 +79,29 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 }
 
 // Add handlers to the current iframe's window.
-function addRecordingMessageHandler() {
-  const resources: NetworkResource[] = [];
-  const interactions: UserInteraction[] = [];
-  const indexedDBAccesses: IndexedDBAccess[] = [];
-  const localStorageAccesses: LocalStorageAccess[] = [];
+function addRecordingMessageHandler(messageHandlerId: string) {
+  const simulationData: SimulationData = [];
+  let numSimulationPacketsSent = 0;
+
+  function pushSimulationData(packet: SimulationPacket) {
+    packet.time = new Date().toISOString();
+    simulationData.push(packet);
+  }
 
   const startTime = Date.now();
+
+  pushSimulationData({
+    kind: 'viewport',
+    size: { width: window.innerWidth, height: window.innerHeight },
+  });
+  pushSimulationData({
+    kind: "locationHref",
+    href: window.location.href,
+  });
+  pushSimulationData({
+    kind: "documentURL",
+    url: window.location.href,
+  });
 
   interface RequestInfo {
     url: string;
@@ -93,9 +112,16 @@ function addRecordingMessageHandler() {
     return Math.min(Math.max(value, min), max);
   }
 
+  function addNetworkResource(resource: NetworkResource) {
+    pushSimulationData({
+      kind: "resource",
+      resource,
+    });
+  }
+
   function addTextResource(info: RequestInfo, text: string, responseHeaders: Record<string, string>) {
-    const url = new URL(info.url, window.location.href).href;
-    resources.push({
+    const url = (new URL(info.url, window.location.href)).href;
+    addNetworkResource({
       url,
       requestBodyBase64: stringToBase64(info.requestBody),
       responseBodyBase64: stringToBase64(text),
@@ -104,50 +130,31 @@ function addRecordingMessageHandler() {
     });
   }
 
+  function addInteraction(interaction: UserInteraction) {
+    pushSimulationData({
+      kind: "interaction",
+      interaction,
+    });
+  }
+
+  function addIndexedDBAccess(access: IndexedDBAccess) {
+    pushSimulationData({
+      kind: "indexedDB",
+      access,
+    });
+  }
+
+  function addLocalStorageAccess(access: LocalStorageAccess) {
+    pushSimulationData({
+      kind: "localStorage",
+      access,
+    });
+  }
+
   async function getSimulationData(): Promise<SimulationData> {
-    const data: SimulationData = [];
-
-    /*
-     * for now we only store the viewport size at the time of the simulation data request
-     * we don't deal with resizes during lifetime of the app
-     */
-    data.push({
-      kind: 'viewport',
-      size: { width: window.innerWidth, height: window.innerHeight },
-    });
-    data.push({
-      kind: 'locationHref',
-      href: window.location.href,
-    });
-    data.push({
-      kind: 'documentURL',
-      url: window.location.href,
-    });
-    for (const resource of resources) {
-      data.push({
-        kind: 'resource',
-        resource,
-      });
-    }
-    for (const interaction of interactions) {
-      data.push({
-        kind: 'interaction',
-        interaction,
-      });
-    }
-    for (const indexedDBAccess of indexedDBAccesses) {
-      data.push({
-        kind: 'indexedDB',
-        access: indexedDBAccess,
-      });
-    }
-    for (const localStorageAccess of localStorageAccesses) {
-      data.push({
-        kind: 'localStorage',
-        access: localStorageAccess,
-      });
-    }
-
+    console.log("GetSimulationData", simulationData.length, numSimulationPacketsSent);
+    const data = simulationData.slice(numSimulationPacketsSent);
+    numSimulationPacketsSent = simulationData.length;
     return data;
   }
 
@@ -265,7 +272,7 @@ function addRecordingMessageHandler() {
     'click',
     (event) => {
       if (event.target) {
-        interactions.push({
+        addInteraction({
           kind: 'click',
           time: Date.now() - startTime,
           ...getMouseEventTargetData(event),
@@ -281,7 +288,7 @@ function addRecordingMessageHandler() {
     'pointermove',
     (event) => {
       if (event.target) {
-        interactions.push({
+        addInteraction({
           kind: 'pointermove',
           time: Date.now() - startTime,
           ...getMouseEventTargetData(event),
@@ -295,7 +302,7 @@ function addRecordingMessageHandler() {
     'keydown',
     (event) => {
       if (event.key) {
-        interactions.push({
+        addInteraction({
           kind: 'keydown',
           time: Date.now() - startTime,
           ...getKeyboardEventTargetData(event),
@@ -348,7 +355,7 @@ function addRecordingMessageHandler() {
   };
 
   function pushIndexedDBAccess(request: IDBRequest, kind: IndexedDBAccess['kind'], key: any, item: any) {
-    indexedDBAccesses.push({
+    addIndexedDBAccess({
       kind,
       key,
       item,
@@ -393,7 +400,7 @@ function addRecordingMessageHandler() {
   };
 
   function pushLocalStorageAccess(kind: LocalStorageAccess['kind'], key: string, value?: string) {
-    localStorageAccesses.push({ kind, key, value });
+    addLocalStorageAccess({ kind, key, value });
   }
 
   const StorageMethods = {
@@ -506,7 +513,7 @@ function addRecordingMessageHandler() {
       responseToRequestInfo.set(rv, requestInfo);
       return createProxy(rv);
     } catch (error) {
-      resources.push({
+      addNetworkResource({
         url,
         requestBodyBase64: stringToBase64(requestBody),
         error: String(error),

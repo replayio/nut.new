@@ -2,16 +2,15 @@ import { useStore } from '@nanostores/react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { simulationReloaded } from '~/lib/replay/SimulationPrompt';
 import { PortDropdown } from './PortDropdown';
 import { PointSelector } from './PointSelector';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 type ResizeSide = 'left' | 'right' | null;
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
 export function getCurrentIFrame() {
-  assert(gCurrentIFrame);
   return gCurrentIFrame;
 }
 
@@ -125,6 +124,7 @@ export const Preview = memo(() => {
 
   const reloadPreview = () => {
     if (iframeRef.current) {
+      simulationReloaded();
       iframeRef.current.src = iframeRef.current.src;
     }
     setIsSelectionMode(false);

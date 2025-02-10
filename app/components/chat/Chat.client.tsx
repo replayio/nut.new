@@ -22,9 +22,8 @@ import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectContents } from './Messages.client';
-import { getSimulationRecording, getSimulationEnhancedPrompt } from '~/lib/replay/SimulationPrompt';
+import { getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData, simulationRepositoryUpdated } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
-import type { SimulationData } from '~/lib/replay/SimulationData';
 import { getCurrentIFrame } from '../workbench/Preview';
 import { getCurrentMouseData } from '../workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
@@ -37,6 +36,43 @@ const toastAnimation = cssTransition({
 });
 
 const logger = createScopedLogger('Chat');
+
+// Debounce things after file writes to avoid creating a bunch of chats.
+let gResetChatFileWrittenTimeout: NodeJS.Timeout | undefined;
+
+export function resetChatFileWritten() {
+  clearTimeout(gResetChatFileWrittenTimeout);
+  gResetChatFileWrittenTimeout = setTimeout(async () => {
+    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    await simulationRepositoryUpdated(contentBase64);
+  }, 500);
+}
+
+async function flushSimulationData() {
+  console.log("FlushSimulationData");
+
+  const iframe = getCurrentIFrame();
+  if (!iframe) {
+    return;
+  }
+  const simulationData = await getIFrameSimulationData(iframe);
+  if (!simulationData.length) {
+    return;
+  }
+
+  console.log("HaveSimulationData", simulationData.length);
+
+  // Add the simulation data to the chat.
+  await simulationAddData(simulationData);
+}
+
+let gLockSimulationData = false;
+
+setInterval(async () => {
+  if (!gLockSimulationData) {
+    flushSimulationData();
+  }
+}, 1000);
 
 export function Chat() {
   renderLogger.trace('Chat');
@@ -262,10 +298,10 @@ export const ChatImpl = memo(
       setChatStarted(true);
     };
 
-    const createRecording = async (simulationData: SimulationData, repositoryContents: string) => {
+    const createRecording = async () => {
       let recordingId, message;
       try {
-        recordingId = await getSimulationRecording(simulationData, repositoryContents);
+        recordingId = await getSimulationRecording();
         message = `[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`;
       } catch (e) {
         console.error("Error creating recording", e);
@@ -281,11 +317,11 @@ export const ChatImpl = memo(
       return { recordingId, recordingMessage };
     };
 
-    const getEnhancedPrompt = async (recordingId: string, userMessage: string) => {
+    const getEnhancedPrompt = async (userMessage: string) => {
       let enhancedPrompt, message;
       try {
         const mouseData = getCurrentMouseData();
-        enhancedPrompt = await getSimulationEnhancedPrompt(recordingId, messages, userMessage, mouseData);
+        enhancedPrompt = await getSimulationEnhancedPrompt(messages, userMessage, mouseData);
         message = `Explanation of the bug:\n\n${enhancedPrompt}`;
       } catch (e) {
         console.error("Error enhancing prompt", e);
@@ -331,35 +367,42 @@ export const ChatImpl = memo(
        */
       await workbenchStore.saveAllFiles();
 
-      const { contentBase64 } = await workbenchStore.generateZipBase64();
-
       let simulationEnhancedPrompt: string | undefined;
 
       if (simulation) {
-        const simulationData = await getIFrameSimulationData(getCurrentIFrame());
-        const { recordingId, recordingMessage } = await createRecording(simulationData, contentBase64);
+        gLockSimulationData = true;
+        try {
+          await flushSimulationData();
 
-        if (numAbortsAtStart != gNumAborts) {
-          return;
-        }
+          const createRecordingPromise = createRecording();
+          const enhancedPromptPromise = getEnhancedPrompt(_input);
 
-        console.log("RecordingMessage", recordingMessage);
-        setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
-
-        if (recordingId) {
-          const info = await getEnhancedPrompt(recordingId, _input);
+          const { recordingId, recordingMessage } = await createRecordingPromise;
 
           if (numAbortsAtStart != gNumAborts) {
             return;
           }
-  
-          simulationEnhancedPrompt = info.enhancedPrompt;
 
-          console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
-          setInjectedMessages([...injectedMessages, { message: info.enhancedPromptMessage, previousId: messages[messages.length - 1].id }]);
+          console.log("RecordingMessage", recordingMessage);
+          setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
+
+          if (recordingId) {
+            const info = await enhancedPromptPromise;
+
+            if (numAbortsAtStart != gNumAborts) {
+              return;
+            }
+
+            simulationEnhancedPrompt = info.enhancedPrompt;
+
+            console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
+            setInjectedMessages([...injectedMessages, { message: info.enhancedPromptMessage, previousId: messages[messages.length - 1].id }]);
+          }
+        } finally {
+          gLockSimulationData = false;
         }
       }
-  
+
       const fileModifications = workbenchStore.getFileModifcations();
 
       chatStore.setKey('aborted', false);
@@ -404,6 +447,7 @@ export const ChatImpl = memo(
       // The project contents are associated with the last message present when
       // the user message is added.
       const lastMessage = messages[messages.length - 1];
+      const { contentBase64 } = await workbenchStore.generateZipBase64();
       saveProjectContents(lastMessage.id, { content: contentBase64 });
     };
 
