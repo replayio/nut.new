@@ -124,8 +124,8 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
 
 const nutAdminKeyCookieName = 'nutAdminKey';
 
-export function getNutAdminKey(): string | undefined {
-  return Cookies.get(nutAdminKeyCookieName);
+export function hasNutAdminKey(): boolean {
+  return !!Cookies.get(nutAdminKeyCookieName);
 }
 
 export function setNutAdminKey(key: string) {

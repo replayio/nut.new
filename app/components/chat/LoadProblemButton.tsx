@@ -13,12 +13,20 @@ interface LoadProblemButtonProps {
   importChat?: (description: string, messages: Message[]) => Promise<void>;
 }
 
+let gLoadedProblem: BoltProblem | undefined;
+
+export function getLoadedProblem() {
+  return gLoadedProblem;
+}
+
 export async function loadProblem(problemId: string, importChat: (description: string, messages: Message[]) => Promise<void>) {
   const problem = await getProblem(problemId);
 
   if (!problem) {
     return;
   }
+
+  gLoadedProblem = problem;
 
   const { repositoryContents, title: problemTitle } = problem;
 

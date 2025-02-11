@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { getNutAdminKey, getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus } from '~/lib/replay/Problems';
+import { getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus, hasNutAdminKey } from '~/lib/replay/Problems';
 import type { BoltProblem, BoltProblemComment, BoltProblemInput } from '~/lib/replay/Problems';
 
 function Status({ status }: { status: BoltProblemStatus }) {
@@ -136,8 +136,6 @@ function ViewProblemPage() {
 
   const [problemData, setProblemData] = useState<BoltProblem | null>(null);
 
-  const hasAdminKey = !!getNutAdminKey();
-
   const updateProblem = async (callback: DoUpdateCallback) => {
     if (!problemData) {
       toast.error('Problem data missing');
@@ -166,7 +164,7 @@ function ViewProblemPage() {
               </div>)
            : <ProblemViewer problem={problemData} />}
         </div>
-        {hasAdminKey && problemData && (
+        {hasNutAdminKey() && problemData && (
           <CommentForm updateProblem={updateProblem} />
         )}
         <ToastContainerWrapper />
