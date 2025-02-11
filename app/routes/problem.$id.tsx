@@ -12,12 +12,22 @@ import { getProblem, updateProblem as backendUpdateProblem, getProblemsUsername,
 import type { BoltProblem, BoltProblemComment, BoltProblemInput } from '~/lib/replay/Problems';
 
 function Status({ status }: { status: BoltProblemStatus }) {
+  const statusColors: Record<BoltProblemStatus, string> = {
+    [BoltProblemStatus.Pending]: 'bg-yellow-400',
+    [BoltProblemStatus.Unsolved]: 'bg-orange-500',
+    [BoltProblemStatus.HasPrompt]: 'bg-blue-200',
+    [BoltProblemStatus.Solved]: 'bg-blue-500'
+  };
+
   return (
-    <div>
-      <h3>Status</h3>
-      <span className={`status status-${status}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
+    <div className="flex items-center gap-2 my-2">
+      <span className="font-semibold">Status:</span>
+      <div className={`inline-flex items-center px-3 py-1 rounded-full bg-opacity-10 ${statusColors[status]} text-${status}`}>
+        <span className={`w-2 h-2 rounded-full mr-2 ${statusColors[status]}`}></span>
+        <span className="font-medium">
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
+      </div>
     </div>
   );
 }
@@ -25,7 +35,6 @@ function Status({ status }: { status: BoltProblemStatus }) {
 function Keywords({ keywords }: { keywords: string[] }) {
   return (
     <div>
-      <h3>Keywords</h3>
       <div className="keywords">
         {keywords.map((keyword, index) => (
           <span key={index} className="keyword">
@@ -40,7 +49,6 @@ function Keywords({ keywords }: { keywords: string[] }) {
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
   return (
     <div className="comments">
-      <h3>Comments</h3>
       {comments.map((comment, index) => (
         <div key={index} className="comment">
           <div className="comment-header">
@@ -65,7 +73,7 @@ function ProblemViewer({ problem }: { problem: BoltProblem }) {
       <p>{description}</p>
       <a 
         href={`/load-problem/${problemId}`} 
-        className="load-button inline-block px-4 py-2 mt-4 mb-6 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 font-medium"
+        className="load-button inline-block px-4 py-2 mt-3 mb-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 font-medium"
       >
         Load Problem
       </a>
