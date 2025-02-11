@@ -4,8 +4,7 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { ToastContainerWrapper } from './problems';
-import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import { cssTransition, toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from '@remix-run/react';
@@ -62,9 +61,12 @@ function ProblemViewer({ problem }: { problem: BoltProblem }) {
 
   return (
     <div className="benchmark">
-      <h1>{title}</h1>
+      <h1 className="text-xl4 font-semibold mb-2">{title}</h1>
       <p>{description}</p>
-      <a href={`/load-problem/${problemId}`} className="load-button">
+      <a 
+        href={`/load-problem/${problemId}`} 
+        className="load-button inline-block px-4 py-2 mt-4 mb-6 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 font-medium"
+      >
         Load Problem
       </a>
       <Status status={status} />
