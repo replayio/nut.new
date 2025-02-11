@@ -77,7 +77,7 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
       },
     });
     console.log("FetchProblemRval", rv);
-    return (rv as { rval: BoltProblem }).rval;
+    return (rv as { rval: { problem: BoltProblem } }).rval.problem;
   } catch (error) {
     console.error("Error fetching problem", error);
     toast.error("Failed to fetch problem");

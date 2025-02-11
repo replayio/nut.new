@@ -58,13 +58,13 @@ function Comments({ comments }: { comments: BoltProblemComment[] }) {
 }
 
 function ProblemViewer({ problem }: { problem: BoltProblem }) {
-  const { title, description, status = BoltProblemStatus.Pending, keywords = [], comments = [] } = problem;
+  const { problemId, title, description, status = BoltProblemStatus.Pending, keywords = [], comments = [] } = problem;
 
   return (
     <div className="benchmark">
       <h1>{title}</h1>
       <p>{description}</p>
-      <a href={`/load-problem/${problem.problemId}`} className="load-button">
+      <a href={`/load-problem/${problemId}`} className="load-button">
         Load Problem
       </a>
       <Status status={status} />
