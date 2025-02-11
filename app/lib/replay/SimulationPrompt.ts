@@ -179,17 +179,20 @@ export async function simulationAddData(data: SimulationData) {
   gChatManager.addPageData(data);
 }
 
-let gLastSimulationData: SimulationData | undefined;
+let gLastUserSimulationData: SimulationData | undefined;
 
-export function getLastSimulationData(): SimulationData | undefined {
-  return gLastSimulationData;
+export function getLastUserSimulationData(): SimulationData | undefined {
+  return gLastUserSimulationData;
 }
 
 export async function getSimulationRecording(): Promise<string> {
   assert(gChatManager, "Expected to have an active chat");
 
   const simulationData = gChatManager.finishSimulationData();
-  gLastSimulationData = simulationData;
+
+  // The repository contents are part of the problem and excluded from the simulation data
+  // reported for solutions.
+  gLastUserSimulationData = simulationData.filter(packet => packet.kind != "repositoryContents");
 
   console.log("SimulationData", new Date().toISOString(), JSON.stringify(simulationData));
 

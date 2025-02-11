@@ -74,7 +74,7 @@ setInterval(async () => {
   }
 }, 1000);
 
-let gLastUserPrompt: string | undefined;
+let gLastUserPrompt: string | undefined = "app goes blank getting directions";
 
 export function getLastUserPrompt(): string | undefined {
   return gLastUserPrompt;

@@ -13,10 +13,16 @@ interface LoadProblemButtonProps {
   importChat?: (description: string, messages: Message[]) => Promise<void>;
 }
 
-let gLoadedProblem: BoltProblem | undefined;
+export function setLastLoadedProblem(problem: BoltProblem) {
+  localStorage.setItem('loadedProblem', JSON.stringify(problem));
+}
 
-export function getLoadedProblem() {
-  return gLoadedProblem;
+export function getLastLoadedProblem(): BoltProblem | undefined {
+  const problemJSON = localStorage.getItem('loadedProblem');
+  if (!problemJSON) {
+    return undefined;
+  }
+  return JSON.parse(problemJSON);
 }
 
 export async function loadProblem(problemId: string, importChat: (description: string, messages: Message[]) => Promise<void>) {
@@ -26,7 +32,7 @@ export async function loadProblem(problemId: string, importChat: (description: s
     return;
   }
 
-  gLoadedProblem = problem;
+  setLastLoadedProblem(problem);
 
   const { repositoryContents, title: problemTitle } = problem;
 

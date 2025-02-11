@@ -26,7 +26,7 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
     { id: 'data', label: 'Data', icon: 'i-ph:database', component: <DataTab /> },
-    { id: 'apiKeys', label: 'API Keys', icon: 'i-ph:key', component: <APIKeysTab /> },
+    { id: 'apiKeys', label: 'User Info', icon: 'i-ph:key', component: <APIKeysTab /> },
     { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
     { id: 'features', label: 'Features', icon: 'i-ph:star', component: <FeaturesTab /> },
     ...(debug

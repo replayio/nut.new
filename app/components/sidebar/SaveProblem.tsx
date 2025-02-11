@@ -41,14 +41,19 @@ export function SaveProblem() {
       return;
     }
 
+    const username = getProblemsUsername();
+
+    if (!username) {
+      toast.error('Please fill in username field');
+      return;
+    }
+
     toast.info("Submitting problem...");
 
     console.log("SubmitProblem", formData);
 
     await workbenchStore.saveAllFiles();
     const { contentBase64 } = await workbenchStore.generateZipBase64();
-
-    const username = getProblemsUsername();
 
     const problem: BoltProblemInput = {
       version: 2,

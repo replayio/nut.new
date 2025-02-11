@@ -2,10 +2,10 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { getProblemsUsername, updateProblem } from "~/lib/replay/Problems";
+import { BoltProblemStatus, getProblemsUsername, updateProblem } from "~/lib/replay/Problems";
 import type { BoltProblemInput } from "~/lib/replay/Problems";
-import { getLoadedProblem } from "../chat/LoadProblemButton";
-import { getLastSimulationData } from "~/lib/replay/SimulationPrompt";
+import { getLastLoadedProblem } from "../chat/LoadProblemButton";
+import { getLastUserSimulationData } from "~/lib/replay/SimulationPrompt";
 import { getLastUserPrompt } from "../chat/Chat.client";
 
 ReactModal.setAppElement('#root');
@@ -40,13 +40,13 @@ export function SaveSolution() {
       return;
     }
 
-    const savedProblem = getLoadedProblem();
+    const savedProblem = getLastLoadedProblem();
     if (!savedProblem) {
       toast.error('No problem loaded');
       return;
     }
 
-    const simulationData = getLastSimulationData();
+    const simulationData = getLastUserSimulationData();
     if (!simulationData) {
       toast.error('No simulation data found');
       return;
@@ -68,6 +68,7 @@ export function SaveSolution() {
       description: savedProblem.description,
       username: savedProblem.username,
       repositoryContents: savedProblem.repositoryContents,
+      status: BoltProblemStatus.Solved,
       solution: {
         simulationData,
         userPrompt,
