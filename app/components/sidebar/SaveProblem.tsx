@@ -1,37 +1,18 @@
 import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
-import { assert, sendCommandDedicatedClient } from "~/lib/replay/ReplayProtocolClient";
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
+import { getProblemsUsername, submitProblem } from "~/lib/replay/Problems";
+import type { BoltProblemInput } from "~/lib/replay/Problems";
 
 ReactModal.setAppElement('#root');
-
-// Combines information about the contents of a project along with a prompt
-// from the user and any associated Replay data to accomplish a task. Together
-// this information is enough that the model should be able to generate a
-// suitable fix.
-//
-// Must be JSON serializable.
-interface ProjectPrompt {
-  content: string; // base64 encoded zip file
-}
-
-export interface BoltProblem {
-  version: number;
-  title: string;
-  description: string;
-  name: string;
-  email: string;
-  prompt: ProjectPrompt;
-}
 
 export function SaveProblem() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    name: '',
-    email: ''
+    name: ''
   });
   const [problemId, setProblemId] = useState<string | null>(null);
 
@@ -40,8 +21,7 @@ export function SaveProblem() {
     setFormData({
       title: '',
       description: '',
-      name: '',
-      email: '',
+      name: ''
     });
     setProblemId(null);
   };
@@ -67,30 +47,20 @@ export function SaveProblem() {
 
     await workbenchStore.saveAllFiles();
     const { contentBase64 } = await workbenchStore.generateZipBase64();
-    const prompt: ProjectPrompt = { content: contentBase64 };
 
-    const problem: BoltProblem = {
-      version: 1,
+    const username = getProblemsUsername();
+
+    const problem: BoltProblemInput = {
+      version: 2,
       title: formData.title,
       description: formData.description,
-      name: formData.name,
-      email: formData.email,
-      prompt,
+      username,
+      repositoryContents: contentBase64,
     };
 
-    try {
-      const rv = await sendCommandDedicatedClient({
-        method: "Recording.globalExperimentalCommand",
-        params: {
-          name: "submitBoltProblem",
-          params: { problem },
-        },
-      });
-      console.log("SubmitProblemRval", rv);
-      setProblemId((rv as any).rval.problemId);
-    } catch (error) {
-      console.error("Error submitting problem", error);
-      toast.error("Failed to submit problem");
+    const problemId = await submitProblem(problem);
+    if (problemId) {
+      setProblemId(problemId);
     }
   }
 
@@ -138,22 +108,6 @@ export function SaveProblem() {
                   name="description"
                   className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
                   value={formData.description}
-                  onChange={handleInputChange}
-                />
-
-                <div className="flex items-center">Name (optional):</div>
-                <input type="text"
-                  name="name"
-                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                />
-
-                <div className="flex items-center">Email (optional):</div>
-                <input type="text"
-                  name="email"
-                  className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-                  value={formData.email}
                   onChange={handleInputChange}
                 />
               </div>

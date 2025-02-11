@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import { createChatFromFolder, type FileArtifact } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
 import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import type { BoltProblem } from '~/components/sidebar/SaveProblem';
+import type { BoltProblem } from '~/lib/replay/Problems';
+import { getProblem } from '~/lib/replay/Problems';
 import JSZip from 'jszip';
 
 interface LoadProblemButtonProps {
@@ -13,31 +14,16 @@ interface LoadProblemButtonProps {
 }
 
 export async function loadProblem(problemId: string, importChat: (description: string, messages: Message[]) => Promise<void>) {
-  let problem: BoltProblem | null = null;
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
-      params: {
-        name: "fetchBoltProblem",
-        params: { problemId },
-      },
-    });
-    console.log("FetchProblemRval", rv);
-    problem = (rv as { rval: BoltProblem }).rval;
-  } catch (error) {
-    console.error("Error fetching problem", error);
-    toast.error("Failed to fetch problem");
-  }
+  const problem = await getProblem(problemId);
 
   if (!problem) {
     return;
   }
 
-  const problemContents = problem.prompt.content;
-  const problemTitle = problem.title;
+  const { repositoryContents, title: problemTitle } = problem;
 
   const zip = new JSZip();
-  await zip.loadAsync(problemContents, { base64: true });
+  await zip.loadAsync(repositoryContents, { base64: true });
 
   const fileArtifacts: FileArtifact[] = [];
   for (const [key, object] of Object.entries(zip.files)) {

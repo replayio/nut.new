@@ -3,24 +3,18 @@ import { Header } from '~/components/header/Header';
 import { Menu } from '~/components/sidebar/Menu.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import { cssTransition, toast, ToastContainer } from 'react-toastify';
+import { cssTransition, ToastContainer } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
-
-interface BoltProblemDescription {
-  problemId: string;
-  title: string;
-  description: string;
-  timestamp: number;
-}
+import { listAllProblems } from '~/lib/replay/Problems';
+import type { BoltProblemDescription } from '~/lib/replay/Problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
 
-function ToastContainerWrapper() {
+export function ToastContainerWrapper() {
   return <ToastContainer
     closeButton={({ closeToast }) => {
       return (
@@ -50,28 +44,11 @@ function ToastContainerWrapper() {
   />
 }
 
-async function fetchProblems(): Promise<BoltProblemDescription[]> {
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
-      params: {
-        name: "listBoltProblems",
-      },
-    });
-    console.log("ListProblemsRval", rv);
-    return (rv as any).rval.problems.reverse();
-  } catch (error) {
-    console.error("Error fetching problems", error);
-    toast.error("Failed to fetch problems");
-    return [];
-  }
-}
-
 function ProblemsPage() {
   const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
 
   useEffect(() => {
-    fetchProblems().then(setProblems);
+    listAllProblems().then(setProblems);
   }, []);
 
   return (

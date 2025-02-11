@@ -3,75 +3,151 @@ import { Header } from '~/components/header/Header';
 import { Menu } from '~/components/sidebar/Menu.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { ToastContainerWrapper } from './problems';
 import { sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import { useParams } from '@remix-run/react';
+import { getNutAdminKey, getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus } from '~/lib/replay/Problems';
+import type { BoltProblem, BoltProblemComment, BoltProblemInput } from '~/lib/replay/Problems';
 
-interface BoltProblemDescription {
-  problemId: string;
-  title: string;
-  description: string;
-  timestamp: number;
+function Status({ status }: { status: BoltProblemStatus }) {
+  return (
+    <div>
+      <h3>Status</h3>
+      <span className={`status status-${status}`}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </span>
+    </div>
+  );
 }
 
-const toastAnimation = cssTransition({
-  enter: 'animated fadeInRight',
-  exit: 'animated fadeOutRight',
-});
-
-function ToastContainerWrapper() {
-  return <ToastContainer
-    closeButton={({ closeToast }) => {
-      return (
-        <button className="Toastify__close-button" onClick={closeToast}>
-          <div className="i-ph:x text-lg" />
-        </button>
-      );
-    }}
-    icon={({ type }) => {
-      /**
-       * @todo Handle more types if we need them. This may require extra color palettes.
-       */
-      switch (type) {
-        case 'success': {
-          return <div className="i-ph:check-bold text-bolt-elements-icon-success text-2xl" />;
-        }
-        case 'error': {
-          return <div className="i-ph:warning-circle-bold text-bolt-elements-icon-error text-2xl" />;
-        }
-      }
-
-      return undefined;
-    }}
-    position="bottom-right"
-    pauseOnFocusLoss
-    transition={toastAnimation}
-  />
+function Keywords({ keywords }: { keywords: string[] }) {
+  return (
+    <div>
+      <h3>Keywords</h3>
+      <div className="keywords">
+        {keywords.map((keyword, index) => (
+          <span key={index} className="keyword">
+            {keyword}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-async function fetchProblems(): Promise<BoltProblemDescription[]> {
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
-      params: {
-        name: "listBoltProblems",
-      },
+function Comments({ comments }: { comments: BoltProblemComment[] }) {
+  return (
+    <div className="comments">
+      <h3>Comments</h3>
+      {comments.map((comment, index) => (
+        <div key={index} className="comment">
+          <div className="comment-header">
+            <span className="comment-author">{comment.username ?? ""}</span>
+            <span className="comment-date">
+              {new Date(comment.timestamp).toLocaleString()}
+            </span>
+          </div>
+          <div className="comment-text">{comment.content}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProblemViewer({ problem }: { problem: BoltProblem }) {
+  const { title, description, status = BoltProblemStatus.Pending, keywords = [], comments = [] } = problem;
+
+  return (
+    <div className="benchmark">
+      <h1>{title}</h1>
+      <p>{description}</p>
+      <a href={`/load-problem/${problem.problemId}`} className="load-button">
+        Load Problem
+      </a>
+      <Status status={status} />
+      <Keywords keywords={keywords} />
+      <Comments comments={comments} />
+    </div>
+  )
+}
+
+type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
+type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
+
+function CommentForm({ updateProblem }: { updateProblem: UpdateProblemCallback }) {
+  const [comment, setComment] = useState({
+    author: '',
+    text: ''
+  })
+
+  const handleAddComment = (content: string) => {
+    const newComment: BoltProblemComment = {
+      timestamp: Date.now(),
+      username: getProblemsUsername(),
+      content,
+    }
+    updateProblem(problem => {
+      const comments = [...(problem.comments || []), newComment];
+      return {
+        ...problem,
+        comments,
+      };
     });
-    console.log("ListProblemsRval", rv);
-    return (rv as any).rval.problems.reverse();
-  } catch (error) {
-    console.error("Error fetching problems", error);
-    toast.error("Failed to fetch problems");
-    return [];
   }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (comment.text.trim() && comment.author.trim()) {
+      handleAddComment(comment.text)
+      setComment({ author: '', text: '' })
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="comment-form">
+      <textarea
+        value={comment.text}
+        onChange={(e) => setComment({ ...comment, text: e.target.value })}
+        placeholder="Add a comment..."
+        rows={3}
+        required
+      />
+      <button 
+        type="submit" 
+        disabled={!comment.text.trim() || !comment.author.trim()}
+      >
+        Add Comment
+      </button>
+    </form>
+  )
 }
 
 function ViewProblemPage() {
-  const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
+  const params = useParams();
+  const problemId = params.id;
+  if (typeof problemId !== 'string') {
+    throw new Error('Problem ID is required');
+  }
+
+  const [problemData, setProblemData] = useState<BoltProblem | null>(null);
+
+  const hasAdminKey = !!getNutAdminKey();
+
+  const updateProblem = async (callback: DoUpdateCallback) => {
+    if (!problemData) {
+      toast.error('Problem data missing');
+      return;
+    }
+    const newProblem = callback(problemData);
+    setProblemData(newProblem);
+    await backendUpdateProblem(problemId, newProblem);
+  }
 
   useEffect(() => {
-    fetchProblems().then(setProblems);
+    getProblem(problemId).then(setProblemData);
   }, []);
 
   return (
@@ -82,30 +158,15 @@ function ViewProblemPage() {
         <ClientOnly>{() => <Menu />}</ClientOnly>
         
         <div className="p-6">
-          {problems === null ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            </div>
-          ) : problems.length === 0 ? (
-            <div className="text-center text-gray-600">No problems found</div>
-          ) : (
-            <div className="grid gap-4">
-              {problems.map((problem) => (
-                <a
-                  href={`/problem/${problem.problemId}`}
-                  key={problem.problemId}
-                  className="p-4 rounded-lg bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-colors cursor-pointer"
-                >
-                  <h2 className="text-xl font-semibold mb-2">{problem.title}</h2>
-                  <p className="text-gray-700 mb-2">{problem.description}</p>
-                  <p className="text-sm text-gray-600">
-                    Time: {new Date(problem.timestamp).toLocaleString()}
-                  </p>
-                </a>
-              ))}
-            </div>
-          )}
+          {problemData === null
+           ? (<div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              </div>)
+           : <ProblemViewer problem={problemData} />}
         </div>
+        {hasAdminKey && problemData && (
+          <CommentForm updateProblem={updateProblem} />
+        )}
         <ToastContainerWrapper />
       </div>
     </TooltipProvider>
