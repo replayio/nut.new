@@ -87,6 +87,10 @@ export function Keywords({ keywords }: { keywords: string[] | undefined }) {
   );
 }
 
+function getProblemStatus(problem: BoltProblemDescription): BoltProblemStatus {
+  return problem.status ?? BoltProblemStatus.Pending;
+}
+
 function ProblemsPage() {
   const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
   const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
@@ -96,8 +100,7 @@ function ProblemsPage() {
   }, []);
 
   const filteredProblems = problems?.filter(problem => {
-    const problemStatus = problem.status ?? BoltProblemStatus.Pending;
-    return statusFilter === 'all' || problemStatus === statusFilter;
+    return statusFilter === 'all' || getProblemStatus(problem) === statusFilter;
   });
 
   return (
@@ -108,20 +111,29 @@ function ProblemsPage() {
         <ClientOnly>{() => <Menu />}</ClientOnly>
 
         <div className="p-6">
-          <div className="mb-4">
+          {problems && <div className="mb-4">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as BoltProblemStatus | 'all')}
-              className="px-3 py-2 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-border text-bolt-content-primary"
+              className="appearance-none w-48 px-4 py-2.5 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-border text-bolt-content-primary hover:border-bolt-elements-border-hover focus:outline-none focus:ring-2 focus:ring-bolt-accent-primary/20 focus:border-bolt-accent-primary cursor-pointer relative pr-10"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 12px center',
+                backgroundSize: '16px'
+              }}
             >
-              <option value="all">All Problems</option>
-              {Object.values(BoltProblemStatus).map((status) => (
-                <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </option>
-              ))}
+              <option value="all">{`All Problems (${problems?.length ?? 0})`}</option>
+              {Object.values(BoltProblemStatus).map((status) => {
+                const count = problems?.filter(problem => getProblemStatus(problem) === status).length ?? 0;
+                return (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1) + ` (${count})`}
+                  </option>
+                );
+              })}
             </select>
-          </div>
+          </div>}
 
           {problems === null ? (
             <div className="flex items-center justify-center">
