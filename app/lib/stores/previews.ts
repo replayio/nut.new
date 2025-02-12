@@ -20,21 +20,22 @@ const PREVIEW_CHANNEL = 'preview-updates';
 export class PreviewsStore {
   #availablePreviews = new Map<number, PreviewInfo>();
   #webcontainer: Promise<WebContainer>;
-  #broadcastChannel: BroadcastChannel;
+  //#broadcastChannel: BroadcastChannel;
   #lastUpdate = new Map<string, number>();
   #watchedFiles = new Set<string>();
   #refreshTimeouts = new Map<string, NodeJS.Timeout>();
   #REFRESH_DELAY = 300;
-  #storageChannel: BroadcastChannel;
+  //#storageChannel: BroadcastChannel;
 
   previews = atom<PreviewInfo[]>([]);
 
   constructor(webcontainerPromise: Promise<WebContainer>) {
     this.#webcontainer = webcontainerPromise;
-    this.#broadcastChannel = new BroadcastChannel(PREVIEW_CHANNEL);
-    this.#storageChannel = new BroadcastChannel('storage-sync-channel');
+    //this.#broadcastChannel = new BroadcastChannel(PREVIEW_CHANNEL);
+    //this.#storageChannel = new BroadcastChannel('storage-sync-channel');
 
     // Listen for preview updates from other tabs
+    /*
     this.#broadcastChannel.onmessage = (event) => {
       const { type, previewId } = event.data;
 
@@ -57,6 +58,7 @@ export class PreviewsStore {
         this._syncStorage(storage);
       }
     };
+    */
 
     // Override localStorage setItem to catch all changes
     if (typeof window !== 'undefined') {
@@ -130,12 +132,14 @@ export class PreviewsStore {
         }
       }
 
+      /*
       this.#storageChannel.postMessage({
         type: 'storage-sync',
         storage,
         source: this._getTabId(),
         timestamp: Date.now(),
       });
+      */
     }
   }
 
@@ -227,11 +231,13 @@ export class PreviewsStore {
     const timestamp = Date.now();
     this.#lastUpdate.set(previewId, timestamp);
 
+    /*
     this.#broadcastChannel.postMessage({
       type: 'state-change',
       previewId,
       timestamp,
     });
+    */
   }
 
   // Broadcast file change to all tabs
@@ -239,11 +245,13 @@ export class PreviewsStore {
     const timestamp = Date.now();
     this.#lastUpdate.set(previewId, timestamp);
 
+    /*
     this.#broadcastChannel.postMessage({
       type: 'file-change',
       previewId,
       timestamp,
     });
+    */
   }
 
   // Broadcast update to all tabs
@@ -254,11 +262,13 @@ export class PreviewsStore {
       const timestamp = Date.now();
       this.#lastUpdate.set(previewId, timestamp);
 
+      /*
       this.#broadcastChannel.postMessage({
         type: 'file-change',
         previewId,
         timestamp,
       });
+      */
     }
   }
 
