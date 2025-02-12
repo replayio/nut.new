@@ -184,8 +184,8 @@ export const ChatImpl = memo(
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
-    const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [imageDataList, setImageDataList] = useState<string[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const [injectedMessages, setInjectedMessages] = useState<InjectedMessage[]>([]);
     const [simulationLoading, setSimulationLoading] = useState(false);
@@ -341,7 +341,7 @@ export const ChatImpl = memo(
       const _input = messageInput || input;
       const numAbortsAtStart = gNumAborts;
 
-      if (_input.length === 0 || isLoading) {
+      if (!messageContent?.trim()) {
         return;
       }
 
@@ -436,7 +436,6 @@ export const ChatImpl = memo(
       setInput('');
       Cookies.remove(PROMPT_COOKIE_KEY);
 
-      // Add file cleanup here
       setUploadedFiles([]);
       setImageDataList([]);
 
