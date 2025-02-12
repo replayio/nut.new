@@ -52,7 +52,6 @@ export function Status({ status }: { status: BoltProblemStatus | undefined }) {
   const statusColors: Record<BoltProblemStatus, string> = {
     [BoltProblemStatus.Pending]: 'bg-yellow-400',
     [BoltProblemStatus.Unsolved]: 'bg-orange-500',
-    [BoltProblemStatus.HasPrompt]: 'bg-blue-200',
     [BoltProblemStatus.Solved]: 'bg-blue-500'
   };
 
@@ -90,10 +89,16 @@ export function Keywords({ keywords }: { keywords: string[] | undefined }) {
 
 function ProblemsPage() {
   const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
+  const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
 
   useEffect(() => {
     listAllProblems().then(setProblems);
   }, []);
+
+  const filteredProblems = problems?.filter(problem => {
+    const problemStatus = problem.status ?? BoltProblemStatus.Pending;
+    return statusFilter === 'all' || problemStatus === statusFilter;
+  });
 
   return (
     <TooltipProvider>
@@ -101,8 +106,23 @@ function ProblemsPage() {
         <BackgroundRays />
         <Header />
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        
+
         <div className="p-6">
+          <div className="mb-4">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as BoltProblemStatus | 'all')}
+              className="px-3 py-2 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-border text-bolt-content-primary"
+            >
+              <option value="all">All Problems</option>
+              {Object.values(BoltProblemStatus).map((status) => (
+                <option key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {problems === null ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -111,7 +131,7 @@ function ProblemsPage() {
             <div className="text-center text-gray-600">No problems found</div>
           ) : (
             <div className="grid gap-4">
-              {problems.map((problem) => (
+              {filteredProblems?.map((problem) => (
                 <a
                   href={`/problem/${problem.problemId}`}
                   key={problem.problemId}

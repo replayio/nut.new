@@ -24,9 +24,6 @@ export enum BoltProblemStatus {
   // Problem has been reviewed and has not been solved yet.
   Unsolved = "Unsolved",
 
-  // There are one or more known prompts describing the recording which solve the problem.
-  HasPrompt = "HasPrompt",
-
   // Nut automatically produces a suitable explanation for solving the problem.
   Solved = "Solved",
 }
