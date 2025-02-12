@@ -21,7 +21,7 @@ import { debounce } from '~/utils/debounce';
 import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
-import { saveProjectContents } from './Messages.client';
+//import { saveProjectContents } from './Messages.client';
 import { getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData, simulationRepositoryUpdated } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '../workbench/Preview';
@@ -341,7 +341,7 @@ export const ChatImpl = memo(
       const _input = messageInput || input;
       const numAbortsAtStart = gNumAborts;
 
-      if (!messageContent?.trim()) {
+      if (!_input?.trim()) {
         return;
       }
 
@@ -445,9 +445,11 @@ export const ChatImpl = memo(
 
       // The project contents are associated with the last message present when
       // the user message is added.
+      /*
       const lastMessage = messages[messages.length - 1];
       const { contentBase64 } = await workbenchStore.generateZipBase64();
       saveProjectContents(lastMessage.id, { content: contentBase64 });
+      */
     };
 
     /**

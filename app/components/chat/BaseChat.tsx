@@ -95,7 +95,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     ref,
   ) => {
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
-    const [apiKeys, setApiKeys] = useState<Record<string, string>>(getApiKeysFromCookies());
     const [modelList, setModelList] = useState<ModelInfo[]>([]);
     const [isModelSettingsCollapsed, setIsModelSettingsCollapsed] = useState(false);
     const [isListening, setIsListening] = useState(false);
@@ -148,59 +147,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setRecognition(recognition);
       }
     }, []);
-
-    useEffect(() => {
-      if (typeof window !== 'undefined') {
-        let parsedApiKeys: Record<string, string> | undefined = {};
-
-        try {
-          parsedApiKeys = getApiKeysFromCookies();
-          setApiKeys(parsedApiKeys);
-        } catch (error) {
-          console.error('Error loading API keys from cookies:', error);
-          Cookies.remove('apiKeys');
-        }
-
-        setIsModelLoading('all');
-        fetch('/api/models')
-          .then((response) => response.json())
-          .then((data) => {
-            const typedData = data as { modelList: ModelInfo[] };
-            setModelList(typedData.modelList);
-          })
-          .catch((error) => {
-            console.error('Error fetching model list:', error);
-          })
-          .finally(() => {
-            setIsModelLoading(undefined);
-          });
-      }
-    }, [providerList, provider]);
-
-    const onApiKeysChange = async (providerName: string, apiKey: string) => {
-      const newApiKeys = { ...apiKeys, [providerName]: apiKey };
-      setApiKeys(newApiKeys);
-      Cookies.set('apiKeys', JSON.stringify(newApiKeys));
-
-      setIsModelLoading(providerName);
-
-      let providerModels: ModelInfo[] = [];
-
-      try {
-        const response = await fetch(`/api/models/${encodeURIComponent(providerName)}`);
-        const data = await response.json();
-        providerModels = (data as { modelList: ModelInfo[] }).modelList;
-      } catch (error) {
-        console.error('Error loading dynamic models for:', providerName, error);
-      }
-
-      // Only update models for the specific provider
-      setModelList((prevModels) => {
-        const otherModels = prevModels.filter((model) => model.provider !== providerName);
-        return [...otherModels, ...providerModels];
-      });
-      setIsModelLoading(undefined);
-    };
 
     const startListening = () => {
       if (recognition) {
