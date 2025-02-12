@@ -52,7 +52,7 @@ function Comments({ comments }: { comments: BoltProblemComment[] }) {
       {comments.map((comment, index) => (
         <div key={index} className="comment">
           <div className="comment-header">
-            <span className="comment-author">{comment.username ?? ""}</span>
+            <span className="comment-username">{comment.username ?? ""}</span>
             <span className="comment-date">
               {new Date(comment.timestamp).toLocaleString()}
             </span>
@@ -84,15 +84,48 @@ function ProblemViewer({ problem }: { problem: BoltProblem }) {
   )
 }
 
+interface UpdateProblemFormProps {
+  handleSubmit: (content: string) => void;
+  updateText: string;
+  placeholder: string;
+}
+
+function UpdateProblemForm(props: UpdateProblemFormProps) {
+  const { handleSubmit, updateText, placeholder } = props;
+
+  const [value, setValue] = useState("");
+
+  const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (value.trim()) {
+      handleSubmit(value)
+      setValue('')
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmitClicked} className="comment-form">
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        required
+      />
+      <button 
+        type="submit" 
+        disabled={!value.trim()}
+      >
+        {updateText}
+      </button>
+    </form>
+  )
+}
+
 type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
 type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
 
-function CommentForm({ updateProblem }: { updateProblem: UpdateProblemCallback }) {
-  const [comment, setComment] = useState({
-    author: '',
-    text: ''
-  })
-
+function UpdateProblemForms({ updateProblem }: { updateProblem: UpdateProblemCallback }) {
   const handleAddComment = (content: string) => {
     const newComment: BoltProblemComment = {
       timestamp: Date.now(),
@@ -108,30 +141,48 @@ function CommentForm({ updateProblem }: { updateProblem: UpdateProblemCallback }
     });
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (comment.text.trim() && comment.author.trim()) {
-      handleAddComment(comment.text)
-      setComment({ author: '', text: '' })
+  const handleSetTitle = (title: string) => {
+    updateProblem(problem => ({
+      ...problem,
+      title,
+    }));
+  }
+
+  const handleSetDescription = (description: string) => {
+    updateProblem(problem => ({
+      ...problem,
+      description,
+    }));
+  }
+
+  const handleSetStatus = (status: string) => {
+    const statusEnum = BoltProblemStatus[status as keyof typeof BoltProblemStatus];
+    if (!statusEnum) {
+      toast.error('Invalid status');
+      return;
     }
+    updateProblem(problem => ({
+      ...problem,
+      status: statusEnum,
+    }));
+  }
+
+  const handleSetKeywords = (keywordString: string) => {
+    const keywords = keywordString.split(' ').map(keyword => keyword.trim()).filter(keyword => keyword.length > 0);
+    updateProblem(problem => ({
+      ...problem,
+      keywords,
+    }));
   }
 
   return (
-    <form onSubmit={handleSubmit} className="comment-form">
-      <textarea
-        value={comment.text}
-        onChange={(e) => setComment({ ...comment, text: e.target.value })}
-        placeholder="Add a comment..."
-        rows={3}
-        required
-      />
-      <button 
-        type="submit" 
-        disabled={!comment.text.trim() || !comment.author.trim()}
-      >
-        Add Comment
-      </button>
-    </form>
+    <>
+      <UpdateProblemForm handleSubmit={handleAddComment} updateText="Add Comment" placeholder="Add a comment..." />
+      <UpdateProblemForm handleSubmit={handleSetTitle} updateText="Set Title" placeholder="Set the title of the problem..." />
+      <UpdateProblemForm handleSubmit={handleSetDescription} updateText="Set Description" placeholder="Set the description of the problem..." />
+      <UpdateProblemForm handleSubmit={handleSetStatus} updateText="Set Status" placeholder="Set the status of the problem..." />
+      <UpdateProblemForm handleSubmit={handleSetKeywords} updateText="Set Keywords" placeholder="Set the keywords of the problem..." />
+    </>
   )
 }
 
@@ -173,7 +224,7 @@ function ViewProblemPage() {
            : <ProblemViewer problem={problemData} />}
         </div>
         {hasNutAdminKey() && problemData && (
-          <CommentForm updateProblem={updateProblem} />
+          <UpdateProblemForms updateProblem={updateProblem} />
         )}
         <ToastContainerWrapper />
       </div>
