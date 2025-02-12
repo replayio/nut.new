@@ -50,6 +50,8 @@ export function GitUrlImport() {
     if (repoUrl) {
       const ig = ignore().add(IGNORE_PATTERNS);
 
+      throw new Error("NYI");
+      /*
       try {
         const { workdir, data } = await gitClone(repoUrl);
 
@@ -99,8 +101,7 @@ ${escapeBoltTags(file.content)}
             messages.push(commandsMessage);
           }
 
-          throw new Error("NYI");
-          //await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages, { gitUrl: repoUrl });
+          await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages, { gitUrl: repoUrl });
         }
       } catch (error) {
         console.error('Error during import:', error);
@@ -110,6 +111,7 @@ ${escapeBoltTags(file.content)}
 
         return;
       }
+      */
     }
   };
 
