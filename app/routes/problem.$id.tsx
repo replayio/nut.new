@@ -3,48 +3,13 @@ import { Header } from '~/components/header/Header';
 import { Menu } from '~/components/sidebar/Menu.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { ToastContainerWrapper } from './problems';
+import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from '@remix-run/react';
 import { getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus, hasNutAdminKey } from '~/lib/replay/Problems';
 import type { BoltProblem, BoltProblemComment, BoltProblemInput } from '~/lib/replay/Problems';
-
-function Status({ status }: { status: BoltProblemStatus }) {
-  const statusColors: Record<BoltProblemStatus, string> = {
-    [BoltProblemStatus.Pending]: 'bg-yellow-400',
-    [BoltProblemStatus.Unsolved]: 'bg-orange-500',
-    [BoltProblemStatus.HasPrompt]: 'bg-blue-200',
-    [BoltProblemStatus.Solved]: 'bg-blue-500'
-  };
-
-  return (
-    <div className="flex items-center gap-2 my-2">
-      <span className="font-semibold">Status:</span>
-      <div className={`inline-flex items-center px-3 py-1 rounded-full bg-opacity-10 ${statusColors[status]} text-${status}`}>
-        <span className={`w-2 h-2 rounded-full mr-2 ${statusColors[status]}`}></span>
-        <span className="font-medium">
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Keywords({ keywords }: { keywords: string[] }) {
-  return (
-    <div>
-      <div className="keywords">
-        {keywords.map((keyword, index) => (
-          <span key={index} className="keyword">
-            {keyword}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
   return (
@@ -92,7 +57,6 @@ interface UpdateProblemFormProps {
 
 function UpdateProblemForm(props: UpdateProblemFormProps) {
   const { handleSubmit, updateText, placeholder } = props;
-
   const [value, setValue] = useState("");
 
   const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
@@ -104,17 +68,19 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmitClicked} className="comment-form">
+    <form onSubmit={onSubmitClicked} className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        rows={3}
+        rows={4}
+        className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px]"
         required
       />
       <button 
         type="submit" 
         disabled={!value.trim()}
+        className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
       >
         {updateText}
       </button>
