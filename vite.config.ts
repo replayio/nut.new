@@ -30,6 +30,7 @@ export default defineConfig((config) => {
     },
     build: {
       target: 'esnext',
+      sourcemap: true,
     },
     plugins: [
       nodePolyfills({
