@@ -5,7 +5,7 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from '@remix-run/react';
 import { getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus, hasNutAdminKey } from '~/lib/replay/Problems';
@@ -161,19 +161,20 @@ function ViewProblemPage() {
 
   const [problemData, setProblemData] = useState<BoltProblem | null>(null);
 
-  const updateProblem = async (callback: DoUpdateCallback) => {
+  const updateProblem = useCallback(async (callback: DoUpdateCallback) => {
     if (!problemData) {
       toast.error('Problem data missing');
       return;
     }
     const newProblem = callback(problemData);
     setProblemData(newProblem);
+    console.log("BackendUpdateProblem", problemId, newProblem);
     await backendUpdateProblem(problemId, newProblem);
-  }
+  }, [problemData]);
 
   useEffect(() => {
     getProblem(problemId).then(setProblemData);
-  }, []);
+  }, [problemId]);
 
   return (
     <TooltipProvider>
