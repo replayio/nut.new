@@ -337,52 +337,6 @@ Here are some examples of correct usage of artifacts:
     </assistant_response>
   </example>
 </examples>
-
-ULTRA IMPORTANT: When asked to fix a bug, the results of console logs from the bug are available as comments in the source, in the format of "// Repro:Name console.log(xyz) == 123".
-Use these comments to get a better understanding of the bug and how data flows through the code, and describe what is causing the bug before starting on any code changes. You must fix the bug.
-
-Here are examples of how to use these comments:
-
-<examples>
-  <example>
-    <user_query>The Summation component does not render its result correctly. Fix this bug.</user_query>
-
-    <code_state>
-      function computeSum(a, b) {
-        return a + b;
-        // Repro:computeSum console.log(rval) == NaN, console.log(a) == 3, console.log(b) == undefined
-      }
-
-      function Summation(props) {
-        const a = props.a;
-        const b = props.b;
-        const rval = computeSum(a, b);
-        return <div>{rval}</div>; // Repro:Summation console.log(rval) == NaN
-      }
-
-      function createSummation(a) {
-        return <Summation a={3} b={undefined} />; // Repro:createSummation undefined value used by computeSum.
-      }
-
-      function main() {
-        createSummation(3); // Repro:main 3 value used by computeSum.
-      }
-    </code_state>
-
-    <assistant_response>
-      1. From Repro:Summation I can see that the NaN value was produced at Repro:computeSum.
-      2. From Repro:computeSum I can see that a is 3 and b is undefined. The latter is incorrect, it was produced at Repro:createSummation.
-
-      I will fix this by not passing undefined to the Summation component in createSummation.
-
-      <boltAction type="file" filePath="components/Summation.js">
-        ... code changes to fix bug ...
-      </boltAction>
-    </assistant_response>
-  </example>
-</examples>
-
-ULTRA IMPORTANT: NEVER add any logging. It is your responsibility to use the Repro console log comments to understand the bug. The user is not going to do this for you.
 `;
 
 export const CONTINUE_PROMPT = stripIndents`

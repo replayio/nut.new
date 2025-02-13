@@ -19,15 +19,27 @@ function convertContentToAnthropic(content: any): ContentBlockParam[] {
   return [];
 }
 
+function flatMessageContent(content: string | ContentBlockParam[]): string {
+  if (typeof content === "string") {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    let result = "";
+    for (const elem of content) {
+      if (elem.type === "text") {
+        result += elem.text;
+      }
+    }
+    return result;
+  }
+  console.log("AnthropicUnknownContent", JSON.stringify(content, null, 2));
+  return "AnthropicUnknownContent";
+}
+
 export async function chatAnthropic(chatController: ChatStreamController, apiKey: string, systemPrompt: string, messages: CoreMessage[]) {
   const anthropic = new Anthropic({ apiKey });
 
   const messageParams: MessageParam[] = [];
-
-  messageParams.push({
-    role: "assistant",
-    content: systemPrompt,
-  });
 
   for (const message of messages) {
     const role = message.role == "user" ? "user" : "assistant";
@@ -38,16 +50,29 @@ export async function chatAnthropic(chatController: ChatStreamController, apiKey
     });
   }
 
-  console.log("AnthropicMessages", JSON.stringify(messageParams, null, 2));
+  console.log("************************************************");
+  console.log("AnthropicMessageSend");
+  console.log("Message system:");
+  console.log(systemPrompt);
+  for (const message of messageParams) {
+    console.log(`Message ${message.role}:`);
+    console.log(flatMessageContent(message.content));
+  }
+  console.log("************************************************");
 
   const response = await anthropic.messages.create({
     model: "claude-3-5-sonnet-20241022",
     messages: messageParams,
     max_tokens: MaxMessageTokens,
+    system: systemPrompt,
   });
 
   for (const content of response.content) {
     if (content.type === "text") {
+      console.log("************************************************");
+      console.log("AnthropicMessageResponse:");
+      console.log(content.text);
+      console.log("************************************************");
       chatController.writeText(content.text);
     } else {
       console.log("AnthropicUnknownResponse", JSON.stringify(content, null, 2));
