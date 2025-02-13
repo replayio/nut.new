@@ -39,13 +39,15 @@ function flatMessageContent(content: string | ContentBlockParam[]): string {
   return "AnthropicUnknownContent";
 }
 
-interface AnthropicResponse {
+export interface AnthropicCall {
+  systemPrompt: string;
+  messages: MessageParam[];
   responseText: string;
   completionTokens: number;
   promptTokens: number;
 }
 
-async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicResponse> {
+async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
   const anthropic = new Anthropic({ apiKey });
 
   console.log("************************************************");
@@ -84,6 +86,8 @@ async function callAnthropic(apiKey: string, systemPrompt: string, messages: Mes
   console.log("************************************************");
 
   return {
+    systemPrompt,
+    messages,
     responseText,
     completionTokens,
     promptTokens,
@@ -105,7 +109,12 @@ function shouldRestorePartialFile(existingContent: string, newContent: string): 
   return existingContent.length > newContent.length;
 }
 
-async function restorePartialFile(existingContent: string, newContent: string, apiKey: string, originalResponse: AnthropicResponse) {
+async function restorePartialFile(
+  existingContent: string,
+  newContent: string,
+  apiKey: string,
+  mainResponseText: string
+) {
   const systemPrompt = `
 You are a helpful assistant that restores the content of a file to reflect partial updates made by another assistant.
 
@@ -142,32 +151,32 @@ ${newContent}
     },
   ];
 
-  const newResponse = await callAnthropic(apiKey, systemPrompt, messages);
-  originalResponse.completionTokens += newResponse.completionTokens;
-  originalResponse.promptTokens += newResponse.promptTokens;
+  const restoreCall = await callAnthropic(apiKey, systemPrompt, messages);
 
   const OpenTag = "<restoredContent>";
   const CloseTag = "</restoredContent>";
-  const openTag = newResponse.responseText.indexOf(OpenTag);
-  const closeTag = newResponse.responseText.indexOf(CloseTag);
+  const openTag = restoreCall.responseText.indexOf(OpenTag);
+  const closeTag = restoreCall.responseText.indexOf(CloseTag);
 
   if (openTag === -1 || closeTag === -1) {
-    console.log("Invalid restored content");
-    return;
+    console.error("Invalid restored content");
+    return { restoreCall, newResponseText: mainResponseText };
   }
 
-  const restoredContent = newResponse.responseText.substring(openTag + OpenTag.length, closeTag);
-  const newContentIndex = originalResponse.responseText.indexOf(newContent);
+  const restoredContent = restoreCall.responseText.substring(openTag + OpenTag.length, closeTag);
+  const newContentIndex = mainResponseText.indexOf(newContent);
 
   if (newContentIndex === -1) {
-    console.log("New content not found in response");
-    return;
+    console.error("New content not found in response");
+    return { restoreCall, newResponseText: mainResponseText };
   }
 
-  originalResponse.responseText =
-    originalResponse.responseText.substring(0, newContentIndex) +
+  const newResponseText =
+    mainResponseText.substring(0, newContentIndex) +
     restoredContent +
-    originalResponse.responseText.substring(newContentIndex + newContent.length);
+    mainResponseText.substring(newContentIndex + newContent.length);
+
+  return { restoreCall, newResponseText };
 }
 
 interface FileContents {
@@ -175,7 +184,7 @@ interface FileContents {
   content: string;
 }
 
-async function restorePartialFiles(files: FileMap, apiKey: string, response: AnthropicResponse) {
+async function restorePartialFiles(files: FileMap, apiKey: string, responseText: string) {
   const fileContents: FileContents[] = [];
 
   const messageParser = new StreamingMessageParser({
@@ -192,16 +201,21 @@ async function restorePartialFiles(files: FileMap, apiKey: string, response: Ant
     }
   });
 
-  messageParser.parse("restore-partial-files-message-id", response.responseText);
+  messageParser.parse("restore-partial-files-message-id", responseText);
 
+  const restoreCalls: AnthropicCall[] = [];
   for (const file of fileContents) {
     const existingContent = getFileContents(files, file.filePath);
     const newContent = file.content;
 
     if (shouldRestorePartialFile(existingContent, newContent)) {
-      await restorePartialFile(existingContent, newContent, apiKey, response);
+      const { restoreCall, newResponseText } = await restorePartialFile(existingContent, newContent, apiKey, responseText);
+      restoreCalls.push(restoreCall);
+      responseText = newResponseText;
     }
   }
+
+  return { responseText, restoreCalls };
 }
 
 export async function chatAnthropic(chatController: ChatStreamController, files: FileMap, apiKey: string, systemPrompt: string, messages: CoreMessage[]) {
@@ -216,12 +230,20 @@ export async function chatAnthropic(chatController: ChatStreamController, files:
     });
   }
 
-  const response = await callAnthropic(apiKey, systemPrompt, messageParams);
+  const mainCall = await callAnthropic(apiKey, systemPrompt, messageParams);
 
-  await restorePartialFiles(files, apiKey, response);
-
-  const { completionTokens, promptTokens, responseText } = response;
+  const { responseText, restoreCalls } = await restorePartialFiles(files, apiKey, mainCall.responseText);
 
   chatController.writeText(responseText);
-  chatController.writeUsage({ completionTokens, promptTokens });
+
+  const callInfos = [mainCall, ...restoreCalls];
+
+  let completionTokens = 0;
+  let promptTokens = 0;
+  for (const callInfo of callInfos) {
+    completionTokens += callInfo.completionTokens;
+    promptTokens += callInfo.promptTokens;
+  }
+
+  chatController.writeUsage({ callInfos, completionTokens, promptTokens });
 }
