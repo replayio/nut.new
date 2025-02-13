@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
-import { createChatFromFolder, type FileArtifact } from '~/utils/folderImport';
+import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
-import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from '~/lib/replay/Problems';
-import { getProblem } from '~/lib/replay/Problems';
-import JSZip from 'jszip';
+import { getProblem, extractFileArtifactsFromRepositoryContents } from '~/lib/replay/Problems';
 
 interface LoadProblemButtonProps {
   className?: string;
@@ -40,17 +39,7 @@ export async function loadProblem(problemId: string, importChat: (description: s
 
   const { repositoryContents, title: problemTitle } = problem;
 
-  const zip = new JSZip();
-  await zip.loadAsync(repositoryContents, { base64: true });
-
-  const fileArtifacts: FileArtifact[] = [];
-  for (const [key, object] of Object.entries(zip.files)) {
-    if (object.dir) continue;
-    fileArtifacts.push({
-      content: await object.async('text'),
-      path: key,
-    });
-  }
+  const fileArtifacts = await extractFileArtifactsFromRepositoryContents(repositoryContents);
 
   try {
     const messages = await createChatFromFolder(fileArtifacts, [], "problem");

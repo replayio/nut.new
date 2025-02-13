@@ -152,7 +152,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   }
 
   async function getSimulationData(): Promise<SimulationData> {
-    console.log("GetSimulationData", simulationData.length, numSimulationPacketsSent);
+    //console.log("GetSimulationData", simulationData.length, numSimulationPacketsSent);
     const data = simulationData.slice(numSimulationPacketsSent);
     numSimulationPacketsSent = simulationData.length;
     return data;

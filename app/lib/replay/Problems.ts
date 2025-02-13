@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { sendCommandDedicatedClient } from "./ReplayProtocolClient";
 import type { ProtocolMessage } from "./SimulationPrompt";
 import Cookies from 'js-cookie';
+import JSZip from 'jszip';
+import type { FileArtifact } from "~/utils/folderImport";
 
 export interface BoltProblemComment {
   username?: string;
@@ -148,4 +150,19 @@ export function getProblemsUsername(): string | undefined {
 
 export function setProblemsUsername(username: string) {
   Cookies.set(nutProblemsUsernameCookieName, username);
+}
+
+export async function extractFileArtifactsFromRepositoryContents(repositoryContents: string): Promise<FileArtifact[]> {
+  const zip = new JSZip();
+  await zip.loadAsync(repositoryContents, { base64: true });
+
+  const fileArtifacts: FileArtifact[] = [];
+  for (const [key, object] of Object.entries(zip.files)) {
+    if (object.dir) continue;
+    fileArtifacts.push({
+      content: await object.async('text'),
+      path: key,
+    });
+  }
+  return fileArtifacts;
 }

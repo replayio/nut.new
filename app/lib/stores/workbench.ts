@@ -19,6 +19,7 @@ import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
 import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
+import { extractFileArtifactsFromRepositoryContents } from '../replay/Problems';
 
 export interface ArtifactState {
   id: string;
@@ -326,10 +327,12 @@ export class WorkbenchStore {
       unreachable('Artifact not found');
     }
 
-    const action = artifact.runner.actions.get()[data.actionId];
+    if (data.actionId != 'restore-contents-action-id') {
+      const action = artifact.runner.actions.get()[data.actionId];
 
-    if (!action || action.executed) {
-      return;
+      if (!action || action.executed) {
+        return;
+      }
     }
 
     if (data.action.type === 'file') {
@@ -419,6 +422,56 @@ export class WorkbenchStore {
     const buf = await content.arrayBuffer();
     const contentBase64 = uint8ArrayToBase64(new Uint8Array(buf));
     return { contentBase64, uniqueProjectName };
+  }
+
+  async restoreProjectContentsBase64(messageId: string, contentBase64: string) {
+    const fileArtifacts = await extractFileArtifactsFromRepositoryContents(contentBase64);
+
+    const modifiedFilePaths = new Set<string>();
+
+    // Check if any files we know about have different contents in the artifacts.
+    const files = this.files.get();
+    const fileRelativePaths = new Set<string>();
+    for (const [filePath, dirent] of Object.entries(files)) {
+      if (dirent?.type === 'file' && !dirent.isBinary) {
+        const relativePath = extractRelativePath(filePath);
+        fileRelativePaths.add(relativePath);
+
+        const content = dirent.content;
+
+        const artifact = fileArtifacts.find((artifact) => artifact.path === relativePath);
+        const artifactContent = artifact?.content ?? "";
+
+        if (content != artifactContent) {
+          modifiedFilePaths.add(relativePath);
+        }
+      }
+    }
+
+    // Also create any new files in the artifacts.
+    for (const artifact of fileArtifacts) {
+      if (!fileRelativePaths.has(artifact.path)) {
+        modifiedFilePaths.add(artifact.path);
+      }
+    }
+
+    for (const filePath of modifiedFilePaths) {
+      console.log("RestoreModifiedFile", filePath);
+
+      const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
+      const artifactContent = artifact?.content ?? "";
+
+      this.runAction({
+        actionId: 'restore-contents-action-id',
+        artifactId: 'restore-contents-artifact-id',
+        messageId,
+        action: {
+          type: 'file',
+          filePath: filePath,
+          content: artifactContent,
+        },
+      });
+    }
   }
 
   async syncFiles(targetHandle: FileSystemDirectoryHandle) {

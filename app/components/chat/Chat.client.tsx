@@ -49,7 +49,7 @@ export function resetChatFileWritten() {
 }
 
 async function flushSimulationData() {
-  console.log("FlushSimulationData");
+  //console.log("FlushSimulationData");
 
   const iframe = getCurrentIFrame();
   if (!iframe) {
@@ -60,7 +60,7 @@ async function flushSimulationData() {
     return;
   }
 
-  console.log("HaveSimulationData", simulationData.length);
+  //console.log("HaveSimulationData", simulationData.length);
 
   // Add the simulation data to the chat.
   await simulationAddData(simulationData);
@@ -428,8 +428,15 @@ export const ChatImpl = memo(
       saveProjectContents(lastMessage.id, { content: contentBase64 });
     };
 
-    const onRewind = (messageId: string, contents: string) => {
+    const onRewind = async (messageId: string, contents: string) => {
       console.log("Rewinding", messageId, contents);
+
+      await workbenchStore.restoreProjectContentsBase64(messageId, contents);
+
+      const messageIndex = messages.findIndex((message) => message.id === messageId);
+      if (messageIndex > 0) {
+        setMessages(messages.slice(0, messageIndex));
+      }
     };
 
     /**

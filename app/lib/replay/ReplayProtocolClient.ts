@@ -35,7 +35,7 @@ export function stringToBase64(inputString: string) {
 }
 
 function logDebug(msg: string, tags: Record<string, any> = {}) {
-  console.log(msg, JSON.stringify(tags));
+  //console.log(msg, JSON.stringify(tags));
 }
 
 class ProtocolError extends Error {
