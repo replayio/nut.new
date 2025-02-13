@@ -1,7 +1,7 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
-import { getStreamTextArguments, type Messages } from '~/lib/.server/llm/stream-text';
+import { getStreamTextArguments, type FileMap, type Messages } from '~/lib/.server/llm/stream-text';
 import { chatAnthropic } from '~/lib/.server/llm/chat-anthropic';
 
 export async function action(args: ActionFunctionArgs) {
@@ -17,7 +17,7 @@ Focus specifically on fixing this bug. Do not guess about other problems.
 async function chatAction({ context, request }: ActionFunctionArgs) {
   const { messages, files, promptId, simulationEnhancedPrompt, anthropicApiKey: clientAnthropicApiKey } = await request.json<{
     messages: Messages;
-    files: any;
+    files: FileMap;
     promptId?: string;
     simulationEnhancedPrompt?: string;
     anthropicApiKey?: string;
@@ -57,7 +57,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         }
 
         try {
-          await chatAnthropic(chatController, anthropicApiKey, system, coreMessages);
+          await chatAnthropic(chatController, files, anthropicApiKey, system, coreMessages);
         } catch (e) {
           console.error(e);
           chatController.writeText(`Error chatting with Anthropic: ${e}`);

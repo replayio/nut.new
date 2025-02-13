@@ -2,6 +2,8 @@ import type { CoreMessage } from "ai";
 import Anthropic from "@anthropic-ai/sdk";
 import { ChatStreamController } from "~/utils/chatStreamController";
 import type { ContentBlockParam, MessageParam } from "@anthropic-ai/sdk/resources/messages/messages.mjs";
+import type { FileMap } from "./stream-text";
+import { StreamingMessageParser } from "~/lib/runtime/message-parser";
 
 const MaxMessageTokens = 8192;
 
@@ -36,9 +38,89 @@ function flatMessageContent(content: string | ContentBlockParam[]): string {
   return "AnthropicUnknownContent";
 }
 
-export async function chatAnthropic(chatController: ChatStreamController, apiKey: string, systemPrompt: string, messages: CoreMessage[]) {
+interface AnthropicResponse {
+  responseText: string;
+  completionTokens: number;
+  promptTokens: number;
+}
+
+async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicResponse> {
   const anthropic = new Anthropic({ apiKey });
 
+  console.log("************************************************");
+  console.log("AnthropicMessageSend");
+  console.log("Message system:");
+  console.log(systemPrompt);
+  for (const message of messages) {
+    console.log(`Message ${message.role}:`);
+    console.log(flatMessageContent(message.content));
+  }
+  console.log("************************************************");
+
+  const response = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    messages,
+    max_tokens: MaxMessageTokens,
+    system: systemPrompt,
+  });
+
+  let responseText = "";
+  for (const content of response.content) {
+    if (content.type === "text") {
+      console.log("************************************************");
+      console.log("AnthropicMessageResponse:");
+      console.log(content.text);
+      console.log("************************************************");
+      responseText += content.text;
+    } else {
+      console.log("AnthropicUnknownResponse", JSON.stringify(content, null, 2));
+    }
+  }
+
+  const completionTokens = response.usage.output_tokens;
+  const promptTokens = response.usage.input_tokens;
+
+  console.log("AnthropicTokens", completionTokens + promptTokens);
+
+  return {
+    responseText,
+    completionTokens,
+    promptTokens,
+  };
+}
+
+interface FileContents {
+  filePath: string;
+  content: string;
+}
+
+async function restorePartialFiles(files: FileMap, response: AnthropicResponse) {
+  const fileContents: FileContents[] = [];
+
+  const messageParser = new StreamingMessageParser({
+    callbacks: {
+      onActionClose: (data) => {
+        if (data.action.type === "file") {
+          const { filePath, content } = data.action;
+          fileContents.push({
+            filePath,
+            content,
+          });
+        }
+      },
+    }
+  });
+
+  messageParser.parse("restore-partial-files-message-id", response.responseText);
+
+  for (const file of fileContents) {
+    console.log("FoundFile", file.filePath);
+    console.log(file.content);
+    console.log("EndContent");
+  }
+}
+
+export async function chatAnthropic(chatController: ChatStreamController, files: FileMap, apiKey: string, systemPrompt: string, messages: CoreMessage[]) {
   const messageParams: MessageParam[] = [];
 
   for (const message of messages) {
@@ -50,37 +132,12 @@ export async function chatAnthropic(chatController: ChatStreamController, apiKey
     });
   }
 
-  console.log("************************************************");
-  console.log("AnthropicMessageSend");
-  console.log("Message system:");
-  console.log(systemPrompt);
-  for (const message of messageParams) {
-    console.log(`Message ${message.role}:`);
-    console.log(flatMessageContent(message.content));
-  }
-  console.log("************************************************");
+  const response = await callAnthropic(apiKey, systemPrompt, messageParams);
 
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    messages: messageParams,
-    max_tokens: MaxMessageTokens,
-    system: systemPrompt,
-  });
+  await restorePartialFiles(files, response);
 
-  for (const content of response.content) {
-    if (content.type === "text") {
-      console.log("************************************************");
-      console.log("AnthropicMessageResponse:");
-      console.log(content.text);
-      console.log("************************************************");
-      chatController.writeText(content.text);
-    } else {
-      console.log("AnthropicUnknownResponse", JSON.stringify(content, null, 2));
-    }
-  }
+  const { completionTokens, promptTokens, responseText } = response;
 
-  const tokens = response.usage.input_tokens + response.usage.output_tokens;
-  console.log("AnthropicTokens", tokens);
-
-  chatController.writeUsage({ completionTokens: response.usage.output_tokens, promptTokens: response.usage.input_tokens });
+  chatController.writeText(responseText);
+  chatController.writeUsage({ completionTokens, promptTokens });
 }
