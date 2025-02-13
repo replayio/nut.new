@@ -109,6 +109,19 @@ async function restorePartialFile(existingContent: string, newContent: string, a
   const systemPrompt = `
 You are a helpful assistant that restores the content of a file to reflect partial updates made by another assistant.
 
+You will be given the existing content for a file and the new content that may contain partial updates.
+Your task is to return complete restored content which both reflects the changes made in the new content
+and includes any code that was removed from the original file.
+
+Describe any places in the new content where code may have been removed.
+ULTRA IMPORTANT: The restored content should be returned in the following format:
+
+<restoredContent>
+Restored content goes here
+</restoredContent>
+  `;
+
+  const userPrompt = `
 The existing content for the file is:
 
 <existingContent>
@@ -120,20 +133,16 @@ The new content that may contain partial updates is:
 <newContent>
 ${newContent}
 </newContent>
+  `;
 
-Your task is to return complete restored content which both reflects the changes made in the new content
-and includes any code that was removed from the original file.
+  const messages: MessageParam[] = [
+    {
+      role: "user",
+      content: userPrompt,
+    },
+  ];
 
-Describe any places in the new content where code may have been removed.
-ULTRA IMPORTANT: The restored content should be returned in the following format:
-
-<restoredContent>
-Restored content goes here
-</restoredContent>
-`;
-
-  const newResponse = await callAnthropic(apiKey, systemPrompt, []);
-
+  const newResponse = await callAnthropic(apiKey, systemPrompt, messages);
   originalResponse.completionTokens += newResponse.completionTokens;
   originalResponse.promptTokens += newResponse.promptTokens;
 
