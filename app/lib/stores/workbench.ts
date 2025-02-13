@@ -455,22 +455,28 @@ export class WorkbenchStore {
       }
     }
 
+    const actionArtifactId = `restore-contents-artifact-id-${messageId}`;
+
     for (const filePath of modifiedFilePaths) {
       console.log("RestoreModifiedFile", filePath);
 
       const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
       const artifactContent = artifact?.content ?? "";
 
-      this.runAction({
-        actionId: 'restore-contents-action-id',
-        artifactId: 'restore-contents-artifact-id',
+      const actionId = `restore-contents-action-${messageId}-${filePath}`;
+      const data: ActionCallbackData = {
+        actionId,
         messageId,
+        artifactId: actionArtifactId,
         action: {
           type: 'file',
           filePath: filePath,
           content: artifactContent,
         },
-      });
+      };
+
+      this.addAction(data);
+      this.runAction(data);
     }
   }
 

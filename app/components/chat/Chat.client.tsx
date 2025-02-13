@@ -434,8 +434,8 @@ export const ChatImpl = memo(
       await workbenchStore.restoreProjectContentsBase64(messageId, contents);
 
       const messageIndex = messages.findIndex((message) => message.id === messageId);
-      if (messageIndex > 0) {
-        setMessages(messages.slice(0, messageIndex));
+      if (messageIndex >= 0) {
+        setMessages(messages.slice(0, messageIndex + 1));
       }
     };
 
