@@ -312,6 +312,25 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     { capture: true, passive: true },
   );
 
+  window.addEventListener(
+    'scroll',
+    (event) => {
+      const target = event.target == window.document ? undefined : (event.target as Element);
+      const selector = target ? computeSelector(target) : undefined;
+
+      addInteraction({
+        kind: 'scroll',
+        time: Date.now() - startTime,
+        selector,
+        windowScrollX: window.scrollX,
+        windowScrollY: window.scrollY,
+        targetScrollX: target?.scrollLeft,
+        targetScrollY: target?.scrollTop,
+      });
+    },
+    { capture: true, passive: true },
+  );
+
   function onInterceptedOperation(name: string) {
     console.log(`InterceptedOperation ${name}`);
   }

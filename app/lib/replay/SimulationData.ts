@@ -47,7 +47,7 @@ interface SimulationPacketResource {
   resource: NetworkResource;
 }
 
-export type UserInteractionKind = 'click' | 'pointermove' | 'keydown';
+export type UserInteractionKind = 'click' | 'pointermove' | 'keydown' | 'scroll';
 
 export interface UserInteraction {
   kind: UserInteractionKind;
@@ -55,8 +55,8 @@ export interface UserInteraction {
   // Elapsed time when the interaction occurred.
   time: number;
 
-  // Selector of the element associated with the interaction.
-  selector: string;
+  // Selector of the element associated with the interaction, if any.
+  selector?: string;
 
   // For mouse interactions, dimensions and position within the
   // element where the event occurred.
@@ -69,6 +69,12 @@ export interface UserInteraction {
 
   // For keydown interactions, the key pressed.
   key?: string;
+
+  // For scroll interactions, the scroll position of the window and the targeted element.
+  windowScrollX?: number;
+  windowScrollY?: number;
+  targetScrollX?: number;
+  targetScrollY?: number;
 }
 
 interface SimulationPacketInteraction {
