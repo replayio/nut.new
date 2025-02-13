@@ -150,24 +150,6 @@ interface ChatProps {
 
 let gNumAborts = 0;
 
-interface InjectedMessage {
-  message: Message;
-  previousId: string;
-}
-
-function handleInjectMessages(baseMessages: Message[], injectedMessages: InjectedMessage[]) {
-  const messages = [];
-  for (const message of baseMessages) {
-    messages.push(message);
-    for (const injectedMessage of injectedMessages) {
-      if (injectedMessage.previousId === message.id) {
-        messages.push(injectedMessage.message);
-      }
-    }
-  }
-  return messages;
-}
-
 function filterFiles(files: FileMap): FileMap {
   const rv: FileMap = {};
   for (const [path, file] of Object.entries(files)) {
@@ -187,7 +169,6 @@ export const ChatImpl = memo(
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
-    const [injectedMessages, setInjectedMessages] = useState<InjectedMessage[]>([]);
     const [simulationLoading, setSimulationLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const { promptId } = useSettings();
@@ -196,7 +177,7 @@ export const ChatImpl = memo(
 
     const [animationScope, animate] = useAnimate();
 
-    const { messages: baseMessages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
+    const { messages, isLoading, input, handleInputChange, setInput, stop, append, setMessages } = useChat({
       api: '/api/chat',
       body: {
         files: filterFiles(files),
@@ -212,10 +193,6 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
-
-    const messages = useMemo(() => {
-      return handleInjectMessages(baseMessages, injectedMessages);
-    }, [baseMessages, injectedMessages]);
 
     useEffect(() => {
       const prompt = searchParams.get('prompt');
@@ -384,7 +361,7 @@ export const ChatImpl = memo(
           }
 
           console.log("RecordingMessage", recordingMessage);
-          setInjectedMessages([...injectedMessages, { message: recordingMessage, previousId: messages[messages.length - 1].id }]);
+          setMessages([...messages, recordingMessage]);
 
           if (recordingId) {
             const info = await enhancedPromptPromise;
@@ -396,7 +373,7 @@ export const ChatImpl = memo(
             simulationEnhancedPrompt = info.enhancedPrompt;
 
             console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
-            setInjectedMessages([...injectedMessages, { message: info.enhancedPromptMessage, previousId: messages[messages.length - 1].id }]);
+            setMessages([...messages, info.enhancedPromptMessage]);
           }
         } finally {
           gLockSimulationData = false;
@@ -449,6 +426,10 @@ export const ChatImpl = memo(
       const lastMessage = messages[messages.length - 1];
       const { contentBase64 } = await workbenchStore.generateZipBase64();
       saveProjectContents(lastMessage.id, { content: contentBase64 });
+    };
+
+    const onRewind = (messageId: string, contents: string) => {
+      console.log("Rewinding", messageId, contents);
     };
 
     /**
@@ -517,6 +498,7 @@ export const ChatImpl = memo(
         setUploadedFiles={setUploadedFiles}
         imageDataList={imageDataList}
         setImageDataList={setImageDataList}
+        onRewind={onRewind}
       />
     );
   },

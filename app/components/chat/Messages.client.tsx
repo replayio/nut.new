@@ -15,6 +15,7 @@ interface MessagesProps {
   className?: string;
   isStreaming?: boolean;
   messages?: Message[];
+  onRewind?: (messageId: string, contents: string) => void;
 }
 
 interface ProjectContents {
@@ -27,11 +28,8 @@ export function saveProjectContents(messageId: string, contents: ProjectContents
   gProjectContentsByMessageId.set(messageId, contents);
 }
 
-// The rewind button is not fully implemented yet.
-const EnableRewindButton = false;
-
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [] } = props;
+  const { id, isStreaming = false, messages = [], onRewind } = props;
 
   const getLastMessageProjectContents = (index: number) => {
     // The message index is for the model response, and the project
@@ -42,7 +40,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       return undefined;
     }
     const previousMessage = messages[index - 2];
-    return gProjectContentsByMessageId.get(previousMessage.id);
+    const contents = gProjectContentsByMessageId.get(previousMessage.id);
+    if (!contents) {
+      return undefined;
+    }
+    return { messageId: previousMessage.id, contents };
   };
 
   return (
@@ -82,13 +84,14 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <AssistantMessage content={content} annotations={message.annotations} />
                     )}
                   </div>
-                  {!isUserMessage && messageId && getLastMessageProjectContents(index) && EnableRewindButton && (
+                  {!isUserMessage && messageId && onRewind && getLastMessageProjectContents(index) && (
                     <div className="flex gap-2 flex-col lg:flex-row">
-                      <WithTooltip tooltip="Rewind to this message">
+                      <WithTooltip tooltip="Undo changes in this message">
                         <button
                           onClick={() => {
-                            const contents = getLastMessageProjectContents(index);
-                            assert(contents);
+                            const info = getLastMessageProjectContents(index);
+                            assert(info);
+                            onRewind(info.messageId, info.contents.content);
                           }}
                           key="i-ph:arrow-u-up-left"
                           className={classNames(
