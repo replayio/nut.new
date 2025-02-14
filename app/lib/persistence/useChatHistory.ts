@@ -37,7 +37,7 @@ export function useChatHistory() {
   const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
-  const [ready, setReady] = useState<boolean>(false);
+  const [ready, setReady] = useState<boolean>(!mixedId && !problemId);
   const [urlId, setUrlId] = useState<string | undefined>();
 
   const importChat = async (description: string, messages: Message[]) => {
@@ -100,7 +100,7 @@ export function useChatHistory() {
   }, []);
 
   return {
-    ready: ready || (!mixedId && !problemId),
+    ready,
     initialMessages,
     storeMessageHistory: async (messages: Message[]) => {
       if (!db || messages.length === 0) {
