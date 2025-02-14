@@ -170,11 +170,19 @@ ${responseDescription}
   const closeTag = restoreCall.responseText.indexOf(CloseTag);
 
   if (openTag === -1 || closeTag === -1) {
-    console.error("Invalid restored content");
+    console.error("Invalid restored content", restoreCall.responseText);
     return { restoreCall, restoredContent: newContent };
   }
 
   const restoredContent = restoreCall.responseText.substring(openTag + OpenTag.length, closeTag);
+
+  // Sometimes the model ignores its instructions and doesn't return the content if it hasn't
+  // made any modifications. In this case we use the unmodified new content.
+  if (restoredContent.length < existingContent.length && restoredContent.length < newContent.length) {
+    console.error("Restored content too short", restoredContent);
+    return { restoreCall, restoredContent: newContent };
+  }
+
   return { restoreCall, restoredContent };
 }
 
@@ -240,9 +248,13 @@ async function upgradePackageJSON(content: string) {
 }
 
 function replaceFileContents(responseText: string, oldContent: string, newContent: string) {
-  const contentIndex = responseText.indexOf(oldContent);
+  let contentIndex = responseText.indexOf(oldContent);
 
   if (contentIndex === -1) {
+    // The old content may have a trailing newline which wasn't originally present in the response.
+    oldContent = oldContent.trim();
+    contentIndex = responseText.indexOf(oldContent);
+
     console.error("Old content not found in response", JSON.stringify({ responseText, oldContent }));
     return responseText;
   }
