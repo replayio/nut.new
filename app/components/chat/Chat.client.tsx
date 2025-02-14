@@ -424,8 +424,10 @@ export const ChatImpl = memo(
       // The project contents are associated with the last message present when
       // the user message is added.
       const lastMessage = messages[messages.length - 1];
-      const { contentBase64 } = await workbenchStore.generateZipBase64();
-      saveProjectContents(lastMessage.id, { content: contentBase64 });
+      if (lastMessage) {
+        const { contentBase64 } = await workbenchStore.generateZipBase64();
+        saveProjectContents(lastMessage.id, { content: contentBase64 });
+      }
     };
 
     const onRewind = async (messageId: string, contents: string) => {

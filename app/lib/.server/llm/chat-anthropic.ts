@@ -113,7 +113,6 @@ async function restorePartialFile(
   existingContent: string,
   newContent: string,
   apiKey: string,
-  mainResponseText: string,
   responseDescription: string
 ) {
   const systemPrompt = `
@@ -172,23 +171,11 @@ ${responseDescription}
 
   if (openTag === -1 || closeTag === -1) {
     console.error("Invalid restored content");
-    return { restoreCall, newResponseText: mainResponseText };
+    return { restoreCall, restoredContent: newContent };
   }
 
   const restoredContent = restoreCall.responseText.substring(openTag + OpenTag.length, closeTag);
-  const newContentIndex = mainResponseText.indexOf(newContent);
-
-  if (newContentIndex === -1) {
-    console.error("New content not found in response");
-    return { restoreCall, newResponseText: mainResponseText };
-  }
-
-  const newResponseText =
-    mainResponseText.substring(0, newContentIndex) +
-    restoredContent +
-    mainResponseText.substring(newContentIndex + newContent.length);
-
-  return { restoreCall, newResponseText };
+  return { restoreCall, restoredContent };
 }
 
 // Return the english description in a model response, skipping over any artifacts.
@@ -214,12 +201,63 @@ function getMessageDescription(responseText: string): string {
   return responseText;
 }
 
+async function getLatestPackageVersion(packageName: string) {
+  try {
+    const response = await fetch(`https://registry.npmjs.org/${packageName}/latest`);
+    const data = await response.json() as any;
+    if (typeof data.version == "string") {
+      return data.version;
+    }
+  } catch (e) {
+    console.error("Error getting latest package version", packageName, e);
+  }
+  return undefined;
+}
+
+function ignorePackageUpgrade(packageName: string) {
+  // Don't upgrade react, our support for react 19 isn't complete yet.
+  return packageName.startsWith("react");
+}
+
+// Upgrade dependencies in package.json to the latest version, instead of the random
+// and sometimes ancient versions that the AI picks.
+async function upgradePackageJSON(content: string) {
+  try {
+    const packageJSON = JSON.parse(content);
+    for (const key of Object.keys(packageJSON.dependencies)) {
+      if (!ignorePackageUpgrade(key)) {
+        const version = await getLatestPackageVersion(key);
+        if (version) {
+          packageJSON.dependencies[key] = version;
+        }
+      }
+    }
+    return JSON.stringify(packageJSON, null, 2);
+  } catch (e) {
+    console.error("Error upgrading package.json", e);
+    return content;
+  }
+}
+
+function replaceFileContents(responseText: string, oldContent: string, newContent: string) {
+  const contentIndex = responseText.indexOf(oldContent);
+
+  if (contentIndex === -1) {
+    console.error("Old content not found in response", JSON.stringify({ responseText, oldContent }));
+    return responseText;
+  }
+
+  return responseText.substring(0, contentIndex) +
+    newContent +
+    responseText.substring(contentIndex + oldContent.length);
+}
+
 interface FileContents {
   filePath: string;
   content: string;
 }
 
-async function restorePartialFiles(files: FileMap, apiKey: string, responseText: string) {
+async function fixupResponseFiles(files: FileMap, apiKey: string, responseText: string) {
   const fileContents: FileContents[] = [];
 
   const messageParser = new StreamingMessageParser({
@@ -240,20 +278,23 @@ async function restorePartialFiles(files: FileMap, apiKey: string, responseText:
   const responseDescription = getMessageDescription(responseText);
 
   const restoreCalls: AnthropicCall[] = [];
-  for (const file of fileContents) {
-    const existingContent = getFileContents(files, file.filePath);
-    const newContent = file.content;
+  for (const { filePath, content: newContent } of fileContents) {
+    const existingContent = getFileContents(files, filePath);
 
     if (shouldRestorePartialFile(existingContent, newContent)) {
-      const { restoreCall, newResponseText } = await restorePartialFile(
+      const { restoreCall, restoredContent } = await restorePartialFile(
         existingContent,
         newContent,
         apiKey,
-        responseText,
         responseDescription
       );
       restoreCalls.push(restoreCall);
-      responseText = newResponseText;
+      responseText = replaceFileContents(responseText, newContent, restoredContent);
+    }
+
+    if (filePath.includes("package.json")) {
+      const newPackageJSON = await upgradePackageJSON(newContent);
+      responseText = replaceFileContents(responseText, newContent, newPackageJSON);
     }
   }
 
@@ -274,7 +315,7 @@ export async function chatAnthropic(chatController: ChatStreamController, files:
 
   const mainCall = await callAnthropic(apiKey, systemPrompt, messageParams);
 
-  const { responseText, restoreCalls } = await restorePartialFiles(files, apiKey, mainCall.responseText);
+  const { responseText, restoreCalls } = await fixupResponseFiles(files, apiKey, mainCall.responseText);
 
   chatController.writeText(responseText);
 

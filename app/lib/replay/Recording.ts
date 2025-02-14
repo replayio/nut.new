@@ -37,7 +37,9 @@ function sendIframeRequest<K extends keyof RequestMap>(
   iframe: HTMLIFrameElement,
   request: Extract<Request, { request: K }>,
 ) {
-  assert(iframe.contentWindow);
+  if (!iframe.contentWindow) {
+    return undefined;
+  }
 
   const target = iframe.contentWindow;
   const requestId = ++lastRequestId;
@@ -56,10 +58,12 @@ function sendIframeRequest<K extends keyof RequestMap>(
   });
 }
 
-let gMessageCount = 0;
-
 export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
+  if (!buffer) {
+    return [];
+  }
+
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(new Uint8Array(buffer));
 
@@ -75,7 +79,9 @@ export interface MouseData {
 }
 
 export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }): Promise<MouseData> {
-  return sendIframeRequest(iframe, { request: 'mouse-data', payload: position });
+  const mouseData = await sendIframeRequest(iframe, { request: 'mouse-data', payload: position });
+  assert(mouseData, "Expected to have mouse data");
+  return mouseData;
 }
 
 // Add handlers to the current iframe's window.
