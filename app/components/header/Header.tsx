@@ -4,6 +4,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { Feedback } from './Feedback';
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -20,6 +21,7 @@ export function Header() {
         <a href="/" className="text-2xl font-semibold text-accent flex items-center">
           <img src="/logo-styled.svg" alt="logo" className="w-[40px] inline-block rotate-90" />
         </a>
+        <Feedback />
       </div>
       {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
         <>
