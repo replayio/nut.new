@@ -194,6 +194,8 @@ export const ChatImpl = memo(
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
 
+    console.log("RenderChat", JSON.stringify(messages, null, 2));
+
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
