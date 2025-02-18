@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -25,3 +25,11 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          command: pages deploy
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -3,6 +3,7 @@ import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type FileMap, type Messages } from '~/lib/.server/llm/stream-text';
 import { chatAnthropic } from '~/lib/.server/llm/chat-anthropic';
+import { ensureOpenTelemetryInitialized } from '~/lib/.server/otel';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
@@ -15,6 +16,8 @@ Focus specifically on fixing this bug. Do not guess about other problems.
 `;
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
+  ensureOpenTelemetryInitialized(context);
+
   const { messages, files, promptId, simulationEnhancedPrompt, anthropicApiKey: clientAnthropicApiKey } = await request.json<{
     messages: Messages;
     files: FileMap;
