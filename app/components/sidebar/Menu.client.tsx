@@ -11,7 +11,6 @@ import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
-import ReactModal from 'react-modal';
 import { SaveProblem } from './SaveProblem';
 import { SaveSolution } from './SaveSolution';
 import { hasNutAdminKey } from '~/lib/replay/Problems';

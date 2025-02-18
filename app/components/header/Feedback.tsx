@@ -10,6 +10,7 @@ ReactModal.setAppElement('#root');
 // Component for leaving feedback.
 
 export function Feedback() {
+  /*
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -70,7 +71,21 @@ export function Feedback() {
       setProblemId(problemId);
     }
   }
+  */
 
+  return (
+    <>
+      <a
+        href="#"
+        className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+        onClick={() => {}}
+      >
+        Feedback
+      </a>
+    </>
+  );
+
+  /*
   return (
     <>
       <a
@@ -128,4 +143,5 @@ export function Feedback() {
       </ReactModal>
     </>
   );
+  */
 }
