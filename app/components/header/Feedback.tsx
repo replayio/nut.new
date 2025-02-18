@@ -2,8 +2,8 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { getProblemsUsername, submitProblem } from "~/lib/replay/Problems";
-import type { BoltProblemInput } from "~/lib/replay/Problems";
+import { submitFeedback } from "~/lib/replay/Problems";
+import { getLastChatMessages } from "~/lib/replay/SimulationPrompt";
 
 ReactModal.setAppElement('#root');
 
@@ -29,40 +29,35 @@ export function Feedback() {
   };
 
   const handleSubmitFeedback = async () => {
-    /*
     // Add validation here
-    if (!formData.title) {
-      toast.error('Please fill in title field');
+    if (!formData.feedback) {
+      toast.error('Please fill in feedback field');
       return;
     }
 
-    const username = getProblemsUsername();
-
-    if (!username) {
-      toast.error('Please fill in username field');
+    if (!formData.email) {
+      toast.error('Please fill in email field');
       return;
     }
 
-    toast.info("Submitting problem...");
+    toast.info("Submitting feedback...");
 
-    console.log("SubmitProblem", formData);
+    console.log("SubmitFeedback", formData);
 
-    await workbenchStore.saveAllFiles();
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
-
-    const problem: BoltProblemInput = {
-      version: 2,
-      title: formData.title,
-      description: formData.description,
-      username,
-      repositoryContents: contentBase64,
+    const feedbackData: any = {
+      feedback: formData.feedback,
+      email: formData.email,
+      share: formData.share
     };
 
-    const problemId = await submitProblem(problem);
-    if (problemId) {
-      setProblemId(problemId);
+    if (feedbackData.share) {
+      const { contentBase64 } = await workbenchStore.generateZipBase64();
+      feedbackData.repositoryContents = contentBase64;
+      feedbackData.chatMessages = getLastChatMessages();
     }
-    */
+
+    await submitFeedback(feedbackData);
+    setSubmitted(true);
   }
 
   return (

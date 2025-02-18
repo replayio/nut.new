@@ -166,3 +166,21 @@ export async function extractFileArtifactsFromRepositoryContents(repositoryConte
   }
   return fileArtifacts;
 }
+
+export async function submitFeedback(feedback: any) {
+  try {
+    const rv = await sendCommandDedicatedClient({
+      method: "Recording.globalExperimentalCommand",
+      params: {
+        name: "submitFeedback",
+        params: { feedback },
+      },
+    });
+    console.log("SubmitFeedbackRval", rv);
+    return (rv as any).rval.problemId;
+  } catch (error) {
+    console.error("Error submitting feedback", error);
+    toast.error("Failed to submit feedback");
+    return null;
+  }
+}

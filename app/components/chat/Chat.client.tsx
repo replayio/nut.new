@@ -48,6 +48,12 @@ export function resetChatFileWritten() {
   }, 500);
 }
 
+let gLastChatMessages: Message[] | undefined;
+
+export function getLastChatMessages() {
+  return gLastChatMessages;
+}
+
 async function flushSimulationData() {
   //console.log("FlushSimulationData");
 
@@ -468,6 +474,19 @@ export const ChatImpl = memo(
 
     const [messageRef, scrollRef] = useSnapScroll();
 
+    const chatMessages = messages.map((message, i) => {
+      if (message.role === 'user') {
+        return message;
+      }
+
+      return {
+        ...message,
+        content: parsedMessages[i] || '',
+      };
+    });
+
+    gLastChatMessages = chatMessages;
+
     return (
       <BaseChat
         ref={animationScope}
@@ -489,16 +508,7 @@ export const ChatImpl = memo(
         description={description}
         importChat={importChat}
         exportChat={exportChat}
-        messages={messages.map((message, i) => {
-          if (message.role === 'user') {
-            return message;
-          }
-
-          return {
-            ...message,
-            content: parsedMessages[i] || '',
-          };
-        })}
+        messages={chatMessages}
         enhancePrompt={() => {
           enhancePrompt(
             input,
