@@ -10,7 +10,6 @@ ReactModal.setAppElement('#root');
 // Component for leaving feedback.
 
 export function Feedback() {
-  /*
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -19,7 +18,7 @@ export function Feedback() {
   });
   const [problemId, setProblemId] = useState<string | null>(null);
 
-  const handleSaveProblem = () => {
+  const handleSubmitFeedback = () => {
     setIsModalOpen(true);
     setFormData({
       title: '',
@@ -29,6 +28,7 @@ export function Feedback() {
     setProblemId(null);
   };
 
+  /*
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -78,10 +78,32 @@ export function Feedback() {
       <a
         href="#"
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={() => {}}
+        onClick={handleSubmitFeedback}
       >
         Feedback
       </a>
+      <ReactModal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 max-w-2xl w-full z-50"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-40"
+      >
+        {problemId && (
+          <>
+            <div className="text-center mb-2">Problem Submitted: {problemId}</div>
+            <div className="text-center">
+              <div className="flex justify-center gap-2 mt-4">
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+              </div>
+            </div>
+          </>
+        )}
+        {!problemId && (
+          <>
+            <div className="text-center">Save prompts as new problems when AI results are unsatisfactory.</div>
+          </>
+        )}
+      </ReactModal>
     </>
   );
 
