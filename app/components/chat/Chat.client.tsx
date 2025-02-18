@@ -194,8 +194,6 @@ export const ChatImpl = memo(
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
 
-    console.log("RenderChat", JSON.stringify(messages, null, 2));
-
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
@@ -216,6 +214,8 @@ export const ChatImpl = memo(
 
     const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer();
     const { parsedMessages, parseMessages } = useMessageParser();
+
+    console.log("RenderChat", JSON.stringify({ messages, parsedMessages }, null, 2));
 
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
