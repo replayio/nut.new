@@ -28,23 +28,33 @@ export function saveProjectContents(messageId: string, contents: ProjectContents
   gProjectContentsByMessageId.set(messageId, contents);
 }
 
+function hasFileModifications(content: string) {
+  return content.includes("__boltArtifact__");
+}
+
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
   const { id, isStreaming = false, messages = [], onRewind } = props;
 
   const getLastMessageProjectContents = (index: number) => {
     // The message index is for the model response, and the project
     // contents will be associated with the last message present when
-    // the user prompt was sent to the model. So look back two messages
-    // for the previous contents.
-    if (index < 2) {
-      return undefined;
-    }
-    const previousMessage = messages[index - 2];
-    const contents = gProjectContentsByMessageId.get(previousMessage.id);
+    // the user prompt was sent to the model. This could be either two
+    // or three messages back, depending on whether the "fix bug"
+    // button was clicked.
+    const beforeUserMessage = messages[index - 2];
+    const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
     if (!contents) {
-      return undefined;
+      const priorMessage = messages[index - 3];
+      const priorContents = gProjectContentsByMessageId.get(priorMessage?.id);
+      if (!priorContents) {
+        return undefined;
+      }
+
+      // We still rewind to just before the user message to retain any
+      // explanation from the Nut API.
+      return { messageId: beforeUserMessage.id, contents: priorContents };
     }
-    return { messageId: previousMessage.id, contents };
+    return { messageId: beforeUserMessage.id, contents };
   };
 
   return (
@@ -84,7 +94,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <AssistantMessage content={content} annotations={message.annotations} />
                     )}
                   </div>
-                  {!isUserMessage && messageId && onRewind && getLastMessageProjectContents(index) && (
+                  {!isUserMessage &&
+                   messageId &&
+                   onRewind &&
+                   getLastMessageProjectContents(index) &&
+                   hasFileModifications(content) && (
                     <div className="flex gap-2 flex-col lg:flex-row">
                       <WithTooltip tooltip="Undo changes in this message">
                         <button

@@ -48,7 +48,10 @@ class ChatManager {
       await this.client.initialize();
 
       const { chatId } = (await this.client.sendCommand({ method: "Nut.startChat", params: {} })) as { chatId: string };
-      return chatId;  
+
+      console.log("ChatStarted", new Date().toISOString(), chatId);
+
+      return chatId;
     })();
   }
 
