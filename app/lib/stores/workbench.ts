@@ -463,7 +463,7 @@ export class WorkbenchStore {
       const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
       const artifactContent = artifact?.content ?? "";
 
-      const actionId = `restore-contents-action-${messageId}-${filePath}`;
+      const actionId = `restore-contents-action-${messageId}-${filePath}-${Math.random().toString()}`;
       const data: ActionCallbackData = {
         actionId,
         messageId,

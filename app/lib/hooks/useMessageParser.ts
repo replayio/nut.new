@@ -66,5 +66,5 @@ export function useMessageParser() {
     }
   }, []);
 
-  return { parsedMessages, parseMessages };
+  return { parsedMessages, setParsedMessages, parseMessages };
 }
