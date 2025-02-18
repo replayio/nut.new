@@ -1,9 +1,8 @@
 import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
-import { workbenchStore } from "~/lib/stores/workbench";
 import { submitFeedback } from "~/lib/replay/Problems";
-import { getLastChatMessages } from "~/lib/replay/SimulationPrompt";
+import { getLastProjectContents, getLastChatMessages } from "../chat/Chat.client";
 
 ReactModal.setAppElement('#root');
 
@@ -51,8 +50,8 @@ export function Feedback() {
     };
 
     if (feedbackData.share) {
-      const { contentBase64 } = await workbenchStore.generateZipBase64();
-      feedbackData.repositoryContents = contentBase64;
+      // Note: We don't just use the workbench store here because wrangler generates a strange error.
+      feedbackData.repositoryContents = getLastProjectContents();
       feedbackData.chatMessages = getLastChatMessages();
     }
 

@@ -48,6 +48,12 @@ export function resetChatFileWritten() {
   }, 500);
 }
 
+let gLastProjectContents: string | undefined;
+
+export function getLastProjectContents() {
+  return gLastProjectContents;
+}
+
 let gLastChatMessages: Message[] | undefined;
 
 export function getLastChatMessages() {
@@ -433,6 +439,7 @@ export const ChatImpl = memo(
       if (lastMessage) {
         const { contentBase64 } = await workbenchStore.generateZipBase64();
         saveProjectContents(lastMessage.id, { content: contentBase64 });
+        gLastProjectContents = contentBase64;
       }
     };
 

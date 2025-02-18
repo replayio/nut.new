@@ -199,10 +199,10 @@ export async function getSimulationRecording(): Promise<string> {
   return gChatManager.recordingIdPromise;
 }
 
-let gLastChatMessages: ProtocolMessage[] | undefined;
+let gLastSimulationChatMessages: ProtocolMessage[] | undefined;
 
-export function getLastChatMessages(): ProtocolMessage[] | undefined {
-  return gLastChatMessages;
+export function getLastSimulationChatMessages(): ProtocolMessage[] | undefined {
+  return gLastSimulationChatMessages;
 }
 
 const SystemPrompt = `
@@ -237,7 +237,7 @@ export async function getSimulationEnhancedPrompt(
     },
   ];
 
-  gLastChatMessages = messages;
+  gLastSimulationChatMessages = messages;
 
   console.log("ChatSendMessage", new Date().toISOString(), JSON.stringify(messages));
 

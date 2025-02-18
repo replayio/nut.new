@@ -5,7 +5,7 @@ import { workbenchStore } from "~/lib/stores/workbench";
 import { BoltProblemStatus, updateProblem } from "~/lib/replay/Problems";
 import type { BoltProblemInput } from "~/lib/replay/Problems";
 import { getLastLoadedProblem } from "../chat/LoadProblemButton";
-import { getLastUserSimulationData, getLastChatMessages } from "~/lib/replay/SimulationPrompt";
+import { getLastUserSimulationData, getLastSimulationChatMessages } from "~/lib/replay/SimulationPrompt";
 
 ReactModal.setAppElement('#root');
 
@@ -48,7 +48,7 @@ export function SaveSolution() {
       return;
     }
 
-    const messages = getLastChatMessages();
+    const messages = getLastSimulationChatMessages();
     if (!messages) {
       toast.error('No user prompt found');
       return;
