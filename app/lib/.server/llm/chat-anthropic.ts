@@ -5,7 +5,9 @@ import type { ContentBlockParam, MessageParam } from "@anthropic-ai/sdk/resource
 import type { FileMap } from "./stream-text";
 import { StreamingMessageParser } from "~/lib/runtime/message-parser";
 import { extractRelativePath } from "~/utils/diff";
+import { wrapWithSpan, getCurrentSpan } from "~/lib/.server/otel";
 
+const Model = "claude-3-5-sonnet-20241022";
 const MaxMessageTokens = 8192;
 
 function convertContentToAnthropic(content: any): ContentBlockParam[] {
@@ -47,52 +49,78 @@ export interface AnthropicCall {
   promptTokens: number;
 }
 
-async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
-  const anthropic = new Anthropic({ apiKey });
+const callAnthropic = wrapWithSpan(
+  {
+    name: "llm-call",
+    attrs: {
+      "llm.provider": "anthropic",
+      "llm.model": Model,
+    },
+  },
 
-  console.log("************************************************");
-  console.log("AnthropicMessageSend");
-  console.log("Message system:");
-  console.log(systemPrompt);
-  for (const message of messages) {
-    console.log(`Message ${message.role}:`);
-    console.log(flatMessageContent(message.content));
-  }
-  console.log("************************************************");
+  // eslint-disable-next-line prefer-arrow-callback
+  async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
+    const span = getCurrentSpan();
+    span?.setAttributes({
+      "llm.chat.calls": 1, // so we can SUM(llm.chat.calls) without doing a COUNT + filter
+      "llm.chat.num_messages": messages.length,
+    });
 
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    messages,
-    max_tokens: MaxMessageTokens,
-    system: systemPrompt,
-  });
+    const anthropic = new Anthropic({ apiKey });
 
-  let responseText = "";
-  for (const content of response.content) {
-    if (content.type === "text") {
-      responseText += content.text;
-    } else {
-      console.log("AnthropicUnknownResponse", JSON.stringify(content, null, 2));
+    console.log("************************************************");
+    console.log("AnthropicMessageSend");
+    console.log("Message system:");
+    console.log(systemPrompt);
+    for (const message of messages) {
+      console.log(`Message ${message.role}:`);
+      console.log(flatMessageContent(message.content));
     }
-  }
+    console.log("************************************************");
 
-  const completionTokens = response.usage.output_tokens;
-  const promptTokens = response.usage.input_tokens;
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      messages,
+      max_tokens: MaxMessageTokens,
+      system: systemPrompt,
+    });
 
-  console.log("************************************************");
-  console.log("AnthropicMessageResponse:");
-  console.log(responseText);
-  console.log("AnthropicTokens", completionTokens + promptTokens);
-  console.log("************************************************");
+    let responseText = "";
+    for (const content of response.content) {
+      if (content.type === "text") {
+        responseText += content.text;
+      } else {
+        console.log("AnthropicUnknownResponse", JSON.stringify(content, null, 2));
+      }
+    }
 
-  return {
-    systemPrompt,
-    messages,
-    responseText,
-    completionTokens,
-    promptTokens,
-  };
-}
+    const completionTokens = response.usage.output_tokens;
+    const promptTokens = response.usage.input_tokens;
+
+    span?.setAttributes({
+      "llm.chat.prompt_tokens": promptTokens,
+      "llm.chat.completion_tokens": completionTokens,
+
+      // to save us needing to worry about a derived column
+      "llm.chat.total_tokens": completionTokens + promptTokens,
+    });
+
+
+    console.log("************************************************");
+    console.log("AnthropicMessageResponse:");
+    console.log(responseText);
+    console.log("AnthropicTokens", completionTokens + promptTokens);
+    console.log("************************************************");
+
+    return {
+      systemPrompt,
+      messages,
+      responseText,
+      completionTokens,
+      promptTokens,
+    };
+  },
+);
 
 function getFileContents(files: FileMap, path: string): string {
   for (const [filePath, file] of Object.entries(files)) {
