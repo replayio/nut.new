@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Markdown } from './Markdown';
 import type { JSONValue } from 'ai';
+import type { ChatAnthropicInfo } from '~/lib/.server/llm/chat-anthropic';
 
 interface AssistantMessageProps {
   content: string;
@@ -13,6 +14,7 @@ export function getAnnotationsTokensUsage(annotations: JSONValue[] | undefined) 
   ) || []) as { type: string; value: any }[];
 
   const usage: {
+    chatInfo: ChatAnthropicInfo;
     completionTokens: number;
     promptTokens: number;
     totalTokens: number;

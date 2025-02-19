@@ -73,15 +73,7 @@ const callAnthropic = wrapWithSpan(
 
     const anthropic = new Anthropic({ apiKey: apiKey.key });
 
-    console.log("************************************************");
     console.log("AnthropicMessageSend");
-    console.log("Message system:");
-    console.log(systemPrompt);
-    for (const message of messages) {
-      console.log(`Message ${message.role}:`);
-      console.log(flatMessageContent(message.content));
-    }
-    console.log("************************************************");
 
     const response = await anthropic.messages.create({
       model: Model,
@@ -111,11 +103,7 @@ const callAnthropic = wrapWithSpan(
     });
 
 
-    console.log("************************************************");
-    console.log("AnthropicMessageResponse:");
-    console.log(responseText);
-    console.log("AnthropicTokens", completionTokens + promptTokens);
-    console.log("************************************************");
+    console.log("AnthropicMessageResponse");
 
     return {
       systemPrompt,
@@ -142,7 +130,13 @@ function shouldRestorePartialFile(existingContent: string, newContent: string): 
   return existingContent.length > newContent.length;
 }
 
+interface ChatState {
+  // Info about how the chat was processed which will be conveyed back to the client.
+  infos: string[];
+}
+
 async function restorePartialFile(
+  state: ChatState,
   existingContent: string,
   newContent: string,
   apiKey: AnthropicApiKey,
@@ -203,7 +197,7 @@ ${responseDescription}
   const closeTag = restoreCall.responseText.indexOf(CloseTag);
 
   if (openTag === -1 || closeTag === -1) {
-    console.error("Invalid restored content", restoreCall.responseText);
+    state.infos.push(`Error: Invalid restored content: ${restoreCall.responseText}`);
     return { restoreCall, restoredContent: newContent };
   }
 
@@ -212,7 +206,7 @@ ${responseDescription}
   // Sometimes the model ignores its instructions and doesn't return the content if it hasn't
   // made any modifications. In this case we use the unmodified new content.
   if (restoredContent.length < existingContent.length && restoredContent.length < newContent.length) {
-    console.error("Restored content too short", restoredContent);
+    state.infos.push(`Error: Restored content too short: ${restoreCall.responseText}`);
     return { restoreCall, restoredContent: newContent };
   }
 
@@ -242,7 +236,7 @@ function getMessageDescription(responseText: string): string {
   return responseText;
 }
 
-async function getLatestPackageVersion(packageName: string) {
+async function getLatestPackageVersion(state: ChatState, packageName: string) {
   try {
     const response = await fetch(`https://registry.npmjs.org/${packageName}/latest`);
     const data = await response.json() as any;
@@ -250,7 +244,7 @@ async function getLatestPackageVersion(packageName: string) {
       return data.version;
     }
   } catch (e) {
-    console.error("Error getting latest package version", packageName, e);
+    state.infos.push(`Error getting latest package version: ${packageName}`);
   }
   return undefined;
 }
@@ -262,12 +256,12 @@ function ignorePackageUpgrade(packageName: string) {
 
 // Upgrade dependencies in package.json to the latest version, instead of the random
 // and sometimes ancient versions that the AI picks.
-async function upgradePackageJSON(content: string) {
+async function upgradePackageJSON(state: ChatState, content: string) {
   try {
     const packageJSON = JSON.parse(content);
     for (const key of Object.keys(packageJSON.dependencies)) {
       if (!ignorePackageUpgrade(key)) {
-        const version = await getLatestPackageVersion(key);
+        const version = await getLatestPackageVersion(state, key);
         if (version) {
           packageJSON.dependencies[key] = version;
         }
@@ -275,12 +269,12 @@ async function upgradePackageJSON(content: string) {
     }
     return JSON.stringify(packageJSON, null, 2);
   } catch (e) {
-    console.error("Error upgrading package.json", e);
+    state.infos.push(`Error upgrading package.json: ${e}`);
     return content;
   }
 }
 
-function replaceFileContents(responseText: string, oldContent: string, newContent: string) {
+function replaceFileContents(state: ChatState, responseText: string, oldContent: string, newContent: string) {
   let contentIndex = responseText.indexOf(oldContent);
 
   if (contentIndex === -1) {
@@ -288,8 +282,10 @@ function replaceFileContents(responseText: string, oldContent: string, newConten
     oldContent = oldContent.trim();
     contentIndex = responseText.indexOf(oldContent);
 
-    console.error("Old content not found in response", JSON.stringify({ responseText, oldContent }));
-    return responseText;
+    if (contentIndex == -1) {
+      state.infos.push(`Error: Old content not found in response: ${JSON.stringify({ responseText, oldContent })}`);
+      return responseText;
+    }
   }
 
   return responseText.substring(0, contentIndex) +
@@ -302,7 +298,7 @@ interface FileContents {
   content: string;
 }
 
-async function fixupResponseFiles(files: FileMap, apiKey: AnthropicApiKey, responseText: string) {
+async function fixupResponseFiles(state: ChatState, files: FileMap, apiKey: AnthropicApiKey, responseText: string) {
   const fileContents: FileContents[] = [];
 
   const messageParser = new StreamingMessageParser({
@@ -328,22 +324,29 @@ async function fixupResponseFiles(files: FileMap, apiKey: AnthropicApiKey, respo
 
     if (shouldRestorePartialFile(existingContent, newContent)) {
       const { restoreCall, restoredContent } = await restorePartialFile(
+        state,
         existingContent,
         newContent,
         apiKey,
         responseDescription
       );
       restoreCalls.push(restoreCall);
-      responseText = replaceFileContents(responseText, newContent, restoredContent);
+      responseText = replaceFileContents(state, responseText, newContent, restoredContent);
     }
 
     if (filePath.includes("package.json")) {
-      const newPackageJSON = await upgradePackageJSON(newContent);
-      responseText = replaceFileContents(responseText, newContent, newPackageJSON);
+      const newPackageJSON = await upgradePackageJSON(state, newContent);
+      responseText = replaceFileContents(state, responseText, newContent, newPackageJSON);
     }
   }
 
   return { responseText, restoreCalls };
+}
+
+export type ChatAnthropicInfo = {
+  mainCall: AnthropicCall;
+  restoreCalls: AnthropicCall[];
+  infos: string[];
 }
 
 export async function chatAnthropic(chatController: ChatStreamController, files: FileMap, apiKey: AnthropicApiKey, systemPrompt: string, messages: CoreMessage[]) {
@@ -360,18 +363,22 @@ export async function chatAnthropic(chatController: ChatStreamController, files:
 
   const mainCall = await callAnthropic(apiKey, systemPrompt, messageParams);
 
-  const { responseText, restoreCalls } = await fixupResponseFiles(files, apiKey, mainCall.responseText);
+  const state: ChatState = {
+    infos: [],
+  };
+
+  const { responseText, restoreCalls } = await fixupResponseFiles(state, files, apiKey, mainCall.responseText);
 
   chatController.writeText(responseText);
 
-  const callInfos = [mainCall, ...restoreCalls];
+  const chatInfo: ChatAnthropicInfo = { mainCall, restoreCalls, infos: state.infos };
 
   let completionTokens = 0;
   let promptTokens = 0;
-  for (const callInfo of callInfos) {
+  for (const callInfo of [mainCall, ...restoreCalls]) {
     completionTokens += callInfo.completionTokens;
     promptTokens += callInfo.promptTokens;
   }
 
-  chatController.writeUsage({ callInfos, completionTokens, promptTokens });
+  chatController.writeUsage({ chatInfo, completionTokens, promptTokens });
 }

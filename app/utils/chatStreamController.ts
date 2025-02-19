@@ -3,7 +3,7 @@
 // to be functionality exported from the associated packages to do this so
 // for now we do it manually after reverse engineering the protocol.
 
-import type { AnthropicCall } from "~/lib/.server/llm/chat-anthropic";
+import type { ChatAnthropicInfo } from "~/lib/.server/llm/chat-anthropic";
 
 export interface ChatFileChange {
   filePath: string;
@@ -38,7 +38,7 @@ export class ChatStreamController {
     this.controller.enqueue(data);
   }
 
-  writeUsage({ callInfos, completionTokens, promptTokens }: { callInfos: AnthropicCall[], completionTokens: number, promptTokens: number }) {
-    this.writeAnnotation("usage", { callInfos, completionTokens, promptTokens, totalTokens: completionTokens + promptTokens });
+  writeUsage({ chatInfo, completionTokens, promptTokens }: { chatInfo: ChatAnthropicInfo, completionTokens: number, promptTokens: number }) {
+    this.writeAnnotation("usage", { chatInfo, completionTokens, promptTokens, totalTokens: completionTokens + promptTokens });
   }
 }
