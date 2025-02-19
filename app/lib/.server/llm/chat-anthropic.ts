@@ -1,13 +1,14 @@
-import type { CoreMessage } from "ai";
-import Anthropic from "@anthropic-ai/sdk";
-import { ChatStreamController } from "~/utils/chatStreamController";
-import type { ContentBlockParam, MessageParam } from "@anthropic-ai/sdk/resources/messages/messages.mjs";
-import type { FileMap } from "./stream-text";
-import { StreamingMessageParser } from "~/lib/runtime/message-parser";
-import { extractRelativePath } from "~/utils/diff";
-import { wrapWithSpan, getCurrentSpan } from "~/lib/.server/otel";
+import type { CoreMessage } from 'ai';
+import Anthropic from '@anthropic-ai/sdk';
+import { ChatStreamController } from '~/utils/chatStreamController';
+import type { ContentBlockParam, MessageParam } from '@anthropic-ai/sdk/resources/messages/messages.mjs';
+import type { FileMap } from './stream-text';
+import { StreamingMessageParser } from '~/lib/runtime/message-parser';
+import { extractRelativePath } from '~/utils/diff';
+import { wrapWithSpan, getCurrentSpan } from '~/lib/.server/otel';
+import { context } from '@opentelemetry/api';
 
-const Model = "claude-3-5-sonnet-20241022";
+const Model = 'claude-3-5-sonnet-20241022';
 const MaxMessageTokens = 8192;
 
 function convertContentToAnthropic(content: any): ContentBlockParam[] {
@@ -79,7 +80,7 @@ const callAnthropic = wrapWithSpan(
     console.log("************************************************");
 
     const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: Model,
       messages,
       max_tokens: MaxMessageTokens,
       system: systemPrompt,

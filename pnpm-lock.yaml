@@ -7,6 +7,11 @@ settings:
 overrides:
   '@typescript-eslint/utils': ^8.0.0-alpha.30
 
+patchedDependencies:
+  '@opentelemetry/context-async-hooks@1.30.1':
+    hash: k7tq4qcxof3n2buu2yqtrqhjhu
+    path: patches/@opentelemetry__context-async-hooks@1.30.1.patch
+
 importers:
 
   .:
@@ -107,9 +112,9 @@ importers:
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
-      '@opentelemetry/context-zone':
+      '@opentelemetry/context-async-hooks':
         specifier: ^1.30.1
-        version: 1.30.1(@opentelemetry/api@1.9.0)
+        version: 1.30.1(patch_hash=k7tq4qcxof3n2buu2yqtrqhjhu)(@opentelemetry/api@1.9.0)
       '@opentelemetry/core':
         specifier: ^1.26.0
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -1681,16 +1686,11 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
-  '@opentelemetry/context-zone-peer-dep@1.30.1':
-    resolution: {integrity: sha512-8oJQR+MBblY5WGOm26AOBLogN+FoO26QEZssH9WJd1qSD7ABMefq9qyGyN9xilFFl2ABPHgcMzkfYb8vx9JBEA==}
+  '@opentelemetry/context-async-hooks@1.30.1':
+    resolution: {integrity: sha512-s5vvxXPVdjqS3kTLKMeBMvop9hbWkwzBpu+mUO2M7sZtlkyDJGwFe33wRKnbaYDo8ExRVBIIdwIGrqpxHuKttA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
-      zone.js: ^0.10.2 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0 || ^0.15.0
-
-  '@opentelemetry/context-zone@1.30.1':
-    resolution: {integrity: sha512-N6CACt5sxXD6XzS2jJPqstNJZ/QFqeW56IiKfHb6hYOelCXVvYfxheF7byAeRXa7+N8rmXUP7aRdupALXP5hdQ==}
-    engines: {node: '>=14'}
 
   '@opentelemetry/core@1.26.0':
     resolution: {integrity: sha512-1iKxXXE8415Cdv0yjG3G6hQnB5eVEsJce3QaawX8SjDn0mAS0ZM8fAbZZJD4ajvhC15cePvosSCut404KrIIvQ==}
@@ -6350,9 +6350,6 @@ packages:
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
-  zone.js@0.15.0:
-    resolution: {integrity: sha512-9oxn0IIjbCZkJ67L+LkhYWRyAy7axphb3VgE2MBDlOqnmHMPWGYMxJxBYFueFq/JGY2GMwS0rU+UCLunEmy5UA==}
-
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -7932,17 +7929,9 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@opentelemetry/context-zone-peer-dep@1.30.1(@opentelemetry/api@1.9.0)(zone.js@0.15.0)':
+  '@opentelemetry/context-async-hooks@1.30.1(patch_hash=k7tq4qcxof3n2buu2yqtrqhjhu)(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      zone.js: 0.15.0
-
-  '@opentelemetry/context-zone@1.30.1(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/context-zone-peer-dep': 1.30.1(@opentelemetry/api@1.9.0)(zone.js@0.15.0)
-      zone.js: 0.15.0
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
 
   '@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -13548,7 +13537,5 @@ snapshots:
       zod: 3.23.8
 
   zod@3.23.8: {}
-
-  zone.js@0.15.0: {}
 
   zwitch@2.0.4: {}

@@ -62,7 +62,7 @@
     "@octokit/types": "^13.6.2",
     "@openrouter/ai-sdk-provider": "^0.0.5",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/context-zone": "^1.30.1",
+    "@opentelemetry/context-async-hooks": "^1.30.1",
     "@opentelemetry/core": "^1.26.0",
     "@opentelemetry/otlp-exporter-base": "^0.53.0",
     "@opentelemetry/otlp-transformer": "^0.53.0",
@@ -147,5 +147,10 @@
   "resolutions": {
     "@typescript-eslint/utils": "^8.0.0-alpha.30"
   },
-  "packageManager": "pnpm@9.4.0"
+  "packageManager": "pnpm@9.4.0",
+  "pnpm": {
+    "patchedDependencies": {
+      "@opentelemetry/context-async-hooks@1.30.1": "patches/@opentelemetry__context-async-hooks@1.30.1.patch"
+    }
+  }
 }

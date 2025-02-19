@@ -1,6 +1,6 @@
 import type { Tracer } from '@opentelemetry/api';
 import { SpanStatusCode, type Attributes, context, trace } from '@opentelemetry/api';
-import { ZoneContextManager } from '@opentelemetry/context-zone';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type { ExportResult } from '@opentelemetry/core';
 import { ExportResultCode } from '@opentelemetry/core';
 import type { ExportServiceError, OTLPExporterConfigBase } from '@opentelemetry/otlp-exporter-base';
@@ -109,6 +109,14 @@ export class OTLPExporter implements SpanExporter {
       return;
     }
 
+    const exportMessage = createExportTraceServiceRequest(spans, {
+      useHex: true,
+      useLongBits: false,
+    });
+
+    const exportPayload = JSON.stringify(exportMessage);
+    console.warn(exportPayload);
+
     let currentRetry = 0;
 
     // types involving config objects with optional fields are such a pain, hence the defaults here.
@@ -120,7 +128,7 @@ export class OTLPExporter implements SpanExporter {
         await this._semaphore.acquire();
 
         try {
-          await this._sendSpans(spans);
+          await this._send(exportPayload);
           return;
         } finally {
           this._semaphore.release();
@@ -140,15 +148,14 @@ export class OTLPExporter implements SpanExporter {
     }
   }
 
-  private async _sendSpans(spans: ReadableSpan[]): Promise<void> {
-    const {url = defaultOptions.url, timeoutMillis = defaultOptions.timeoutMillis, headers = defaultOptions.headers } = this._config;
+  private async _send(payload: string): Promise<void> {
+    const {
+      url = defaultOptions.url,
+      timeoutMillis = defaultOptions.timeoutMillis,
+      headers = defaultOptions.headers,
+    } = this._config;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMillis);
-
-    const exportMessage = createExportTraceServiceRequest(spans, {
-      useHex: true,
-      useLongBits: false,
-    });
 
     try {
       const response = await fetch(url, {
@@ -157,7 +164,7 @@ export class OTLPExporter implements SpanExporter {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: JSON.stringify(exportMessage),
+        body: payload,
         signal: controller.signal,
       });
 
@@ -184,9 +191,9 @@ export class OTLPExporter implements SpanExporter {
   }
 }
 
-export function createTracer(context: AppLoadContext) {
-  const honeycombApiKey = (context.cloudflare.env as any).HONEYCOMB_API_KEY;
-  const honeycombDataset = (context.cloudflare.env as any).HONEYCOMB_DATASET;
+export function createTracer(appContext: AppLoadContext) {
+  const honeycombApiKey = (appContext.cloudflare.env as any).HONEYCOMB_API_KEY;
+  const honeycombDataset = (appContext.cloudflare.env as any).HONEYCOMB_DATASET;
 
   if (!honeycombApiKey || !honeycombDataset) {
     console.warn('OpenTelemetry initialization skipped: HONEYCOMB_API_KEY and/or HONEYCOMB_DATASET not set');
@@ -214,9 +221,10 @@ export function createTracer(context: AppLoadContext) {
       spanProcessors: [new SimpleSpanProcessor(exporter), new SimpleSpanProcessor(new ConsoleSpanExporter())],
     });
 
-    provider.register({
-      contextManager: new ZoneContextManager(),
-    });
+    const contextManager = new AsyncLocalStorageContextManager();
+    context.setGlobalContextManager(contextManager);
+
+    provider.register({ contextManager });
 
     return provider.getTracer('nut-server');
   } catch (e) {
@@ -265,8 +273,14 @@ export function wrapWithSpan<Args extends any[], T>(
   opts: SpanOptions,
   fn: (...args: Args) => Promise<T>,
 ): (...args: Args) => Promise<T> {
-  return async (...args: Args) => {
-    return ensureTracer().startActiveSpan(opts.name, async (span) => {
+  return (...args: Args) => {
+    const span = ensureTracer().startSpan(opts.name);
+
+    if (opts.attrs) {
+      span.setAttributes(opts.attrs);
+    }
+
+    return context.with(trace.setSpan(context.active(), span), async () => {
       if (opts.attrs) {
         span.setAttributes(opts.attrs);
       }
@@ -294,5 +308,5 @@ export function wrapWithSpan<Args extends any[], T>(
 }
 
 export function getCurrentSpan() {
-  return trace.getSpan(context.active());
+  return trace.getActiveSpan();
 }

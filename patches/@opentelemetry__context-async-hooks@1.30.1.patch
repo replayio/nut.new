@@ -1,0 +1,32 @@
+diff --git a/build/src/AsyncHooksContextManager.js b/build/src/AsyncHooksContextManager.js
+index 3b8866855dd900570cbd126b9ca57bd91e1d7cb5..b55f3fb34b54695e06fea6a3e39dcbb133d0c594 100644
+--- a/build/src/AsyncHooksContextManager.js
++++ b/build/src/AsyncHooksContextManager.js
+@@ -14,10 +14,10 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
++import * as asyncHooks from "node:async_hooks";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.AsyncHooksContextManager = void 0;
+ const api_1 = require("@opentelemetry/api");
+-const asyncHooks = require("async_hooks");
+ const AbstractAsyncHooksContextManager_1 = require("./AbstractAsyncHooksContextManager");
+ class AsyncHooksContextManager extends AbstractAsyncHooksContextManager_1.AbstractAsyncHooksContextManager {
+     constructor() {
+diff --git a/build/src/AsyncLocalStorageContextManager.js b/build/src/AsyncLocalStorageContextManager.js
+index 86fe67194acd7af0b8e00fd0eb10dc2edf8945f0..65baff025a8d6a8fafbeae1f6f91906d08a657e6 100644
+--- a/build/src/AsyncLocalStorageContextManager.js
++++ b/build/src/AsyncLocalStorageContextManager.js
+@@ -14,10 +14,10 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
++import * as async_hooks_1 from "node:async_hooks";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.AsyncLocalStorageContextManager = void 0;
+ const api_1 = require("@opentelemetry/api");
+-const async_hooks_1 = require("async_hooks");
+ const AbstractAsyncHooksContextManager_1 = require("./AbstractAsyncHooksContextManager");
+ class AsyncLocalStorageContextManager extends AbstractAsyncHooksContextManager_1.AbstractAsyncHooksContextManager {
+     constructor() {
