@@ -115,7 +115,6 @@ export class OTLPExporter implements SpanExporter {
     });
 
     const exportPayload = JSON.stringify(exportMessage);
-    console.warn(exportPayload);
 
     let currentRetry = 0;
 
