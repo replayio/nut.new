@@ -13,14 +13,45 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 
 import type { AppLoadContext } from '@remix-run/cloudflare';
 
+// used to implement concurrencyLimit in the otlp exporter
+class Semaphore {
+  private _permits: number;
+  private _tasks: (() => void)[] = [];
+
+  constructor(permits: number) {
+    this._permits = permits;
+  }
+
+  async acquire(): Promise<void> {
+    if (this._permits > 0) {
+      this._permits -= 1;
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      this._tasks.push(resolve);
+    });
+  }
+
+  release(): void {
+    this._permits += 1;
+
+    const nextTask = this._tasks.shift();
+
+    if (nextTask) {
+      this._permits -= 1;
+      nextTask();
+    }
+  }
+}
+
 interface OTLPExporterConfig extends OTLPExporterConfigBase {
-  url: string; // required for us
   retryCount?: number;
   retryIntervalMillis?: number;
 }
 
-const defaultConfig = {
-  url: "'https://api.honeycomb.io/v1/traces'",
+const defaultOptions = {
+  url: 'https://api.honeycomb.io/v1/traces',
   concurrencyLimit: 5,
   timeoutMillis: 5000,
   headers: {},
@@ -32,14 +63,16 @@ export class OTLPExporter implements SpanExporter {
   private readonly _config: OTLPExporterConfig;
   private _shutdownOnce: boolean;
   private _activeExports: Promise<void>[];
+  private _semaphore: Semaphore;
 
   constructor(config: OTLPExporterConfig) {
     this._config = {
-      ...defaultConfig,
       ...config,
+      headers: { ...config.headers },
     };
     this._shutdownOnce = false;
     this._activeExports = [];
+    this._semaphore = new Semaphore(this._config.concurrencyLimit || defaultOptions.concurrencyLimit);
   }
 
   export(spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {
@@ -79,17 +112,23 @@ export class OTLPExporter implements SpanExporter {
     let currentRetry = 0;
 
     // types involving config objects with optional fields are such a pain, hence the defaults here.
-    const { retryCount = defaultConfig.retryCount, retryIntervalMillis = defaultConfig.retryIntervalMillis } =
+    const { retryCount = defaultOptions.retryCount, retryIntervalMillis = defaultOptions.retryIntervalMillis } =
       this._config;
 
     while (currentRetry < retryCount!) {
       try {
-        await this._sendSpans(spans);
-        return;
+        await this._semaphore.acquire();
+
+        try {
+          await this._sendSpans(spans);
+          return;
+        } finally {
+          this._semaphore.release();
+        }
       } catch (error) {
         currentRetry++;
 
-        if (currentRetry === this._config.retryCount) {
+        if (currentRetry === retryCount) {
           throw new OTLPExporterError(
             `Failed to export spans after ${retryCount} retries.  most recent error is ${error instanceof Error ? error.toString() : error}`,
           );
@@ -102,8 +141,9 @@ export class OTLPExporter implements SpanExporter {
   }
 
   private async _sendSpans(spans: ReadableSpan[]): Promise<void> {
+    const {url = defaultOptions.url, timeoutMillis = defaultOptions.timeoutMillis, headers = defaultOptions.headers } = this._config;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this._config.timeoutMillis);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMillis);
 
     const exportMessage = createExportTraceServiceRequest(spans, {
       useHex: true,
@@ -111,11 +151,11 @@ export class OTLPExporter implements SpanExporter {
     });
 
     try {
-      const response = await fetch(this._config.url, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this._config.headers,
+          ...headers,
         },
         body: JSON.stringify(exportMessage),
         signal: controller.signal,
