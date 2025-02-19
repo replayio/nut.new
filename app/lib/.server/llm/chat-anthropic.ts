@@ -6,7 +6,6 @@ import type { FileMap } from './stream-text';
 import { StreamingMessageParser } from '~/lib/runtime/message-parser';
 import { extractRelativePath } from '~/utils/diff';
 import { wrapWithSpan, getCurrentSpan } from '~/lib/.server/otel';
-import { context } from '@opentelemetry/api';
 
 const Model = 'claude-3-5-sonnet-20241022';
 const MaxMessageTokens = 8192;
@@ -42,6 +41,10 @@ function flatMessageContent(content: string | ContentBlockParam[]): string {
   return "AnthropicUnknownContent";
 }
 
+export interface AnthropicApiKey {
+  key: string;
+  isUser: boolean;
+}
 export interface AnthropicCall {
   systemPrompt: string;
   messages: MessageParam[];
@@ -60,14 +63,15 @@ const callAnthropic = wrapWithSpan(
   },
 
   // eslint-disable-next-line prefer-arrow-callback
-  async function callAnthropic(apiKey: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
+  async function callAnthropic(apiKey: AnthropicApiKey, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
     const span = getCurrentSpan();
     span?.setAttributes({
       "llm.chat.calls": 1, // so we can SUM(llm.chat.calls) without doing a COUNT + filter
       "llm.chat.num_messages": messages.length,
+      "llm.chat.is_user_api_key": apiKey.isUser,
     });
 
-    const anthropic = new Anthropic({ apiKey });
+    const anthropic = new Anthropic({ apiKey: apiKey.key });
 
     console.log("************************************************");
     console.log("AnthropicMessageSend");
@@ -141,7 +145,7 @@ function shouldRestorePartialFile(existingContent: string, newContent: string): 
 async function restorePartialFile(
   existingContent: string,
   newContent: string,
-  apiKey: string,
+  apiKey: AnthropicApiKey,
   responseDescription: string
 ) {
   const systemPrompt = `
@@ -298,7 +302,7 @@ interface FileContents {
   content: string;
 }
 
-async function fixupResponseFiles(files: FileMap, apiKey: string, responseText: string) {
+async function fixupResponseFiles(files: FileMap, apiKey: AnthropicApiKey, responseText: string) {
   const fileContents: FileContents[] = [];
 
   const messageParser = new StreamingMessageParser({
@@ -342,7 +346,7 @@ async function fixupResponseFiles(files: FileMap, apiKey: string, responseText: 
   return { responseText, restoreCalls };
 }
 
-export async function chatAnthropic(chatController: ChatStreamController, files: FileMap, apiKey: string, systemPrompt: string, messages: CoreMessage[]) {
+export async function chatAnthropic(chatController: ChatStreamController, files: FileMap, apiKey: AnthropicApiKey, systemPrompt: string, messages: CoreMessage[]) {
   const messageParams: MessageParam[] = [];
 
   for (const message of messages) {
