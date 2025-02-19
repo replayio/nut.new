@@ -48,7 +48,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
     const anthropicApiKey: AnthropicApiKey = {
       key: apiKey,
-      isUser: apiKey !== context.cloudflare.env.ANTHROPIC_API_KEY,
+      isUser: !!clientAnthropicApiKey,
     };
 
     const resultStream = new ReadableStream({
