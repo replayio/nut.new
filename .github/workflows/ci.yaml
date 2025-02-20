@@ -19,7 +19,7 @@ jobs:
       - name: Setup and Build
         uses: ./.github/actions/setup-and-build
         with:
-          sentry-auth-token: ${{ github.ref == 'refs/heads/main' ? secrets.SENTRY_AUTH_TOKEN : "" }}
+          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
 
       - name: Run type check
         run: pnpm run typecheck
