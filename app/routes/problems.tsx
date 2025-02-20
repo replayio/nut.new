@@ -6,7 +6,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { type Problem, type ProblemComment, type ProblemStatus, listAllProblems, getProblemsUsername } from '~/lib/supabase/problems';
+import { type Problem, type ProblemComment, type ProblemStatus, listAllProblems, getProblemsUsername } from '~/lib/supabase/Problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
 import { getProblemsUsername, submitProblem } from "~/lib/replay/Problems";
 import type { BoltProblemInput } from "~/lib/replay/Problems";
+import { createProblem } from "~/lib/supabase/Problems";  
+
 
 ReactModal.setAppElement('#root');
 
@@ -65,7 +67,18 @@ export function SaveProblem() {
       repositoryContents: contentBase64,
     };
 
-    const problemId = await submitProblem(problem);
+    console.log("CreateProblem", problem);
+
+    const problemId = await createProblem({
+      title: problem.title,
+      description: problem.description,
+      status: 'pending',
+      keywords: [],
+      repository_contents: problem.repositoryContents,
+      user_id: null
+    });
+
+    console.log("CreateProblemRval", problemId);
     if (problemId) {
       setProblemId(problemId);
     }

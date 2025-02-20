@@ -39,6 +39,9 @@ export async function getProblem(id: string): Promise<Problem | null> {
 }
 
 export async function createProblem(problem: Database['public']['Tables']['problems']['Insert']) {
+  
+  console.log('Creating problem:', problem);
+  
   const { data, error } = await supabase
     .from('problems')
     .insert(problem)

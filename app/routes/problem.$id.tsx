@@ -16,7 +16,7 @@ import {
   getProblemsUsername,
   hasNutAdminKey,
   addProblemComment,
-} from '~/lib/supabase/problems';
+} from '~/lib/supabase/Problems';
 
 function Comments({ comments }: { comments: ProblemComment[] }) {
   return (
