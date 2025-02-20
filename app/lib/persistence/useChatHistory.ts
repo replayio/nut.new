@@ -15,6 +15,7 @@ import {
   createChatFromMessages,
 } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
+import { createAsyncSuspenseValue } from '../asyncSuspenseValue';
 
 export interface ChatHistoryItem {
   id: string;
@@ -26,14 +27,19 @@ export interface ChatHistoryItem {
 
 const persistenceEnabled = !import.meta.env.VITE_DISABLE_PERSISTENCE;
 
-export const db = persistenceEnabled ? await openDatabase() : undefined;
+export const database = persistenceEnabled ? createAsyncSuspenseValue(openDatabase) : undefined;
+
+if (typeof document !== 'undefined') {
+  database?.preload();
+}
 
 export const chatId = atom<string | undefined>(undefined);
 export const description = atom<string | undefined>(undefined);
 
 export function useChatHistory() {
+  const db = database?.read();
   const navigate = useNavigate();
-  const { id: mixedId, problemId } = useLoaderData<{ id?: string, problemId?: string }>() ?? {};
+  const { id: mixedId, problemId } = useLoaderData<{ id?: string; problemId?: string }>() ?? {};
   const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);

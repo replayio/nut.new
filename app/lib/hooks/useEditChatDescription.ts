@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   chatId as chatIdStore,
-  db,
+  database,
   description as descriptionStore,
   getMessages,
   updateChatDescription,
@@ -44,6 +44,7 @@ export function useEditChatDescription({
   customChatId,
   syncWithGlobalStore,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
+  const db = database?.read();
   const chatIdFromStore = useStore(chatIdStore);
   const [editing, setEditing] = useState(false);
   const [currentDescription, setCurrentDescription] = useState(initialDescription);

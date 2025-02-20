@@ -4,7 +4,6 @@ import { classNames } from '~/utils/classNames';
 import { AssistantMessage, getAnnotationsTokensUsage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 import { useLocation } from '@remix-run/react';
-import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
@@ -29,7 +28,7 @@ export function saveProjectContents(messageId: string, contents: ProjectContents
 }
 
 function hasFileModifications(content: string) {
-  return content.includes("__boltArtifact__");
+  return content.includes('__boltArtifact__');
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
@@ -95,27 +94,27 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     )}
                   </div>
                   {!isUserMessage &&
-                   messageId &&
-                   onRewind &&
-                   getLastMessageProjectContents(index) &&
-                   hasFileModifications(content) && (
-                    <div className="flex gap-2 flex-col lg:flex-row">
-                      <WithTooltip tooltip="Undo changes in this message">
-                        <button
-                          onClick={() => {
-                            const info = getLastMessageProjectContents(index);
-                            assert(info);
-                            onRewind(info.messageId, info.contents.content);
-                          }}
-                          key="i-ph:arrow-u-up-left"
-                          className={classNames(
-                            'i-ph:arrow-u-up-left',
-                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                          )}
-                        />
-                      </WithTooltip>
-                    </div>
-                  )}
+                    messageId &&
+                    onRewind &&
+                    getLastMessageProjectContents(index) &&
+                    hasFileModifications(content) && (
+                      <div className="flex gap-2 flex-col lg:flex-row">
+                        <WithTooltip tooltip="Undo changes in this message">
+                          <button
+                            onClick={() => {
+                              const info = getLastMessageProjectContents(index);
+                              assert(info);
+                              onRewind(info.messageId, info.contents.content);
+                            }}
+                            key="i-ph:arrow-u-up-left"
+                            className={classNames(
+                              'i-ph:arrow-u-up-left',
+                              'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                            )}
+                          />
+                        </WithTooltip>
+                      </div>
+                    )}
                 </Suspense>
               </div>
             );

@@ -32,6 +32,21 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
   };
 
   const asyncValue = {
+    load: async () => {
+      if (!record) {
+        return load();
+      }
+
+      switch (record.status) {
+        case 'pending':
+          return record.promise;
+        case 'resolved':
+          return record.value;
+        case 'rejected':
+          throw record.error;
+      }
+    },
+
     read() {
       if (!record) {
         throw load();
