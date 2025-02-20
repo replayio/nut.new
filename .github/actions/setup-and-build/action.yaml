@@ -9,6 +9,11 @@ inputs:
     required: false
     type: string
     default: '20.15.1'
+  sentry-auth-token:
+    required: false
+    type: string
+    default: ''
+
 
 runs:
   using: composite
@@ -30,3 +35,5 @@ runs:
       run: |
         pnpm install
         pnpm run build
+      env:
+        SENTRY_AUTH_TOKEN: ${{ inputs.sentry-auth-token }}

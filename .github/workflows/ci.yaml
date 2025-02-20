@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: CI/CD (and deploy on main)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,6 +18,8 @@ jobs:
 
       - name: Setup and Build
         uses: ./.github/actions/setup-and-build
+        with:
+          sentry-auth-token: ${{ github.ref == 'refs/heads/main' ? secrets.SENTRY_AUTH_TOKEN : "" }}
 
       - name: Run type check
         run: pnpm run typecheck
