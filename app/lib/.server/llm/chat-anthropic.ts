@@ -24,23 +24,6 @@ function convertContentToAnthropic(content: any): ContentBlockParam[] {
   return [];
 }
 
-function flatMessageContent(content: string | ContentBlockParam[]): string {
-  if (typeof content === "string") {
-    return content;
-  }
-  if (Array.isArray(content)) {
-    let result = "";
-    for (const elem of content) {
-      if (elem.type === "text") {
-        result += elem.text;
-      }
-    }
-    return result;
-  }
-  console.log("AnthropicUnknownContent", JSON.stringify(content, null, 2));
-  return "AnthropicUnknownContent";
-}
-
 export interface AnthropicApiKey {
   key: string;
   isUser: boolean;
