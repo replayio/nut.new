@@ -50,21 +50,24 @@ CREATE POLICY "Allow public read access to problem comments"
   USING (true);
 
 -- Allow authenticated users to create and update problems
-CREATE POLICY "Allow authenticated users to create problems"
+DROP POLICY IF EXISTS "Allow authenticated users to create problems" ON problems;
+CREATE POLICY "Allow anyone to create problems"
   ON problems FOR INSERT
-  TO authenticated
+  TO public
   WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated users to update problems"
+DROP POLICY IF EXISTS "Allow authenticated users to update problems" ON problems;
+CREATE POLICY "Allow anyone to update problems"
   ON problems FOR UPDATE
-  TO authenticated
+  TO public
   USING (true)
   WITH CHECK (true);
 
 -- Allow authenticated users to create comments
-CREATE POLICY "Allow authenticated users to create comments"
+DROP POLICY IF EXISTS "Allow authenticated users to create comments" ON problem_comments;
+CREATE POLICY "Allow anyone to create comments"
   ON problem_comments FOR INSERT
-  TO authenticated
+  TO public
   WITH CHECK (true);
 
 -- Create function to get problem with comments

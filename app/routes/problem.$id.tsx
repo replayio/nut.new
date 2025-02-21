@@ -191,9 +191,11 @@ function ViewProblemPage() {
             <ProblemViewer problem={problemData} />
           )}
         </div>
-        {hasNutAdminKey() && problemData && (
-          <UpdateProblemForms updateProblem={updateProblem} />
-        )}
+        <ClientOnly>
+          {() => hasNutAdminKey() && problemData && (
+            <UpdateProblemForms updateProblem={updateProblem} />
+          )}
+        </ClientOnly>
         <ToastContainerWrapper />
       </div>
     </TooltipProvider>

@@ -1,4 +1,5 @@
 import { supabase, type Database } from './client';
+import { logStore } from '~/lib/stores/logs';
 
 export type Problem = Database['public']['Tables']['problems']['Row'];
 export type ProblemComment = Database['public']['Tables']['problem_comments']['Row'];
@@ -39,21 +40,40 @@ export async function getProblem(id: string): Promise<Problem | null> {
 }
 
 export async function createProblem(problem: Database['public']['Tables']['problems']['Insert']) {
+  logStore.logSystem('Starting database problem creation', {
+    title: problem.title,
+    description: problem.description,
+    status: problem.status
+  });
   
-  console.log('Creating problem:', problem);
-  
-  const { data, error } = await supabase
-    .from('problems')
-    .insert(problem)
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('problems')
+      .insert(problem)
+      .select()
+      .single();
 
-  if (error) {
-    console.error('Error creating problem:', error);
+    if (error) {
+      logStore.logError('Database error creating problem', error, {
+        title: problem.title,
+        errorCode: error.code,
+        errorMessage: error.message
+      });
+      throw error;
+    }
+
+    logStore.logSystem('Problem created in database successfully', {
+      problemId: data.id,
+      title: data.title
+    });
+
+    return data;
+  } catch (error) {
+    logStore.logError('Unexpected error creating problem', error, {
+      title: problem.title
+    });
     throw error;
   }
-
-  return data;
 }
 
 export async function updateProblem(id: string, updates: Database['public']['Tables']['problems']['Update']) {
@@ -87,23 +107,31 @@ export async function addProblemComment(comment: Database['public']['Tables']['p
   return data;
 }
 
+function isClient() {
+  return typeof window !== 'undefined';
+}
+
 // Helper functions for managing user state
 export function getProblemsUsername(): string {
-  return localStorage.getItem('problems_username') || 'Anonymous';
+  return isClient() ? localStorage.getItem('problems_username') || 'Anonymous' : 'Anonymous';
 }
 
 export function setProblemsUsername(username: string) {
-  localStorage.setItem('problems_username', username);
+  if (isClient()) {
+    localStorage.setItem('problems_username', username);
+  }
 }
 
 export function hasNutAdminKey(): boolean {
-  return !!localStorage.getItem('nut_admin_key');
+  return isClient() ? !!localStorage.getItem('nut_admin_key') : false;
 }
 
 export function setNutAdminKey(key: string) {
-  localStorage.setItem('nut_admin_key', key);
+  if (isClient()) {
+    localStorage.setItem('nut_admin_key', key);
+  }
 }
 
 export function getNutAdminKey(): string | null {
-  return localStorage.getItem('nut_admin_key');
+  return isClient() ? localStorage.getItem('nut_admin_key') : null;
 } 

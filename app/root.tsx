@@ -7,6 +7,7 @@ import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect, useState } from 'react';
 import { logStore } from './lib/stores/logs';
+import { initializeAuth } from './lib/stores/auth';
 
 // @ts-ignore
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
@@ -119,11 +120,22 @@ function ThemeProvider() {
   return null;
 }
 
+function AuthProvider() {
+  useEffect(() => {
+    initializeAuth().catch((error) => {
+      logStore.logError('Failed to initialize auth', error);
+    });
+  }, []);
+
+  return null;
+}
+
 export default function App() {
   return (
     <>
       <ClientOnly>
         <ThemeProvider />
+        <AuthProvider />
       </ClientOnly>
       <Outlet />
       <ScrollRestoration />

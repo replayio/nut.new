@@ -287,7 +287,7 @@ export class ActionRunner {
     if (folder !== '.') {
       try {
         await webcontainer.fs.mkdir(folder, { recursive: true });
-        logger.debug('Created folder', folder);
+        // logger.debug('Created folder', folder);
       } catch (error) {
         logger.error('Failed to create folder\n\n', error);
       }
@@ -296,7 +296,7 @@ export class ActionRunner {
     try {
       await webcontainer.fs.writeFile(relativePath, action.content);
       resetChatFileWritten();
-      logger.debug(`File written ${relativePath}`);
+      // logger.debug(`File written ${relativePath}`);
     } catch (error) {
       logger.error('Failed to write file\n\n', error);
     }

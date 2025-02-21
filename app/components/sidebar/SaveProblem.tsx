@@ -2,10 +2,13 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { getProblemsUsername, submitProblem } from "~/lib/replay/Problems";
+import { getProblemsUsername } from "~/lib/replay/Problems";
 import type { BoltProblemInput } from "~/lib/replay/Problems";
-import { createProblem } from "~/lib/supabase/Problems";  
-
+import { createProblem } from "~/lib/supabase/Problems";
+import { logStore } from "~/lib/stores/logs";
+import { useStore } from '@nanostores/react';
+import { userStore } from "~/lib/stores/auth";
+import { AuthModal } from "~/components/auth/AuthModal";
 
 ReactModal.setAppElement('#root');
 
@@ -13,14 +16,21 @@ ReactModal.setAppElement('#root');
 
 export function SaveProblem() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     name: ''
   });
   const [problemId, setProblemId] = useState<string | null>(null);
+  const user = useStore(userStore);
 
   const handleSaveProblem = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
     setIsModalOpen(true);
     setFormData({
       title: '',
@@ -39,8 +49,19 @@ export function SaveProblem() {
   };
 
   const handleSubmitProblem = async () => {
+    logStore.logSystem('Starting problem submission', { title: formData.title });
+
+    if (!user) {
+      logStore.logError('No authenticated user');
+      toast.error('Please sign in to save problems');
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     // Add validation here
     if (!formData.title) {
+      const error = new Error('Missing title');
+      logStore.logError('Problem submission validation failed', error, { formData });
       toast.error('Please fill in title field');
       return;
     }
@@ -48,41 +69,64 @@ export function SaveProblem() {
     const username = getProblemsUsername();
 
     if (!username) {
+      const error = new Error('Missing username');
+      logStore.logError('Problem submission validation failed', error, { formData });
       toast.error('Please fill in username field');
       return;
     }
 
     toast.info("Submitting problem...");
+    logStore.logSystem('Saving all files before problem submission');
 
-    console.log("SubmitProblem", formData);
+    try {
+      await workbenchStore.saveAllFiles();
+      logStore.logSystem('Files saved successfully');
 
-    await workbenchStore.saveAllFiles();
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
+      const { contentBase64 } = await workbenchStore.generateZipBase64();
+      logStore.logSystem('Zip file generated', { 
+        contentSize: contentBase64.length,
+        title: formData.title 
+      });
 
-    const problem: BoltProblemInput = {
-      version: 2,
-      title: formData.title,
-      description: formData.description,
-      username,
-      repositoryContents: contentBase64,
-    };
+      const problem: BoltProblemInput = {
+        version: 2,
+        title: formData.title,
+        description: formData.description,
+        username,
+        repositoryContents: contentBase64,
+      };
 
-    console.log("CreateProblem", problem);
+      logStore.logSystem('Creating problem in database', { 
+        title: problem.title,
+        description: problem.description,
+        username: problem.username 
+      });
 
-    const problemId = await createProblem({
-      title: problem.title,
-      description: problem.description,
-      status: 'pending',
-      keywords: [],
-      repository_contents: problem.repositoryContents,
-      user_id: null
-    });
+      const createdProblem = await createProblem({
+        title: problem.title,
+        description: problem.description,
+        status: 'pending',
+        keywords: [],
+        repository_contents: problem.repositoryContents,
+        user_id: user.id
+      });
 
-    console.log("CreateProblemRval", problemId);
-    if (problemId) {
-      setProblemId(problemId);
+      logStore.logSystem('Problem created successfully', { problemId: createdProblem.id });
+      
+      if (createdProblem) {
+        setProblemId(createdProblem.id);
+        toast.success('Problem saved successfully!');
+      } else {
+        throw new Error('No problem ID returned from creation');
+      }
+    } catch (error) {
+      logStore.logError('Failed to submit problem', error, { 
+        title: formData.title,
+        description: formData.description 
+      });
+      toast.error('Failed to save problem');
     }
-  }
+  };
 
   return (
     <>
@@ -139,6 +183,7 @@ export function SaveProblem() {
           </>
         )}
       </ReactModal>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </>
   );
 }
