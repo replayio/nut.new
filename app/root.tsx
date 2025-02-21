@@ -2,17 +2,33 @@ import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '@remix-run/cloudflare';
 import { json } from '@remix-run/cloudflare';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
-import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
-import { themeStore } from './lib/stores/theme';
+import { themeStore, type Theme } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { logStore } from './lib/stores/logs';
 
+// @ts-ignore
+import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
+// @ts-ignore
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
+// @ts-ignore
 import globalStyles from './styles/index.scss?url';
+// @ts-ignore
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
+
+// Declare module types for CSS imports
+declare module '*.css' {
+  const url: string;
+  export default url;
+}
+
+declare module '*.scss' {
+  const url: string;
+  export default url;
+}
 
 export const links: LinksFunction = () => [
   {
@@ -72,39 +88,46 @@ export const Head = createHead(() => (
   </>
 ));
 
-export function Layout({ children }: { children: React.ReactNode }) {
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? <>{children}</> : null;
+}
+
+function ThemeProvider() {
   const theme = useStore(themeStore);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('bolt_theme') as Theme | null;
+    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
+      themeStore.set(savedTheme);
+    } else {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      themeStore.set(isDark ? 'dark' : 'light');
+    }
+  }, []);
 
   useEffect(() => {
     document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  return (
-    <>
-      {children}
-      <ScrollRestoration />
-      <Scripts />
-    </>
-  );
-}
-
-import { logStore } from './lib/stores/logs';
-
-export default function App() {
-  const theme = useStore(themeStore);
-
-  useEffect(() => {
-    logStore.logSystem('Application initialized', {
+    logStore.logSystem('Theme updated', {
       theme,
       platform: navigator.platform,
       userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString(),
     });
-  }, []);
+  }, [theme]);
 
+  return null;
+}
+
+export default function App() {
   return (
-    <Layout>
+    <>
+      <ClientOnly>
+        <ThemeProvider />
+      </ClientOnly>
       <Outlet />
-    </Layout>
+      <ScrollRestoration />
+      <Scripts />
+    </>
   );
 }

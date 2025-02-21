@@ -1,80 +1,51 @@
-import type { AppLoadContext, EntryContext } from '@remix-run/cloudflare';
+import type { EntryContext } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
-import { isbot } from 'isbot';
-import { renderToReadableStream } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
+import { PassThrough } from 'node:stream';
+import { createReadableStreamFromReadable } from '@remix-run/node';
 import { renderHeadToString } from 'remix-island';
-import { Head } from './root';
-import { themeStore } from '~/lib/stores/theme';
+import { Head, links } from './root';
 
-export default async function handleRequest(
+const ABORT_DELAY = 5_000;
+
+export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
-  _loadContext: AppLoadContext,
+  remixContext: EntryContext
 ) {
-  // await initializeModelList({});
-
-  const readable = await renderToReadableStream(<RemixServer context={remixContext} url={request.url} />, {
-    signal: request.signal,
-    onError(error: unknown) {
-      console.error(error);
-      responseStatusCode = 500;
-    },
-  });
-
-  const body = new ReadableStream({
-    start(controller) {
-      const head = renderHeadToString({ request, remixContext, Head });
-
-      controller.enqueue(
-        new Uint8Array(
-          new TextEncoder().encode(
-            `<!DOCTYPE html><html lang="en" data-theme="${themeStore.value}"><head>${head}</head><body><div id="root" class="w-full h-full">`,
-          ),
-        ),
-      );
-
-      const reader = readable.getReader();
-
-      function read() {
-        reader
-          .read()
-          .then(({ done, value }) => {
-            if (done) {
-              controller.enqueue(new Uint8Array(new TextEncoder().encode('</div></body></html>')));
-              controller.close();
-
-              return;
-            }
-
-            controller.enqueue(value);
-            read();
-          })
-          .catch((error) => {
-            controller.error(error);
-            readable.cancel();
-          });
-      }
-      read();
-    },
-
-    cancel() {
-      readable.cancel();
-    },
-  });
-
-  if (isbot(request.headers.get('user-agent') || '')) {
-    await readable.allReady;
-  }
+  const head = renderHeadToString({ request, remixContext, Head });
+  const html = renderToString(
+    <RemixServer context={remixContext} url={request.url} />
+  );
 
   responseHeaders.set('Content-Type', 'text/html');
-
   responseHeaders.set('Cross-Origin-Embedder-Policy', 'require-corp');
   responseHeaders.set('Cross-Origin-Opener-Policy', 'same-origin');
 
-  return new Response(body, {
-    headers: responseHeaders,
-    status: responseStatusCode,
-  });
+  const linkElements = links()
+    .map(
+      (link) =>
+        `<link ${Object.entries(link)
+          .map(([key, value]) => `${key}="${value}"`)
+          .join(' ')}/>`
+    )
+    .join('\n');
+
+  return new Response(
+    `<!DOCTYPE html>
+    <html lang="en" data-theme="light">
+      <head>
+        ${linkElements}
+        ${head}
+      </head>
+      <body>
+        <div id="root" class="w-full h-full">${html}</div>
+      </body>
+    </html>`,
+    {
+      status: responseStatusCode,
+      headers: responseHeaders,
+    }
+  );
 }

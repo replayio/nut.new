@@ -1,0 +1,7 @@
+{
+  "buildCommand": "remix build",
+  "devCommand": "remix dev",
+  "framework": "remix",
+  "installCommand": "bun install",
+  "outputDirectory": "public/build"
+}
