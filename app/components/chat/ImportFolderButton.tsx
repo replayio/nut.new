@@ -2,12 +2,24 @@ import React, { useState } from 'react';
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { MAX_FILES, isBinaryFile, shouldIncludeFile } from '~/utils/fileUtils';
-import { createChatFromFolder, getFileArtifacts } from '~/utils/folderImport';
-import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
+import { logStore } from '~/lib/stores/logs';
 
 interface ImportFolderButtonProps {
   className?: string;
   importChat?: (description: string, messages: Message[]) => Promise<void>;
+}
+
+interface FileArtifact {
+  path: string;
+  content: string;
+}
+
+interface ImportFolderResponse {
+  files: FileArtifact[];
+}
+
+interface CreateChatResponse {
+  messages: Message[];
 }
 
 export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ className, importChat }) => {
@@ -15,19 +27,17 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const allFiles = Array.from(e.target.files || []);
-
+    const folderName = allFiles[0]?.webkitRelativePath.split('/')[0] || 'Unknown Folder';
+    
     const filteredFiles = allFiles.filter((file) => {
       const path = file.webkitRelativePath.split('/').slice(1).join('/');
-      const include = shouldIncludeFile(path);
-
-      return include;
+      return shouldIncludeFile(path);
     });
 
     if (filteredFiles.length === 0) {
       const error = new Error('No valid files found');
-      logStore.logError('File import failed - no valid files', error, { folderName: 'Unknown Folder' });
+      logStore.logError('File import failed - no valid files', error, { folderName });
       toast.error('No files found in the selected folder');
-
       return;
     }
 
@@ -40,13 +50,10 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       toast.error(
         `This folder contains ${filteredFiles.length.toLocaleString()} files. This product is not yet optimized for very large projects. Please select a folder with fewer than ${MAX_FILES.toLocaleString()} files.`,
       );
-
       return;
     }
 
-    const folderName = filteredFiles[0]?.webkitRelativePath.split('/')[0] || 'Unknown Folder';
     setIsLoading(true);
-
     const loadingToast = toast.loading(`Importing ${folderName}...`);
 
     try {
@@ -66,7 +73,6 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
         const error = new Error('No text files found');
         logStore.logError('File import failed - no text files', error, { folderName });
         toast.error('No text files found in the selected folder');
-
         return;
       }
 
@@ -78,11 +84,42 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
         toast.info(`Skipping ${binaryFilePaths.length} binary files`);
       }
 
-      const textFileArtifacts = await getFileArtifacts(textFiles);
-      const messages = await createChatFromFolder(textFileArtifacts, binaryFilePaths, folderName);
+      // First, upload the files
+      const formData = new FormData();
+      textFiles.forEach((file) => formData.append('files', file));
+      
+      const uploadResponse = await fetch('/api/import-folder', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload files');
+      }
+
+      const { files: fileArtifacts } = await uploadResponse.json() as ImportFolderResponse;
+
+      // Then, create the chat
+      const chatResponse = await fetch('/api/create-chat-from-folder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files: fileArtifacts,
+          binaryFiles: binaryFilePaths,
+          folderName,
+        }),
+      });
+
+      if (!chatResponse.ok) {
+        throw new Error('Failed to create chat');
+      }
+
+      const { messages } = await chatResponse.json() as CreateChatResponse;
 
       if (importChat) {
-        await importChat(folderName, [...messages]);
+        await importChat(folderName, messages);
       }
 
       logStore.logSystem('Folder imported successfully', {
