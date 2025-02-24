@@ -20,6 +20,22 @@ function convertContentToAnthropic(content: any): ContentBlockParam[] {
   if (content.type === "text" && typeof content.text === "string") {
     return [{ type: "text", text: content.text }];
   }
+  if (content.type == "image" && typeof content.image == "string") {
+    // Parse data URL to extract content type and base64 data
+    const matches = content.image.match(/^data:([^;]+);base64,(.+)$/);
+    if (!matches) {
+      console.log("Invalid image data URL format");
+      return [];
+    }
+    return [{
+      type: "image",
+      source: {
+        type: "base64",
+        data: matches[2],
+        media_type: matches[1]
+      }
+    }];
+  }
   console.log("AnthropicUnknownContent", JSON.stringify(content, null, 2));
   return [];
 }
