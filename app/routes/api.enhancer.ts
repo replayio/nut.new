@@ -1,4 +1,4 @@
-import { type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { type ActionFunctionArgs } from '@remix-run/node';
 
 //import { StreamingTextResponse, parseStreamPart } from 'ai';
 import { streamText } from '~/lib/.server/llm/stream-text';

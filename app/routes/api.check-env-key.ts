@@ -1,4 +1,4 @@
-import type { LoaderFunction } from '@remix-run/cloudflare';
+import type { LoaderFunction } from '@remix-run/node';
 import { providerBaseUrlEnvKeys } from '~/utils/constants';
 
 export const loader: LoaderFunction = async ({ context, request }) => {

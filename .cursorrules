@@ -8,3 +8,13 @@ use tailwind css as css framework
 use this command to diff with main 
 ```
 git diff main -- . ':!pnpm-lock.yaml'
+
+
+Run the dev server with this command
+```
+pnpm run dev
+```
+
+
+
+

@@ -1,4 +1,4 @@
-import { type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { type ActionFunctionArgs } from '@remix-run/node';
 import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type FileMap, type Messages } from '~/lib/.server/llm/stream-text';
@@ -10,15 +10,23 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 // Directions given to the LLM when we have an enhanced prompt describing the bug to fix.
-const EnhancedPromptPrefix = `
+const ENHANCED_PROMPT_PREFIX = `
 ULTRA IMPORTANT: Below is a detailed description of the bug.
 Focus specifically on fixing this bug. Do not guess about other problems.
 `;
 
 async function chatAction({ context, request }: ActionFunctionArgs) {
+  // Only initialize OpenTelemetry if the context is available
   ensureOpenTelemetryInitialized(context);
 
-  const { messages, files, promptId, simulationEnhancedPrompt, anthropicApiKey: clientAnthropicApiKey, loginKey } = await request.json<{
+  const { 
+    messages, 
+    files, 
+    promptId, 
+    simulationEnhancedPrompt, 
+    anthropicApiKey: clientAnthropicApiKey,
+    loginKey, 
+  } = await request.json<{
     messages: Messages;
     files: FileMap;
     promptId?: string;
@@ -27,24 +35,33 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     loginKey?: string;
   }>();
 
-  let finished: (v?: any) => void;
-  context.cloudflare.ctx.waitUntil(new Promise((resolve) => finished = resolve));
-
-  console.log("SimulationEnhancedPrompt", simulationEnhancedPrompt);
+  console.log('SimulationEnhancedPrompt', simulationEnhancedPrompt);
 
   try {
+    // Create a compatible env object that satisfies the expected Env interface
+    const compatibleEnv = {
+      ...process.env,
+      DEFAULT_NUM_CTX: process.env.DEFAULT_NUM_CTX || '',
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      GROQ_API_KEY: process.env.GROQ_API_KEY || '',
+      // Add other required keys with empty string defaults
+    };
+
     const { system, messages: coreMessages } = await getStreamTextArguments({
       messages,
-      env: context.cloudflare.env,
+      env: compatibleEnv,
       apiKeys: {},
       files,
       providerSettings: undefined,
       promptId,
     });
 
-    const apiKey = clientAnthropicApiKey ?? context.cloudflare.env.ANTHROPIC_API_KEY;
+    // Use either client-provided API key or environment variable
+    const apiKey = clientAnthropicApiKey || process.env.ANTHROPIC_API_KEY;
+    
     if (!apiKey) {
-      throw new Error("Anthropic API key is not set");
+      throw new Error('Anthropic API key is not set');
     }
 
     const anthropicApiKey: AnthropicApiKey = {
@@ -59,11 +76,15 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
         if (simulationEnhancedPrompt) {
           const lastMessage = coreMessages[coreMessages.length - 1];
-          assert(lastMessage.role == "user", "Last message must be a user message");
-          assert(lastMessage.content.length > 0, "Last message must have content");
+          assert(lastMessage.role === 'user', 'Last message must be a user message');
+          assert(lastMessage.content.length > 0, 'Last message must have content');
+          
           const lastContent = lastMessage.content[0];
-          assert(typeof lastContent == "object" && lastContent.type == "text", "Last message content must be text");
-          lastContent.text += `\n\n${EnhancedPromptPrefix}\n\n${simulationEnhancedPrompt}`;
+          assert(
+            typeof lastContent === 'object' && lastContent.type === 'text', 
+            'Last message content must be text'
+          );
+          lastContent.text += `\n\n${ENHANCED_PROMPT_PREFIX}\n\n${simulationEnhancedPrompt}`;
         }
 
         try {
@@ -74,7 +95,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         }
 
         controller.close();
-        setTimeout(finished, 1000);
       },
     });
 
