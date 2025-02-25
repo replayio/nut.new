@@ -1,7 +1,7 @@
 /**
  * Middleware implementation using our Sentry wrapper
  */
-import { initSentry, Sentry } from '~/lib/sentry-wrapper';
+import { initSentry, sentry } from '~/lib/sentry-wrapper';
 
 export const onRequest = [
   async (context: any) => {
@@ -21,7 +21,7 @@ export const onRequest = [
       return await context.next();
     } catch (error) {
       // Capture any errors that occur
-      Sentry.captureException(error);
+      sentry.captureException(error);
       throw error;
     }
   },

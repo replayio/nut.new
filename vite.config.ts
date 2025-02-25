@@ -29,6 +29,39 @@ export default defineConfig((config) => {
     build: {
       target: 'esnext',
       sourcemap: true,
+      rollupOptions: {
+        // Externalize all Node.js built-in modules for browser builds
+        external: [
+          'node:util', 
+          'node:os', 
+          'node:path', 
+          'node:fs', 
+          'node:stream', 
+          'node:crypto',
+          'node:events',
+          'node:http',
+          'node:https',
+          'node:zlib',
+          'node:buffer',
+          'node:url',
+          'node:querystring',
+          'node:assert',
+          'node:process',
+          'node:child_process',
+          'node:worker_threads',
+          'util',
+          'fs',
+          'path',
+          'os',
+          'crypto',
+          'stream',
+          'events',
+          'http',
+          'https',
+          'zlib',
+          'url',
+        ],
+      },
     },
     plugins: [
       nodePolyfills({
@@ -67,6 +100,10 @@ export default defineConfig((config) => {
           api: 'modern-compiler',
         },
       },
+    },
+    optimizeDeps: {
+      // Exclude server-only packages from browser builds
+      exclude: ['@sentry/node'],
     },
   };
 });

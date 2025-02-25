@@ -14,7 +14,7 @@ import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 import 'virtual:uno.css';
 
 import { logStore } from './lib/stores/logs';
-import { Sentry } from './lib/sentry-wrapper';
+import { sentry } from './lib/sentry-wrapper';
 
 export const links: LinksFunction = () => [
   {
@@ -86,7 +86,7 @@ export const ErrorBoundary = () => {
   console.error('Application error:', error);
   
   // Report error to Sentry
-  Sentry.captureException(error);
+  sentry.captureException(error);
   
   useEffect(() => {
     logStore.logError('Application encountered an error', {

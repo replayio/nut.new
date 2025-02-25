@@ -1,4 +1,4 @@
-import { sentryHandleError, Sentry } from '~/lib/sentry-wrapper';
+import { sentryHandleError, sentry, initSentry } from '~/lib/sentry-wrapper';
 import type { AppLoadContext, EntryContext } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { PassThrough } from 'stream';
@@ -7,6 +7,15 @@ import { renderHeadToString } from 'remix-island';
 import { Head } from './root';
 import { themeStore } from '~/lib/stores/theme';
 import { isbot } from 'isbot';
+
+// Initialize Sentry for the server environment
+initSentry({
+  dsn: process.env.SENTRY_DSN || 'https://5465638ce4f73a256d861820b3a4dad4@o437061.ingest.us.sentry.io/4508853437399040',
+  initServer: true,
+  tracesSampleRate: 1.0,
+}).catch(error => {
+  console.error('Failed to initialize server-side Sentry:', error);
+});
 
 export const handleError = sentryHandleError;
 
@@ -92,7 +101,7 @@ export default async function handleRequest(
       onError(error: unknown) {
         didError = true;
         console.error(error);
-        Sentry.captureException(error);
+        sentry.captureException(error);
       },
     });
 
