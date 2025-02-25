@@ -1,4 +1,3 @@
-import { captureRemixErrorBoundaryError } from '@sentry/remix';
 import { useStore } from '@nanostores/react';
 import type { LinksFunction } from '@remix-run/cloudflare';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '@remix-run/react';
@@ -83,7 +82,7 @@ import { logStore } from './lib/stores/logs';
 
 export const ErrorBoundary = () => {
   const error = useRouteError();
-  captureRemixErrorBoundaryError(error);
+  console.error('Application error:', error);
 
   return <div>Something went wrong</div>;
 };
