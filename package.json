@@ -75,6 +75,7 @@
     "@remix-run/node": "^2.15.3",
     "@remix-run/react": "^2.15.0",
     "@sentry/cloudflare": "^8.55.0",
+    "@sentry/node": "^9.2.0",
     "@sentry/remix": "^8",
     "@sentry/vite-plugin": "^3.1.2",
     "@uiw/codemirror-theme-vscode": "^4.23.6",
