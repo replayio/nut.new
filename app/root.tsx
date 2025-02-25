@@ -13,6 +13,9 @@ import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
 
+import { logStore } from './lib/stores/logs';
+import { Sentry } from './lib/sentry-wrapper';
+
 export const links: LinksFunction = () => [
   {
     rel: 'icon',
@@ -78,11 +81,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { logStore } from './lib/stores/logs';
-
 export const ErrorBoundary = () => {
   const error = useRouteError();
   console.error('Application error:', error);
+  
+  // Report error to Sentry
+  Sentry.captureException(error);
+  
+  useEffect(() => {
+    logStore.logError('Application encountered an error', {
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString(),
+    });
+  }, [error]);
 
   return <div>Something went wrong</div>;
 };

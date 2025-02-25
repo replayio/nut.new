@@ -1,0 +1,4 @@
+use pnpm as package manager
+use typescript
+use remix run as framework
+use tailwind css as css framework
