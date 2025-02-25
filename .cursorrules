@@ -2,3 +2,9 @@ use pnpm as package manager
 use typescript
 use remix run as framework
 use tailwind css as css framework
+
+
+
+use this command to diff with main 
+```
+git diff main -- . ':!pnpm-lock.yaml'
