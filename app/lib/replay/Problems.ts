@@ -6,6 +6,15 @@ import type { ProtocolMessage } from './SimulationPrompt';
 import Cookies from 'js-cookie';
 import JSZip from 'jszip';
 import type { FileArtifact } from '~/utils/folderImport';
+import { shouldUseSupabase } from '~/lib/supabase/client';
+import {
+  supabaseListAllProblems,
+  supabaseGetProblem,
+  supabaseSubmitProblem,
+  supabaseUpdateProblem,
+  supabaseSubmitFeedback,
+  supabaseDeleteProblem,
+} from '~/lib/supabase/problems';
 
 export interface BoltProblemComment {
   username?: string;
@@ -51,6 +60,10 @@ export interface BoltProblem extends BoltProblemDescription {
 export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
+  if (shouldUseSupabase()) {
+    return supabaseListAllProblems();
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
       method: 'Recording.globalExperimentalCommand',
@@ -70,7 +83,16 @@ export async function listAllProblems(): Promise<BoltProblemDescription[]> {
 }
 
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
+  if (shouldUseSupabase()) {
+    return supabaseGetProblem(problemId);
+  }
+
   try {
+    if (!problemId) {
+      toast.error('Invalid problem ID');
+      return null;
+    }
+
     const rv = await sendCommandDedicatedClient({
       method: 'Recording.globalExperimentalCommand',
       params: {
@@ -78,9 +100,13 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
         params: { problemId },
       },
     });
-    console.log('FetchProblemRval', rv);
 
     const problem = (rv as { rval: { problem: BoltProblem } }).rval.problem;
+
+    if (!problem) {
+      toast.error('Problem not found');
+      return null;
+    }
 
     if ('prompt' in problem) {
       // 2/11/2025: Update obsolete data format for older problems.
@@ -91,12 +117,23 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
     return problem;
   } catch (error) {
     console.error('Error fetching problem', error);
-    toast.error('Failed to fetch problem');
+
+    // Check for specific protocol error
+    if (error instanceof Error && error.message.includes('Unknown problem ID')) {
+      toast.error('Problem not found');
+    } else {
+      toast.error('Failed to fetch problem');
+    }
   }
+
   return null;
 }
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
+  if (shouldUseSupabase()) {
+    return supabaseSubmitProblem(problem);
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
       method: 'Recording.globalExperimentalCommand',
@@ -116,11 +153,24 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput | undefined) {
+export async function deleteProblem(problemId: string): Promise<void | undefined> {
+  if (shouldUseSupabase()) {
+    return supabaseDeleteProblem(problemId);
+  }
+
+  return undefined;
+}
+
+export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<void | undefined> {
+  if (shouldUseSupabase()) {
+    return supabaseUpdateProblem(problemId, problem);
+  }
+
   try {
     if (!getNutIsAdmin()) {
       toast.error('Admin user required');
-      return;
+
+      return undefined;
     }
 
     const loginKey = Cookies.get(nutLoginKeyCookieName);
@@ -131,10 +181,14 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
         params: { problemId, problem, loginKey },
       },
     });
+
+    return undefined;
   } catch (error) {
     console.error('Error updating problem', error);
     toast.error('Failed to update problem');
   }
+
+  return undefined;
 }
 
 const nutLoginKeyCookieName = 'nutLoginKey';
@@ -208,6 +262,10 @@ export async function extractFileArtifactsFromRepositoryContents(repositoryConte
 }
 
 export async function submitFeedback(feedback: any) {
+  if (shouldUseSupabase()) {
+    return supabaseSubmitFeedback(feedback);
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
       method: 'Recording.globalExperimentalCommand',

@@ -10,6 +10,7 @@ import { useParams } from '@remix-run/react';
 import {
   getProblem,
   updateProblem as backendUpdateProblem,
+  deleteProblem as backendDeleteProblem,
   getProblemsUsername,
   BoltProblemStatus,
   getNutIsAdmin,
@@ -222,7 +223,7 @@ function ViewProblemPage() {
 
   const deleteProblem = useCallback(async () => {
     console.log('BackendDeleteProblem', problemId);
-    await backendUpdateProblem(problemId, undefined);
+    await backendDeleteProblem(problemId);
     toast.success('Problem deleted');
   }, [problemData]);
 
