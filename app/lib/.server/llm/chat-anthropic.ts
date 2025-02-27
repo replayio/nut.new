@@ -5,7 +5,7 @@ import type { ContentBlockParam, MessageParam } from '@anthropic-ai/sdk/resource
 import type { FileMap } from './stream-text';
 import { StreamingMessageParser } from '~/lib/runtime/message-parser';
 import { extractRelativePath } from '~/utils/diff';
-import { wrapWithSpan, getCurrentSpan } from '~/lib/.server/otel';
+import { wrapWithSpan, getCurrentSpan } from '~/lib/.server/otel-wrapper';
 
 const Model = 'claude-3-7-sonnet-20250219';
 const MaxMessageTokens = 8192;

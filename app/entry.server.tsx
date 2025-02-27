@@ -1,4 +1,9 @@
-import * as Sentry from '@sentry/remix';
+import { sentryHandleError } from '~/lib/sentry';
+
+/**
+ * Using our conditional Sentry implementation instead of direct import
+ * This avoids loading Sentry in development environments
+ */
 import type { AppLoadContext, EntryContext } from '@remix-run/cloudflare';
 import { RemixServer } from '@remix-run/react';
 import { isbot } from 'isbot';
@@ -7,7 +12,7 @@ import { renderHeadToString } from 'remix-island';
 import { Head } from './root';
 import { themeStore } from '~/lib/stores/theme';
 
-export const handleError = Sentry.sentryHandleError;
+export const handleError = sentryHandleError;
 
 export default async function handleRequest(
   request: Request,
@@ -26,10 +31,11 @@ export default async function handleRequest(
     },
   });
 
+  // @ts-ignore - Fix for incompatible EntryContext types between different remix versions
+  const head = renderHeadToString({ request, remixContext, Head });
+
   const body = new ReadableStream({
     start(controller) {
-      const head = renderHeadToString({ request, remixContext, Head });
-
       controller.enqueue(
         new Uint8Array(
           new TextEncoder().encode(

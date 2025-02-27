@@ -3,7 +3,7 @@ import { ChatStreamController } from '~/utils/chatStreamController';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import { getStreamTextArguments, type FileMap, type Messages } from '~/lib/.server/llm/stream-text';
 import { chatAnthropic, type AnthropicApiKey } from '~/lib/.server/llm/chat-anthropic';
-import { ensureOpenTelemetryInitialized } from '~/lib/.server/otel';
+import { ensureOpenTelemetryInitialized } from '~/lib/.server/otel-wrapper';
 
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
