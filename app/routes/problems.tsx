@@ -5,7 +5,8 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { Suspense, useEffect, useState } from 'react';
-import { BoltProblemStatus, listAllProblems } from '~/lib/replay/Problems';
+import { listAllProblems } from '~/lib/supabase/problems';
+import { BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemDescription } from '~/lib/replay/Problems';
 
 const toastAnimation = cssTransition({
@@ -97,7 +98,22 @@ function ProblemsPage() {
   const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
 
   useEffect(() => {
-    listAllProblems().then(setProblems);
+    // Map the Supabase problem data to BoltProblemDescription format
+    listAllProblems().then(problems => {
+      const boltProblems: BoltProblemDescription[] = problems.map(problem => ({
+        version: 1,
+        problemId: problem.id,
+        timestamp: new Date(problem.created_at).getTime(),
+        title: problem.title,
+        description: problem.description,
+        status: problem.status === 'pending' ? BoltProblemStatus.Pending :
+                problem.status === 'solved' ? BoltProblemStatus.Solved :
+                problem.status === 'unsolved' ? BoltProblemStatus.Unsolved :
+                BoltProblemStatus.Pending,
+        keywords: problem.keywords
+      }));
+      setProblems(boltProblems);
+    });
   }, []);
 
   const filteredProblems = problems?.filter(problem => {
