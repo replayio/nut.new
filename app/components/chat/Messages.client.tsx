@@ -8,6 +8,7 @@ import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
 import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
+import ApproveChange from './ApproveChange';
 
 interface MessagesProps {
   id?: string;
@@ -55,6 +56,27 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     }
     return { messageId: beforeUserMessage.id, contents };
   };
+
+  /*
+  const showApproveChange = (() => {
+    if (isStreaming) {
+      return false;
+    }
+
+    if (!messages.length) {
+      return false;
+    }
+
+    const lastMessageProjectContents = getLastMessageProjectContents(messages.length - 1);
+    if (!lastMessageProjectContents) {
+      return false;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    return hasFileModifications(lastMessage.content);
+  })();
+  */
+  const showApproveChange = true;
 
   return (
     <div id={id} ref={ref} className={props.className}>
@@ -122,6 +144,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         : null}
       {isStreaming && (
         <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+      )}
+      {showApproveChange && (
+        <ApproveChange onApprove={() => {}} onReject={() => {}} />
       )}
     </div>
   );
