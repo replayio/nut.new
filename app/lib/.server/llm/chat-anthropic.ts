@@ -45,6 +45,7 @@ export interface AnthropicApiKey {
   isUser: boolean;
   userLoginKey?: string;
 }
+
 export interface AnthropicCall {
   systemPrompt: string;
   messages: MessageParam[];
@@ -53,7 +54,7 @@ export interface AnthropicCall {
   promptTokens: number;
 }
 
-const callAnthropic = wrapWithSpan(
+export const callAnthropic = wrapWithSpan(
   {
     name: "llm-call",
     attrs: {
@@ -63,11 +64,12 @@ const callAnthropic = wrapWithSpan(
   },
 
   // eslint-disable-next-line prefer-arrow-callback
-  async function callAnthropic(apiKey: AnthropicApiKey, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
+  async function callAnthropic(apiKey: AnthropicApiKey, reason: string, systemPrompt: string, messages: MessageParam[]): Promise<AnthropicCall> {
     const span = getCurrentSpan();
     span?.setAttributes({
       "llm.chat.calls": 1, // so we can SUM(llm.chat.calls) without doing a COUNT + filter
       "llm.chat.num_messages": messages.length,
+      "llm.chat.reason": reason,
       "llm.chat.is_user_api_key": apiKey.isUser,
       "llm.chat.user_login_key": apiKey.userLoginKey,
     });
@@ -140,7 +142,7 @@ async function restorePartialFile(
   state: ChatState,
   existingContent: string,
   newContent: string,
-  apiKey: AnthropicApiKey,
+  cx: AnthropicApiKey,
   responseDescription: string
 ) {
   const systemPrompt = `
@@ -190,7 +192,7 @@ ${responseDescription}
     },
   ];
 
-  const restoreCall = await callAnthropic(apiKey, systemPrompt, messages);
+  const restoreCall = await callAnthropic(cx, "RestorePartialFile", systemPrompt, messages);
 
   const OpenTag = "<restoredContent>";
   const CloseTag = "</restoredContent>";
@@ -299,7 +301,7 @@ interface FileContents {
   content: string;
 }
 
-async function fixupResponseFiles(state: ChatState, files: FileMap, apiKey: AnthropicApiKey, responseText: string) {
+async function fixupResponseFiles(state: ChatState, files: FileMap, cx: AnthropicApiKey, responseText: string) {
   const fileContents: FileContents[] = [];
 
   const messageParser = new StreamingMessageParser({
@@ -328,7 +330,7 @@ async function fixupResponseFiles(state: ChatState, files: FileMap, apiKey: Anth
         state,
         existingContent,
         newContent,
-        apiKey,
+        cx,
         responseDescription
       );
       restoreCalls.push(restoreCall);
@@ -362,7 +364,7 @@ export async function chatAnthropic(chatController: ChatStreamController, files:
     });
   }
 
-  const mainCall = await callAnthropic(apiKey, systemPrompt, messageParams);
+  const mainCall = await callAnthropic(apiKey, "SendChatMessage", systemPrompt, messageParams);
 
   const state: ChatState = {
     infos: [],

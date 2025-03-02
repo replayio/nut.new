@@ -30,6 +30,7 @@ import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses 
 import type { FileMap } from '~/lib/stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { getNutLoginKey } from '~/lib/replay/Problems';
+import { shouldUseSimulation } from '~/lib/hooks/useSimulation';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -327,7 +328,7 @@ export const ChatImpl = memo(
       return { enhancedPrompt, enhancedPromptMessage };
     }
 
-    const sendMessage = async (_event: React.UIEvent, messageInput?: string, simulation?: boolean) => {
+    const sendMessage = async (_event: React.UIEvent, messageInput?: string) => {
       const _input = messageInput || input;
       const numAbortsAtStart = gNumAborts;
 
@@ -362,6 +363,14 @@ export const ChatImpl = memo(
       await workbenchStore.saveAllFiles();
 
       let simulationEnhancedPrompt: string | undefined;
+
+      const simulation = await shouldUseSimulation(messages, _input);
+
+      if (numAbortsAtStart != gNumAborts) {
+        return;
+      }
+
+      console.log("UseSimulation", simulation);
 
       if (simulation) {
         gLockSimulationData = true;

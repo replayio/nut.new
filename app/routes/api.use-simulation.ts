@@ -1,0 +1,53 @@
+import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
+
+import { stripIndents } from '~/utils/stripIndent';
+import { callAnthropic, type AnthropicApiKey } from '~/lib/.server/llm/chat-anthropic';
+
+export async function action(args: ActionFunctionArgs) {
+  return useSimulationAction(args);
+}
+
+async function useSimulationAction({ context, request }: ActionFunctionArgs) {
+  const { messages, messageInput } = await request.json<{
+    messages: Message[];
+    messageInput: string;
+  }>();
+
+  const apiKey = context.cloudflare.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("Anthropic API key is not set");
+  }
+
+  const anthropicApiKey: AnthropicApiKey = {
+    key: apiKey,
+    isUser: false,
+    userLoginKey: undefined,
+  };
+
+  const systemPrompt = `
+You are a helpful assistant that determines whether a user's message that is asking an AI
+to make a change to an application should first perform a detailed analysis of the application's
+behavior to generate a better answer.
+
+This is most helpful when the user is asking the AI to fix a problem with the application.
+When making straightforward improvements to the application a detailed analysis is not necessary.
+
+The text of the user's message is wrapped in \`<user_message>\` tags below. You must describe your
+reasoning and then respond with either \`<analyze_application>true</analyze_application>\` or
+\`<analyze_application>false</analyze_application>\`.
+
+<user_message>
+${messageInput}
+</user_message>
+  `;
+
+  const { responseText } = await callAnthropic(anthropicApiKey, "UseSimulation", systemPrompt, []);
+
+  const match = /<analyze_application>(.*?)<\/analyze_application>/.exec(responseText);
+  if (match) {
+    const analyzeApplication = match[1];
+    return json({ analyzeApplication });
+  } else {
+    return json({ analyzeApplication: false });
+  }
+}

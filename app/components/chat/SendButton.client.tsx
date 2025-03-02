@@ -2,7 +2,6 @@ import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
 
 interface SendButtonProps {
   show: boolean;
-  fixBug: boolean;
   isStreaming?: boolean;
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -11,17 +10,13 @@ interface SendButtonProps {
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const SendButton = ({ show, fixBug, isStreaming, disabled, onClick }: SendButtonProps) => {
-  const className = fixBug
-    ? "absolute flex justify-center items-center top-[18px] right-[60px] p-1 bg-accent-500 hover:brightness-94 color-white rounded-md w-[34px] h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed"
-    : "absolute flex justify-center items-center top-[18px] right-[22px] p-1 bg-accent-500 hover:brightness-94 color-white rounded-md w-[34px] h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed";
+export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonProps) => {
+  const className = "absolute flex justify-center items-center top-[18px] right-[22px] p-1 bg-accent-500 hover:brightness-94 color-white rounded-md w-[34px] h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed";
 
   // Determine tooltip text based on button state
-  const tooltipText = fixBug
-    ? "Fix Bug"
-    : isStreaming
+  const tooltipText = isStreaming
     ? "Stop Generation"
-    : "Make Improvement";
+    : "Chat";
 
   return (
     <AnimatePresence>
@@ -43,11 +38,9 @@ export const SendButton = ({ show, fixBug, isStreaming, disabled, onClick }: Sen
           }}
         >
           <div className="text-lg">
-            {fixBug
-              ? <div className="i-ph:bug-fill"></div>
-              : !isStreaming
-                ? <div className="i-ph:hand-fill"></div>
-                : <div className="i-ph:stop-circle-bold"></div>}
+            {!isStreaming
+             ? <div className="i-ph:hand-fill"></div>
+             : <div className="i-ph:stop-circle-bold"></div>}
           </div>
         </motion.button>
       ) : null}
