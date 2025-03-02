@@ -1,7 +1,7 @@
 import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 
-import { stripIndents } from '~/utils/stripIndent';
 import { callAnthropic, type AnthropicApiKey } from '~/lib/.server/llm/chat-anthropic';
+import type { MessageParam } from '@anthropic-ai/sdk/resources/messages/messages.mjs';
 
 export async function action(args: ActionFunctionArgs) {
   return useSimulationAction(args);
@@ -32,22 +32,24 @@ behavior to generate a better answer.
 This is most helpful when the user is asking the AI to fix a problem with the application.
 When making straightforward improvements to the application a detailed analysis is not necessary.
 
-The text of the user's message is wrapped in \`<user_message>\` tags below. You must describe your
-reasoning and then respond with either \`<analyze_application>true</analyze_application>\` or
-\`<analyze_application>false</analyze_application>\`.
-
-<user_message>
-${messageInput}
-</user_message>
+The text of the user's message will be wrapped in \`<user_message>\` tags. You must describe your
+reasoning and then respond with either \`<analyze>true</analyze>\` or \`<analyze>false</analyze>\`.
   `;
 
-  const { responseText } = await callAnthropic(anthropicApiKey, "UseSimulation", systemPrompt, []);
+  const message: MessageParam = {
+    role: "user",
+    content: `Here is the user message you need to evaluate: <user_message>${messageInput}</user_message>`,
+  };
 
-  const match = /<analyze_application>(.*?)<\/analyze_application>/.exec(responseText);
+  const { responseText } = await callAnthropic(anthropicApiKey, "UseSimulation", systemPrompt, [message]);
+
+  console.log("UseSimulationResponse", responseText);
+
+  const match = /<analyze>(.*?)<\/analyze>/.exec(responseText);
   if (match) {
-    const analyzeApplication = match[1];
-    return json({ analyzeApplication });
+    const useSimulation = match[1];
+    return json({ useSimulation });
   } else {
-    return json({ analyzeApplication: false });
+    return json({ useSimulation: false });
   }
 }
