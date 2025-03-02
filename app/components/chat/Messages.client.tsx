@@ -39,8 +39,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     // The message index is for the model response, and the project
     // contents will be associated with the last message present when
     // the user prompt was sent to the model. This could be either two
-    // or three messages back, depending on whether the "fix bug"
-    // button was clicked.
+    // or three messages back, depending on whether a bug explanation was added.
     const beforeUserMessage = messages[index - 2];
     const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
     if (!contents) {

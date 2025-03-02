@@ -27,7 +27,7 @@ import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
 
-const TEXTAREA_MIN_HEIGHT = 76;
+export const TEXTAREA_MIN_HEIGHT = 76;
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
