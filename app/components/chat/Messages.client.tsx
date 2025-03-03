@@ -8,7 +8,7 @@ import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
 import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import ApproveChange from './ApproveChange';
+import ApproveChange, { type RejectChangeData } from './ApproveChange';
 
 interface MessagesProps {
   id?: string;
@@ -16,6 +16,8 @@ interface MessagesProps {
   isStreaming?: boolean;
   messages?: Message[];
   onRewind?: (messageId: string, contents: string) => void;
+  onApproveChange?: (messageId: string) => void;
+  onRejectChange?: (messageId: string, contents: string, data: RejectChangeData) => void;
 }
 
 interface ProjectContents {
@@ -33,7 +35,7 @@ function hasFileModifications(content: string) {
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [], onRewind } = props;
+  const { id, isStreaming = false, messages = [], onRewind, onApproveChange, onRejectChange } = props;
 
   const getLastMessageProjectContents = (index: number) => {
     // The message index is for the model response, and the project
@@ -145,7 +147,26 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
       )}
       {showApproveChange && (
-        <ApproveChange onApprove={() => {}} onReject={() => {}} />
+        <ApproveChange
+          onApprove={() => {
+            if (onApproveChange) {
+              const lastMessage = messages[messages.length - 1];
+              assert(lastMessage);
+              onApproveChange(lastMessage.id);
+            }
+          }}
+          onReject={(data) => {
+            if (onRejectChange) {
+              const lastMessage = messages[messages.length - 1];
+              assert(lastMessage);
+
+              const info = getLastMessageProjectContents(messages.length - 1);
+              assert(info);
+
+              onRejectChange(lastMessage.id, info.contents.content, data);
+            }
+          }}
+        />
       )}
     </div>
   );

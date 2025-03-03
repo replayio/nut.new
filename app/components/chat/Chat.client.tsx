@@ -31,6 +31,7 @@ import type { FileMap } from '~/lib/stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { getNutLoginKey } from '~/lib/replay/Problems';
 import { shouldUseSimulation } from '~/lib/hooks/useSimulation';
+import type { RejectChangeData } from './ApproveChange';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -328,7 +329,7 @@ export const ChatImpl = memo(
       return { enhancedPrompt, enhancedPromptMessage };
     }
 
-    const sendMessage = async (_event: React.UIEvent, messageInput?: string) => {
+    const sendMessage = async (messageInput?: string) => {
       const _input = messageInput || input;
       const numAbortsAtStart = gNumAborts;
 
@@ -473,6 +474,27 @@ export const ChatImpl = memo(
       }
     };
 
+    const onApproveChange = (messageId: string) => {
+      console.log("ApproveChange", messageId);
+    };
+
+    const onRejectChange = async (messageId: string, projectContents: string, data: RejectChangeData) => {
+      console.log("RejectChange", messageId, data);
+
+      const message = messages.find((message) => message.id === messageId);
+      const messageContents = message?.content ?? "";
+
+      await onRewind(messageId, projectContents);
+
+      if (data.shareProject) {
+        throw new Error("FIXME");
+      }
+
+      if (data.retry) {
+        sendMessage(messageContents);
+      }
+    };
+
     /**
      * Handles the change event for the textarea and updates the input state.
      * @param event - The change event from the textarea.
@@ -544,6 +566,8 @@ export const ChatImpl = memo(
         imageDataList={imageDataList}
         setImageDataList={setImageDataList}
         onRewind={onRewind}
+        onApproveChange={onApproveChange}
+        onRejectChange={onRejectChange}
       />
     );
   },
