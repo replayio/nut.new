@@ -7,8 +7,8 @@ import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { BoltProblemStatus, getProblemsUsername, getNutIsAdmin } from '~/lib/replay/Problems.client';
-import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems.client';
+import { getProblemsUsername, getNutIsAdmin } from '~/lib/replay/Problems.client';
+import { BoltProblemStatus, type BoltProblem, type BoltProblemComment } from '~/lib/replay/types';
 import { getProblem, updateProblem as backendUpdateProblem } from '~/lib/api/problems';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {

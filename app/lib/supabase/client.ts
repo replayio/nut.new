@@ -1,12 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+declare global {
+  interface Window {
+    ENV?: {
+      SUPABASE_URL: string;
+      SUPABASE_ANON_KEY: string;
+    };
+  }
+}
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
@@ -48,13 +51,13 @@ let supabaseAnonKey = '';
 
 // Determine execution environment and get appropriate variables
 if (typeof process === 'undefined') {
-  // Client-side or Cloudflare environment
+  // Client-side environment
   if (typeof window !== 'undefined' && window.ENV) {
     supabaseUrl = window.ENV.SUPABASE_URL || '';
     supabaseAnonKey = window.ENV.SUPABASE_ANON_KEY || '';
   }
 } else {
-  // Node.js environment (development)
+  // Node.js or Cloudflare environment
   supabaseUrl = process.env.SUPABASE_URL || '';
   supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 }
@@ -75,4 +78,4 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Helper function to check if Supabase is properly initialized
 export const isSupabaseInitialized = (): boolean => {
   return Boolean(supabaseUrl && supabaseAnonKey);
-}; 
+};

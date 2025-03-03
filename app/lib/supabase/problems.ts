@@ -6,7 +6,6 @@ import {
 } from '~/lib/replay/Problems.server';
 
 import {
-  BoltProblemStatus,
   getProblemsUsername as replayGetProblemsUsername,
   saveProblemsUsername as replaySaveProblemsUsername,
   getNutIsAdmin,
@@ -14,7 +13,13 @@ import {
   saveNutLoginKey,
 } from '~/lib/replay/Problems.client';
 
-import type { BoltProblem, BoltProblemInput, BoltProblemComment } from '~/lib/replay/Problems.client';
+import {
+  BoltProblemStatus,
+  type BoltProblem,
+  type BoltProblemInput,
+  type BoltProblemComment,
+} from '~/lib/replay/types';
+
 import type { Database } from './client';
 
 export type Problem = Database['public']['Tables']['problems']['Row'];
@@ -118,6 +123,7 @@ export async function listAllProblems(): Promise<Problem[]> {
     return Promise.all(
       boltProblems.map(async (boltProblemDesc) => {
         const fullProblem = await replayGetProblem(boltProblemDesc.problemId);
+
         if (!fullProblem) {
           // Create a minimal problem if we couldn't get the full details
           return {
@@ -133,6 +139,7 @@ export async function listAllProblems(): Promise<Problem[]> {
             problem_comments: [],
           };
         }
+
         return mapBoltProblemToProblem(fullProblem);
       }),
     );
@@ -148,9 +155,11 @@ export async function listAllProblems(): Promise<Problem[]> {
 export async function getProblem(id: string): Promise<Problem | null> {
   try {
     const boltProblem = await replayGetProblem(id);
+
     if (!boltProblem) {
       return null;
     }
+
     return mapBoltProblemToProblem(boltProblem);
   } catch (error) {
     console.error('Error fetching problem:', error);
@@ -174,12 +183,14 @@ export async function createProblem(problem: Database['public']['Tables']['probl
     };
 
     const problemId = await replaySubmitProblem(boltProblemInput);
+
     if (!problemId) {
       throw new Error('Failed to create problem');
     }
 
     // Get the newly created problem
     const newBoltProblem = await replayGetProblem(problemId);
+
     if (!newBoltProblem) {
       throw new Error('Failed to retrieve created problem');
     }
@@ -203,6 +214,7 @@ export async function updateProblem(
 
     // Get the current problem to merge with updates
     const currentProblem = await replayGetProblem(id);
+
     if (!currentProblem) {
       throw new Error('Problem not found');
     }
@@ -217,6 +229,7 @@ export async function updateProblem(
 
     // Get the updated problem
     const updatedBoltProblem = await replayGetProblem(id);
+
     if (!updatedBoltProblem) {
       throw new Error('Failed to retrieve updated problem');
     }
@@ -237,6 +250,7 @@ export async function addProblemComment(
   try {
     // Get the current problem
     const boltProblem = await replayGetProblem(comment.problem_id);
+
     if (!boltProblem) {
       throw new Error('Problem not found');
     }

@@ -4,66 +4,22 @@ import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import JSZip from 'jszip';
 import type { FileArtifact } from '~/utils/folderImport';
-import type { ProtocolMessage } from './SimulationPrompt';
+import type { BoltProblem, BoltProblemInput } from './types';
 
-// ========================== Type Definitions ==========================
+// ========================== Cookie Keys ==========================
 
-export interface BoltProblemComment {
-  username?: string;
-  content: string;
-  timestamp: number;
-}
+const PROBLEMS_USERNAME_KEY = 'problems_username';
+const NUT_LOGIN_KEY = 'nut_login_key';
+const NUT_IS_ADMIN_KEY = 'nut_is_admin';
 
-export interface BoltProblemSolution {
-  simulationData: any;
-  messages: ProtocolMessage[];
-  evaluator?: string;
-}
-
-export enum BoltProblemStatus {
-  // Problem has been submitted but not yet reviewed.
-  Pending = 'Pending',
-
-  // Problem has been reviewed and has not been solved yet.
-  Unsolved = 'Unsolved',
-
-  // Nut automatically produces a suitable explanation for solving the problem.
-  Solved = 'Solved',
-}
-
-// Information about each problem stored in the index file.
-export interface BoltProblemDescription {
-  version: number;
-  problemId: string;
-  timestamp: number;
-  title: string;
-  description: string;
-  status?: BoltProblemStatus;
-  keywords?: string[];
-}
-
-export interface BoltProblem extends BoltProblemDescription {
-  username?: string;
-  repositoryContents: string;
-  comments?: BoltProblemComment[];
-  solution?: BoltProblemSolution;
-}
-
-export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
-
-// ========================== Cookie Management ==========================
-
-const nutLoginKeyCookieName = 'nutLoginKey';
-const nutIsAdminCookieName = 'nutIsAdmin';
-const nutProblemsUsernameCookieName = 'nutProblemsUsername';
+// ========================== User Management Functions ==========================
 
 export function getNutLoginKey(): string | undefined {
-  const cookieValue = Cookies.get(nutLoginKeyCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
+  return Cookies.get(NUT_LOGIN_KEY);
 }
 
 export function getNutIsAdmin(): boolean {
-  return Cookies.get(nutIsAdminCookieName) === 'true';
+  return Cookies.get(NUT_IS_ADMIN_KEY) === 'true';
 }
 
 interface UserInfo {
@@ -74,57 +30,58 @@ interface UserInfo {
 }
 
 export async function saveNutLoginKey(key: string): Promise<void> {
-  // For simplicity, assume any key with admin=true will be an admin
-  const userInfo: UserInfo = {
-    username: 'admin',
-    loginKey: key,
-    details: '',
-    admin: true,
-  };
+  try {
+    const response = await fetch(`/api/auth?key=${encodeURIComponent(key)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    const userInfo: UserInfo = await response.json();
 
-  console.log('UserInfo', userInfo);
+    Cookies.set(NUT_LOGIN_KEY, key);
+    Cookies.set(NUT_IS_ADMIN_KEY, String(userInfo.admin));
 
-  Cookies.set(nutLoginKeyCookieName, key);
-  Cookies.set(nutIsAdminCookieName, userInfo.admin ? 'true' : 'false');
+    if (userInfo.username) {
+      saveProblemsUsername(userInfo.username);
+    }
+  } catch (error) {
+    handleClientError('save login key', error);
+  }
 }
 
 export function setNutIsAdmin(isAdmin: boolean): void {
-  Cookies.set(nutIsAdminCookieName, isAdmin ? 'true' : 'false');
+  Cookies.set(NUT_IS_ADMIN_KEY, String(isAdmin));
 }
 
 export function getProblemsUsername(): string | undefined {
-  const cookieValue = Cookies.get(nutProblemsUsernameCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
+  return Cookies.get(PROBLEMS_USERNAME_KEY);
 }
 
 export function saveProblemsUsername(username: string): void {
-  Cookies.set(nutProblemsUsernameCookieName, username);
+  Cookies.set(PROBLEMS_USERNAME_KEY, username);
 }
 
-// ========================== Utility Functions ==========================
+// ========================== Helper Functions ==========================
 
 export async function extractFileArtifactsFromRepositoryContents(repositoryContents: string): Promise<FileArtifact[]> {
-  const zip = new JSZip();
-  await zip.loadAsync(repositoryContents, { base64: true });
+  try {
+    const zip = await JSZip.loadAsync(repositoryContents, { base64: true });
+    const artifacts: FileArtifact[] = [];
 
-  const fileArtifacts: FileArtifact[] = [];
-
-  for (const [key, object] of Object.entries(zip.files)) {
-    if (object.dir) {
-      continue;
+    for (const [path, file] of Object.entries(zip.files)) {
+      if (!file.dir) {
+        const content = await file.async('string');
+        artifacts.push({ path, content });
+      }
     }
 
-    fileArtifacts.push({
-      content: await object.async('text'),
-      path: key,
-    });
+    return artifacts;
+  } catch (error) {
+    handleClientError('extract repository contents', error);
+    return [];
   }
-
-  return fileArtifacts;
 }
 
-// Client-side error handling helper
 export function handleClientError(action: string, error: any): void {
-  console.error(`Error ${action}:`, error);
-  toast.error(`Failed to ${action}`);
-} 
+  console.error(`Error during ${action}:`, error);
+  toast.error(`Error during ${action}: ${error.message || 'Unknown error'}`);
+}

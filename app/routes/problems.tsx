@@ -5,8 +5,7 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { Suspense, useEffect, useState } from 'react';
-import { BoltProblemStatus } from '~/lib/replay/Problems.client';
-import type { BoltProblemDescription } from '~/lib/replay/Problems.client';
+import { BoltProblemStatus, type BoltProblemDescription } from '~/lib/replay/types';
 import { listAllProblems } from '~/lib/api/problems';
 
 const toastAnimation = cssTransition({

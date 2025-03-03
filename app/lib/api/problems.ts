@@ -1,9 +1,5 @@
 import { handleClientError } from '~/lib/replay/Problems.client';
-import type { 
-  BoltProblemDescription, 
-  BoltProblem, 
-  BoltProblemInput 
-} from '~/lib/replay/Problems.client';
+import type { BoltProblemDescription, BoltProblem, BoltProblemInput } from '~/lib/replay/types';
 
 /**
  * Fetch all problems from the API
@@ -51,11 +47,11 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
       },
       body: JSON.stringify(problem),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data.problemId;
   } catch (error) {
@@ -76,11 +72,11 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
       },
       body: JSON.stringify(problem),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
-    
+
     return true;
   } catch (error) {
     handleClientError('update problem', error);
@@ -100,14 +96,14 @@ export async function submitFeedback(feedback: any): Promise<boolean> {
       },
       body: JSON.stringify(feedback),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
-    
+
     return true;
   } catch (error) {
     handleClientError('submit feedback', error);
     return false;
   }
-} 
+}

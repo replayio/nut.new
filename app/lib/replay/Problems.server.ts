@@ -4,16 +4,14 @@ import { toast } from 'react-toastify';
 import { supabase, type Database } from '~/lib/supabase/client';
 import {
   BoltProblemStatus,
-  BoltProblem,
-  BoltProblemDescription,
-  BoltProblemInput,
-  BoltProblemComment,
-  getNutIsAdmin,
-  getProblemsUsername,
-  handleClientError
-} from './Problems.client';
+  type BoltProblem,
+  type BoltProblemDescription,
+  type BoltProblemInput,
+  type BoltProblemComment,
+} from './types';
+import { getNutIsAdmin, getProblemsUsername, handleClientError } from './Problems.client';
 
-// ========================== Status Mapping Functions ==========================
+/* ========================== Status Mapping Functions ========================== */
 
 function mapSupabaseToBoltStatus(status: Database['public']['Tables']['problems']['Row']['status']): BoltProblemStatus {
   switch (status) {
@@ -29,7 +27,7 @@ function mapSupabaseToBoltStatus(status: Database['public']['Tables']['problems'
 }
 
 function mapBoltToSupabaseStatus(
-  status?: BoltProblemStatus
+  status?: BoltProblemStatus,
 ): Database['public']['Tables']['problems']['Row']['status'] {
   switch (status) {
     case BoltProblemStatus.Pending:
@@ -43,7 +41,7 @@ function mapBoltToSupabaseStatus(
   }
 }
 
-// ========================== Conversion Functions ==========================
+/* ========================== Conversion Functions ========================== */
 
 function convertSupabaseProblemToBolt(problem: Database['public']['Tables']['problems']['Row']): BoltProblem {
   // Convert comments
@@ -67,7 +65,7 @@ function convertSupabaseProblemToBolt(problem: Database['public']['Tables']['pro
 }
 
 function convertBoltProblemDescriptionToSupabase(
-  problem: BoltProblemInput
+  problem: BoltProblemInput,
 ): Database['public']['Tables']['problems']['Insert'] {
   return {
     id: undefined as any, // This will be set by Supabase
@@ -80,15 +78,12 @@ function convertBoltProblemDescriptionToSupabase(
   };
 }
 
-// ========================== Database Operations ==========================
+/* ========================== Database Operations ========================== */
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
   try {
-    const { data, error } = await supabase
-      .from('problems')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
+    const { data, error } = await supabase.from('problems').select('*').order('created_at', { ascending: false });
+
     if (error) {
       throw error;
     }
@@ -112,15 +107,17 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
   try {
     const { data, error } = await supabase
       .from('problems')
-      .select(`
+      .select(
+        `
         *,
         problem_comments (
           *
         )
-      `)
+      `,
+      )
       .eq('id', problemId)
       .single();
-    
+
     if (error) {
       throw error;
     }
@@ -134,14 +131,15 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
   try {
+    if (!getNutIsAdmin()) {
+      toast.error('Admin user required');
+      return null;
+    }
+
     const supabaseProblem = convertBoltProblemDescriptionToSupabase(problem);
-    
-    const { data, error } = await supabase
-      .from('problems')
-      .insert(supabaseProblem)
-      .select()
-      .single();
-    
+
+    const { data, error } = await supabase.from('problems').insert(supabaseProblem).select().single();
+
     if (error) {
       throw error;
     }
@@ -174,11 +172,8 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
     };
 
     // Update the problem
-    const { error: updateError } = await supabase
-      .from('problems')
-      .update(updates)
-      .eq('id', problemId);
-    
+    const { error: updateError } = await supabase.from('problems').update(updates).eq('id', problemId);
+
     if (updateError) {
       throw updateError;
     }
@@ -190,7 +185,7 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
         .from('problem_comments')
         .select('*')
         .eq('problem_id', problemId);
-      
+
       if (commentsFetchError) {
         throw commentsFetchError;
       }
@@ -211,10 +206,8 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
           username: comment.username || getProblemsUsername() || 'Anonymous',
         }));
 
-        const { error: commentsError } = await supabase
-          .from('problem_comments')
-          .insert(commentInserts);
-        
+        const { error: commentsError } = await supabase.from('problem_comments').insert(commentInserts);
+
         if (commentsError) {
           throw commentsError;
         }
@@ -227,13 +220,23 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
 
 export async function submitFeedback(feedback: any): Promise<boolean> {
   try {
-    // Store feedback in supabase if needed
-    // For now, just return true
-    console.log('Feedback submitted:', feedback);
-    
+    if (!getNutIsAdmin()) {
+      toast.error('Admin user required');
+      return false;
+    }
+
+    const { error } = await supabase.from('feedback').insert({
+      content: feedback,
+      username: getProblemsUsername() || 'Anonymous',
+    });
+
+    if (error) {
+      throw error;
+    }
+
     return true;
   } catch (error) {
     handleClientError('submit feedback', error);
     return false;
   }
-} 
+}
