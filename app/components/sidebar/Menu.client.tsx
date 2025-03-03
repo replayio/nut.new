@@ -13,7 +13,7 @@ import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { SaveProblem } from './SaveProblem';
 import { SaveSolution } from './SaveSolution';
-import { getNutIsAdmin } from '~/lib/replay/Problems';
+import { getNutIsAdmin } from '~/lib/replay/Problems.client';
 
 const menuVariants = {
   closed: {

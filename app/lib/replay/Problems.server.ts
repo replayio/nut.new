@@ -1,56 +1,20 @@
-// Accessors for the API to access saved problems.
+// Server-side functionality for Problems - contains all Supabase operations
 
 import { toast } from 'react-toastify';
-import Cookies from 'js-cookie';
-import JSZip from 'jszip';
-import type { FileArtifact } from '~/utils/folderImport';
-import type { ProtocolMessage } from './SimulationPrompt';
 import { supabase, type Database } from '~/lib/supabase/client';
+import {
+  BoltProblemStatus,
+  BoltProblem,
+  BoltProblemDescription,
+  BoltProblemInput,
+  BoltProblemComment,
+  getNutIsAdmin,
+  getProblemsUsername,
+  handleClientError
+} from './Problems.client';
 
-export interface BoltProblemComment {
-  username?: string;
-  content: string;
-  timestamp: number;
-}
+// ========================== Status Mapping Functions ==========================
 
-export interface BoltProblemSolution {
-  simulationData: any;
-  messages: ProtocolMessage[];
-  evaluator?: string;
-}
-
-export enum BoltProblemStatus {
-  // Problem has been submitted but not yet reviewed.
-  Pending = 'Pending',
-
-  // Problem has been reviewed and has not been solved yet.
-  Unsolved = 'Unsolved',
-
-  // Nut automatically produces a suitable explanation for solving the problem.
-  Solved = 'Solved',
-}
-
-// Information about each problem stored in the index file.
-export interface BoltProblemDescription {
-  version: number;
-  problemId: string;
-  timestamp: number;
-  title: string;
-  description: string;
-  status?: BoltProblemStatus;
-  keywords?: string[];
-}
-
-export interface BoltProblem extends BoltProblemDescription {
-  username?: string;
-  repositoryContents: string;
-  comments?: BoltProblemComment[];
-  solution?: BoltProblemSolution;
-}
-
-export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
-
-// Helper functions for mapping between Supabase and Bolt types
 function mapSupabaseToBoltStatus(status: Database['public']['Tables']['problems']['Row']['status']): BoltProblemStatus {
   switch (status) {
     case 'pending':
@@ -64,7 +28,9 @@ function mapSupabaseToBoltStatus(status: Database['public']['Tables']['problems'
   }
 }
 
-function mapBoltToSupabaseStatus(status?: BoltProblemStatus): Database['public']['Tables']['problems']['Row']['status'] {
+function mapBoltToSupabaseStatus(
+  status?: BoltProblemStatus
+): Database['public']['Tables']['problems']['Row']['status'] {
   switch (status) {
     case BoltProblemStatus.Pending:
       return 'pending';
@@ -77,12 +43,14 @@ function mapBoltToSupabaseStatus(status?: BoltProblemStatus): Database['public']
   }
 }
 
+// ========================== Conversion Functions ==========================
+
 function convertSupabaseProblemToBolt(problem: Database['public']['Tables']['problems']['Row']): BoltProblem {
   // Convert comments
-  const comments: BoltProblemComment[] = (problem.problem_comments || []).map(comment => ({
+  const comments: BoltProblemComment[] = (problem.problem_comments || []).map((comment) => ({
     username: comment.username,
     content: comment.content,
-    timestamp: new Date(comment.created_at).getTime()
+    timestamp: new Date(comment.created_at).getTime(),
   }));
 
   return {
@@ -94,11 +62,13 @@ function convertSupabaseProblemToBolt(problem: Database['public']['Tables']['pro
     status: mapSupabaseToBoltStatus(problem.status),
     keywords: problem.keywords,
     repositoryContents: problem.repository_contents as string,
-    comments
+    comments,
   };
 }
 
-function convertBoltProblemDescriptionToSupabase(problem: BoltProblemInput): Database['public']['Tables']['problems']['Insert'] {
+function convertBoltProblemDescriptionToSupabase(
+  problem: BoltProblemInput
+): Database['public']['Tables']['problems']['Insert'] {
   return {
     id: undefined as any, // This will be set by Supabase
     title: problem.title,
@@ -106,9 +76,11 @@ function convertBoltProblemDescriptionToSupabase(problem: BoltProblemInput): Dat
     status: mapBoltToSupabaseStatus(problem.status),
     keywords: problem.keywords || [],
     repository_contents: problem.repositoryContents,
-    user_id: null
+    user_id: null,
   };
 }
+
+// ========================== Database Operations ==========================
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
   try {
@@ -121,19 +93,17 @@ export async function listAllProblems(): Promise<BoltProblemDescription[]> {
       throw error;
     }
 
-    return data.map(problem => ({
+    return data.map((problem) => ({
       version: 1,
       problemId: problem.id,
       timestamp: new Date(problem.created_at).getTime(),
       title: problem.title,
       description: problem.description,
       status: mapSupabaseToBoltStatus(problem.status),
-      keywords: problem.keywords
+      keywords: problem.keywords,
     }));
   } catch (error) {
-    console.error('Error fetching problems', error);
-    toast.error('Failed to fetch problems');
-
+    handleClientError('fetch problems', error);
     return [];
   }
 }
@@ -157,11 +127,9 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
 
     return convertSupabaseProblemToBolt(data);
   } catch (error) {
-    console.error('Error fetching problem', error);
-    toast.error('Failed to fetch problem');
+    handleClientError('fetch problem', error);
+    return null;
   }
-
-  return null;
 }
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
@@ -180,14 +148,12 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
 
     return data.id;
   } catch (error) {
-    console.error('Error submitting problem', error);
-    toast.error('Failed to submit problem');
-
+    handleClientError('submit problem', error);
     return null;
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput) {
+export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<void> {
   try {
     if (!getNutIsAdmin()) {
       toast.error('Admin user required');
@@ -204,7 +170,7 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
       description: problem.description,
       status: mapBoltToSupabaseStatus(problem.status),
       keywords: problem.keywords || [],
-      repository_contents: problem.repositoryContents
+      repository_contents: problem.repositoryContents,
     };
 
     // Update the problem
@@ -230,19 +196,19 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
       }
 
       // Filter out comments that already exist (based on timestamp)
-      const existingTimestamps = existingComments.map(c => {
+      const existingTimestamps = existingComments.map((c) => {
         const date = new Date(c.created_at);
         return date.getTime();
       });
 
-      const newComments = comments.filter(c => !existingTimestamps.includes(c.timestamp));
+      const newComments = comments.filter((c) => !existingTimestamps.includes(c.timestamp));
 
       // Add new comments
       if (newComments.length > 0) {
-        const commentInserts = newComments.map(comment => ({
+        const commentInserts = newComments.map((comment) => ({
           problem_id: problemId,
           content: comment.content,
-          username: comment.username || getProblemsUsername() || 'Anonymous'
+          username: comment.username || getProblemsUsername() || 'Anonymous',
         }));
 
         const { error: commentsError } = await supabase
@@ -255,81 +221,11 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
       }
     }
   } catch (error) {
-    console.error('Error updating problem', error);
-    toast.error('Failed to update problem');
+    handleClientError('update problem', error);
   }
 }
 
-const nutLoginKeyCookieName = 'nutLoginKey';
-const nutIsAdminCookieName = 'nutIsAdmin';
-
-export function getNutLoginKey(): string | undefined {
-  const cookieValue = Cookies.get(nutLoginKeyCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
-}
-
-export function getNutIsAdmin(): boolean {
-  return Cookies.get(nutIsAdminCookieName) === 'true';
-}
-
-interface UserInfo {
-  username: string;
-  loginKey: string;
-  details: string;
-  admin: boolean;
-}
-
-export async function saveNutLoginKey(key: string) {
-  // For simplicity, assume any key with admin=true will be an admin
-  const userInfo: UserInfo = {
-    username: 'admin',
-    loginKey: key,
-    details: '',
-    admin: true
-  };
-
-  console.log('UserInfo', userInfo);
-
-  Cookies.set(nutLoginKeyCookieName, key);
-  Cookies.set(nutIsAdminCookieName, userInfo.admin ? 'true' : 'false');
-}
-
-export function setNutIsAdmin(isAdmin: boolean) {
-  Cookies.set(nutIsAdminCookieName, isAdmin ? 'true' : 'false');
-}
-
-const nutProblemsUsernameCookieName = 'nutProblemsUsername';
-
-export function getProblemsUsername(): string | undefined {
-  const cookieValue = Cookies.get(nutProblemsUsernameCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
-}
-
-export function saveProblemsUsername(username: string) {
-  Cookies.set(nutProblemsUsernameCookieName, username);
-}
-
-export async function extractFileArtifactsFromRepositoryContents(repositoryContents: string): Promise<FileArtifact[]> {
-  const zip = new JSZip();
-  await zip.loadAsync(repositoryContents, { base64: true });
-
-  const fileArtifacts: FileArtifact[] = [];
-
-  for (const [key, object] of Object.entries(zip.files)) {
-    if (object.dir) {
-      continue;
-    }
-
-    fileArtifacts.push({
-      content: await object.async('text'),
-      path: key,
-    });
-  }
-
-  return fileArtifacts;
-}
-
-export async function submitFeedback(feedback: any) {
+export async function submitFeedback(feedback: any): Promise<boolean> {
   try {
     // Store feedback in supabase if needed
     // For now, just return true
@@ -337,9 +233,7 @@ export async function submitFeedback(feedback: any) {
     
     return true;
   } catch (error) {
-    console.error('Error submitting feedback', error);
-    toast.error('Failed to submit feedback');
-
+    handleClientError('submit feedback', error);
     return false;
   }
-}
+} 

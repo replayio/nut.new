@@ -2,8 +2,9 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { BoltProblemStatus, updateProblem } from "~/lib/replay/Problems";
-import type { BoltProblemInput } from "~/lib/replay/Problems";
+import { BoltProblemStatus } from "~/lib/replay/Problems.client";
+import type { BoltProblemInput } from "~/lib/replay/Problems.client";
+import { updateProblem } from "~/lib/api/problems";
 import { getLastLoadedProblem } from "../chat/LoadProblemButton";
 import { getLastUserSimulationData, getLastSimulationChatMessages } from "~/lib/replay/SimulationPrompt";
 

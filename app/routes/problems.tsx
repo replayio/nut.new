@@ -5,10 +5,9 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { Suspense, useEffect, useState } from 'react';
-import { listAllProblems } from '~/lib/supabase/problems';
-import { BoltProblemStatus } from '~/lib/replay/Problems';
-import type { BoltProblemDescription } from '~/lib/replay/Problems';
-import { mapSupabaseStatusToBoltStatus } from '~/lib/supabase/problems';
+import { BoltProblemStatus } from '~/lib/replay/Problems.client';
+import type { BoltProblemDescription } from '~/lib/replay/Problems.client';
+import { listAllProblems } from '~/lib/api/problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -99,17 +98,8 @@ function ProblemsPage() {
   const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
 
   useEffect(() => {
-    // Map the Supabase problem data to BoltProblemDescription format
-    listAllProblems().then(problems => {
-      const boltProblems: BoltProblemDescription[] = problems.map(problem => ({
-        version: 1,
-        problemId: problem.id,
-        timestamp: new Date(problem.created_at).getTime(),
-        title: problem.title,
-        description: problem.description,
-        status: mapSupabaseStatusToBoltStatus(problem.status),
-        keywords: problem.keywords
-      }));
+    // Fetch problems from API
+    listAllProblems().then(boltProblems => {
       setProblems(boltProblems);
     });
   }, []);

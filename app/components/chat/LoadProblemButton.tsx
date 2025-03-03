@@ -4,8 +4,9 @@ import { toast } from 'react-toastify';
 import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
 import { assert } from '~/lib/replay/ReplayProtocolClient';
-import type { BoltProblem } from '~/lib/replay/Problems';
-import { getProblem, extractFileArtifactsFromRepositoryContents } from '~/lib/replay/Problems';
+import type { BoltProblem } from '~/lib/replay/Problems.client';
+import { extractFileArtifactsFromRepositoryContents } from '~/lib/replay/Problems.client';
+import { getProblem } from '~/lib/api/problems';
 
 interface LoadProblemButtonProps {
   className?: string;

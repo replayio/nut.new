@@ -2,8 +2,9 @@ import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
-import { getProblemsUsername, submitProblem } from "~/lib/replay/Problems";
-import type { BoltProblemInput } from "~/lib/replay/Problems";
+import { getProblemsUsername } from "~/lib/replay/Problems.client";
+import { submitProblem } from "~/lib/api/problems";
+import type { BoltProblemInput } from "~/lib/replay/Problems.client";
 
 ReactModal.setAppElement('#root');
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
-import { saveNutLoginKey, saveProblemsUsername, getNutLoginKey, getProblemsUsername } from '~/lib/replay/Problems';
+import { saveNutLoginKey, saveProblemsUsername, getNutLoginKey, getProblemsUsername } from '~/lib/replay/Problems.client';
 
 export default function ConnectionsTab() {
   const [apiKey, setApiKey] = useState(Cookies.get(anthropicApiKeyCookieName) || '');

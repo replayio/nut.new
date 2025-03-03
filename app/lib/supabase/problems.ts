@@ -3,18 +3,18 @@ import {
   getProblem as replayGetProblem,
   submitProblem as replaySubmitProblem,
   updateProblem as replayUpdateProblem,
+} from '~/lib/replay/Problems.server';
+
+import {
   BoltProblemStatus,
   getProblemsUsername as replayGetProblemsUsername,
   saveProblemsUsername as replaySaveProblemsUsername,
   getNutIsAdmin,
   getNutLoginKey,
-  saveNutLoginKey
-} from '~/lib/replay/Problems';
-import type {
-  BoltProblem,
-  BoltProblemInput,
-  BoltProblemComment
-} from '~/lib/replay/Problems';
+  saveNutLoginKey,
+} from '~/lib/replay/Problems.client';
+
+import type { BoltProblem, BoltProblemInput, BoltProblemComment } from '~/lib/replay/Problems.client';
 import type { Database } from './client';
 
 export type Problem = Database['public']['Tables']['problems']['Row'];
@@ -63,7 +63,7 @@ function mapBoltProblemToProblem(boltProblem: BoltProblem): Problem {
     created_at: new Date(comment.timestamp).toISOString(),
     problem_id: boltProblem.problemId,
     content: comment.content,
-    username: comment.username || 'Anonymous'
+    username: comment.username || 'Anonymous',
   }));
 
   return {
@@ -76,7 +76,7 @@ function mapBoltProblemToProblem(boltProblem: BoltProblem): Problem {
     keywords: boltProblem.keywords || [],
     repository_contents: boltProblem.repositoryContents,
     user_id: null,
-    problem_comments: problemComments
+    problem_comments: problemComments,
   };
 }
 
@@ -130,11 +130,11 @@ export async function listAllProblems(): Promise<Problem[]> {
             keywords: boltProblemDesc.keywords || [],
             repository_contents: '',
             user_id: null,
-            problem_comments: []
+            problem_comments: [],
           };
         }
         return mapBoltProblemToProblem(fullProblem);
-      })
+      }),
     );
   } catch (error) {
     console.error('Error fetching problems:', error);
@@ -170,7 +170,7 @@ export async function createProblem(problem: Database['public']['Tables']['probl
       keywords: problem.keywords,
       repositoryContents: problem.repository_contents as string,
       username: getProblemsUsername(),
-      version: 1 // Required field
+      version: 1, // Required field
     };
 
     const problemId = await replaySubmitProblem(boltProblemInput);
@@ -194,20 +194,23 @@ export async function createProblem(problem: Database['public']['Tables']['probl
 /**
  * Updates a problem
  */
-export async function updateProblem(id: string, updates: Database['public']['Tables']['problems']['Update']): Promise<Problem> {
+export async function updateProblem(
+  id: string,
+  updates: Database['public']['Tables']['problems']['Update'],
+): Promise<Problem> {
   try {
     const boltProblemUpdate = mapProblemUpdatesToBoltProblem(updates);
-    
+
     // Get the current problem to merge with updates
     const currentProblem = await replayGetProblem(id);
     if (!currentProblem) {
       throw new Error('Problem not found');
     }
-    
+
     // Merge current problem with updates
     const boltProblemInput: BoltProblemInput = {
       ...currentProblem,
-      ...boltProblemUpdate
+      ...boltProblemUpdate,
     };
 
     await replayUpdateProblem(id, boltProblemInput);
@@ -228,7 +231,9 @@ export async function updateProblem(id: string, updates: Database['public']['Tab
 /**
  * Adds a comment to a problem
  */
-export async function addProblemComment(comment: Database['public']['Tables']['problem_comments']['Insert']): Promise<ProblemComment> {
+export async function addProblemComment(
+  comment: Database['public']['Tables']['problem_comments']['Insert'],
+): Promise<ProblemComment> {
   try {
     // Get the current problem
     const boltProblem = await replayGetProblem(comment.problem_id);
@@ -240,12 +245,12 @@ export async function addProblemComment(comment: Database['public']['Tables']['p
     const newBoltComment: BoltProblemComment = {
       timestamp: Date.now(),
       username: comment.username,
-      content: comment.content
+      content: comment.content,
     };
 
     const boltProblemInput: BoltProblemInput = {
       ...boltProblem,
-      comments: [...(boltProblem.comments || []), newBoltComment]
+      comments: [...(boltProblem.comments || []), newBoltComment],
     };
 
     // Update the problem with the new comment
@@ -257,7 +262,7 @@ export async function addProblemComment(comment: Database['public']['Tables']['p
       created_at: new Date(newBoltComment.timestamp).toISOString(),
       problem_id: comment.problem_id,
       content: newBoltComment.content,
-      username: newBoltComment.username || 'Anonymous'
+      username: newBoltComment.username || 'Anonymous',
     };
   } catch (error) {
     console.error('Error adding comment:', error);
@@ -285,4 +290,4 @@ export function setNutAdminKey(key: string) {
 
 export function getNutAdminKey(): string | null {
   return getNutLoginKey() || null;
-} 
+}
