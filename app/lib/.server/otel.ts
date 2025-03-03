@@ -1,6 +1,5 @@
 import type { Tracer } from '@opentelemetry/api';
 import { SpanStatusCode, type Attributes, context, trace } from '@opentelemetry/api';
-import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type { ExportResult } from '@opentelemetry/core';
 import { ExportResultCode } from '@opentelemetry/core';
 import type { ExportServiceError, OTLPExporterConfigBase } from '@opentelemetry/otlp-exporter-base';
@@ -190,7 +189,18 @@ export class OTLPExporter implements SpanExporter {
   }
 }
 
-export function createTracer(appContext: AppLoadContext) {
+// Helper to safely load the async hooks module
+async function loadAsyncHooksContextManager() {
+  try {
+    const module = await import('@opentelemetry/context-async-hooks');
+    return module.AsyncLocalStorageContextManager;
+  } catch (error) {
+    console.error('Failed to load AsyncLocalStorageContextManager:', error);
+    throw error;
+  }
+}
+
+export async function createTracer(appContext: AppLoadContext) {
   const honeycombApiKey = (appContext.cloudflare.env as any).HONEYCOMB_API_KEY;
   const honeycombDataset = (appContext.cloudflare.env as any).HONEYCOMB_DATASET;
 
@@ -202,6 +212,18 @@ export function createTracer(appContext: AppLoadContext) {
   console.info('Initializing OpenTelemetry');
 
   try {
+    // Load development flag
+    const isDev = process.env.NODE_ENV === 'development';
+    
+    // Skip initialization in development
+    if (isDev) {
+      console.warn('OpenTelemetry initialization skipped in development mode');
+      return undefined;
+    }
+    
+    // Dynamically import the problematic module
+    const ASYNC_HOOKS_MANAGER = await loadAsyncHooksContextManager();
+    
     const exporter = new OTLPExporter({
       url: 'https://api.honeycomb.io/v1/traces',
       headers: {
@@ -220,7 +242,7 @@ export function createTracer(appContext: AppLoadContext) {
       spanProcessors: [new SimpleSpanProcessor(exporter), new SimpleSpanProcessor(new ConsoleSpanExporter())],
     });
 
-    const contextManager = new AsyncLocalStorageContextManager();
+    const contextManager = new ASYNC_HOOKS_MANAGER();
     context.setGlobalContextManager(contextManager);
 
     provider.register({ contextManager });
@@ -234,12 +256,23 @@ export function createTracer(appContext: AppLoadContext) {
 
 let tracer: Tracer | undefined;
 
-export function ensureOpenTelemetryInitialized(context: AppLoadContext) {
+export async function ensureOpenTelemetryInitialized(context: AppLoadContext) {
   if (tracer) {
     return;
   }
 
-  tracer = createTracer(context);
+  try {
+    // Skip initialization in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('OpenTelemetry initialization skipped in development mode');
+      return;
+    }
+    
+    tracer = await createTracer(context);
+  } catch (e) {
+    console.error('Failed to initialize OpenTelemetry:', e);
+    // Don't throw, just log and continue - this allows the app to function without telemetry
+  }
 }
 
 export function ensureTracer() {
