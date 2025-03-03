@@ -47,7 +47,7 @@ reasoning and then respond with either \`<analyze>true</analyze>\` or \`<analyze
 
   const match = /<analyze>(.*?)<\/analyze>/.exec(responseText);
   if (match) {
-    const useSimulation = match[1];
+    const useSimulation = match[1] === "true";
     return json({ useSimulation });
   } else {
     return json({ useSimulation: false });

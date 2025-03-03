@@ -53,8 +53,9 @@ interface BaseChatProps {
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
   onRewind?: (messageId: string, contents: string) => void;
+  approveChangesMessageId?: string;
   onApproveChange?: (messageId: string) => void;
-  onRejectChange?: (messageId: string, contents: string, data: RejectChangeData) => void;
+  onRejectChange?: (lastMessageId: string, rewindMessageId: string, contents: string, data: RejectChangeData) => void;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -82,6 +83,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       setImageDataList,
       messages,
       onRewind,
+      approveChangesMessageId,
       onApproveChange,
       onRejectChange,
     },
@@ -249,6 +251,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       messages={messages}
                       isStreaming={isStreaming}
                       onRewind={onRewind}
+                      approveChangesMessageId={approveChangesMessageId}
                       onApproveChange={onApproveChange}
                       onRejectChange={onRejectChange}
                     />

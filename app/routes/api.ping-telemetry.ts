@@ -1,4 +1,4 @@
-import { type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { getCurrentSpan, wrapWithSpan } from '~/lib/.server/otel';
 
 export async function action(args: ActionFunctionArgs) {
@@ -22,5 +22,7 @@ const pingTelemetryAction = wrapWithSpan(
       "telemetry.event": event,
       "telemetry.data": data,
     });
+
+    return json({ success: true });
   }
 );

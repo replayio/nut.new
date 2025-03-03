@@ -16,8 +16,9 @@ interface MessagesProps {
   isStreaming?: boolean;
   messages?: Message[];
   onRewind?: (messageId: string, contents: string) => void;
+  approveChangesMessageId?: string;
   onApproveChange?: (messageId: string) => void;
-  onRejectChange?: (messageId: string, contents: string, data: RejectChangeData) => void;
+  onRejectChange?: (lastMessageId: string, rewindMessageId: string, contents: string, data: RejectChangeData) => void;
 }
 
 interface ProjectContents {
@@ -34,10 +35,8 @@ function hasFileModifications(content: string) {
   return content.includes('__boltArtifact__');
 }
 
-const gApprovedOrRejectedMessageIds = new Set<string>();
-
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [], onRewind, onApproveChange, onRejectChange } = props;
+  const { id, isStreaming = false, messages = [], onRewind, approveChangesMessageId, onApproveChange, onRejectChange } = props;
 
   const getLastMessageProjectContents = (index: number) => {
     // The message index is for the model response, and the project
@@ -74,12 +73,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       return false;
     }
 
-    const lastMessage = messages[messages.length - 1];
-
-    if (gApprovedOrRejectedMessageIds.has(lastMessage.id)) {
+    if (lastMessageProjectContents.messageId != approveChangesMessageId) {
       return false;
     }
 
+    const lastMessage = messages[messages.length - 1];
     return hasFileModifications(lastMessage.content);
   })();
 
@@ -156,7 +154,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             if (onApproveChange) {
               const lastMessage = messages[messages.length - 1];
               assert(lastMessage);
-              gApprovedOrRejectedMessageIds.add(lastMessage.id);
               onApproveChange(lastMessage.id);
             }
           }}
@@ -164,12 +161,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             if (onRejectChange) {
               const lastMessage = messages[messages.length - 1];
               assert(lastMessage);
-              gApprovedOrRejectedMessageIds.add(lastMessage.id);
 
               const info = getLastMessageProjectContents(messages.length - 1);
               assert(info);
 
-              onRejectChange(lastMessage.id, info.contents.content, data);
+              onRejectChange(lastMessage.id, info.messageId, info.contents.content, data);
             }
           }}
         />

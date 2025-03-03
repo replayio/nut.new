@@ -188,6 +188,7 @@ export const ChatImpl = memo(
     const [simulationLoading, setSimulationLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const { promptId } = useSettings();
+    const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
 
     const { showChat } = useStore(chatStore);
 
@@ -459,6 +460,7 @@ export const ChatImpl = memo(
         const { contentBase64 } = await workbenchStore.generateZipBase64();
         saveProjectContents(lastMessage.id, { content: contentBase64 });
         gLastProjectContents = contentBase64;
+        setApproveChangesMessageId(lastMessage.id);
       }
 
       await pingTelemetry("Chat.SendMessage", {
@@ -516,6 +518,8 @@ export const ChatImpl = memo(
     const onApproveChange = async (messageId: string) => {
       console.log("ApproveChange", messageId);
 
+      setApproveChangesMessageId(undefined);
+
       await flashScreen();
 
       await pingTelemetry("Chat.ApproveChange", {
@@ -524,30 +528,26 @@ export const ChatImpl = memo(
       });
     };
 
-    const onRejectChange = async (messageId: string, projectContents: string, data: RejectChangeData) => {
+    const onRejectChange = async (messageId: string, rewindMessageId: string, projectContents: string, data: RejectChangeData) => {
       console.log("RejectChange", messageId, data);
+
+      setApproveChangesMessageId(undefined);
 
       const message = messages.find((message) => message.id === messageId);
       const messageContents = message?.content ?? "";
 
-      await onRewind(messageId, projectContents);
+      await onRewind(rewindMessageId, projectContents);
 
       let shareProjectSuccess = false;
       if (data.shareProject) {
         const feedbackData: any = {
           explanation: data.explanation,
           retry: data.retry,
-          chatMessages: getLastChatMessages(),
+          chatMessages: messages,
           repositoryContents: getLastProjectContents(),
           loginKey: getNutLoginKey(),
         };
-    
-        if (feedbackData.share) {
-          // Note: We don't just use the workbench store here because wrangler generates a strange error.
-          feedbackData.repositoryContents = getLastProjectContents();
-          feedbackData.chatMessages = messages;
-        }
-    
+
         shareProjectSuccess = await submitFeedback(feedbackData);
       }
 
@@ -635,6 +635,7 @@ export const ChatImpl = memo(
         imageDataList={imageDataList}
         setImageDataList={setImageDataList}
         onRewind={onRewind}
+        approveChangesMessageId={approveChangesMessageId}
         onApproveChange={onApproveChange}
         onRejectChange={onRejectChange}
       />
