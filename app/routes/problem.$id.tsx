@@ -7,9 +7,10 @@ import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { getProblemsUsername, getNutIsAdmin } from '~/lib/replay/Problems.client';
+import { getProblemsUsername } from '~/lib/replay/Problems.client';
 import { BoltProblemStatus, type BoltProblem, type BoltProblemComment } from '~/lib/replay/types';
 import { getProblem, updateProblem as backendUpdateProblem } from '~/lib/api/problems';
+import { AdminCheck } from '~/components/admin/AdminCheck.client';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
   return (
@@ -17,10 +18,8 @@ function Comments({ comments }: { comments: BoltProblemComment[] }) {
       {comments.map((comment, index) => (
         <div key={index} className="comment">
           <div className="comment-header">
-            <span className="comment-username">{comment.username ?? ""}</span>
-            <span className="comment-date">
-              {new Date(comment.timestamp).toLocaleString()}
-            </span>
+            <span className="comment-username">{comment.username ?? ''}</span>
+            <span className="comment-date">{new Date(comment.timestamp).toLocaleString()}</span>
           </div>
           <div className="comment-text">{comment.content}</div>
         </div>
@@ -46,7 +45,7 @@ function ProblemViewer({ problem }: { problem: BoltProblem }) {
       <Keywords keywords={keywords} />
       <Comments comments={comments} />
     </div>
-  )
+  );
 }
 
 interface UpdateProblemFormProps {
@@ -57,15 +56,15 @@ interface UpdateProblemFormProps {
 
 function UpdateProblemForm(props: UpdateProblemFormProps) {
   const { handleSubmit, updateText, placeholder } = props;
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
   const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (value.trim()) {
-      handleSubmit(value)
-      setValue('')
+      handleSubmit(value);
+      setValue('');
     }
-  }
+  };
 
   return (
     <form onSubmit={onSubmitClicked} className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
@@ -85,7 +84,7 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
         {updateText}
       </button>
     </form>
-  )
+  );
 }
 
 type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
@@ -170,7 +169,7 @@ function ViewProblemPage() {
     }
     const newProblem = callback(problemData);
     setProblemData(newProblem);
-    console.log("BackendUpdateProblem", problemId, newProblem);
+    console.log('BackendUpdateProblem', problemId, newProblem);
     await backendUpdateProblem(problemId, newProblem);
   }, [problemData]);
 
@@ -193,9 +192,15 @@ function ViewProblemPage() {
               </div>)
            : <ProblemViewer problem={problemData} />}
         </div>
-        {getNutIsAdmin() && problemData && (
-          <UpdateProblemForms updateProblem={updateProblem} />
-        )}
+        <ClientOnly>
+          {() => (
+            problemData && (
+              <AdminCheck>
+                <UpdateProblemForms updateProblem={updateProblem} />
+              </AdminCheck>
+            )
+          )}
+        </ClientOnly>
         <ToastContainerWrapper />
       </div>
     </TooltipProvider>

@@ -1,8 +1,8 @@
 import { toast } from "react-toastify";
 import ReactModal from 'react-modal';
 import { useState } from "react";
-import { submitFeedback } from "~/lib/api/problems";
-import { getLastProjectContents, getLastChatMessages } from "../chat/Chat.client";
+import { submitFeedback } from '~/lib/api/problems';
+import { getLastProjectContents, getLastChatMessages } from '~/components/chat/Chat.client';
 
 ReactModal.setAppElement('#root');
 

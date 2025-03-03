@@ -9,7 +9,41 @@ import {
   type BoltProblemInput,
   type BoltProblemComment,
 } from './types';
-import { getNutIsAdmin, getProblemsUsername, handleClientError } from './Problems.client';
+import { getProblemsUsername, handleClientError } from './Problems.client';
+
+interface UserInfo {
+  admin: boolean;
+}
+
+// Server-side admin check that doesn't rely on browser cookies
+async function checkIsAdmin(request: Request): Promise<boolean> {
+  // Get the auth cookie from the request headers
+  const authCookie = request.headers
+    .get('Cookie')
+    ?.split(';')
+    .find((c) => c.trim().startsWith('nut_login_key='));
+
+  if (!authCookie) {
+    return false;
+  }
+
+  const key = authCookie.split('=')[1];
+
+  try {
+    const response = await fetch(`/api/auth?key=${encodeURIComponent(key)}`);
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const userInfo = (await response.json()) as UserInfo;
+
+    return userInfo.admin === true;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
 
 /* ========================== Status Mapping Functions ========================== */
 
@@ -129,9 +163,9 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
   }
 }
 
-export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
+export async function submitProblem(problem: BoltProblemInput, request: Request): Promise<string | null> {
   try {
-    if (!getNutIsAdmin()) {
+    if (!(await checkIsAdmin(request))) {
       toast.error('Admin user required');
       return null;
     }
@@ -151,9 +185,9 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<void> {
+export async function updateProblem(problemId: string, problem: BoltProblemInput, request: Request): Promise<void> {
   try {
-    if (!getNutIsAdmin()) {
+    if (!(await checkIsAdmin(request))) {
       toast.error('Admin user required');
       return;
     }
@@ -218,9 +252,9 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
   }
 }
 
-export async function submitFeedback(feedback: any): Promise<boolean> {
+export async function submitFeedback(feedback: any, request: Request): Promise<boolean> {
   try {
-    if (!getNutIsAdmin()) {
+    if (!(await checkIsAdmin(request))) {
       toast.error('Admin user required');
       return false;
     }

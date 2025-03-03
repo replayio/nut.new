@@ -10,47 +10,48 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   // Check for specific problem ID in query params
   const problemId = url.searchParams.get('id');
+
   if (problemId) {
     const problem = await getProblem(problemId);
+
     if (!problem) {
       return json({ error: 'Problem not found' }, { status: 404 });
     }
+
     return json({ problem });
   }
 
   // Otherwise, list all problems
   const problems = await listAllProblems();
+
   return json({ problems });
 }
 
 /**
  * POST /api/problems - Create a new problem
- * PUT /api/problems?id=xyz - Update an existing problem
+ * PUT /api/problems/:id - Update an existing problem
  */
 export async function action({ request }: ActionFunctionArgs) {
-  const data = (await request.json()) as BoltProblemInput;
+  const url = new URL(request.url);
+  const problemId = url.searchParams.get('id');
+  const method = request.method.toUpperCase();
+  const body = (await request.json()) as BoltProblemInput;
 
-  // Handle update (PUT) requests
-  if (request.method === 'PUT') {
-    const url = new URL(request.url);
-    const problemId = url.searchParams.get('id');
+  if (method === 'POST') {
+    const id = await submitProblem(body, request);
 
-    if (!problemId) {
-      return json({ error: 'Problem ID is required for updates' }, { status: 400 });
+    if (!id) {
+      return json({ error: 'Failed to create problem' }, { status: 500 });
     }
 
-    await updateProblem(problemId, data);
+    return json({ id });
+  }
+
+  if (method === 'PUT' && problemId) {
+    await updateProblem(problemId, body, request);
+
     return json({ success: true });
   }
 
-  // Handle creation (POST) requests
-  if (request.method === 'POST') {
-    const problemId = await submitProblem(data);
-    if (!problemId) {
-      return json({ error: 'Failed to create problem' }, { status: 500 });
-    }
-    return json({ problemId });
-  }
-
-  return json({ error: 'Method not allowed' }, { status: 405 });
+  return json({ error: 'Invalid request' }, { status: 400 });
 }

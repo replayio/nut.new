@@ -11,7 +11,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const data = await request.json();
-    const success = await submitFeedback(data);
+    const success = await submitFeedback(data, request);
 
     if (!success) {
       return json({ error: 'Failed to submit feedback' }, { status: 500 });
@@ -22,4 +22,4 @@ export async function action({ request }: ActionFunctionArgs) {
     console.error('Error submitting feedback:', error);
     return json({ error: 'Failed to submit feedback' }, { status: 500 });
   }
-} 
+}

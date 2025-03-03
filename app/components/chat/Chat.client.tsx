@@ -332,145 +332,185 @@ export const ChatImpl = memo(
       return { enhancedPrompt, enhancedPromptMessage };
     }
 
-    const sendMessage = async (messageInput?: string) => {
-      const _input = messageInput || input;
-      const numAbortsAtStart = gNumAborts;
-
-      if (_input.length === 0 || isLoading) {
-        return;
-      }
-
-      const loginKey = getNutLoginKey();
-
-      const apiKeyCookie = Cookies.get(anthropicApiKeyCookieName);
-      const anthropicApiKey = apiKeyCookie?.length ? apiKeyCookie : undefined;
-
-      if (!loginKey && !anthropicApiKey) {
-        const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
-        if (numFreeUses >= MaxFreeUses) {
-          toast.error('All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.');
+    const sendMessage = useCallback(
+      async (messageInput?: string) => {
+        const _input = messageInput || input;
+        
+        if (_input.length === 0 || isLoading) {
           return;
         }
 
-        Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
-      }
+        const loginKey = getNutLoginKey();
+        const apiKeyCookie = Cookies.get(anthropicApiKeyCookieName);
+        const anthropicApiKey = apiKeyCookie?.length ? apiKeyCookie : undefined;
 
-      setSimulationLoading(true);
+        if (!loginKey && !anthropicApiKey) {
+          const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
+          if (numFreeUses >= MaxFreeUses) {
+            toast.error('All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.');
+            return;
+          }
+        }
 
-      /**
-       * @note (delm) Usually saving files shouldn't take long but it may take longer if there
-       * many unsaved files. In that case we need to block user input and show an indicator
-       * of some kind so the user is aware that something is happening. But I consider the
-       * happy case to be no unsaved files and I would expect users to save their changes
-       * before they send another message.
-       */
-      await workbenchStore.saveAllFiles();
+        setSimulationLoading(true);
 
-      let simulationEnhancedPrompt: string | undefined;
+        const numAbortsAtStart = gNumAborts;
 
-      const simulation = await shouldUseSimulation(messages, _input);
-
-      if (numAbortsAtStart != gNumAborts) {
-        return;
-      }
-
-      console.log("UseSimulation", simulation);
-
-      let didEnhancePrompt = false;
-
-      if (simulation) {
-        gLockSimulationData = true;
         try {
-          await flushSimulationData();
-
-          const createRecordingPromise = createRecording();
-          const enhancedPromptPromise = getEnhancedPrompt(_input);
-
-          const { recordingId, recordingMessage } = await createRecordingPromise;
-
+          await workbenchStore.saveAllFiles();
+          
           if (numAbortsAtStart != gNumAborts) {
             return;
           }
 
-          console.log("RecordingMessage", recordingMessage);
-          setMessages([...messages, recordingMessage]);
+          let simulationEnhancedPrompt: string | undefined;
 
-          if (recordingId) {
-            const info = await enhancedPromptPromise;
+          try {
+            const simulation = await shouldUseSimulation(messages, _input);
 
             if (numAbortsAtStart != gNumAborts) {
               return;
             }
 
-            simulationEnhancedPrompt = info.enhancedPrompt;
-            didEnhancePrompt = true;
+            console.log("UseSimulation", simulation);
 
-            console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
-            setMessages([...messages, info.enhancedPromptMessage]);
+            let didEnhancePrompt = false;
+
+            if (simulation) {
+              gLockSimulationData = true;
+              try {
+                await flushSimulationData();
+
+                const createRecordingPromise = createRecording();
+                const enhancedPromptPromise = getEnhancedPrompt(_input);
+
+                const { recordingId, recordingMessage } = await createRecordingPromise;
+
+                if (numAbortsAtStart != gNumAborts) {
+                  return;
+                }
+
+                console.log("RecordingMessage", recordingMessage);
+                setMessages([...messages, recordingMessage]);
+
+                if (recordingId) {
+                  const info = await enhancedPromptPromise;
+
+                  if (numAbortsAtStart != gNumAborts) {
+                    return;
+                  }
+
+                  simulationEnhancedPrompt = info.enhancedPrompt;
+                  didEnhancePrompt = true;
+
+                  console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
+                  setMessages([...messages, info.enhancedPromptMessage]);
+                }
+              } catch (error) {
+                console.error('Error during simulation process:', error);
+              } finally {
+                gLockSimulationData = false;
+              }
+            }
+
+            chatStore.setKey('aborted', false);
+
+            runAnimation();
+
+            setSimulationLoading(false);
+
+            console.log('About to append message to chat');
+            try {
+              append({
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: _input,
+                  },
+                  ...imageDataList.map((imageData) => ({
+                    type: 'image',
+                    image: imageData,
+                  })),
+                ] as any, // Type assertion to bypass compiler check
+              }, { body: { simulationEnhancedPrompt, anthropicApiKey, loginKey } });
+            } catch (error) {
+              console.error('Error appending message:', error);
+            }
+
+            const fileModifications = workbenchStore.getFileModifcations();
+            if (fileModifications !== undefined) {
+              console.log('Resetting file modifications');
+              workbenchStore.resetAllFileModifications();
+            }
+
+            setInput('');
+            Cookies.remove(PROMPT_COOKIE_KEY);
+
+            // Add file cleanup here
+            setUploadedFiles([]);
+            setImageDataList([]);
+
+            resetEnhancer();
+
+            textareaRef.current?.blur();
+
+            // The project contents are associated with the last message present when
+            // the user message is added.
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage) {
+              console.log('Saving project contents for last message');
+              try {
+                const { contentBase64 } = await workbenchStore.generateZipBase64();
+                saveProjectContents(lastMessage.id, { content: contentBase64 });
+                gLastProjectContents = contentBase64;
+                setApproveChangesMessageId(lastMessage.id);
+              } catch (error) {
+                console.error('Error saving project contents:', error);
+              }
+            }
+
+            console.log('About to ping telemetry');
+            try {
+              await pingTelemetry("Chat.SendMessage", {
+                numMessages: messages.length,
+                simulation,
+                didEnhancePrompt,
+                loginKey: getNutLoginKey(),
+              });
+            } catch (error) {
+              console.error('Error pinging telemetry:', error);
+            }
+          } catch (error) {
+            console.error('Unexpected error in sendMessage:', error);
+            setSimulationLoading(false);
           }
-        } finally {
-          gLockSimulationData = false;
+        } catch (error) {
+          console.error('Error saving files:', error);
+          setSimulationLoading(false);
         }
-      }
-
-      const fileModifications = workbenchStore.getFileModifcations();
-
-      chatStore.setKey('aborted', false);
-
-      runAnimation();
-
-      setSimulationLoading(false);
-
-      append({
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: _input,
-          },
-          ...imageDataList.map((imageData) => ({
-            type: 'image',
-            image: imageData,
-          })),
-        ] as any, // Type assertion to bypass compiler check
-      }, { body: { simulationEnhancedPrompt, anthropicApiKey, loginKey } });
-
-      if (fileModifications !== undefined) {
-        /**
-         * After sending a new message we reset all modifications since the model
-         * should now be aware of all the changes.
-         */
-        workbenchStore.resetAllFileModifications();
-      }
-
-      setInput('');
-      Cookies.remove(PROMPT_COOKIE_KEY);
-
-      // Add file cleanup here
-      setUploadedFiles([]);
-      setImageDataList([]);
-
-      resetEnhancer();
-
-      textareaRef.current?.blur();
-
-      // The project contents are associated with the last message present when
-      // the user message is added.
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage) {
-        const { contentBase64 } = await workbenchStore.generateZipBase64();
-        saveProjectContents(lastMessage.id, { content: contentBase64 });
-        gLastProjectContents = contentBase64;
-        setApproveChangesMessageId(lastMessage.id);
-      }
-
-      await pingTelemetry("Chat.SendMessage", {
-        numMessages: messages.length,
-        simulation,
-        didEnhancePrompt,
-        loginKey: getNutLoginKey(),
-      });
-    };
+      },
+      [
+        messages, 
+        isLoading, 
+        input, 
+        setInput, 
+        workbenchStore,
+        shouldUseSimulation,
+        chatStore,
+        append,
+        imageDataList,
+        setUploadedFiles,
+        setImageDataList,
+        resetEnhancer,
+        textareaRef,
+        saveProjectContents,
+        setApproveChangesMessageId,
+        pingTelemetry,
+        getNutLoginKey,
+        setSimulationLoading
+      ]
+    );
 
     const onRewind = async (messageId: string, contents: string) => {
       console.log("Rewinding", messageId, contents);
