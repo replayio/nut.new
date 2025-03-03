@@ -8,6 +8,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { listAllProblems } from '~/lib/supabase/problems';
 import { BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemDescription } from '~/lib/replay/Problems';
+import { mapSupabaseStatusToBoltStatus } from '~/lib/supabase/problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -106,10 +107,7 @@ function ProblemsPage() {
         timestamp: new Date(problem.created_at).getTime(),
         title: problem.title,
         description: problem.description,
-        status: problem.status === 'pending' ? BoltProblemStatus.Pending :
-                problem.status === 'solved' ? BoltProblemStatus.Solved :
-                problem.status === 'unsolved' ? BoltProblemStatus.Unsolved :
-                BoltProblemStatus.Pending,
+        status: mapSupabaseStatusToBoltStatus(problem.status),
         keywords: problem.keywords
       }));
       setProblems(boltProblems);

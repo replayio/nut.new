@@ -24,7 +24,7 @@ export type ProblemStatus = Problem['status'];
 /**
  * Maps a BoltProblemStatus to a ProblemStatus
  */
-function mapBoltStatusToSupabaseStatus(status: BoltProblemStatus | undefined): ProblemStatus {
+export function mapBoltStatusToSupabaseStatus(status: BoltProblemStatus | undefined): ProblemStatus {
   switch (status) {
     case BoltProblemStatus.Pending:
       return 'pending';
@@ -40,7 +40,7 @@ function mapBoltStatusToSupabaseStatus(status: BoltProblemStatus | undefined): P
 /**
  * Maps a ProblemStatus to a BoltProblemStatus
  */
-function mapSupabaseStatusToBoltStatus(status: ProblemStatus | undefined): BoltProblemStatus {
+export function mapSupabaseStatusToBoltStatus(status: ProblemStatus | undefined): BoltProblemStatus {
   switch (status) {
     case 'pending':
       return BoltProblemStatus.Pending;
