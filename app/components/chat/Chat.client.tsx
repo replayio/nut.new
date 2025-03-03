@@ -29,8 +29,9 @@ import { getCurrentMouseData } from '../workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
 import type { FileMap } from '~/lib/stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
-import { getNutLoginKey } from '~/lib/replay/Problems';
+import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { shouldUseSimulation } from '~/lib/hooks/useSimulation';
+import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 
 const toastAnimation = cssTransition({
@@ -373,6 +374,8 @@ export const ChatImpl = memo(
 
       console.log("UseSimulation", simulation);
 
+      let didEnhancePrompt = false;
+
       if (simulation) {
         gLockSimulationData = true;
         try {
@@ -398,6 +401,7 @@ export const ChatImpl = memo(
             }
 
             simulationEnhancedPrompt = info.enhancedPrompt;
+            didEnhancePrompt = true;
 
             console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
             setMessages([...messages, info.enhancedPromptMessage]);
@@ -456,6 +460,13 @@ export const ChatImpl = memo(
         saveProjectContents(lastMessage.id, { content: contentBase64 });
         gLastProjectContents = contentBase64;
       }
+
+      await pingTelemetry("Chat.SendMessage", {
+        numMessages: messages.length,
+        simulation,
+        didEnhancePrompt,
+        loginKey: getNutLoginKey(),
+      });
     };
 
     const onRewind = async (messageId: string, contents: string) => {
@@ -472,10 +483,45 @@ export const ChatImpl = memo(
         setParsedMessages(newParsedMessages);
         setMessages(messages.slice(0, messageIndex + 1));
       }
+
+      await pingTelemetry("Chat.Rewind", {
+        numMessages: messages.length,
+        rewindIndex: messageIndex,
+        loginKey: getNutLoginKey(),
+      });
     };
 
-    const onApproveChange = (messageId: string) => {
+    const flashScreen = async () => {
+      const flash = document.createElement('div');
+      flash.style.position = 'fixed';
+      flash.style.top = '0';
+      flash.style.left = '0';
+      flash.style.width = '100%';
+      flash.style.height = '100%';
+      flash.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+      flash.style.zIndex = '9999';
+      flash.style.pointerEvents = 'none';
+      document.body.appendChild(flash);
+
+      // Fade out and remove after 500ms
+      setTimeout(() => {
+        flash.style.transition = 'opacity 0.5s';
+        flash.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(flash);
+        }, 500);
+      }, 200);
+    };
+
+    const onApproveChange = async (messageId: string) => {
       console.log("ApproveChange", messageId);
+
+      await flashScreen();
+
+      await pingTelemetry("Chat.ApproveChange", {
+        numMessages: messages.length,
+        loginKey: getNutLoginKey(),
+      });
     };
 
     const onRejectChange = async (messageId: string, projectContents: string, data: RejectChangeData) => {
@@ -486,13 +532,36 @@ export const ChatImpl = memo(
 
       await onRewind(messageId, projectContents);
 
+      let shareProjectSuccess = false;
       if (data.shareProject) {
-        throw new Error("FIXME");
+        const feedbackData: any = {
+          explanation: data.explanation,
+          retry: data.retry,
+          chatMessages: getLastChatMessages(),
+          repositoryContents: getLastProjectContents(),
+          loginKey: getNutLoginKey(),
+        };
+    
+        if (feedbackData.share) {
+          // Note: We don't just use the workbench store here because wrangler generates a strange error.
+          feedbackData.repositoryContents = getLastProjectContents();
+          feedbackData.chatMessages = messages;
+        }
+    
+        shareProjectSuccess = await submitFeedback(feedbackData);
       }
 
       if (data.retry) {
         sendMessage(messageContents);
       }
+
+      await pingTelemetry("Chat.RejectChange", {
+        retry: data.retry,
+        shareProject: data.shareProject,
+        shareProjectSuccess,
+        numMessages: messages.length,
+        loginKey: getNutLoginKey(),
+      });
     };
 
     /**

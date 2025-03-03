@@ -34,6 +34,8 @@ function hasFileModifications(content: string) {
   return content.includes('__boltArtifact__');
 }
 
+const gApprovedOrRejectedMessageIds = new Set<string>();
+
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
   const { id, isStreaming = false, messages = [], onRewind, onApproveChange, onRejectChange } = props;
 
@@ -58,7 +60,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     return { messageId: beforeUserMessage.id, contents };
   };
 
-  /*
   const showApproveChange = (() => {
     if (isStreaming) {
       return false;
@@ -74,10 +75,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     }
 
     const lastMessage = messages[messages.length - 1];
+
+    if (gApprovedOrRejectedMessageIds.has(lastMessage.id)) {
+      return false;
+    }
+
     return hasFileModifications(lastMessage.content);
   })();
-  */
-  const showApproveChange = true;
 
   return (
     <div id={id} ref={ref} className={props.className}>
@@ -152,6 +156,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             if (onApproveChange) {
               const lastMessage = messages[messages.length - 1];
               assert(lastMessage);
+              gApprovedOrRejectedMessageIds.add(lastMessage.id);
               onApproveChange(lastMessage.id);
             }
           }}
@@ -159,6 +164,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             if (onRejectChange) {
               const lastMessage = messages[messages.length - 1];
               assert(lastMessage);
+              gApprovedOrRejectedMessageIds.add(lastMessage.id);
 
               const info = getLastMessageProjectContents(messages.length - 1);
               assert(info);
