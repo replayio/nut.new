@@ -1,7 +1,8 @@
 import { sentryHandleError } from '~/lib/sentry';
 import { useStore } from '@nanostores/react';
-import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '@remix-run/react';
+import type { LinksFunction, LoaderFunction } from '@remix-run/cloudflare';
+import { json } from '@remix-run/cloudflare';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
@@ -38,6 +39,15 @@ export const links: LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
   },
 ];
+
+export const loader: LoaderFunction = async ({ context }) => {
+  return json({
+    ENV: {
+      SUPABASE_URL: context.SUPABASE_URL || process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: context.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY,
+    },
+  });
+};
 
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
@@ -83,13 +93,15 @@ import { logStore } from './lib/stores/logs';
 
 export const ErrorBoundary = () => {
   const error = useRouteError();
-  sentryHandleError(error as Error);
+  // Using our conditional error handling instead of direct Sentry import
+  sentryHandleError(error instanceof Error ? error : new Error(String(error)));
 
   return <div>Something went wrong</div>;
 };
 
 export default function App() {
   const theme = useStore(themeStore);
+  const data = useLoaderData<typeof loader>();
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {

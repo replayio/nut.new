@@ -17,9 +17,9 @@ import { extractRelativePath } from '~/utils/diff';
 import { description } from '~/lib/persistence';
 import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
-import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
+import { uint8ArrayToBase64 } from '~/lib/replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
-import { extractFileArtifactsFromRepositoryContents } from '../replay/Problems';
+import { extractFileArtifactsFromRepositoryContents } from '~/lib/replay/Problems.client';
 
 export interface ArtifactState {
   id: string;
@@ -440,7 +440,7 @@ export class WorkbenchStore {
         const content = dirent.content;
 
         const artifact = fileArtifacts.find((artifact) => artifact.path === relativePath);
-        const artifactContent = artifact?.content ?? "";
+        const artifactContent = artifact?.content ?? '';
 
         if (content != artifactContent) {
           modifiedFilePaths.add(relativePath);
@@ -458,10 +458,10 @@ export class WorkbenchStore {
     const actionArtifactId = `restore-contents-artifact-id-${messageId}`;
 
     for (const filePath of modifiedFilePaths) {
-      console.log("RestoreModifiedFile", filePath);
+      console.log('RestoreModifiedFile', filePath);
 
       const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
-      const artifactContent = artifact?.content ?? "";
+      const artifactContent = artifact?.content ?? '';
 
       const actionId = `restore-contents-action-${messageId}-${filePath}-${Math.random().toString()}`;
       const data: ActionCallbackData = {

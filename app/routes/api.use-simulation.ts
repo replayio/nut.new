@@ -8,19 +8,24 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 async function useSimulationAction({ context, request }: ActionFunctionArgs) {
-  const { messages, messageInput } = await request.json<{
+  const {
+    messages,
+    messageInput,
+    anthropicApiKey: clientAnthropicApiKey,
+  } = await request.json<{
     messages: Message[];
     messageInput: string;
+    anthropicApiKey?: string;
   }>();
 
-  const apiKey = context.cloudflare.env.ANTHROPIC_API_KEY;
+  const apiKey = clientAnthropicApiKey ?? context.cloudflare.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    throw new Error("Anthropic API key is not set");
+    throw new Error('Anthropic API key is not set');
   }
 
   const anthropicApiKey: AnthropicApiKey = {
     key: apiKey,
-    isUser: false,
+    isUser: !!clientAnthropicApiKey,
     userLoginKey: undefined,
   };
 
@@ -37,17 +42,17 @@ reasoning and then respond with either \`<analyze>true</analyze>\` or \`<analyze
   `;
 
   const message: MessageParam = {
-    role: "user",
+    role: 'user',
     content: `Here is the user message you need to evaluate: <user_message>${messageInput}</user_message>`,
   };
 
-  const { responseText } = await callAnthropic(anthropicApiKey, "UseSimulation", systemPrompt, [message]);
+  const { responseText } = await callAnthropic(anthropicApiKey, 'UseSimulation', systemPrompt, [message]);
 
-  console.log("UseSimulationResponse", responseText);
+  console.log('UseSimulationResponse', responseText);
 
   const match = /<analyze>(.*?)<\/analyze>/.exec(responseText);
   if (match) {
-    const useSimulation = match[1] === "true";
+    const useSimulation = match[1] === 'true';
     return json({ useSimulation });
   } else {
     return json({ useSimulation: false });

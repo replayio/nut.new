@@ -5,8 +5,8 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { Suspense, useEffect, useState } from 'react';
-import { BoltProblemStatus, listAllProblems } from '~/lib/replay/Problems';
-import type { BoltProblemDescription } from '~/lib/replay/Problems';
+import { BoltProblemStatus, type BoltProblemDescription } from '~/lib/replay/types';
+import { listAllProblems } from '~/lib/api/problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -97,7 +97,10 @@ function ProblemsPage() {
   const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
 
   useEffect(() => {
-    listAllProblems().then(setProblems);
+    // Fetch problems from API
+    listAllProblems().then(boltProblems => {
+      setProblems(boltProblems);
+    });
   }, []);
 
   const filteredProblems = problems?.filter(problem => {

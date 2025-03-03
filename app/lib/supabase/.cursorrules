@@ -1,0 +1,3 @@
+### instructions
+- use `pnpm` as the package manager.
+- start dev server with `pnpm run dev`

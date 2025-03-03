@@ -3,7 +3,7 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import type { Message } from 'ai';
-import React, { type RefCallback, useEffect, useState } from 'react';
+import React, { type RefCallback, useEffect, useState, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
@@ -146,25 +146,35 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
-    const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
-      if (sendMessage) {
-        sendMessage(messageInput);
-
+    const handleSendMessage = useCallback(
+      (input: string | React.UIEvent) => {
         if (recognition) {
-          recognition.abort(); // Stop current recognition
-          setTranscript(''); // Clear transcript
-          setIsListening(false);
-
-          // Clear the input by triggering handleInputChange with empty value
-          if (handleInputChange) {
-            const syntheticEvent = {
-              target: { value: '' },
-            } as React.ChangeEvent<HTMLTextAreaElement>;
-            handleInputChange(syntheticEvent);
+          recognition.stop();
+          setTranscript('');
+          if (typeof handleInputChange === 'function') {
+            handleInputChange('');
           }
         }
-      }
-    };
+        if (typeof sendMessage === 'function') {
+          if (typeof input === 'string') {
+            sendMessage(input);
+          } else {
+            sendMessage();
+          }
+        }
+      },
+      [handleInputChange, recognition, sendMessage]
+    );
+
+    const handleExamplePrompt = useCallback(
+      (input: string) => {
+        if (isStreaming) {
+          stopListening();
+        }
+        handleSendMessage(input);
+      },
+      [handleSendMessage, isStreaming, stopListening]
+    );
 
     const handleFileUpload = () => {
       const input = document.createElement('input');
@@ -430,14 +440,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             )}
             {!chatStarted &&
-              ExamplePrompts((event, messageInput) => {
-                if (isStreaming) {
-                  handleStop?.();
-                  return;
-                }
-
-                handleSendMessage?.(event, messageInput);
-              })}
+              <ExamplePrompts sendMessage={handleExamplePrompt} />
+            }
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
         </div>
