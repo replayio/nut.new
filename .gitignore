@@ -40,3 +40,9 @@ site
 
 # commit file ignore
 app/commit.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
