@@ -1,0 +1,5 @@
+- use `pnpm`.
+- dev server `pnpm dev`
+
+
+- use `@remix-run/react` as much as possible

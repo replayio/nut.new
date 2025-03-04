@@ -7,7 +7,10 @@ import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { logStore } from './lib/stores/logs';
+import { initializeAuth } from './lib/stores/auth';
+import ReactModal from 'react-modal';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -89,10 +92,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { logStore } from './lib/stores/logs';
+// Client-only initialization
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? <>{children}</> : null;
+}
+
+// Auth initialization component
+function AuthProvider() {
+  useEffect(() => {
+    // Initialize auth
+    initializeAuth().catch((error) => {
+      logStore.logError('Failed to initialize auth', error);
+    });
+  }, []);
+
+  return null;
+}
+
+// ReactModal initialization
+if (typeof document !== 'undefined') {
+  ReactModal.setAppElement('#root');
+}
 
 export const ErrorBoundary = () => {
   const error = useRouteError();
+  
   // Using our conditional error handling instead of direct Sentry import
   sentryHandleError(error instanceof Error ? error : new Error(String(error)));
 
@@ -102,6 +128,14 @@ export const ErrorBoundary = () => {
 export default function App() {
   const theme = useStore(themeStore);
   const data = useLoaderData<typeof loader>();
+
+  // Make ENV available to the window object
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // @ts-ignore - Type 'unknown' issue with data.ENV
+      window.ENV = data.ENV;
+    }
+  }, [data]);
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -114,6 +148,9 @@ export default function App() {
 
   return (
     <Layout>
+      <ClientOnly>
+        <AuthProvider />
+      </ClientOnly>
       <Outlet />
     </Layout>
   );

@@ -1,5 +1,8 @@
-/// <reference types="@remix-run/cloudflare" />
-/// <reference types="vite/client" />
+/**
+ * Remix and Vite types
+ * @reference types="@remix-run/cloudflare"
+ * @reference types="vite/client"
+ */
 
 interface NodeEnv {
   SUPABASE_URL?: string;
@@ -12,3 +15,10 @@ declare namespace NodeJS {
 
 // Ensure this is treated as a module
 export {};
+
+interface Window {
+  ENV: {
+    SUPABASE_URL: string;
+    SUPABASE_ANON_KEY: string;
+  };
+}
