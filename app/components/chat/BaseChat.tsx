@@ -152,7 +152,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           recognition.stop();
           setTranscript('');
           if (typeof handleInputChange === 'function') {
-            handleInputChange('');
+            const syntheticEvent = {
+              target: { value: '' },
+              preventDefault: () => {},
+              stopPropagation: () => {}
+            } as React.ChangeEvent<HTMLTextAreaElement>;
+            
+            handleInputChange(syntheticEvent);
           }
         }
         if (typeof sendMessage === 'function') {

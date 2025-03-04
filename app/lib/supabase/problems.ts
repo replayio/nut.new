@@ -170,7 +170,10 @@ export async function getProblem(id: string): Promise<Problem | null> {
 /**
  * Creates a new problem
  */
-export async function createProblem(problem: Database['public']['Tables']['problems']['Insert']): Promise<Problem> {
+export async function createProblem(
+  problem: Database['public']['Tables']['problems']['Insert'],
+  request: Request,
+): Promise<Problem> {
   try {
     const boltProblemInput: BoltProblemInput = {
       title: problem.title,
@@ -182,7 +185,8 @@ export async function createProblem(problem: Database['public']['Tables']['probl
       version: 1, // Required field
     };
 
-    const problemId = await replaySubmitProblem(boltProblemInput);
+    // The actual request will be passed from the API endpoint
+    const problemId = await replaySubmitProblem(boltProblemInput, request);
 
     if (!problemId) {
       throw new Error('Failed to create problem');
@@ -208,6 +212,7 @@ export async function createProblem(problem: Database['public']['Tables']['probl
 export async function updateProblem(
   id: string,
   updates: Database['public']['Tables']['problems']['Update'],
+  request: Request,
 ): Promise<Problem> {
   try {
     const boltProblemUpdate = mapProblemUpdatesToBoltProblem(updates);
@@ -225,7 +230,8 @@ export async function updateProblem(
       ...boltProblemUpdate,
     };
 
-    await replayUpdateProblem(id, boltProblemInput);
+    // The actual request will be passed from the API endpoint
+    await replayUpdateProblem(id, boltProblemInput, request);
 
     // Get the updated problem
     const updatedBoltProblem = await replayGetProblem(id);
@@ -246,6 +252,7 @@ export async function updateProblem(
  */
 export async function addProblemComment(
   comment: Database['public']['Tables']['problem_comments']['Insert'],
+  request: Request,
 ): Promise<ProblemComment> {
   try {
     // Get the current problem
@@ -262,13 +269,21 @@ export async function addProblemComment(
       content: comment.content,
     };
 
+    // Merge current problem with updates
     const boltProblemInput: BoltProblemInput = {
       ...boltProblem,
       comments: [...(boltProblem.comments || []), newBoltComment],
     };
 
-    // Update the problem with the new comment
-    await replayUpdateProblem(comment.problem_id, boltProblemInput);
+    // The actual request will be passed from the API endpoint
+    await replayUpdateProblem(comment.problem_id, boltProblemInput, request);
+
+    // Get the updated problem
+    const updatedBoltProblem = await replayGetProblem(comment.problem_id);
+
+    if (!updatedBoltProblem) {
+      throw new Error('Failed to retrieve updated problem');
+    }
 
     // Return the new comment in Supabase format
     return {

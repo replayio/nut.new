@@ -7,13 +7,17 @@ import type { BoltProblemDescription, BoltProblem, BoltProblemInput } from '~/li
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
   try {
     const response = await fetch('/api/problems');
+
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
-    const data = await response.json();
+
+    const data = (await response.json()) as { problems: BoltProblemDescription[] };
+
     return data.problems;
   } catch (error) {
     handleClientError('fetch problems', error);
+
     return [];
   }
 }
@@ -24,13 +28,17 @@ export async function listAllProblems(): Promise<BoltProblemDescription[]> {
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
   try {
     const response = await fetch(`/api/problems?id=${encodeURIComponent(problemId)}`);
+
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
-    const data = await response.json();
+
+    const data = (await response.json()) as { problem: BoltProblem };
+
     return data.problem;
   } catch (error) {
     handleClientError('fetch problem', error);
+
     return null;
   }
 }
@@ -46,16 +54,19 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(problem),
+      credentials: 'same-origin',
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { problemId: string };
+
     return data.problemId;
   } catch (error) {
     handleClientError('submit problem', error);
+
     return null;
   }
 }
@@ -71,6 +82,7 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(problem),
+      credentials: 'same-origin',
     });
 
     if (!response.ok) {

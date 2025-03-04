@@ -185,11 +185,15 @@ export async function submitProblem(problem: BoltProblemInput, request: Request)
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput, request: Request): Promise<void> {
+export async function updateProblem(
+  problemId: string,
+  problem: BoltProblemInput,
+  request: Request,
+): Promise<BoltProblem | null> {
   try {
     if (!(await checkIsAdmin(request))) {
       toast.error('Admin user required');
-      return;
+      return null;
     }
 
     // Extract comments to add separately if needed
@@ -206,7 +210,10 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
     };
 
     // Update the problem
-    const { error: updateError } = await supabase.from('problems').update(updates).eq('id', problemId);
+    const { error: updateError, data: updatedProblem } = await supabase
+      .from('problems')
+      .update(updates)
+      .eq('id', problemId);
 
     if (updateError) {
       throw updateError;
@@ -246,10 +253,17 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
           throw commentsError;
         }
       }
+
+      if (!updatedProblem) {
+        throw new Error('Failed to retrieve updated problem');
+      }
+
+      return convertSupabaseProblemToBolt(updatedProblem);
     }
   } catch (error) {
     handleClientError('update problem', error);
   }
+  return null;
 }
 
 export async function submitFeedback(feedback: any, request: Request): Promise<boolean> {

@@ -6,6 +6,9 @@ import JSZip from 'jszip';
 import type { FileArtifact } from '~/utils/folderImport';
 import type { BoltProblem, BoltProblemInput } from './types';
 
+// Re-export the types
+export type { BoltProblem, BoltProblemInput };
+
 // ========================== Cookie Keys ==========================
 
 const PROBLEMS_USERNAME_KEY = 'problems_username';
