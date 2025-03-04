@@ -58,12 +58,16 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
     });
 
     if (!response.ok) {
+      // Check for specific error types
+      if (response.status === 403) {
+        throw new Error('Admin permissions required to submit problems');
+      }
       throw new Error(`HTTP error ${response.status}`);
     }
 
-    const data = (await response.json()) as { problemId: string };
+    const data = (await response.json()) as { id: string };
 
-    return data.problemId;
+    return data.id;
   } catch (error) {
     handleClientError('submit problem', error);
 

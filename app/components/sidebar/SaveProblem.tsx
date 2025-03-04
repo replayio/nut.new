@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from "react";
 import { workbenchStore } from "~/lib/stores/workbench";
@@ -15,7 +15,7 @@ export function SaveProblem() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    name: ''
+    name: '',
   });
   const [problemId, setProblemId] = useState<string | null>(null);
 
@@ -24,16 +24,16 @@ export function SaveProblem() {
     setFormData({
       title: '',
       description: '',
-      name: ''
+      name: '',
     });
     setProblemId(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -51,11 +51,12 @@ export function SaveProblem() {
       return;
     }
 
-    toast.info("Submitting problem...");
+    toast.info('Submitting problem...');
 
-    console.log("SubmitProblem", formData);
+    console.log('SubmitProblem', formData);
 
     await workbenchStore.saveAllFiles();
+    
     const { contentBase64 } = await workbenchStore.generateZipBase64();
 
     const problem: BoltProblemInput = {
@@ -66,18 +67,35 @@ export function SaveProblem() {
       repositoryContents: contentBase64,
     };
 
-    const problemId = await submitProblem(problem);
-    if (problemId) {
-      setProblemId(problemId);
+    try {
+      const problemId = await submitProblem(problem);
+      
+      if (problemId) {
+        setProblemId(problemId);
+        toast.success('Problem submitted successfully!');
+      } else {
+        toast.error('Failed to submit problem. You may need admin privileges.');
+      }
+    } catch (error) {
+      console.error('Error submitting problem:', error);
+      const err = error as { message?: string };
+      if (err.message && err.message.includes('Admin permissions')) {
+        toast.error('Admin permissions required to submit problems');
+      } else {
+        toast.error(`Error: ${err.message || 'Unknown error'}`);
+      }
     }
-  }
+  };
 
   return (
     <>
       <a
         href="#"
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={handleSaveProblem}
+        onClick={(e) => {
+          e.preventDefault();
+          handleSaveProblem();
+        }}
       >
         Save Problem
       </a>

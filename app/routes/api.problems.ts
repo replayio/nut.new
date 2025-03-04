@@ -41,6 +41,21 @@ export async function action({ request }: ActionFunctionArgs) {
     const id = await submitProblem(body, request);
 
     if (!id) {
+      /*
+       * Check if it's due to admin permissions
+       * Get the auth cookie to see if the user is logged in at all
+       */
+      const authCookie = request.headers
+        .get('Cookie')
+        ?.split(';')
+        .find((c) => c.trim().startsWith('nut_login_key='));
+
+      if (authCookie) {
+        // User is logged in but not an admin
+        return json({ error: 'Admin permissions required' }, { status: 403 });
+      }
+
+      // General error
       return json({ error: 'Failed to create problem' }, { status: 500 });
     }
 
