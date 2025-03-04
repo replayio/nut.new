@@ -22,6 +22,14 @@ export function Header() {
           <img src="/logo-styled.svg" alt="logo" className="w-[40px] inline-block rotate-90" />
         </a>
         <Feedback />
+        <a
+          href="https://www.replay.io/discord"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-bolt-elements-textPrimary hover:text-accent"
+        >
+          <div className="i-ph:discord-logo-fill text-xl" />
+        </a>
       </div>
       {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
         <>

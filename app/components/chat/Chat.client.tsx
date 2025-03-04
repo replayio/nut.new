@@ -31,7 +31,7 @@ import type { FileMap } from '~/lib/stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { shouldUseSimulation } from '~/lib/hooks/useSimulation';
-import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 
 const toastAnimation = cssTransition({
@@ -176,6 +176,8 @@ function filterFiles(files: FileMap): FileMap {
   return rv;
 }
 
+let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
+
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
@@ -210,6 +212,12 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
+    // Once we are no longer loading the message is complete.
+    if (gActiveChatMessageTelemetry && !isLoading && !simulationLoading) {
+      gActiveChatMessageTelemetry.finish();
+      gActiveChatMessageTelemetry = undefined;
+    }
 
     useEffect(() => {
       const prompt = searchParams.get('prompt');
@@ -262,6 +270,11 @@ export const ChatImpl = memo(
       chatStore.setKey('aborted', true);
       workbenchStore.abortAllActions();
       setSimulationLoading(false);
+
+      if (gActiveChatMessageTelemetry) {
+        gActiveChatMessageTelemetry.abort("StopButtonClicked");
+        gActiveChatMessageTelemetry = undefined;
+      }
     };
 
     useEffect(() => {
@@ -312,7 +325,7 @@ export const ChatImpl = memo(
     };
 
     const getEnhancedPrompt = async (userMessage: string) => {
-      let enhancedPrompt, message;
+      let enhancedPrompt, message, hadError = false;
       try {
         const mouseData = getCurrentMouseData();
         enhancedPrompt = await getSimulationEnhancedPrompt(messages, userMessage, mouseData);
@@ -320,6 +333,7 @@ export const ChatImpl = memo(
       } catch (e) {
         console.error("Error enhancing prompt", e);
         message = "Error enhancing prompt.";
+        hadError = true;
       }
 
       const enhancedPromptMessage: Message = {
@@ -328,7 +342,7 @@ export const ChatImpl = memo(
         content: message,
       };
 
-      return { enhancedPrompt, enhancedPromptMessage };
+      return { enhancedPrompt, enhancedPromptMessage, hadError };
     }
 
     const sendMessage = async (messageInput?: string) => {
@@ -339,6 +353,8 @@ export const ChatImpl = memo(
         return;
       }
 
+      gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
+
       const loginKey = getNutLoginKey();
 
       const apiKeyCookie = Cookies.get(anthropicApiKeyCookieName);
@@ -348,6 +364,8 @@ export const ChatImpl = memo(
         const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
         if (numFreeUses >= MaxFreeUses) {
           toast.error('All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.');
+          gActiveChatMessageTelemetry.abort("NoFreeUses");
+          gActiveChatMessageTelemetry = undefined;
           return;
         }
 
@@ -367,7 +385,7 @@ export const ChatImpl = memo(
 
       let simulationEnhancedPrompt: string | undefined;
 
-      const simulation = await shouldUseSimulation(messages, _input);
+      const simulation = chatStarted && await shouldUseSimulation(messages, _input);
 
       if (numAbortsAtStart != gNumAborts) {
         return;
@@ -375,9 +393,10 @@ export const ChatImpl = memo(
 
       console.log("UseSimulation", simulation);
 
-      let didEnhancePrompt = false;
-
+      let simulationStatus = "NoSimulation";
       if (simulation) {
+        gActiveChatMessageTelemetry.startSimulation();
+
         gLockSimulationData = true;
         try {
           await flushSimulationData();
@@ -402,11 +421,16 @@ export const ChatImpl = memo(
             }
 
             simulationEnhancedPrompt = info.enhancedPrompt;
-            didEnhancePrompt = true;
 
             console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
             setMessages([...messages, info.enhancedPromptMessage]);
+
+            simulationStatus = info.hadError ? "PromptError" : "Success";
+          } else {
+            simulationStatus = "RecordingError";
           }
+
+          gActiveChatMessageTelemetry.endSimulation(simulationStatus);
         } finally {
           gLockSimulationData = false;
         }
@@ -463,12 +487,7 @@ export const ChatImpl = memo(
         setApproveChangesMessageId(lastMessage.id);
       }
 
-      await pingTelemetry("Chat.SendMessage", {
-        numMessages: messages.length,
-        simulation,
-        didEnhancePrompt,
-        loginKey: getNutLoginKey(),
-      });
+      gActiveChatMessageTelemetry.sendPrompt(simulationStatus);
     };
 
     const onRewind = async (messageId: string, contents: string) => {
@@ -486,7 +505,7 @@ export const ChatImpl = memo(
         setMessages(messages.slice(0, messageIndex + 1));
       }
 
-      await pingTelemetry("Chat.Rewind", {
+      await pingTelemetry("RewindChat", {
         numMessages: messages.length,
         rewindIndex: messageIndex,
         loginKey: getNutLoginKey(),
@@ -522,7 +541,7 @@ export const ChatImpl = memo(
 
       await flashScreen();
 
-      await pingTelemetry("Chat.ApproveChange", {
+      await pingTelemetry("ApproveChange", {
         numMessages: messages.length,
         loginKey: getNutLoginKey(),
       });
@@ -555,7 +574,7 @@ export const ChatImpl = memo(
         sendMessage(messageContents);
       }
 
-      await pingTelemetry("Chat.RejectChange", {
+      await pingTelemetry("RejectChange", {
         retry: data.retry,
         shareProject: data.shareProject,
         shareProjectSuccess,

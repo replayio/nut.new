@@ -328,9 +328,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
          <ClientOnly>
            {() => (
              <SendButton
-               show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
+               show={(isStreaming || input.length > 0 || uploadedFiles.length > 0) && chatStarted}
                isStreaming={isStreaming}
                onClick={(event) => {
+                 if (isStreaming) {
+                   handleStop?.();
+                   return;
+                 }
+
                  if (input.length > 0 || uploadedFiles.length > 0) {
                    handleSendMessage?.(event);
                  }
