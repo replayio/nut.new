@@ -40,9 +40,9 @@ export function getLastMessageProjectContents(messages: Message[], index: number
 
     // We still rewind to just before the user message to retain any
     // explanation from the Nut API.
-    return { messageId: beforeUserMessage.id, contents: priorContents };
+    return { rewindMessageId: beforeUserMessage.id, contentsMessageId: priorMessage.id, contents: priorContents };
   }
-  return { messageId: beforeUserMessage.id, contents };
+  return { rewindMessageId: beforeUserMessage.id, contentsMessageId: beforeUserMessage.id, contents };
 }
 
 export function hasFileModifications(content: string) {
@@ -100,7 +100,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                             onClick={() => {
                               const info = getLastMessageProjectContents(messages, index);
                               assert(info);
-                              onRewind(info.messageId, info.contents.content);
+                              onRewind(info.rewindMessageId, info.contents.content);
                             }}
                             key="i-ph:arrow-u-up-left"
                             className={classNames(

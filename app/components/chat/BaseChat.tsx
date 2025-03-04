@@ -95,6 +95,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [isListening, setIsListening] = useState(false);
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
+    const [rejectFormOpen, setRejectFormOpen] = useState(false);
 
     useEffect(() => {
       console.log(transcript);
@@ -234,14 +235,135 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         return false;
       }
   
-      if (lastMessageProjectContents.messageId != approveChangesMessageId) {
+      if (lastMessageProjectContents.contentsMessageId != approveChangesMessageId) {
         return false;
       }
   
       const lastMessage = messages[messages.length - 1];
-      return hasFileModifications(lastMessage.content);
+      if (!hasFileModifications(lastMessage.content)) {
+        return false;
+      }
+
+      return true;
     })();
   
+    let messageInput;
+    if (!rejectFormOpen) {
+      messageInput = (
+        <div
+         className={classNames(
+           'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg',
+         )}
+       >
+         <textarea
+           ref={textareaRef}
+           className={classNames(
+             'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+             'transition-all duration-200',
+             'hover:border-bolt-elements-focus',
+           )}
+           onDragEnter={(e) => {
+             e.preventDefault();
+             e.currentTarget.style.border = '2px solid #1488fc';
+           }}
+           onDragOver={(e) => {
+             e.preventDefault();
+             e.currentTarget.style.border = '2px solid #1488fc';
+           }}
+           onDragLeave={(e) => {
+             e.preventDefault();
+             e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
+           }}
+           onDrop={(e) => {
+             e.preventDefault();
+             e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
+
+             const files = Array.from(e.dataTransfer.files);
+             files.forEach((file) => {
+               if (file.type.startsWith('image/')) {
+                 const reader = new FileReader();
+
+                 reader.onload = (e) => {
+                   const base64Image = e.target?.result as string;
+                   setUploadedFiles?.([...uploadedFiles, file]);
+                   setImageDataList?.([...imageDataList, base64Image]);
+                 };
+                 reader.readAsDataURL(file);
+               }
+             });
+           }}
+           onKeyDown={(event) => {
+             if (event.key === 'Enter') {
+               if (event.shiftKey) {
+                 return;
+               }
+
+               event.preventDefault();
+
+               if (isStreaming) {
+                 handleStop?.();
+                 return;
+               }
+
+               // ignore if using input method engine
+               if (event.nativeEvent.isComposing) {
+                 return;
+               }
+
+               handleSendMessage?.(event);
+             }
+           }}
+           value={input}
+           onChange={(event) => {
+             handleInputChange?.(event);
+           }}
+           onPaste={handlePaste}
+           style={{
+             minHeight: TEXTAREA_MIN_HEIGHT,
+             maxHeight: TEXTAREA_MAX_HEIGHT,
+           }}
+           placeholder={chatStarted ? "How can we help you?" : "What do you want to build?"}
+           translate="no"
+         />
+         <ClientOnly>
+           {() => (
+             <SendButton
+               show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
+               isStreaming={isStreaming}
+               onClick={(event) => {
+                 if (input.length > 0 || uploadedFiles.length > 0) {
+                   handleSendMessage?.(event);
+                 }
+               }}
+             />
+           )}
+         </ClientOnly>
+         <div className="flex justify-between items-center text-sm p-4 pt-2">
+           <div className="flex gap-1 items-center">
+             <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
+               <div className="i-ph:paperclip text-xl"></div>
+             </IconButton>
+
+             <SpeechRecognitionButton
+               isListening={isListening}
+               onStart={startListening}
+               onStop={stopListening}
+               disabled={isStreaming}
+             />
+             {chatStarted && <ClientOnly>{() => <ExportChatButton exportChat={exportChat} />}</ClientOnly>}
+           </div>
+           {input.length > 3 ? (
+             <div className="text-xs text-bolt-elements-textTertiary">
+               Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd> +{' '}
+               <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd> a
+               new line
+             </div>
+           ) : null}
+         </div>
+       </div>
+      );
+    }
+
     const baseChat = (
       <div
         ref={ref}
@@ -331,139 +453,31 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     />
                   )}
                 </ClientOnly>
-                <div
-                  className={classNames(
-                    'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg',
-                  )}
-                >
-                  {showApproveChange && (
-                    <ApproveChange
-                      onApprove={() => {
-                        if (onApproveChange && messages) {
-                          const lastMessage = messages[messages.length - 1];
-                          assert(lastMessage);
-                          onApproveChange(lastMessage.id);
-                        }
-                      }}
-                      onReject={(data) => {
-                        if (onRejectChange && messages) {
-                          const lastMessage = messages[messages.length - 1];
-                          assert(lastMessage);
-
-                          const info = getLastMessageProjectContents(messages, messages.length - 1);
-                          assert(info);
-
-                          onRejectChange(lastMessage.id, info.messageId, info.contents.content, data);
-                        }
-                      }}
-                    />
-                  )}
-                  <textarea
-                    ref={textareaRef}
-                    className={classNames(
-                      'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
-                      'transition-all duration-200',
-                      'hover:border-bolt-elements-focus',
-                    )}
-                    onDragEnter={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.style.border = '2px solid #1488fc';
-                    }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.style.border = '2px solid #1488fc';
-                    }}
-                    onDragLeave={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
-
-                      const files = Array.from(e.dataTransfer.files);
-                      files.forEach((file) => {
-                        if (file.type.startsWith('image/')) {
-                          const reader = new FileReader();
-
-                          reader.onload = (e) => {
-                            const base64Image = e.target?.result as string;
-                            setUploadedFiles?.([...uploadedFiles, file]);
-                            setImageDataList?.([...imageDataList, base64Image]);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      });
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        if (event.shiftKey) {
-                          return;
-                        }
-
-                        event.preventDefault();
-
-                        if (isStreaming) {
-                          handleStop?.();
-                          return;
-                        }
-
-                        // ignore if using input method engine
-                        if (event.nativeEvent.isComposing) {
-                          return;
-                        }
-
-                        handleSendMessage?.(event);
+                {showApproveChange && (
+                  <ApproveChange
+                    rejectFormOpen={rejectFormOpen}
+                    setRejectFormOpen={setRejectFormOpen}
+                    onApprove={() => {
+                      if (onApproveChange && messages) {
+                        const lastMessage = messages[messages.length - 1];
+                        assert(lastMessage);
+                        onApproveChange(lastMessage.id);
                       }
                     }}
-                    value={input}
-                    onChange={(event) => {
-                      handleInputChange?.(event);
-                    }}
-                    onPaste={handlePaste}
-                    style={{
-                      minHeight: TEXTAREA_MIN_HEIGHT,
-                      maxHeight: TEXTAREA_MAX_HEIGHT,
-                    }}
-                    placeholder={chatStarted ? "How can we help you?" : "What do you want to build?"}
-                    translate="no"
-                  />
-                  <ClientOnly>
-                    {() => (
-                      <SendButton
-                        show={(input.length > 0 || uploadedFiles.length > 0) && chatStarted}
-                        isStreaming={isStreaming}
-                        onClick={(event) => {
-                          if (input.length > 0 || uploadedFiles.length > 0) {
-                            handleSendMessage?.(event);
-                          }
-                        }}
-                      />
-                    )}
-                  </ClientOnly>
-                  <div className="flex justify-between items-center text-sm p-4 pt-2">
-                    <div className="flex gap-1 items-center">
-                      <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
-                        <div className="i-ph:paperclip text-xl"></div>
-                      </IconButton>
+                    onReject={(data) => {
+                      if (onRejectChange && messages) {
+                        const lastMessage = messages[messages.length - 1];
+                        assert(lastMessage);
 
-                      <SpeechRecognitionButton
-                        isListening={isListening}
-                        onStart={startListening}
-                        onStop={stopListening}
-                        disabled={isStreaming}
-                      />
-                      {chatStarted && <ClientOnly>{() => <ExportChatButton exportChat={exportChat} />}</ClientOnly>}
-                    </div>
-                    {input.length > 3 ? (
-                      <div className="text-xs text-bolt-elements-textTertiary">
-                        Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd> +{' '}
-                        <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd> a
-                        new line
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
+                        const info = getLastMessageProjectContents(messages, messages.length - 1);
+                        assert(info);
+
+                        onRejectChange(lastMessage.id, info.rewindMessageId, info.contents.content, data);
+                      }
+                    }}
+                  />
+                )}
+                {!rejectFormOpen && messageInput}
               </div>
             </div>
             {!chatStarted && (

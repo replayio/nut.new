@@ -323,7 +323,7 @@ export const ChatImpl = memo(
       }
 
       const enhancedPromptMessage: Message = {
-        id: `enhanced-prompt-${messages.length}`,
+        id: `enhanced-prompt-${Math.random()}`,
         role: 'assistant',
         content: message,
       };

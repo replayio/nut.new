@@ -9,17 +9,19 @@ export interface RejectChangeData {
 }
 
 interface ApproveChangeProps {
+  rejectFormOpen: boolean;
+  setRejectFormOpen: (rejectFormOpen: boolean) => void;
   onApprove: () => void;
   onReject: (data: RejectChangeData) => void;
 }
 
-const ApproveChange: React.FC<ApproveChangeProps> = ({ onApprove, onReject }) => {
+const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setRejectFormOpen, onApprove, onReject }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [hasRejected, setHasRejected] = useState(false);
   const [shareProject, setShareProject] = useState(false);
 
-  if (hasRejected) {
+  if (rejectFormOpen) {
     const performReject = (retry: boolean) => {
+      setRejectFormOpen(false);
       const explanation = textareaRef.current?.value ?? '';
       onReject({
         explanation,
@@ -32,7 +34,7 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ onApprove, onReject }) =>
       <>
         <div
           className={classNames(
-            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg bg-red-50 mt-3',
+            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg bg-red-50 mb-2',
           )}
         >
           <textarea
@@ -78,16 +80,16 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ onApprove, onReject }) =>
           <button
             onClick={() => performReject(false)}
             className="flex-1 h-[30px] flex justify-center items-center bg-red-100 border border-red-500 text-red-500 hover:bg-red-200 hover:text-red-600 transition-colors rounded"
-            aria-label="Cancel changes"
-            title="Cancel changes"
+            aria-label="Revert changes"
+            title="Revert changes"
           >
-            <div className="i-ph:x-bold"></div>
+            <div className="i-ph:arrow-arc-left-bold"></div>
           </button>
           <button
             onClick={() => performReject(true)}
             className="flex-1 h-[30px] flex justify-center items-center bg-green-100 border border-green-500 text-green-500 hover:bg-green-200 hover:text-green-600 transition-colors rounded"
-            aria-label="Try changes again"
-            title="Try changes again"
+            aria-label="Retry changes"
+            title="Retry changes"
           >
             <div className="i-ph:repeat-bold"></div>
           </button>
@@ -97,9 +99,9 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ onApprove, onReject }) =>
   }
 
   return (
-    <div className="flex items-center gap-1 w-full h-[30px] pt-2">
+    <div className="flex items-center gap-1 w-full h-[30px] mb-2">
       <button
-        onClick={() => setHasRejected(true)}
+        onClick={() => setRejectFormOpen(true)}
         className="flex-1 h-[30px] flex justify-center items-center bg-red-100 border border-red-500 text-red-500 hover:bg-red-200 hover:text-red-600 transition-colors rounded"
         aria-label="Reject change"
         title="Reject change"
