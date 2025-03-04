@@ -12,16 +12,16 @@ import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
   return (
-    <div className="comments">
+    <div className="space-y-4 mt-6">
       {comments.map((comment, index) => (
-        <div key={index} className="comment">
-          <div className="comment-header">
-            <span className="comment-username">{comment.username ?? ""}</span>
-            <span className="comment-date">
+        <div key={index} className="bg-bolt-elements-background-depth-2 rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-bolt-text">{comment.username ?? "Anonymous"}</span>
+            <span className="text-sm text-bolt-text-secondary">
               {new Date(comment.timestamp).toLocaleString()}
             </span>
           </div>
-          <div className="comment-text">{comment.content}</div>
+          <div className="text-bolt-text whitespace-pre-wrap">{comment.content}</div>
         </div>
       ))}
     </div>
@@ -89,8 +89,9 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
 
 type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
 type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
+type DeleteProblemCallback = () => void;
 
-function UpdateProblemForms({ updateProblem }: { updateProblem: UpdateProblemCallback }) {
+function UpdateProblemForms({ updateProblem, deleteProblem }: { updateProblem: UpdateProblemCallback, deleteProblem: DeleteProblemCallback }) {
   const handleAddComment = (content: string) => {
     const newComment: BoltProblemComment = {
       timestamp: Date.now(),
@@ -147,6 +148,15 @@ function UpdateProblemForms({ updateProblem }: { updateProblem: UpdateProblemCal
       <UpdateProblemForm handleSubmit={handleSetDescription} updateText="Set Description" placeholder="Set the description of the problem..." />
       <UpdateProblemForm handleSubmit={handleSetStatus} updateText="Set Status" placeholder="Set the status of the problem..." />
       <UpdateProblemForm handleSubmit={handleSetKeywords} updateText="Set Keywords" placeholder="Set the keywords of the problem..." />
+      
+      <div className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
+        <button 
+          onClick={deleteProblem}
+          className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 font-medium"
+        >
+          Delete Problem
+        </button>
+      </div>
     </>
   )
 }
@@ -173,6 +183,12 @@ function ViewProblemPage() {
     await backendUpdateProblem(problemId, newProblem);
   }, [problemData]);
 
+  const deleteProblem = useCallback(async () => {
+    console.log("BackendDeleteProblem", problemId);
+    await backendUpdateProblem(problemId, undefined);
+    toast.success("Problem deleted");
+  }, [problemData]);
+
   useEffect(() => {
     getProblem(problemId).then(setProblemData);
   }, [problemId]);
@@ -193,7 +209,7 @@ function ViewProblemPage() {
            : <ProblemViewer problem={problemData} />}
         </div>
         {getNutIsAdmin() && problemData && (
-          <UpdateProblemForms updateProblem={updateProblem} />
+          <UpdateProblemForms updateProblem={updateProblem} deleteProblem={deleteProblem} />
         )}
         <ToastContainerWrapper />
       </div>

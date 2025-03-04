@@ -109,7 +109,7 @@ export async function submitProblem(problem: BoltProblemInput): Promise<string |
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput) {
+export async function updateProblem(problemId: string, problem: BoltProblemInput | undefined) {
   try {
     if (!getNutIsAdmin()) {
       toast.error("Admin user required");

@@ -9,7 +9,7 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { Messages } from './Messages.client';
+import { getLastMessageProjectContents, hasFileModifications, Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { APIKeyManager } from './APIKeyManager';
 import Cookies from 'js-cookie';
@@ -27,6 +27,8 @@ import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
 import type { RejectChangeData } from './ApproveChange';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
+import ApproveChange from './ApproveChange';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -218,6 +220,28 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
+    const showApproveChange = (() => {
+      if (isStreaming) {
+        return false;
+      }
+  
+      if (!messages?.length) {
+        return false;
+      }
+
+      const lastMessageProjectContents = getLastMessageProjectContents(messages, messages.length - 1);
+      if (!lastMessageProjectContents) {
+        return false;
+      }
+  
+      if (lastMessageProjectContents.messageId != approveChangesMessageId) {
+        return false;
+      }
+  
+      const lastMessage = messages[messages.length - 1];
+      return hasFileModifications(lastMessage.content);
+    })();
+  
     const baseChat = (
       <div
         ref={ref}
@@ -251,9 +275,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       messages={messages}
                       isStreaming={isStreaming}
                       onRewind={onRewind}
-                      approveChangesMessageId={approveChangesMessageId}
-                      onApproveChange={onApproveChange}
-                      onRejectChange={onRejectChange}
                     />
                   ) : null;
                 }}
@@ -315,6 +336,28 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg',
                   )}
                 >
+                  {showApproveChange && (
+                    <ApproveChange
+                      onApprove={() => {
+                        if (onApproveChange && messages) {
+                          const lastMessage = messages[messages.length - 1];
+                          assert(lastMessage);
+                          onApproveChange(lastMessage.id);
+                        }
+                      }}
+                      onReject={(data) => {
+                        if (onRejectChange && messages) {
+                          const lastMessage = messages[messages.length - 1];
+                          assert(lastMessage);
+
+                          const info = getLastMessageProjectContents(messages, messages.length - 1);
+                          assert(info);
+
+                          onRejectChange(lastMessage.id, info.messageId, info.contents.content, data);
+                        }
+                      }}
+                    />
+                  )}
                   <textarea
                     ref={textareaRef}
                     className={classNames(

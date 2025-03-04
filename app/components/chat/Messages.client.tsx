@@ -1,14 +1,10 @@
 import type { Message } from 'ai';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
-import { AssistantMessage, getAnnotationsTokensUsage } from './AssistantMessage';
+import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
-import { useLocation } from '@remix-run/react';
-import { forkChat } from '~/lib/persistence/db';
-import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
-import { assert, sendCommandDedicatedClient } from '~/lib/replay/ReplayProtocolClient';
-import ApproveChange, { type RejectChangeData } from './ApproveChange';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 interface MessagesProps {
   id?: string;
@@ -16,9 +12,6 @@ interface MessagesProps {
   isStreaming?: boolean;
   messages?: Message[];
   onRewind?: (messageId: string, contents: string) => void;
-  approveChangesMessageId?: string;
-  onApproveChange?: (messageId: string) => void;
-  onRejectChange?: (lastMessageId: string, rewindMessageId: string, contents: string, data: RejectChangeData) => void;
 }
 
 interface ProjectContents {
@@ -31,55 +24,33 @@ export function saveProjectContents(messageId: string, contents: ProjectContents
   gProjectContentsByMessageId.set(messageId, contents);
 }
 
-function hasFileModifications(content: string) {
+export function getLastMessageProjectContents(messages: Message[], index: number) {
+  // The message index is for the model response, and the project
+  // contents will be associated with the last message present when
+  // the user prompt was sent to the model. This could be either two
+  // or three messages back, depending on whether a bug explanation was added.
+  const beforeUserMessage = messages[index - 2];
+  const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
+  if (!contents) {
+    const priorMessage = messages[index - 3];
+    const priorContents = gProjectContentsByMessageId.get(priorMessage?.id);
+    if (!priorContents) {
+      return undefined;
+    }
+
+    // We still rewind to just before the user message to retain any
+    // explanation from the Nut API.
+    return { messageId: beforeUserMessage.id, contents: priorContents };
+  }
+  return { messageId: beforeUserMessage.id, contents };
+}
+
+export function hasFileModifications(content: string) {
   return content.includes('__boltArtifact__');
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [], onRewind, approveChangesMessageId, onApproveChange, onRejectChange } = props;
-
-  const getLastMessageProjectContents = (index: number) => {
-    // The message index is for the model response, and the project
-    // contents will be associated with the last message present when
-    // the user prompt was sent to the model. This could be either two
-    // or three messages back, depending on whether a bug explanation was added.
-    const beforeUserMessage = messages[index - 2];
-    const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
-    if (!contents) {
-      const priorMessage = messages[index - 3];
-      const priorContents = gProjectContentsByMessageId.get(priorMessage?.id);
-      if (!priorContents) {
-        return undefined;
-      }
-
-      // We still rewind to just before the user message to retain any
-      // explanation from the Nut API.
-      return { messageId: beforeUserMessage.id, contents: priorContents };
-    }
-    return { messageId: beforeUserMessage.id, contents };
-  };
-
-  const showApproveChange = (() => {
-    if (isStreaming) {
-      return false;
-    }
-
-    if (!messages.length) {
-      return false;
-    }
-
-    const lastMessageProjectContents = getLastMessageProjectContents(messages.length - 1);
-    if (!lastMessageProjectContents) {
-      return false;
-    }
-
-    if (lastMessageProjectContents.messageId != approveChangesMessageId) {
-      return false;
-    }
-
-    const lastMessage = messages[messages.length - 1];
-    return hasFileModifications(lastMessage.content);
-  })();
+  const { id, isStreaming = false, messages = [], onRewind } = props;
 
   return (
     <div id={id} ref={ref} className={props.className}>
@@ -121,13 +92,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   {!isUserMessage &&
                     messageId &&
                     onRewind &&
-                    getLastMessageProjectContents(index) &&
+                    getLastMessageProjectContents(messages, index) &&
                     hasFileModifications(content) && (
                       <div className="flex gap-2 flex-col lg:flex-row">
                         <WithTooltip tooltip="Undo changes in this message">
                           <button
                             onClick={() => {
-                              const info = getLastMessageProjectContents(index);
+                              const info = getLastMessageProjectContents(messages, index);
                               assert(info);
                               onRewind(info.messageId, info.contents.content);
                             }}
@@ -147,28 +118,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         : null}
       {isStreaming && (
         <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
-      )}
-      {showApproveChange && (
-        <ApproveChange
-          onApprove={() => {
-            if (onApproveChange) {
-              const lastMessage = messages[messages.length - 1];
-              assert(lastMessage);
-              onApproveChange(lastMessage.id);
-            }
-          }}
-          onReject={(data) => {
-            if (onRejectChange) {
-              const lastMessage = messages[messages.length - 1];
-              assert(lastMessage);
-
-              const info = getLastMessageProjectContents(messages.length - 1);
-              assert(info);
-
-              onRejectChange(lastMessage.id, info.messageId, info.contents.content, data);
-            }
-          }}
-        />
       )}
     </div>
   );
