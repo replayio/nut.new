@@ -11,7 +11,7 @@ export function Auth({ onClose }: AuthProps) {
   const [isSignUp, setIsSignUp] = useState(false);
 
   // Get the data from the action response
-  const actionData = useActionData<{ error?: string; session?: any }>();
+  const actionData = useActionData<{ error?: string; session?: any; message?: string }>();
   const navigation = useNavigation();
   const isLoading = navigation.state === 'submitting';
 
@@ -19,8 +19,19 @@ export function Auth({ onClose }: AuthProps) {
   const formAction = isSignUp ? '/auth/sign-up' : '/auth/sign-in';
 
   // Handle success message or redirect
-  if (actionData?.session && !actionData?.error) {
-    onClose();
+  if (actionData?.message && !actionData?.error) {
+    return (
+      <div className="p-6 bg-bolt-elements-background-depth-1 rounded-lg shadow-lg max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-6 text-center">Success</h2>
+        <p className="text-center">{actionData.message}</p>
+        <button
+          onClick={onClose}
+          className="w-full mt-4 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+        >
+          Close
+        </button>
+      </div>
+    );
   }
 
   return (

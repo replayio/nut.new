@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate } from '@remix-run/react';
-import { json, type LoaderFunction } from '@remix-run/cloudflare';
+import { useNavigate, json } from '@remix-run/react';
+import { type LoaderFunction } from '@remix-run/cloudflare';
 import { Auth } from '~/components/auth/Auth';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
