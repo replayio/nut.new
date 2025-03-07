@@ -7,6 +7,10 @@ export function assert(condition: any, message: string = "Assertion failed!"): a
   }
 }
 
+export function generateRandomId() {
+  return Math.random().toString(16).substring(2, 10);
+}
+
 export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason?: any) => void } {
   let resolve: (value: T) => void;
   let reject: (reason?: any) => void;
