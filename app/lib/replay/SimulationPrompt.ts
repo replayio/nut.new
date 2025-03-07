@@ -270,7 +270,9 @@ export async function getSimulationEnhancedPrompt(
 }
 
 export async function shouldUseSimulation(messageInput: string) {
-  assert(gChatManager, "Chat not started");
+  if (!gChatManager) {
+    gChatManager = new ChatManager();
+  }
 
   const systemPrompt = `
 You are a helpful assistant that determines whether a user's message that is asking an AI
@@ -324,17 +326,31 @@ function getProtocolRule(message: Message): "user" | "assistant" | "system" {
   }
 }
 
-function buildProtocolMessage(message: Message): ProtocolMessage {
-  const role = getProtocolRule(message);
-  return {
-    role,
-    type: "text",
-    content: message.content,
-  };
+function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
+  const rv: ProtocolMessage[] = [];
+  for (const msg of messages) {
+    const role = getProtocolRule(msg);
+    for (const content of msg.content as any) {
+      switch (content.type) {
+        case "text":
+          rv.push({
+            role,
+            type: "text",
+            content: content.text,
+          });
+          break;
+        default:
+          console.error("Unknown message content", msg.content);
+      }
+    }
+  }
+  return rv;
 }
 
 export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onContent: (content: string) => void) {
-  assert(gChatManager, "Chat not started");
+  if (!gChatManager) {
+    gChatManager = new ChatManager();
+  }
 
   const developerFiles: ProtocolFile[] = [];
   for (const [path, file] of Object.entries(files)) {
@@ -346,5 +362,5 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
     }
   }
 
-  return gChatManager.sendChatMessage(messages.map(buildProtocolMessage), developerFiles, onContent);
+  return gChatManager.sendChatMessage(buildProtocolMessages(messages), developerFiles, onContent);
 }
