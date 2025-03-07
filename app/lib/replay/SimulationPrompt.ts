@@ -4,8 +4,10 @@
 import type { Message } from 'ai';
 import type { SimulationData, SimulationPacket } from './SimulationData';
 import { SimulationDataVersion } from './SimulationData';
-import { assert, ProtocolClient } from './ReplayProtocolClient';
+import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import type { MouseData } from './Recording';
+import type { FileMap } from '../stores/files';
+import { shouldIncludeFile } from '~/utils/fileUtils';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -19,6 +21,12 @@ export type ProtocolMessage = {
   role: "user" | "assistant" | "system";
   type: "text";
   content: string;
+};
+
+export type ProtocolFile = {
+  path: string;
+  content: string;
+  base64?: boolean;
 };
 
 class ChatManager {
@@ -121,26 +129,41 @@ class ChatManager {
     return allData;
   }
 
-  async sendChatMessage(messages: ProtocolMessage[]) {
+  async sendChatMessage(messages: ProtocolMessage[], developerFiles?: ProtocolFile[], onResponsePart?: (response: string) => void) {
     assert(this.client, "Chat has been destroyed");
 
+    const responseId = `response-${generateRandomId()}`;
+
     let response: string = "";
-    this.client.listenForMessage("Nut.chatResponsePart", ({ message }: { message: ProtocolMessage }) => {
-      console.log("ChatResponsePart", message);
-      response += message.content;
+    const removeResponseListener = this.client.listenForMessage("Nut.chatResponsePart", ({ responseId: eventResponseId, message }: { responseId: string, message: ProtocolMessage }) => {
+      if (responseId == eventResponseId) {
+        console.log("ChatResponsePart", message);
+        response += message.content;
+        onResponsePart?.(response);
+      }
     });
 
-    const responseId = "<response-id>";
+    let modifiedFiles: ProtocolFile[] = [];
+    const removeFileListener = this.client.listenForMessage("Nut.chatModifiedFile", ({ responseId: eventResponseId, file }: { responseId: string, file: ProtocolFile }) => {
+      if (responseId == eventResponseId) {
+        console.log("ChatModifiedFile", file);
+        modifiedFiles.push(file);
+      }
+    });
+
     const chatId = await this.chatIdPromise;
 
     console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify(messages));
 
     await this.client.sendCommand({
       method: "Nut.sendChatMessage",
-      params: { chatId, responseId, messages },
+      params: { chatId, responseId, messages, developerFiles },
     });
 
-    return response;
+    removeResponseListener();
+    removeFileListener();
+
+    return { response, modifiedFiles };
   }
 }
 
@@ -242,5 +265,86 @@ export async function getSimulationEnhancedPrompt(
 
   gLastSimulationChatMessages = messages;
 
-  return gChatManager.sendChatMessage(messages);
+  const { response } = await gChatManager.sendChatMessage(messages);
+  return response;
+}
+
+export async function shouldUseSimulation(messageInput: string) {
+  assert(gChatManager, "Chat not started");
+
+  const systemPrompt = `
+You are a helpful assistant that determines whether a user's message that is asking an AI
+to make a change to an application should first perform a detailed analysis of the application's
+behavior to generate a better answer.
+
+This is most helpful when the user is asking the AI to fix a problem with the application.
+When making straightforward improvements to the application a detailed analysis is not necessary.
+
+The text of the user's message will be wrapped in \`<user_message>\` tags. You must describe your
+reasoning and then respond with either \`<analyze>true</analyze>\` or \`<analyze>false</analyze>\`.
+  `;
+
+  const userMessage = `
+Here is the user message you need to evaluate: <user_message>${messageInput}</user_message>
+  `;
+
+  const messages: ProtocolMessage[] = [
+    {
+      role: "system",
+      type: "text",
+      content: systemPrompt,
+    },
+    {
+      role: "user",
+      type: "text",
+      content: userMessage,
+    },
+  ];
+
+  const { response } = await gChatManager.sendChatMessage(messages);
+
+  console.log("UseSimulationResponse", response);
+
+  const match = /<analyze>(.*?)<\/analyze>/.exec(response);
+  if (match) {
+    return match[1] === "true";
+  }
+  return false;
+}
+
+function getProtocolRule(message: Message): "user" | "assistant" | "system" {
+  switch (message.role) {
+    case "user":
+      return "user";
+    case "assistant":
+    case "data":
+      return "assistant";
+    case "system":
+      return "system";
+  }
+}
+
+function buildProtocolMessage(message: Message): ProtocolMessage {
+  const role = getProtocolRule(message);
+  return {
+    role,
+    type: "text",
+    content: message.content,
+  };
+}
+
+export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onContent: (content: string) => void) {
+  assert(gChatManager, "Chat not started");
+
+  const developerFiles: ProtocolFile[] = [];
+  for (const [path, file] of Object.entries(files)) {
+    if (file?.type == "file" && shouldIncludeFile(path)) {
+      developerFiles.push({
+        path,
+        content: file.content,
+      });
+    }
+  }
+
+  return gChatManager.sendChatMessage(messages.map(buildProtocolMessage), developerFiles, onContent);
 }
