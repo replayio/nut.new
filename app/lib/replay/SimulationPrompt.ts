@@ -8,6 +8,7 @@ import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient
 import type { MouseData } from './Recording';
 import type { FileMap } from '../stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
+import { DeveloperSystemPrompt } from '../common/prompts/prompts';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -153,7 +154,7 @@ class ChatManager {
 
     const chatId = await this.chatIdPromise;
 
-    console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify(messages));
+    console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify({ messages, developerFiles }));
 
     await this.client.sendCommand({
       method: "Nut.sendChatMessage",
@@ -231,7 +232,7 @@ export function getLastSimulationChatMessages(): ProtocolMessage[] | undefined {
   return gLastSimulationChatMessages;
 }
 
-const SystemPrompt = `
+const SimulationSystemPrompt = `
 The following user message describes a bug or other problem on the page which needs to be fixed.
 You must respond with a useful explanation that will help the user understand the source of the problem.
 Do not describe the specific fix needed.
@@ -245,7 +246,7 @@ export async function getSimulationEnhancedPrompt(
   assert(gChatManager, "Chat not started");
   assert(gChatManager.simulationFinished, "Simulation not finished");
 
-  let system = SystemPrompt;
+  let system = SimulationSystemPrompt;
   if (mouseData) {
     system += `The user pointed to an element on the page <element selector=${JSON.stringify(mouseData.selector)} height=${mouseData.height} width=${mouseData.width} x=${mouseData.x} y=${mouseData.y} />`;
   }
@@ -362,5 +363,12 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
     }
   }
 
-  return gChatManager.sendChatMessage(buildProtocolMessages(messages), developerFiles, onContent);
+  const protocolMessages = buildProtocolMessages(messages);
+  protocolMessages.unshift({
+    role: "system",
+    type: "text",
+    content: DeveloperSystemPrompt,
+  });
+
+  return gChatManager.sendChatMessage(protocolMessages, developerFiles, onContent);
 }
