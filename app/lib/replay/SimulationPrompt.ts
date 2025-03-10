@@ -18,11 +18,21 @@ function createRepositoryContentsPacket(contents: string): SimulationPacket {
   };
 }
 
-export type ProtocolMessage = {
-  role: "user" | "assistant" | "system";
+type ProtocolMessageRole = "user" | "assistant" | "system";
+
+type ProtocolMessageText = {
   type: "text";
+  role: ProtocolMessageRole;
   content: string;
 };
+
+type ProtocolMessageImage = {
+  type: "image";
+  role: ProtocolMessageRole;
+  dataURL: string;
+};
+
+export type ProtocolMessage = ProtocolMessageText | ProtocolMessageImage;
 
 export type ProtocolFile = {
   path: string;
@@ -139,7 +149,9 @@ class ChatManager {
     const removeResponseListener = this.client.listenForMessage("Nut.chatResponsePart", ({ responseId: eventResponseId, message }: { responseId: string, message: ProtocolMessage }) => {
       if (responseId == eventResponseId) {
         console.log("ChatResponsePart", message);
-        response += message.content;
+        if (message.type == "text") {
+          response += message.content;
+        }
         onResponsePart?.(response);
       }
     });
@@ -340,8 +352,15 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
             content: content.text,
           });
           break;
+        case "image":
+          rv.push({
+            role,
+            type: "image",
+            dataURL: content.image,
+          });
+          break;
         default:
-          console.error("Unknown message content", msg.content);
+          console.error("Unknown message content", content);
       }
     }
   }
