@@ -40,17 +40,6 @@ const toastAnimation = cssTransition({
 
 const logger = createScopedLogger('Chat');
 
-// Debounce things after file writes to avoid creating a bunch of chats.
-let gResetChatFileWrittenTimeout: NodeJS.Timeout | undefined;
-
-export function resetChatFileWritten() {
-  clearTimeout(gResetChatFileWrittenTimeout);
-  gResetChatFileWrittenTimeout = setTimeout(async () => {
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
-    await simulationRepositoryUpdated(contentBase64);
-  }, 500);
-}
-
 let gLastProjectContents: string | undefined;
 
 export function getLastProjectContents() {
@@ -167,6 +156,28 @@ let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
+// When files are modified during a chat message we wait until the message finishes
+// before updating the simulation.
+let gUpdateSimulationAfterChatMessage = false;
+
+async function clearActiveChat() {
+  gActiveChatMessageTelemetry = undefined;
+  if (gUpdateSimulationAfterChatMessage) {
+    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    await simulationRepositoryUpdated(contentBase64);
+    gUpdateSimulationAfterChatMessage = false;
+  }
+}
+
+export async function onRepositoryFileWritten() {
+  if (gActiveChatMessageTelemetry) {
+    gUpdateSimulationAfterChatMessage = true;
+  } else {
+    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    await simulationRepositoryUpdated(contentBase64);
+  }
+}
+
 function buildMessageId(prefix: string, chatId: string) {
   return `${prefix}-${chatId}`;
 }
@@ -233,7 +244,7 @@ export const ChatImpl = memo(
 
       if (gActiveChatMessageTelemetry) {
         gActiveChatMessageTelemetry.abort("StopButtonClicked");
-        gActiveChatMessageTelemetry = undefined;
+        clearActiveChat();
       }
     };
 
@@ -329,7 +340,7 @@ export const ChatImpl = memo(
         if (numFreeUses >= MaxFreeUses) {
           toast.error('All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.');
           gActiveChatMessageTelemetry.abort("NoFreeUses");
-          gActiveChatMessageTelemetry = undefined;
+          clearActiveChat();
           return;
         }
 
@@ -458,6 +469,8 @@ export const ChatImpl = memo(
       }
 
       gActiveChatMessageTelemetry.finish();
+      clearActiveChat();
+
       setActiveChatId(undefined);
 
       if (fileModifications !== undefined) {
