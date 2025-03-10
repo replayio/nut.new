@@ -163,11 +163,18 @@ class ChatManager {
       }
     });
 
-    let modifiedFiles: ProtocolFile[] = [];
     const removeFileListener = this.client.listenForMessage("Nut.chatModifiedFile", ({ responseId: eventResponseId, file }: { responseId: string, file: ProtocolFile }) => {
       if (responseId == eventResponseId) {
         console.log("ChatModifiedFile", file);
-        modifiedFiles.push(file);
+
+        const content = `
+        <boltArtifact id="modified-file-${generateRandomId()}" title="File Changes">
+        <boltAction type="file" filePath="${file.path}">${file.content}</boltAction>
+        </boltArtifact>
+        `;
+
+        response += content;
+        options?.onResponsePart?.(content);
       }
     });
 
@@ -183,7 +190,7 @@ class ChatManager {
     removeResponseListener();
     removeFileListener();
 
-    return { response, modifiedFiles };
+    return response;
   }
 }
 
@@ -285,8 +292,7 @@ export async function getSimulationEnhancedPrompt(
 
   gLastSimulationChatMessages = messages;
 
-  const { response } = await gChatManager.sendChatMessage(messages);
-  return response;
+  return await gChatManager.sendChatMessage(messages);
 }
 
 export async function shouldUseSimulation(messageInput: string) {
@@ -323,7 +329,7 @@ Here is the user message you need to evaluate: <user_message>${messageInput}</us
     },
   ];
 
-  const { response } = await gChatManager.sendChatMessage(messages, { chatOnly: true });
+  const response = await gChatManager.sendChatMessage(messages, { chatOnly: true });
 
   console.log("UseSimulationResponse", response);
 
