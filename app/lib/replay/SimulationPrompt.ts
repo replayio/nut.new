@@ -9,6 +9,7 @@ import type { MouseData } from './Recording';
 import type { FileMap } from '../stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { DeveloperSystemPrompt } from '../common/prompts/prompts';
+import { detectProjectCommands } from '~/utils/projectCommands';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -163,9 +164,11 @@ class ChatManager {
       }
     });
 
+    const modifiedFiles: ProtocolFile[] = [];
     const removeFileListener = this.client.listenForMessage("Nut.chatModifiedFile", ({ responseId: eventResponseId, file }: { responseId: string, file: ProtocolFile }) => {
       if (responseId == eventResponseId) {
         console.log("ChatModifiedFile", file);
+        modifiedFiles.push(file);
 
         const content = `
         <boltArtifact id="modified-file-${generateRandomId()}" title="File Changes">
@@ -189,6 +192,19 @@ class ChatManager {
 
     removeResponseListener();
     removeFileListener();
+
+    if (modifiedFiles.length) {
+      const commands = await detectProjectCommands(modifiedFiles);
+
+      const content = `
+      <boltArtifact id="project-setup" title="Project Setup">
+      <boltAction type="shell">${commands.setupCommand}</boltAction>
+      </boltArtifact>
+      `;
+
+      response += content;
+      options?.onResponsePart?.(content);
+    }
 
     return response;
   }
@@ -356,25 +372,33 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   const rv: ProtocolMessage[] = [];
   for (const msg of messages) {
     const role = getProtocolRule(msg);
-    for (const content of msg.content as any) {
-      switch (content.type) {
-        case "text":
-          rv.push({
-            role,
-            type: "text",
-            content: content.text,
-          });
-          break;
-        case "image":
-          rv.push({
-            role,
-            type: "image",
-            dataURL: content.image,
-          });
-          break;
-        default:
-          console.error("Unknown message content", content);
+    if (Array.isArray(msg.content)) {
+      for (const content of msg.content) {
+        switch (content.type) {
+          case "text":
+            rv.push({
+              role,
+              type: "text",
+              content: content.text,
+            });
+            break;
+          case "image":
+            rv.push({
+              role,
+              type: "image",
+              dataURL: content.image,
+            });
+            break;
+          default:
+            console.error("Unknown message content", content);
+        }
       }
+    } else if (typeof msg.content == "string") {
+      rv.push({
+        role,
+        type: "text",
+        content: msg.content,
+      });
     }
   }
   return rv;

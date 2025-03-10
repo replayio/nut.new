@@ -276,9 +276,7 @@ export const ChatImpl = memo(
       setChatStarted(true);
     };
 
-    const createRecording = async () => {
-      assert(activeChatId);
-
+    const createRecording = async (chatId: string) => {
       let recordingId, message;
       try {
         recordingId = await getSimulationRecording();
@@ -289,7 +287,7 @@ export const ChatImpl = memo(
       }
 
       const recordingMessage: Message = {
-        id: buildMessageId("create-recording", activeChatId),
+        id: buildMessageId("create-recording", chatId),
         role: 'assistant',
         content: message,
       };
@@ -297,9 +295,7 @@ export const ChatImpl = memo(
       return { recordingId, recordingMessage };
     };
 
-    const getEnhancedPrompt = async (userMessage: string) => {
-      assert(activeChatId);
-
+    const getEnhancedPrompt = async (chatId: string, userMessage: string) => {
       let enhancedPrompt, message, hadError = false;
       try {
         const mouseData = getCurrentMouseData();
@@ -312,7 +308,7 @@ export const ChatImpl = memo(
       }
 
       const enhancedPromptMessage: Message = {
-        id: buildMessageId("enhanced-prompt", activeChatId),
+        id: buildMessageId("enhanced-prompt", chatId),
         role: 'assistant',
         content: message,
       };
@@ -397,8 +393,8 @@ export const ChatImpl = memo(
         try {
           await flushSimulationData();
 
-          const createRecordingPromise = createRecording();
-          const enhancedPromptPromise = getEnhancedPrompt(_input);
+          const createRecordingPromise = createRecording(chatId);
+          const enhancedPromptPromise = getEnhancedPrompt(chatId, _input);
 
           const { recordingId, recordingMessage } = await createRecordingPromise;
 
