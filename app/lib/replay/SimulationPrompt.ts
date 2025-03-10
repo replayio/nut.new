@@ -40,6 +40,14 @@ export type ProtocolFile = {
   base64?: boolean;
 };
 
+type ChatResponsePartCallback = (response: string) => void;
+
+interface ChatMessageOptions {
+  chatOnly?: boolean;
+  developerFiles?: ProtocolFile[];
+  onResponsePart?: ChatResponsePartCallback;
+}
+
 class ChatManager {
   // Empty if this chat has been destroyed.
   client: ProtocolClient | undefined;
@@ -140,7 +148,7 @@ class ChatManager {
     return allData;
   }
 
-  async sendChatMessage(messages: ProtocolMessage[], developerFiles?: ProtocolFile[], onResponsePart?: (response: string) => void) {
+  async sendChatMessage(messages: ProtocolMessage[], options?: ChatMessageOptions) {
     assert(this.client, "Chat has been destroyed");
 
     const responseId = `response-${generateRandomId()}`;
@@ -148,11 +156,10 @@ class ChatManager {
     let response: string = "";
     const removeResponseListener = this.client.listenForMessage("Nut.chatResponsePart", ({ responseId: eventResponseId, message }: { responseId: string, message: ProtocolMessage }) => {
       if (responseId == eventResponseId) {
-        console.log("ChatResponsePart", message);
         if (message.type == "text") {
           response += message.content;
+          options?.onResponsePart?.(message.content);
         }
-        onResponsePart?.(response);
       }
     });
 
@@ -166,11 +173,11 @@ class ChatManager {
 
     const chatId = await this.chatIdPromise;
 
-    console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify({ messages, developerFiles }));
+    console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify({ messages, developerFiles: options?.developerFiles }));
 
     await this.client.sendCommand({
       method: "Nut.sendChatMessage",
-      params: { chatId, responseId, messages, developerFiles },
+      params: { chatId, responseId, messages, chatOnly: options?.chatOnly, developerFiles: options?.developerFiles },
     });
 
     removeResponseListener();
@@ -316,7 +323,7 @@ Here is the user message you need to evaluate: <user_message>${messageInput}</us
     },
   ];
 
-  const { response } = await gChatManager.sendChatMessage(messages);
+  const { response } = await gChatManager.sendChatMessage(messages, { chatOnly: true });
 
   console.log("UseSimulationResponse", response);
 
@@ -367,7 +374,7 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   return rv;
 }
 
-export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onContent: (content: string) => void) {
+export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onResponsePart: ChatResponsePartCallback) {
   if (!gChatManager) {
     gChatManager = new ChatManager();
   }
@@ -389,5 +396,5 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
     content: DeveloperSystemPrompt,
   });
 
-  return gChatManager.sendChatMessage(protocolMessages, developerFiles, onContent);
+  return gChatManager.sendChatMessage(protocolMessages, { chatOnly: true, developerFiles, onResponsePart });
 }

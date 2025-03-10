@@ -357,6 +357,10 @@ export const ChatImpl = memo(
       let newMessages = [...messages, userMessage];
       setMessages(newMessages);
 
+      // Add file cleanup here
+      setUploadedFiles([]);
+      setImageDataList([]);
+
       /**
        * @note (delm) Usually saving files shouldn't take long but it may take longer if there
        * many unsaved files. In that case we need to block user input and show an indicator
@@ -466,10 +470,6 @@ export const ChatImpl = memo(
 
       setInput('');
       Cookies.remove(PROMPT_COOKIE_KEY);
-
-      // Add file cleanup here
-      setUploadedFiles([]);
-      setImageDataList([]);
 
       textareaRef.current?.blur();
 
