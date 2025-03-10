@@ -368,6 +368,28 @@ function getProtocolRule(message: Message): "user" | "assistant" | "system" {
   }
 }
 
+function removeBoltArtifacts(text: string): string {
+  const OpenTag = "<boltArtifact";
+  const CloseTag = "</boltArtifact>";
+
+  while (true) {
+    const openTag = text.indexOf(OpenTag);
+    if (openTag === -1) {
+      break;
+    }
+
+    const prefix = text.substring(0, openTag);
+
+    const closeTag = text.indexOf(CloseTag, openTag + OpenTag.length);
+    if (closeTag === -1) {
+      text = prefix;
+    } else {
+      text = prefix + text.substring(closeTag + CloseTag.length);
+    }
+  }
+  return text;
+}
+
 function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   const rv: ProtocolMessage[] = [];
   for (const msg of messages) {
@@ -379,7 +401,7 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
             rv.push({
               role,
               type: "text",
-              content: content.text,
+              content: removeBoltArtifacts(content.text),
             });
             break;
           case "image":

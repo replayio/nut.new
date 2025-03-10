@@ -377,7 +377,12 @@ export const ChatImpl = memo(
        */
       await workbenchStore.saveAllFiles();
 
-      const simulation = chatStarted && await shouldUseSimulation(_input);
+      let simulation = false;
+      try {
+        simulation = chatStarted && await shouldUseSimulation(_input);
+      } catch (e) {
+        console.error("Error checking simulation", e);
+      }
 
       if (numAbortsAtStart != gNumAborts) {
         return;
@@ -440,7 +445,7 @@ export const ChatImpl = memo(
       let responseMessageContent = "";
       let hasResponseMessage = false;
 
-      await sendDeveloperChatMessage(newMessages, files, content => {
+      const addResponseContent = (content: string) => {
         responseMessageContent += content;
 
         if (gNumAborts != numAbortsAtStart) {
@@ -458,7 +463,14 @@ export const ChatImpl = memo(
         });
         setMessages(newMessages);
         hasResponseMessage = true;
-      });
+      }
+
+      try {
+        await sendDeveloperChatMessage(newMessages, files, addResponseContent);
+      } catch (e) {
+        console.error("Error sending message", e);
+        addResponseContent("Error sending message.");
+      }
 
       if (gNumAborts != numAbortsAtStart) {
         return;

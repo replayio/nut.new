@@ -53,6 +53,9 @@ export class WorkbenchStore {
   modifiedFiles = new Set<string>();
   artifactIdList: string[] = [];
   #globalExecutionQueue = Promise.resolve();
+
+  private fileMap: FileMap = {};
+
   constructor() {
     if (import.meta.hot) {
       import.meta.hot.data.artifacts = this.artifacts;
@@ -339,6 +342,12 @@ export class WorkbenchStore {
       const wc = await webcontainer;
       const fullPath = nodePath.join(wc.workdir, data.action.filePath);
 
+      this.fileMap[fullPath] = {
+        type: 'file',
+        content: data.action.content,
+        isBinary: false,
+      };
+
       if (this.selectedFile.value !== fullPath) {
         this.setSelectedFile(fullPath);
       }
@@ -375,7 +384,7 @@ export class WorkbenchStore {
 
   private async generateZip() {
     const zip = new JSZip();
-    const files = this.files.get();
+    const files = this.fileMap;
 
     // Get the project name from the description input, or use a default name
     const projectName = (description.value ?? 'project').toLocaleLowerCase().split(' ').join('_');
