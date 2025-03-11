@@ -1,6 +1,5 @@
 import type { Message } from 'ai';
 import { generateId, shouldIncludeFile } from './fileUtils';
-import { detectProjectCommands, createCommandsMessage } from './projectCommands';
 
 export interface FileArtifact {
   content: string;
@@ -33,9 +32,6 @@ export const createChatFromFolder = async (
   binaryFiles: string[],
   folderName: string,
 ): Promise<Message[]> => {
-  const commands = await detectProjectCommands(fileArtifacts);
-  const commandsMessage = createCommandsMessage(commands);
-
   const binaryFilesMessage =
     binaryFiles.length > 0
       ? `\n\nSkipped ${binaryFiles.length} binary files:\n${binaryFiles.map((f) => `- ${f}`).join('\n')}`
@@ -65,10 +61,6 @@ export const createChatFromFolder = async (
   };
 
   const messages = [userMessage, filesMessage];
-
-  if (commandsMessage) {
-    messages.push(commandsMessage);
-  }
 
   return messages;
 };

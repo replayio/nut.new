@@ -372,7 +372,7 @@ function buildFileList(
         continue;
       }
 
-      if (i === segments.length - 1 && dirent?.type === 'file') {
+      if (i === segments.length - 1) {
         fileList.push({
           kind: 'file',
           id: fileList.length,

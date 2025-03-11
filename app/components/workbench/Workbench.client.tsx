@@ -59,7 +59,7 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
 
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const hasPreview = useStore(computed(workbenchStore.previews, (previews) => previews.length > 0));
+  const previewURL = useStore(workbenchStore.previewURL);
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const selectedFile = useStore(workbenchStore.selectedFile);
   const currentDocument = useStore(workbenchStore.currentDocument);
@@ -74,10 +74,10 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
   };
 
   useEffect(() => {
-    if (hasPreview) {
+    if (previewURL) {
       setSelectedView('preview');
     }
-  }, [hasPreview]);
+  }, [previewURL]);
 
   useEffect(() => {
     workbenchStore.setDocuments(files);
@@ -209,15 +209,6 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                     <PanelHeaderButton className="mr-1 text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
                       {isSyncing ? <div className="i-ph:spinner" /> : <div className="i-ph:cloud-arrow-down" />}
                       {isSyncing ? 'Syncing...' : 'Sync Files'}
-                    </PanelHeaderButton>
-                    <PanelHeaderButton
-                      className="mr-1 text-sm"
-                      onClick={() => {
-                        workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
-                      }}
-                    >
-                      <div className="i-ph:terminal" />
-                      Toggle Terminal
                     </PanelHeaderButton>
                     <PanelHeaderButton
                       className="mr-1 text-sm"

@@ -1,14 +1,9 @@
 import { atom, map, type MapStore, type ReadableAtom, type WritableAtom } from 'nanostores';
 import type { EditorDocument, ScrollPosition } from '~/components/editor/codemirror/CodeMirrorEditor';
-import { ActionRunner } from '~/lib/runtime/action-runner';
 import type { ActionCallbackData, ArtifactCallbackData } from '~/lib/runtime/message-parser';
-import { webcontainer } from '~/lib/webcontainer';
-import type { ITerminal } from '~/types/terminal';
 import { unreachable } from '~/utils/unreachable';
 import { EditorStore } from './editor';
 import { FilesStore, type FileMap } from './files';
-import { PreviewsStore } from './previews';
-import { TerminalStore } from './terminal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest';
@@ -20,13 +15,13 @@ import { createSampler } from '~/utils/sampler';
 import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
 import { extractFileArtifactsFromRepositoryContents } from '../replay/Problems';
+import { onRepositoryFileWritten } from '~/components/chat/Chat.client';
 
 export interface ArtifactState {
   id: string;
   title: string;
   type?: string;
   closed: boolean;
-  runner: ActionRunner;
 }
 
 export type ArtifactUpdateState = Pick<ArtifactState, 'title' | 'closed'>;
@@ -36,12 +31,10 @@ type Artifacts = MapStore<Record<string, ArtifactState>>;
 export type WorkbenchViewType = 'code' | 'preview';
 
 export class WorkbenchStore {
-  #previewsStore = new PreviewsStore(webcontainer);
-  #filesStore = new FilesStore(webcontainer);
+  #filesStore = new FilesStore();
   #editorStore = new EditorStore(this.#filesStore);
-  #terminalStore = new TerminalStore(webcontainer);
 
-  #reloadedMessages = new Set<string>();
+  previewURL = atom<string | undefined>(undefined);
 
   artifacts: Artifacts = import.meta.hot?.data.artifacts ?? map({});
 
@@ -70,10 +63,6 @@ export class WorkbenchStore {
     this.#globalExecutionQueue = this.#globalExecutionQueue.then(() => callback());
   }
 
-  get previews() {
-    return this.#previewsStore.previews;
-  }
-
   get files() {
     return this.#filesStore.files;
   }
@@ -94,32 +83,11 @@ export class WorkbenchStore {
     return this.#filesStore.filesCount;
   }
 
-  get showTerminal() {
-    return this.#terminalStore.showTerminal;
-  }
-  get boltTerminal() {
-    return this.#terminalStore.boltTerminal;
-  }
   get alert() {
     return this.actionAlert;
   }
   clearAlert() {
     this.actionAlert.set(undefined);
-  }
-
-  toggleTerminal(value?: boolean) {
-    this.#terminalStore.toggleTerminal(value);
-  }
-
-  attachTerminal(terminal: ITerminal) {
-    this.#terminalStore.attachTerminal(terminal);
-  }
-  attachBoltTerminal(terminal: ITerminal) {
-    this.#terminalStore.attachBoltTerminal(terminal);
-  }
-
-  onTerminalResize(cols: number, rows: number) {
-    this.#terminalStore.onTerminalResize(cols, rows);
   }
 
   setDocuments(files: FileMap) {
@@ -128,7 +96,7 @@ export class WorkbenchStore {
     if (this.#filesStore.filesCount > 0 && this.currentDocument.get() === undefined) {
       // we find the first file and select it
       for (const [filePath, dirent] of Object.entries(files)) {
-        if (dirent?.type === 'file') {
+        if (dirent) {
           this.setSelectedFile(filePath);
           break;
         }
@@ -254,10 +222,6 @@ export class WorkbenchStore {
     // TODO: what do we wanna do and how do we wanna recover from this?
   }
 
-  setReloadedMessages(messages: string[]) {
-    this.#reloadedMessages = new Set(messages);
-  }
-
   addArtifact({ messageId, title, id, type }: ArtifactCallbackData) {
     const artifact = this.#getArtifact(messageId);
 
@@ -274,17 +238,6 @@ export class WorkbenchStore {
       title,
       closed: false,
       type,
-      runner: new ActionRunner(
-        webcontainer,
-        () => this.boltTerminal,
-        (alert) => {
-          if (this.#reloadedMessages.has(messageId)) {
-            return;
-          }
-
-          this.actionAlert.set(alert);
-        },
-      ),
     });
   }
 
@@ -297,85 +250,41 @@ export class WorkbenchStore {
 
     this.artifacts.setKey(messageId, { ...artifact, ...state });
   }
-  addAction(data: ActionCallbackData) {
-    // this._addAction(data);
 
-    this.addToExecutionQueue(() => this._addAction(data));
+  runAction(data: ActionCallbackData) {
+    this.addToExecutionQueue(() => this._runAction(data));
   }
-  async _addAction(data: ActionCallbackData) {
+
+  async _runAction(data: ActionCallbackData) {
     const { messageId } = data;
 
     const artifact = this.#getArtifact(messageId);
 
     if (!artifact) {
       unreachable('Artifact not found');
-    }
-
-    return artifact.runner.addAction(data);
-  }
-
-  runAction(data: ActionCallbackData, isStreaming: boolean = false) {
-    if (isStreaming) {
-      this.actionStreamSampler(data, isStreaming);
-    } else {
-      this.addToExecutionQueue(() => this._runAction(data, isStreaming));
-    }
-  }
-  async _runAction(data: ActionCallbackData, isStreaming: boolean = false) {
-    const { messageId } = data;
-
-    const artifact = this.#getArtifact(messageId);
-
-    if (!artifact) {
-      unreachable('Artifact not found');
-    }
-
-    if (data.actionId != 'restore-contents-action-id') {
-      const action = artifact.runner.actions.get()[data.actionId];
-
-      if (!action || action.executed) {
-        return;
-      }
     }
 
     if (data.action.type === 'file') {
-      const wc = await webcontainer;
-      const fullPath = nodePath.join(wc.workdir, data.action.filePath);
+      const { filePath, content } = data.action;
 
-      this.fileMap[fullPath] = {
-        type: 'file',
-        content: data.action.content,
-        isBinary: false,
+      this.fileMap[filePath] = {
+        path: filePath,
+        content,
       };
 
-      if (this.selectedFile.value !== fullPath) {
-        this.setSelectedFile(fullPath);
+      onRepositoryFileWritten();
+
+      if (this.selectedFile.value !== filePath) {
+        this.setSelectedFile(filePath);
       }
 
       if (this.currentView.value !== 'code') {
         this.currentView.set('code');
       }
 
-      const doc = this.#editorStore.documents.get()[fullPath];
-
-      if (!doc) {
-        await artifact.runner.runAction(data, isStreaming);
-      }
-
-      this.#editorStore.updateFile(fullPath, data.action.content);
-
-      if (!isStreaming) {
-        await artifact.runner.runAction(data);
-        this.resetAllFileModifications();
-      }
-    } else {
-      await artifact.runner.runAction(data);
+      this.#editorStore.updateFile(filePath, content);
     }
   }
-
-  actionStreamSampler = createSampler(async (data: ActionCallbackData, isStreaming: boolean = false) => {
-    return await this._runAction(data, isStreaming);
-  }, 100); // TODO: remove this magic number to have it configurable
 
   #getArtifact(id: string) {
     const artifacts = this.artifacts.get();
@@ -394,7 +303,7 @@ export class WorkbenchStore {
     const uniqueProjectName = `${projectName}_${timestampHash}`;
 
     for (const [filePath, dirent] of Object.entries(files)) {
-      if (dirent?.type === 'file' && !dirent.isBinary) {
+      if (dirent) {
         const relativePath = extractRelativePath(filePath);
         const content = dirent.content;
 
@@ -442,7 +351,7 @@ export class WorkbenchStore {
     const files = this.files.get();
     const fileRelativePaths = new Set<string>();
     for (const [filePath, dirent] of Object.entries(files)) {
-      if (dirent?.type === 'file' && !dirent.isBinary) {
+      if (dirent) {
         const relativePath = extractRelativePath(filePath);
         fileRelativePaths.add(relativePath);
 
@@ -484,7 +393,6 @@ export class WorkbenchStore {
         },
       };
 
-      this.addAction(data);
       this.runAction(data);
     }
   }
@@ -494,7 +402,7 @@ export class WorkbenchStore {
     const syncedFiles = [];
 
     for (const [filePath, dirent] of Object.entries(files)) {
-      if (dirent?.type === 'file' && !dirent.isBinary) {
+      if (dirent) {
         const relativePath = extractRelativePath(filePath);
         const pathSegments = relativePath.split('/');
         let currentHandle = targetHandle;
@@ -564,7 +472,7 @@ export class WorkbenchStore {
       // Create blobs for each file
       const blobs = await Promise.all(
         Object.entries(files).map(async ([filePath, dirent]) => {
-          if (dirent?.type === 'file' && dirent.content) {
+          if (dirent) {
             const { data: blob } = await octokit.git.createBlob({
               owner: repo.owner.login,
               repo: repo.name,

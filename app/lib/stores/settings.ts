@@ -22,14 +22,6 @@ export const LOCAL_PROVIDERS = ['OpenAILike', 'LMStudio', 'Ollama'];
 
 export type ProviderSetting = Record<string, IProviderConfig>;
 
-export const shortcutsStore = map<Shortcuts>({
-  toggleTerminal: {
-    key: 'j',
-    ctrlOrMetaKey: true,
-    action: () => workbenchStore.toggleTerminal(),
-  },
-});
-
 const initialProviderSettings: ProviderSetting = {};
 PROVIDER_LIST.forEach((provider) => {
   initialProviderSettings[provider.name] = {

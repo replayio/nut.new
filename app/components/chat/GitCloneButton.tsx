@@ -1,7 +1,6 @@
 import ignore from 'ignore';
 import { useGit } from '~/lib/hooks/useGit';
 import type { Message } from 'ai';
-import { detectProjectCommands, createCommandsMessage } from '~/utils/projectCommands';
 import { generateId } from '~/utils/fileUtils';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -59,21 +58,15 @@ export default function GitCloneButton({ importChat }: GitCloneButtonProps) {
           const filePaths = Object.keys(data).filter((filePath) => !ig.ignores(filePath));
           console.log(filePaths);
 
-          const textDecoder = new TextDecoder('utf-8');
-
           const fileContents = filePaths
             .map((filePath) => {
-              const { data: content, encoding } = data[filePath];
+              const file = data[filePath];
               return {
                 path: filePath,
-                content:
-                  encoding === 'utf8' ? content : content instanceof Uint8Array ? textDecoder.decode(content) : '',
+                content: file?.content,
               };
             })
             .filter((f) => f.content);
-
-          const commands = await detectProjectCommands(fileContents);
-          const commandsMessage = createCommandsMessage(commands);
 
           const filesMessage: Message = {
             role: 'assistant',
@@ -93,10 +86,6 @@ ${file.content}
           };
 
           const messages = [filesMessage];
-
-          if (commandsMessage) {
-            messages.push(commandsMessage);
-          }
 
           await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages);
         }

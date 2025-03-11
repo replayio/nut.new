@@ -9,7 +9,6 @@ import type { MouseData } from './Recording';
 import type { FileMap } from '../stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { DeveloperSystemPrompt } from '../common/prompts/prompts';
-import { detectProjectCommands } from '~/utils/projectCommands';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -192,19 +191,6 @@ class ChatManager {
 
     removeResponseListener();
     removeFileListener();
-
-    if (modifiedFiles.length) {
-      const commands = await detectProjectCommands(modifiedFiles);
-
-      const content = `
-      <boltArtifact id="project-setup" title="Project Setup">
-      <boltAction type="shell">${commands.setupCommand}</boltAction>
-      </boltArtifact>
-      `;
-
-      response += content;
-      options?.onResponsePart?.(content);
-    }
 
     return response;
   }
@@ -433,7 +419,7 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
 
   const developerFiles: ProtocolFile[] = [];
   for (const [path, file] of Object.entries(files)) {
-    if (file?.type == "file" && shouldIncludeFile(path)) {
+    if (file && shouldIncludeFile(path)) {
       developerFiles.push({
         path,
         content: file.content,

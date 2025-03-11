@@ -3,7 +3,6 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { simulationReloaded } from '~/lib/replay/SimulationPrompt';
-import { PortDropdown } from './PortDropdown';
 import { PointSelector } from './PointSelector';
 
 type ResizeSide = 'left' | 'right' | null;
@@ -19,17 +18,15 @@ export const Preview = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const hasSelectedPreview = useRef(false);
-  const previews = useStore(workbenchStore.previews);
-  const activePreview = previews[activePreviewIndex];
 
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
+
+  const previewURL = useStore(workbenchStore.previewURL);
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
@@ -51,76 +48,16 @@ export const Preview = memo(() => {
   gCurrentIFrame = iframeRef.current ?? undefined;
 
   useEffect(() => {
-    if (!activePreview) {
+    if (!previewURL) {
       setUrl('');
       setIframeUrl(undefined);
 
       return;
     }
 
-    const { baseUrl } = activePreview;
-    setUrl(baseUrl);
-    setIframeUrl(baseUrl);
-  }, [activePreview]);
-
-  // Trim any long base URL from the start of the provided URL.
-  const displayUrl = (url: string) => {
-    if (!activePreview) {
-      return url;
-    }
-
-    const { baseUrl } = activePreview;
-
-    if (url.startsWith(baseUrl)) {
-      const trimmedUrl = url.slice(baseUrl.length);
-      if (trimmedUrl.startsWith('/')) {
-        return trimmedUrl;
-      }
-      return "/" + trimmedUrl;
-    }
-
-    return url;
-  }
-
-  const validateUrl = useCallback(
-    (value: string) => {
-      if (!activePreview) {
-        return null;
-      }
-
-      const { baseUrl } = activePreview;
-
-      if (value === baseUrl) {
-        return value;
-      } else if (value.startsWith(baseUrl)) {
-        if (['/', '?', '#'].includes(value.charAt(baseUrl.length))) {
-          return value;
-        }
-      }
-
-      if (value.startsWith('/')) {
-        return baseUrl + value;
-      }
-
-      return null;
-    },
-    [activePreview],
-  );
-
-  const findMinPortIndex = useCallback(
-    (minIndex: number, preview: { port: number }, index: number, array: { port: number }[]) => {
-      return preview.port < array[minIndex].port ? index : minIndex;
-    },
-    [],
-  );
-
-  // When previews change, display the lowest port if user hasn't selected a preview
-  useEffect(() => {
-    if (previews.length > 1 && !hasSelectedPreview.current) {
-      const minPortIndex = previews.reduce(findMinPortIndex, 0);
-      setActivePreviewIndex(minPortIndex);
-    }
-  }, [previews, findMinPortIndex]);
+    setUrl(previewURL);
+    setIframeUrl(previewURL);
+  }, [previewURL]);
 
   const reloadPreview = () => {
     if (iframeRef.current) {
@@ -273,13 +210,13 @@ export const Preview = memo(() => {
             ref={inputRef}
             className="w-full bg-transparent outline-none"
             type="text"
-            value={displayUrl(url)}
+            value={url}
             onChange={(event) => {
               setUrl(event.target.value);
             }}
             onKeyDown={(event) => {
               let newUrl;
-              if (event.key === 'Enter' && (newUrl = validateUrl(url))) {
+              if (event.key === 'Enter') {
                 setIframeUrl(newUrl);
 
                 if (inputRef.current) {
@@ -289,17 +226,6 @@ export const Preview = memo(() => {
             }}
           />
         </div>
-
-        {previews.length > 1 && (
-          <PortDropdown
-            activePreviewIndex={activePreviewIndex}
-            setActivePreviewIndex={setActivePreviewIndex}
-            isDropdownOpen={isPortDropdownOpen}
-            setHasSelectedPreview={(value) => (hasSelectedPreview.current = value)}
-            setIsDropdownOpen={setIsPortDropdownOpen}
-            previews={previews}
-          />
-        )}
 
         {/* Device mode toggle button */}
         <IconButton
@@ -327,7 +253,7 @@ export const Preview = memo(() => {
             display: 'flex',
           }}
         >
-          {activePreview ? (
+          {previewURL ? (
             <>
               <iframe
                 ref={iframeRef}

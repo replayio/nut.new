@@ -7,7 +7,6 @@ import { BaseChat } from '~/components/chat/BaseChat';
 import { Chat } from '~/components/chat/Chat.client';
 import { useGit } from '~/lib/hooks/useGit';
 import { useChatHistory } from '~/lib/persistence';
-import { createCommandsMessage, detectProjectCommands } from '~/utils/projectCommands';
 import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 import { toast } from 'react-toastify';
 
@@ -59,17 +58,13 @@ export function GitUrlImport() {
 
           const fileContents = filePaths
             .map((filePath) => {
-              const { data: content, encoding } = data[filePath];
+              const file = data[filePath];
               return {
                 path: filePath,
-                content:
-                  encoding === 'utf8' ? content : content instanceof Uint8Array ? textDecoder.decode(content) : '',
+                content: file?.content,
               };
             })
             .filter((f) => f.content);
-
-          const commands = await detectProjectCommands(fileContents);
-          const commandsMessage = createCommandsMessage(commands);
 
           const filesMessage: Message = {
             role: 'assistant',
@@ -89,10 +84,6 @@ ${file.content}
           };
 
           const messages = [filesMessage];
-
-          if (commandsMessage) {
-            messages.push(commandsMessage);
-          }
 
           await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages);
         }

@@ -175,9 +175,6 @@ importers:
       '@unocss/reset':
         specifier: ^0.61.9
         version: 0.61.9
-      '@webcontainer/api':
-        specifier: 1.5.1-internal.8
-        version: 1.5.1-internal.8
       '@xterm/addon-fit':
         specifier: ^0.10.0
         version: 0.10.0(@xterm/xterm@5.5.0)
@@ -3260,9 +3257,6 @@ packages:
 
   '@web3-storage/multipart-parser@1.0.0':
     resolution: {integrity: sha512-BEO6al7BYqcnfX15W2cnGR+Q566ACXAT9UQykORCWW80lmkpWsnEob6zJS1ZVBKsSJC8+7vJkHwlp+lXG1UCdw==}
-
-  '@webcontainer/api@1.5.1-internal.8':
-    resolution: {integrity: sha512-EgtnRLOIFhBiTS/1nQmg3A6RtQXvp+kDK08cbEZZpnXGyaNd1y9dSCJUEn3OUCuHSEZr3LeqBtwR5mYOxFeiUQ==}
 
   '@xterm/addon-fit@0.10.0':
     resolution: {integrity: sha512-UFYkDm4HUahf2lnEyHvio51TNGiLK66mqP2JoATy7hRZeXaGMRDr00JiSF7m63vR5WKATF605yEggJKsw0JpMQ==}
@@ -10466,8 +10460,6 @@ snapshots:
       tinyrainbow: 1.2.0
 
   '@web3-storage/multipart-parser@1.0.0': {}
-
-  '@webcontainer/api@1.5.1-internal.8': {}
 
   '@xterm/addon-fit@0.10.0(@xterm/xterm@5.5.0)':
     dependencies:
