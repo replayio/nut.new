@@ -2,6 +2,13 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 /**
+ * Checks if Supabase is enabled based on the environment variable
+ */
+export function isSupabaseEnabled(): boolean {
+  return process.env.USE_SUPABASE === 'true';
+}
+
+/**
  * Waits for the page to be fully loaded
  */
 export async function waitForPageLoad(page: Page): Promise<void> {

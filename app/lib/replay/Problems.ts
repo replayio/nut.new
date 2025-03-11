@@ -261,7 +261,7 @@ export async function extractFileArtifactsFromRepositoryContents(repositoryConte
   return fileArtifacts;
 }
 
-export async function submitFeedback(feedback: any) {
+export async function submitFeedback(feedback: any): Promise<boolean> {
   if (shouldUseSupabase()) {
     return supabaseSubmitFeedback(feedback);
   }

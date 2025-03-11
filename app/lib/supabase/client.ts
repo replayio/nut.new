@@ -32,6 +32,19 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['problem_comments']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['problem_comments']['Insert']>;
       };
+      feedback: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          user_id: string | null;
+          description: string;
+          status: 'pending' | 'reviewed' | 'resolved';
+          metadata: Json;
+        };
+        Insert: Omit<Database['public']['Tables']['feedback']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['feedback']['Insert']>;
+      };
     };
   };
 }
