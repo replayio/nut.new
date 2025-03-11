@@ -228,18 +228,29 @@ export async function supabaseUpdateProblem(problemId: string, problem: BoltProb
 }
 
 export async function supabaseSubmitFeedback(feedback: any) {
-  try {
-    /*
-     * Store feedback in supabase if needed
-     * For now, just return true
-     */
-    console.log('Feedback submitted:', feedback);
+  const supabase = getSupabase();
 
-    return true;
-  } catch (error) {
-    console.error('Error submitting feedback', error);
+  // Get the current user ID if available
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id || null;
+
+  // Insert feedback into the feedback table
+  const { data, error } = await supabase.from('feedback').insert({
+    user_id: userId,
+    description: feedback.description || feedback.text || JSON.stringify(feedback),
+    metadata: feedback,
+  });
+
+  if (error) {
+    console.error('Error submitting feedback to Supabase:', error);
     toast.error('Failed to submit feedback');
 
     return false;
   }
+
+  console.log('Feedback submitted successfully:', data);
+
+  return true;
 }
