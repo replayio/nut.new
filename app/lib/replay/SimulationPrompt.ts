@@ -9,6 +9,7 @@ import type { MouseData } from './Recording';
 import type { FileMap } from '../stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { DeveloperSystemPrompt } from '../common/prompts/prompts';
+import { ensureDevelopmentServerURL } from './DevelopmentServer';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -212,9 +213,11 @@ function startChat(repositoryContents: string, pageData: SimulationData) {
 }
 
 // Called when the repository contents have changed. We'll start a new chat
-// with the same interaction data as any existing chat.
+// with the same interaction data as any existing chat. The remote development
+// server will also be updated.
 export async function simulationRepositoryUpdated(repositoryContents: string) {
   startChat(repositoryContents, gChatManager?.pageData ?? []);
+  ensureDevelopmentServerURL(repositoryContents);
 }
 
 // Called when the page gathering interaction data has been reloaded. We'll
