@@ -40,9 +40,11 @@ export const isBinaryFile = async (file: File): Promise<boolean> => {
 };
 
 export const shouldIncludeFile = (path: string): boolean => {
-  const projectDirectory = "/home/project/";
+  const projectDirectory = '/home/project/';
+
   if (path.startsWith(projectDirectory)) {
     path = path.substring(projectDirectory.length);
   }
+
   return !ig.ignores(path);
 };

@@ -1,12 +1,11 @@
-
 // FIXME ping telemetry server directly instead of going through the backend.
 
-import { getNutLoginKey } from "../replay/Problems";
+import { getNutLoginKey } from '../replay/Problems';
 
 // We do this to work around CORS insanity.
 export async function pingTelemetry(event: string, data: any) {
   const requestBody: any = {
-    event: "NutChat." + event,
+    event: 'NutChat.' + event,
     data,
   };
 
@@ -25,7 +24,7 @@ export class ChatMessageTelemetry {
   constructor(numMessages: number) {
     this.id = Math.random().toString(36).substring(2, 15);
     this.numMessages = numMessages;
-    this.ping("StartMessage");
+    this.ping('StartMessage');
   }
 
   private ping(event: string, data: any = {}) {
@@ -38,22 +37,22 @@ export class ChatMessageTelemetry {
   }
 
   finish() {
-    this.ping("FinishMessage");
+    this.ping('FinishMessage');
   }
 
   abort(reason: string) {
-    this.ping("AbortMessage", { reason });
+    this.ping('AbortMessage', { reason });
   }
 
   startSimulation() {
-    this.ping("StartSimulation");
+    this.ping('StartSimulation');
   }
 
   endSimulation(status: string) {
-    this.ping("EndSimulation", { status });
+    this.ping('EndSimulation', { status });
   }
 
   sendPrompt(simulationStatus: string) {
-    this.ping("SendPrompt", { simulationStatus });
+    this.ping('SendPrompt', { simulationStatus });
   }
 }

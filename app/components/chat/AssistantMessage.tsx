@@ -29,9 +29,7 @@ export const AssistantMessage = memo(({ content, annotations }: AssistantMessage
   return (
     <div className="overflow-hidden w-full">
       {usage && (
-        <div 
-          className="text-sm text-bolt-elements-textSecondary mb-2"
-        >
+        <div className="text-sm text-bolt-elements-textSecondary mb-2">
           Tokens: {usage.totalTokens} (prompt: {usage.promptTokens}, completion: {usage.completionTokens})
         </div>
       )}

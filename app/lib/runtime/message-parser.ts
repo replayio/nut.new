@@ -236,8 +236,10 @@ export class StreamingMessageParser {
 
               this._options.callbacks?.onArtifactOpen?.({ messageId, ...currentArtifact });
 
-              //const artifactFactory = this._options.artifactElement ?? createArtifactElement;
-              //output += artifactFactory({ messageId });
+              /*
+               * const artifactFactory = this._options.artifactElement ?? createArtifactElement;
+               * output += artifactFactory({ messageId });
+               */
 
               i = openTagEnd + 1;
             } else {

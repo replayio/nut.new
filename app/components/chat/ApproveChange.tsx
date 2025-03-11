@@ -22,6 +22,7 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
   if (rejectFormOpen) {
     const performReject = (retry: boolean) => {
       setRejectFormOpen(false);
+
       const explanation = textareaRef.current?.value ?? '';
       onReject({
         explanation,
@@ -42,7 +43,7 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
             className={classNames(
               'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
               'transition-all duration-200',
-              'hover:border-bolt-elements-focus'
+              'hover:border-bolt-elements-focus',
             )}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {

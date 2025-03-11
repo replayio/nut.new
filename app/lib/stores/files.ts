@@ -93,7 +93,7 @@ export class FilesStore {
       const oldContent = this.getFile(filePath)?.content;
 
       if (!oldContent) {
-        console.log("CurrentFiles", JSON.stringify(Object.keys(this.files.get())));
+        console.log('CurrentFiles', JSON.stringify(Object.keys(this.files.get())));
         unreachable(`Cannot save unknown file ${filePath}`);
       }
 

@@ -73,14 +73,16 @@ export const Preview = memo(() => {
 
     if (url.startsWith(baseUrl)) {
       const trimmedUrl = url.slice(baseUrl.length);
+
       if (trimmedUrl.startsWith('/')) {
         return trimmedUrl;
       }
-      return "/" + trimmedUrl;
+
+      return '/' + trimmedUrl;
     }
 
     return url;
-  }
+  };
 
   const validateUrl = useCallback(
     (value: string) => {
@@ -127,6 +129,7 @@ export const Preview = memo(() => {
       simulationReloaded();
       iframeRef.current.src = iframeRef.current.src;
     }
+
     setIsSelectionMode(false);
     setSelectionPoint(null);
   };
@@ -261,7 +264,10 @@ export const Preview = memo(() => {
         <IconButton
           icon="i-ph:bug-beetle"
           title="Point to Bug"
-          onClick={() => { setSelectionPoint(null); setIsSelectionMode(!isSelectionMode); }}
+          onClick={() => {
+            setSelectionPoint(null);
+            setIsSelectionMode(!isSelectionMode);
+          }}
           className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
         />
         <div
@@ -279,6 +285,7 @@ export const Preview = memo(() => {
             }}
             onKeyDown={(event) => {
               let newUrl;
+
               if (event.key === 'Enter' && (newUrl = validateUrl(url))) {
                 setIframeUrl(newUrl);
 

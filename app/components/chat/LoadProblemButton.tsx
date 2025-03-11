@@ -22,13 +22,18 @@ export function setLastLoadedProblem(problem: BoltProblem) {
 
 export function getLastLoadedProblem(): BoltProblem | undefined {
   const problemJSON = localStorage.getItem('loadedProblem');
+
   if (!problemJSON) {
     return undefined;
   }
+
   return JSON.parse(problemJSON);
 }
 
-export async function loadProblem(problemId: string, importChat: (description: string, messages: Message[]) => Promise<void>) {
+export async function loadProblem(
+  problemId: string,
+  importChat: (description: string, messages: Message[]) => Promise<void>,
+) {
   const problem = await getProblem(problemId);
 
   if (!problem) {
@@ -42,7 +47,7 @@ export async function loadProblem(problemId: string, importChat: (description: s
   const fileArtifacts = await extractFileArtifactsFromRepositoryContents(repositoryContents);
 
   try {
-    const messages = await createChatFromFolder(fileArtifacts, [], "problem");
+    const messages = await createChatFromFolder(fileArtifacts, [], 'problem');
     await importChat(`Problem: ${problemTitle}`, [...messages]);
 
     logStore.logSystem('Problem loaded successfully', {
@@ -67,7 +72,7 @@ export const LoadProblemButton: React.FC<LoadProblemButtonProps> = ({ className,
 
     const problemId = (document.getElementById('problem-input') as HTMLInputElement)?.value;
 
-    assert(importChat, "importChat is required");
+    assert(importChat, 'importChat is required');
     await loadProblem(problemId, importChat);
     setIsLoading(false);
   };

@@ -8,8 +8,10 @@ interface SimulationPacketServerURL {
   url: string;
 }
 
-// Simulation data specifying the contents of the repository to set up a dev server
-// for static resources.
+/*
+ * Simulation data specifying the contents of the repository to set up a dev server
+ * for static resources.
+ */
 interface SimulationPacketRepositoryContents {
   kind: 'repositoryContents';
   contents: string; // base64 encoded zip of the repository.
@@ -58,8 +60,10 @@ export interface UserInteraction {
   // Selector of the element associated with the interaction, if any.
   selector?: string;
 
-  // For mouse interactions, dimensions and position within the
-  // element where the event occurred.
+  /*
+   * For mouse interactions, dimensions and position within the
+   * element where the event occurred.
+   */
   width?: number;
   height?: number;
   x?: number;

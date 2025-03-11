@@ -128,33 +128,35 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
           {
             description: 'Text Files',
             accept: {
-              'text/*': ['.txt', '.js', '.ts', '.jsx', '.tsx', '.json', '.html', '.css']
-            }
-          }
-        ]
+              'text/*': ['.txt', '.js', '.ts', '.jsx', '.tsx', '.json', '.html', '.css'],
+            },
+          },
+        ],
       });
 
       const changesFile = await fileHandle.getFile();
       const changesContent = await changesFile.text();
 
-      let path = "";
-      let contents = "";
+      let path = '';
+      let contents = '';
 
       async function saveCurrentFile() {
         if (path) {
-          await workbenchStore.saveFileContents("/home/project/src/" + path, contents);
+          await workbenchStore.saveFileContents('/home/project/src/' + path, contents);
         }
       }
 
-      for (const line of changesContent.split("\n")) {
+      for (const line of changesContent.split('\n')) {
         const match = /^FILE (.*)/.exec(line);
+
         if (match) {
           await saveCurrentFile();
           path = match[1];
-          contents = "";
+          contents = '';
           continue;
         }
-        contents += line + "\n";
+
+        contents += line + '\n';
       }
 
       await saveCurrentFile();
@@ -190,10 +192,7 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                 <div className="ml-auto" />
                 {selectedView === 'code' && (
                   <div className="flex overflow-y-auto">
-                    <PanelHeaderButton
-                      className="mr-1 text-sm"
-                      onClick={handleApplyChanges}
-                    >
+                    <PanelHeaderButton className="mr-1 text-sm" onClick={handleApplyChanges}>
                       <div className="i-ph:code" />
                       Apply Changes
                     </PanelHeaderButton>

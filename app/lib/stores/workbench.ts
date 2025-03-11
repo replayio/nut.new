@@ -418,6 +418,7 @@ export class WorkbenchStore {
 
     // Generate the zip file and save it
     const content = await zip.generateAsync({ type: 'blob' });
+
     return { content, uniqueProjectName };
   }
 
@@ -430,6 +431,7 @@ export class WorkbenchStore {
     const { content, uniqueProjectName } = await this.generateZip();
     const buf = await content.arrayBuffer();
     const contentBase64 = uint8ArrayToBase64(new Uint8Array(buf));
+
     return { contentBase64, uniqueProjectName };
   }
 
@@ -441,6 +443,7 @@ export class WorkbenchStore {
     // Check if any files we know about have different contents in the artifacts.
     const files = this.files.get();
     const fileRelativePaths = new Set<string>();
+
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent?.type === 'file' && !dirent.isBinary) {
         const relativePath = extractRelativePath(filePath);
@@ -449,7 +452,7 @@ export class WorkbenchStore {
         const content = dirent.content;
 
         const artifact = fileArtifacts.find((artifact) => artifact.path === relativePath);
-        const artifactContent = artifact?.content ?? "";
+        const artifactContent = artifact?.content ?? '';
 
         if (content != artifactContent) {
           modifiedFilePaths.add(relativePath);
@@ -467,10 +470,10 @@ export class WorkbenchStore {
     const actionArtifactId = `restore-contents-artifact-id-${messageId}`;
 
     for (const filePath of modifiedFilePaths) {
-      console.log("RestoreModifiedFile", filePath);
+      console.log('RestoreModifiedFile', filePath);
 
       const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
-      const artifactContent = artifact?.content ?? "";
+      const artifactContent = artifact?.content ?? '';
 
       const actionId = `restore-contents-action-${messageId}-${filePath}-${Math.random().toString()}`;
       const data: ActionCallbackData = {
@@ -479,7 +482,7 @@ export class WorkbenchStore {
         artifactId: actionArtifactId,
         action: {
           type: 'file',
-          filePath: filePath,
+          filePath,
           content: artifactContent,
         },
       };

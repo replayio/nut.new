@@ -25,23 +25,30 @@ export function saveProjectContents(messageId: string, contents: ProjectContents
 }
 
 export function getLastMessageProjectContents(messages: Message[], index: number) {
-  // The message index is for the model response, and the project
-  // contents will be associated with the last message present when
-  // the user prompt was sent to the model. This could be either two
-  // or three messages back, depending on whether a bug explanation was added.
+  /*
+   * The message index is for the model response, and the project
+   * contents will be associated with the last message present when
+   * the user prompt was sent to the model. This could be either two
+   * or three messages back, depending on whether a bug explanation was added.
+   */
   const beforeUserMessage = messages[index - 2];
   const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
+
   if (!contents) {
     const priorMessage = messages[index - 3];
     const priorContents = gProjectContentsByMessageId.get(priorMessage?.id);
+
     if (!priorContents) {
       return undefined;
     }
 
-    // We still rewind to just before the user message to retain any
-    // explanation from the Nut API.
+    /*
+     * We still rewind to just before the user message to retain any
+     * explanation from the Nut API.
+     */
     return { rewindMessageId: beforeUserMessage.id, contentsMessageId: priorMessage.id, contents: priorContents };
   }
+
   return { rewindMessageId: beforeUserMessage.id, contentsMessageId: beforeUserMessage.id, contents };
 }
 

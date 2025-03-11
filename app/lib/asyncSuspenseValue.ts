@@ -28,6 +28,7 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
     );
 
     record = { status: 'pending', promise };
+
     return promise;
   };
 
@@ -65,6 +66,7 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
       if (record) {
         return;
       }
+
       load().catch(() => {});
     },
   };

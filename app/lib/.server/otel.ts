@@ -214,16 +214,16 @@ export async function createTracer(appContext: AppLoadContext) {
   try {
     // Load development flag
     const isDev = process.env.NODE_ENV === 'development';
-    
+
     // Skip initialization in development
     if (isDev) {
       console.warn('OpenTelemetry initialization skipped in development mode');
       return undefined;
     }
-    
+
     // Dynamically import the problematic module
     const ASYNC_HOOKS_MANAGER = await loadAsyncHooksContextManager();
-    
+
     const exporter = new OTLPExporter({
       url: 'https://api.honeycomb.io/v1/traces',
       headers: {
@@ -267,10 +267,11 @@ export async function ensureOpenTelemetryInitialized(context: AppLoadContext) {
       console.warn('OpenTelemetry initialization skipped in development mode');
       return;
     }
-    
+
     tracer = await createTracer(context);
   } catch (e) {
     console.error('Failed to initialize OpenTelemetry:', e);
+
     // Don't throw, just log and continue - this allows the app to function without telemetry
   }
 }

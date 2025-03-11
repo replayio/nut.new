@@ -1,13 +1,13 @@
 import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 
 async function pingTelemetry(event: string, data: any): Promise<boolean> {
-  console.log("PingTelemetry", event, data);
+  console.log('PingTelemetry', event, data);
 
   try {
-    const response = await fetch("https://telemetry.replay.io/", {
-      method: "POST",
+    const response = await fetch('https://telemetry.replay.io/', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ event, ...data }),
     });
@@ -16,9 +16,10 @@ async function pingTelemetry(event: string, data: any): Promise<boolean> {
       console.error(`Telemetry request returned unexpected status: ${response.status}`);
       return false;
     }
+
     return true;
   } catch (error) {
-    console.error("Telemetry request failed:", error);
+    console.error('Telemetry request failed:', error);
     return false;
   }
 }

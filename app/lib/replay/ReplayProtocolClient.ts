@@ -1,6 +1,6 @@
-const replayWsServer = "wss://dispatch.replay.io";
+const replayWsServer = 'wss://dispatch.replay.io';
 
-export function assert(condition: any, message: string = "Assertion failed!"): asserts condition {
+export function assert(condition: any, message: string = 'Assertion failed!'): asserts condition {
   if (!condition) {
     debugger;
     throw new Error(message);
@@ -18,23 +18,28 @@ export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; 
     resolve = _resolve;
     reject = _reject;
   });
+
   return { promise, resolve: resolve!, reject: reject! };
 }
 
 export function uint8ArrayToBase64(data: Uint8Array) {
-  let str = "";
+  let str = '';
+
   for (const byte of data) {
     str += String.fromCharCode(byte);
   }
+
   return btoa(str);
 }
 
 export function stringToBase64(inputString: string) {
-  if (typeof inputString !== "string") {
-      throw new TypeError("Input must be a string.");
+  if (typeof inputString !== 'string') {
+    throw new TypeError('Input must be a string.');
   }
+
   const encoder = new TextEncoder();
   const data = encoder.encode(inputString);
+
   return uint8ArrayToBase64(data);
 }
 
@@ -73,6 +78,7 @@ function createDeferred<T>(): Deferred<T> {
     resolve = _resolve;
     reject = _reject;
   });
+
   return { promise, resolve: resolve!, reject: reject! };
 }
 
@@ -90,12 +96,12 @@ export class ProtocolClient {
 
     this.socket = new WebSocket(replayWsServer);
 
-    this.socket.addEventListener("close", this.onSocketClose);
-    this.socket.addEventListener("error", this.onSocketError);
-    this.socket.addEventListener("open", this.onSocketOpen);
-    this.socket.addEventListener("message", this.onSocketMessage);
+    this.socket.addEventListener('close', this.onSocketClose);
+    this.socket.addEventListener('error', this.onSocketError);
+    this.socket.addEventListener('open', this.onSocketOpen);
+    this.socket.addEventListener('message', this.onSocketMessage);
 
-    this.listenForMessage("Recording.sessionError", (error: any) => {
+    this.listenForMessage('Recording.sessionError', (error: any) => {
       logDebug(`Session error ${error}`);
     });
   }
@@ -110,6 +116,7 @@ export class ProtocolClient {
 
   listenForMessage(method: string, callback: (params: any) => void) {
     let listeners = this.eventListeners.get(method);
+
     if (listeners == null) {
       listeners = new Set([callback]);
 
@@ -127,7 +134,7 @@ export class ProtocolClient {
     const id = this.nextMessageId++;
 
     const { method, params, sessionId } = args;
-    logDebug("Sending command", { id, method, params, sessionId });
+    logDebug('Sending command', { id, method, params, sessionId });
 
     const command = {
       id,
@@ -140,11 +147,12 @@ export class ProtocolClient {
 
     const deferred = createDeferred();
     this.pendingCommands.set(id, deferred);
+
     return deferred.promise;
   }
 
   onSocketClose = () => {
-    logDebug("Socket closed");
+    logDebug('Socket closed');
   };
 
   onSocketError = (error: any) => {
@@ -159,26 +167,28 @@ export class ProtocolClient {
       assert(deferred, `Received message with unknown id: ${id}`);
 
       this.pendingCommands.delete(id);
+
       if (result) {
         deferred.resolve(result);
       } else if (error) {
-        console.error("ProtocolError", error);
+        console.error('ProtocolError', error);
         deferred.reject(new ProtocolError(error));
       } else {
-        deferred.reject(new Error("Channel error"));
+        deferred.reject(new Error('Channel error'));
       }
     } else if (this.eventListeners.has(method)) {
       const callbacks = this.eventListeners.get(method);
+
       if (callbacks) {
-        callbacks.forEach(callback => callback(params));
+        callbacks.forEach((callback) => callback(params));
       }
     } else {
-      logDebug("Received message without a handler", { method, params });
+      logDebug('Received message without a handler', { method, params });
     }
   };
 
   onSocketOpen = async () => {
-    logDebug("Socket opened");
+    logDebug('Socket opened');
     this.openDeferred.resolve();
   };
 }
@@ -187,9 +197,11 @@ export class ProtocolClient {
 export async function sendCommandDedicatedClient(args: { method: string; params: any }) {
   const client = new ProtocolClient();
   await client.initialize();
+
   try {
     const rval = await client.sendCommand(args);
     client.close();
+
     return rval;
   } finally {
     client.close();

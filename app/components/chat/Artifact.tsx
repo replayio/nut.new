@@ -18,9 +18,11 @@ const highlighterOptions = {
 const shellHighlighter = createAsyncSuspenseValue(async () => {
   const shellHighlighterPromise: Promise<HighlighterGeneric<BundledLanguage, BundledTheme>> =
     import.meta.hot?.data.shellHighlighterPromise ?? createHighlighter(highlighterOptions);
+
   if (import.meta.hot) {
     import.meta.hot.data.shellHighlighterPromise = shellHighlighterPromise;
   }
+
   return shellHighlighterPromise;
 });
 
