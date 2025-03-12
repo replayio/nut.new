@@ -42,3 +42,9 @@ site
 
 # commit file ignore
 app/commit.json
+
+# Playwright specific
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

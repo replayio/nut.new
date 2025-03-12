@@ -12,6 +12,8 @@
     "dev": "node pre-start.cjs  && remix vite:dev",
     "test": "vitest --run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint app",
     "lint:fix": "npm run lint -- --fix && prettier app --write",
     "start:windows": "wrangler pages dev ./build/client",
@@ -121,6 +123,7 @@
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",
     "@cloudflare/workers-types": "^4.20241127.0",
+    "@playwright/test": "^1.51.0",
     "@remix-run/dev": "^2.15.0",
     "@types/diff": "^5.2.3",
     "@types/dom-speech-recognition": "^0.0.4",
