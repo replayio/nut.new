@@ -180,6 +180,12 @@ function buildMessageId(prefix: string, chatId: string) {
   return `${prefix}-${chatId}`;
 }
 
+const EnhancedPromptPrefix = "enhanced-prompt";
+
+export function isEnhancedPromptMessage(message: Message): boolean {
+  return message.id.startsWith(EnhancedPromptPrefix);
+}
+
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -304,7 +310,7 @@ export const ChatImpl = memo(
       }
 
       const enhancedPromptMessage: Message = {
-        id: buildMessageId("enhanced-prompt", chatId),
+        id: buildMessageId(EnhancedPromptPrefix, chatId),
         role: 'assistant',
         content: message,
       };

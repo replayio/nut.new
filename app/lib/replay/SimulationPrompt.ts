@@ -11,6 +11,7 @@ import { shouldIncludeFile } from '~/utils/fileUtils';
 import { DeveloperSystemPrompt } from '../common/prompts/prompts';
 import { ensureDevelopmentServerURL } from './DevelopmentServer';
 import { workbenchStore } from '../stores/workbench';
+import { isEnhancedPromptMessage } from '~/components/chat/Chat.client';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
@@ -191,6 +192,8 @@ class ChatManager {
       params: { chatId, responseId, messages, chatOnly: options?.chatOnly, developerFiles: options?.developerFiles },
     });
 
+    console.log("ChatResponse", response);
+
     removeResponseListener();
     removeFileListener();
 
@@ -349,7 +352,7 @@ Here is the user message you need to evaluate: <user_message>${messageInput}</us
   return false;
 }
 
-function getProtocolRule(message: Message): "user" | "assistant" | "system" {
+function getProtocolRole(message: Message): "user" | "assistant" | "system" {
   switch (message.role) {
     case "user":
       return "user";
@@ -386,7 +389,7 @@ function removeBoltArtifacts(text: string): string {
 function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   const rv: ProtocolMessage[] = [];
   for (const msg of messages) {
-    const role = getProtocolRule(msg);
+    const role = getProtocolRole(msg);
     if (Array.isArray(msg.content)) {
       for (const content of msg.content) {
         switch (content.type) {
@@ -419,6 +422,20 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   return rv;
 }
 
+function messagesHaveEnhancedPrompt(messages: Message[]): boolean {
+  const lastEnhancedPromptMessage = messages.findLastIndex(msg => isEnhancedPromptMessage(msg));
+  if (lastEnhancedPromptMessage == -1) {
+    return false;
+  }
+
+  const lastUserMessage = messages.findLastIndex(msg => msg.role == "user");
+  if (lastUserMessage == -1) {
+    return false;
+  }
+
+  return lastUserMessage < lastEnhancedPromptMessage;
+}
+
 export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onResponsePart: ChatResponsePartCallback) {
   if (!gChatManager) {
     gChatManager = new ChatManager();
@@ -434,11 +451,22 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
     }
   }
 
+  let systemPrompt = DeveloperSystemPrompt;
+
+  if (messagesHaveEnhancedPrompt(messages)) {
+    // Add directions to the LLM when we have an enhanced prompt describing the bug to fix.
+    const SystemEnhancedPrompt = `
+ULTRA IMPORTANT: You have been given a detailed description of a bug you need to fix.
+Focus specifically on fixing this bug. Do not guess about other problems.
+    `;
+    systemPrompt += SystemEnhancedPrompt;
+  }
+
   const protocolMessages = buildProtocolMessages(messages);
   protocolMessages.unshift({
     role: "system",
     type: "text",
-    content: DeveloperSystemPrompt,
+    content: systemPrompt,
   });
 
   return gChatManager.sendChatMessage(protocolMessages, { chatOnly: true, developerFiles, onResponsePart });
