@@ -13,6 +13,7 @@ import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
 import { extractFileArtifactsFromRepositoryContents } from '../replay/Problems';
 import { onRepositoryFileWritten } from '~/components/chat/Chat.client';
+import { doInjectRecordingMessageHandler } from '../replay/Recording';
 
 export interface ArtifactState {
   id: string;
@@ -290,7 +291,7 @@ export class WorkbenchStore {
     return artifacts[id];
   }
 
-  private async generateZip() {
+  private async generateZip(injectRecordingMessageHandler = false) {
     const zip = new JSZip();
     const files = this.files.get();
 
@@ -303,7 +304,11 @@ export class WorkbenchStore {
 
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent) {
-        const content = dirent.content;
+        let content = dirent.content;
+
+        if (injectRecordingMessageHandler && filePath == "index.html") {
+          content = doInjectRecordingMessageHandler(content);
+        }
 
         // split the path into segments
         const pathSegments = filePath.split('/');
@@ -333,8 +338,8 @@ export class WorkbenchStore {
     saveAs(content, `${uniqueProjectName}.zip`);
   }
 
-  async generateZipBase64() {
-    const { content, uniqueProjectName } = await this.generateZip();
+  async generateZipBase64(injectRecordingMessageHandler = false) {
+    const { content, uniqueProjectName } = await this.generateZip(injectRecordingMessageHandler);
     const buf = await content.arrayBuffer();
     const contentBase64 = uint8ArrayToBase64(new Uint8Array(buf));
     return { contentBase64, uniqueProjectName };

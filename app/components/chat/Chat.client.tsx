@@ -163,8 +163,7 @@ let gUpdateSimulationAfterChatMessage = false;
 async function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
   if (gUpdateSimulationAfterChatMessage) {
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
-    await simulationRepositoryUpdated(contentBase64);
+    await simulationRepositoryUpdated();
     gUpdateSimulationAfterChatMessage = false;
   }
 }
@@ -173,8 +172,7 @@ export async function onRepositoryFileWritten() {
   if (gActiveChatMessageTelemetry) {
     gUpdateSimulationAfterChatMessage = true;
   } else {
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
-    await simulationRepositoryUpdated(contentBase64);
+    await simulationRepositoryUpdated();
   }
 }
 
