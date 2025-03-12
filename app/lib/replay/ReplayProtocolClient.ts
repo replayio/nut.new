@@ -82,7 +82,7 @@ export class ProtocolClient {
   openDeferred = createDeferred<void>();
   eventListeners = new Map<string, Set<EventListener>>();
   nextMessageId = 1;
-  pendingCommands = new Map<number, Deferred<any>>();
+  pendingCommands = new Map<number, { method: string, deferred: Deferred<any> }>();
   socket: WebSocket;
 
   constructor() {
@@ -139,7 +139,7 @@ export class ProtocolClient {
     this.socket.send(JSON.stringify(command));
 
     const deferred = createDeferred();
-    this.pendingCommands.set(id, deferred);
+    this.pendingCommands.set(id, { method, deferred });
     return deferred.promise;
   }
 
@@ -155,17 +155,17 @@ export class ProtocolClient {
     const { error, id, method, params, result } = JSON.parse(String(event.data));
 
     if (id) {
-      const deferred = this.pendingCommands.get(id);
-      assert(deferred, `Received message with unknown id: ${id}`);
+      const info = this.pendingCommands.get(id);
+      assert(info, `Received message with unknown id: ${id}`);
 
       this.pendingCommands.delete(id);
       if (result) {
-        deferred.resolve(result);
+        info.deferred.resolve(result);
       } else if (error) {
-        console.error("ProtocolError", error);
-        deferred.reject(new ProtocolError(error));
+        console.error("ProtocolError", info.method, id, error);
+        info.deferred.reject(new ProtocolError(error));
       } else {
-        deferred.reject(new Error("Channel error"));
+        info.deferred.reject(new Error("Channel error"));
       }
     } else if (this.eventListeners.has(method)) {
       const callbacks = this.eventListeners.get(method);

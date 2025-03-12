@@ -3,6 +3,7 @@
 import { debounce } from '~/utils/debounce';
 import { assert, ProtocolClient } from './ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { toast } from 'react-toastify';
 
 class DevelopmentServerManager {
   // Empty if this chat has been destroyed.
@@ -32,19 +33,23 @@ class DevelopmentServerManager {
     this.client = undefined;
   }
 
-  async setRepositoryContents(contents: string) {
+  async setRepositoryContents(contents: string): Promise<string | undefined> {
     assert(this.client, "Chat has been destroyed");
 
-    const chatId = await this.chatIdPromise;
-    const { url } = await this.client.sendCommand({
-      method: "Nut.startDevelopmentServer",
-      params: {
-        chatId,
-        repositoryContents: contents,
-      },
-    }) as { url: string };
-
-    return url;
+    try {
+      const chatId = await this.chatIdPromise;
+      const { url } = await this.client.sendCommand({
+        method: "Nut.startDevelopmentServer",
+        params: {
+          chatId,
+          repositoryContents: contents,
+        },
+      }) as { url: string };
+      return url;
+    } catch (e) {
+      console.error("DevelopmentServerError", e);
+      return undefined;
+    }
   }
 }
 
@@ -56,6 +61,11 @@ const debounceSetRepositoryContents = debounce(async (repositoryContents: string
   }
 
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryContents);
+
+  if (!url) {
+    toast.error("Failed to start development server");
+  }
+
   workbenchStore.previewURL.set(url);
 }, 500);
 
