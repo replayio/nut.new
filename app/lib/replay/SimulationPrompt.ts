@@ -9,7 +9,7 @@ import type { MouseData } from './Recording';
 import type { FileMap } from '../stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
 import { DeveloperSystemPrompt } from '../common/prompts/prompts';
-import { ensureDevelopmentServerURL } from './DevelopmentServer';
+import { updateDevelopmentServer } from './DevelopmentServer';
 import { workbenchStore } from '../stores/workbench';
 import { isEnhancedPromptMessage } from '~/components/chat/Chat.client';
 
@@ -171,15 +171,6 @@ class ChatManager {
       if (responseId == eventResponseId) {
         console.log("ChatModifiedFile", file);
         modifiedFiles.push(file);
-
-        const content = `
-        <boltArtifact id="modified-file-${generateRandomId()}" title="File Changes">
-        <boltAction type="file" filePath="${file.path}">${file.content}</boltAction>
-        </boltArtifact>
-        `;
-
-        response += content;
-        options?.onResponsePart?.(content);
       }
     });
 
@@ -192,7 +183,20 @@ class ChatManager {
       params: { chatId, responseId, messages, chatOnly: options?.chatOnly, developerFiles: options?.developerFiles },
     });
 
-    console.log("ChatResponse", response);
+    // The modified files are added at the end as inserting them in the middle of the
+    // response can cause weird rendering behavior.
+    for (const file of modifiedFiles) {
+      const content = `
+      <boltArtifact id="modified-file-${generateRandomId()}" title="File Changes">
+      <boltAction type="file" filePath="${file.path}">${file.content}</boltAction>
+      </boltArtifact>
+      `;
+
+      response += content;
+      options?.onResponsePart?.(content);
+    }
+
+    console.log("ChatResponse", chatId, response);
 
     removeResponseListener();
     removeFileListener();
@@ -224,7 +228,7 @@ export async function simulationRepositoryUpdated() {
   startChat(repositoryContents, gChatManager?.pageData ?? []);
 
   const { contentBase64: injectedContents } = await workbenchStore.generateZipBase64(/* injectRecordingMessageHandler */ true);
-  ensureDevelopmentServerURL(injectedContents);
+  updateDevelopmentServer(injectedContents);
 }
 
 // Called when the page gathering interaction data has been reloaded. We'll

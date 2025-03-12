@@ -50,7 +50,7 @@ class DevelopmentServerManager {
 
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
-export const ensureDevelopmentServerURL = debounce(async (repositoryContents: string) => {
+const debounceSetRepositoryContents = debounce(async (repositoryContents: string) => {
   if (!gActiveDevelopmentServer) {
     gActiveDevelopmentServer = new DevelopmentServerManager();
   }
@@ -58,3 +58,8 @@ export const ensureDevelopmentServerURL = debounce(async (repositoryContents: st
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryContents);
   workbenchStore.previewURL.set(url);
 }, 500);
+
+export async function updateDevelopmentServer(repositoryContents: string) {
+  workbenchStore.previewURL.set(undefined);
+  debounceSetRepositoryContents(repositoryContents);
+}

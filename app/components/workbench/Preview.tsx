@@ -51,7 +51,7 @@ export const Preview = memo(() => {
     if (!previewURL) {
       setUrl('');
       setIframeUrl(undefined);
-
+      setSelectionPoint(null);
       return;
     }
 
