@@ -1,5 +1,6 @@
 // Support using the Nut API for the development server.
 
+import { debounce } from '~/utils/debounce';
 import { assert, ProtocolClient } from './ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
 
@@ -49,11 +50,11 @@ class DevelopmentServerManager {
 
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
-export async function ensureDevelopmentServerURL(repositoryContents: string) {
+export const ensureDevelopmentServerURL = debounce(async (repositoryContents: string) => {
   if (!gActiveDevelopmentServer) {
     gActiveDevelopmentServer = new DevelopmentServerManager();
   }
 
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryContents);
   workbenchStore.previewURL.set(url);
-}
+}, 500);
