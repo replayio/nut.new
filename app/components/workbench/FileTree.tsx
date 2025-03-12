@@ -13,8 +13,6 @@ interface Props {
   files?: FileMap;
   selectedFile?: string;
   onFileSelect?: (filePath: string) => void;
-  rootFolder?: string;
-  hideRoot?: boolean;
   collapsed?: boolean;
   allowFolderSelection?: boolean;
   hiddenFiles?: Array<string | RegExp>;
@@ -27,8 +25,6 @@ export const FileTree = memo(
     files = {},
     onFileSelect,
     selectedFile,
-    rootFolder,
-    hideRoot = false,
     collapsed = false,
     allowFolderSelection = false,
     hiddenFiles,
@@ -40,8 +36,8 @@ export const FileTree = memo(
     const computedHiddenFiles = useMemo(() => [...DEFAULT_HIDDEN_FILES, ...(hiddenFiles ?? [])], [hiddenFiles]);
 
     const fileList = useMemo(() => {
-      return buildFileList(files, rootFolder, hideRoot, computedHiddenFiles);
-    }, [files, rootFolder, hideRoot, computedHiddenFiles]);
+      return buildFileList(files, computedHiddenFiles);
+    }, [files, computedHiddenFiles]);
 
     const [collapsedFolders, setCollapsedFolders] = useState(() => {
       return collapsed
@@ -121,7 +117,7 @@ export const FileTree = memo(
 
     const onCopyRelativePath = (fileOrFolder: FileNode | FolderNode) => {
       try {
-        navigator.clipboard.writeText(fileOrFolder.fullPath.substring((rootFolder || '').length));
+        navigator.clipboard.writeText(fileOrFolder.fullPath);
       } catch (error) {
         logger.error(error);
       }
@@ -336,19 +332,12 @@ interface FolderNode extends BaseNode {
 
 function buildFileList(
   files: FileMap,
-  rootFolder = '/',
-  hideRoot: boolean,
   hiddenFiles: Array<string | RegExp>,
 ): Node[] {
   const folderPaths = new Set<string>();
   const fileList: Node[] = [];
 
   let defaultDepth = 0;
-
-  if (rootFolder === '/' && !hideRoot) {
-    defaultDepth = 1;
-    fileList.push({ kind: 'folder', name: '/', depth: 0, id: 0, fullPath: '/' });
-  }
 
   for (const [filePath, dirent] of Object.entries(files)) {
     const segments = filePath.split('/').filter((segment) => segment);
@@ -358,19 +347,14 @@ function buildFileList(
       continue;
     }
 
-    let currentPath = '';
+    let fullPath = '';
 
     let i = 0;
     let depth = 0;
 
     while (i < segments.length) {
       const name = segments[i];
-      const fullPath = (currentPath += `/${name}`);
-
-      if (!fullPath.startsWith(rootFolder) || (hideRoot && fullPath === rootFolder)) {
-        i++;
-        continue;
-      }
+      fullPath += (fullPath.length ? "/" : "") + name;
 
       if (i === segments.length - 1) {
         fileList.push({
@@ -397,7 +381,7 @@ function buildFileList(
     }
   }
 
-  return sortFileList(rootFolder, fileList, hideRoot);
+  return sortFileList(fileList);
 }
 
 function isHiddenFile(filePath: string, fileName: string, hiddenFiles: Array<string | RegExp>) {
@@ -408,6 +392,16 @@ function isHiddenFile(filePath: string, fileName: string, hiddenFiles: Array<str
 
     return pathOrRegex.test(filePath);
   });
+}
+
+function getParentPath(path: string): string {
+  const lastSlash = path.lastIndexOf('/');
+
+  if (lastSlash === -1) {
+    return "";
+  }
+
+  return path.slice(0, lastSlash);
 }
 
 /**
@@ -423,7 +417,7 @@ function isHiddenFile(filePath: string, fileName: string, hiddenFiles: Array<str
  *
  * @returns A new array of nodes sorted in depth-first order.
  */
-function sortFileList(rootFolder: string, nodeList: Node[], hideRoot: boolean): Node[] {
+function sortFileList(nodeList: Node[]): Node[] {
   logger.trace('sortFileList');
 
   const nodeMap = new Map<string, Node>();
@@ -435,15 +429,13 @@ function sortFileList(rootFolder: string, nodeList: Node[], hideRoot: boolean): 
   for (const node of nodeList) {
     nodeMap.set(node.fullPath, node);
 
-    const parentPath = node.fullPath.slice(0, node.fullPath.lastIndexOf('/'));
+    const parentPath = getParentPath(node.fullPath);
 
-    if (parentPath !== rootFolder.slice(0, rootFolder.lastIndexOf('/'))) {
-      if (!childrenMap.has(parentPath)) {
-        childrenMap.set(parentPath, []);
-      }
-
-      childrenMap.get(parentPath)?.push(node);
+    if (!childrenMap.has(parentPath)) {
+      childrenMap.set(parentPath, []);
     }
+
+    childrenMap.get(parentPath)?.push(node);
   }
 
   const sortedList: Node[] = [];
@@ -468,15 +460,10 @@ function sortFileList(rootFolder: string, nodeList: Node[], hideRoot: boolean): 
     }
   };
 
-  if (hideRoot) {
-    // if root is hidden, start traversal from its immediate children
-    const rootChildren = childrenMap.get(rootFolder) || [];
+  const rootChildren = childrenMap.get("") || [];
 
-    for (const child of rootChildren) {
-      depthFirstTraversal(child.fullPath);
-    }
-  } else {
-    depthFirstTraversal(rootFolder);
+  for (const child of rootChildren) {
+    depthFirstTraversal(child.fullPath);
   }
 
   return sortedList;

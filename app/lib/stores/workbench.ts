@@ -7,11 +7,8 @@ import { FilesStore, type FileMap } from './files';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest';
-import * as nodePath from 'node:path';
-import { extractRelativePath } from '~/utils/diff';
 import { description } from '~/lib/persistence';
 import Cookies from 'js-cookie';
-import { createSampler } from '~/utils/sampler';
 import { uint8ArrayToBase64 } from '../replay/ReplayProtocolClient';
 import type { ActionAlert } from '~/types/actions';
 import { extractFileArtifactsFromRepositoryContents } from '../replay/Problems';
@@ -46,8 +43,6 @@ export class WorkbenchStore {
   modifiedFiles = new Set<string>();
   artifactIdList: string[] = [];
   #globalExecutionQueue = Promise.resolve();
-
-  private fileMap: FileMap = {};
 
   constructor() {
     if (import.meta.hot) {
@@ -267,10 +262,14 @@ export class WorkbenchStore {
     if (data.action.type === 'file') {
       const { filePath, content } = data.action;
 
-      this.fileMap[filePath] = {
-        path: filePath,
-        content,
-      };
+      const existingFiles = this.files.get();
+      this.files.set({
+        ...existingFiles,
+        [filePath]: {
+          path: filePath,
+          content,
+        },
+      });
 
       onRepositoryFileWritten();
 
@@ -293,7 +292,7 @@ export class WorkbenchStore {
 
   private async generateZip() {
     const zip = new JSZip();
-    const files = this.fileMap;
+    const files = this.files.get();
 
     // Get the project name from the description input, or use a default name
     const projectName = (description.value ?? 'project').toLocaleLowerCase().split(' ').join('_');
@@ -304,11 +303,10 @@ export class WorkbenchStore {
 
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent) {
-        const relativePath = extractRelativePath(filePath);
         const content = dirent.content;
 
         // split the path into segments
-        const pathSegments = relativePath.split('/');
+        const pathSegments = filePath.split('/');
 
         // if there's more than one segment, we need to create folders
         if (pathSegments.length > 1) {
@@ -320,7 +318,7 @@ export class WorkbenchStore {
           currentFolder.file(pathSegments[pathSegments.length - 1], content);
         } else {
           // if there's only one segment, it's a file in the root
-          zip.file(relativePath, content);
+          zip.file(filePath, content);
         }
       }
     }
@@ -352,16 +350,15 @@ export class WorkbenchStore {
     const fileRelativePaths = new Set<string>();
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent) {
-        const relativePath = extractRelativePath(filePath);
-        fileRelativePaths.add(relativePath);
+        fileRelativePaths.add(filePath);
 
         const content = dirent.content;
 
-        const artifact = fileArtifacts.find((artifact) => artifact.path === relativePath);
+        const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
         const artifactContent = artifact?.content ?? "";
 
         if (content != artifactContent) {
-          modifiedFilePaths.add(relativePath);
+          modifiedFilePaths.add(filePath);
         }
       }
     }
@@ -403,8 +400,7 @@ export class WorkbenchStore {
 
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent) {
-        const relativePath = extractRelativePath(filePath);
-        const pathSegments = relativePath.split('/');
+        const pathSegments = filePath.split('/');
         let currentHandle = targetHandle;
 
         for (let i = 0; i < pathSegments.length - 1; i++) {
@@ -421,7 +417,7 @@ export class WorkbenchStore {
         await writable.write(dirent.content);
         await writable.close();
 
-        syncedFiles.push(relativePath);
+        syncedFiles.push(filePath);
       }
     }
 
@@ -479,7 +475,7 @@ export class WorkbenchStore {
               content: Buffer.from(dirent.content).toString('base64'),
               encoding: 'base64',
             });
-            return { path: extractRelativePath(filePath), sha: blob.sha };
+            return { path: filePath, sha: blob.sha };
           }
 
           return null;

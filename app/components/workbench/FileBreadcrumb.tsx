@@ -3,12 +3,9 @@ import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import type { FileMap } from '~/lib/stores/files';
 import { classNames } from '~/utils/classNames';
-import { WORK_DIR } from '~/utils/constants';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import FileTree from './FileTree';
-
-const WORK_DIR_REGEX = new RegExp(`^${WORK_DIR.split('/').slice(0, -1).join('/').replaceAll('/', '\\/')}/`);
 
 interface FileBreadcrumbProps {
   files?: FileMap;
@@ -76,10 +73,6 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
 
         const path = pathSegments.slice(0, index).join('/');
 
-        if (!WORK_DIR_REGEX.test(path)) {
-          return null;
-        }
-
         const isActive = activeIndex === index;
 
         return (
@@ -121,8 +114,6 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                           <div className="max-h-[50vh] min-w-[300px] overflow-scroll bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-sm rounded-lg">
                             <FileTree
                               files={files}
-                              hideRoot
-                              rootFolder={path}
                               collapsed
                               allowFolderSelection
                               selectedFile={`${path}/${segment}`}

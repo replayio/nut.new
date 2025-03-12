@@ -13,7 +13,6 @@ import { PanelHeader } from '~/components/ui/PanelHeader';
 import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton';
 import type { FileMap } from '~/lib/stores/files';
 import { themeStore } from '~/lib/stores/theme';
-import { WORK_DIR } from '~/utils/constants';
 import { renderLogger } from '~/utils/logger';
 import { isMobile } from '~/utils/mobile';
 import { FileBreadcrumb } from './FileBreadcrumb';
@@ -78,9 +77,7 @@ export const EditorPanel = memo(
                 <FileTree
                   className="h-full"
                   files={files}
-                  hideRoot
                   unsavedFiles={unsavedFiles}
-                  rootFolder={WORK_DIR}
                   selectedFile={selectedFile}
                   onFileSelect={onFileSelect}
                 />
