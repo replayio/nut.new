@@ -4,8 +4,19 @@ import { expect } from '@playwright/test';
 /**
  * Checks if Supabase is enabled based on the environment variable
  */
-export function isSupabaseEnabled(): boolean {
-  return process.env.USE_SUPABASE === 'true';
+export async function isSupabaseEnabled(page: Page): Promise<boolean> {
+  return page.evaluate(() => {
+    return new Promise((resolve) => {
+      const checkEnv = () => {
+        if (window.ENV) {
+          resolve(window.ENV.USE_SUPABASE === 'true');
+        } else {
+          setTimeout(checkEnv, 50);
+        }
+      };
+      checkEnv();
+    });
+  });
 }
 
 /**

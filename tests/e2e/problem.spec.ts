@@ -6,18 +6,23 @@ const problemName = {
   true: 'sdfsdf',
 };
 
-test.beforeEach(async () => {
-  // Log Supabase status at the start of each test
-  const useSupabase = isSupabaseEnabled();
-  console.log(`Test running with USE_SUPABASE=${useSupabase}`);
-});
-
 test('Should be able to load a problem', async ({ page }) => {
   await page.goto('/problems');
-  await page.getByRole('combobox').selectOption('all');
 
-  const problem = problemName[isSupabaseEnabled()];
-  await page.getByRole('link', { name: problem }).first().click();
-  await page.getByRole('link', { name: 'Load Problem' }).click();
-  await expect(page.getByText('Import the "problem" folder')).toBeVisible();
+  const combobox = page.getByRole('combobox');
+  await expect(combobox).toBeVisible({ timeout: 30000 });
+  await combobox.selectOption('all');
+
+  const useSupabase = await isSupabaseEnabled(page);
+  const problem = problemName[useSupabase ? 'true' : 'false'];
+
+  const problemLink = page.getByRole('link', { name: problem }).first();
+  await expect(problemLink).toBeVisible({ timeout: 30000 });
+  await problemLink.click();
+
+  const loadProblemLink = page.getByRole('link', { name: 'Load Problem' });
+  await expect(loadProblemLink).toBeVisible({ timeout: 30000 });
+  await loadProblemLink.click();
+
+  await expect(page.getByText('Import the "problem" folder')).toBeVisible({ timeout: 30000 });
 });
