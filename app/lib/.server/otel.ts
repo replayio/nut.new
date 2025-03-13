@@ -200,7 +200,7 @@ async function loadAsyncHooksContextManager() {
   }
 }
 
-export async function createTracer(appContext: AppLoadContext) {
+export async function createTracer(_appContext: AppLoadContext) {
   const honeycombApiKey = process.env.HONEYCOMB_API_KEY;
   const honeycombDataset = process.env.HONEYCOMB_DATASET;
 

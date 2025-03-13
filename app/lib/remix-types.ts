@@ -1,10 +1,10 @@
 // This file provides compatibility types to smoothly migrate from Cloudflare to Vercel
 
-import type { 
+import type {
   ActionFunctionArgs as VercelActionFunctionArgs,
   LoaderFunctionArgs as VercelLoaderFunctionArgs,
   AppLoadContext as VercelAppLoadContext,
-  EntryContext as VercelEntryContext
+  EntryContext as VercelEntryContext,
 } from '@vercel/remix';
 
 // Re-export necessary types with compatible names
@@ -14,7 +14,7 @@ export type LoaderFunction = (args: LoaderFunctionArgs) => Promise<Response> | R
 export type ActionFunction = (args: ActionFunctionArgs) => Promise<Response> | Response;
 export type AppLoadContext = VercelAppLoadContext;
 export type EntryContext = VercelEntryContext;
-export type MetaFunction = () => Array<{ 
+export type MetaFunction = () => Array<{
   title?: string;
   name?: string;
   content?: string;
@@ -22,7 +22,7 @@ export type MetaFunction = () => Array<{
 }>;
 export type LinksFunction = () => Array<{ rel: string; href: string }>;
 
-// Re-export json function 
+// Re-export json function
 export function json<T>(data: T, init?: ResponseInit): Response {
   return new Response(JSON.stringify(data), {
     ...init,
@@ -34,14 +34,16 @@ export function json<T>(data: T, init?: ResponseInit): Response {
 }
 
 // Export a createRequestHandler function
-export function createRequestHandler(options: {
+export function createRequestHandler(_options: {
   build: any;
   mode?: string;
   getLoadContext?: (req: Request) => AppLoadContext;
 }) {
-  return async (request: Request) => {
-    // This is a simplified handler for type checking
-    // The real implementation will use Vercel's handler
-    return new Response("Not implemented", { status: 501 });
+  return async (_request: Request) => {
+    /*
+     * This is a simplified handler for type checking
+     * The real implementation will use Vercel's handler
+     */
+    return new Response('Not implemented', { status: 501 });
   };
 }

@@ -29,7 +29,7 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 async function pingTelemetryAction({ request }: ActionFunctionArgs) {
-  const { event, data } = await request.json() as {
+  const { event, data } = (await request.json()) as {
     event: string;
     data: any;
   };

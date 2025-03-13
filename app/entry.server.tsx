@@ -4,7 +4,7 @@ import { sentryHandleError } from '~/lib/sentry';
  * Using our conditional Sentry implementation instead of direct import
  * This avoids loading Sentry in development environments
  */
-import type { AppLoadContext, EntryContext } from '~/lib/remix-types';
+import type { AppLoadContext } from '~/lib/remix-types';
 import { RemixServer } from '@remix-run/react';
 import { isbot } from 'isbot';
 import { renderToString } from 'react-dom/server';
@@ -26,9 +26,21 @@ export default async function handleRequest(
   const isBot = isbot(userAgent || '');
 
   // Create the HTML string
-  const markup = renderToString(
-    <RemixServer context={remixContext} url={request.url} />
-  );
+  const markup = renderToString(<RemixServer context={remixContext} url={request.url} />);
+
+  // If this is a bot request, we can wait for all data to be ready
+  if (isBot) {
+    /*
+     * In Cloudflare, we had:
+     * await readable.allReady;
+     *
+     * For Vercel, we could do additional processing for bots
+     * such as waiting for all data fetching to complete.
+     * Future enhancement: add mechanism to ensure all data is loaded
+     * before rendering for bots (important for SEO)
+     */
+    console.log(`Bot detected: ${userAgent}`);
+  }
 
   // @ts-ignore - Fix for incompatible EntryContext types between different remix versions
   const head = renderHeadToString({ request, remixContext, Head });
