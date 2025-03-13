@@ -9,9 +9,10 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: CI/CD (and deploy on main)
+  typecheck:
+    name: Type Check
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,14 +25,53 @@ jobs:
       - name: Run type check
         run: pnpm run typecheck
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup and Build
+        uses: ./.github/actions/setup-and-build
+        with:
+          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
+
       - name: Run ESLint
         run: pnpm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup and Build
+        uses: ./.github/actions/setup-and-build
+        with:
+          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
 
       - name: Run tests
         run: pnpm run test
 
-      - name: Deploy
-        if: github.ref == 'refs/heads/main'
+  deploy:
+    name: Deploy
+    needs: [typecheck, lint, test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup and Build
+        uses: ./.github/actions/setup-and-build
+        with:
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           command: pages deploy

@@ -75,6 +75,8 @@ export function Feedback() {
     }
   };
 
+  console.log(shouldUseSupabase() ? 'supabase true' : 'supabase false');
+
   return (
     <>
       <button

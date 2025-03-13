@@ -1,19 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { isSupabaseEnabled } from './setup/test-utils';
 
-test.beforeEach(async () => {
-  // Log Supabase status at the start of each test
-  const useSupabase = isSupabaseEnabled();
-  console.log(`Test running with USE_SUPABASE=${useSupabase}`);
-});
-
 test('should submit feedback', async ({ page }) => {
-  // Navigate to the homepage
-  // The URL will automatically use the baseURL from the config
   await page.goto('/');
 
   // Get Supabase status from environment variable
-  const useSupabase = isSupabaseEnabled();
+  const useSupabase = await isSupabaseEnabled(page);
 
   // Click on the Feedback button
   await page.getByRole('button', { name: 'Feedback' }).click();
@@ -22,28 +14,22 @@ test('should submit feedback', async ({ page }) => {
   await expect(page.getByText('Share Your Feedback')).toBeVisible();
 
   // Prepare feedback message
-  const feedbackMessage = useSupabase 
-    ? '[test] This is a test feedback message with Supabase' 
+  const feedbackMessage = useSupabase
+    ? '[test] This is a test feedback message with Supabase'
     : 'This is a test feedback message';
-  
+
   await page.locator('textarea[name="description"]').fill(feedbackMessage);
 
   // If email field is required (when not using Supabase), fill it
   const emailField = page.locator('input[type="email"][name="email"]');
 
-  if (await emailField.isVisible()) {
-    // We expect email field to be visible when NOT using Supabase
-    expect(useSupabase).toBe(false);
-    await emailField.fill('test@example.com');
+  if (useSupabase) {
+    await expect(emailField).toBeHidden();
   } else {
-    // We expect email field to NOT be visible when using Supabase
-    expect(useSupabase).toBe(true);
+    await emailField.fill('test@example.com');
   }
 
-  // Check the share project checkbox if Supabase is enabled
-  if (useSupabase) {
-    await page.locator('input[type="checkbox"][name="share"]').check();
-  }
+  await page.locator('input[type="checkbox"][name="share"]').check();
 
   // Submit the feedback
   await page.getByRole('button', { name: 'Submit Feedback' }).click();
