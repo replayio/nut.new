@@ -64,6 +64,7 @@ export const Preview = memo(() => {
       simulationReloaded();
       iframeRef.current.src = iframeRef.current.src;
     }
+
     setIsSelectionMode(false);
     setSelectionPoint(null);
   };
@@ -198,7 +199,10 @@ export const Preview = memo(() => {
         <IconButton
           icon="i-ph:bug-beetle"
           title="Point to Bug"
-          onClick={() => { setSelectionPoint(null); setIsSelectionMode(!isSelectionMode); }}
+          onClick={() => {
+            setSelectionPoint(null);
+            setIsSelectionMode(!isSelectionMode);
+          }}
           className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
         />
         <div

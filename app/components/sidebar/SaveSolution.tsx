@@ -1,86 +1,139 @@
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useState } from "react";
-import { workbenchStore } from "~/lib/stores/workbench";
-import { BoltProblemStatus, updateProblem } from "~/lib/replay/Problems";
-import type { BoltProblemInput } from "~/lib/replay/Problems";
-import { getLastLoadedProblem } from "../chat/LoadProblemButton";
-import { getLastUserSimulationData, getLastSimulationChatMessages } from "~/lib/replay/SimulationPrompt";
+import { useState } from 'react';
+import { BoltProblemStatus, updateProblem } from '~/lib/replay/Problems';
+import type { BoltProblem, BoltProblemInput } from '~/lib/replay/Problems';
+import { getOrFetchLastLoadedProblem } from '~/components/chat/LoadProblemButton';
+import {
+  getLastUserSimulationData,
+  getLastSimulationChatMessages,
+  getSimulationRecordingId,
+  isSimulatingOrHasFinished,
+} from '~/lib/replay/SimulationPrompt';
 
 ReactModal.setAppElement('#root');
 
-// Component for saving input simulation and prompt information for
-// the problem the current chat was loaded from.
+/*
+ * Component for saving input simulation and prompt information for
+ * the problem the current chat was loaded from.
+ */
 
 export function SaveSolution() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    evaluator: ''
+    evaluator: '',
   });
   const [savedSolution, setSavedSolution] = useState<boolean>(false);
+  const [problem, setProblem] = useState<BoltProblem | null>(null);
 
-  const handleSaveSolution = () => {
-    setIsModalOpen(true);
-    setFormData({
-      evaluator: '',
-    });
+  const handleSaveSolution = async () => {
+    const loadId = toast.loading('Loading problem...');
+
+    try {
+      const savedProblem = await getOrFetchLastLoadedProblem();
+
+      if (!savedProblem) {
+        toast.error('No problem loaded');
+        return;
+      }
+
+      setProblem(savedProblem);
+      setFormData({
+        evaluator: savedProblem.solution?.evaluator || '',
+      });
+    } finally {
+      toast.dismiss(loadId);
+    }
     setSavedSolution(false);
+    setIsModalOpen(true);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmitSolution = async () => {
-    const savedProblem = getLastLoadedProblem();
-    if (!savedProblem) {
+    if (!problem) {
       toast.error('No problem loaded');
       return;
     }
 
-    const simulationData = getLastUserSimulationData();
-    if (!simulationData) {
-      toast.error('No simulation data found');
+    if (!isSimulatingOrHasFinished()) {
+      toast.error('No simulation found (neither in progress nor finished)');
       return;
     }
 
-    const messages = getLastSimulationChatMessages();
-    if (!messages) {
-      toast.error('No user prompt found');
-      return;
+    try {
+      const loadId = toast.loading('Waiting for recording...');
+
+      try {
+        /*
+         * Wait for simulation to finish.
+         * const recordingId =
+         */
+        await getSimulationRecordingId();
+      } finally {
+        toast.dismiss(loadId);
+      }
+
+      toast.info('Submitting solution...');
+
+      console.log('SubmitSolution', formData);
+
+      const simulationData = getLastUserSimulationData();
+
+      if (!simulationData) {
+        toast.error('No simulation data found');
+        return;
+      }
+
+      const messages = getLastSimulationChatMessages();
+
+      if (!messages) {
+        toast.error('No user prompt found');
+        return;
+      }
+
+      /*
+       * The evaluator is only present when the problem has been solved.
+       * We still create a "solution" object even if it hasn't been
+       * solved quite yet, which is used for working on the problem.
+       *
+       * TODO: Split `solution` into `reproData` and `evaluator`.
+       */
+      const evaluator = formData.evaluator.length ? formData.evaluator : undefined;
+
+      const problemUpdatePacket: BoltProblemInput = {
+        version: 2,
+        title: problem.title,
+        description: problem.description,
+        username: problem.username,
+        repositoryContents: problem.repositoryContents,
+        status: evaluator ? BoltProblemStatus.Solved : BoltProblemStatus.Unsolved,
+        solution: {
+          simulationData,
+          messages,
+          evaluator,
+
+          /*
+           * TODO: Also store recordingId for easier debugging.
+           * recordingId,
+           */
+        },
+      };
+
+      await updateProblem(problem.problemId, problemUpdatePacket);
+
+      setSavedSolution(true);
+    } catch (error: any) {
+      console.error('Error saving solution', error?.stack || error);
+      toast.error(`Error saving solution: ${error?.message}`);
     }
-
-    toast.info("Submitting solution...");
-
-    console.log("SubmitSolution", formData);
-
-    // The evaluator is only present when the problem has been solved.
-    // We still create a "solution" object even if it hasn't been
-    // solved quite yet, which is used for working on the problem.
-    const evaluator = formData.evaluator.length ? formData.evaluator : undefined;
-
-    const problem: BoltProblemInput = {
-      version: 2,
-      title: savedProblem.title,
-      description: savedProblem.description,
-      username: savedProblem.username,
-      repositoryContents: savedProblem.repositoryContents,
-      status: evaluator ? BoltProblemStatus.Solved : BoltProblemStatus.Unsolved,
-      solution: {
-        simulationData,
-        messages,
-        evaluator,
-      },
-    };
-
-    await updateProblem(savedProblem.problemId, problem);
-
-    setSavedSolution(true);
-  }
+  };
 
   return (
     <>
@@ -102,7 +155,12 @@ export function SaveSolution() {
             <div className="text-center mb-2">Solution Saved</div>
             <div className="text-center">
               <div className="flex justify-center gap-2 mt-4">
-                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </>
@@ -111,11 +169,14 @@ export function SaveSolution() {
           <>
             <div className="text-center">Save solution for loaded problem from last prompt and recording.</div>
             <div className="text-center">Evaluator describes a condition the explanation must satisfy.</div>
-            <div className="text-center">Leave the evaluator blank if the API explanation is not right and the problem isn't solved yet.</div>
-            <div style={{ marginTop: "10px" }}>
+            <div className="text-center">
+              Leave the evaluator blank if the API explanation is not right and the problem isn't solved yet.
+            </div>
+            <div style={{ marginTop: '10px' }}>
               <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
                 <div className="flex items-center">Evaluator:</div>
-                <input type="text"
+                <input
+                  type="text"
                   name="evaluator"
                   className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
                   value={formData.evaluator}
@@ -123,8 +184,18 @@ export function SaveSolution() {
                 />
               </div>
               <div className="flex justify-center gap-2 mt-4">
-                <button onClick={handleSubmitSolution} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
-                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                <button
+                  onClick={handleSubmitSolution}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </>

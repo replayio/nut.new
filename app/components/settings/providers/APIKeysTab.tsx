@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
-import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
+import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, maxFreeUses } from '~/utils/freeUses';
 import { saveNutLoginKey, saveProblemsUsername, getNutLoginKey, getProblemsUsername } from '~/lib/replay/Problems';
 
 export default function ConnectionsTab() {
@@ -31,7 +31,7 @@ export default function ConnectionsTab() {
     try {
       await saveNutLoginKey(key);
       toast.success('Login key saved');
-    } catch (error) {
+    } catch {
       toast.error('Failed to save login key');
     }
   };
@@ -49,10 +49,10 @@ export default function ConnectionsTab() {
           />
         </div>
       </div>
-      {numFreeUses < MaxFreeUses && (
+      {numFreeUses < maxFreeUses && (
         <div className="flex mb-4">
           <div className="flex-1 mr-2">
-            {MaxFreeUses - numFreeUses} / {MaxFreeUses} free uses remaining
+            {maxFreeUses - numFreeUses} / {maxFreeUses} free uses remaining
           </div>
         </div>
       )}

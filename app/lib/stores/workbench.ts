@@ -291,7 +291,7 @@ export class WorkbenchStore {
     return artifacts[id];
   }
 
-  private async generateZip(injectRecordingMessageHandler = false) {
+  private async _generateZip(injectRecordingMessageHandler = false) {
     const zip = new JSZip();
     const files = this.files.get();
 
@@ -330,18 +330,20 @@ export class WorkbenchStore {
 
     // Generate the zip file and save it
     const content = await zip.generateAsync({ type: 'blob' });
+
     return { content, uniqueProjectName };
   }
 
   async downloadZip() {
-    const { content, uniqueProjectName } = await this.generateZip();
+    const { content, uniqueProjectName } = await this._generateZip();
     saveAs(content, `${uniqueProjectName}.zip`);
   }
 
   async generateZipBase64(injectRecordingMessageHandler = false) {
-    const { content, uniqueProjectName } = await this.generateZip(injectRecordingMessageHandler);
+    const { content, uniqueProjectName } = await this._generateZip(injectRecordingMessageHandler);
     const buf = await content.arrayBuffer();
     const contentBase64 = uint8ArrayToBase64(new Uint8Array(buf));
+
     return { contentBase64, uniqueProjectName };
   }
 
@@ -353,6 +355,7 @@ export class WorkbenchStore {
     // Check if any files we know about have different contents in the artifacts.
     const files = this.files.get();
     const fileRelativePaths = new Set<string>();
+
     for (const [filePath, dirent] of Object.entries(files)) {
       if (dirent) {
         fileRelativePaths.add(filePath);
@@ -378,10 +381,10 @@ export class WorkbenchStore {
     const actionArtifactId = `restore-contents-artifact-id-${messageId}`;
 
     for (const filePath of modifiedFilePaths) {
-      console.log("RestoreModifiedFile", filePath);
+      console.log('RestoreModifiedFile', filePath);
 
       const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
-      const artifactContent = artifact?.content ?? "";
+      const artifactContent = artifact?.content ?? '';
 
       const actionId = `restore-contents-action-${messageId}-${filePath}-${Math.random().toString()}`;
       const data: ActionCallbackData = {
@@ -390,7 +393,7 @@ export class WorkbenchStore {
         artifactId: actionArtifactId,
         action: {
           type: 'file',
-          filePath: filePath,
+          filePath,
           content: artifactContent,
         },
       };

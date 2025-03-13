@@ -60,6 +60,7 @@ function sendIframeRequest<K extends keyof RequestMap>(
 
 export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
+
   if (!buffer) {
     return [];
   }
@@ -80,12 +81,13 @@ export interface MouseData {
 
 export async function getMouseData(iframe: HTMLIFrameElement, position: { x: number; y: number }): Promise<MouseData> {
   const mouseData = await sendIframeRequest(iframe, { request: 'mouse-data', payload: position });
-  assert(mouseData, "Expected to have mouse data");
+  assert(mouseData, 'Expected to have mouse data');
+
   return mouseData;
 }
 
 // Add handlers to the current iframe's window.
-function addRecordingMessageHandler(messageHandlerId: string) {
+function addRecordingMessageHandler(_messageHandlerId: string) {
   const simulationData: SimulationData = [];
   let numSimulationPacketsSent = 0;
 
@@ -101,11 +103,11 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     size: { width: window.innerWidth, height: window.innerHeight },
   });
   pushSimulationData({
-    kind: "locationHref",
+    kind: 'locationHref',
     href: window.location.href,
   });
   pushSimulationData({
-    kind: "documentURL",
+    kind: 'documentURL',
     url: window.location.href,
   });
 
@@ -120,13 +122,13 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   function addNetworkResource(resource: NetworkResource) {
     pushSimulationData({
-      kind: "resource",
+      kind: 'resource',
       resource,
     });
   }
 
   function addTextResource(info: RequestInfo, text: string, responseHeaders: Record<string, string>) {
-    const url = (new URL(info.url, window.location.href)).href;
+    const url = new URL(info.url, window.location.href).href;
     addNetworkResource({
       url,
       requestBodyBase64: stringToBase64(info.requestBody),
@@ -138,21 +140,21 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
   function addInteraction(interaction: UserInteraction) {
     pushSimulationData({
-      kind: "interaction",
+      kind: 'interaction',
       interaction,
     });
   }
 
   function addIndexedDBAccess(access: IndexedDBAccess) {
     pushSimulationData({
-      kind: "indexedDB",
+      kind: 'indexedDB',
       access,
     });
   }
 
   function addLocalStorageAccess(access: LocalStorageAccess) {
     pushSimulationData({
-      kind: "localStorage",
+      kind: 'localStorage',
       access,
     });
   }
@@ -161,6 +163,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     //console.log("GetSimulationData", simulationData.length, numSimulationPacketsSent);
     const data = simulationData.slice(numSimulationPacketsSent);
     numSimulationPacketsSent = simulationData.length;
+
     return data;
   }
 
@@ -195,6 +198,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
         };
       }
     }
+    throw new Error(`Unknown request type: ${request}`);
   }
 
   window.addEventListener('message', async (event) => {
@@ -259,9 +263,11 @@ function addRecordingMessageHandler(messageHandlerId: string) {
 
       // Add nth-child if there are siblings
       const parent = current.parentElement;
+
       if (parent) {
         const siblings = Array.from(parent.children);
         const index = siblings.indexOf(current) + 1;
+
         if (siblings.filter((el) => el.tagName === current!.tagName).length > 1) {
           selector += `:nth-child(${index})`;
         }
@@ -337,7 +343,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     { capture: true, passive: true },
   );
 
-  function onInterceptedOperation(name: string) {
+  function onInterceptedOperation(_name: string) {
     //console.log(`InterceptedOperation ${name}`);
   }
 
@@ -350,31 +356,33 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       ...descriptor,
       get() {
         onInterceptedOperation(`Getter:${prop}`);
+
         if (!interceptValue) {
           const baseValue = (descriptor?.get as any).call(obj);
           interceptValue = interceptor(baseValue);
         }
+
         return interceptValue;
       },
     });
   }
 
-  const IDBFactoryMethods = {
+  const idbFactoryMethods = {
     _name: 'IDBFactory',
     open: (v: any) => createFunctionProxy(v, 'open'),
   };
 
-  const IDBOpenDBRequestMethods = {
+  const idbOpenDBRequestMethods = {
     _name: 'IDBOpenDBRequest',
     result: createProxy,
   };
 
-  const IDBDatabaseMethods = {
+  const idbDatabaseMethods = {
     _name: 'IDBDatabase',
     transaction: (v: any) => createFunctionProxy(v, 'transaction'),
   };
 
-  const IDBTransactionMethods = {
+  const idbTransactionMethods = {
     _name: 'IDBTransaction',
     objectStore: (v: any) => createFunctionProxy(v, 'objectStore'),
   };
@@ -393,7 +401,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   // Map "get" requests to their keys.
   const getRequestKeys: Map<IDBRequest, any> = new Map();
 
-  const IDBObjectStoreMethods = {
+  const idbObjectStoreMethods = {
     _name: 'IDBObjectStore',
     get: (v: any) =>
       createFunctionProxy(v, 'get', (request, key) => {
@@ -413,13 +421,15 @@ function addRecordingMessageHandler(messageHandlerId: string) {
       }),
   };
 
-  const IDBRequestMethods = {
+  const idbRequestMethods = {
     _name: 'IDBRequest',
     result: (value: any, target: any) => {
       const key = getRequestKeys.get(target);
+
       if (key) {
         pushIndexedDBAccess(target, 'get', key, value);
       }
+
       return value;
     },
   };
@@ -428,7 +438,7 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     addLocalStorageAccess({ kind, key, value });
   }
 
-  const StorageMethods = {
+  const storageMethods = {
     _name: 'Storage',
     getItem: (v: any) =>
       createFunctionProxy(v, 'getItem', (value: string, key: string) => {
@@ -449,69 +459,82 @@ function addRecordingMessageHandler(messageHandlerId: string) {
     headers.forEach((value, key) => {
       result[key] = value;
     });
+
     return result;
   }
 
-  const ResponseMethods = {
+  const responseMethods = {
     _name: 'Response',
     json: (v: any, response: Response) =>
       createFunctionProxy(v, 'json', async (promise: Promise<any>) => {
         const json = await promise;
         const requestInfo = responseToRequestInfo.get(response);
+
         if (requestInfo) {
           addTextResource(requestInfo, JSON.stringify(json), convertHeaders(response.headers));
         }
+
         return json;
       }),
     text: (v: any, response: Response) =>
       createFunctionProxy(v, 'text', async (promise: Promise<any>) => {
         const text = await promise;
         const requestInfo = responseToRequestInfo.get(response);
+
         if (requestInfo) {
           addTextResource(requestInfo, text, convertHeaders(response.headers));
         }
+
         return text;
       }),
   };
 
   function createProxy(obj: any) {
     let methods;
+
     if (obj instanceof IDBFactory) {
-      methods = IDBFactoryMethods;
+      methods = idbFactoryMethods;
     } else if (obj instanceof IDBOpenDBRequest) {
-      methods = IDBOpenDBRequestMethods;
+      methods = idbOpenDBRequestMethods;
     } else if (obj instanceof IDBDatabase) {
-      methods = IDBDatabaseMethods;
+      methods = idbDatabaseMethods;
     } else if (obj instanceof IDBTransaction) {
-      methods = IDBTransactionMethods;
+      methods = idbTransactionMethods;
     } else if (obj instanceof IDBObjectStore) {
-      methods = IDBObjectStoreMethods;
+      methods = idbObjectStoreMethods;
     } else if (obj instanceof IDBRequest) {
-      methods = IDBRequestMethods;
+      methods = idbRequestMethods;
     } else if (obj instanceof Storage) {
-      methods = StorageMethods;
+      methods = storageMethods;
     } else if (obj instanceof Response) {
-      methods = ResponseMethods;
+      methods = responseMethods;
     }
+
     assert(methods, 'Unknown object for createProxy');
+
     const name = methods._name;
 
     return new Proxy(obj, {
       get(target, prop) {
         onInterceptedOperation(`ProxyGetter:${name}.${String(prop)}`);
+
         let value = target[prop];
+
         if (typeof value === 'function') {
           value = value.bind(target);
         }
+
         if (methods[prop]) {
           value = methods[prop](value, target);
         }
+
         return value;
       },
 
       set(target, prop, value) {
         onInterceptedOperation(`ProxySetter:${name}.${String(prop)}`);
         target[prop] = value;
+
         return true;
       },
     });
@@ -520,7 +543,9 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   function createFunctionProxy(fn: any, name: string, handler?: (v: any, ...args: any[]) => any) {
     return (...args: any[]) => {
       onInterceptedOperation(`FunctionCall:${name}`);
+
       const v = fn(...args);
+
       return handler ? handler(v, ...args) : createProxy(v);
     };
   }
@@ -529,13 +554,16 @@ function addRecordingMessageHandler(messageHandlerId: string) {
   interceptProperty(window, 'localStorage', createProxy);
 
   const baseFetch = window.fetch;
+
   window.fetch = async (info, options) => {
     const url = info instanceof Request ? info.url : info.toString();
     const requestBody = typeof options?.body == 'string' ? options.body : '';
     const requestInfo: RequestInfo = { url, requestBody };
+
     try {
       const rv = await baseFetch(info, options);
       responseToRequestInfo.set(rv, requestInfo);
+
       return createProxy(rv);
     } catch (error) {
       addNetworkResource({

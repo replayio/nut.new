@@ -208,6 +208,8 @@ export async function createChatFromMessages(
   const newId = await getNextId(db);
   const newUrlId = await getUrlId(db, newId); // Get a new urlId for the duplicated chat
 
+  // TODO: Call setLastLoadedProblem(null).
+
   await setMessages(
     db,
     newId,

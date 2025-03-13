@@ -33,9 +33,9 @@ function AboutPage() {
             >
               Bolt.new
             </a>{' '}
-            for helping you develop full stack apps using AI. AI developers frequently struggle with fixing
-            even simple bugs when they don't know the cause, and get stuck making ineffective changes
-            over and over. We want to crack these tough nuts, so to speak, so you can get back to building.
+            for helping you develop full stack apps using AI. AI developers frequently struggle with fixing even simple
+            bugs when they don't know the cause, and get stuck making ineffective changes over and over. We want to
+            crack these tough nuts, so to speak, so you can get back to building.
           </p>
 
           <p className="mb-6">
@@ -49,16 +49,15 @@ function AboutPage() {
               Replay.io
             </a>{' '}
             recording of your app and whatever you did to produce the bug. The recording captures all the runtime
-            behavior of your app, which is analyzed to explain the bug's root cause.
-            This explanation is given to the AI developer so it has context to write a good fix.
+            behavior of your app, which is analyzed to explain the bug's root cause. This explanation is given to the AI
+            developer so it has context to write a good fix.
           </p>
 
           <p className="mb-6">
-            Nut.new is already pretty good at fixing problems, and we're working to make it better.
-            We want it to reliably fix anything you're seeing, as long as it has a clear explanation
-            and the problem isn't too complicated (AIs aren't magic).  If it's doing poorly, let us know!
-            Use the UI to leave us some private feedback or save your project to our public set of problems
-            where AIs struggle.
+            Nut.new is already pretty good at fixing problems, and we're working to make it better. We want it to
+            reliably fix anything you're seeing, as long as it has a clear explanation and the problem isn't too
+            complicated (AIs aren't magic). If it's doing poorly, let us know! Use the UI to leave us some private
+            feedback or save your project to our public set of problems where AIs struggle.
           </p>
 
           <p>
@@ -71,15 +70,12 @@ function AboutPage() {
             >
               Replay.io
             </a>{' '}
-            team.
-            We're offering unlimited free access to Nut.new for early adopters who can give us feedback
-            we'll use to improve Nut. Reach us at{' '}
-            <a
-              href="mailto:hi@replay.io"
-              className="text-bolt-elements-accent underline hover:no-underline"
-            >
+            team. We're offering unlimited free access to Nut.new for early adopters who can give us feedback we'll use
+            to improve Nut. Reach us at{' '}
+            <a href="mailto:hi@replay.io" className="text-bolt-elements-accent underline hover:no-underline">
               hi@replay.io
-            </a>{' '} or fill out our{' '}
+            </a>{' '}
+            or fill out our{' '}
             <a
               href="https://replay.io/contact"
               className="text-bolt-elements-accent underline hover:no-underline"

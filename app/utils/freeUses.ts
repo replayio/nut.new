@@ -1,3 +1,3 @@
 export const anthropicApiKeyCookieName = 'anthropicApiKey';
 export const anthropicNumFreeUsesCookieName = 'anthropicNumFreeUses';
-export const MaxFreeUses = 5;
+export const maxFreeUses = 5;

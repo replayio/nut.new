@@ -28,6 +28,7 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
     );
 
     record = { status: 'pending', promise };
+
     return promise;
   };
 
@@ -44,6 +45,8 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
           return record.value;
         case 'rejected':
           throw record.error;
+        default:
+          throw new Error(`Unknown status: ${(record as any).status}`);
       }
     },
 
@@ -59,13 +62,19 @@ export function createAsyncSuspenseValue<T>(getValue: () => Promise<T>) {
           return record.value;
         case 'rejected':
           throw record.error;
+        default:
+          throw new Error(`Unknown status: ${(record as any).status}`);
       }
     },
     preload() {
       if (record) {
         return;
       }
-      load().catch(() => {});
+
+      load().catch((error) => {
+        // Errors are already handled by the load method, just swallow them here
+        console.error('Preload error:', error);
+      });
     },
   };
 

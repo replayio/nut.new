@@ -236,8 +236,10 @@ export class StreamingMessageParser {
 
               this._options.callbacks?.onArtifactOpen?.({ messageId, ...currentArtifact });
 
-              //const artifactFactory = this._options.artifactElement ?? createArtifactElement;
-              //output += artifactFactory({ messageId });
+              /*
+               * const artifactFactory = this._options.artifactElement ?? createArtifactElement;
+               * output += artifactFactory({ messageId });
+               */
 
               i = openTagEnd + 1;
             } else {
@@ -307,6 +309,7 @@ export class StreamingMessageParser {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createArtifactElement: ElementFactory = (props) => {
   const elementProps = [
     'class="__boltArtifact__"',

@@ -1,8 +1,6 @@
 import { memo } from 'react';
 import { Markdown } from './Markdown';
 import type { JSONValue } from 'ai';
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages.mjs';
-import { toast } from 'react-toastify';
 
 interface AssistantMessageProps {
   content: string;
@@ -29,9 +27,7 @@ export const AssistantMessage = memo(({ content, annotations }: AssistantMessage
   return (
     <div className="overflow-hidden w-full">
       {usage && (
-        <div 
-          className="text-sm text-bolt-elements-textSecondary mb-2"
-        >
+        <div className="text-sm text-bolt-elements-textSecondary mb-2">
           Tokens: {usage.totalTokens} (prompt: {usage.promptTokens}, completion: {usage.completionTokens})
         </div>
       )}

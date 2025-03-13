@@ -3,9 +3,9 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import { useStore } from '@nanostores/react';
-import type { CreateMessage, Message } from 'ai';
+import type { Message } from 'ai';
 import { useAnimate } from 'framer-motion';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useMessageParser, useSnapScroll } from '~/lib/hooks';
 import { description, useChatHistory } from '~/lib/persistence';
@@ -13,33 +13,34 @@ import { chatStore } from '~/lib/stores/chat';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { PROMPT_COOKIE_KEY } from '~/utils/constants';
 import { cubicEasingFn } from '~/utils/easings';
-import { createScopedLogger, renderLogger } from '~/utils/logger';
+import { renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
 import Cookies from 'js-cookie';
 import { debounce } from '~/utils/debounce';
-import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { saveProjectContents } from './Messages.client';
-import { getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData, simulationRepositoryUpdated, shouldUseSimulation, sendDeveloperChatMessage, type ProtocolMessage } from '~/lib/replay/SimulationPrompt';
+import {
+  getSimulationRecording,
+  getSimulationEnhancedPrompt,
+  simulationAddData,
+  simulationRepositoryUpdated,
+  shouldUseSimulation,
+  sendDeveloperChatMessage,
+} from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
-import { getCurrentIFrame } from '../workbench/Preview';
-import { getCurrentMouseData } from '../workbench/PointSelector';
-import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, MaxFreeUses } from '~/utils/freeUses';
-import type { FileMap } from '~/lib/stores/files';
-import { shouldIncludeFile } from '~/utils/fileUtils';
+import { getCurrentIFrame } from '~/components/workbench/Preview';
+import { getCurrentMouseData } from '~/components/workbench/PointSelector';
+import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, maxFreeUses } from '~/utils/freeUses';
 import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
-import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
-
-const logger = createScopedLogger('Chat');
-
 let gLastProjectContents: string | undefined;
 
 export function getLastProjectContents() {
@@ -56,10 +57,13 @@ async function flushSimulationData() {
   //console.log("FlushSimulationData");
 
   const iframe = getCurrentIFrame();
+
   if (!iframe) {
     return;
   }
+
   const simulationData = await getIFrameSimulationData(iframe);
+
   if (!simulationData.length) {
     return;
   }
@@ -156,12 +160,15 @@ let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
-// When files are modified during a chat message we wait until the message finishes
-// before updating the simulation.
+/*
+ * When files are modified during a chat message we wait until the message finishes
+ * before updating the simulation.
+ */
 let gUpdateSimulationAfterChatMessage = false;
 
 async function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
+
   if (gUpdateSimulationAfterChatMessage) {
     await simulationRepositoryUpdated();
     gUpdateSimulationAfterChatMessage = false;
@@ -199,8 +206,10 @@ export const ChatImpl = memo(
     // Input currently in the textarea.
     const [input, setInput] = useState('');
 
-    // This is set when the user has triggered a chat message and the response hasn't finished
-    // being generated.
+    /*
+     * This is set when the user has triggered a chat message and the response hasn't finished
+     * being generated.
+     */
     const [activeChatId, setActiveChatId] = useState<string | undefined>(undefined);
     const isLoading = activeChatId !== undefined;
 
@@ -245,7 +254,7 @@ export const ChatImpl = memo(
       setActiveChatId(undefined);
 
       if (gActiveChatMessageTelemetry) {
-        gActiveChatMessageTelemetry.abort("StopButtonClicked");
+        gActiveChatMessageTelemetry.abort('StopButtonClicked');
         clearActiveChat();
       }
     };
@@ -280,16 +289,17 @@ export const ChatImpl = memo(
 
     const createRecording = async (chatId: string) => {
       let recordingId, message;
+
       try {
         recordingId = await getSimulationRecording();
         message = `[Recording of the bug](https://app.replay.io/recording/${recordingId})\n\n`;
       } catch (e) {
-        console.error("Error creating recording", e);
-        message = "Error creating recording.";
+        console.error('Error creating recording', e);
+        message = 'Error creating recording.';
       }
 
       const recordingMessage: Message = {
-        id: buildMessageId("create-recording", chatId),
+        id: buildMessageId('create-recording', chatId),
         role: 'assistant',
         content: message,
       };
@@ -298,14 +308,17 @@ export const ChatImpl = memo(
     };
 
     const getEnhancedPrompt = async (chatId: string, userMessage: string) => {
-      let enhancedPrompt, message, hadError = false;
+      let enhancedPrompt,
+        message,
+        hadError = false;
+
       try {
         const mouseData = getCurrentMouseData();
         enhancedPrompt = await getSimulationEnhancedPrompt(messages, userMessage, mouseData);
         message = `Explanation of the bug:\n\n${enhancedPrompt}`;
       } catch (e) {
-        console.error("Error enhancing prompt", e);
-        message = "Error enhancing prompt.";
+        console.error('Error enhancing prompt', e);
+        message = 'Error enhancing prompt.';
         hadError = true;
       }
 
@@ -316,7 +329,7 @@ export const ChatImpl = memo(
       };
 
       return { enhancedPrompt, enhancedPromptMessage, hadError };
-    }
+    };
 
     const sendMessage = async (messageInput?: string) => {
       const _input = messageInput || input;
@@ -335,10 +348,14 @@ export const ChatImpl = memo(
 
       if (!loginKey && !anthropicApiKey) {
         const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
-        if (numFreeUses >= MaxFreeUses) {
-          toast.error('All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.');
-          gActiveChatMessageTelemetry.abort("NoFreeUses");
+
+        if (numFreeUses >= maxFreeUses) {
+          toast.error(
+            'All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.',
+          );
+          gActiveChatMessageTelemetry.abort('NoFreeUses');
           clearActiveChat();
+
           return;
         }
 
@@ -349,7 +366,7 @@ export const ChatImpl = memo(
       setActiveChatId(chatId);
 
       const userMessage: Message = {
-        id: buildMessageId("user", chatId),
+        id: buildMessageId('user', chatId),
         role: 'user',
         content: [
           {
@@ -380,23 +397,26 @@ export const ChatImpl = memo(
       await workbenchStore.saveAllFiles();
 
       let simulation = false;
+
       try {
-        simulation = chatStarted && await shouldUseSimulation(_input);
+        simulation = chatStarted && (await shouldUseSimulation(_input));
       } catch (e) {
-        console.error("Error checking simulation", e);
+        console.error('Error checking simulation', e);
       }
 
       if (numAbortsAtStart != gNumAborts) {
         return;
       }
 
-      console.log("UseSimulation", simulation);
+      console.log('UseSimulation', simulation);
 
-      let simulationStatus = "NoSimulation";
+      let simulationStatus = 'NoSimulation';
+
       if (simulation) {
         gActiveChatMessageTelemetry.startSimulation();
 
         gLockSimulationData = true;
+
         try {
           await flushSimulationData();
 
@@ -409,7 +429,7 @@ export const ChatImpl = memo(
             return;
           }
 
-          console.log("RecordingMessage", recordingMessage);
+          console.log('RecordingMessage', recordingMessage);
           newMessages = [...newMessages, recordingMessage];
           setMessages(newMessages);
 
@@ -420,13 +440,13 @@ export const ChatImpl = memo(
               return;
             }
 
-            console.log("EnhancedPromptMessage", info.enhancedPromptMessage);
+            console.log('EnhancedPromptMessage', info.enhancedPromptMessage);
             newMessages = [...newMessages, info.enhancedPromptMessage];
             setMessages(newMessages);
 
-            simulationStatus = info.hadError ? "PromptError" : "Success";
+            simulationStatus = info.hadError ? 'PromptError' : 'Success';
           } else {
-            simulationStatus = "RecordingError";
+            simulationStatus = 'RecordingError';
           }
 
           gActiveChatMessageTelemetry.endSimulation(simulationStatus);
@@ -443,8 +463,8 @@ export const ChatImpl = memo(
 
       gActiveChatMessageTelemetry.sendPrompt(simulationStatus);
 
-      const responseMessageId = buildMessageId("response", chatId);
-      let responseMessageContent = "";
+      const responseMessageId = buildMessageId('response', chatId);
+      let responseMessageContent = '';
       let hasResponseMessage = false;
 
       const addResponseContent = (content: string) => {
@@ -455,9 +475,11 @@ export const ChatImpl = memo(
         }
 
         newMessages = [...newMessages];
+
         if (hasResponseMessage) {
           newMessages.pop();
         }
+
         newMessages.push({
           id: responseMessageId,
           role: 'assistant',
@@ -465,13 +487,13 @@ export const ChatImpl = memo(
         });
         setMessages(newMessages);
         hasResponseMessage = true;
-      }
+      };
 
       try {
         await sendDeveloperChatMessage(newMessages, files, addResponseContent);
       } catch (e) {
-        console.error("Error sending message", e);
-        addResponseContent("Error sending message.");
+        console.error('Error sending message', e);
+        addResponseContent('Error sending message.');
       }
 
       if (gNumAborts != numAbortsAtStart) {
@@ -504,13 +526,15 @@ export const ChatImpl = memo(
     };
 
     const onRewind = async (messageId: string, contents: string) => {
-      console.log("Rewinding", messageId, contents);
+      console.log('Rewinding', messageId, contents);
 
       await workbenchStore.restoreProjectContentsBase64(messageId, contents);
 
       const messageIndex = messages.findIndex((message) => message.id === messageId);
+
       if (messageIndex >= 0) {
         const newParsedMessages = { ...parsedMessages };
+
         for (let i = messageIndex + 1; i < messages.length; i++) {
           delete newParsedMessages[i];
         }
@@ -518,7 +542,7 @@ export const ChatImpl = memo(
         setMessages(messages.slice(0, messageIndex + 1));
       }
 
-      await pingTelemetry("RewindChat", {
+      await pingTelemetry('RewindChat', {
         numMessages: messages.length,
         rewindIndex: messageIndex,
         loginKey: getNutLoginKey(),
@@ -548,29 +572,35 @@ export const ChatImpl = memo(
     };
 
     const onApproveChange = async (messageId: string) => {
-      console.log("ApproveChange", messageId);
+      console.log('ApproveChange', messageId);
 
       setApproveChangesMessageId(undefined);
 
       await flashScreen();
 
-      await pingTelemetry("ApproveChange", {
+      await pingTelemetry('ApproveChange', {
         numMessages: messages.length,
         loginKey: getNutLoginKey(),
       });
     };
 
-    const onRejectChange = async (messageId: string, rewindMessageId: string, projectContents: string, data: RejectChangeData) => {
-      console.log("RejectChange", messageId, data);
+    const onRejectChange = async (
+      messageId: string,
+      rewindMessageId: string,
+      projectContents: string,
+      data: RejectChangeData,
+    ) => {
+      console.log('RejectChange', messageId, data);
 
       setApproveChangesMessageId(undefined);
 
       const message = messages.find((message) => message.id === messageId);
-      const messageContents = message?.content ?? "";
+      const messageContents = message?.content ?? '';
 
       await onRewind(rewindMessageId, projectContents);
 
       let shareProjectSuccess = false;
+
       if (data.shareProject) {
         const feedbackData: any = {
           explanation: data.explanation,
@@ -587,7 +617,7 @@ export const ChatImpl = memo(
         sendMessage(messageContents);
       }
 
-      await pingTelemetry("RejectChange", {
+      await pingTelemetry('RejectChange', {
         retry: data.retry,
         shareProject: data.shareProject,
         shareProjectSuccess,

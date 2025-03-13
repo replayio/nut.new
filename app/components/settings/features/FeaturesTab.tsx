@@ -11,7 +11,11 @@ export default function FeaturesTab() {
     enableEventLogs,
     isLatestBranch,
     enableLatestBranch,
+
+    // Unused variables but needed from useSettings
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     promptId,
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     setPromptId,
     autoSelectTemplate,
     setAutoSelectTemplate,

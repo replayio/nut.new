@@ -1,8 +1,8 @@
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useState } from "react";
-import { submitFeedback } from "~/lib/replay/Problems";
-import { getLastProjectContents, getLastChatMessages } from "../chat/Chat.client";
+import { useState } from 'react';
+import { submitFeedback } from '~/lib/replay/Problems';
+import { getLastProjectContents, getLastChatMessages } from '~/components/chat/Chat.client';
 
 ReactModal.setAppElement('#root');
 
@@ -13,7 +13,7 @@ export function Feedback() {
   const [formData, setFormData] = useState({
     feedback: '',
     email: '',
-    share: false
+    share: false,
   });
   const [submitted, setSubmitted] = useState<boolean>(false);
 
@@ -22,7 +22,7 @@ export function Feedback() {
     setFormData({
       feedback: '',
       email: '',
-      share: false
+      share: false,
     });
     setSubmitted(false);
   };
@@ -39,14 +39,14 @@ export function Feedback() {
       return;
     }
 
-    toast.info("Submitting feedback...");
+    toast.info('Submitting feedback...');
 
-    console.log("SubmitFeedback", formData);
+    console.log('SubmitFeedback', formData);
 
     const feedbackData: any = {
       feedback: formData.feedback,
       email: formData.email,
-      share: formData.share
+      share: formData.share,
     };
 
     if (feedbackData.share) {
@@ -56,10 +56,11 @@ export function Feedback() {
     }
 
     const success = await submitFeedback(feedbackData);
+
     if (success) {
       setSubmitted(true);
     }
-  }
+  };
 
   return (
     <>
@@ -81,7 +82,12 @@ export function Feedback() {
             <div className="text-center mb-2">Feedback Submitted</div>
             <div className="text-center">
               <div className="flex justify-center gap-2 mt-4">
-                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </>
@@ -94,36 +100,51 @@ export function Feedback() {
               name="feedback"
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
               value={formData.feedback}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                feedback: e.target.value
-              }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  feedback: e.target.value,
+                }))
+              }
             />
             <div className="flex items-center">Email:</div>
-            <input type="text"
+            <input
+              type="text"
               name="email"
               className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                email: e.target.value
-              }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
             />
             <div className="flex items-center gap-2">
               <span>Share project with the Nut team:</span>
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 name="share"
                 className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded border border-gray-300"
                 checked={formData.share}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  share: e.target.checked
-                }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    share: e.target.checked,
+                  }))
+                }
               />
             </div>
             <div className="flex justify-center gap-2 mt-4">
-              <button onClick={handleSubmitFeedback} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+              <button
+                onClick={handleSubmitFeedback}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Submit
+              </button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                Cancel
+              </button>
             </div>
           </>
         )}

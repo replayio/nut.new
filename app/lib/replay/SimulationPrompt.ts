@@ -1,36 +1,38 @@
-// Core logic for using simulation data from a remote recording to enhance
-// the AI developer prompt.
+/*
+ * Core logic for using simulation data from a remote recording to enhance
+ * the AI developer prompt.
+ */
 
 import type { Message } from 'ai';
 import type { SimulationData, SimulationPacket } from './SimulationData';
-import { SimulationDataVersion } from './SimulationData';
+import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import type { MouseData } from './Recording';
-import type { FileMap } from '../stores/files';
+import type { FileMap } from '~/lib/stores/files';
 import { shouldIncludeFile } from '~/utils/fileUtils';
-import { DeveloperSystemPrompt } from '../common/prompts/prompts';
+import { developerSystemPrompt } from '../common/prompts/prompts';
 import { updateDevelopmentServer } from './DevelopmentServer';
 import { workbenchStore } from '../stores/workbench';
 import { isEnhancedPromptMessage } from '~/components/chat/Chat.client';
 
 function createRepositoryContentsPacket(contents: string): SimulationPacket {
   return {
-    kind: "repositoryContents",
+    kind: 'repositoryContents',
     contents,
     time: new Date().toISOString(),
   };
 }
 
-type ProtocolMessageRole = "user" | "assistant" | "system";
+type ProtocolMessageRole = 'user' | 'assistant' | 'system';
 
 type ProtocolMessageText = {
-  type: "text";
+  type: 'text';
   role: ProtocolMessageRole;
   content: string;
 };
 
 type ProtocolMessageImage = {
-  type: "image";
+  type: 'image';
   role: ProtocolMessageRole;
   dataURL: string;
 };
@@ -73,16 +75,20 @@ class ChatManager {
   constructor() {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
-      assert(this.client, "Chat has been destroyed");
+      assert(this.client, 'Chat has been destroyed');
 
       await this.client.initialize();
 
-      const { chatId } = (await this.client.sendCommand({ method: "Nut.startChat", params: {} })) as { chatId: string };
+      const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
 
-      console.log("ChatStarted", new Date().toISOString(), chatId);
+      console.log('ChatStarted', new Date().toISOString(), chatId);
 
       return chatId;
     })();
+  }
+
+  isValid() {
+    return !!this.client;
   }
 
   destroy() {
@@ -91,17 +97,17 @@ class ChatManager {
   }
 
   async setRepositoryContents(contents: string) {
-    assert(this.client, "Chat has been destroyed");
+    assert(this.client, 'Chat has been destroyed');
     this.repositoryContents = contents;
 
     const packet = createRepositoryContentsPacket(contents);
 
     const chatId = await this.chatIdPromise;
     await this.client.sendCommand({
-      method: "Nut.addSimulation",
+      method: 'Nut.addSimulation',
       params: {
         chatId,
-        version: SimulationDataVersion,
+        version: simulationDataVersion,
         simulationData: [packet],
         completeData: false,
         saveRecording: true,
@@ -110,61 +116,68 @@ class ChatManager {
   }
 
   async addPageData(data: SimulationData) {
-    assert(this.client, "Chat has been destroyed");
-    assert(this.repositoryContents, "Expected repository contents");
+    assert(this.client, 'Chat has been destroyed');
+    assert(this.repositoryContents, 'Expected repository contents');
 
     this.pageData.push(...data);
 
-    // If page data comes in while we are waiting for the chat to finish
-    // we remember it but don't update the existing chat.
+    /*
+     * If page data comes in while we are waiting for the chat to finish
+     * we remember it but don't update the existing chat.
+     */
     if (this.simulationFinished) {
       return;
     }
 
     const chatId = await this.chatIdPromise;
     await this.client.sendCommand({
-      method: "Nut.addSimulationData",
+      method: 'Nut.addSimulationData',
       params: { chatId, simulationData: data },
     });
   }
 
   finishSimulationData(): SimulationData {
-    assert(this.client, "Chat has been destroyed");
-    assert(!this.simulationFinished, "Simulation has been finished");
-    assert(this.repositoryContents, "Expected repository contents");
+    assert(this.client, 'Chat has been destroyed');
+    assert(!this.simulationFinished, 'Simulation has been finished');
+    assert(this.repositoryContents, 'Expected repository contents');
 
     this.recordingIdPromise = (async () => {
-      assert(this.client, "Chat has been destroyed");
-  
-      const chatId = await this.chatIdPromise;
-      const { recordingId } = await this.client.sendCommand({
-        method: "Nut.finishSimulationData",
-        params: { chatId },
-      }) as { recordingId: string | undefined };
+      assert(this.client, 'Chat has been destroyed');
 
-      assert(recordingId, "Recording ID not set");
+      const chatId = await this.chatIdPromise;
+      const { recordingId } = (await this.client.sendCommand({
+        method: 'Nut.finishSimulationData',
+        params: { chatId },
+      })) as { recordingId: string | undefined };
+
+      assert(recordingId, 'Recording ID not set');
+
       return recordingId;
-    })();  
+    })();
 
     const allData = [createRepositoryContentsPacket(this.repositoryContents), ...this.pageData];
     this.simulationFinished = true;
+
     return allData;
   }
 
   async sendChatMessage(messages: ProtocolMessage[], options?: ChatMessageOptions) {
-    assert(this.client, "Chat has been destroyed");
+    assert(this.client, 'Chat has been destroyed');
 
     const responseId = `response-${generateRandomId()}`;
 
-    let response: string = "";
-    const removeResponseListener = this.client.listenForMessage("Nut.chatResponsePart", ({ responseId: eventResponseId, message }: { responseId: string, message: ProtocolMessage }) => {
-      if (responseId == eventResponseId) {
-        if (message.type == "text") {
-          response += message.content;
-          options?.onResponsePart?.(message.content);
+    let response: string = '';
+    const removeResponseListener = this.client.listenForMessage(
+      'Nut.chatResponsePart',
+      ({ responseId: eventResponseId, message }: { responseId: string; message: ProtocolMessage }) => {
+        if (responseId == eventResponseId) {
+          if (message.type == 'text') {
+            response += message.content;
+            options?.onResponsePart?.(message.content);
+          }
         }
-      }
-    });
+      },
+    );
 
     const modifiedFiles: ProtocolFile[] = [];
     const removeFileListener = this.client.listenForMessage("Nut.chatModifiedFile", ({ responseId: eventResponseId, file }: { responseId: string, file: ProtocolFile }) => {
@@ -176,10 +189,15 @@ class ChatManager {
 
     const chatId = await this.chatIdPromise;
 
-    console.log("ChatSendMessage", new Date().toISOString(), chatId, JSON.stringify({ messages, developerFiles: options?.developerFiles }));
+    console.log(
+      'ChatSendMessage',
+      new Date().toISOString(),
+      chatId,
+      JSON.stringify({ messages, developerFiles: options?.developerFiles }),
+    );
 
     await this.client.sendCommand({
-      method: "Nut.sendChatMessage",
+      method: 'Nut.sendChatMessage',
       params: { chatId, responseId, messages, chatOnly: options?.chatOnly, developerFiles: options?.developerFiles },
     });
 
@@ -212,9 +230,11 @@ function startChat(repositoryContents: string, pageData: SimulationData) {
   if (gChatManager) {
     gChatManager.destroy();
   }
+
   gChatManager = new ChatManager();
 
   gChatManager.setRepositoryContents(repositoryContents);
+
   if (pageData.length) {
     gChatManager.addPageData(pageData);
   }
@@ -231,19 +251,21 @@ export async function simulationRepositoryUpdated() {
   updateDevelopmentServer(injectedContents);
 }
 
-// Called when the page gathering interaction data has been reloaded. We'll
-// start a new chat with the same repository contents as any existing chat.
+/*
+ * Called when the page gathering interaction data has been reloaded. We'll
+ * start a new chat with the same repository contents as any existing chat.
+ */
 export async function simulationReloaded() {
-  assert(gChatManager, "Expected to have an active chat");
+  assert(gChatManager, 'Expected to have an active chat');
 
   const repositoryContents = gChatManager.repositoryContents;
-  assert(repositoryContents, "Expected active chat to have repository contents");
+  assert(repositoryContents, 'Expected active chat to have repository contents');
 
   startChat(repositoryContents, []);
 }
 
 export async function simulationAddData(data: SimulationData) {
-  assert(gChatManager, "Expected to have an active chat");
+  assert(gChatManager, 'Expected to have an active chat');
   gChatManager.addPageData(data);
 }
 
@@ -254,17 +276,31 @@ export function getLastUserSimulationData(): SimulationData | undefined {
 }
 
 export async function getSimulationRecording(): Promise<string> {
-  assert(gChatManager, "Expected to have an active chat");
+  assert(gChatManager, 'Expected to have an active chat');
 
   const simulationData = gChatManager.finishSimulationData();
 
-  // The repository contents are part of the problem and excluded from the simulation data
-  // reported for solutions.
-  gLastUserSimulationData = simulationData.filter(packet => packet.kind != "repositoryContents");
+  /*
+   * The repository contents are part of the problem and excluded from the simulation data
+   * reported for solutions.
+   */
+  gLastUserSimulationData = simulationData.filter((packet) => packet.kind != 'repositoryContents');
 
-  console.log("SimulationData", new Date().toISOString(), JSON.stringify(simulationData));
+  console.log('SimulationData', new Date().toISOString(), JSON.stringify(simulationData));
 
-  assert(gChatManager.recordingIdPromise, "Expected recording promise");
+  assert(gChatManager.recordingIdPromise, 'Expected recording promise');
+
+  return gChatManager.recordingIdPromise;
+}
+
+export function isSimulatingOrHasFinished(): boolean {
+  return gChatManager?.isValid() ?? false;
+}
+
+export async function getSimulationRecordingId(): Promise<string> {
+  assert(gChatManager, 'Chat not started');
+  assert(gChatManager.recordingIdPromise, 'Expected recording promise');
+
   return gChatManager.recordingIdPromise;
 }
 
@@ -274,7 +310,7 @@ export function getLastSimulationChatMessages(): ProtocolMessage[] | undefined {
   return gLastSimulationChatMessages;
 }
 
-const SimulationSystemPrompt = `
+const simulationSystemPrompt = `
 The following user message describes a bug or other problem on the page which needs to be fixed.
 You must respond with a useful explanation that will help the user understand the source of the problem.
 Do not describe the specific fix needed.
@@ -283,25 +319,26 @@ Do not describe the specific fix needed.
 export async function getSimulationEnhancedPrompt(
   chatMessages: Message[],
   userMessage: string,
-  mouseData: MouseData | undefined
+  mouseData: MouseData | undefined,
 ): Promise<string> {
-  assert(gChatManager, "Chat not started");
-  assert(gChatManager.simulationFinished, "Simulation not finished");
+  assert(gChatManager, 'Chat not started');
+  assert(gChatManager.simulationFinished, 'Simulation not finished');
 
-  let system = SimulationSystemPrompt;
+  let system = simulationSystemPrompt;
+
   if (mouseData) {
     system += `The user pointed to an element on the page <element selector=${JSON.stringify(mouseData.selector)} height=${mouseData.height} width=${mouseData.width} x=${mouseData.x} y=${mouseData.y} />`;
   }
 
   const messages: ProtocolMessage[] = [
     {
-      role: "system",
-      type: "text",
+      role: 'system',
+      type: 'text',
       content: system,
     },
     {
-      role: "user",
-      type: "text",
+      role: 'user',
+      type: 'text',
       content: userMessage,
     },
   ];
@@ -334,95 +371,104 @@ Here is the user message you need to evaluate: <user_message>${messageInput}</us
 
   const messages: ProtocolMessage[] = [
     {
-      role: "system",
-      type: "text",
+      role: 'system',
+      type: 'text',
       content: systemPrompt,
     },
     {
-      role: "user",
-      type: "text",
+      role: 'user',
+      type: 'text',
       content: userMessage,
     },
   ];
 
   const response = await gChatManager.sendChatMessage(messages, { chatOnly: true });
 
-  console.log("UseSimulationResponse", response);
+  console.log('UseSimulationResponse', response);
 
   const match = /<analyze>(.*?)<\/analyze>/.exec(response);
+
   if (match) {
-    return match[1] === "true";
+    return match[1] === 'true';
   }
+
   return false;
 }
 
 function getProtocolRole(message: Message): "user" | "assistant" | "system" {
   switch (message.role) {
-    case "user":
-      return "user";
-    case "assistant":
-    case "data":
-      return "assistant";
-    case "system":
-      return "system";
+    case 'user':
+      return 'user';
+    case 'assistant':
+    case 'data':
+      return 'assistant';
+    case 'system':
+      return 'system';
+    default:
+      throw new Error(`Unknown message role: ${message.role}`);
   }
 }
 
 function removeBoltArtifacts(text: string): string {
-  const OpenTag = "<boltArtifact";
-  const CloseTag = "</boltArtifact>";
+  const openTag = '<boltArtifact';
+  const closeTag = '</boltArtifact>';
 
   while (true) {
-    const openTag = text.indexOf(OpenTag);
-    if (openTag === -1) {
+    const openTagIndex = text.indexOf(openTag);
+
+    if (openTagIndex === -1) {
       break;
     }
 
-    const prefix = text.substring(0, openTag);
+    const prefix = text.substring(0, openTagIndex);
 
-    const closeTag = text.indexOf(CloseTag, openTag + OpenTag.length);
-    if (closeTag === -1) {
+    const closeTagIndex = text.indexOf(closeTag, openTagIndex + openTag.length);
+
+    if (closeTagIndex === -1) {
       text = prefix;
     } else {
-      text = prefix + text.substring(closeTag + CloseTag.length);
+      text = prefix + text.substring(closeTagIndex + closeTag.length);
     }
   }
+
   return text;
 }
 
 function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
   const rv: ProtocolMessage[] = [];
+
   for (const msg of messages) {
     const role = getProtocolRole(msg);
     if (Array.isArray(msg.content)) {
       for (const content of msg.content) {
         switch (content.type) {
-          case "text":
+          case 'text':
             rv.push({
               role,
-              type: "text",
+              type: 'text',
               content: removeBoltArtifacts(content.text),
             });
             break;
-          case "image":
+          case 'image':
             rv.push({
               role,
-              type: "image",
+              type: 'image',
               dataURL: content.image,
             });
             break;
           default:
-            console.error("Unknown message content", content);
+            console.error('Unknown message content', content);
         }
       }
-    } else if (typeof msg.content == "string") {
+    } else if (typeof msg.content == 'string') {
       rv.push({
         role,
-        type: "text",
+        type: 'text',
         content: msg.content,
       });
     }
   }
+
   return rv;
 }
 
@@ -446,6 +492,7 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
   }
 
   const developerFiles: ProtocolFile[] = [];
+
   for (const [path, file] of Object.entries(files)) {
     if (file && shouldIncludeFile(path)) {
       developerFiles.push({
@@ -455,15 +502,15 @@ export async function sendDeveloperChatMessage(messages: Message[], files: FileM
     }
   }
 
-  let systemPrompt = DeveloperSystemPrompt;
+  let systemPrompt = developerSystemPrompt;
 
   if (messagesHaveEnhancedPrompt(messages)) {
     // Add directions to the LLM when we have an enhanced prompt describing the bug to fix.
-    const SystemEnhancedPrompt = `
+    const systemEnhancedPrompt = `
 ULTRA IMPORTANT: You have been given a detailed description of a bug you need to fix.
 Focus specifically on fixing this bug. Do not guess about other problems.
     `;
-    systemPrompt += SystemEnhancedPrompt;
+    systemPrompt += systemEnhancedPrompt;
   }
 
   const protocolMessages = buildProtocolMessages(messages);

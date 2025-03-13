@@ -11,3 +11,10 @@ interface Performance {
     usedJSHeapSize: number;
   };
 }
+
+// Add browser property to Process interface
+declare namespace NodeJS {
+  interface Process {
+    browser?: boolean;
+  }
+}

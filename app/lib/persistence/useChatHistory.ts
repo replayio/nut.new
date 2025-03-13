@@ -15,7 +15,7 @@ import {
   createChatFromMessages,
 } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
-import { createAsyncSuspenseValue } from '../asyncSuspenseValue';
+import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 
 export interface ChatHistoryItem {
   id: string;

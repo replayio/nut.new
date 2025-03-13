@@ -39,6 +39,7 @@ export const createChatFromFolder = async (
 
   let filesContent = `I've imported the contents of the "${folderName}" folder.${binaryFilesMessage}`;
   filesContent += `<boltArtifact id="imported-files" title="Imported Files">`;
+
   for (const file of fileArtifacts) {
     if (shouldIncludeFile(file.path)) {
       filesContent += `<boltAction type="file" filePath="${file.path}">${file.content}</boltAction>\n\n`;

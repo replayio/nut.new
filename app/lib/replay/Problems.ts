@@ -1,11 +1,20 @@
 // Accessors for the API to access saved problems.
 
-import { toast } from "react-toastify";
-import { sendCommandDedicatedClient } from "./ReplayProtocolClient";
-import type { ProtocolMessage } from "./SimulationPrompt";
+import { toast } from 'react-toastify';
+import { sendCommandDedicatedClient } from './ReplayProtocolClient';
+import type { ProtocolMessage } from './SimulationPrompt';
 import Cookies from 'js-cookie';
 import JSZip from 'jszip';
-import type { FileArtifact } from "~/utils/folderImport";
+import type { FileArtifact } from '~/utils/folderImport';
+import { shouldUseSupabase } from '~/lib/supabase/client';
+import {
+  supabaseListAllProblems,
+  supabaseGetProblem,
+  supabaseSubmitProblem,
+  supabaseUpdateProblem,
+  supabaseSubmitFeedback,
+  supabaseDeleteProblem,
+} from '~/lib/supabase/problems';
 
 export interface BoltProblemComment {
   username?: string;
@@ -21,13 +30,13 @@ export interface BoltProblemSolution {
 
 export enum BoltProblemStatus {
   // Problem has been submitted but not yet reviewed.
-  Pending = "Pending",
+  Pending = 'Pending',
 
   // Problem has been reviewed and has not been solved yet.
-  Unsolved = "Unsolved",
+  Unsolved = 'Unsolved',
 
   // Nut automatically produces a suitable explanation for solving the problem.
-  Solved = "Solved",
+  Solved = 'Solved',
 }
 
 // Information about each problem stored in the index file.
@@ -48,86 +57,138 @@ export interface BoltProblem extends BoltProblemDescription {
   solution?: BoltProblemSolution;
 }
 
-export type BoltProblemInput = Omit<BoltProblem, "problemId" | "timestamp">;
+export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
+  if (shouldUseSupabase()) {
+    return supabaseListAllProblems();
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
+      method: 'Recording.globalExperimentalCommand',
       params: {
-        name: "listBoltProblems",
+        name: 'listBoltProblems',
       },
     });
-    console.log("ListProblemsRval", rv);
+    console.log('ListProblemsRval', rv);
+
     return (rv as any).rval.problems.reverse();
   } catch (error) {
-    console.error("Error fetching problems", error);
-    toast.error("Failed to fetch problems");
+    console.error('Error fetching problems', error);
+    toast.error('Failed to fetch problems');
+
     return [];
   }
 }
 
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
+  if (shouldUseSupabase()) {
+    return supabaseGetProblem(problemId);
+  }
+
   try {
+    if (!problemId) {
+      toast.error('Invalid problem ID');
+      return null;
+    }
+
     const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
+      method: 'Recording.globalExperimentalCommand',
       params: {
-        name: "fetchBoltProblem",
+        name: 'fetchBoltProblem',
         params: { problemId },
       },
     });
-    console.log("FetchProblemRval", rv);
+
     const problem = (rv as { rval: { problem: BoltProblem } }).rval.problem;
-    if ("prompt" in problem) {
+
+    if (!problem) {
+      toast.error('Problem not found');
+      return null;
+    }
+
+    if ('prompt' in problem) {
       // 2/11/2025: Update obsolete data format for older problems.
       problem.repositoryContents = (problem as any).prompt.content;
       delete problem.prompt;
     }
+
     return problem;
   } catch (error) {
-    console.error("Error fetching problem", error);
-    toast.error("Failed to fetch problem");
+    console.error('Error fetching problem', error);
+
+    // Check for specific protocol error
+    if (error instanceof Error && error.message.includes('Unknown problem ID')) {
+      toast.error('Problem not found');
+    } else {
+      toast.error('Failed to fetch problem');
+    }
   }
+
   return null;
 }
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
+  if (shouldUseSupabase()) {
+    return supabaseSubmitProblem(problem);
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
+      method: 'Recording.globalExperimentalCommand',
       params: {
-        name: "submitBoltProblem",
+        name: 'submitBoltProblem',
         params: { problem },
       },
     });
-    console.log("SubmitProblemRval", rv);
+    console.log('SubmitProblemRval', rv);
+
     return (rv as any).rval.problemId;
   } catch (error) {
-    console.error("Error submitting problem", error);
-    toast.error("Failed to submit problem");
+    console.error('Error submitting problem', error);
+    toast.error('Failed to submit problem');
+
     return null;
   }
 }
 
-export async function updateProblem(problemId: string, problem: BoltProblemInput | undefined) {
+export async function deleteProblem(problemId: string): Promise<void | undefined> {
+  if (shouldUseSupabase()) {
+    return supabaseDeleteProblem(problemId);
+  }
+
+  return undefined;
+}
+
+export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<void | undefined> {
+  if (shouldUseSupabase()) {
+    return supabaseUpdateProblem(problemId, problem);
+  }
+
   try {
     if (!getNutIsAdmin()) {
-      toast.error("Admin user required");
-      return;
+      toast.error('Admin user required');
+
+      return undefined;
     }
 
     const loginKey = Cookies.get(nutLoginKeyCookieName);
     await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
+      method: 'Recording.globalExperimentalCommand',
       params: {
-        name: "updateBoltProblem",
+        name: 'updateBoltProblem',
         params: { problemId, problem, loginKey },
       },
     });
+
+    return undefined;
   } catch (error) {
-    console.error("Error updating problem", error);
-    toast.error("Failed to update problem");
+    console.error('Error updating problem', error);
+    toast.error('Failed to update problem');
   }
+
+  return undefined;
 }
 
 const nutLoginKeyCookieName = 'nutLoginKey';
@@ -150,14 +211,16 @@ interface UserInfo {
 }
 
 export async function saveNutLoginKey(key: string) {
-  const { rval: { userInfo } } = await sendCommandDedicatedClient({
-    method: "Recording.globalExperimentalCommand",
+  const {
+    rval: { userInfo },
+  } = (await sendCommandDedicatedClient({
+    method: 'Recording.globalExperimentalCommand',
     params: {
-      name: "getUserInfo",
+      name: 'getUserInfo',
       params: { loginKey: key },
     },
-  }) as { rval: { userInfo: UserInfo } };
-  console.log("UserInfo", userInfo);
+  })) as { rval: { userInfo: UserInfo } };
+  console.log('UserInfo', userInfo);
 
   Cookies.set(nutLoginKeyCookieName, key);
   Cookies.set(nutIsAdminCookieName, userInfo.admin ? 'true' : 'false');
@@ -183,30 +246,41 @@ export async function extractFileArtifactsFromRepositoryContents(repositoryConte
   await zip.loadAsync(repositoryContents, { base64: true });
 
   const fileArtifacts: FileArtifact[] = [];
+
   for (const [key, object] of Object.entries(zip.files)) {
-    if (object.dir) continue;
+    if (object.dir) {
+      continue;
+    }
+
     fileArtifacts.push({
       content: await object.async('text'),
       path: key,
     });
   }
+
   return fileArtifacts;
 }
 
 export async function submitFeedback(feedback: any) {
+  if (shouldUseSupabase()) {
+    return supabaseSubmitFeedback(feedback);
+  }
+
   try {
     const rv = await sendCommandDedicatedClient({
-      method: "Recording.globalExperimentalCommand",
+      method: 'Recording.globalExperimentalCommand',
       params: {
-        name: "submitFeedback",
+        name: 'submitFeedback',
         params: { feedback },
       },
     });
-    console.log("SubmitFeedbackRval", rv);
+    console.log('SubmitFeedbackRval', rv);
+
     return true;
   } catch (error) {
-    console.error("Error submitting feedback", error);
-    toast.error("Failed to submit feedback");
+    console.error('Error submitting feedback', error);
+    toast.error('Failed to submit feedback');
+
     return false;
   }
 }
