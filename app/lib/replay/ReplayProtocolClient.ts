@@ -89,7 +89,7 @@ export class ProtocolClient {
   openDeferred = createDeferred<void>();
   eventListeners = new Map<string, Set<EventListener>>();
   nextMessageId = 1;
-  pendingCommands = new Map<number, { method: string, deferred: Deferred<any> }>();
+  pendingCommands = new Map<number, { method: string; deferred: Deferred<any> }>();
   socket: WebSocket;
 
   constructor() {
@@ -148,6 +148,7 @@ export class ProtocolClient {
 
     const deferred = createDeferred();
     this.pendingCommands.set(id, { method, deferred });
+
     return deferred.promise;
   }
 
@@ -171,10 +172,10 @@ export class ProtocolClient {
       if (result) {
         info.deferred.resolve(result);
       } else if (error) {
-        console.error("ProtocolError", info.method, id, error);
+        console.error('ProtocolError', info.method, id, error);
         info.deferred.reject(new ProtocolError(error));
       } else {
-        info.deferred.reject(new Error("Channel error"));
+        info.deferred.reject(new Error('Channel error'));
       }
     } else if (this.eventListeners.has(method)) {
       const callbacks = this.eventListeners.get(method);

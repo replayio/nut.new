@@ -52,6 +52,7 @@ export const Preview = memo(() => {
       setUrl('');
       setIframeUrl(undefined);
       setSelectionPoint(null);
+
       return;
     }
 
@@ -220,6 +221,7 @@ export const Preview = memo(() => {
             }}
             onKeyDown={(event) => {
               let newUrl;
+
               if (event.key === 'Enter') {
                 setIframeUrl(newUrl);
 

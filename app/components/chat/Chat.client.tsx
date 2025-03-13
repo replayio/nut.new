@@ -187,7 +187,7 @@ function buildMessageId(prefix: string, chatId: string) {
   return `${prefix}-${chatId}`;
 }
 
-const EnhancedPromptPrefix = "enhanced-prompt";
+const EnhancedPromptPrefix = 'enhanced-prompt';
 
 export function isEnhancedPromptMessage(message: Message): boolean {
   return message.id.startsWith(EnhancedPromptPrefix);

@@ -21,6 +21,7 @@ export function computeFileModifications(files: FileMap, modifiedFiles: Map<stri
 
   for (const [filePath, originalContent] of modifiedFiles) {
     const file = files[filePath];
+
     if (!file) {
       continue;
     }

@@ -180,12 +180,15 @@ class ChatManager {
     );
 
     const modifiedFiles: ProtocolFile[] = [];
-    const removeFileListener = this.client.listenForMessage("Nut.chatModifiedFile", ({ responseId: eventResponseId, file }: { responseId: string, file: ProtocolFile }) => {
-      if (responseId == eventResponseId) {
-        console.log("ChatModifiedFile", file);
-        modifiedFiles.push(file);
-      }
-    });
+    const removeFileListener = this.client.listenForMessage(
+      'Nut.chatModifiedFile',
+      ({ responseId: eventResponseId, file }: { responseId: string; file: ProtocolFile }) => {
+        if (responseId == eventResponseId) {
+          console.log('ChatModifiedFile', file);
+          modifiedFiles.push(file);
+        }
+      },
+    );
 
     const chatId = await this.chatIdPromise;
 
@@ -201,8 +204,10 @@ class ChatManager {
       params: { chatId, responseId, messages, chatOnly: options?.chatOnly, developerFiles: options?.developerFiles },
     });
 
-    // The modified files are added at the end as inserting them in the middle of the
-    // response can cause weird rendering behavior.
+    /*
+     * The modified files are added at the end as inserting them in the middle of the
+     * response can cause weird rendering behavior.
+     */
     for (const file of modifiedFiles) {
       const content = `
       <boltArtifact id="modified-file-${generateRandomId()}" title="File Changes">
@@ -214,7 +219,7 @@ class ChatManager {
       options?.onResponsePart?.(content);
     }
 
-    console.log("ChatResponse", chatId, response);
+    console.log('ChatResponse', chatId, response);
 
     removeResponseListener();
     removeFileListener();
@@ -240,14 +245,18 @@ function startChat(repositoryContents: string, pageData: SimulationData) {
   }
 }
 
-// Called when the repository contents have changed. We'll start a new chat
-// with the same interaction data as any existing chat. The remote development
-// server will also be updated.
+/*
+ * Called when the repository contents have changed. We'll start a new chat
+ * with the same interaction data as any existing chat. The remote development
+ * server will also be updated.
+ */
 export async function simulationRepositoryUpdated() {
   const { contentBase64: repositoryContents } = await workbenchStore.generateZipBase64();
   startChat(repositoryContents, gChatManager?.pageData ?? []);
 
-  const { contentBase64: injectedContents } = await workbenchStore.generateZipBase64(/* injectRecordingMessageHandler */ true);
+  const { contentBase64: injectedContents } = await workbenchStore.generateZipBase64(
+    /* injectRecordingMessageHandler */ true,
+  );
   updateDevelopmentServer(injectedContents);
 }
 
@@ -395,7 +404,7 @@ Here is the user message you need to evaluate: <user_message>${messageInput}</us
   return false;
 }
 
-function getProtocolRole(message: Message): "user" | "assistant" | "system" {
+function getProtocolRole(message: Message): 'user' | 'assistant' | 'system' {
   switch (message.role) {
     case 'user':
       return 'user';
@@ -439,6 +448,7 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
 
   for (const msg of messages) {
     const role = getProtocolRole(msg);
+
     if (Array.isArray(msg.content)) {
       for (const content of msg.content) {
         switch (content.type) {
@@ -473,12 +483,14 @@ function buildProtocolMessages(messages: Message[]): ProtocolMessage[] {
 }
 
 function messagesHaveEnhancedPrompt(messages: Message[]): boolean {
-  const lastEnhancedPromptMessage = messages.findLastIndex(msg => isEnhancedPromptMessage(msg));
+  const lastEnhancedPromptMessage = messages.findLastIndex((msg) => isEnhancedPromptMessage(msg));
+
   if (lastEnhancedPromptMessage == -1) {
     return false;
   }
 
-  const lastUserMessage = messages.findLastIndex(msg => msg.role == "user");
+  const lastUserMessage = messages.findLastIndex((msg) => msg.role == 'user');
+
   if (lastUserMessage == -1) {
     return false;
   }
@@ -486,7 +498,11 @@ function messagesHaveEnhancedPrompt(messages: Message[]): boolean {
   return lastUserMessage < lastEnhancedPromptMessage;
 }
 
-export async function sendDeveloperChatMessage(messages: Message[], files: FileMap, onResponsePart: ChatResponsePartCallback) {
+export async function sendDeveloperChatMessage(
+  messages: Message[],
+  files: FileMap,
+  onResponsePart: ChatResponsePartCallback,
+) {
   if (!gChatManager) {
     gChatManager = new ChatManager();
   }
@@ -515,8 +531,8 @@ Focus specifically on fixing this bug. Do not guess about other problems.
 
   const protocolMessages = buildProtocolMessages(messages);
   protocolMessages.unshift({
-    role: "system",
-    type: "text",
+    role: 'system',
+    type: 'text',
     content: systemPrompt,
   });
 

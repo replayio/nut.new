@@ -306,7 +306,7 @@ export class WorkbenchStore {
       if (dirent) {
         let content = dirent.content;
 
-        if (injectRecordingMessageHandler && filePath == "index.html") {
+        if (injectRecordingMessageHandler && filePath == 'index.html') {
           content = doInjectRecordingMessageHandler(content);
         }
 
@@ -363,7 +363,7 @@ export class WorkbenchStore {
         const content = dirent.content;
 
         const artifact = fileArtifacts.find((artifact) => artifact.path === filePath);
-        const artifactContent = artifact?.content ?? "";
+        const artifactContent = artifact?.content ?? '';
 
         if (content != artifactContent) {
           modifiedFilePaths.add(filePath);

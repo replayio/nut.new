@@ -59,7 +59,7 @@ export function useGit() {
         await git.clone({
           fs,
           http,
-          dir: "/",
+          dir: '/',
           url,
           depth: 1,
           singleBranch: true,
@@ -91,7 +91,7 @@ export function useGit() {
           },
         });
 
-        return { workdir: "/", data: fileData.current };
+        return { workdir: '/', data: fileData.current };
       } catch (error) {
         console.error('Git clone error:', error);
         throw error;
@@ -104,12 +104,13 @@ export function useGit() {
 }
 
 function createFileFromEncoding(path: string, data: any, encoding: string | undefined): ProtocolFile {
-  if (typeof data == "string") {
+  if (typeof data == 'string') {
     return { path, content: data };
   }
 
-  console.error("CreateFileFromEncodingFailed", { data, encoding });
-  return { path, content: "CreateFileFromEncodingFailed" };
+  console.error('CreateFileFromEncodingFailed', { data, encoding });
+
+  return { path, content: 'CreateFileFromEncodingFailed' };
 }
 
 const getFs = (files: FileMap) => ({
@@ -129,33 +130,31 @@ const getFs = (files: FileMap) => ({
       const encoding = options.encoding;
       files[path] = createFileFromEncoding(path, data, encoding);
     },
-    mkdir: async (path: string, options: any) => {
-    },
+    mkdir: async (path: string, options: any) => {},
     readdir: async (path: string, options: any) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     rm: async (path: string, options: any) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     rmdir: async (path: string, options: any) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     unlink: async (path: string) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     stat: async (path: string) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     lstat: async (path: string) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     readlink: async (path: string) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
     symlink: async (target: string, path: string) => {
-      throw new Error("NYI");
+      throw new Error('NYI');
     },
-    chmod: async (_path: string, _mode: number) => {
-    },
+    chmod: async (_path: string, _mode: number) => {},
   },
 });

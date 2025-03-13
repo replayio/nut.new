@@ -330,14 +330,11 @@ interface FolderNode extends BaseNode {
   kind: 'folder';
 }
 
-function buildFileList(
-  files: FileMap,
-  hiddenFiles: Array<string | RegExp>,
-): Node[] {
+function buildFileList(files: FileMap, hiddenFiles: Array<string | RegExp>): Node[] {
   const folderPaths = new Set<string>();
   const fileList: Node[] = [];
 
-  let defaultDepth = 0;
+  const defaultDepth = 0;
 
   for (const [filePath, dirent] of Object.entries(files)) {
     const segments = filePath.split('/').filter((segment) => segment);
@@ -354,7 +351,7 @@ function buildFileList(
 
     while (i < segments.length) {
       const name = segments[i];
-      fullPath += (fullPath.length ? "/" : "") + name;
+      fullPath += (fullPath.length ? '/' : '') + name;
 
       if (i === segments.length - 1) {
         fileList.push({
@@ -398,7 +395,7 @@ function getParentPath(path: string): string {
   const lastSlash = path.lastIndexOf('/');
 
   if (lastSlash === -1) {
-    return "";
+    return '';
   }
 
   return path.slice(0, lastSlash);
@@ -460,7 +457,7 @@ function sortFileList(nodeList: Node[]): Node[] {
     }
   };
 
-  const rootChildren = childrenMap.get("") || [];
+  const rootChildren = childrenMap.get('') || [];
 
   for (const child of rootChildren) {
     depthFirstTraversal(child.fullPath);

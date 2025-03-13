@@ -16,13 +16,13 @@ class DevelopmentServerManager {
     this.client = new ProtocolClient();
 
     this.chatIdPromise = (async () => {
-      assert(this.client, "Chat has been destroyed");
+      assert(this.client, 'Chat has been destroyed');
 
       await this.client.initialize();
 
-      const { chatId } = (await this.client.sendCommand({ method: "Nut.startChat", params: {} })) as { chatId: string };
+      const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
 
-      console.log("DevelopmentServerChat", new Date().toISOString(), chatId);
+      console.log('DevelopmentServerChat', new Date().toISOString(), chatId);
 
       return chatId;
     })();
@@ -34,20 +34,21 @@ class DevelopmentServerManager {
   }
 
   async setRepositoryContents(contents: string): Promise<string | undefined> {
-    assert(this.client, "Chat has been destroyed");
+    assert(this.client, 'Chat has been destroyed');
 
     try {
       const chatId = await this.chatIdPromise;
-      const { url } = await this.client.sendCommand({
-        method: "Nut.startDevelopmentServer",
+      const { url } = (await this.client.sendCommand({
+        method: 'Nut.startDevelopmentServer',
         params: {
           chatId,
           repositoryContents: contents,
         },
-      }) as { url: string };
+      })) as { url: string };
+
       return url;
     } catch (e) {
-      console.error("DevelopmentServerError", e);
+      console.error('DevelopmentServerError', e);
       return undefined;
     }
   }
@@ -63,7 +64,7 @@ const debounceSetRepositoryContents = debounce(async (repositoryContents: string
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryContents);
 
   if (!url) {
-    toast.error("Failed to start development server");
+    toast.error('Failed to start development server');
   }
 
   workbenchStore.previewURL.set(url);
