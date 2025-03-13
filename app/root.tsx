@@ -1,7 +1,7 @@
 import { sentryHandleError } from '~/lib/sentry';
 import { useStore } from '@nanostores/react';
-import type { LinksFunction, LoaderFunction } from '@remix-run/cloudflare';
-import { json } from '@remix-run/cloudflare';
+import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
+import { json } from '~/lib/remix-types';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';

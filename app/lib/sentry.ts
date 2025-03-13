@@ -24,7 +24,7 @@ export function sentryHandleError(error: Error): Error {
      * In production, dynamically import and use Sentry
      * This code only executes in production, so the import will never run in dev
      */
-    import('@sentry/remix')
+    import('@sentry/nextjs')
       .then((sentry) => {
         sentry.captureException(error);
       })

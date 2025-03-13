@@ -1,4 +1,4 @@
-import type { LoaderFunction } from '@remix-run/cloudflare';
+import type { LoaderFunction } from '~/lib/remix-types';
 import { providerBaseUrlEnvKeys } from '~/utils/constants';
 
 export const loader: LoaderFunction = async ({ context, request }) => {
@@ -10,7 +10,8 @@ export const loader: LoaderFunction = async ({ context, request }) => {
   }
 
   const envVarName = providerBaseUrlEnvKeys[provider].apiTokenKey;
-  const isSet = !!(process.env[envVarName] || (context?.cloudflare?.env as Record<string, any>)?.[envVarName]);
+  // Use only process.env since context.env might be undefined
+  const isSet = !!process.env[envVarName];
 
   return Response.json({ isSet });
 };

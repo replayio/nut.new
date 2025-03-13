@@ -10,7 +10,7 @@ import type { SpanExporter, ReadableSpan } from '@opentelemetry/sdk-trace-base';
 import { ConsoleSpanExporter, SimpleSpanProcessor, BasicTracerProvider } from '@opentelemetry/sdk-trace-base';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
-import type { AppLoadContext } from '@remix-run/cloudflare';
+import type { AppLoadContext } from '@remix-run/node';
 
 // used to implement concurrencyLimit in the otlp exporter
 class Semaphore {
@@ -201,8 +201,8 @@ async function loadAsyncHooksContextManager() {
 }
 
 export async function createTracer(appContext: AppLoadContext) {
-  const honeycombApiKey = (appContext.cloudflare.env as any).HONEYCOMB_API_KEY;
-  const honeycombDataset = (appContext.cloudflare.env as any).HONEYCOMB_DATASET;
+  const honeycombApiKey = process.env.HONEYCOMB_API_KEY;
+  const honeycombDataset = process.env.HONEYCOMB_DATASET;
 
   if (!honeycombApiKey || !honeycombDataset) {
     console.warn('OpenTelemetry initialization skipped: HONEYCOMB_API_KEY and/or HONEYCOMB_DATASET not set');

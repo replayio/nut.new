@@ -1,4 +1,5 @@
 logs
+.vercel
 .cursor
 supabase/.temp
 *.log

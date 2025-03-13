@@ -4,7 +4,7 @@
  * In production: Uses the real OpenTelemetry implementation
  */
 
-import type { AppLoadContext } from '@remix-run/cloudflare';
+import type { AppLoadContext } from '@remix-run/node';
 
 // Function to check if we're in development environment
 const isDevelopment = (): boolean => process.env.NODE_ENV === 'development';

@@ -1,4 +1,4 @@
-import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs } from '~/lib/remix-types';
 
 async function pingTelemetry(event: string, data: any): Promise<boolean> {
   console.log('PingTelemetry', event, data);
@@ -29,10 +29,10 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 async function pingTelemetryAction({ request }: ActionFunctionArgs) {
-  const { event, data } = await request.json<{
+  const { event, data } = await request.json() as {
     event: string;
     data: any;
-  }>();
+  };
 
   const success = await pingTelemetry(event, data);
 

@@ -1,5 +1,5 @@
-import { json } from '@remix-run/cloudflare';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { json } from '~/lib/remix-types';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '~/lib/remix-types';
 
 // Handle all HTTP methods
 export async function action({ request, params }: ActionFunctionArgs) {
