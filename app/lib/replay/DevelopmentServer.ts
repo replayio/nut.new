@@ -3,7 +3,6 @@
 import { assert, ProtocolClient } from './ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { recordingMessageHandlerScript } from './Recording';
-import { toast } from 'react-toastify';
 
 class DevelopmentServerManager {
   // Empty if this chat has been destroyed.
