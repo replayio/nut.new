@@ -32,42 +32,10 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
-      # Use PNPM store cache to improve performance
-      - name: PNPM store cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      # Use node_modules cache to improve performance between runs
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
 
       # Install dependencies with fallback for lockfile mismatch
       - name: Install dependencies
-        run: |
-          # Try frozen install first
-          pnpm install --frozen-lockfile || \
-          # If frozen install fails, update lockfile and try again
-          (echo "Frozen install failed, updating lockfile..." && pnpm install)
-
-      # Cache Playwright browsers to speed up workflow
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
+        run: pnpm install
 
       - name: Install Playwright browsers
         run: pnpm playwright install chromium
