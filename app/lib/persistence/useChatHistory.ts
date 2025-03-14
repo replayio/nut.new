@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
 import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
-import type { Message } from 'ai';
+import type { Message as BaseMessage } from 'ai';
 import { toast } from 'react-toastify';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
@@ -16,6 +16,13 @@ import {
 } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
+
+// Messages in a chat's history. The repository may update in response to changes in the messages.
+// Each message which changes the repository state must have a repositoryId.
+export interface Message extends BaseMessage {
+  // Describes the state of the project after changes in this message were applied.
+  repositoryId?: string;
+}
 
 export interface ChatState {
   description: string;
@@ -118,19 +125,6 @@ export function useChatHistory() {
         return;
       }
 
-      const { firstArtifact } = workbenchStore;
-
-      if (!urlId && firstArtifact?.id) {
-        const urlId = await getUrlId(db, firstArtifact.id);
-
-        navigateChat(urlId);
-        setUrlId(urlId);
-      }
-
-      if (!description.get() && firstArtifact?.title) {
-        description.set(firstArtifact?.title);
-      }
-
       if (initialMessages.length === 0 && !chatId.get()) {
         const nextId = await getNextId(db);
 
@@ -193,4 +187,20 @@ function navigateChat(nextId: string) {
   url.pathname = `/chat/${nextId}`;
 
   window.history.replaceState({}, '', url);
+}
+
+// Get the repositoryId before any changes in the message at the given index.
+export function getPreviousRepositoryId(messages: Message[], index: number): string | undefined {
+  for (let i = index - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.repositoryId) {
+      return message.repositoryId;
+    }
+  }
+  return undefined;
+}
+
+// Get the repositoryId after applying some messages.
+export function getMessagesRepositoryId(messages: Message[]): string | undefined {
+  return getPreviousRepositoryId(messages, messages.length);
 }

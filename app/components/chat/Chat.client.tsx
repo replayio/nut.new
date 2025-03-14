@@ -34,7 +34,7 @@ import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
-import type { Message } from './Messages.client';
+import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -181,7 +181,6 @@ export const ChatImpl = memo(
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
     const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
-    const repositoryId = useStore(workbenchStore.repositoryId);
 
     // Input currently in the textarea.
     const [input, setInput] = useState('');
@@ -451,7 +450,6 @@ export const ChatImpl = memo(
           id: responseMessageId,
           role: 'assistant',
           content: responseMessageContent,
-          previousRepositoryId: repositoryId,
           repositoryId: responseRepositoryId,
         });
         setMessages(newMessages);
@@ -464,6 +462,7 @@ export const ChatImpl = memo(
       };
 
       try {
+        const repositoryId = getMessagesRepositoryId(newMessages);
         responseRepositoryId = await sendDeveloperChatMessage(newMessages, repositoryId, addResponseContent);
         updateResponseMessage();
       } catch (e) {
@@ -486,7 +485,7 @@ export const ChatImpl = memo(
       textareaRef.current?.blur();
 
       if (responseRepositoryId) {
-        workbenchStore.repositoryId.set(responseRepositoryId);
+        simulationRepositoryUpdated(responseRepositoryId);
         gLastRepositoryId = responseRepositoryId;
         setApproveChangesMessageId(responseMessageId);
       }
@@ -502,8 +501,8 @@ export const ChatImpl = memo(
         return;
       }
 
-      const message = messages[messageIndex];
-      if (!message.previousRepositoryId) {
+      const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex);
+      if (!previousRepositoryId) {
         toast.error('No repository ID found for rewind');
         return;
       }
@@ -516,7 +515,7 @@ export const ChatImpl = memo(
       setParsedMessages(newParsedMessages);
       setMessages(messages.slice(0, messageIndex + 1));
 
-      workbenchStore.repositoryId.set(message.previousRepositoryId);
+      simulationRepositoryUpdated(previousRepositoryId);
 
       await pingTelemetry('RewindChat', {
         numMessages: messages.length,

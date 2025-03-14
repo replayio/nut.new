@@ -1,17 +1,9 @@
-import type { Message as BaseMessage } from 'ai';
 import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 import WithTooltip from '~/components/ui/Tooltip';
-
-export interface Message extends BaseMessage {
-  // Describes the state of the project before changes in this message were applied.
-  previousRepositoryId?: string;
-
-  // Describes the state of the project after changes in this message were applied.
-  repositoryId?: string;
-}
+import { getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
 
 interface MessagesProps {
   id?: string;
@@ -28,7 +20,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     <div id={id} ref={ref} className={props.className}>
       {messages.length > 0
         ? messages.map((message, index) => {
-            const { role, content, id: messageId, previousRepositoryId, repositoryId } = message;
+            const { role, content, id: messageId, repositoryId } = message;
+            const previousRepositoryId = getPreviousRepositoryId(messages, index);
             const isUserMessage = role === 'user';
             const isFirst = index === 0;
             const isLast = index === messages.length - 1;

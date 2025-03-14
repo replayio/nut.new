@@ -8,7 +8,6 @@ import type { SimulationData, SimulationPacket } from './SimulationData';
 import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import type { MouseData } from './Recording';
-import { shouldIncludeFile } from '~/utils/fileUtils';
 import { developerSystemPrompt } from '~/lib/common/prompts/prompts';
 import { updateDevelopmentServer } from './DevelopmentServer';
 import { isEnhancedPromptMessage } from '~/components/chat/Chat.client';
@@ -212,10 +211,10 @@ function startChat(repositoryId: string, pageData: SimulationData) {
 }
 
 /*
- * Called when the repository contents have changed. We'll start a new chat
+ * Called when the repository has changed. We'll start a new chat
  * and update the remote development server.
  */
-export async function simulationRepositoryUpdated(repositoryId: string) {
+export function simulationRepositoryUpdated(repositoryId: string) {
   startChat(repositoryId, []);
   updateDevelopmentServer(repositoryId);
 }

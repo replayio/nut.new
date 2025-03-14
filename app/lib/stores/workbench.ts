@@ -3,10 +3,10 @@ import { atom, type WritableAtom } from 'nanostores';
 export type WorkbenchViewType = 'code' | 'preview';
 
 export class WorkbenchStore {
-  // Current state of the project.
+  // The current repository.
   repositoryId = atom<string | undefined>(undefined);
 
-  // Any available preview URL for the current project state.
+  // Any available preview URL for the current repository.
   previewURL = atom<string | undefined>(undefined);
 
   showWorkbench: WritableAtom<boolean> = import.meta.hot?.data.showWorkbench ?? atom(false);

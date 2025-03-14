@@ -1,13 +1,14 @@
-import type { Message } from 'ai';
-import { generateId, shouldIncludeFile } from './fileUtils';
+import type { Message } from '~/lib/persistence/useChatHistory';
+import { generateId } from './fileUtils';
+import JSZip from 'jszip';
 
-export interface FileArtifact {
+interface FileArtifact {
   content: string;
   path: string;
 }
 
-export async function getFileArtifacts(files: File[]): Promise<FileArtifact[]> {
-  return Promise.all(
+export async function getFileRepositoryContents(files: File[]): Promise<string> {
+  const artifacts: FileArtifact[] = await Promise.all(
     files.map(async (file) => {
       return new Promise<FileArtifact>((resolve, reject) => {
         const reader = new FileReader();
@@ -25,25 +26,33 @@ export async function getFileArtifacts(files: File[]): Promise<FileArtifact[]> {
       });
     }),
   );
+
+  const zip = new JSZip();
+  for (const { path, content } of artifacts) {
+    zip.file(path, content);
+  }
+  return await zip.generateAsync({ type: "base64" });
 }
 
 export function createChatFromFolder(
   folderName: string,
+  repositoryId: string
 ): Message[] {
   let filesContent = `I've imported the contents of the "${folderName}" folder.`;
-
-  const filesMessage: Message = {
-    role: 'assistant',
-    content: filesContent,
-    id: generateId(),
-    createdAt: new Date(),
-  };
 
   const userMessage: Message = {
     role: 'user',
     id: generateId(),
     content: `Import the "${folderName}" folder`,
     createdAt: new Date(),
+  };
+
+  const filesMessage: Message = {
+    role: 'assistant',
+    content: filesContent,
+    id: generateId(),
+    createdAt: new Date(),
+    repositoryId,
   };
 
   const messages = [userMessage, filesMessage];

@@ -8,7 +8,8 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { Messages, type Message } from './Messages.client';
+import { Messages } from './Messages.client';
+import { getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
 import { SendButton } from './SendButton.client';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -227,7 +228,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
       const lastMessage = messages[messages.length - 1];
 
-      if (!lastMessage.previousRepositoryId || !lastMessage.repositoryId) {
+      if (!lastMessage.repositoryId) {
+        return false;
+      }
+
+      if (!getPreviousRepositoryId(messages, messages.length - 1)) {
         return false;
       }
 
