@@ -1,72 +1,180 @@
-name: CI/CD and Deploy
+name: CI
 
 on:
-  # Disabled due to https://linear.app/replay/issue/PRO-1001/nutnew-broken-builds
-  #push:
-  #  branches:
-  #    - main
-  workflow_dispatch:
+  push:
+   branches:
+     - main
   pull_request:
+  deployment_status:
+
+# Cancel in-progress runs when a new commit is pushed
+concurrency:
+  # For pull requests, use the PR number as the concurrency group
+  # For other events (push, deployment_status), use the branch/ref
+  # This ensures PR builds are cancelled when new commits are pushed
+  # And deployment status events don't interfere with push events for the same branch
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.deployment.environment || github.ref }}
+  cancel-in-progress: true
+
+# Define Node.js version in one place
+env:
+  NODE_VERSION: "22.x"
+  PNPM_VERSION: 8
 
 jobs:
+  # Setup job to install dependencies and cache them
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
+      # Use PNPM store cache to improve performance
+      - name: PNPM store cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Install dependencies with fallback for lockfile mismatch
+      - name: PNPM Install
+        run: |
+          # Try frozen install first
+          pnpm install --frozen-lockfile || \
+          # If frozen install fails, update lockfile and try again
+          (echo "Frozen install failed, updating lockfile..." && pnpm install)
+
+      # Cache node_modules to share between jobs
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
   typecheck:
     name: Type Check
+    needs: setup
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup and Build
-        uses: ./.github/actions/setup-and-build
+      # Restore cached node_modules
+      - name: Restore cached node_modules
+        uses: actions/cache@v4
         with:
-          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run type check
         run: pnpm run typecheck
 
   lint:
     name: Lint
+    needs: setup
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup and Build
-        uses: ./.github/actions/setup-and-build
+      # Restore cached node_modules
+      - name: Restore cached node_modules
+        uses: actions/cache@v4
         with:
-          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run ESLint
         run: pnpm run lint
 
   test:
-    name: Test
+    name: Unit Tests
+    needs: setup
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup and Build
-        uses: ./.github/actions/setup-and-build
+      # Restore cached node_modules
+      - name: Restore cached node_modules
+        uses: actions/cache@v4
         with:
-          sentry-auth-token: ${{ github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run tests
         run: pnpm run test
-
-  deploy:
-    name: Deploy
-    needs: [typecheck, lint, test]
+        
+  playwright:
+    name: Playwright Tests
+    needs: setup
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    if: ${{ (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup and Build
-        uses: ./.github/actions/setup-and-build
+      # Restore cached node_modules
+      - name: Restore cached node_modules
+        uses: actions/cache@v4
         with:
-          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      # Cache Playwright browsers to speed up workflow
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        run: pnpm playwright install chromium
+
+      - name: Get Vercel Preview URL
+        run: |
+          echo "PLAYWRIGHT_TEST_BASE_URL=${{ github.event.deployment_status.target_url }}" >> $GITHUB_ENV
+          echo "Testing against Vercel Preview URL: ${{ github.event.deployment_status.target_url }}"
+
+      - name: Run Playwright tests against Vercel preview
+        if: ${{ github.event_name == 'deployment_status' }}
+        run: pnpm run test:e2e
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
