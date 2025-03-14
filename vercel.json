@@ -3,7 +3,9 @@
   "framework": "remix",
   "installCommand": "pnpm install",
   "outputDirectory": "build",
-  "regions": ["iad1"],
+  "regions": [
+    "iad1"
+  ],
   "headers": [
     {
       "source": "/(.*)",

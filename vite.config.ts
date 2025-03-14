@@ -20,9 +20,6 @@ const getGitHash = () => {
   }
 };
 
-
-
-
 export default defineConfig((config) => {
   return {
     define: {
@@ -35,15 +32,12 @@ export default defineConfig((config) => {
       sourcemap: true,
     },
     plugins: [
-      nodePolyfills({
-        include: ['path', 'buffer', 'process'],
-      }),
       remixVitePlugin({
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,
           v3_throwAbortReason: true,
-          v3_lazyRouteDiscovery: true
+          v3_lazyRouteDiscovery: true,
         },
         presets: [vercelPreset()],
       }),
@@ -59,7 +53,16 @@ export default defineConfig((config) => {
           project: 'nut',
         }),
     ],
-    envPrefix: ["VITE_","OPENAI_LIKE_API_BASE_URL", "OLLAMA_API_BASE_URL", "LMSTUDIO_API_BASE_URL","TOGETHER_API_BASE_URL"],
+    envPrefix: [
+      'VITE_',
+      'OPENAI_LIKE_API_BASE_URL',
+      'OLLAMA_API_BASE_URL',
+      'LMSTUDIO_API_BASE_URL',
+      'TOGETHER_API_BASE_URL',
+      'SUPABASE_URL',
+      'SUPABASE_ANON_KEY',
+      'USE_SUPABASE',
+    ],
     css: {
       preprocessorOptions: {
         scss: {

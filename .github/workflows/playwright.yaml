@@ -1,0 +1,104 @@
+name: Playwright Tests
+
+on:
+  deployment_status:
+
+
+# Cancel in-progress runs when a new deployment status event is received
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.deployment.environment || github.ref }}
+  cancel-in-progress: true
+
+# Define Node.js version in one place
+env:
+  NODE_VERSION: "22.x"
+  PNPM_VERSION: 8
+
+jobs:
+  test:
+    name: 'Playwright Tests'
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.4.0
+          
+      - name: Install dependencies
+        run: pnpm install 
+      
+      - name: Install Playwright browsers
+        run: pnpm playwright install chromium
+      
+      - name: Get Vercel Preview URL
+        if: ${{ github.event_name == 'deployment_status' }}
+        run: |
+          echo "PLAYWRIGHT_TEST_BASE_URL=${{ github.event.deployment_status.target_url }}" >> $GITHUB_ENV
+          echo "Testing against Vercel Preview URL: ${{ github.event.deployment_status.target_url }}"
+
+      - name: Run Playwright tests 
+        run: pnpm test:e2e
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Install Vercel CLI
+        run: pnpm install -g vercel@latest
+
+      - name: Deploy to Vercel with Supabase Target
+        id: deploy
+        run: |
+          DEPLOY_OUTPUT=$(vercel deploy --yes --target=supabase --token=${{ secrets.VERCEL_TOKEN }})
+          WITH_SUPABASE_PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -o 'https://[^ ]*' | tail -1)
+          echo "WITH_SUPABASE_PREVIEW_URL=$WITH_SUPABASE_PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $WITH_SUPABASE_PREVIEW_URL"
+
+      - name: Wait for deployment to be ready
+        run: |
+          echo "Waiting for deployment to be fully available..."
+          # Simple check to see if the URL is accessible
+          timeout=300  # 5 minutes timeout
+          interval=10  # Check every 10 seconds
+          elapsed=0
+          
+          until curl -s --head --fail "${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}" > /dev/null; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Timeout waiting for deployment to be available"
+              exit 1
+            fi
+            echo "Waiting for deployment to be available... ($elapsed seconds elapsed)"
+            sleep $interval
+            elapsed=$((elapsed + interval))
+          done
+          
+          echo "Deployment is now available!"
+          # Additional wait to ensure everything is fully loaded
+          sleep 10
+
+      # Run Playwright tests against the newly deployed URL
+      - name: Run Playwright tests against Supabase deployment
+        run: pnpm run test:e2e
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-supabase
+          path: playwright-report/
+          retention-days: 30

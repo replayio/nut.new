@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { logStore } from './lib/stores/logs';
 import { initializeAuth, userStore, isLoadingStore } from './lib/stores/auth';
 import { ToastContainer } from 'react-toastify';
+import { Analytics } from '@vercel/analytics/remix';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -51,10 +52,12 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export const loader: LoaderFunction = async ({ context }) => {
-  const supabaseUrl = (context.SUPABASE_URL || process.env.SUPABASE_URL || '') as string;
-  const supabaseAnonKey = (context.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '') as string;
-  const useSupabase = (context.USE_SUPABASE || process.env.USE_SUPABASE || '') as string;
+export const loader: LoaderFunction = async () => {
+  const supabaseUrl = process.env.SUPABASE_URL as string;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
+  const useSupabase = process.env.USE_SUPABASE as string;
+
+  console.log('useSupabase', useSupabase);
 
   return json<LoaderData>({
     ENV: {
@@ -165,6 +168,7 @@ export default function App() {
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />
+      <Analytics />
     </>
   );
 }

@@ -83,7 +83,7 @@ export function shouldUseSupabase(): boolean {
 
 export function getSupabase() {
   // Determine execution environment and get appropriate variables
-  if (process.browser) {
+  if (typeof window == 'object') {
     supabaseUrl = window.ENV.SUPABASE_URL || '';
     supabaseAnonKey = window.ENV.SUPABASE_ANON_KEY || '';
   } else {
