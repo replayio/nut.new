@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { getProblemsUsername, submitProblem } from '~/lib/replay/Problems';
 import type { BoltProblemInput } from '~/lib/replay/Problems';
+import { getRepositoryContents } from '~/lib/replay/Repository';
 
 ReactModal.setAppElement('#root');
 
@@ -54,16 +55,21 @@ export function SaveProblem() {
 
     console.log('SubmitProblem', formData);
 
-    await workbenchStore.saveAllFiles();
+    const repositoryId = workbenchStore.repositoryId.get();
 
-    const { contentBase64 } = await workbenchStore.generateZipBase64();
+    if (!repositoryId) {
+      toast.error('No repository ID found');
+      return;
+    }
+
+    const repositoryContents = await getRepositoryContents(repositoryId);
 
     const problem: BoltProblemInput = {
       version: 2,
       title: formData.title,
       description: formData.description,
       username,
-      repositoryContents: contentBase64,
+      repositoryContents,
     };
 
     const problemId = await submitProblem(problem);

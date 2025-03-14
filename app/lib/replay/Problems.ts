@@ -4,8 +4,6 @@ import { toast } from 'react-toastify';
 import { sendCommandDedicatedClient } from './ReplayProtocolClient';
 import type { ProtocolMessage } from './SimulationPrompt';
 import Cookies from 'js-cookie';
-import JSZip from 'jszip';
-import type { FileArtifact } from '~/utils/folderImport';
 import { shouldUseSupabase } from '~/lib/supabase/client';
 import {
   supabaseListAllProblems,

@@ -6,10 +6,11 @@ import { logStore } from '~/lib/stores/logs';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from '~/lib/replay/Problems';
 import { getProblem } from '~/lib/replay/Problems';
+import { createRepositoryImported } from '~/lib/replay/Repository';
 
 interface LoadProblemButtonProps {
   className?: string;
-  importChat?: (description: string, messages: Message[], repositoryContents: string) => Promise<void>;
+  importChat?: (description: string, messages: Message[]) => Promise<void>;
 }
 
 export function setLastLoadedProblem(problem: BoltProblem) {
@@ -72,8 +73,9 @@ export async function loadProblem(
   const { repositoryContents, title: problemTitle } = problem;
 
   try {
-    const messages = createChatFromFolder('problem');
-    await importChat(`Problem: ${problemTitle}`, [...messages], repositoryContents);
+    const repositoryId = await createRepositoryImported(`ImportProblem:${problemId}`, repositoryContents);
+    const messages = createChatFromFolder('problem', repositoryId);
+    await importChat(`Problem: ${problemTitle}`, [...messages]);
 
     logStore.logSystem('Problem loaded successfully', {
       problemId,

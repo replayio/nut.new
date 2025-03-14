@@ -17,7 +17,6 @@ import styles from './BaseChat.module.scss';
 import { ExportChatButton } from '~/components/chat/chatExportAndImport/ExportChatButton';
 import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
-import GitCloneButton from './GitCloneButton';
 
 import FilePreview from './FilePreview';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
@@ -478,7 +477,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {!chatStarted && (
               <div className="flex justify-center gap-2">
                 {ImportButtons(importChat)}
-                <GitCloneButton importChat={importChat} />
               </div>
             )}
             {!chatStarted &&

@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import { submitFeedback } from '~/lib/replay/Problems';
-import { getLastProjectContents, getLastChatMessages } from '~/components/chat/Chat.client';
+import { getLastChatMessages } from '~/components/chat/Chat.client';
 import { shouldUseSupabase } from '~/lib/supabase/client';
 
 ReactModal.setAppElement('#root');
@@ -56,7 +56,6 @@ export function Feedback() {
         };
 
     if (feedbackData.share) {
-      feedbackData.repositoryContents = getLastProjectContents();
       feedbackData.chatMessages = getLastChatMessages();
     }
 

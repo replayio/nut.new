@@ -6,10 +6,9 @@ import { useStore } from '@nanostores/react';
 import { useAnimate } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
-import { useMessageParser, useSnapScroll } from '~/lib/hooks';
+import { useSnapScroll } from '~/lib/hooks';
 import { description, useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { PROMPT_COOKIE_KEY } from '~/utils/constants';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
@@ -40,11 +39,6 @@ const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
-let gLastRepositoryId: string | undefined;
-
-export function getLastRepositoryId() {
-  return gLastRepositoryId;
-}
 
 let gLastChatMessages: Message[] | undefined;
 
@@ -133,12 +127,9 @@ const processSampledMessages = createSampler(
   (options: {
     messages: Message[];
     initialMessages: Message[];
-    isLoading: boolean;
-    parseMessages: (messages: Message[], isLoading: boolean) => void;
     storeMessageHistory: (messages: Message[]) => Promise<void>;
   }) => {
-    const { messages, initialMessages, isLoading, parseMessages, storeMessageHistory } = options;
-    parseMessages(messages, isLoading);
+    const { messages, initialMessages, storeMessageHistory } = options;
 
     if (messages.length > initialMessages.length) {
       storeMessageHistory(messages).catch((error) => toast.error(error.message));
@@ -207,8 +198,6 @@ export const ChatImpl = memo(
       }
     }, [searchParams]);
 
-    const { parsedMessages, setParsedMessages, parseMessages } = useMessageParser();
-
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
     useEffect(() => {
@@ -219,11 +208,9 @@ export const ChatImpl = memo(
       processSampledMessages({
         messages,
         initialMessages,
-        isLoading,
-        parseMessages,
         storeMessageHistory,
       });
-    }, [messages, isLoading, parseMessages]);
+    }, [messages, isLoading]);
 
     const abort = () => {
       stop();
@@ -486,7 +473,6 @@ export const ChatImpl = memo(
 
       if (responseRepositoryId) {
         simulationRepositoryUpdated(responseRepositoryId);
-        gLastRepositoryId = responseRepositoryId;
         setApproveChangesMessageId(responseMessageId);
       }
     };
@@ -507,14 +493,7 @@ export const ChatImpl = memo(
         return;
       }
 
-      const newParsedMessages = { ...parsedMessages };
-
-      for (let i = messageIndex + 1; i < messages.length; i++) {
-        delete newParsedMessages[i];
-      }
-      setParsedMessages(newParsedMessages);
       setMessages(messages.slice(0, messageIndex + 1));
-
       simulationRepositoryUpdated(previousRepositoryId);
 
       await pingTelemetry('RewindChat', {
@@ -621,18 +600,7 @@ export const ChatImpl = memo(
 
     const [messageRef, scrollRef] = useSnapScroll();
 
-    const chatMessages = messages.map((message, i) => {
-      if (message.role === 'user') {
-        return message;
-      }
-
-      return {
-        ...message,
-        content: parsedMessages[i] || '',
-      };
-    });
-
-    gLastChatMessages = chatMessages;
+    gLastChatMessages = messages;
 
     return (
       <BaseChat
@@ -653,7 +621,7 @@ export const ChatImpl = memo(
         description={description}
         importChat={importChat}
         exportChat={exportChat}
-        messages={chatMessages}
+        messages={messages}
         uploadedFiles={uploadedFiles}
         setUploadedFiles={setUploadedFiles}
         imageDataList={imageDataList}
