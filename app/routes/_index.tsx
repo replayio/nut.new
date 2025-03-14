@@ -16,7 +16,7 @@ const Nothing = () => null;
 
 export default function Index() {
   return (
-    <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
+    <div className="flex flex-col h-full min-h-screen w-full bg-bolt-elements-background-depth-1 dark:bg-black">
       <BackgroundRays />
       <Header />
       <Suspense fallback={<Nothing />}>

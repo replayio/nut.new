@@ -10,5 +10,5 @@ When you ask Nut to fix a bug, it creates a Replay.io recording of your app and 
 ```
 pnpm install
 pnpm build
-./node_modules/.bin/wrangler pages dev
+pnpm dev
 ```

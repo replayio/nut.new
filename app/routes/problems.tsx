@@ -109,7 +109,7 @@ function ProblemsPage() {
   return (
     <Suspense fallback={<Nothing />}>
       <TooltipProvider>
-        <div className="flex flex-col min-h-fit w-full bg-bolt-elements-background-depth-1 dark:bg-black text-gray-900 dark:text-gray-200">
+        <div className="flex flex-col min-h-fit min-h-screen w-full bg-bolt-elements-background-depth-1 dark:bg-black text-gray-900 dark:text-gray-200">
           <BackgroundRays />
           <Header />
           <ClientOnly>{() => <Menu />}</ClientOnly>
