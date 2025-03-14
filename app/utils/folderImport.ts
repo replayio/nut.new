@@ -27,25 +27,10 @@ export async function getFileArtifacts(files: File[]): Promise<FileArtifact[]> {
   );
 }
 
-export const createChatFromFolder = async (
-  fileArtifacts: FileArtifact[],
-  binaryFiles: string[],
+export function createChatFromFolder(
   folderName: string,
-): Promise<Message[]> => {
-  const binaryFilesMessage =
-    binaryFiles.length > 0
-      ? `\n\nSkipped ${binaryFiles.length} binary files:\n${binaryFiles.map((f) => `- ${f}`).join('\n')}`
-      : '';
-
-  let filesContent = `I've imported the contents of the "${folderName}" folder.${binaryFilesMessage}`;
-  filesContent += `<boltArtifact id="imported-files" title="Imported Files">`;
-
-  for (const file of fileArtifacts) {
-    if (shouldIncludeFile(file.path)) {
-      filesContent += `<boltAction type="file" filePath="${file.path}">${file.content}</boltAction>\n\n`;
-    }
-  }
-  filesContent += `</boltArtifact>`;
+): Message[] {
+  let filesContent = `I've imported the contents of the "${folderName}" folder.`;
 
   const filesMessage: Message = {
     role: 'assistant',
@@ -64,4 +49,4 @@ export const createChatFromFolder = async (
   const messages = [userMessage, filesMessage];
 
   return messages;
-};
+}

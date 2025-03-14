@@ -3,7 +3,6 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import { useStore } from '@nanostores/react';
-import type { Message } from 'ai';
 import { useAnimate } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
@@ -19,7 +18,6 @@ import Cookies from 'js-cookie';
 import { debounce } from '~/utils/debounce';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
-import { saveProjectContents } from './Messages.client';
 import {
   getSimulationRecording,
   getSimulationEnhancedPrompt,
@@ -36,15 +34,16 @@ import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import type { Message } from './Messages.client';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
-let gLastProjectContents: string | undefined;
+let gLastRepositoryId: string | undefined;
 
-export function getLastProjectContents() {
-  return gLastProjectContents;
+export function getLastRepositoryId() {
+  return gLastRepositoryId;
 }
 
 let gLastChatMessages: Message[] | undefined;
@@ -160,27 +159,8 @@ let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
-/*
- * When files are modified during a chat message we wait until the message finishes
- * before updating the simulation.
- */
-let gUpdateSimulationAfterChatMessage = false;
-
 async function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
-
-  if (gUpdateSimulationAfterChatMessage) {
-    await simulationRepositoryUpdated();
-    gUpdateSimulationAfterChatMessage = false;
-  }
-}
-
-export async function onRepositoryFileWritten() {
-  if (gActiveChatMessageTelemetry) {
-    gUpdateSimulationAfterChatMessage = true;
-  } else {
-    await simulationRepositoryUpdated();
-  }
 }
 
 function buildMessageId(prefix: string, chatId: string) {
@@ -200,8 +180,8 @@ export const ChatImpl = memo(
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
-    const files = useStore(workbenchStore.files);
     const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
+    const repositoryId = useStore(workbenchStore.repositoryId);
 
     // Input currently in the textarea.
     const [input, setInput] = useState('');
@@ -250,7 +230,6 @@ export const ChatImpl = memo(
       stop();
       gNumAborts++;
       chatStore.setKey('aborted', true);
-      workbenchStore.abortAllActions();
       setActiveChatId(undefined);
 
       if (gActiveChatMessageTelemetry) {
@@ -387,15 +366,6 @@ export const ChatImpl = memo(
       setUploadedFiles([]);
       setImageDataList([]);
 
-      /**
-       * @note (delm) Usually saving files shouldn't take long but it may take longer if there
-       * many unsaved files. In that case we need to block user input and show an indicator
-       * of some kind so the user is aware that something is happening. But I consider the
-       * happy case to be no unsaved files and I would expect users to save their changes
-       * before they send another message.
-       */
-      await workbenchStore.saveAllFiles();
-
       let simulation = false;
 
       try {
@@ -455,8 +425,6 @@ export const ChatImpl = memo(
         }
       }
 
-      const fileModifications = workbenchStore.getFileModifcations();
-
       chatStore.setKey('aborted', false);
 
       runAnimation();
@@ -465,11 +433,10 @@ export const ChatImpl = memo(
 
       const responseMessageId = buildMessageId('response', chatId);
       let responseMessageContent = '';
+      let responseRepositoryId: string | undefined;
       let hasResponseMessage = false;
 
-      const addResponseContent = (content: string) => {
-        responseMessageContent += content;
-
+      const updateResponseMessage = () => {
         if (gNumAborts != numAbortsAtStart) {
           return;
         }
@@ -484,13 +451,21 @@ export const ChatImpl = memo(
           id: responseMessageId,
           role: 'assistant',
           content: responseMessageContent,
+          previousRepositoryId: repositoryId,
+          repositoryId: responseRepositoryId,
         });
         setMessages(newMessages);
         hasResponseMessage = true;
       };
 
+      const addResponseContent = (content: string) => {
+        responseMessageContent += content;
+        updateResponseMessage();
+      };
+
       try {
-        await sendDeveloperChatMessage(newMessages, files, addResponseContent);
+        responseRepositoryId = await sendDeveloperChatMessage(newMessages, repositoryId, addResponseContent);
+        updateResponseMessage();
       } catch (e) {
         console.error('Error sending message', e);
         addResponseContent('Error sending message.');
@@ -505,42 +480,43 @@ export const ChatImpl = memo(
 
       setActiveChatId(undefined);
 
-      if (fileModifications !== undefined) {
-        /**
-         * After sending a new message we reset all modifications since the model
-         * should now be aware of all the changes.
-         */
-        workbenchStore.resetAllFileModifications();
-      }
-
       setInput('');
       Cookies.remove(PROMPT_COOKIE_KEY);
 
       textareaRef.current?.blur();
 
-      // The project contents are associated with the response message.
-      const { contentBase64 } = await workbenchStore.generateZipBase64();
-      saveProjectContents(responseMessageId, { content: contentBase64 });
-      gLastProjectContents = contentBase64;
-      setApproveChangesMessageId(responseMessageId);
+      if (responseRepositoryId) {
+        workbenchStore.repositoryId.set(responseRepositoryId);
+        gLastRepositoryId = responseRepositoryId;
+        setApproveChangesMessageId(responseMessageId);
+      }
     };
 
-    const onRewind = async (messageId: string, contents: string) => {
-      console.log('Rewinding', messageId, contents);
-
-      await workbenchStore.restoreProjectContentsBase64(messageId, contents);
+    const onRewind = async (messageId: string) => {
+      console.log('Rewinding', messageId);
 
       const messageIndex = messages.findIndex((message) => message.id === messageId);
 
-      if (messageIndex >= 0) {
-        const newParsedMessages = { ...parsedMessages };
-
-        for (let i = messageIndex + 1; i < messages.length; i++) {
-          delete newParsedMessages[i];
-        }
-        setParsedMessages(newParsedMessages);
-        setMessages(messages.slice(0, messageIndex + 1));
+      if (messageIndex < 0) {
+        toast.error('Rewind message not found');
+        return;
       }
+
+      const message = messages[messageIndex];
+      if (!message.previousRepositoryId) {
+        toast.error('No repository ID found for rewind');
+        return;
+      }
+
+      const newParsedMessages = { ...parsedMessages };
+
+      for (let i = messageIndex + 1; i < messages.length; i++) {
+        delete newParsedMessages[i];
+      }
+      setParsedMessages(newParsedMessages);
+      setMessages(messages.slice(0, messageIndex + 1));
+
+      workbenchStore.repositoryId.set(message.previousRepositoryId);
 
       await pingTelemetry('RewindChat', {
         numMessages: messages.length,
@@ -586,8 +562,6 @@ export const ChatImpl = memo(
 
     const onRejectChange = async (
       messageId: string,
-      rewindMessageId: string,
-      projectContents: string,
       data: RejectChangeData,
     ) => {
       console.log('RejectChange', messageId, data);
@@ -597,7 +571,7 @@ export const ChatImpl = memo(
       const message = messages.find((message) => message.id === messageId);
       const messageContents = message?.content ?? '';
 
-      await onRewind(rewindMessageId, projectContents);
+      await onRewind(messageId);
 
       let shareProjectSuccess = false;
 
@@ -606,7 +580,7 @@ export const ChatImpl = memo(
           explanation: data.explanation,
           retry: data.retry,
           chatMessages: messages,
-          repositoryContents: getLastProjectContents(),
+          repositoryId: message?.repositoryId,
           loginKey: getNutLoginKey(),
         };
 

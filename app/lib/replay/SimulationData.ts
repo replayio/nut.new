@@ -8,13 +8,11 @@ interface SimulationPacketServerURL {
   url: string;
 }
 
-/*
- * Simulation data specifying the contents of the repository to set up a dev server
- * for static resources.
- */
-interface SimulationPacketRepositoryContents {
-  kind: 'repositoryContents';
-  contents: string; // base64 encoded zip of the repository.
+// Simulation data specifying a repository ID to set up a dev server
+// for static resources and any initial database contents.
+interface SimulationPacketRepositoryId {
+  kind: "repositoryId";
+  repositoryId: string;
 }
 
 // Simulation data specifying the viewport size
@@ -178,7 +176,7 @@ interface SimulationPacketLocalStorage {
 
 type SimulationPacketBase =
   | SimulationPacketServerURL
-  | SimulationPacketRepositoryContents
+  | SimulationPacketRepositoryId
   | SimulationPacketViewport
   | SimulationPacketLocationHref
   | SimulationPacketDocumentURL

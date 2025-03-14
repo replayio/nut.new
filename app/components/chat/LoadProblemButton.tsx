@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { createChatFromFolder } from '~/utils/folderImport';
-import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
+import { logStore } from '~/lib/stores/logs';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from '~/lib/replay/Problems';
-import { getProblem, extractFileArtifactsFromRepositoryContents } from '~/lib/replay/Problems';
+import { getProblem } from '~/lib/replay/Problems';
 
 interface LoadProblemButtonProps {
   className?: string;
-  importChat?: (description: string, messages: Message[]) => Promise<void>;
+  importChat?: (description: string, messages: Message[], repositoryContents: string) => Promise<void>;
 }
 
 export function setLastLoadedProblem(problem: BoltProblem) {
@@ -71,15 +71,12 @@ export async function loadProblem(
 
   const { repositoryContents, title: problemTitle } = problem;
 
-  const fileArtifacts = await extractFileArtifactsFromRepositoryContents(repositoryContents);
-
   try {
-    const messages = await createChatFromFolder(fileArtifacts, [], 'problem');
-    await importChat(`Problem: ${problemTitle}`, [...messages]);
+    const messages = createChatFromFolder('problem');
+    await importChat(`Problem: ${problemTitle}`, [...messages], repositoryContents);
 
     logStore.logSystem('Problem loaded successfully', {
       problemId,
-      textFileCount: fileArtifacts.length,
     });
     toast.success('Problem loaded successfully');
   } catch (error) {

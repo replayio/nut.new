@@ -241,26 +241,6 @@ export function saveProblemsUsername(username: string) {
   Cookies.set(nutProblemsUsernameCookieName, username);
 }
 
-export async function extractFileArtifactsFromRepositoryContents(repositoryContents: string): Promise<FileArtifact[]> {
-  const zip = new JSZip();
-  await zip.loadAsync(repositoryContents, { base64: true });
-
-  const fileArtifacts: FileArtifact[] = [];
-
-  for (const [key, object] of Object.entries(zip.files)) {
-    if (object.dir) {
-      continue;
-    }
-
-    fileArtifacts.push({
-      content: await object.async('text'),
-      path: key,
-    });
-  }
-
-  return fileArtifacts;
-}
-
 export async function submitFeedback(feedback: any): Promise<boolean> {
   if (shouldUseSupabase()) {
     return supabaseSubmitFeedback(feedback);

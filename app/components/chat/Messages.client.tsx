@@ -1,59 +1,24 @@
-import type { Message } from 'ai';
+import type { Message as BaseMessage } from 'ai';
 import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 import WithTooltip from '~/components/ui/Tooltip';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
+
+export interface Message extends BaseMessage {
+  // Describes the state of the project before changes in this message were applied.
+  previousRepositoryId?: string;
+
+  // Describes the state of the project after changes in this message were applied.
+  repositoryId?: string;
+}
 
 interface MessagesProps {
   id?: string;
   className?: string;
   isStreaming?: boolean;
   messages?: Message[];
-  onRewind?: (messageId: string, contents: string) => void;
-}
-
-interface ProjectContents {
-  content: string; // base64 encoded
-}
-
-const gProjectContentsByMessageId = new Map<string, ProjectContents>();
-
-export function saveProjectContents(messageId: string, contents: ProjectContents) {
-  gProjectContentsByMessageId.set(messageId, contents);
-}
-
-export function getLastMessageProjectContents(messages: Message[], index: number) {
-  /*
-   * The message index is for the model response, and the project
-   * contents will be associated with the last message present when
-   * the user prompt was sent to the model. This could be either two
-   * or three messages back, depending on whether a bug explanation was added.
-   */
-  const beforeUserMessage = messages[index - 2];
-  const contents = gProjectContentsByMessageId.get(beforeUserMessage?.id);
-
-  if (!contents) {
-    const priorMessage = messages[index - 3];
-    const priorContents = gProjectContentsByMessageId.get(priorMessage?.id);
-
-    if (!priorContents) {
-      return undefined;
-    }
-
-    /*
-     * We still rewind to just before the user message to retain any
-     * explanation from the Nut API.
-     */
-    return { rewindMessageId: beforeUserMessage.id, contentsMessageId: priorMessage.id, contents: priorContents };
-  }
-
-  return { rewindMessageId: beforeUserMessage.id, contentsMessageId: beforeUserMessage.id, contents };
-}
-
-export function hasFileModifications(content: string) {
-  return content.includes('__boltArtifact__');
+  onRewind?: (messageId: string) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
@@ -63,7 +28,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     <div id={id} ref={ref} className={props.className}>
       {messages.length > 0
         ? messages.map((message, index) => {
-            const { role, content, id: messageId } = message;
+            const { role, content, id: messageId, previousRepositoryId, repositoryId } = message;
             const isUserMessage = role === 'user';
             const isFirst = index === 0;
             const isLast = index === messages.length - 1;
@@ -95,18 +60,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <AssistantMessage content={content} annotations={message.annotations} />
                     )}
                   </div>
-                  {!isUserMessage &&
-                    messageId &&
-                    onRewind &&
-                    getLastMessageProjectContents(messages, index) &&
-                    hasFileModifications(content) && (
+                  {previousRepositoryId && repositoryId && onRewind && (
                       <div className="flex gap-2 flex-col lg:flex-row">
                         <WithTooltip tooltip="Undo changes in this message">
                           <button
                             onClick={() => {
-                              const info = getLastMessageProjectContents(messages, index);
-                              assert(info);
-                              onRewind(info.rewindMessageId, info.contents.content);
+                              onRewind(messageId);
                             }}
                             key="i-ph:arrow-u-up-left"
                             className={classNames(

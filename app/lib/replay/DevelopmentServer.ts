@@ -1,8 +1,8 @@
 // Support using the Nut API for the development server.
 
-import { debounce } from '~/utils/debounce';
 import { assert, ProtocolClient } from './ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { recordingMessageHandlerScript } from './Recording';
 import { toast } from 'react-toastify';
 
 class DevelopmentServerManager {
@@ -33,7 +33,7 @@ class DevelopmentServerManager {
     this.client = undefined;
   }
 
-  async setRepositoryContents(contents: string): Promise<string | undefined> {
+  async setRepositoryContents(repositoryId: string): Promise<string | undefined> {
     assert(this.client, 'Chat has been destroyed');
 
     try {
@@ -42,7 +42,8 @@ class DevelopmentServerManager {
         method: 'Nut.startDevelopmentServer',
         params: {
           chatId,
-          repositoryContents: contents,
+          repositoryId,
+          injectedScript: recordingMessageHandlerScript,
         },
       })) as { url: string };
 
@@ -56,21 +57,18 @@ class DevelopmentServerManager {
 
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
-const debounceSetRepositoryContents = debounce(async (repositoryContents: string) => {
+export async function updateDevelopmentServer(repositoryId: string) {
+  workbenchStore.previewURL.set(undefined);
+
   if (!gActiveDevelopmentServer) {
     gActiveDevelopmentServer = new DevelopmentServerManager();
   }
 
-  const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryContents);
+  const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryId);
 
   if (!url) {
     toast.error('Failed to start development server');
   }
 
   workbenchStore.previewURL.set(url);
-}, 500);
-
-export async function updateDevelopmentServer(repositoryContents: string) {
-  workbenchStore.previewURL.set(undefined);
-  debounceSetRepositoryContents(repositoryContents);
 }

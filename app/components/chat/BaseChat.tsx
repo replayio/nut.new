@@ -2,14 +2,13 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import type { Message } from 'ai';
 import React, { type RefCallback, useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { getLastMessageProjectContents, hasFileModifications, Messages } from './Messages.client';
+import { Messages, type Message } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -51,10 +50,10 @@ interface BaseChatProps {
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
-  onRewind?: (messageId: string, contents: string) => void;
+  onRewind?: (messageId: string) => void;
   approveChangesMessageId?: string;
   onApproveChange?: (messageId: string) => void;
-  onRejectChange?: (lastMessageId: string, rewindMessageId: string, contents: string, data: RejectChangeData) => void;
+  onRejectChange?: (lastMessageId: string, data: RejectChangeData) => void;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -226,19 +225,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         return false;
       }
 
-      const lastMessageProjectContents = getLastMessageProjectContents(messages, messages.length - 1);
-
-      if (!lastMessageProjectContents) {
-        return false;
-      }
-
-      if (lastMessageProjectContents.contentsMessageId != approveChangesMessageId) {
-        return false;
-      }
-
       const lastMessage = messages[messages.length - 1];
 
-      if (!hasFileModifications(lastMessage.content)) {
+      if (!lastMessage.previousRepositoryId || !lastMessage.repositoryId) {
+        return false;
+      }
+
+      if (lastMessage.id != approveChangesMessageId) {
         return false;
       }
 
@@ -469,11 +462,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       if (onRejectChange && messages) {
                         const lastMessage = messages[messages.length - 1];
                         assert(lastMessage);
-
-                        const info = getLastMessageProjectContents(messages, messages.length - 1);
-                        assert(info);
-
-                        onRejectChange(lastMessage.id, info.rewindMessageId, info.contents.content, data);
+                        onRejectChange(lastMessage.id, data);
                       }
                     }}
                   />

@@ -576,20 +576,9 @@ function addRecordingMessageHandler(_messageHandlerId: string) {
   };
 }
 
-const recordingMessageHandlerScript = `
+export const recordingMessageHandlerScript = `
       ${assert}
       ${stringToBase64}
       ${uint8ArrayToBase64}
       (${addRecordingMessageHandler})()
 `;
-
-export function doInjectRecordingMessageHandler(content: string) {
-  const headTag = content.indexOf('<head>');
-  assert(headTag != -1, 'No <head> tag found');
-
-  const headEnd = headTag + 6;
-
-  const scriptTag = `<script>${recordingMessageHandlerScript}</script>`;
-
-  return content.slice(0, headEnd) + scriptTag + content.slice(headEnd);
-}

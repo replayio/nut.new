@@ -17,6 +17,11 @@ import {
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 
+export interface ChatState {
+  description: string;
+  messages: Message[];
+}
+
 export interface ChatHistoryItem {
   id: string;
   urlId?: string;
