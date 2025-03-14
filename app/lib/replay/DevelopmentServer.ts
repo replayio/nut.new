@@ -58,8 +58,10 @@ class DevelopmentServerManager {
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
 export async function updateDevelopmentServer(repositoryId: string) {
+  workbenchStore.showWorkbench.set(true);
   workbenchStore.repositoryId.set(repositoryId);
   workbenchStore.previewURL.set(undefined);
+  workbenchStore.previewError.set(false);
 
   if (!gActiveDevelopmentServer) {
     gActiveDevelopmentServer = new DevelopmentServerManager();
@@ -67,9 +69,9 @@ export async function updateDevelopmentServer(repositoryId: string) {
 
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryId);
 
-  if (!url) {
-    toast.error('Failed to start development server');
+  if (url) {
+    workbenchStore.previewURL.set(url);
+  } else {
+    workbenchStore.previewError.set(true);
   }
-
-  workbenchStore.previewURL.set(url);
 }
