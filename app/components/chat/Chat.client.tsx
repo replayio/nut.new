@@ -198,6 +198,14 @@ export const ChatImpl = memo(
       }
     }, [searchParams]);
 
+    // Load any repository in the initial messages.
+    useEffect(() => {
+      const repositoryId = getMessagesRepositoryId(initialMessages);
+      if (repositoryId) {
+        simulationRepositoryUpdated(repositoryId);
+      }
+    }, [initialMessages]);
+
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
     useEffect(() => {

@@ -489,7 +489,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 handleSendMessage?.(event, messageInput);
               })}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
         </div>
       </div>
     );
