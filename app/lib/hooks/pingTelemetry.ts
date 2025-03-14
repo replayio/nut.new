@@ -9,7 +9,7 @@ export async function pingTelemetry(event: string, data: any) {
     data,
   };
 
-  await fetch('/api/ping-telemetry', {
+  fetch('/api/ping-telemetry', {
     method: 'POST',
     body: JSON.stringify(requestBody),
   });

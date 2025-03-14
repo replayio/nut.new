@@ -485,6 +485,7 @@ export const ChatImpl = memo(
       }
     };
 
+    // Rewind far enough to erase the specified message.
     const onRewind = async (messageId: string) => {
       console.log('Rewinding', messageId);
 
@@ -501,10 +502,10 @@ export const ChatImpl = memo(
         return;
       }
 
-      setMessages(messages.slice(0, messageIndex + 1));
+      setMessages(messages.slice(0, messageIndex));
       simulationRepositoryUpdated(previousRepositoryId);
 
-      await pingTelemetry('RewindChat', {
+      pingTelemetry('RewindChat', {
         numMessages: messages.length,
         rewindIndex: messageIndex,
         loginKey: getNutLoginKey(),
@@ -540,7 +541,7 @@ export const ChatImpl = memo(
 
       await flashScreen();
 
-      await pingTelemetry('ApproveChange', {
+      pingTelemetry('ApproveChange', {
         numMessages: messages.length,
         loginKey: getNutLoginKey(),
       });
@@ -577,7 +578,7 @@ export const ChatImpl = memo(
         sendMessage(messageContents);
       }
 
-      await pingTelemetry('RejectChange', {
+      pingTelemetry('RejectChange', {
         retry: data.retry,
         shareProject: data.shareProject,
         shareProjectSuccess,
