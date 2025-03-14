@@ -5,7 +5,6 @@ import { TEXTAREA_MIN_HEIGHT } from './BaseChat';
 export interface RejectChangeData {
   explanation: string;
   shareProject: boolean;
-  retry: boolean;
 }
 
 interface ApproveChangeProps {
@@ -20,14 +19,13 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
   const [shareProject, setShareProject] = useState(false);
 
   if (rejectFormOpen) {
-    const performReject = (retry: boolean) => {
+    const performReject = () => {
       setRejectFormOpen(false);
 
       const explanation = textareaRef.current?.value ?? '';
       onReject({
         explanation,
         shareProject,
-        retry,
       });
     };
 
@@ -52,7 +50,7 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
                 }
 
                 event.preventDefault();
-                performReject(true);
+                performReject();
               }
             }}
             style={{
@@ -79,20 +77,12 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
 
         <div className="flex items-center gap-1 w-full h-[30px] pt-2">
           <button
-            onClick={() => performReject(false)}
+            onClick={() => performReject()}
             className="flex-1 h-[30px] flex justify-center items-center bg-red-100 border border-red-500 text-red-500 hover:bg-red-200 hover:text-red-600 transition-colors rounded"
             aria-label="Revert changes"
             title="Revert changes"
           >
             <div className="i-ph:arrow-arc-left-bold"></div>
-          </button>
-          <button
-            onClick={() => performReject(true)}
-            className="flex-1 h-[30px] flex justify-center items-center bg-green-100 border border-green-500 text-green-500 hover:bg-green-200 hover:text-green-600 transition-colors rounded"
-            aria-label="Retry changes"
-            title="Retry changes"
-          >
-            <div className="i-ph:repeat-bold"></div>
           </button>
         </div>
       </>

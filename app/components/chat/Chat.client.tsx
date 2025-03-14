@@ -556,7 +556,6 @@ export const ChatImpl = memo(
       setApproveChangesMessageId(undefined);
 
       const message = messages.find((message) => message.id === messageId);
-      const messageContents = message?.content ?? '';
 
       await onRewind(messageId);
 
@@ -565,7 +564,6 @@ export const ChatImpl = memo(
       if (data.shareProject) {
         const feedbackData: any = {
           explanation: data.explanation,
-          retry: data.retry,
           chatMessages: messages,
           repositoryId: message?.repositoryId,
           loginKey: getNutLoginKey(),
@@ -574,12 +572,7 @@ export const ChatImpl = memo(
         shareProjectSuccess = await submitFeedback(feedbackData);
       }
 
-      if (data.retry) {
-        sendMessage(messageContents);
-      }
-
       pingTelemetry('RejectChange', {
-        retry: data.retry,
         shareProject: data.shareProject,
         shareProjectSuccess,
         numMessages: messages.length,
