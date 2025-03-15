@@ -28,17 +28,16 @@ export async function getFileRepositoryContents(files: File[]): Promise<string> 
   );
 
   const zip = new JSZip();
+
   for (const { path, content } of artifacts) {
     zip.file(path, content);
   }
-  return await zip.generateAsync({ type: "base64" });
+
+  return await zip.generateAsync({ type: 'base64' });
 }
 
-export function createChatFromFolder(
-  folderName: string,
-  repositoryId: string
-): Message[] {
-  let filesContent = `I've imported the contents of the "${folderName}" folder.`;
+export function createChatFromFolder(folderName: string, repositoryId: string): Message[] {
+  const filesContent = `I've imported the contents of the "${folderName}" folder.`;
 
   const userMessage: Message = {
     role: 'user',

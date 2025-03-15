@@ -201,6 +201,7 @@ export const ChatImpl = memo(
     // Load any repository in the initial messages.
     useEffect(() => {
       const repositoryId = getMessagesRepositoryId(initialMessages);
+
       if (repositoryId) {
         simulationRepositoryUpdated(repositoryId);
       }
@@ -497,6 +498,7 @@ export const ChatImpl = memo(
       }
 
       const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex);
+
       if (!previousRepositoryId) {
         toast.error('No repository ID found for rewind');
         return;
@@ -547,10 +549,7 @@ export const ChatImpl = memo(
       });
     };
 
-    const onRejectChange = async (
-      messageId: string,
-      data: RejectChangeData,
-    ) => {
+    const onRejectChange = async (messageId: string, data: RejectChangeData) => {
       console.log('RejectChange', messageId, data);
 
       setApproveChangesMessageId(undefined);

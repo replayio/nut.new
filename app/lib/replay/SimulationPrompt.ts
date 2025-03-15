@@ -486,6 +486,10 @@ Focus specifically on fixing this bug. Do not guess about other problems.
     content: systemPrompt,
   });
 
-  const { repositoryId } = await gChatManager.sendChatMessage('developer', protocolMessages, { baseRepositoryId, onResponsePart });
+  const { repositoryId } = await gChatManager.sendChatMessage('developer', protocolMessages, {
+    baseRepositoryId,
+    onResponsePart,
+  });
+
   return repositoryId;
 }

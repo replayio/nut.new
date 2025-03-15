@@ -474,11 +474,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {!rejectFormOpen && messageInput}
               </div>
             </div>
-            {!chatStarted && (
-              <div className="flex justify-center gap-2">
-                {ImportButtons(importChat)}
-              </div>
-            )}
+            {!chatStarted && <div className="flex justify-center gap-2">{ImportButtons(importChat)}</div>}
             {!chatStarted &&
               ExamplePrompts((event, messageInput) => {
                 if (isStreaming) {

@@ -54,21 +54,21 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     )}
                   </div>
                   {previousRepositoryId && repositoryId && onRewind && (
-                      <div className="flex gap-2 flex-col lg:flex-row">
-                        <WithTooltip tooltip="Undo changes in this message">
-                          <button
-                            onClick={() => {
-                              onRewind(messageId);
-                            }}
-                            key="i-ph:arrow-u-up-left"
-                            className={classNames(
-                              'i-ph:arrow-u-up-left',
-                              'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                            )}
-                          />
-                        </WithTooltip>
-                      </div>
-                    )}
+                    <div className="flex gap-2 flex-col lg:flex-row">
+                      <WithTooltip tooltip="Undo changes in this message">
+                        <button
+                          onClick={() => {
+                            onRewind(messageId);
+                          }}
+                          key="i-ph:arrow-u-up-left"
+                          className={classNames(
+                            'i-ph:arrow-u-up-left',
+                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                          )}
+                        />
+                      </WithTooltip>
+                    </div>
+                  )}
                 </Suspense>
               </div>
             );

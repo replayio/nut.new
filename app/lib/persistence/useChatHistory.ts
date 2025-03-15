@@ -3,22 +3,15 @@ import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
 import type { Message as BaseMessage } from 'ai';
 import { toast } from 'react-toastify';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import {
-  getMessages,
-  getNextId,
-  getUrlId,
-  openDatabase,
-  setMessages,
-  duplicateChat,
-  createChatFromMessages,
-} from './db';
+import { getMessages, getNextId, openDatabase, setMessages, duplicateChat, createChatFromMessages } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 
-// Messages in a chat's history. The repository may update in response to changes in the messages.
-// Each message which changes the repository state must have a repositoryId.
+/*
+ * Messages in a chat's history. The repository may update in response to changes in the messages.
+ * Each message which changes the repository state must have a repositoryId.
+ */
 export interface Message extends BaseMessage {
   // Describes the state of the project after changes in this message were applied.
   repositoryId?: string;
@@ -193,6 +186,7 @@ function navigateChat(nextId: string) {
 export function getPreviousRepositoryId(messages: Message[], index: number): string | undefined {
   for (let i = index - 1; i >= 0; i--) {
     const message = messages[i];
+
     if (message.repositoryId) {
       return message.repositoryId;
     }

@@ -8,10 +8,12 @@ interface SimulationPacketServerURL {
   url: string;
 }
 
-// Simulation data specifying a repository ID to set up a dev server
-// for static resources and any initial database contents.
+/*
+ * Simulation data specifying a repository ID to set up a dev server
+ * for static resources and any initial database contents.
+ */
 interface SimulationPacketRepositoryId {
-  kind: "repositoryId";
+  kind: 'repositoryId';
   repositoryId: string;
 }
 

@@ -80,7 +80,7 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       }
 
       const repositoryContents = await getFileRepositoryContents(textFiles);
-      const repositoryId = await createRepositoryImported("ImportFolder", repositoryContents);
+      const repositoryId = await createRepositoryImported('ImportFolder', repositoryContents);
 
       const messages = createChatFromFolder(folderName, repositoryId);
 
