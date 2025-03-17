@@ -27,7 +27,7 @@ export interface OllamaApiResponse {
   models: OllamaModel[];
 }
 
-export const DEFAULT_NUM_CTX = process?.env?.DEFAULT_NUM_CTX ? parseInt(process.env.DEFAULT_NUM_CTX, 10) : 32768;
+export const DEFAULT_NUM_CTX = import.meta.env.DEFAULT_NUM_CTX ? parseInt(import.meta.env.DEFAULT_NUM_CTX, 10) : 32768;
 
 export default class OllamaProvider extends BaseProvider {
   name = 'Ollama';
@@ -101,7 +101,7 @@ export default class OllamaProvider extends BaseProvider {
       throw new Error('No baseUrl found for OLLAMA provider');
     }
 
-    const isDocker = process.env.RUNNING_IN_DOCKER === 'true';
+    const isDocker = import.meta.env.RUNNING_IN_DOCKER === 'true';
     baseUrl = isDocker ? baseUrl.replace('localhost', 'host.docker.internal') : baseUrl;
     baseUrl = isDocker ? baseUrl.replace('127.0.0.1', 'host.docker.internal') : baseUrl;
 

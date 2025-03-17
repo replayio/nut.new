@@ -2,7 +2,6 @@ import { vitePlugin as remixVitePlugin } from '@remix-run/dev';
 import { vercelPreset } from '@vercel/remix/vite';
 import UnoCSS from 'unocss/vite';
 import { defineConfig, type ViteDevServer } from 'vite';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { optimizeCssModules } from 'vite-plugin-optimize-css-modules';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -25,6 +24,7 @@ export default defineConfig((config) => {
     define: {
       __COMMIT_HASH: JSON.stringify(getGitHash()),
       __APP_VERSION: JSON.stringify(process.env.npm_package_version),
+
       // 'process.env': JSON.stringify(process.env)
     },
     build: {
@@ -62,6 +62,8 @@ export default defineConfig((config) => {
       'SUPABASE_URL',
       'SUPABASE_ANON_KEY',
       'USE_SUPABASE',
+      'DEFAULT_NUM_CTX',
+      'RUNNING_IN_DOCKER',
     ],
     css: {
       preprocessorOptions: {

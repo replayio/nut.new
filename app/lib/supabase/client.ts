@@ -64,7 +64,7 @@ export function shouldUseSupabase(): boolean {
 
   // Check environment variables
   const useSupabaseFromEnv =
-    typeof window !== 'undefined' ? window.ENV?.USE_SUPABASE === 'true' : process.env.USE_SUPABASE === 'true';
+    typeof window === 'object' ? window.ENV?.USE_SUPABASE === 'true' : process.env.USE_SUPABASE === 'true';
 
   // URL param takes precedence over environment variable
   const shouldUse = useSupabaseFromUrl || useSupabaseFromEnv;
