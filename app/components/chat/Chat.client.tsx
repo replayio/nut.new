@@ -319,7 +319,9 @@ export const ChatImpl = memo(
         }
 
         newMessages = [...newMessages];
+
         const lastMessage = newMessages[newMessages.length - 1];
+
         if (lastMessage.id == msg.id) {
           newMessages.pop();
           assert(lastMessage.type == 'text', 'Last message must be a text message');
@@ -338,6 +340,7 @@ export const ChatImpl = memo(
       const references: ChatReference[] = [];
 
       const mouseData = getCurrentMouseData();
+
       if (mouseData) {
         references.push({
           kind: 'element',

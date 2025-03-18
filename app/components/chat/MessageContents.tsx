@@ -13,8 +13,11 @@ interface MessageContentsProps {
 export function MessageContents({ message }: MessageContentsProps) {
   switch (message.type) {
     case 'text':
-      const textContent = stripMetadata(message.content);
-      return <div className="overflow-hidden pt-[4px]"><Markdown html>{textContent}</Markdown></div>;
+      return (
+        <div className="overflow-hidden pt-[4px]">
+          <Markdown html>{stripMetadata(message.content)}</Markdown>
+        </div>
+      );
     case 'image':
       return (
         <div className="overflow-hidden pt-[4px]">
