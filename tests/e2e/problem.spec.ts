@@ -1,10 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { isSupabaseEnabled } from './setup/test-utils';
-
-const problemName = {
-  false: 'Contact book tiny search icon',
-  true: 'sdfsdf',
-};
 
 test('Should be able to load a problem', async ({ page }) => {
   await page.goto('/problems');
@@ -13,8 +7,7 @@ test('Should be able to load a problem', async ({ page }) => {
   await expect(combobox).toBeVisible({ timeout: 30000 });
   await combobox.selectOption('all');
 
-  const useSupabase = await isSupabaseEnabled(page);
-  const problem = problemName[useSupabase ? 'true' : 'false'];
+  const problem = 'Contact book tiny search icon';
 
   const problemLink = page.getByRole('link', { name: problem }).first();
   await expect(problemLink).toBeVisible({ timeout: 30000 });
