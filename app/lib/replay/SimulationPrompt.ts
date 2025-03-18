@@ -7,6 +7,7 @@ import type { SimulationData, SimulationPacket } from './SimulationData';
 import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import { updateDevelopmentServer } from './DevelopmentServer';
+import type { Message } from '~/lib/persistence/useChatHistory';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -17,7 +18,7 @@ function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
 }
 
 interface ChatReferenceElement {
-  element: 'kind';
+  kind: 'element';
   selector: string;
   width: number;
   height: number;
@@ -25,7 +26,7 @@ interface ChatReferenceElement {
   y: number;
 }
 
-type ChatReference = ChatReferenceElement;
+export type ChatReference = ChatReferenceElement;
 
 type ChatResponsePartCallback = (message: Message) => void;
 

@@ -22,6 +22,7 @@ import {
   simulationFinishData,
   simulationRepositoryUpdated,
   sendChatMessage,
+  type ChatReference,
 } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '~/components/workbench/Preview';
@@ -332,6 +333,20 @@ export const ChatImpl = memo(
 
         setMessages(newMessages);
       };
+
+      const references: ChatReference[] = [];
+
+      const mouseData = getCurrentMouseData();
+      if (mouseData) {
+        references.push({
+          kind: 'element',
+          selector: mouseData.selector,
+          x: mouseData.x,
+          y: mouseData.y,
+          width: mouseData.width,
+          height: mouseData.height,
+        });
+      }
 
       try {
         await sendChatMessage(newMessages, references, addResponseMessage);
