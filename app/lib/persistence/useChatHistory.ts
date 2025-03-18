@@ -1,21 +1,31 @@
 import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
 import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
-import type { Message as BaseMessage } from 'ai';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
 import { getMessages, getNextId, openDatabase, setMessages, duplicateChat, createChatFromMessages } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 
-/*
- * Messages in a chat's history. The repository may update in response to changes in the messages.
- * Each message which changes the repository state must have a repositoryId.
- */
-export interface Message extends BaseMessage {
-  // Describes the state of the project after changes in this message were applied.
+type MessageRole = 'user' | 'assistant';
+
+interface MessageBase {
+  id: string;
+  role: MessageRole;
   repositoryId?: string;
 }
+
+interface MessageText extends MessageBase {
+  type: 'text';
+  content: string;
+}
+
+interface MessageImage extends MessageBase {
+  type: 'image';
+  dataURL: string;
+}
+
+export type Message = MessageText | MessageImage;
 
 export interface ChatState {
   description: string;

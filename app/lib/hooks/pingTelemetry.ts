@@ -43,16 +43,4 @@ export class ChatMessageTelemetry {
   abort(reason: string) {
     this._ping('AbortMessage', { reason });
   }
-
-  startSimulation() {
-    this._ping('StartSimulation');
-  }
-
-  endSimulation(status: string) {
-    this._ping('EndSimulation', { status });
-  }
-
-  sendPrompt(simulationStatus: string) {
-    this._ping('SendPrompt', { simulationStatus });
-  }
 }
