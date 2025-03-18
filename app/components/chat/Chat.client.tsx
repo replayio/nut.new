@@ -30,7 +30,7 @@ import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, maxFreeUses 
 import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
-import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
 
 const toastAnimation = cssTransition({
@@ -282,19 +282,22 @@ export const ChatImpl = memo(
       const userMessage: Message = {
         id: `user-${chatId}`,
         role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: _input,
-          },
-          ...imageDataList.map((imageData) => ({
-            type: 'image',
-            image: imageData,
-          })),
-        ] as any, // Type assertion to bypass compiler check
+        type: 'text',
+        content: _input,
       };
 
       let newMessages = [...messages, userMessage];
+
+      imageDataList.forEach((imageData, index) => {
+        const imageMessage: Message = {
+          id: `image-${chatId}-${index}`,
+          role: 'user',
+          type: 'image',
+          dataURL: imageData,
+        };
+        newMessages.push(imageMessage);
+      });
+
       setMessages(newMessages);
 
       // Add file cleanup here
@@ -314,28 +317,24 @@ export const ChatImpl = memo(
         }
 
         newMessages = [...newMessages];
-
-        if (hasResponseMessage) {
+        const lastMessage = newMessages[newMessages.length - 1];
+        if (lastMessage.id == msg.id) {
           newMessages.pop();
+          assert(lastMessage.type == 'text', 'Last message must be a text message');
+          assert(msg.type == 'text', 'Message must be a text message');
+          newMessages.push({
+            ...msg,
+            content: lastMessage.content + msg.content,
+          });
+        } else {
+          newMessages.push(msg);
         }
 
-        newMessages.push({
-          id: responseMessageId,
-          role: 'assistant',
-          content: responseMessageContent,
-          repositoryId: responseRepositoryId,
-        });
         setMessages(newMessages);
-        hasResponseMessage = true;
-      };
-
-      const addResponseContent = (content: string) => {
-        responseMessageContent += content;
-        updateResponseMessage();
       };
 
       try {
-        await sendChatMessage(newMessages, references, addResponseContent);
+        await sendChatMessage(newMessages, references, addResponseMessage);
       } catch (e) {
         toast.error('Error sending message');
         console.error('Error sending message', e);
@@ -355,9 +354,14 @@ export const ChatImpl = memo(
 
       textareaRef.current?.blur();
 
-      if (responseRepositoryId) {
+      const existingRepositoryId = getMessagesRepositoryId(messages);
+      const responseRepositoryId = getMessagesRepositoryId(newMessages);
+
+      if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
         simulationRepositoryUpdated(responseRepositoryId);
-        setApproveChangesMessageId(responseMessageId);
+
+        const lastMessage = newMessages[newMessages.length - 1];
+        setApproveChangesMessageId(lastMessage.id);
       }
     };
 
