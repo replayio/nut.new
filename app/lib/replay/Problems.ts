@@ -2,7 +2,7 @@
 
 import { toast } from 'react-toastify';
 import { sendCommandDedicatedClient } from './ReplayProtocolClient';
-import type { ProtocolMessage } from './SimulationPrompt';
+import type { Message } from '~/lib/persistence/message';
 import Cookies from 'js-cookie';
 import { shouldUseSupabase } from '~/lib/supabase/client';
 import {
@@ -22,7 +22,7 @@ export interface BoltProblemComment {
 
 export interface BoltProblemSolution {
   simulationData: any;
-  messages: ProtocolMessage[];
+  messages: Message[];
   evaluator?: string;
 }
 

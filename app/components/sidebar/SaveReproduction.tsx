@@ -7,7 +7,6 @@ import { getOrFetchLastLoadedProblem } from '~/components/chat/LoadProblemButton
 import {
   getLastUserSimulationData,
   getLastSimulationChatMessages,
-  getSimulationRecordingId,
   isSimulatingOrHasFinished,
 } from '~/lib/replay/SimulationPrompt';
 
@@ -54,18 +53,6 @@ export function SaveReproductionModal() {
     }
 
     try {
-      const loadId = toast.loading('Waiting for recording...');
-
-      try {
-        /*
-         * Wait for simulation to finish.
-         * const recordingId =
-         */
-        await getSimulationRecordingId();
-      } finally {
-        toast.dismiss(loadId);
-      }
-
       toast.info('Submitting reproduction...');
       console.log('SubmitReproduction');
 

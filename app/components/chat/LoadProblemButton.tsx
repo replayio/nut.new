@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs';
@@ -7,6 +6,7 @@ import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { BoltProblem } from '~/lib/replay/Problems';
 import { getProblem } from '~/lib/replay/Problems';
 import { createRepositoryImported } from '~/lib/replay/Repository';
+import type { Message } from '~/lib/persistence/message';
 
 interface LoadProblemButtonProps {
   className?: string;

@@ -32,7 +32,8 @@ import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
-import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
+import { getMessagesRepositoryId, getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
+import type { Message } from '~/lib/persistence/message';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',

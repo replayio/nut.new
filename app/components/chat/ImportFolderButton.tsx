@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { MAX_FILES, isBinaryFile, shouldIncludeFile } from '~/utils/fileUtils';
 import { createChatFromFolder, getFileRepositoryContents } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs'; // Assuming logStore is imported from this location
 import { createRepositoryImported } from '~/lib/replay/Repository';
+import type { Message } from '~/lib/persistence/message';
 
 interface ImportFolderButtonProps {
   className?: string;

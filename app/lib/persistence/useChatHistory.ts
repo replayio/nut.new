@@ -6,26 +6,7 @@ import { logStore } from '~/lib/stores/logs'; // Import logStore
 import { getMessages, getNextId, openDatabase, setMessages, duplicateChat, createChatFromMessages } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
-
-type MessageRole = 'user' | 'assistant';
-
-interface MessageBase {
-  id: string;
-  role: MessageRole;
-  repositoryId?: string;
-}
-
-interface MessageText extends MessageBase {
-  type: 'text';
-  content: string;
-}
-
-interface MessageImage extends MessageBase {
-  type: 'image';
-  dataURL: string;
-}
-
-export type Message = MessageText | MessageImage;
+import type { Message } from './message';
 
 export interface ChatState {
   description: string;

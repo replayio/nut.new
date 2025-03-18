@@ -1,6 +1,6 @@
-import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { ImportFolderButton } from '~/components/chat/ImportFolderButton';
+import type { Message } from '~/lib/persistence/message';
 
 type ChatData = {
   messages?: Message[]; // Standard Bolt format

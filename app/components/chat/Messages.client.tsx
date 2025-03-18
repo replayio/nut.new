@@ -1,9 +1,9 @@
 import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
-import { AssistantMessage } from './AssistantMessage';
-import { UserMessage } from './UserMessage';
 import WithTooltip from '~/components/ui/Tooltip';
-import { getPreviousRepositoryId, type Message } from '~/lib/persistence/useChatHistory';
+import { getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
+import type { Message } from '~/lib/persistence/message';
+import { MessageContents } from './MessageContents';
 
 interface MessagesProps {
   id?: string;
@@ -20,7 +20,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     <div id={id} ref={ref} className={props.className}>
       {messages.length > 0
         ? messages.map((message, index) => {
-            const { role, content, id: messageId, repositoryId } = message;
+            const { role, id: messageId, repositoryId } = message;
             const previousRepositoryId = getPreviousRepositoryId(messages, index);
             const isUserMessage = role === 'user';
             const isFirst = index === 0;
@@ -47,11 +47,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     </div>
                   )}
                   <div className="grid grid-col-1 w-full">
-                    {isUserMessage ? (
-                      <UserMessage content={content} />
-                    ) : (
-                      <AssistantMessage content={content} annotations={message.annotations} />
-                    )}
+                    <MessageContents message={message} />
                   </div>
                   {previousRepositoryId && repositoryId && onRewind && (
                     <div className="flex gap-2 flex-col lg:flex-row">

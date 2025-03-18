@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { database, deleteById, getAll, setMessages } from '~/lib/persistence';
 import { logStore } from '~/lib/stores/logs';
 import { classNames } from '~/utils/classNames';
-import type { Message } from 'ai';
+import type { Message } from '~/lib/persistence/message';
 
 // List of supported providers that can have API keys
 const API_KEY_PROVIDERS = [

@@ -1,4 +1,4 @@
-import type { Message } from '~/lib/persistence/useChatHistory';
+import type { Message } from '~/lib/persistence/message';
 import { generateId } from './fileUtils';
 import JSZip from 'jszip';
 
@@ -43,15 +43,15 @@ export function createChatFromFolder(folderName: string, repositoryId: string): 
     role: 'user',
     id: generateId(),
     content: `Import the "${folderName}" folder`,
-    createdAt: new Date(),
+    type: 'text',
   };
 
   const filesMessage: Message = {
     role: 'assistant',
     content: filesContent,
     id: generateId(),
-    createdAt: new Date(),
     repositoryId,
+    type: 'text',
   };
 
   const messages = [userMessage, filesMessage];

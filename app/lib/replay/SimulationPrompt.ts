@@ -7,7 +7,7 @@ import type { SimulationData, SimulationPacket } from './SimulationData';
 import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import { updateDevelopmentServer } from './DevelopmentServer';
-import type { Message } from '~/lib/persistence/useChatHistory';
+import type { Message } from '~/lib/persistence/message';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
