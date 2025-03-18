@@ -81,6 +81,31 @@ export function shouldUseSupabase(): boolean {
   return shouldUse;
 }
 
+/**
+ * Gets the current authenticated user from Supabase.
+ * Returns the user's email if available, otherwise null.
+ */
+export async function getCurrentUser(): Promise<string | null> {
+  try {
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+
+    return user?.email || null;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
+/**
+ * Checks if there is a currently authenticated user.
+ */
+export async function isAuthenticated(): Promise<boolean> {
+  const user = await getCurrentUser();
+  return user !== null;
+}
+
 export function getSupabase() {
   // Determine execution environment and get appropriate variables
   if (typeof window == 'object') {
