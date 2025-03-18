@@ -138,7 +138,7 @@ class ChatManager {
 
     const chatId = await this.chatIdPromise;
 
-    console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages }));
+    console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages, references }));
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',
