@@ -35,7 +35,6 @@ test('Should be able to save a problem ', async ({ page }) => {
     await page.getByRole('textbox', { name: 'Email' }).click();
 
     const email = process.env.SUPABASE_TEST_USER_EMAIL || '';
-
     const password = process.env.SUPABASE_TEST_USER_PASSWORD || '';
 
     await page.getByRole('textbox', { name: 'Email' }).fill(email);
