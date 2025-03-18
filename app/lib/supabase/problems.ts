@@ -127,7 +127,7 @@ export async function supabaseSubmitProblem(problem: BoltProblemInput): Promise<
       status: problem.status as BoltProblemStatus,
       keywords: problem.keywords || [],
       repository_contents: problem.repositoryContents,
-      user_id: null,
+      user_id: problem.user_id,
     };
 
     const { data, error } = await getSupabase().from('problems').insert(supabaseProblem).select().single();

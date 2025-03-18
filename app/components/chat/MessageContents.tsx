@@ -14,13 +14,13 @@ export function MessageContents({ message }: MessageContentsProps) {
   switch (message.type) {
     case 'text':
       return (
-        <div className="overflow-hidden pt-[4px]">
+        <div data-testid="message-content" className="overflow-hidden pt-[4px]">
           <Markdown html>{stripMetadata(message.content)}</Markdown>
         </div>
       );
     case 'image':
       return (
-        <div className="overflow-hidden pt-[4px]">
+        <div data-testid="message-content" className="overflow-hidden pt-[4px]">
           <div className="flex flex-col gap-4">
             <img
               src={message.dataURL}

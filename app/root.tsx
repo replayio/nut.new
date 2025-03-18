@@ -12,6 +12,7 @@ import { logStore } from './lib/stores/logs';
 import { initializeAuth, userStore, isLoadingStore } from './lib/stores/auth';
 import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/remix';
+import { AuthModal } from './components/auth/AuthModal';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -165,6 +166,7 @@ export default function App() {
         <AuthProvider data={data} />
         <main className="">{isLoading ? <div></div> : <Outlet />}</main>
         <ToastContainer position="bottom-right" theme={theme} />
+        <AuthModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />

@@ -50,6 +50,7 @@ export interface BoltProblemDescription {
 
 export interface BoltProblem extends BoltProblemDescription {
   username?: string;
+  user_id?: string;
   repositoryContents: string;
   comments?: BoltProblemComment[];
   solution?: BoltProblemSolution;

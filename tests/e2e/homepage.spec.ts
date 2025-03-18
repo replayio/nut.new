@@ -9,7 +9,7 @@ test('should load the homepage', async ({ page }) => {
   await expect(page.locator('header')).toBeVisible();
 });
 
-test.skip('Create a project from a preset', async ({ page }) => {
+test('Create a project from a preset', async ({ page }) => {
   // Using baseURL from config instead of hardcoded URL
   await page.goto('/');
   await page.getByRole('button', { name: 'Build a todo app in React' }).click();
@@ -18,5 +18,6 @@ test.skip('Create a project from a preset', async ({ page }) => {
     .filter({ hasText: /^Build a todo app in React using Tailwind$/ })
     .first()
     .click();
-  await page.getByRole('button', { name: 'Code', exact: true }).click();
+
+  await expect(page.locator('[data-testid="message"]')).toBeVisible();
 });

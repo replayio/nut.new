@@ -28,6 +28,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
 
             return (
               <div
+                data-testid="message"
                 key={index}
                 className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
                   'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),

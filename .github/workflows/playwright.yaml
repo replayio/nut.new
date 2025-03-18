@@ -47,6 +47,9 @@ jobs:
 
       - name: Run Playwright tests 
         run: pnpm test:e2e
+        env:
+          SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
+          SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
 
       - name: Upload test results
         if: always()
@@ -94,6 +97,8 @@ jobs:
         run: pnpm run test:e2e
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
+          SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
+          SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
       
       - name: Upload test results
         if: always()

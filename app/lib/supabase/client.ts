@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -69,16 +70,28 @@ export function shouldUseSupabase(): boolean {
   // URL param takes precedence over environment variable
   const shouldUse = useSupabaseFromUrl || useSupabaseFromEnv;
 
-  // Log for debugging
-  if (typeof window !== 'undefined') {
-    console.log('Supabase usage check:', {
-      fromUrl: useSupabaseFromUrl,
-      fromEnv: useSupabaseFromEnv,
-      enabled: shouldUse,
-    });
-  }
-
   return shouldUse;
+}
+
+export async function getCurrentUser(): Promise<SupabaseUser | null> {
+  try {
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+
+    return user;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
+/**
+ * Checks if there is a currently authenticated user.
+ */
+export async function isAuthenticated(): Promise<boolean> {
+  const user = await getCurrentUser();
+  return user !== null;
 }
 
 export function getSupabase() {

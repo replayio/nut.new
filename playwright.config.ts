@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+if (!process.env.CI) {
+  dotenv.config({ path: '.env.local' });
+}
 
 const port = 5175;
 const usePreviewUrl = !!process.env.PLAYWRIGHT_TEST_BASE_URL;
