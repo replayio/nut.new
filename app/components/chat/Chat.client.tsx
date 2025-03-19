@@ -315,6 +315,9 @@ export const ChatImpl = memo(
 
       runAnimation();
 
+      const existingRepositoryId = getMessagesRepositoryId(messages);
+      let updatedRepository = false;
+
       const addResponseMessage = (msg: Message) => {
         if (gNumAborts != numAbortsAtStart) {
           return;
@@ -334,6 +337,13 @@ export const ChatImpl = memo(
           });
         } else {
           newMessages.push(msg);
+
+          // Update the repository as soon as it has changed.
+          const responseRepositoryId = getMessagesRepositoryId(newMessages);
+          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+            simulationRepositoryUpdated(responseRepositoryId);
+            updatedRepository = true;
+          }
         }
 
         setMessages(newMessages);
@@ -375,12 +385,7 @@ export const ChatImpl = memo(
 
       textareaRef.current?.blur();
 
-      const existingRepositoryId = getMessagesRepositoryId(messages);
-      const responseRepositoryId = getMessagesRepositoryId(newMessages);
-
-      if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-        simulationRepositoryUpdated(responseRepositoryId);
-
+      if (updatedRepository) {
         const lastMessage = newMessages[newMessages.length - 1];
         setApproveChangesMessageId(lastMessage.id);
       } else {
@@ -457,8 +462,18 @@ export const ChatImpl = memo(
       setApproveChangesMessageId(undefined);
 
       const message = messages.find((message) => message.id === messageId);
+      assert(message, 'Message not found');
+      assert(message == messages[messages.length - 1], 'Message must be the last message');
 
-      await onRewind(messageId);
+      // Erase all messages since the last user message.
+      let rewindMessageId = message.id;
+      for (let i = messages.length - 2; i >= 0; i--) {
+        if (messages[i].role == 'user') {
+          break;
+        }
+        rewindMessageId = messages[i].id;
+      }
+      await onRewind(rewindMessageId);
 
       let shareProjectSuccess = false;
 
@@ -466,7 +481,6 @@ export const ChatImpl = memo(
         const feedbackData: any = {
           explanation: data.explanation,
           chatMessages: messages,
-          repositoryId: message?.repositoryId,
           loginKey: getNutLoginKey(),
         };
 
