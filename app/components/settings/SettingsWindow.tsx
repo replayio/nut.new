@@ -118,7 +118,7 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
               </div>
             </div>
             <RadixDialog.Close asChild onClick={onClose}>
-              <IconButton icon="i-ph:x" className="absolute top-[10px] right-[10px]" />
+              <IconButton testId="dialog-close" icon="i-ph:x" className="absolute top-[10px] right-[10px]" />
             </RadixDialog.Close>
           </motion.div>
         </RadixDialog.Content>

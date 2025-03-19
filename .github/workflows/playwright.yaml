@@ -50,6 +50,8 @@ jobs:
         env:
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
+          NUT_LOGIN_KEY: ${{ secrets.NUT_LOGIN_KEY }}
+          NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
       - name: Upload test results
         if: always()
@@ -99,7 +101,9 @@ jobs:
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
-      
+          NUT_LOGIN_KEY: ${{ secrets.NUT_LOGIN_KEY }}
+          NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

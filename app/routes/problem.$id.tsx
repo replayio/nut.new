@@ -7,14 +7,14 @@ import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
+import { useStore } from '@nanostores/react';
 import {
   getProblem,
   updateProblem as backendUpdateProblem,
   deleteProblem as backendDeleteProblem,
-  getProblemsUsername,
   BoltProblemStatus,
-  getNutIsAdmin,
 } from '~/lib/replay/Problems';
+import { isAdminStore, usernameStore } from '~/lib/stores/user';
 import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
@@ -57,10 +57,12 @@ interface UpdateProblemFormProps {
   handleSubmit: (content: string) => void;
   updateText: string;
   placeholder: string;
+  inputType?: 'textarea' | 'select';
+  options?: { value: string; label: string }[];
 }
 
 function UpdateProblemForm(props: UpdateProblemFormProps) {
-  const { handleSubmit, updateText, placeholder } = props;
+  const { handleSubmit, updateText, placeholder, inputType = 'textarea', options = [] } = props;
   const [value, setValue] = useState('');
 
   const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,14 +76,32 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
 
   return (
     <form onSubmit={onSubmitClicked} className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
-      <textarea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder={placeholder}
-        rows={4}
-        className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px]"
-        required
-      />
+      {inputType === 'textarea' ? (
+        <textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={placeholder}
+          rows={4}
+          className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px]"
+          required
+        />
+      ) : (
+        <select
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          required
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      )}
       <button
         type="submit"
         disabled={!value.trim()}
@@ -104,10 +124,12 @@ function UpdateProblemForms({
   updateProblem: UpdateProblemCallback;
   deleteProblem: DeleteProblemCallback;
 }) {
+  const username = useStore(usernameStore);
+
   const handleAddComment = (content: string) => {
     const newComment: BoltProblemComment = {
       timestamp: Date.now(),
-      username: getProblemsUsername(),
+      username,
       content,
     };
     updateProblem((problem) => {
@@ -158,6 +180,12 @@ function UpdateProblemForms({
     }));
   };
 
+  // Convert BoltProblemStatus enum to options array for select
+  const statusOptions = Object.entries(BoltProblemStatus).map(([key, _value]) => ({
+    value: key,
+    label: key,
+  }));
+
   return (
     <>
       <UpdateProblemForm handleSubmit={handleAddComment} updateText="Add Comment" placeholder="Add a comment..." />
@@ -174,7 +202,9 @@ function UpdateProblemForms({
       <UpdateProblemForm
         handleSubmit={handleSetStatus}
         updateText="Set Status"
-        placeholder="Set the status of the problem..."
+        placeholder="Select a status..."
+        inputType="select"
+        options={statusOptions}
       />
       <UpdateProblemForm
         handleSubmit={handleSetKeywords}
@@ -199,6 +229,7 @@ const Nothing = () => null;
 function ViewProblemPage() {
   const params = useParams();
   const problemId = params.id;
+  const isAdmin = useStore(isAdminStore);
 
   if (typeof problemId !== 'string') {
     throw new Error('Problem ID is required');
@@ -248,9 +279,7 @@ function ViewProblemPage() {
               <ProblemViewer problem={problemData} />
             )}
           </div>
-          {getNutIsAdmin() && problemData && (
-            <UpdateProblemForms updateProblem={updateProblem} deleteProblem={deleteProblem} />
-          )}
+          {isAdmin && problemData && <UpdateProblemForms updateProblem={updateProblem} deleteProblem={deleteProblem} />}
           <ToastContainerWrapper />
         </div>
       </TooltipProvider>

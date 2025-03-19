@@ -17,11 +17,13 @@ interface BaseIconButtonProps {
 type IconButtonWithoutChildrenProps = {
   icon: string;
   children?: undefined;
+  testId?: string;
 } & BaseIconButtonProps;
 
 type IconButtonWithChildrenProps = {
   icon?: undefined;
   children: string | JSX.Element | JSX.Element[];
+  testId?: string;
 } & BaseIconButtonProps;
 
 type IconButtonProps = IconButtonWithoutChildrenProps | IconButtonWithChildrenProps;
@@ -37,6 +39,7 @@ export const IconButton = memo(
         iconClassName,
         disabledClassName,
         disabled = false,
+        testId,
         title,
         onClick,
         children,
@@ -56,6 +59,7 @@ export const IconButton = memo(
           )}
           title={title}
           disabled={disabled}
+          data-testid={testId || 'icon-button'}
           onClick={(event) => {
             if (disabled) {
               return;

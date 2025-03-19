@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState, useEffect } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { getProblemsUsername, submitProblem, saveProblemsUsername, BoltProblemStatus } from '~/lib/replay/Problems';
+import { getUsername, submitProblem, saveUsername, BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemInput } from '~/lib/replay/Problems';
 import { getRepositoryContents } from '~/lib/replay/Repository';
 import { shouldUseSupabase, getCurrentUser, isAuthenticated } from '~/lib/supabase/client';
@@ -31,7 +31,7 @@ export function SaveProblem() {
       } else {
         setIsLoggedIn(true); // Always considered logged in when not using Supabase
 
-        const username = getProblemsUsername();
+        const username = getUsername();
 
         if (username) {
           setFormData((prev) => ({ ...prev, username }));
@@ -70,7 +70,7 @@ export function SaveProblem() {
 
     // Only save username to cookie if not using Supabase
     if (!shouldUseSupabase()) {
-      saveProblemsUsername(formData.username);
+      saveUsername(formData.username);
     }
 
     toast.info('Submitting problem...');

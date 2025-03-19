@@ -13,6 +13,8 @@ import {
   supabaseSubmitFeedback,
   supabaseDeleteProblem,
 } from '~/lib/supabase/problems';
+import { getNutIsAdmin as getNutIsAdminFromSupabase } from '~/lib/supabase/client';
+import { updateIsAdmin, updateUsername } from '~/lib/stores/user';
 
 export interface BoltProblemComment {
   username?: string;
@@ -59,26 +61,41 @@ export interface BoltProblem extends BoltProblemDescription {
 export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
+  let problems: BoltProblemDescription[] = [];
+
   if (shouldUseSupabase()) {
-    return supabaseListAllProblems();
+    problems = await supabaseListAllProblems();
+  } else {
+    try {
+      const rv = await sendCommandDedicatedClient({
+        method: 'Recording.globalExperimentalCommand',
+        params: {
+          name: 'listBoltProblems',
+        },
+      });
+      console.log('ListProblemsRval', rv);
+
+      problems = (rv as any).rval.problems.reverse();
+
+      const filteredProblems = problems.filter((problem) => {
+        // if ?showAll=true is not in the url, filter out [test] problems
+        if (window.location.search.includes('showAll=true')) {
+          return true;
+        }
+
+        return !problem.title.includes('[test]');
+      });
+
+      return filteredProblems;
+    } catch (error) {
+      console.error('Error fetching problems', error);
+      toast.error('Failed to fetch problems');
+
+      return [];
+    }
   }
 
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: 'Recording.globalExperimentalCommand',
-      params: {
-        name: 'listBoltProblems',
-      },
-    });
-    console.log('ListProblemsRval', rv);
-
-    return (rv as any).rval.problems.reverse();
-  } catch (error) {
-    console.error('Error fetching problems', error);
-    toast.error('Failed to fetch problems');
-
-    return [];
-  }
+  return problems;
 }
 
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
@@ -192,13 +209,18 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
 
 const nutLoginKeyCookieName = 'nutLoginKey';
 const nutIsAdminCookieName = 'nutIsAdmin';
+const nutUsernameCookieName = 'nutUsername';
 
 export function getNutLoginKey(): string | undefined {
   const cookieValue = Cookies.get(nutLoginKeyCookieName);
   return cookieValue?.length ? cookieValue : undefined;
 }
 
-export function getNutIsAdmin(): boolean {
+export async function getNutIsAdmin(): Promise<boolean> {
+  if (shouldUseSupabase()) {
+    return getNutIsAdminFromSupabase();
+  }
+
   return Cookies.get(nutIsAdminCookieName) === 'true';
 }
 
@@ -222,22 +244,26 @@ export async function saveNutLoginKey(key: string) {
   console.log('UserInfo', userInfo);
 
   Cookies.set(nutLoginKeyCookieName, key);
-  Cookies.set(nutIsAdminCookieName, userInfo.admin ? 'true' : 'false');
+  setNutIsAdmin(userInfo.admin);
 }
 
 export function setNutIsAdmin(isAdmin: boolean) {
   Cookies.set(nutIsAdminCookieName, isAdmin ? 'true' : 'false');
+
+  // Update the store
+  updateIsAdmin(isAdmin);
 }
 
-const nutProblemsUsernameCookieName = 'nutProblemsUsername';
-
-export function getProblemsUsername(): string | undefined {
-  const cookieValue = Cookies.get(nutProblemsUsernameCookieName);
+export function getUsername(): string | undefined {
+  const cookieValue = Cookies.get(nutUsernameCookieName);
   return cookieValue?.length ? cookieValue : undefined;
 }
 
-export function saveProblemsUsername(username: string) {
-  Cookies.set(nutProblemsUsernameCookieName, username);
+export function saveUsername(username: string) {
+  Cookies.set(nutUsernameCookieName, username);
+
+  // Update the store
+  updateUsername(username);
 }
 
 export async function submitFeedback(feedback: any): Promise<boolean> {

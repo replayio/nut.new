@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { isSupabaseEnabled } from './setup/test-utils';
+import { isSupabaseEnabled, login, setLoginKey } from './setup/test-utils';
 
 test('Should be able to load a problem', async ({ page }) => {
   await page.goto('/problems');
@@ -34,13 +34,7 @@ test('Should be able to save a problem ', async ({ page }) => {
     await page.getByRole('button', { name: 'Log In' }).click();
     await page.getByRole('textbox', { name: 'Email' }).click();
 
-    const email = process.env.SUPABASE_TEST_USER_EMAIL || '';
-    const password = process.env.SUPABASE_TEST_USER_PASSWORD || '';
-
-    await page.getByRole('textbox', { name: 'Email' }).fill(email);
-    await page.getByRole('textbox', { name: 'Email' }).press('Tab');
-    await page.getByRole('textbox', { name: 'Password' }).fill(password);
-    await page.getByRole('textbox', { name: 'Password' }).press('Enter');
+    await login(page);
 
     await expect(page.getByText('Import the "problem" folder')).toBeVisible({ timeout: 30000 });
 
@@ -67,4 +61,36 @@ test('Should be able to save a problem ', async ({ page }) => {
     await page.getByRole('button', { name: 'Submit' }).click();
     await page.getByRole('button', { name: 'Close' }).click();
   }
+});
+
+test('Should be able to update a problem', async ({ page }) => {
+  await page.goto('/problems?showAll=true');
+  await page.getByRole('combobox').selectOption('all');
+
+  await page.getByRole('link', { name: '[test] playwright' }).first().click();
+  expect(await page.getByRole('textbox', { name: 'Set the title of the problem' })).not.toBeVisible();
+
+  if (await isSupabaseEnabled(page)) {
+    await login(page);
+  } else {
+    await setLoginKey(page);
+  }
+
+  const currentTime = new Date();
+  const hours = currentTime.getHours().toString().padStart(2, '0');
+  const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+  const timeString = `${hours}:${minutes}`;
+  const title = `[test] playwright ${timeString}`;
+
+  await page.getByRole('textbox', { name: 'Set the title of the problem' }).click();
+  await page.getByRole('textbox', { name: 'Set the title of the problem' }).fill(title);
+  await page.getByRole('button', { name: 'Set Title' }).click();
+
+  await page.getByRole('heading', { name: title }).click();
+  await page.getByRole('combobox').selectOption('Solved');
+  await page.getByRole('button', { name: 'Set Status' }).click();
+  await page.locator('span').filter({ hasText: 'Solved' }).click();
+  await page.getByRole('combobox').selectOption('Pending');
+  await page.getByRole('button', { name: 'Set Status' }).click();
+  await page.locator('span').filter({ hasText: 'Pending' }).click();
 });

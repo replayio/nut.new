@@ -53,3 +53,28 @@ export async function clickButton(page: Page, selector: string): Promise<void> {
 export async function getElementText(page: Page, selector: string): Promise<string> {
   return page.locator(selector).textContent() as Promise<string>;
 }
+
+export async function login(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Sign In' }).click();
+  await page.getByRole('textbox', { name: 'Email' }).click();
+  await page.getByRole('textbox', { name: 'Email' }).fill(process.env.SUPABASE_TEST_USER_EMAIL || '');
+  await page.getByRole('textbox', { name: 'Email' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.SUPABASE_TEST_USER_PASSWORD || '');
+  await page.getByRole('textbox', { name: 'Password' }).press('Enter');
+}
+
+export async function setLoginKey(page: Page): Promise<void> {
+  await page.locator('[data-testid="sidebar-icon"]').click();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: 'User Info' }).click();
+  await page.getByRole('textbox').nth(1).click();
+
+  await page.getByRole('textbox', { name: 'Enter your username' }).click();
+  await page.getByRole('textbox', { name: 'Enter your login key' }).click();
+  await page.getByRole('textbox', { name: 'Enter your login key' }).fill(process.env.NUT_LOGIN_KEY || '');
+
+  await page.getByRole('textbox', { name: 'Enter your username' }).click();
+  await page.getByRole('textbox', { name: 'Enter your username' }).fill(process.env.NUT_USERNAME || '');
+
+  await page.getByTestId('dialog-close').click();
+}

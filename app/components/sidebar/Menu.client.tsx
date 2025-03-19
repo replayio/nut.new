@@ -1,6 +1,7 @@
 import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useStore } from '@nanostores/react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
@@ -13,7 +14,7 @@ import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { SaveProblem } from './SaveProblem';
 import { SaveReproductionModal } from './SaveReproduction';
-import { getNutIsAdmin } from '~/lib/replay/Problems';
+import { isAdminStore } from '~/lib/stores/user';
 
 const menuVariants = {
   closed: {
@@ -46,6 +47,7 @@ export const Menu = () => {
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const isAdmin = useStore(isAdminStore);
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
@@ -140,7 +142,7 @@ export const Menu = () => {
             Problems
           </a>
           <SaveProblem />
-          {getNutIsAdmin() && <SaveReproductionModal />}
+          {isAdmin && <SaveReproductionModal />}
           <a
             href="/about"
             className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"

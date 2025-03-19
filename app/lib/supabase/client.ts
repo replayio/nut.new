@@ -54,6 +54,9 @@ export interface Database {
 let supabaseUrl = '';
 let supabaseAnonKey = '';
 
+// Add a singleton client instance
+let supabaseClientInstance: ReturnType<typeof createClient<Database>> | null = null;
+
 /**
  * Determines whether Supabase should be used based on URL parameters and environment variables.
  * URL parameters take precedence over environment variables.
@@ -86,6 +89,27 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
   }
 }
 
+export async function getNutIsAdmin(): Promise<boolean> {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return false;
+  }
+
+  const { data: profileData, error: profileError } = await getSupabase()
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user?.id)
+    .single();
+
+  if (profileError) {
+    console.error('Error fetching user profile:', profileError);
+    return false;
+  }
+
+  return profileData?.is_admin || false;
+}
+
 /**
  * Checks if there is a currently authenticated user.
  */
@@ -95,6 +119,11 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export function getSupabase() {
+  // If we already have an instance, return it
+  if (supabaseClientInstance) {
+    return supabaseClientInstance;
+  }
+
   // Determine execution environment and get appropriate variables
   if (typeof window == 'object') {
     supabaseUrl = window.ENV.SUPABASE_URL || '';
@@ -115,13 +144,15 @@ export function getSupabase() {
     console.warn('Missing Supabase environment variables. Some features may not work properly.');
   }
 
-  // Create and return the Supabase client
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  // Create and cache the Supabase client
+  supabaseClientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
     },
   });
+
+  return supabaseClientInstance;
 }
 
 // Helper function to check if Supabase is properly initialized

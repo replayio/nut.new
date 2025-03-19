@@ -3,7 +3,7 @@
 import { toast } from 'react-toastify';
 import { getSupabase, type Database } from './client';
 import type { BoltProblem, BoltProblemDescription, BoltProblemInput, BoltProblemStatus } from '~/lib/replay/Problems';
-import { getProblemsUsername, getNutIsAdmin } from '~/lib/replay/Problems';
+import { getUsername, getNutIsAdmin } from '~/lib/replay/Problems';
 
 export async function supabaseListAllProblems(): Promise<BoltProblemDescription[]> {
   try {
@@ -11,8 +11,6 @@ export async function supabaseListAllProblems(): Promise<BoltProblemDescription[
       .from('problems')
       .select('id, created_at, updated_at, title, description, status, keywords, user_id')
       .order('created_at', { ascending: false });
-
-    console.log('ListAllProblemsData', data);
 
     if (error) {
       throw error;
@@ -197,7 +195,7 @@ export async function supabaseUpdateProblem(problemId: string, problem: BoltProb
       const commentInserts = comments.map((comment) => ({
         problem_id: problemId,
         content: comment.content,
-        username: comment.username || getProblemsUsername() || 'Anonymous',
+        username: comment.username || getUsername() || 'Anonymous',
 
         /**
          * Use timestamp as a unique identifier for the comment.

@@ -10,6 +10,7 @@ import { createHead } from 'remix-island';
 import { useEffect, useState } from 'react';
 import { logStore } from './lib/stores/logs';
 import { initializeAuth, userStore, isLoadingStore } from './lib/stores/auth';
+import { initializeUserStores } from './lib/stores/user';
 import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/remix';
 import { AuthModal } from './components/auth/AuthModal';
@@ -115,8 +116,13 @@ function AuthProvider({ data }: { data: LoaderData }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.ENV = data.ENV;
+
+      // Initialize auth and user stores
       initializeAuth().catch((err: Error) => {
         logStore.logError('Failed to initialize auth', err);
+      });
+      initializeUserStores().catch((err: Error) => {
+        logStore.logError('Failed to initialize user stores', err);
       });
     }
   }, [data]);

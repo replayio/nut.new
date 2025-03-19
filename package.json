@@ -10,6 +10,8 @@
     "deploy": "vercel deploy --prod",
     "build": "npx remix vite:build",
     "dev": "node pre-start.cjs  && npx remix vite:dev",
+    "dev:supabase": "USE_SUPABASE=true node pre-start.cjs  && npx remix vite:dev",
+    "dev:legacy": "USE_SUPABASE=false node pre-start.cjs  && npx remix vite:dev",
     "test": "vitest --run --exclude tests/e2e",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
