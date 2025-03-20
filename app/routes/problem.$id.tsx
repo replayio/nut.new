@@ -14,7 +14,7 @@ import {
   deleteProblem as backendDeleteProblem,
   BoltProblemStatus,
 } from '~/lib/replay/Problems';
-import { isAdminStore, usernameStore } from '~/lib/stores/user';
+import { useAdminStatus, usernameStore } from '~/lib/stores/user';
 import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
@@ -229,7 +229,7 @@ const Nothing = () => null;
 function ViewProblemPage() {
   const params = useParams();
   const problemId = params.id;
-  const isAdmin = useStore(isAdminStore);
+  const { isAdmin } = useAdminStatus();
 
   if (typeof problemId !== 'string') {
     throw new Error('Problem ID is required');

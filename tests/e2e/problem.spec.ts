@@ -94,3 +94,20 @@ test('Should be able to update a problem', async ({ page }) => {
   await page.getByRole('button', { name: 'Set Status' }).click();
   await page.locator('span').filter({ hasText: 'Pending' }).click();
 });
+
+test('Confirm that isAdmin is saved correctly', async ({ page }) => {
+  await page.goto('/problems?showAll=true');
+  await page.getByRole('combobox').selectOption('all');
+  await page.getByRole('link', { name: '[test] playwright' }).first().click();
+
+  if (await isSupabaseEnabled(page)) {
+    expect(true).toBe(true);
+    return;
+  }
+
+  await setLoginKey(page);
+  await expect(await page.getByRole('button', { name: 'Set Status' })).toBeVisible();
+
+  await page.reload();
+  await expect(await page.getByRole('button', { name: 'Set Status' })).toBeVisible();
+});
