@@ -1,7 +1,6 @@
 import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useStore } from '@nanostores/react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
@@ -14,7 +13,7 @@ import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { SaveProblem } from './SaveProblem';
 import { SaveReproductionModal } from './SaveReproduction';
-import { isAdminStore } from '~/lib/stores/user';
+import { useAdminStatus } from '~/lib/stores/user';
 
 const menuVariants = {
   closed: {
@@ -47,7 +46,7 @@ export const Menu = () => {
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const isAdmin = useStore(isAdminStore);
+  const { isAdmin } = useAdminStatus();
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { isSupabaseEnabled, login, setLoginKey } from './setup/test-utils';
+import { isSupabaseEnabled, login, setLoginKey, openSidebar } from './setup/test-utils';
 
 test('Should be able to load a problem', async ({ page }) => {
   await page.goto('/problems');
@@ -29,7 +29,7 @@ test('Should be able to save a problem ', async ({ page }) => {
   const useSupabase = await isSupabaseEnabled(page);
 
   if (useSupabase) {
-    await page.locator('[data-testid="sidebar-icon"]').click();
+    await openSidebar(page);
     await page.getByRole('button', { name: 'Save Problem' }).click();
     await page.getByRole('button', { name: 'Log In' }).click();
     await page.getByRole('textbox', { name: 'Email' }).click();
@@ -133,4 +133,17 @@ test('Should be able to add a comment to a problem', async ({ page }) => {
   // Reload the page and check that the comment is still visible
   await page.reload();
   await expect(page.locator('[data-testid="problem-comment"]').filter({ hasText: comment })).toBeVisible();
+});
+
+test('Confirm that admins see the "Save Reproduction" button', async ({ page }) => {
+  await page.goto('/problems?showAll=true');
+
+  if (await isSupabaseEnabled(page)) {
+    await login(page);
+  } else {
+    await setLoginKey(page);
+  }
+
+  await openSidebar(page);
+  await expect(page.getByRole('link', { name: 'Save Reproduction' })).toBeVisible();
 });

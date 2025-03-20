@@ -54,6 +54,10 @@ export async function getElementText(page: Page, selector: string): Promise<stri
   return page.locator(selector).textContent() as Promise<string>;
 }
 
+export async function openSidebar(page: Page): Promise<void> {
+  await page.locator('[data-testid="sidebar-icon"]').click();
+}
+
 export async function login(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByRole('textbox', { name: 'Email' }).click();
@@ -64,7 +68,7 @@ export async function login(page: Page): Promise<void> {
 }
 
 export async function setLoginKey(page: Page): Promise<void> {
-  await page.locator('[data-testid="sidebar-icon"]').click();
+  await openSidebar(page);
   await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'User Info' }).click();
   await page.getByRole('textbox').nth(1).click();
