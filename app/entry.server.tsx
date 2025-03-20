@@ -1,9 +1,5 @@
-import { sentryHandleError } from '~/lib/sentry';
+import '~/lib/sentry'; // keep this first
 
-/**
- * Using our conditional Sentry implementation instead of direct import
- * This avoids loading Sentry in development environments
- */
 import type { AppLoadContext } from '~/lib/remix-types';
 import { RemixServer } from '@remix-run/react';
 import { isbot } from 'isbot';
@@ -11,8 +7,6 @@ import { renderToString } from 'react-dom/server';
 import { renderHeadToString } from 'remix-island';
 import { Head } from './root';
 import { themeStore } from '~/lib/stores/theme';
-
-export const handleError = sentryHandleError;
 
 export default async function handleRequest(
   request: Request,
