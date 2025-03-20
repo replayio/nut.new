@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install 
       
+      - name: Install Vercel CLI
+        run: pnpm install -g vercel@latest
+
       - name: Install Playwright browsers
         run: pnpm playwright install chromium
       
@@ -54,15 +57,18 @@ jobs:
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
       - name: Upload test results
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
 
-      - name: Install Vercel CLI
-        run: pnpm install -g vercel@latest
+      - name: Deploy playwright report to Vercel
+        run: |
+          cd playwright-report
+          vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }}
+
 
       - name: Deploy to Vercel with Supabase Target
         id: deploy
@@ -96,7 +102,7 @@ jobs:
 
       # Run Playwright tests against the newly deployed URL
       - name: Run Playwright tests against Supabase deployment
-        run: pnpm run test:e2e
+        run: pnpm run test:e2e --reporter=html 
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
@@ -105,9 +111,15 @@ jobs:
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
       - name: Upload test results
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-supabase
           path: playwright-report/
           retention-days: 30
+
+      - name: Deploy Supabase playwright report to Vercel
+        run: |
+          cd playwright-report
+          vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }}
+
