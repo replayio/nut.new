@@ -46,6 +46,10 @@ class ChatManager {
   // Simulation data for the page itself and any user interactions.
   pageData: SimulationData = [];
 
+  // State to ensure that the chat manager is not destroyed until all messages finish.
+  private pendingMessages = 0;
+  private mustDestroyAfterChatFinishes = false;
+
   constructor() {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
@@ -65,9 +69,17 @@ class ChatManager {
     return !!this.client;
   }
 
-  destroy() {
+  private destroy() {
     this.client?.close();
     this.client = undefined;
+  }
+
+  destroyAfterChatFinishes() {
+    if (this.pendingMessages == 0) {
+      this.destroy();
+    } else {
+      this.mustDestroyAfterChatFinishes = true;
+    }
   }
 
   async setRepositoryId(repositoryId: string) {
@@ -126,6 +138,8 @@ class ChatManager {
   async sendChatMessage(messages: Message[], references: ChatReference[], onResponsePart: ChatResponsePartCallback) {
     assert(this.client, 'Chat has been destroyed');
 
+    this.pendingMessages++;
+
     const responseId = `response-${generateRandomId()}`;
 
     const removeResponseListener = this.client.listenForMessage(
@@ -147,7 +161,13 @@ class ChatManager {
       params: { chatId, responseId, messages, references },
     });
 
+    console.log('ChatMessageFinished', new Date().toISOString(), chatId);
+
     removeResponseListener();
+
+    if (--this.pendingMessages == 0 && this.mustDestroyAfterChatFinishes) {
+      this.destroy();
+    }
   }
 }
 
@@ -155,8 +175,11 @@ class ChatManager {
 let gChatManager: ChatManager | undefined;
 
 function startChat(repositoryId: string | undefined, pageData: SimulationData) {
+  // Any existing chat manager won't be used anymore for new messages, but it will
+  // not close until its messages actually finish and any future repository updates
+  // occur.
   if (gChatManager) {
-    gChatManager.destroy();
+    gChatManager.destroyAfterChatFinishes();
   }
 
   gChatManager = new ChatManager();
@@ -206,11 +229,14 @@ export function simulationAddData(data: SimulationData) {
   gChatManager.addPageData(data);
 }
 
-export function simulationFinishData() {
-  gChatManager?.finishSimulationData();
-}
-
 let gLastUserSimulationData: SimulationData | undefined;
+
+export function simulationFinishData() {
+  if (gChatManager) {
+    gChatManager.finishSimulationData();
+    gLastUserSimulationData = [...gChatManager.pageData];
+  }
+}
 
 export function getLastUserSimulationData(): SimulationData | undefined {
   return gLastUserSimulationData;
@@ -226,6 +252,12 @@ export function getLastSimulationChatMessages(): Message[] | undefined {
   return gLastSimulationChatMessages;
 }
 
+let gLastSimulationChatReferences: ChatReference[] | undefined;
+
+export function getLastSimulationChatReferences(): ChatReference[] | undefined {
+  return gLastSimulationChatReferences;
+}
+
 export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
@@ -234,6 +266,9 @@ export async function sendChatMessage(
   if (!gChatManager) {
     gChatManager = new ChatManager();
   }
+
+  gLastSimulationChatMessages = messages;
+  gLastSimulationChatReferences = references;
 
   await gChatManager.sendChatMessage(messages, references, onResponsePart);
 }

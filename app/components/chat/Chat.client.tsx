@@ -337,16 +337,16 @@ export const ChatImpl = memo(
           });
         } else {
           newMessages.push(msg);
-
-          // Update the repository as soon as it has changed.
-          const responseRepositoryId = getMessagesRepositoryId(newMessages);
-          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-            simulationRepositoryUpdated(responseRepositoryId);
-            updatedRepository = true;
-          }
         }
 
         setMessages(newMessages);
+
+        // Update the repository as soon as it has changed.
+        const responseRepositoryId = getMessagesRepositoryId(newMessages);
+        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+          simulationRepositoryUpdated(responseRepositoryId);
+          updatedRepository = true;
+        }
       };
 
       const references: ChatReference[] = [];

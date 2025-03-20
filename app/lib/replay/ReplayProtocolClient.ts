@@ -113,6 +113,11 @@ export class ProtocolClient {
 
   close() {
     this.socket.close();
+
+    for (const info of this.pendingCommands.values()) {
+      info.deferred.reject(new Error('Client destroyed'));
+    }
+    this.pendingCommands.clear();
   }
 
   listenForMessage(method: string, callback: (params: any) => void) {
