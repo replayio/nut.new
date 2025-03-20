@@ -13,12 +13,15 @@ export function getCurrentIFrame() {
   return gCurrentIFrame;
 }
 
+const testFullscreenSupport = () => typeof document.createElement('div').requestFullscreen === 'function';
+
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
+  const [supportsFullscreen] = useState(testFullscreenSupport);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [url, setUrl] = useState('');
@@ -80,6 +83,10 @@ export const Preview = memo(() => {
   };
 
   useEffect(() => {
+    if (!supportsFullscreen) {
+      return;
+    }
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -89,7 +96,7 @@ export const Preview = memo(() => {
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [supportsFullscreen]);
 
   const toggleDeviceMode = () => {
     setIsDeviceModeOn((prev) => !prev);
@@ -242,11 +249,13 @@ export const Preview = memo(() => {
         />
 
         {/* Fullscreen toggle button */}
-        <IconButton
-          icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
-          onClick={toggleFullscreen}
-          title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-        />
+        {supportsFullscreen ? (
+          <IconButton
+            icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+          />
+        ) : null}
       </div>
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
