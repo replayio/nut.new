@@ -57,6 +57,7 @@ jobs:
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -64,6 +65,7 @@ jobs:
           retention-days: 30
 
       - name: Deploy playwright report to Vercel
+        if: always()
         run: |
           cd playwright-report
           vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
@@ -111,6 +113,7 @@ jobs:
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-supabase
@@ -118,6 +121,7 @@ jobs:
           retention-days: 30
 
       - name: Deploy Supabase playwright report to Vercel
+        if: always()
         run: |
           cd playwright-report
           vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
