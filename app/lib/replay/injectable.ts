@@ -13,7 +13,7 @@ interface InjectableFunction<
 > {
   dependencies: Dependencies;
   fn: (dependencies: CallableDependencies<Dependencies>, ...args: Args) => R;
-  asCallString: () => string;
+  asCallString: (...args: Args) => string;
 }
 
 type Dependency = AnyFunction | InjectableFunction;
@@ -33,11 +33,30 @@ function getAllDependencies(
   return allDependencies;
 }
 
-function asCallString(dependencies: Record<string, Dependency>, fn: AnyFunction) {
+function serializeValue(value: unknown): string {
+  switch (typeof value) {
+    case 'symbol':
+      throw new Error("Symbols can't be serialized");
+    case 'function':
+      throw new Error('Functions should be injected as dependencies');
+    case 'undefined':
+      return 'undefined';
+    case 'object':
+      if (Array.isArray(value)) {
+        return `[${value.map(serializeValue).join(', ')}]`;
+      }
+    // fallthrough
+    default:
+      return JSON.stringify(value);
+  }
+}
+
+function asCallString(dependencies: Record<string, Dependency>, fn: AnyFunction, ...args: unknown[]) {
   const dependenciesString = Object.entries(getAllDependencies(dependencies))
     .map(([key, value]) => `${JSON.stringify(key)}: ${value}`)
     .join(',\n');
-  return `(${fn})({\n${dependenciesString}\n})`;
+  const argsString = args.map(serializeValue).join(', ');
+  return `(${fn})({\n${dependenciesString}\n}, ${argsString})`;
 }
 
 function validateDependencies(rootDependencies: Record<string, Dependency>, dependencies: Record<string, Dependency>) {
