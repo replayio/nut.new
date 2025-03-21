@@ -27,6 +27,7 @@ export default [
       'multiline-comment-style': ['off'],
       'padding-line-between-statements': ['off'],
       '@blitz/lines-around-comment': ['off'],
+      '@blitz/newline-before-return': ['off'],
     },
   },
   {
