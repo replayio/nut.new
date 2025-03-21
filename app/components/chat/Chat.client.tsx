@@ -343,6 +343,7 @@ export const ChatImpl = memo(
 
         // Update the repository as soon as it has changed.
         const responseRepositoryId = getMessagesRepositoryId(newMessages);
+
         if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
           simulationRepositoryUpdated(responseRepositoryId);
           updatedRepository = true;
@@ -467,10 +468,12 @@ export const ChatImpl = memo(
 
       // Erase all messages since the last user message.
       let rewindMessageId = message.id;
+
       for (let i = messages.length - 2; i >= 0; i--) {
         if (messages[i].role == 'user') {
           break;
         }
+
         rewindMessageId = messages[i].id;
       }
       await onRewind(rewindMessageId);

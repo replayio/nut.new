@@ -47,8 +47,8 @@ class ChatManager {
   pageData: SimulationData = [];
 
   // State to ensure that the chat manager is not destroyed until all messages finish.
-  private pendingMessages = 0;
-  private mustDestroyAfterChatFinishes = false;
+  private _pendingMessages = 0;
+  private _mustDestroyAfterChatFinishes = false;
 
   constructor() {
     this.client = new ProtocolClient();
@@ -69,16 +69,16 @@ class ChatManager {
     return !!this.client;
   }
 
-  private destroy() {
+  private _destroy() {
     this.client?.close();
     this.client = undefined;
   }
 
   destroyAfterChatFinishes() {
-    if (this.pendingMessages == 0) {
-      this.destroy();
+    if (this._pendingMessages == 0) {
+      this._destroy();
     } else {
-      this.mustDestroyAfterChatFinishes = true;
+      this._mustDestroyAfterChatFinishes = true;
     }
   }
 
@@ -138,7 +138,7 @@ class ChatManager {
   async sendChatMessage(messages: Message[], references: ChatReference[], onResponsePart: ChatResponsePartCallback) {
     assert(this.client, 'Chat has been destroyed');
 
-    this.pendingMessages++;
+    this._pendingMessages++;
 
     const responseId = `response-${generateRandomId()}`;
 
@@ -165,8 +165,8 @@ class ChatManager {
 
     removeResponseListener();
 
-    if (--this.pendingMessages == 0 && this.mustDestroyAfterChatFinishes) {
-      this.destroy();
+    if (--this._pendingMessages == 0 && this._mustDestroyAfterChatFinishes) {
+      this._destroy();
     }
   }
 }
@@ -175,9 +175,11 @@ class ChatManager {
 let gChatManager: ChatManager | undefined;
 
 function startChat(repositoryId: string | undefined, pageData: SimulationData) {
-  // Any existing chat manager won't be used anymore for new messages, but it will
-  // not close until its messages actually finish and any future repository updates
-  // occur.
+  /*
+   * Any existing chat manager won't be used anymore for new messages, but it will
+   * not close until its messages actually finish and any future repository updates
+   * occur.
+   */
   if (gChatManager) {
     gChatManager.destroyAfterChatFinishes();
   }
