@@ -18,8 +18,15 @@ export interface Database {
           repository_contents: Json;
           user_id: string | null;
           problem_comments: Database['public']['Tables']['problem_comments']['Row'][];
+          solution: Json;
+          repository_contents_path: string | null;
+          prompt_path: string | null;
+          solution_path: string | null;
         };
-        Insert: Omit<Database['public']['Tables']['problems']['Row'], 'created_at' | 'updated_at' | 'problem_comments'>;
+        Insert: Omit<
+          Database['public']['Tables']['problems']['Row'],
+          'created_at' | 'updated_at' | 'problem_comments' | 'solution'
+        >;
         Update: Partial<Database['public']['Tables']['problems']['Insert']>;
       };
       problem_comments: {

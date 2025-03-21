@@ -11,6 +11,7 @@ export default function ConnectionsTab() {
   const [loginKey, setLoginKey] = useState(getNutLoginKey() || '');
   const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
+  const [loginKeyIsLoading, setLoginKeyIsLoading] = useState(false);
   const handleSaveAPIKey = async (key: string) => {
     if (key && !key.startsWith('sk-ant-')) {
       toast.error('Please provide a valid Anthropic API key');
@@ -37,10 +38,13 @@ export default function ConnectionsTab() {
     setLoginKey(key);
 
     try {
+      setLoginKeyIsLoading(true);
       await saveNutLoginKey(key);
       toast.success('Login key saved');
     } catch {
       toast.error('Failed to save login key');
+    } finally {
+      setLoginKeyIsLoading(false);
     }
   };
 
@@ -83,6 +87,8 @@ export default function ConnectionsTab() {
             type="text"
             placeholder="Enter your login key"
             value={loginKey}
+            data-testid="login-key-input"
+            data-isloading={loginKeyIsLoading}
             onChange={(e) => handleSaveLoginKey(e.target.value)}
             className="w-full bg-white dark:bg-bolt-elements-background-depth-4 relative px-2 py-1.5 rounded-md focus:outline-none placeholder-bolt-elements-textTertiary text-bolt-elements-textPrimary dark:text-bolt-elements-textPrimary border border-bolt-elements-borderColor disabled:opacity-50"
           />

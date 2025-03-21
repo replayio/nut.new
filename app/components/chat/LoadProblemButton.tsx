@@ -14,45 +14,21 @@ interface LoadProblemButtonProps {
 }
 
 export function setLastLoadedProblem(problem: BoltProblem) {
-  const problemSerialized = JSON.stringify(problem);
-
-  try {
-    localStorage.setItem('loadedProblemId', problem.problemId);
-    localStorage.setItem('loadedProblem', problemSerialized);
-  } catch (error: any) {
-    // Remove loadedProblem, so we don't accidentally associate (e.g. reproduction) data with the wrong problem.
-    localStorage.removeItem('loadedProblem');
-    console.error(
-      `Failed to set last loaded problem (size=${(problemSerialized.length / 1024).toFixed(2)}kb):`,
-      error.stack || error,
-    );
-  }
+  localStorage.setItem('loadedProblemId', problem.problemId);
 }
 
 export async function getOrFetchLastLoadedProblem(): Promise<BoltProblem | null> {
-  const problemJSON = localStorage.getItem('loadedProblem');
   let problem: BoltProblem | null = null;
+  const problemId = localStorage.getItem('loadedProblemId');
 
-  if (problemJSON) {
-    problem = JSON.parse(problemJSON);
-  } else {
-    /*
-     * Problem might not have fit into localStorage.
-     * Try to re-load it from server.
-     */
-    const problemId = localStorage.getItem('loadedProblemId');
+  if (!problemId) {
+    return null;
+  }
 
-    if (!problemId) {
-      return null;
-    }
+  problem = await getProblem(problemId);
 
-    problem = await getProblem(problemId);
-
-    if (!problem) {
-      return null;
-    }
-
-    setLastLoadedProblem(problem);
+  if (!problem) {
+    return null;
   }
 
   return problem;

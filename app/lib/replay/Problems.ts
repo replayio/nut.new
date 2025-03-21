@@ -16,7 +16,15 @@ import {
 import { getNutIsAdmin as getNutIsAdminFromSupabase } from '~/lib/supabase/client';
 import { updateIsAdmin, updateUsername } from '~/lib/stores/user';
 
+// Add global declaration for the problem property
+declare global {
+  interface Window {
+    __currentProblem__?: BoltProblem;
+  }
+}
+
 export interface BoltProblemComment {
+  id?: string;
   username?: string;
   content: string;
   timestamp: number;
@@ -99,50 +107,57 @@ export async function listAllProblems(): Promise<BoltProblemDescription[]> {
 }
 
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
+  let problem: BoltProblem | null = null;
+
   if (shouldUseSupabase()) {
-    return supabaseGetProblem(problemId);
-  }
+    problem = await supabaseGetProblem(problemId);
+  } else {
+    try {
+      if (!problemId) {
+        toast.error('Invalid problem ID');
+        return null;
+      }
 
-  try {
-    if (!problemId) {
-      toast.error('Invalid problem ID');
-      return null;
-    }
+      const rv = await sendCommandDedicatedClient({
+        method: 'Recording.globalExperimentalCommand',
+        params: {
+          name: 'fetchBoltProblem',
+          params: { problemId },
+        },
+      });
 
-    const rv = await sendCommandDedicatedClient({
-      method: 'Recording.globalExperimentalCommand',
-      params: {
-        name: 'fetchBoltProblem',
-        params: { problemId },
-      },
-    });
+      problem = (rv as { rval: { problem: BoltProblem } }).rval.problem;
 
-    const problem = (rv as { rval: { problem: BoltProblem } }).rval.problem;
+      if (!problem) {
+        toast.error('Problem not found');
+        return null;
+      }
 
-    if (!problem) {
-      toast.error('Problem not found');
-      return null;
-    }
+      if ('prompt' in problem) {
+        // 2/11/2025: Update obsolete data format for older problems.
+        problem.repositoryContents = (problem as any).prompt.content;
+        delete problem.prompt;
+      }
+    } catch (error) {
+      console.error('Error fetching problem', error);
 
-    if ('prompt' in problem) {
-      // 2/11/2025: Update obsolete data format for older problems.
-      problem.repositoryContents = (problem as any).prompt.content;
-      delete problem.prompt;
-    }
-
-    return problem;
-  } catch (error) {
-    console.error('Error fetching problem', error);
-
-    // Check for specific protocol error
-    if (error instanceof Error && error.message.includes('Unknown problem ID')) {
-      toast.error('Problem not found');
-    } else {
-      toast.error('Failed to fetch problem');
+      // Check for specific protocol error
+      if (error instanceof Error && error.message.includes('Unknown problem ID')) {
+        toast.error('Problem not found');
+      } else {
+        toast.error('Failed to fetch problem');
+      }
     }
   }
 
-  return null;
+  /*
+   * Only used for testing
+   */
+  if (problem) {
+    window.__currentProblem__ = problem;
+  }
+
+  return problem;
 }
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
@@ -177,39 +192,39 @@ export async function deleteProblem(problemId: string): Promise<void | undefined
   return undefined;
 }
 
+const nutLoginKeyCookieName = 'nutLoginKey';
+const nutIsAdminCookieName = 'nutIsAdmin';
+const nutUsernameCookieName = 'nutUsername';
+
 export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<BoltProblem | null> {
   if (shouldUseSupabase()) {
     await supabaseUpdateProblem(problemId, problem);
-  }
+  } else {
+    try {
+      if (!getNutIsAdmin()) {
+        toast.error('Admin user required');
 
-  try {
-    if (!getNutIsAdmin()) {
-      toast.error('Admin user required');
+        return null;
+      }
 
-      return null;
+      const loginKey = Cookies.get(nutLoginKeyCookieName);
+      await sendCommandDedicatedClient({
+        method: 'Recording.globalExperimentalCommand',
+        params: {
+          name: 'updateBoltProblem',
+          params: { problemId, problem, loginKey },
+        },
+      });
+    } catch (error) {
+      console.error('Error updating problem', error);
+      toast.error('Failed to update problem');
     }
-
-    const loginKey = Cookies.get(nutLoginKeyCookieName);
-    await sendCommandDedicatedClient({
-      method: 'Recording.globalExperimentalCommand',
-      params: {
-        name: 'updateBoltProblem',
-        params: { problemId, problem, loginKey },
-      },
-    });
-  } catch (error) {
-    console.error('Error updating problem', error);
-    toast.error('Failed to update problem');
   }
 
   const updatedProblem = await getProblem(problemId);
 
   return updatedProblem;
 }
-
-const nutLoginKeyCookieName = 'nutLoginKey';
-const nutIsAdminCookieName = 'nutIsAdmin';
-const nutUsernameCookieName = 'nutUsername';
 
 export function getNutLoginKey(): string | undefined {
   const cookieValue = Cookies.get(nutLoginKeyCookieName);

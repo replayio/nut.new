@@ -57,8 +57,15 @@ export async function getElementText(page: Page, selector: string): Promise<stri
 export async function openSidebar(page: Page): Promise<void> {
   await page.locator('[data-testid="sidebar-icon"]').click();
 }
-
 export async function login(page: Page): Promise<void> {
+  if (await isSupabaseEnabled(page)) {
+    await loginToSupabase(page);
+  } else {
+    await setLoginKey(page);
+  }
+}
+
+export async function loginToSupabase(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill(process.env.SUPABASE_TEST_USER_EMAIL || '');
@@ -76,6 +83,9 @@ export async function setLoginKey(page: Page): Promise<void> {
   await page.getByRole('textbox', { name: 'Enter your username' }).click();
   await page.getByRole('textbox', { name: 'Enter your login key' }).click();
   await page.getByRole('textbox', { name: 'Enter your login key' }).fill(process.env.NUT_LOGIN_KEY || '');
+
+  // wait for loading to finish data-isloading="true"
+  await page.waitForSelector('input[data-isloading="false"]', { state: 'attached' });
 
   await page.getByRole('textbox', { name: 'Enter your username' }).click();
   await page.getByRole('textbox', { name: 'Enter your username' }).fill(process.env.NUT_USERNAME || '');

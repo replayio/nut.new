@@ -5,6 +5,18 @@ import { getSupabase, type Database } from './client';
 import type { BoltProblem, BoltProblemDescription, BoltProblemInput, BoltProblemStatus } from '~/lib/replay/Problems';
 import { getUsername, getNutIsAdmin } from '~/lib/replay/Problems';
 
+async function downloadBlob(bucket: string, path: string) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.storage.from(bucket).download(path);
+
+  if (error) {
+    console.error('Error downloading blob:', error);
+    return null;
+  }
+
+  return data.text();
+}
+
 export async function supabaseListAllProblems(): Promise<BoltProblemDescription[]> {
   try {
     const { data, error } = await getSupabase()
@@ -72,61 +84,20 @@ export async function supabaseGetProblem(problemId: string): Promise<BoltProblem
     }
 
     // Fetch blob data from storage if paths are available
-    let repositoryContents = '';
-    let prompt = undefined;
-    let solution = undefined;
+    let repositoryContents = data.repository_contents;
+    let solution = data.solution;
+    const prompt = data.prompt;
 
     // Create a supabase instance for storage operations
     const supabase = getSupabase();
 
     // Fetch repository contents from storage if path is available
     if (data.repository_contents_path) {
-      try {
-        const { data: blobData, error: blobError } = await supabase.storage
-          .from('repository-contents')
-          .download(data.repository_contents_path);
-
-        if (!blobError && blobData) {
-          repositoryContents = await blobData.text();
-        } else {
-          console.error('Error fetching repository contents:', blobError);
-        }
-      } catch (storageError) {
-        console.error('Error downloading repository contents:', storageError);
-      }
+      repositoryContents = (await downloadBlob('repository-contents', data.repository_contents_path)) || '';
     }
 
-    // Fetch repository contents from storage if path is available
-    if (data.prompt_path) {
-      try {
-        const { data: blobData, error: blobError } = await supabase.storage.from('prompts').download(data.prompt_path);
-
-        if (!blobError && blobData) {
-          prompt = await blobData.text();
-        } else {
-          console.error('Error fetching repository contents:', blobError);
-        }
-      } catch (storageError) {
-        console.error('Error downloading repository contents:', storageError);
-      }
-    }
-
-    // Fetch solution from storage if path is available
     if (data.solution_path) {
-      try {
-        const { data: blobData, error: blobError } = await supabase.storage
-          .from('solutions')
-          .download(data.solution_path);
-
-        if (!blobError && blobData) {
-          const solutionText = await blobData.text();
-          solution = JSON.parse(solutionText);
-        } else {
-          console.error('Error fetching solution:', blobError);
-        }
-      } catch (storageError) {
-        console.error('Error downloading solution:', storageError);
-      }
+      solution = JSON.parse((await downloadBlob('solutions', data.solution_path)) || '{}');
     }
 
     // If the problem has a user_id, fetch the profile information
@@ -225,17 +196,14 @@ export async function supabaseUpdateProblem(problemId: string, problem: BoltProb
       return undefined;
     }
 
-    // Extract comments to add separately if needed
-    const comments = problem.comments || [];
-    delete (problem as any).comments;
-
     // Convert to Supabase format
     const updates: Database['public']['Tables']['problems']['Update'] = {
       title: problem.title,
       description: problem.description,
       status: problem.status,
       keywords: problem.keywords || [],
-      repository_contents: problem.repositoryContents,
+      repository_contents_path: problem.repositoryContents ? `problems/${problemId}.txt` : undefined,
+      solution_path: problem.solution ? `solutions/${problemId}.json` : undefined,
     };
 
     // Update the problem
@@ -245,38 +213,44 @@ export async function supabaseUpdateProblem(problemId: string, problem: BoltProb
       throw updateError;
     }
 
+    if (updates.repository_contents_path) {
+      const { error: repositoryContentsError } = await getSupabase()
+        .storage.from('repository-contents')
+        .upload(updates.repository_contents_path, problem.repositoryContents);
+
+      // @ts-ignore - ignore duplicate error
+      if (repositoryContentsError && repositoryContentsError.error !== 'Duplicate') {
+        throw repositoryContentsError;
+      }
+    }
+
+    if (updates.solution_path) {
+      const { error: solutionError } = await getSupabase()
+        .storage.from('solutions')
+        .upload(updates.solution_path, JSON.stringify(problem.solution), { upsert: true });
+
+      if (solutionError) {
+        throw solutionError;
+      }
+    }
+
     // Handle comments if they exist
-    if (comments.length > 0) {
-      /**
-       * Create a unique identifier for each comment based on content and timestamp.
-       * This allows us to use upsert with onConflict to avoid duplicates.
-       */
-      const commentInserts = comments.map((comment) => {
-        // Ensure timestamp is a valid number
-        const timestamp =
-          typeof comment.timestamp === 'number' && !isNaN(comment.timestamp) ? comment.timestamp : Date.now();
-
-        return {
-          problem_id: problemId,
-          content: comment.content,
-          username: comment.username || getUsername() || 'Anonymous',
-
-          /**
-           * Use timestamp as a unique identifier for the comment.
-           * This assumes that comments with the same timestamp are the same comment.
-           */
-          created_at: new Date(timestamp).toISOString(),
-        };
-      });
+    if (problem.comments && problem.comments.length > 0) {
+      const commentInserts = problem.comments
+        .filter((comment) => !comment.id)
+        .map((comment) => {
+          return {
+            problem_id: problemId,
+            content: comment.content,
+            username: comment.username || getUsername() || 'Anonymous',
+          };
+        });
 
       /**
        * Use upsert with onConflict to avoid duplicates.
        * This will insert new comments and ignore existing ones based on created_at.
        */
-      const { error: commentsError } = await getSupabase().from('problem_comments').upsert(commentInserts, {
-        onConflict: 'created_at',
-        ignoreDuplicates: true,
-      });
+      const { error: commentsError } = await getSupabase().from('problem_comments').insert(commentInserts);
 
       if (commentsError) {
         throw commentsError;

@@ -2,11 +2,13 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState, useEffect } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { getUsername, submitProblem, saveUsername, BoltProblemStatus } from '~/lib/replay/Problems';
+import { submitProblem, BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemInput } from '~/lib/replay/Problems';
 import { getRepositoryContents } from '~/lib/replay/Repository';
-import { shouldUseSupabase, getCurrentUser, isAuthenticated } from '~/lib/supabase/client';
+import { shouldUseSupabase, getCurrentUser } from '~/lib/supabase/client';
 import { authModalStore } from '~/lib/stores/authModal';
+import { authStatusStore } from '~/lib/stores/auth';
+import { useStore } from '@nanostores/react';
 
 ReactModal.setAppElement('#root');
 
@@ -20,27 +22,15 @@ export function SaveProblem() {
     username: '',
   });
   const [problemId, setProblemId] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const isLoggedIn = useStore(authStatusStore.isLoggedIn);
+  const username = useStore(authStatusStore.username);
 
-  // Check authentication status and get username
+  // Update the username from the store when component mounts
   useEffect(() => {
-    async function checkAuthAndUsername() {
-      if (shouldUseSupabase()) {
-        const authenticated = await isAuthenticated();
-        setIsLoggedIn(authenticated);
-      } else {
-        setIsLoggedIn(true); // Always considered logged in when not using Supabase
-
-        const username = getUsername();
-
-        if (username) {
-          setFormData((prev) => ({ ...prev, username }));
-        }
-      }
+    if (username) {
+      setFormData((prev) => ({ ...prev, username }));
     }
-
-    checkAuthAndUsername();
-  }, []);
+  }, [username]);
 
   const handleSaveProblem = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -55,6 +45,11 @@ export function SaveProblem() {
       ...prev,
       [name]: value,
     }));
+
+    // Update username in the store if it's the username field
+    if (name === 'username') {
+      authStatusStore.updateUsername(value);
+    }
   };
 
   const handleSubmitProblem = async () => {
@@ -66,11 +61,6 @@ export function SaveProblem() {
     if (!shouldUseSupabase() && !formData.username) {
       toast.error('Please enter a username');
       return;
-    }
-
-    // Only save username to cookie if not using Supabase
-    if (!shouldUseSupabase()) {
-      saveUsername(formData.username);
     }
 
     toast.info('Submitting problem...');
@@ -98,6 +88,7 @@ export function SaveProblem() {
 
     if (problemId) {
       setProblemId(problemId);
+      localStorage.setItem('loadedProblemId', problemId);
     }
   };
 
