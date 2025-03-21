@@ -29,7 +29,10 @@ export default [
       'curly': ["error"],
       'no-eval': ["error"],
       'linebreak-style': ["error", "unix"],
-      'arrow-spacing': ["error", { "before": true, "after": true }]
+      'arrow-spacing': ["error", { "before": true, "after": true }],
+      'multiline-comment-style': ["off"]
+      'padding-line-between-statements': ["off"]
+      '@blitz/lines-around-comment': ["off"]
     },
   },
   {

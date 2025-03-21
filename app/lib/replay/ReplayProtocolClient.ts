@@ -1,3 +1,5 @@
+import { createInjectableFunction } from './injectable';
+
 const replayWsServer = 'wss://dispatch.replay.io';
 
 export function assert(condition: any, message: string = 'Assertion failed!'): asserts condition {
@@ -33,7 +35,9 @@ export function uint8ArrayToBase64(data: Uint8Array) {
   return btoa(str);
 }
 
-export function stringToBase64(inputString: string) {
+export const stringToBase64 = createInjectableFunction({ uint8ArrayToBase64 }, (deps, inputString: string) => {
+  const { uint8ArrayToBase64 } = deps;
+
   if (typeof inputString !== 'string') {
     throw new TypeError('Input must be a string.');
   }
@@ -42,7 +46,7 @@ export function stringToBase64(inputString: string) {
   const data = encoder.encode(inputString);
 
   return uint8ArrayToBase64(data);
-}
+});
 
 function logDebug(msg: string, _tags: Record<string, any> = {}) {
   //console.log(msg, JSON.stringify(tags));

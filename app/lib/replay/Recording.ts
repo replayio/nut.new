@@ -1,5 +1,6 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
 
+import { createInjectableFunction } from './injectable';
 import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
 import type {
   IndexedDBAccess,
@@ -87,7 +88,14 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
 }
 
 // Add handlers to the current iframe's window.
-function addRecordingMessageHandler(_messageHandlerId: string) {
+const addRecordingMessageHandler = createInjectableFunction( {
+   assert,
+   stringToBase64,
+   uint8ArrayToBase64,
+ },(deps) => {
+  const assert: typeof deps.assert = deps.assert;
+  const { stringToBase64 } = deps;
+
   const simulationData: SimulationData = [];
   let numSimulationPacketsSent = 0;
 
@@ -131,8 +139,8 @@ function addRecordingMessageHandler(_messageHandlerId: string) {
     const url = new URL(info.url, window.location.href).href;
     addNetworkResource({
       url,
-      requestBodyBase64: stringToBase64(info.requestBody),
-      responseBodyBase64: stringToBase64(text),
+      requestBodyBase64: stringToBase64(deps, info.requestBody),
+      responseBodyBase64: stringToBase64(deps, text),
       responseStatus: 200,
       responseHeaders,
     });
@@ -568,17 +576,12 @@ function addRecordingMessageHandler(_messageHandlerId: string) {
     } catch (error) {
       addNetworkResource({
         url,
-        requestBodyBase64: stringToBase64(requestBody),
+        requestBodyBase64: stringToBase64(deps, requestBody),
         error: String(error),
       });
       throw error;
     }
   };
-}
+})
 
-export const recordingMessageHandlerScript = `
-      ${assert}
-      ${stringToBase64}
-      ${uint8ArrayToBase64}
-      (${addRecordingMessageHandler})()
-`;
+export const recordingMessageHandlerScript = addRecordingMessageHandler.asCallString();
