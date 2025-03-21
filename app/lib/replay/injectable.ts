@@ -59,7 +59,7 @@ export function createInjectableFunction<Dependencies extends Record<string, Dep
   validateDependencies(dependencies, dependencies);
 
   return {
-    dependencies: dependencies,
+    dependencies,
     fn,
     asCallString: asCallString.bind(null, dependencies, fn),
   };
