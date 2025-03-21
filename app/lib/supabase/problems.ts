@@ -71,11 +71,69 @@ export async function supabaseGetProblem(problemId: string): Promise<BoltProblem
       return null;
     }
 
+    // Fetch blob data from storage if paths are available
+    let repositoryContents = '';
+    let prompt = undefined;
+    let solution = undefined;
+
+    // Create a supabase instance for storage operations
+    const supabase = getSupabase();
+
+    // Fetch repository contents from storage if path is available
+    if (data.repository_contents_path) {
+      try {
+        const { data: blobData, error: blobError } = await supabase.storage
+          .from('repository-contents')
+          .download(data.repository_contents_path);
+
+        if (!blobError && blobData) {
+          repositoryContents = await blobData.text();
+        } else {
+          console.error('Error fetching repository contents:', blobError);
+        }
+      } catch (storageError) {
+        console.error('Error downloading repository contents:', storageError);
+      }
+    }
+
+    // Fetch repository contents from storage if path is available
+    if (data.prompt_path) {
+      try {
+        const { data: blobData, error: blobError } = await supabase.storage.from('prompts').download(data.prompt_path);
+
+        if (!blobError && blobData) {
+          prompt = await blobData.text();
+        } else {
+          console.error('Error fetching repository contents:', blobError);
+        }
+      } catch (storageError) {
+        console.error('Error downloading repository contents:', storageError);
+      }
+    }
+
+    // Fetch solution from storage if path is available
+    if (data.solution_path) {
+      try {
+        const { data: blobData, error: blobError } = await supabase.storage
+          .from('solutions')
+          .download(data.solution_path);
+
+        if (!blobError && blobData) {
+          const solutionText = await blobData.text();
+          solution = JSON.parse(solutionText);
+        } else {
+          console.error('Error fetching solution:', blobError);
+        }
+      } catch (storageError) {
+        console.error('Error downloading solution:', storageError);
+      }
+    }
+
     // If the problem has a user_id, fetch the profile information
     let username = null;
 
     if (data.user_id) {
-      const { data: profileData, error: profileError } = await getSupabase()
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('username')
         .eq('id', data.user_id)
@@ -94,8 +152,9 @@ export async function supabaseGetProblem(problemId: string): Promise<BoltProblem
       description: data.description,
       status: data.status as BoltProblemStatus,
       keywords: data.keywords,
-      repositoryContents: data.repository_contents,
+      repositoryContents,
       username,
+      solution: solution || prompt,
       comments: data.problem_comments.map((comment: any) => ({
         id: comment.id,
         timestamp: comment.created_at,

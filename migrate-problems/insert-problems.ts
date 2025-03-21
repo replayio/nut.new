@@ -121,6 +121,7 @@ async function importProblems(): Promise<void> {
 async function uploadBlob(bucket: string, path: string, contents: string) {
   const { error } = await supabase.storage.from(bucket).upload(path, contents);
 
+  // @ts-ignore
   if (error && error.error !== 'Duplicate') {
     console.error(`  ❌ Error uploading ${path}:`, error.message, error);
     throw error;
