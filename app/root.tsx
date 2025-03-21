@@ -1,8 +1,7 @@
-import { sentryHandleError } from '~/lib/sentry';
 import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
 import { json } from '~/lib/remix-types';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
@@ -131,11 +130,6 @@ function AuthProvider({ data }: { data: LoaderData }) {
 }
 
 export const ErrorBoundary = () => {
-  const error = useRouteError();
-
-  // Using our conditional error handling instead of direct Sentry import
-  sentryHandleError(error instanceof Error ? error : new Error(String(error)));
-
   return <div>Something went wrong</div>;
 };
 

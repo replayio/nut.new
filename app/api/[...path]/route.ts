@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/nextjs';
 import { createRequestHandler } from '~/lib/remix-types';
 
 /*
@@ -29,10 +28,7 @@ const handleRequest = async (request: Request) => {
 
     // Handle the request
     return handler(request);
-  } catch (error) {
-    // Log the error with Sentry
-    Sentry.captureException(error);
-
+  } catch {
     // Return a basic error response
     return new Response('Server Error', { status: 500 });
   }
