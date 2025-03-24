@@ -141,8 +141,8 @@ const addRecordingMessageHandler = createInjectableFunction(
       const url = new URL(info.url, window.location.href).href;
       addNetworkResource({
         url,
-        requestBodyBase64: stringToBase64(deps, info.requestBody),
-        responseBodyBase64: stringToBase64(deps, text),
+        requestBodyBase64: stringToBase64(info.requestBody),
+        responseBodyBase64: stringToBase64(text),
         responseStatus: 200,
         responseHeaders,
       });
@@ -578,7 +578,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       } catch (error) {
         addNetworkResource({
           url,
-          requestBodyBase64: stringToBase64(deps, requestBody),
+          requestBodyBase64: stringToBase64(requestBody),
           error: String(error),
         });
         throw error;

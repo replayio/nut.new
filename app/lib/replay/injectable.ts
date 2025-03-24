@@ -1,9 +1,17 @@
 import { assert } from './ReplayProtocolClient';
 
-type AnyFunction = (...args: never) => unknown;
+type UnknownFunction = (...args: never) => unknown;
+
+type DropDependencies<F extends UnknownFunction> = F extends (dependencies: any, ...args: infer A) => infer R
+  ? (...args: A) => R
+  : never;
 
 type CallableDependencies<Dependencies extends Record<string, Dependency>> = {
-  [K in keyof Dependencies]: 'fn' extends keyof Dependencies[K] ? Dependencies[K]['fn'] : Dependencies[K];
+  [K in keyof Dependencies]: 'fn' extends keyof Dependencies[K]
+    ? Dependencies[K]['fn'] extends UnknownFunction
+      ? DropDependencies<Dependencies[K]['fn']>
+      : never
+    : Dependencies[K];
 };
 
 interface InjectableFunction<
@@ -16,21 +24,30 @@ interface InjectableFunction<
   asCallString: (...args: Args) => string;
 }
 
-type Dependency = AnyFunction | InjectableFunction;
+type Dependency = UnknownFunction | InjectableFunction;
 
 function getAllDependencies(
   dependencies: Record<string, Dependency>,
-  allDependencies: Record<string, AnyFunction> = {},
+  bindableNames: Set<string>,
+  allDependencies: Record<string, UnknownFunction> = {},
 ) {
   for (const [key, value] of Object.entries(dependencies)) {
     if ('fn' in value) {
       allDependencies[key] = value.fn;
-      getAllDependencies(value.dependencies, allDependencies);
+      bindableNames.add(key);
+      getAllDependencies(value.dependencies, bindableNames, allDependencies);
     } else {
       allDependencies[key] = value;
     }
   }
   return allDependencies;
+}
+
+function bindDependencies(dependencies: Record<string, UnknownFunction>, bindableNames: string[]) {
+  for (const name of bindableNames) {
+    dependencies[name] = dependencies[name].bind(null, dependencies);
+  }
+  return dependencies;
 }
 
 function serializeValue(value: unknown): string {
@@ -51,12 +68,16 @@ function serializeValue(value: unknown): string {
   }
 }
 
-function asCallString(dependencies: Record<string, Dependency>, fn: AnyFunction, ...args: unknown[]) {
-  const dependenciesString = Object.entries(getAllDependencies(dependencies))
+function asCallString(dependencies: Record<string, Dependency>, fn: UnknownFunction, ...args: unknown[]) {
+  const bindableNames = new Set<string>();
+  const dependenciesString = Object.entries(getAllDependencies(dependencies, bindableNames))
     .map(([key, value]) => `${JSON.stringify(key)}: ${value}`)
     .join(',\n');
+  const boundDependencies = `(${bindDependencies})({\n${dependenciesString}\n}, [${Array.from(bindableNames)
+    .map((name) => JSON.stringify(name))
+    .join(', ')}])`;
   const argsString = args.map(serializeValue).join(', ');
-  return `(${fn})({\n${dependenciesString}\n}, ${argsString})`;
+  return `(${fn})(${boundDependencies}, ${argsString})`;
 }
 
 function validateDependencies(rootDependencies: Record<string, Dependency>, dependencies: Record<string, Dependency>) {
