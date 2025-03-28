@@ -151,6 +151,14 @@ export function ClientAuth() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold mb-4 text-bolt-elements-textPrimary">Sign In</h2>
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSigningIn}
+              className="w-full mb-4 p-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+            >
+              {isSigningIn ? 'Processing...' : 'Use Google'}
+            </button>
             <form onSubmit={handleSignIn}>
               <div className="mb-4">
                 <label htmlFor="email" className="block mb-1 text-bolt-elements-textPrimary">
@@ -193,14 +201,6 @@ export function ClientAuth() {
                   className="flex-1 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
                 >
                   {isSigningIn ? 'Processing...' : 'Sign Up'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isSigningIn}
-                  className="flex-1 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
-                >
-                  {isSigningIn ? 'Processing...' : 'Sign in with Google'}
                 </button>
               </div>
             </form>
