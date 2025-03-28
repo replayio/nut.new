@@ -64,25 +64,6 @@ let supabaseAnonKey = '';
 // Add a singleton client instance
 let supabaseClientInstance: ReturnType<typeof createClient<Database>> | null = null;
 
-/**
- * Determines whether Supabase should be used based on URL parameters and environment variables.
- * URL parameters take precedence over environment variables.
- */
-export function shouldUseSupabase(): boolean {
-  // Check URL parameters (client-side only)
-  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const useSupabaseFromUrl = urlParams ? urlParams.get('supabase') === 'true' : false;
-
-  // Check environment variables
-  const useSupabaseFromEnv =
-    typeof window === 'object' ? window.ENV?.USE_SUPABASE === 'true' : process.env.USE_SUPABASE === 'true';
-
-  // URL param takes precedence over environment variable
-  const shouldUse = useSupabaseFromUrl || useSupabaseFromEnv;
-
-  return shouldUse;
-}
-
 export async function getCurrentUser(): Promise<SupabaseUser | null> {
   try {
     const {
@@ -139,11 +120,6 @@ export function getSupabase() {
     // Node.js environment (development)
     supabaseUrl = process.env.SUPABASE_URL || '';
     supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-  }
-
-  // If neither URL param nor environment variable is set to true, log a warning
-  if (!shouldUseSupabase()) {
-    console.log('Supabase is not enabled. Set USE_SUPABASE=true or use ?supabase=true query parameter.');
   }
 
   // Log warning if environment variables are missing

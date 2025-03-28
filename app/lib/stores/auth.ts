@@ -3,8 +3,7 @@ import { getSupabase } from '~/lib/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { logStore } from './logs';
 import { useEffect, useState } from 'react';
-import { shouldUseSupabase, isAuthenticated } from '~/lib/supabase/client';
-import { getUsername, saveUsername } from '~/lib/replay/Problems';
+import { isAuthenticated } from '~/lib/supabase/client';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
@@ -13,39 +12,17 @@ export const isLoadingStore = atom<boolean>(true);
 // Auth status store for both Supabase and non-Supabase modes
 export const authStatusStore = {
   isLoggedIn: atom<boolean | null>(null),
-  username: atom<string>(''),
 
   // Initialize auth status store
   async init() {
-    if (shouldUseSupabase()) {
-      // For Supabase, subscribe to the userStore
-      userStore.listen((user) => {
-        this.isLoggedIn.set(!!user);
-      });
+    // For Supabase, subscribe to the userStore
+    userStore.listen((user) => {
+      this.isLoggedIn.set(!!user);
+    });
 
-      // Check initial auth state
-      const authenticated = await isAuthenticated();
-      this.isLoggedIn.set(authenticated);
-    } else {
-      // For non-Supabase, always logged in
-      this.isLoggedIn.set(true);
-
-      // Get username from storage
-      const storedUsername = getUsername();
-
-      if (storedUsername) {
-        this.username.set(storedUsername);
-      }
-    }
-  },
-
-  // Update username (only meaningful in non-Supabase mode)
-  updateUsername(newUsername: string) {
-    this.username.set(newUsername);
-
-    if (!shouldUseSupabase()) {
-      saveUsername(newUsername);
-    }
+    // Check initial auth state
+    const authenticated = await isAuthenticated();
+    this.isLoggedIn.set(authenticated);
   },
 };
 
@@ -191,24 +168,16 @@ export async function signOut() {
   }
 }
 
-// Keep the hook for backwards compatibility, but implement it using the store
 export function useAuthStatus() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(authStatusStore.isLoggedIn.get());
-  const [username, setUsername] = useState<string>(authStatusStore.username.get());
 
   useEffect(() => {
     const unsubscribeIsLoggedIn = authStatusStore.isLoggedIn.listen(setIsLoggedIn);
-    const unsubscribeUsername = authStatusStore.username.listen(setUsername);
 
     return () => {
       unsubscribeIsLoggedIn();
-      unsubscribeUsername();
     };
   }, []);
 
-  const updateUsername = (newUsername: string) => {
-    authStatusStore.updateUsername(newUsername);
-  };
-
-  return { isLoggedIn, username, updateUsername };
+  return { isLoggedIn };
 }

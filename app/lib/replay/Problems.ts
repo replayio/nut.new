@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import { assert, sendCommandDedicatedClient } from './ReplayProtocolClient';
 import type { Message } from '~/lib/persistence/message';
 import Cookies from 'js-cookie';
-import { shouldUseSupabase } from '~/lib/supabase/client';
 import {
   supabaseListAllProblems,
   supabaseGetProblem,
@@ -69,82 +68,11 @@ export interface BoltProblem extends BoltProblemDescription {
 export type BoltProblemInput = Omit<BoltProblem, 'problemId' | 'timestamp'>;
 
 export async function listAllProblems(): Promise<BoltProblemDescription[]> {
-  let problems: BoltProblemDescription[] = [];
-
-  if (shouldUseSupabase()) {
-    problems = await supabaseListAllProblems();
-  } else {
-    try {
-      const rv = await sendCommandDedicatedClient({
-        method: 'Recording.globalExperimentalCommand',
-        params: {
-          name: 'listBoltProblems',
-        },
-      });
-      console.log('ListProblemsRval', rv);
-
-      problems = (rv as any).rval.problems.reverse();
-
-      const filteredProblems = problems.filter((problem) => {
-        // if ?showAll=true is not in the url, filter out [test] problems
-        if (window.location.search.includes('showAll=true')) {
-          return true;
-        }
-
-        return !problem.title.includes('[test]');
-      });
-
-      return filteredProblems;
-    } catch (error) {
-      console.error('Error fetching problems', error);
-      toast.error('Failed to fetch problems');
-
-      return [];
-    }
-  }
-
-  return problems;
+  return supabaseListAllProblems();
 }
 
 export async function getProblem(problemId: string): Promise<BoltProblem | null> {
-  let problem: BoltProblem | null = null;
-
-  if (shouldUseSupabase()) {
-    problem = await supabaseGetProblem(problemId);
-  } else {
-    try {
-      if (!problemId) {
-        toast.error('Invalid problem ID');
-        return null;
-      }
-
-      const rv = await sendCommandDedicatedClient({
-        method: 'Recording.globalExperimentalCommand',
-        params: {
-          name: 'fetchBoltProblem',
-          params: { problemId },
-        },
-      });
-
-      problem = (rv as { rval: { problem: BoltProblem } }).rval.problem;
-
-      if (!problem) {
-        toast.error('Problem not found');
-        return null;
-      }
-
-      assert(problem.repositoryId, 'Problem probably has outdated data format. Must have a repositoryId.');
-    } catch (error) {
-      console.error('Error fetching problem', error);
-
-      // Check for specific protocol error
-      if (error instanceof Error && error.message.includes('Unknown problem ID')) {
-        toast.error('Problem not found');
-      } else {
-        toast.error('Failed to fetch problem');
-      }
-    }
-  }
+  const problem = await supabaseGetProblem(problemId);
 
   /*
    * Only used for testing
@@ -157,35 +85,11 @@ export async function getProblem(problemId: string): Promise<BoltProblem | null>
 }
 
 export async function submitProblem(problem: BoltProblemInput): Promise<string | null> {
-  if (shouldUseSupabase()) {
-    return supabaseSubmitProblem(problem);
-  }
-
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: 'Recording.globalExperimentalCommand',
-      params: {
-        name: 'submitBoltProblem',
-        params: { problem },
-      },
-    });
-    console.log('SubmitProblemRval', rv);
-
-    return (rv as any).rval.problemId;
-  } catch (error) {
-    console.error('Error submitting problem', error);
-    toast.error('Failed to submit problem');
-
-    return null;
-  }
+  return supabaseSubmitProblem(problem);
 }
 
 export async function deleteProblem(problemId: string): Promise<void | undefined> {
-  if (shouldUseSupabase()) {
-    return supabaseDeleteProblem(problemId);
-  }
-
-  return undefined;
+  return supabaseDeleteProblem(problemId);
 }
 
 const nutLoginKeyCookieName = 'nutLoginKey';
@@ -193,29 +97,7 @@ const nutIsAdminCookieName = 'nutIsAdmin';
 const nutUsernameCookieName = 'nutUsername';
 
 export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<BoltProblem | null> {
-  if (shouldUseSupabase()) {
-    await supabaseUpdateProblem(problemId, problem);
-  } else {
-    try {
-      if (!getNutIsAdmin()) {
-        toast.error('Admin user required');
-
-        return null;
-      }
-
-      const loginKey = Cookies.get(nutLoginKeyCookieName);
-      await sendCommandDedicatedClient({
-        method: 'Recording.globalExperimentalCommand',
-        params: {
-          name: 'updateBoltProblem',
-          params: { problemId, problem, loginKey },
-        },
-      });
-    } catch (error) {
-      console.error('Error updating problem', error);
-      toast.error('Failed to update problem');
-    }
-  }
+  await supabaseUpdateProblem(problemId, problem);
 
   const updatedProblem = await getProblem(problemId);
 
@@ -228,11 +110,7 @@ export function getNutLoginKey(): string | undefined {
 }
 
 export async function getNutIsAdmin(): Promise<boolean> {
-  if (shouldUseSupabase()) {
-    return getNutIsAdminFromSupabase();
-  }
-
-  return Cookies.get(nutIsAdminCookieName) === 'true';
+  return getNutIsAdminFromSupabase();
 }
 
 interface UserInfo {
@@ -278,25 +156,5 @@ export function saveUsername(username: string) {
 }
 
 export async function submitFeedback(feedback: any): Promise<boolean> {
-  if (shouldUseSupabase()) {
-    return supabaseSubmitFeedback(feedback);
-  }
-
-  try {
-    const rv = await sendCommandDedicatedClient({
-      method: 'Recording.globalExperimentalCommand',
-      params: {
-        name: 'submitFeedback',
-        params: { feedback },
-      },
-    });
-    console.log('SubmitFeedbackRval', rv);
-
-    return true;
-  } catch (error) {
-    console.error('Error submitting feedback', error);
-    toast.error('Failed to submit feedback');
-
-    return false;
-  }
+  return supabaseSubmitFeedback(feedback);
 }

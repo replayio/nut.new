@@ -7,7 +7,6 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { Feedback } from './Feedback';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
-import { shouldUseSupabase } from '~/lib/supabase/client';
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -47,15 +46,13 @@ export function Header() {
         </div>
       </div>
 
-      {shouldUseSupabase() && (
-        <ClientOnly>
-          {() => (
-            <Suspense fallback={<div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />}>
-              <ClientAuth />
-            </Suspense>
-          )}
-        </ClientOnly>
-      )}
+      <ClientOnly>
+        {() => (
+          <Suspense fallback={<div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />}>
+            <ClientAuth />
+          </Suspense>
+        )}
+      </ClientOnly>
     </header>
   );
 }

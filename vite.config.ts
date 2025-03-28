@@ -61,7 +61,6 @@ export default defineConfig((config) => {
       'TOGETHER_API_BASE_URL',
       'SUPABASE_URL',
       'SUPABASE_ANON_KEY',
-      'USE_SUPABASE',
       'DEFAULT_NUM_CTX',
       'RUNNING_IN_DOCKER',
     ],

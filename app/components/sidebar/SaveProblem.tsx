@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { submitProblem, BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemInput, BoltProblemSolution } from '~/lib/replay/Problems';
-import { shouldUseSupabase, getCurrentUser } from '~/lib/supabase/client';
+import { getCurrentUser } from '~/lib/supabase/client';
 import { authModalStore } from '~/lib/stores/authModal';
 import { authStatusStore } from '~/lib/stores/auth';
 import { useStore } from '@nanostores/react';
@@ -30,11 +30,6 @@ async function saveProblem(
     return null;
   }
 
-  if (!shouldUseSupabase() && !username) {
-    toast.error('Please enter a username');
-    return null;
-  }
-
   toast.info('Submitting problem...');
 
   const repositoryId = workbenchStore.repositoryId.get();
@@ -53,8 +48,7 @@ async function saveProblem(
     version: 2,
     title,
     description,
-    username: shouldUseSupabase() ? (undefined as any) : username,
-    user_id: shouldUseSupabase() ? (await getCurrentUser())?.id || '' : undefined,
+    user_id: (await getCurrentUser())?.id || '',
     repositoryId,
     status: BoltProblemStatus.Pending,
     solution,
@@ -112,14 +106,6 @@ export function SaveProblem() {
   const [problemId, setProblemId] = useState<string | null>(null);
   const [reproData, setReproData] = useState<any>(null);
   const isLoggedIn = useStore(authStatusStore.isLoggedIn);
-  const username = useStore(authStatusStore.username);
-
-  // Update the username from the store when component mounts
-  useEffect(() => {
-    if (username) {
-      setFormData((prev) => ({ ...prev, username }));
-    }
-  }, [username]);
 
   const handleSaveProblem = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -142,11 +128,6 @@ export function SaveProblem() {
       ...prev,
       [name]: value,
     }));
-
-    // Update username in the store if it's the username field
-    if (name === 'username') {
-      authStatusStore.updateUsername(value);
-    }
   };
 
   const handleSubmitProblem = async () => {
@@ -195,7 +176,7 @@ export function SaveProblem() {
           },
         }}
       >
-        {shouldUseSupabase() && !isLoggedIn && (
+        {!isLoggedIn && (
           <div className="text-center">
             <div className="mb-4">Please log in to save a problem</div>
             <button
@@ -209,7 +190,7 @@ export function SaveProblem() {
             </button>
           </div>
         )}
-        {(!shouldUseSupabase() || isLoggedIn) && problemId && (
+        {isLoggedIn && problemId && (
           <>
             <div className="text-center mb-2">Problem Submitted: {problemId}</div>
             <div className="text-center">
@@ -224,7 +205,7 @@ export function SaveProblem() {
             </div>
           </>
         )}
-        {(!shouldUseSupabase() || isLoggedIn) && !problemId && (
+        {isLoggedIn && !problemId && (
           <>
             <div className="text-center">
               Save prompts as new problems when AI results are unsatisfactory. Problems are publicly visible and are
@@ -232,18 +213,6 @@ export function SaveProblem() {
             </div>
             <div style={{ marginTop: '10px' }}>
               <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
-                {!shouldUseSupabase() && (
-                  <>
-                    <div className="flex items-center">Username:</div>
-                    <input
-                      type="text"
-                      name="username"
-                      className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 w-full border border-gray-300"
-                      value={formData.username}
-                      onChange={handleInputChange}
-                    />
-                  </>
-                )}
 
                 <div className="flex items-center">Title:</div>
                 <input

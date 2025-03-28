@@ -25,7 +25,6 @@ interface LoaderData {
   ENV: {
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
-    USE_SUPABASE?: string;
   };
 }
 
@@ -57,15 +56,11 @@ export const links: LinksFunction = () => [
 export const loader: LoaderFunction = async () => {
   const supabaseUrl = process.env.SUPABASE_URL as string;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
-  const useSupabase = process.env.USE_SUPABASE as string;
-
-  console.log('useSupabase', useSupabase);
 
   return json<LoaderData>({
     ENV: {
       SUPABASE_URL: supabaseUrl,
       SUPABASE_ANON_KEY: supabaseAnonKey,
-      USE_SUPABASE: useSupabase,
     },
   });
 };
