@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { currentChatId, currentChatTitle, getMessages, updateChatTitle } from '~/lib/persistence';
+import { currentChatId, currentChatTitle, getChatContents, updateChatTitle } from '~/lib/persistence';
 
 interface EditChatDescriptionOptions {
   initialTitle?: string;
@@ -63,7 +63,7 @@ export function useEditChatTitle({
     }
 
     try {
-      const chat = await getMessages(chatId);
+      const chat = await getChatContents(chatId);
       return chat?.title || initialTitle;
     } catch (error) {
       console.error('Failed to fetch latest description:', error);

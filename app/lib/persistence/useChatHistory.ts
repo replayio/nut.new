@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import { createChat, getMessages, setMessages } from './db';
+import { createChat, getChatContents, setChatContents } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import type { Message } from './message';
 
@@ -33,11 +33,11 @@ export function useChatHistory() {
 
   useEffect(() => {
     if (mixedId) {
-      getMessages(mixedId)
-        .then((storedMessages) => {
-          if (storedMessages && storedMessages.messages.length > 0) {
-            setInitialMessages(storedMessages.messages);
-            currentChatTitle.set(storedMessages.title);
+      getChatContents(mixedId)
+        .then((chatContents) => {
+          if (chatContents && chatContents.messages.length > 0) {
+            setInitialMessages(chatContents.messages);
+            currentChatTitle.set(chatContents.title);
             currentChatId.set(mixedId);
           } else {
             navigate('/', { replace: true });
@@ -70,7 +70,7 @@ export function useChatHistory() {
         navigateChat(id);
       }
 
-      await setMessages(currentChatId.get() as string, title, messages);
+      await setChatContents(currentChatId.get() as string, title, messages);
     },
     importChat,
   };
