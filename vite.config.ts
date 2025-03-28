@@ -55,14 +55,8 @@ export default defineConfig((config) => {
     ],
     envPrefix: [
       'VITE_',
-      'OPENAI_LIKE_API_BASE_URL',
-      'OLLAMA_API_BASE_URL',
-      'LMSTUDIO_API_BASE_URL',
-      'TOGETHER_API_BASE_URL',
       'SUPABASE_URL',
       'SUPABASE_ANON_KEY',
-      'DEFAULT_NUM_CTX',
-      'RUNNING_IN_DOCKER',
     ],
     css: {
       preprocessorOptions: {
