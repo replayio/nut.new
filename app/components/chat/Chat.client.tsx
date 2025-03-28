@@ -9,7 +9,6 @@ import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { description, useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
-import { PROMPT_COOKIE_KEY } from '~/utils/constants';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
@@ -376,7 +375,6 @@ export const ChatImpl = memo(
       setActiveChatId(undefined);
 
       setInput('');
-      Cookies.remove(PROMPT_COOKIE_KEY);
 
       textareaRef.current?.blur();
 
@@ -496,18 +494,6 @@ export const ChatImpl = memo(
       setInput(event.target.value);
     };
 
-    /**
-     * Debounced function to cache the prompt in cookies.
-     * Caches the trimmed value of the textarea input after a delay to optimize performance.
-     */
-    const debouncedCachePrompt = useCallback(
-      debounce((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const trimmedValue = event.target.value.trim();
-        Cookies.set(PROMPT_COOKIE_KEY, trimmedValue, { expires: 30 });
-      }, 1000),
-      [],
-    );
-
     const [messageRef, scrollRef] = useSnapScroll();
 
     gLastChatMessages = messages;
@@ -525,7 +511,6 @@ export const ChatImpl = memo(
         scrollRef={scrollRef}
         handleInputChange={(e) => {
           onTextareaChange(e);
-          debouncedCachePrompt(e);
         }}
         handleStop={abort}
         description={description}
