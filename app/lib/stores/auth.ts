@@ -25,13 +25,10 @@ export const authStatusStore = {
   },
 };
 
-// Initialize auth status store
-if (typeof window !== 'undefined') {
-  authStatusStore.init();
-}
-
 export async function initializeAuth() {
   try {
+    authStatusStore.init();
+
     isLoadingStore.set(true);
 
     // Get initial session

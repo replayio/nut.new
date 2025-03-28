@@ -85,9 +85,19 @@ export function ClientAuth() {
     toast.success('Signed out successfully');
   };
 
+  const handleGoogleSignIn = async () => {
+    const { error } = await getSupabase().auth.signInWithOAuth({
+      provider: 'google',
+    });
+    console.log('GoogleSignIn', error);
+  };
+
   if (loading) {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
   }
+
+  // Avatar URLs are disabled due to broken links from CORS issues.
+  const UseAvatarURL = false;
 
   return (
     <>
@@ -97,7 +107,7 @@ export function ClientAuth() {
             className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            {user.user_metadata?.avatar_url ? (
+            {(UseAvatarURL && user.user_metadata?.avatar_url) ? (
               <img
                 src={user.user_metadata.avatar_url}
                 alt="User avatar"
@@ -109,7 +119,7 @@ export function ClientAuth() {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-48 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded shadow-lg z-10">
+            <div className="absolute right-0 mt-2 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded shadow-lg z-10">
               <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
                 {user.email}
               </div>
@@ -183,6 +193,14 @@ export function ClientAuth() {
                   className="flex-1 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
                 >
                   {isSigningIn ? 'Processing...' : 'Sign Up'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isSigningIn}
+                  className="flex-1 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+                >
+                  {isSigningIn ? 'Processing...' : 'Sign in with Google'}
                 </button>
               </div>
             </form>
