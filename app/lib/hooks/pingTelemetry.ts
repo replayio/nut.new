@@ -1,7 +1,5 @@
 // FIXME ping telemetry server directly instead of going through the backend.
 
-import { getNutLoginKey } from '~/lib/replay/Problems';
-
 // We do this to work around CORS insanity.
 export async function pingTelemetry(event: string, data: any) {
   const requestBody: any = {
@@ -30,7 +28,6 @@ export class ChatMessageTelemetry {
   private _ping(event: string, data: any = {}) {
     pingTelemetry(event, {
       ...data,
-      loginKey: getNutLoginKey(),
       messageId: this.id,
       numMessages: this.numMessages,
     });

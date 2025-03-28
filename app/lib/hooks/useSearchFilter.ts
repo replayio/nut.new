@@ -1,18 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { debounce } from '~/utils/debounce';
-import type { ChatHistoryItem } from '~/lib/persistence';
+import type { ChatContents } from '~/lib/persistence/db';
 
 interface UseSearchFilterOptions {
-  items: ChatHistoryItem[];
-  searchFields?: (keyof ChatHistoryItem)[];
+  items: ChatContents[];
+  searchFields?: (keyof ChatContents)[];
   debounceMs?: number;
 }
 
-export function useSearchFilter({
-  items = [],
-  searchFields = ['description'],
-  debounceMs = 300,
-}: UseSearchFilterOptions) {
+export function useSearchFilter({ items = [], searchFields = ['title'], debounceMs = 300 }: UseSearchFilterOptions) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const debouncedSetSearch = useCallback(debounce(setSearchQuery, debounceMs), []);

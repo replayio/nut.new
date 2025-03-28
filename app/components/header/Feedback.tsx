@@ -3,7 +3,6 @@ import ReactModal from 'react-modal';
 import { useState } from 'react';
 import { submitFeedback } from '~/lib/replay/Problems';
 import { getLastChatMessages } from '~/components/chat/Chat.client';
-import { shouldUseSupabase } from '~/lib/supabase/client';
 
 ReactModal.setAppElement('#root');
 
@@ -35,25 +34,13 @@ export function Feedback() {
       return;
     }
 
-    if (!shouldUseSupabase() && !formData.email) {
-      toast.error('Please fill in the email field');
-
-      return;
-    }
-
     toast.info('Submitting feedback...');
 
-    const feedbackData: any = shouldUseSupabase()
-      ? {
-          description: formData.description,
-          share: formData.share,
-          source: 'feedback_modal',
-        }
-      : {
-          feedback: formData.description,
-          email: formData.email,
-          share: formData.share,
-        };
+    const feedbackData: any = {
+      description: formData.description,
+      share: formData.share,
+      source: 'feedback_modal',
+    };
 
     if (feedbackData.share) {
       feedbackData.chatMessages = getLastChatMessages();
@@ -73,8 +60,6 @@ export function Feedback() {
       toast.error('An error occurred while submitting feedback');
     }
   };
-
-  console.log(shouldUseSupabase() ? 'supabase true' : 'supabase false');
 
   return (
     <>
@@ -129,25 +114,6 @@ export function Feedback() {
                     }}
                   />
                 </div>
-
-                {!shouldUseSupabase() && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Email:</label>
-                    <input
-                      type="email"
-                      name="email"
-                      className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 w-full border border-gray-300"
-                      value={formData.email}
-                      placeholder="Enter your email address"
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }));
-                      }}
-                    />
-                  </div>
-                )}
 
                 <div className="flex items-center gap-2 mb-6">
                   <input

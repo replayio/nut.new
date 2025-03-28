@@ -15,7 +15,7 @@ test('Create a project from a preset', async ({ page }) => {
   await page.getByRole('button', { name: 'Build a todo app in React' }).click();
   await page
     .locator('div')
-    .filter({ hasText: /^Build a todo app in React using Tailwind$/ })
+    .filter({ hasText: /^Build a todo app in React$/ })
     .first()
     .click();
 

@@ -1,8 +1,7 @@
 import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
-import type { Message } from '~/lib/persistence/message';
+import { getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 
 interface MessagesProps {

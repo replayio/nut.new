@@ -1,16 +1,16 @@
 import { format, isAfter, isThisWeek, isThisYear, isToday, isYesterday, subDays } from 'date-fns';
-import type { ChatHistoryItem } from '~/lib/persistence';
+import type { ChatContents } from '~/lib/persistence/db';
 
-type Bin = { category: string; items: ChatHistoryItem[] };
+type Bin = { category: string; items: ChatContents[] };
 
-export function binDates(_list: ChatHistoryItem[]) {
-  const list = [..._list].sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+export function binDates(_list: ChatContents[]) {
+  const list = [..._list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
   const binLookup: Record<string, Bin> = {};
   const bins: Array<Bin> = [];
 
   list.forEach((item) => {
-    const category = dateCategory(new Date(item.timestamp));
+    const category = dateCategory(new Date(item.createdAt));
 
     if (!(category in binLookup)) {
       const bin = {

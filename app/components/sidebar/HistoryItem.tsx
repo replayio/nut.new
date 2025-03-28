@@ -1,25 +1,24 @@
 import { useParams } from '@remix-run/react';
 import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
-import { type ChatHistoryItem } from '~/lib/persistence';
+import { type ChatContents } from '~/lib/persistence/db';
 import WithTooltip from '~/components/ui/Tooltip';
-import { useEditChatDescription } from '~/lib/hooks';
+import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { forwardRef, type ForwardedRef } from 'react';
 
 interface HistoryItemProps {
-  item: ChatHistoryItem;
+  item: ChatContents;
   onDelete?: (event: React.UIEvent) => void;
   onDuplicate?: (id: string) => void;
-  exportChat: (id?: string) => void;
 }
 
-export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) {
+export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   const { id: urlId } = useParams();
-  const isActiveChat = urlId === item.urlId;
+  const isActiveChat = urlId === item.id;
 
-  const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentDescription, toggleEditMode } =
-    useEditChatDescription({
-      initialDescription: item.description,
+  const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
+    useEditChatTitle({
+      initialTitle: item.title,
       customChatId: item.id,
       syncWithGlobalStore: isActiveChat,
     });
@@ -30,7 +29,7 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
         type="text"
         className="flex-1 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2"
         autoFocus
-        value={currentDescription}
+        value={currentTitle}
         onChange={handleChange}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
@@ -53,8 +52,8 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
       {editing ? (
         renderDescriptionForm
       ) : (
-        <a href={`/chat/${item.urlId}`} className="flex w-full relative truncate block">
-          {currentDescription}
+        <a href={`/chat/${item.id}`} className="flex w-full relative truncate block">
+          {item.title}
           <div
             className={classNames(
               'absolute right-0 z-1 top-0 bottom-0 bg-gradient-to-l from-bolt-elements-background-depth-2 group-hover:from-bolt-elements-background-depth-3 box-content pl-3 to-transparent w-10 flex justify-end group-hover:w-22 group-hover:from-99%',
@@ -62,14 +61,6 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
             )}
           >
             <div className="flex items-center p-1 text-bolt-elements-textSecondary opacity-0 group-hover:opacity-100 transition-opacity">
-              <ChatActionButton
-                toolTipContent="Export chat"
-                icon="i-ph:download-simple"
-                onClick={(event) => {
-                  event.preventDefault();
-                  exportChat(item.id);
-                }}
-              />
               {onDuplicate && (
                 <ChatActionButton
                   toolTipContent="Duplicate chat"

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { isSupabaseEnabled, login, setLoginKey, openSidebar } from './setup/test-utils';
+import { login, setLoginKey, openSidebar } from './setup/test-utils';
 
 test('Should be able to load a problem', async ({ page }) => {
   await page.goto('/problems');
@@ -25,7 +25,6 @@ test.skip('Should be able to save a problem ', async ({ page }) => {
   await page.getByRole('link', { name: 'App goes blank getting' }).click();
   await page.getByRole('link', { name: 'Load Problem' }).click();
 
-  const useSupabase = await isSupabaseEnabled(page);
   await expect(page.getByText('Import the "problem" folder')).toBeVisible({ timeout: 30000 });
   await login(page);
 
@@ -38,11 +37,6 @@ test.skip('Should be able to save a problem ', async ({ page }) => {
   await page.locator('input[name="title"]').fill('[test] playwright');
   await page.locator('input[name="description"]').click();
   await page.locator('input[name="description"]').fill('...');
-
-  if (!useSupabase) {
-    await page.locator('input[name="username"]').click();
-    await page.locator('input[name="username"]').fill('playwright');
-  }
 
   await page.getByRole('button', { name: 'Submit' }).click();
   await page.getByRole('button', { name: 'Close' }).click();
@@ -74,23 +68,6 @@ test('Should be able to update a problem', async ({ page }) => {
   await page.getByRole('combobox').selectOption('Pending');
   await page.getByRole('button', { name: 'Set Status' }).click();
   await page.locator('span').filter({ hasText: 'Pending' }).click();
-});
-
-test('Confirm that isAdmin is saved correctly', async ({ page }) => {
-  await page.goto('/problems?showAll=true');
-  await page.getByRole('combobox').selectOption('all');
-  await page.getByRole('link', { name: '[test] playwright' }).first().click();
-
-  if (await isSupabaseEnabled(page)) {
-    expect(true).toBe(true);
-    return;
-  }
-
-  await setLoginKey(page);
-  await expect(await page.getByRole('button', { name: 'Set Status' })).toBeVisible();
-
-  await page.reload();
-  await expect(await page.getByRole('button', { name: 'Set Status' })).toBeVisible();
 });
 
 test('Should be able to add a comment to a problem', async ({ page }) => {

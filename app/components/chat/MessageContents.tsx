@@ -2,7 +2,6 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import { MODEL_REGEX, PROVIDER_REGEX } from '~/utils/constants';
 import { Markdown } from './Markdown';
 import type { Message } from '~/lib/persistence/message';
 
@@ -15,7 +14,7 @@ export function MessageContents({ message }: MessageContentsProps) {
     case 'text':
       return (
         <div data-testid="message-content" className="overflow-hidden pt-[4px]">
-          <Markdown html>{stripMetadata(message.content)}</Markdown>
+          <Markdown html>{message.content}</Markdown>
         </div>
       );
     case 'image':
@@ -31,8 +30,4 @@ export function MessageContents({ message }: MessageContentsProps) {
         </div>
       );
   }
-}
-
-function stripMetadata(content: string) {
-  return content.replace(MODEL_REGEX, '').replace(PROVIDER_REGEX, '');
 }

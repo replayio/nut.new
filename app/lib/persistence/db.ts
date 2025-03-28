@@ -1,236 +1,94 @@
-import { createScopedLogger } from '~/utils/logger';
-import type { ChatHistoryItem } from './useChatHistory';
-import type { Message } from './message';
+import { getSupabase } from '~/lib/supabase/client';
+import { v4 as uuid } from 'uuid';
+import { getMessagesRepositoryId, type Message } from './message';
 
-const logger = createScopedLogger('ChatHistory');
+export interface ChatContents {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  title: string;
+  repositoryId: string | undefined;
+  messages: Message[];
+}
 
-// this is used at the top level and never rejects
-export async function openDatabase(): Promise<IDBDatabase | undefined> {
-  if (typeof indexedDB === 'undefined') {
-    console.error('indexedDB is not available in this environment.');
-    return undefined;
+function databaseRowToChatContents(d: any): ChatContents {
+  return {
+    id: d.id,
+    createdAt: d.created_at,
+    updatedAt: d.updated_at,
+    title: d.title,
+    messages: d.messages,
+    repositoryId: d.repository_id,
+  };
+}
+
+export async function getAllChats(): Promise<ChatContents[]> {
+  const { data, error } = await getSupabase().from('chats').select('*');
+
+  if (error) {
+    throw error;
   }
 
-  return new Promise((resolve) => {
-    const request = indexedDB.open('boltHistory', 1);
-
-    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      if (!db.objectStoreNames.contains('chats')) {
-        const store = db.createObjectStore('chats', { keyPath: 'id' });
-        store.createIndex('id', 'id', { unique: true });
-        store.createIndex('urlId', 'urlId', { unique: true });
-      }
-    };
-
-    request.onsuccess = (event: Event) => {
-      resolve((event.target as IDBOpenDBRequest).result);
-    };
-
-    request.onerror = (event: Event) => {
-      resolve(undefined);
-      logger.error((event.target as IDBOpenDBRequest).error);
-    };
-  });
+  return data.map(databaseRowToChatContents);
 }
 
-export async function getAll(db: IDBDatabase): Promise<ChatHistoryItem[]> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const request = store.getAll();
+export async function setChatContents(id: string, title: string, messages: Message[]): Promise<void> {
+  const { data: user } = await getSupabase().auth.getUser();
+  const userId = user.user?.id;
 
-    request.onsuccess = () => resolve(request.result as ChatHistoryItem[]);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function setMessages(
-  db: IDBDatabase,
-  id: string,
-  messages: Message[],
-  urlId?: string,
-  description?: string,
-  timestamp?: string,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readwrite');
-    const store = transaction.objectStore('chats');
-
-    if (timestamp && isNaN(Date.parse(timestamp))) {
-      reject(new Error('Invalid timestamp'));
-      return;
-    }
-
-    const request = store.put({
-      id,
-      messages,
-      urlId,
-      description,
-      timestamp: timestamp ?? new Date().toISOString(),
-    });
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function getMessages(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
-  return (await getMessagesById(db, id)) || (await getMessagesByUrlId(db, id));
-}
-
-export async function getMessagesByUrlId(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const index = store.index('urlId');
-    const request = index.get(id);
-
-    request.onsuccess = () => resolve(request.result as ChatHistoryItem);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function getMessagesById(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const request = store.get(id);
-
-    request.onsuccess = () => resolve(request.result as ChatHistoryItem);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function deleteById(db: IDBDatabase, id: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readwrite');
-    const store = transaction.objectStore('chats');
-    const request = store.delete(id);
-
-    request.onsuccess = () => resolve(undefined);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function getNextId(db: IDBDatabase): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const request = store.getAllKeys();
-
-    request.onsuccess = () => {
-      const highestId = request.result.reduce((cur, acc) => Math.max(+cur, +acc), 0);
-      resolve(String(+highestId + 1));
-    };
-
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function getUrlId(db: IDBDatabase, id: string): Promise<string> {
-  const idList = await getUrlIds(db);
-
-  if (!idList.includes(id)) {
-    return id;
-  } else {
-    let i = 2;
-
-    while (idList.includes(`${id}-${i}`)) {
-      i++;
-    }
-
-    return `${id}-${i}`;
-  }
-}
-
-async function getUrlIds(db: IDBDatabase): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const idList: string[] = [];
-
-    const request = store.openCursor();
-
-    request.onsuccess = (event: Event) => {
-      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
-
-      if (cursor) {
-        idList.push(cursor.value.urlId);
-        cursor.continue();
-      } else {
-        resolve(idList);
-      }
-    };
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
-}
-
-export async function forkChat(db: IDBDatabase, chatId: string, messageId: string): Promise<string> {
-  const chat = await getMessages(db, chatId);
-
-  if (!chat) {
-    throw new Error('Chat not found');
+  if (!userId) {
+    throw new Error('Not logged in');
   }
 
-  // Find the index of the message to fork at
-  const messageIndex = chat.messages.findIndex((msg) => msg.id === messageId);
+  const repositoryId = getMessagesRepositoryId(messages);
 
-  if (messageIndex === -1) {
-    throw new Error('Message not found');
-  }
-
-  // Get messages up to and including the selected message
-  const messages = chat.messages.slice(0, messageIndex + 1);
-
-  return createChatFromMessages(db, chat.description ? `${chat.description} (fork)` : 'Forked chat', messages);
-}
-
-export async function duplicateChat(db: IDBDatabase, id: string): Promise<string> {
-  const chat = await getMessages(db, id);
-
-  if (!chat) {
-    throw new Error('Chat not found');
-  }
-
-  return createChatFromMessages(db, `${chat.description || 'Chat'} (copy)`, chat.messages);
-}
-
-export async function createChatFromMessages(
-  db: IDBDatabase,
-  description: string,
-  messages: Message[],
-): Promise<string> {
-  const newId = await getNextId(db);
-  const newUrlId = await getUrlId(db, newId); // Get a new urlId for the duplicated chat
-
-  // TODO: Call setLastLoadedProblem(null).
-
-  await setMessages(
-    db,
-    newId,
+  const { error } = await getSupabase().from('chats').upsert({
+    id,
     messages,
-    newUrlId, // Use the new urlId
-    description,
-  );
+    title,
+    user_id: userId,
+    repository_id: repositoryId,
+  });
 
-  return newUrlId; // Return the urlId instead of id for navigation
+  if (error) {
+    throw error;
+  }
 }
 
-export async function updateChatDescription(db: IDBDatabase, id: string, description: string): Promise<void> {
-  const chat = await getMessages(db, id);
+export async function getChatContents(id: string): Promise<ChatContents> {
+  const { data, error } = await getSupabase().from('chats').select('*').eq('id', id);
 
-  if (!chat) {
-    throw new Error('Chat not found');
+  if (error) {
+    throw error;
   }
 
-  if (!description.trim()) {
-    throw new Error('Description cannot be empty');
+  if (data.length != 1) {
+    throw new Error('Unexpected chat contents returned');
   }
 
-  await setMessages(db, id, chat.messages, chat.urlId, description, chat.timestamp);
+  return databaseRowToChatContents(data[0]);
+}
+
+export async function deleteById(id: string): Promise<void> {
+  const { error } = await getSupabase().from('chats').delete().eq('id', id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createChat(title: string, messages: Message[]): Promise<string> {
+  const id = uuid();
+  await setChatContents(id, title, messages);
+  return id;
+}
+
+export async function updateChatTitle(id: string, title: string): Promise<void> {
+  const chat = await getChatContents(id);
+
+  if (!title.trim()) {
+    throw new Error('Title cannot be empty');
+  }
+
+  await setChatContents(id, title, chat.messages);
 }

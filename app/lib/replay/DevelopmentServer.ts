@@ -57,6 +57,8 @@ class DevelopmentServerManager {
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
 export async function updateDevelopmentServer(repositoryId: string) {
+  console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryId);
+
   workbenchStore.showWorkbench.set(true);
   workbenchStore.repositoryId.set(repositoryId);
   workbenchStore.previewURL.set(undefined);

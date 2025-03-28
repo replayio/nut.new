@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
-import type { BoltProblem } from '~/lib/replay/Problems';
+import type { NutProblem } from '~/lib/replay/Problems';
 import { getProblem } from '~/lib/replay/Problems';
 import type { Message } from '~/lib/persistence/message';
 
@@ -12,12 +12,12 @@ interface LoadProblemButtonProps {
   importChat?: (description: string, messages: Message[]) => Promise<void>;
 }
 
-export function setLastLoadedProblem(problem: BoltProblem) {
+export function setLastLoadedProblem(problem: NutProblem) {
   localStorage.setItem('loadedProblemId', problem.problemId);
 }
 
-export async function getOrFetchLastLoadedProblem(): Promise<BoltProblem | null> {
-  let problem: BoltProblem | null = null;
+export async function getOrFetchLastLoadedProblem(): Promise<NutProblem | null> {
+  let problem: NutProblem | null = null;
   const problemId = localStorage.getItem('loadedProblemId');
 
   if (!problemId) {

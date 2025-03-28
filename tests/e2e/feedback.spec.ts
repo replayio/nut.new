@@ -1,11 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { isSupabaseEnabled } from './setup/test-utils';
 
 test('should submit feedback', async ({ page }) => {
   await page.goto('/');
-
-  // Get Supabase status from environment variable
-  const useSupabase = await isSupabaseEnabled(page);
 
   // Click on the Feedback button
   await page.getByRole('button', { name: 'Feedback' }).click();
@@ -14,20 +10,14 @@ test('should submit feedback', async ({ page }) => {
   await expect(page.getByText('Share Your Feedback')).toBeVisible();
 
   // Prepare feedback message
-  const feedbackMessage = useSupabase
-    ? '[test] This is a test feedback message with Supabase'
-    : 'This is a test feedback message';
+  const feedbackMessage = '[test] This is a test feedback message with Supabase';
 
   await page.locator('textarea[name="description"]').fill(feedbackMessage);
 
   // If email field is required (when not using Supabase), fill it
   const emailField = page.locator('input[type="email"][name="email"]');
 
-  if (useSupabase) {
-    await expect(emailField).toBeHidden();
-  } else {
-    await emailField.fill('test@example.com');
-  }
+  await expect(emailField).toBeHidden();
 
   await page.locator('input[type="checkbox"][name="share"]').check();
 

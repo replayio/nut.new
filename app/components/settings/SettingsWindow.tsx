@@ -5,13 +5,7 @@ import { classNames } from '~/utils/classNames';
 import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/components/ui/Dialog';
 import { IconButton } from '~/components/ui/IconButton';
 import styles from './Settings.module.scss';
-import APIKeysTab from './providers/APIKeysTab';
-import { useSettings } from '~/lib/hooks/useSettings';
-import FeaturesTab from './features/FeaturesTab';
-import DebugTab from './debug/DebugTab';
-import EventLogsTab from './event-logs/EventLogsTab';
 import ConnectionsTab from './connections/ConnectionsTab';
-import DataTab from './data/DataTab';
 
 interface SettingsProps {
   open: boolean;
@@ -21,34 +15,10 @@ interface SettingsProps {
 type TabType = 'data' | 'apiKeys' | 'features' | 'debug' | 'event-logs' | 'connection';
 
 export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
-  const { debug, eventLogs } = useSettings();
   const [activeTab, setActiveTab] = useState<TabType>('data');
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
-    { id: 'data', label: 'Data', icon: 'i-ph:database', component: <DataTab /> },
-    { id: 'apiKeys', label: 'User Info', icon: 'i-ph:key', component: <APIKeysTab /> },
     { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
-    { id: 'features', label: 'Features', icon: 'i-ph:star', component: <FeaturesTab /> },
-    ...(debug
-      ? [
-          {
-            id: 'debug' as TabType,
-            label: 'Debug Tab',
-            icon: 'i-ph:bug',
-            component: <DebugTab />,
-          },
-        ]
-      : []),
-    ...(eventLogs
-      ? [
-          {
-            id: 'event-logs' as TabType,
-            label: 'Event Logs',
-            icon: 'i-ph:list-bullets',
-            component: <EventLogsTab />,
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -91,26 +61,6 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
                     {tab.label}
                   </button>
                 ))}
-                <div className="mt-auto flex flex-col gap-2">
-                  <a
-                    href="https://github.com/stackblitz-labs/bolt.diy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={classNames(styles['settings-button'], 'flex items-center gap-2')}
-                  >
-                    <div className="i-ph:github-logo" />
-                    GitHub
-                  </a>
-                  <a
-                    href="https://stackblitz-labs.github.io/bolt.diy/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={classNames(styles['settings-button'], 'flex items-center gap-2')}
-                  >
-                    <div className="i-ph:book" />
-                    Docs
-                  </a>
-                </div>
               </div>
 
               <div className="flex-1 flex flex-col p-8 pt-10 bg-bolt-elements-background-depth-2">

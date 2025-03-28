@@ -2,24 +2,6 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 /**
- * Checks if Supabase is enabled based on the environment variable
- */
-export async function isSupabaseEnabled(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    return new Promise((resolve) => {
-      const checkEnv = () => {
-        if (window.ENV) {
-          resolve(window.ENV.USE_SUPABASE === 'true');
-        } else {
-          setTimeout(checkEnv, 50);
-        }
-      };
-      checkEnv();
-    });
-  });
-}
-
-/**
  * Waits for the page to be fully loaded
  */
 export async function waitForPageLoad(page: Page): Promise<void> {
@@ -58,11 +40,7 @@ export async function openSidebar(page: Page): Promise<void> {
   await page.locator('[data-testid="sidebar-icon"]').click();
 }
 export async function login(page: Page): Promise<void> {
-  if (await isSupabaseEnabled(page)) {
-    await loginToSupabase(page);
-  } else {
-    await setLoginKey(page);
-  }
+  await loginToSupabase(page);
 }
 
 export async function loginToSupabase(page: Page): Promise<void> {

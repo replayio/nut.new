@@ -7,17 +7,16 @@ import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { useStore } from '@nanostores/react';
 import {
   getProblem,
   updateProblem as backendUpdateProblem,
   deleteProblem as backendDeleteProblem,
-  BoltProblemStatus,
+  NutProblemStatus,
 } from '~/lib/replay/Problems';
-import { useAdminStatus, usernameStore } from '~/lib/stores/user';
-import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems';
+import { useAdminStatus } from '~/lib/stores/user';
+import type { NutProblem, NutProblemComment } from '~/lib/replay/Problems';
 
-function Comments({ comments }: { comments: BoltProblemComment[] }) {
+function Comments({ comments }: { comments: NutProblemComment[] }) {
   return (
     <div className="space-y-4 mt-6">
       {comments.map((comment, index) => (
@@ -42,8 +41,8 @@ function Comments({ comments }: { comments: BoltProblemComment[] }) {
   );
 }
 
-function ProblemViewer({ problem }: { problem: BoltProblem }) {
-  const { problemId, title, description, status = BoltProblemStatus.Pending, keywords = [], comments = [] } = problem;
+function ProblemViewer({ problem }: { problem: NutProblem }) {
+  const { problemId, title, description, status = NutProblemStatus.Pending, keywords = [], comments = [] } = problem;
 
   return (
     <div className="benchmark">
@@ -122,7 +121,7 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
   );
 }
 
-type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
+type DoUpdateCallback = (problem: NutProblem) => NutProblem;
 type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
 type DeleteProblemCallback = () => void;
 
@@ -133,12 +132,10 @@ function UpdateProblemForms({
   updateProblem: UpdateProblemCallback;
   deleteProblem: DeleteProblemCallback;
 }) {
-  const username = useStore(usernameStore);
-
   const handleAddComment = (content: string) => {
-    const newComment: BoltProblemComment = {
+    const newComment: NutProblemComment = {
       timestamp: Date.now(),
-      username,
+      username: 'Anonymous',
       content,
     };
     updateProblem((problem) => {
@@ -165,7 +162,7 @@ function UpdateProblemForms({
   };
 
   const handleSetStatus = (status: string) => {
-    const statusEnum = BoltProblemStatus[status as keyof typeof BoltProblemStatus];
+    const statusEnum = NutProblemStatus[status as keyof typeof NutProblemStatus];
 
     if (!statusEnum) {
       toast.error('Invalid status');
@@ -189,8 +186,8 @@ function UpdateProblemForms({
     }));
   };
 
-  // Convert BoltProblemStatus enum to options array for select
-  const statusOptions = Object.entries(BoltProblemStatus).map(([key, _value]) => ({
+  // Convert NutProblemStatus enum to options array for select
+  const statusOptions = Object.entries(NutProblemStatus).map(([key, _value]) => ({
     value: key,
     label: key,
   }));
@@ -244,7 +241,7 @@ function ViewProblemPage() {
     throw new Error('Problem ID is required');
   }
 
-  const [problemData, setProblemData] = useState<BoltProblem | null>(null);
+  const [problemData, setProblemData] = useState<NutProblem | null>(null);
 
   const updateProblem = useCallback(
     async (callback: DoUpdateCallback) => {
