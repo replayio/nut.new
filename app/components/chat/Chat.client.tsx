@@ -31,8 +31,7 @@ import { submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
-import { getMessagesRepositoryId, getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
-import type { Message } from '~/lib/persistence/message';
+import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { useAuthStatus } from '~/lib/stores/auth';
 
 const toastAnimation = cssTransition({

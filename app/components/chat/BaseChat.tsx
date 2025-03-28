@@ -9,8 +9,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from './Messages.client';
-import { getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
-import type { Message } from '~/lib/persistence/message';
+import { getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { SendButton } from './SendButton.client';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
