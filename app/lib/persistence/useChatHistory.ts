@@ -1,54 +1,25 @@
-import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import { getMessages, getNextId, openDatabase, setMessages, duplicateChat, createChatFromMessages } from './db';
+import { createChat, getMessages, getNextId, setMessages } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
-import { createAsyncSuspenseValue } from '~/lib/asyncSuspenseValue';
 import type { Message } from './message';
 
-export interface ChatState {
-  description: string;
-  messages: Message[];
-}
-
-export interface ChatHistoryItem {
-  id: string;
-  urlId?: string;
-  description?: string;
-  messages: Message[];
-  timestamp: string;
-}
-
-const persistenceEnabled = !import.meta.env.VITE_DISABLE_PERSISTENCE;
-
-export const database = persistenceEnabled ? createAsyncSuspenseValue(openDatabase) : undefined;
-
-if (typeof document !== 'undefined') {
-  database?.preload();
-}
-
-export const chatId = atom<string | undefined>(undefined);
-export const description = atom<string | undefined>(undefined);
+export const currentChatId = atom<string | undefined>(undefined);
+export const currentChatTitle = atom<string | undefined>(undefined);
 
 export function useChatHistory() {
-  const db = database?.read();
   const navigate = useNavigate();
   const { id: mixedId, problemId } = useLoaderData<{ id?: string; problemId?: string }>() ?? {};
-  const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const [ready, setReady] = useState<boolean>(!mixedId && !problemId);
-  const [urlId, setUrlId] = useState<string | undefined>();
 
   const importChat = async (description: string, messages: Message[]) => {
-    if (!db) {
-      return;
-    }
-
     try {
-      const newId = await createChatFromMessages(db, description, messages);
+      const newId = await createChat(description, messages);
       window.location.href = `/chat/${newId}`;
       toast.success('Chat imported successfully');
     } catch (error) {
@@ -61,31 +32,13 @@ export function useChatHistory() {
   };
 
   useEffect(() => {
-    if (!db) {
-      setReady(true);
-
-      if (persistenceEnabled) {
-        const error = new Error('Chat persistence is unavailable');
-        logStore.logError('Chat persistence initialization failed', error);
-        toast.error('Chat persistence is unavailable');
-      }
-
-      return;
-    }
-
     if (mixedId) {
-      getMessages(db, mixedId)
+      getMessages(mixedId)
         .then((storedMessages) => {
           if (storedMessages && storedMessages.messages.length > 0) {
-            const rewindId = searchParams.get('rewindTo');
-            const filteredMessages = rewindId
-              ? storedMessages.messages.slice(0, storedMessages.messages.findIndex((m) => m.id === rewindId) + 1)
-              : storedMessages.messages;
-
-            setInitialMessages(filteredMessages);
-            setUrlId(storedMessages.urlId);
-            description.set(storedMessages.description);
-            chatId.set(storedMessages.id);
+            setInitialMessages(storedMessages.messages);
+            currentChatTitle.set(storedMessages.title);
+            currentChatId.set(mixedId);
           } else {
             navigate('/', { replace: true });
           }
@@ -105,59 +58,19 @@ export function useChatHistory() {
     ready,
     initialMessages,
     storeMessageHistory: async (messages: Message[]) => {
-      if (!db || messages.length === 0) {
+      if (messages.length === 0) {
         return;
       }
 
-      if (initialMessages.length === 0 && !chatId.get()) {
-        const nextId = await getNextId(db);
-
-        chatId.set(nextId);
-
-        if (!urlId) {
-          navigateChat(nextId);
-        }
+      if (!currentChatId.get()) {
+        const id = await createChat(currentChatTitle.get() ?? 'New Chat', initialMessages);
+        currentChatId.set(id);
+        navigateChat(id);
       }
 
-      await setMessages(db, chatId.get() as string, messages, urlId, description.get());
-    },
-    duplicateCurrentChat: async (listItemId: string) => {
-      if (!db || (!mixedId && !listItemId)) {
-        return;
-      }
-
-      try {
-        const newId = await duplicateChat(db, mixedId || listItemId);
-        navigate(`/chat/${newId}`);
-        toast.success('Chat duplicated successfully');
-      } catch (error) {
-        toast.error('Failed to duplicate chat');
-        console.log(error);
-      }
+      await setMessages(currentChatId.get() as string, messages, currentChatTitle.get());
     },
     importChat,
-    exportChat: async (id = urlId) => {
-      if (!db || !id) {
-        return;
-      }
-
-      const chat = await getMessages(db, id);
-      const chatData = {
-        messages: chat.messages,
-        description: chat.description,
-        exportDate: new Date().toISOString(),
-      };
-
-      const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `chat-${new Date().toISOString()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    },
   };
 }
 

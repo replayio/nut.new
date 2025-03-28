@@ -1,41 +1,17 @@
 import { createScopedLogger } from '~/utils/logger';
-import type { ChatHistoryItem } from './useChatHistory';
 import type { Message } from './message';
 
 const logger = createScopedLogger('ChatHistory');
 
-// this is used at the top level and never rejects
-export async function openDatabase(): Promise<IDBDatabase | undefined> {
-  if (typeof indexedDB === 'undefined') {
-    console.error('indexedDB is not available in this environment.');
-    return undefined;
-  }
-
-  return new Promise((resolve) => {
-    const request = indexedDB.open('boltHistory', 1);
-
-    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      if (!db.objectStoreNames.contains('chats')) {
-        const store = db.createObjectStore('chats', { keyPath: 'id' });
-        store.createIndex('id', 'id', { unique: true });
-        store.createIndex('urlId', 'urlId', { unique: true });
-      }
-    };
-
-    request.onsuccess = (event: Event) => {
-      resolve((event.target as IDBOpenDBRequest).result);
-    };
-
-    request.onerror = (event: Event) => {
-      resolve(undefined);
-      logger.error((event.target as IDBOpenDBRequest).error);
-    };
-  });
+interface ChatContents {
+  createdAt: string;
+  updatedAt: string;
+  title: string;
+  repositoryId: string | undefined;
+  messages: Message[];
 }
 
-export async function getAll(db: IDBDatabase): Promise<ChatHistoryItem[]> {
+export async function getAll(): Promise<ChatHistoryItem[]> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -47,21 +23,13 @@ export async function getAll(db: IDBDatabase): Promise<ChatHistoryItem[]> {
 }
 
 export async function setMessages(
-  db: IDBDatabase,
   id: string,
   messages: Message[],
-  urlId?: string,
-  description?: string,
-  timestamp?: string,
+  description?: string
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readwrite');
     const store = transaction.objectStore('chats');
-
-    if (timestamp && isNaN(Date.parse(timestamp))) {
-      reject(new Error('Invalid timestamp'));
-      return;
-    }
 
     const request = store.put({
       id,
@@ -76,20 +44,8 @@ export async function setMessages(
   });
 }
 
-export async function getMessages(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
+export async function getMessages(id: string): Promise<ChatContents> {
   return (await getMessagesById(db, id)) || (await getMessagesByUrlId(db, id));
-}
-
-export async function getMessagesByUrlId(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction('chats', 'readonly');
-    const store = transaction.objectStore('chats');
-    const index = store.index('urlId');
-    const request = index.get(id);
-
-    request.onsuccess = () => resolve(request.result as ChatHistoryItem);
-    request.onerror = () => reject(request.error);
-  });
 }
 
 export async function getMessagesById(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
@@ -170,45 +126,12 @@ async function getUrlIds(db: IDBDatabase): Promise<string[]> {
   });
 }
 
-export async function forkChat(db: IDBDatabase, chatId: string, messageId: string): Promise<string> {
-  const chat = await getMessages(db, chatId);
-
-  if (!chat) {
-    throw new Error('Chat not found');
-  }
-
-  // Find the index of the message to fork at
-  const messageIndex = chat.messages.findIndex((msg) => msg.id === messageId);
-
-  if (messageIndex === -1) {
-    throw new Error('Message not found');
-  }
-
-  // Get messages up to and including the selected message
-  const messages = chat.messages.slice(0, messageIndex + 1);
-
-  return createChatFromMessages(db, chat.description ? `${chat.description} (fork)` : 'Forked chat', messages);
-}
-
-export async function duplicateChat(db: IDBDatabase, id: string): Promise<string> {
-  const chat = await getMessages(db, id);
-
-  if (!chat) {
-    throw new Error('Chat not found');
-  }
-
-  return createChatFromMessages(db, `${chat.description || 'Chat'} (copy)`, chat.messages);
-}
-
-export async function createChatFromMessages(
-  db: IDBDatabase,
+export async function createChat(
   description: string,
   messages: Message[],
 ): Promise<string> {
   const newId = await getNextId(db);
   const newUrlId = await getUrlId(db, newId); // Get a new urlId for the duplicated chat
-
-  // TODO: Call setLastLoadedProblem(null).
 
   await setMessages(
     db,
