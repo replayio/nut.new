@@ -104,7 +104,7 @@ export function ClientAuth() {
       {user ? (
         <div className="relative">
           <button
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white"
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {(UseAvatarURL && user.user_metadata?.avatar_url) ? (
@@ -135,7 +135,7 @@ export function ClientAuth() {
       ) : (
         <button
           onClick={() => setShowSignIn(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-bold"
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-bold"
         >
           Sign In
         </button>
@@ -182,7 +182,7 @@ export function ClientAuth() {
                 <button
                   type="submit"
                   disabled={isSigningIn}
-                  className="flex-1 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                  className="flex-1 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
                 >
                   {isSigningIn ? 'Processing...' : 'Sign In'}
                 </button>
