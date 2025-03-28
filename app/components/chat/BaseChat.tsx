@@ -15,7 +15,6 @@ import { SendButton } from './SendButton.client';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 import styles from './BaseChat.module.scss';
-import { ExportChatButton } from '~/components/chat/chatExportAndImport/ExportChatButton';
 import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 
@@ -36,7 +35,6 @@ interface BaseChatProps {
   chatStarted?: boolean;
   isStreaming?: boolean;
   messages?: Message[];
-  description?: string;
   enhancingPrompt?: boolean;
   promptEnhanced?: boolean;
   input?: string;
@@ -45,8 +43,7 @@ interface BaseChatProps {
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   _enhancingPrompt?: boolean;
   _enhancePrompt?: () => void;
-  importChat?: (description: string, messages: Message[]) => Promise<void>;
-  exportChat?: () => void;
+  importChat?: (title: string, messages: Message[]) => Promise<void>;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
@@ -67,14 +64,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       chatStarted = false,
       isStreaming = false,
       input = '',
-      _enhancingPrompt,
       handleInputChange,
 
-      _enhancePrompt,
       sendMessage,
       handleStop,
       importChat,
-      exportChat,
       uploadedFiles = [],
       setUploadedFiles,
       imageDataList = [],
@@ -350,7 +344,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 onStop={stopListening}
                 disabled={isStreaming}
               />
-              {chatStarted && <ClientOnly>{() => <ExportChatButton exportChat={exportChat} />}</ClientOnly>}
             </div>
             {input.length > 3 ? (
               <div className="text-xs text-bolt-elements-textTertiary">

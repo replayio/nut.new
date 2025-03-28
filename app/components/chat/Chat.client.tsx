@@ -4,16 +4,15 @@
  */
 import { useStore } from '@nanostores/react';
 import { useAnimate } from 'framer-motion';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { description, useChatHistory } from '~/lib/persistence';
+import { useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
 import Cookies from 'js-cookie';
-import { debounce } from '~/utils/debounce';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import {
@@ -75,19 +74,12 @@ setInterval(async () => {
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const { ready, initialMessages, storeMessageHistory, importChat, exportChat } = useChatHistory();
-  const title = useStore(description);
+  const { ready, initialMessages, storeMessageHistory, importChat } = useChatHistory();
 
   return (
     <>
       {ready && (
-        <ChatImpl
-          description={title}
-          initialMessages={initialMessages}
-          exportChat={exportChat}
-          storeMessageHistory={storeMessageHistory}
-          importChat={importChat}
-        />
+        <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} importChat={importChat} />
       )}
       <ToastContainer
         closeButton={({ closeToast }) => {
@@ -139,8 +131,6 @@ interface ChatProps {
   initialMessages: Message[];
   storeMessageHistory: (messages: Message[]) => Promise<void>;
   importChat: (description: string, messages: Message[]) => Promise<void>;
-  exportChat: () => void;
-  description?: string;
 }
 
 let gNumAborts = 0;
@@ -151,381 +141,377 @@ async function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
 }
 
-export const ChatImpl = memo(
-  ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
-    const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
-    const { isLoggedIn } = useAuthStatus();
+export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat }: ChatProps) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
+  const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
+  const { isLoggedIn } = useAuthStatus();
 
-    // Input currently in the textarea.
-    const [input, setInput] = useState('');
+  // Input currently in the textarea.
+  const [input, setInput] = useState('');
 
-    /*
-     * This is set when the user has triggered a chat message and the response hasn't finished
-     * being generated.
-     */
-    const [activeChatId, setActiveChatId] = useState<string | undefined>(undefined);
-    const isLoading = activeChatId !== undefined;
+  /*
+   * This is set when the user has triggered a chat message and the response hasn't finished
+   * being generated.
+   */
+  const [activeChatId, setActiveChatId] = useState<string | undefined>(undefined);
+  const isLoading = activeChatId !== undefined;
 
-    const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-    const { showChat } = useStore(chatStore);
+  const { showChat } = useStore(chatStore);
 
-    const [animationScope, animate] = useAnimate();
+  const [animationScope, animate] = useAnimate();
 
-    useEffect(() => {
-      const prompt = searchParams.get('prompt');
+  useEffect(() => {
+    const prompt = searchParams.get('prompt');
 
-      if (prompt) {
-        setSearchParams({});
-        sendMessage(prompt);
-      }
-    }, [searchParams]);
+    if (prompt) {
+      setSearchParams({});
+      sendMessage(prompt);
+    }
+  }, [searchParams]);
 
-    // Load any repository in the initial messages.
-    useEffect(() => {
-      const repositoryId = getMessagesRepositoryId(initialMessages);
+  // Load any repository in the initial messages.
+  useEffect(() => {
+    const repositoryId = getMessagesRepositoryId(initialMessages);
 
-      if (repositoryId) {
-        simulationRepositoryUpdated(repositoryId);
-      }
-    }, [initialMessages]);
+    if (repositoryId) {
+      simulationRepositoryUpdated(repositoryId);
+    }
+  }, [initialMessages]);
 
-    const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
+  const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
-    useEffect(() => {
-      chatStore.setKey('started', initialMessages.length > 0);
-    }, []);
+  useEffect(() => {
+    chatStore.setKey('started', initialMessages.length > 0);
+  }, []);
 
-    useEffect(() => {
-      processSampledMessages({
-        messages,
-        initialMessages,
-        storeMessageHistory,
-      });
-    }, [messages, isLoading]);
+  useEffect(() => {
+    processSampledMessages({
+      messages,
+      initialMessages,
+      storeMessageHistory,
+    });
+  }, [messages, isLoading]);
 
-    const abort = () => {
-      stop();
-      gNumAborts++;
-      chatStore.setKey('aborted', true);
-      setActiveChatId(undefined);
+  const abort = () => {
+    stop();
+    gNumAborts++;
+    chatStore.setKey('aborted', true);
+    setActiveChatId(undefined);
 
-      if (gActiveChatMessageTelemetry) {
-        gActiveChatMessageTelemetry.abort('StopButtonClicked');
+    if (gActiveChatMessageTelemetry) {
+      gActiveChatMessageTelemetry.abort('StopButtonClicked');
+      clearActiveChat();
+      simulationReset();
+    }
+  };
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (textarea) {
+      textarea.style.height = 'auto';
+
+      const scrollHeight = textarea.scrollHeight;
+
+      textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
+      textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
+    }
+  }, [input, textareaRef]);
+
+  const runAnimation = async () => {
+    if (chatStarted) {
+      return;
+    }
+
+    await Promise.all([
+      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
+      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
+    ]);
+
+    chatStore.setKey('started', true);
+
+    setChatStarted(true);
+  };
+
+  const sendMessage = async (messageInput?: string) => {
+    const _input = messageInput || input;
+    const numAbortsAtStart = gNumAborts;
+
+    if (_input.length === 0 || isLoading) {
+      return;
+    }
+
+    gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
+
+    if (!isLoggedIn) {
+      const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
+
+      if (numFreeUses >= maxFreeUses) {
+        toast.error('All free uses consumed. Please login to continue using Nut.');
+        gActiveChatMessageTelemetry.abort('NoFreeUses');
         clearActiveChat();
-        simulationReset();
-      }
-    };
-
-    useEffect(() => {
-      const textarea = textareaRef.current;
-
-      if (textarea) {
-        textarea.style.height = 'auto';
-
-        const scrollHeight = textarea.scrollHeight;
-
-        textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
-        textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
-      }
-    }, [input, textareaRef]);
-
-    const runAnimation = async () => {
-      if (chatStarted) {
         return;
       }
 
-      await Promise.all([
-        animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
-        animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
-      ]);
+      Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
+    }
 
-      chatStore.setKey('started', true);
+    const chatId = generateRandomId();
+    setActiveChatId(chatId);
 
-      setChatStarted(true);
+    const userMessage: Message = {
+      id: `user-${chatId}`,
+      role: 'user',
+      type: 'text',
+      content: _input,
     };
 
-    const sendMessage = async (messageInput?: string) => {
-      const _input = messageInput || input;
-      const numAbortsAtStart = gNumAborts;
+    let newMessages = [...messages, userMessage];
 
-      if (_input.length === 0 || isLoading) {
-        return;
-      }
-
-      gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
-
-      if (!isLoggedIn) {
-        const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
-
-        if (numFreeUses >= maxFreeUses) {
-          toast.error('All free uses consumed. Please login to continue using Nut.');
-          gActiveChatMessageTelemetry.abort('NoFreeUses');
-          clearActiveChat();
-          return;
-        }
-
-        Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
-      }
-
-      const chatId = generateRandomId();
-      setActiveChatId(chatId);
-
-      const userMessage: Message = {
-        id: `user-${chatId}`,
+    imageDataList.forEach((imageData, index) => {
+      const imageMessage: Message = {
+        id: `image-${chatId}-${index}`,
         role: 'user',
-        type: 'text',
-        content: _input,
+        type: 'image',
+        dataURL: imageData,
       };
+      newMessages.push(imageMessage);
+    });
 
-      let newMessages = [...messages, userMessage];
+    setMessages(newMessages);
 
-      imageDataList.forEach((imageData, index) => {
-        const imageMessage: Message = {
-          id: `image-${chatId}-${index}`,
-          role: 'user',
-          type: 'image',
-          dataURL: imageData,
-        };
-        newMessages.push(imageMessage);
-      });
+    // Add file cleanup here
+    setUploadedFiles([]);
+    setImageDataList([]);
 
-      setMessages(newMessages);
+    await flushSimulationData();
+    simulationFinishData();
 
-      // Add file cleanup here
-      setUploadedFiles([]);
-      setImageDataList([]);
+    chatStore.setKey('aborted', false);
 
-      await flushSimulationData();
-      simulationFinishData();
+    runAnimation();
 
-      chatStore.setKey('aborted', false);
+    const existingRepositoryId = getMessagesRepositoryId(messages);
+    let updatedRepository = false;
 
-      runAnimation();
-
-      const existingRepositoryId = getMessagesRepositoryId(messages);
-      let updatedRepository = false;
-
-      const addResponseMessage = (msg: Message) => {
-        if (gNumAborts != numAbortsAtStart) {
-          return;
-        }
-
-        newMessages = [...newMessages];
-
-        const lastMessage = newMessages[newMessages.length - 1];
-
-        if (lastMessage.id == msg.id) {
-          newMessages.pop();
-          assert(lastMessage.type == 'text', 'Last message must be a text message');
-          assert(msg.type == 'text', 'Message must be a text message');
-          newMessages.push({
-            ...msg,
-            content: lastMessage.content + msg.content,
-          });
-        } else {
-          newMessages.push(msg);
-        }
-
-        setMessages(newMessages);
-
-        // Update the repository as soon as it has changed.
-        const responseRepositoryId = getMessagesRepositoryId(newMessages);
-
-        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-          simulationRepositoryUpdated(responseRepositoryId);
-          updatedRepository = true;
-        }
-      };
-
-      const references: ChatReference[] = [];
-
-      const mouseData = getCurrentMouseData();
-
-      if (mouseData) {
-        references.push({
-          kind: 'element',
-          selector: mouseData.selector,
-          x: mouseData.x,
-          y: mouseData.y,
-          width: mouseData.width,
-          height: mouseData.height,
-        });
-      }
-
-      try {
-        await sendChatMessage(newMessages, references, addResponseMessage);
-      } catch (e) {
-        toast.error('Error sending message');
-        console.error('Error sending message', e);
-      }
-
+    const addResponseMessage = (msg: Message) => {
       if (gNumAborts != numAbortsAtStart) {
         return;
       }
 
-      gActiveChatMessageTelemetry.finish();
-      clearActiveChat();
+      newMessages = [...newMessages];
 
-      setActiveChatId(undefined);
+      const lastMessage = newMessages[newMessages.length - 1];
 
-      setInput('');
-
-      textareaRef.current?.blur();
-
-      if (updatedRepository) {
-        const lastMessage = newMessages[newMessages.length - 1];
-        setApproveChangesMessageId(lastMessage.id);
+      if (lastMessage.id == msg.id) {
+        newMessages.pop();
+        assert(lastMessage.type == 'text', 'Last message must be a text message');
+        assert(msg.type == 'text', 'Message must be a text message');
+        newMessages.push({
+          ...msg,
+          content: lastMessage.content + msg.content,
+        });
       } else {
-        simulationReset();
+        newMessages.push(msg);
+      }
+
+      setMessages(newMessages);
+
+      // Update the repository as soon as it has changed.
+      const responseRepositoryId = getMessagesRepositoryId(newMessages);
+
+      if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+        simulationRepositoryUpdated(responseRepositoryId);
+        updatedRepository = true;
       }
     };
 
-    // Rewind far enough to erase the specified message.
-    const onRewind = async (messageId: string) => {
-      console.log('Rewinding', messageId);
+    const references: ChatReference[] = [];
 
-      const messageIndex = messages.findIndex((message) => message.id === messageId);
+    const mouseData = getCurrentMouseData();
 
-      if (messageIndex < 0) {
-        toast.error('Rewind message not found');
-        return;
-      }
-
-      const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex);
-
-      if (!previousRepositoryId) {
-        toast.error('No repository ID found for rewind');
-        return;
-      }
-
-      setMessages(messages.slice(0, messageIndex));
-      simulationRepositoryUpdated(previousRepositoryId);
-
-      pingTelemetry('RewindChat', {
-        numMessages: messages.length,
-        rewindIndex: messageIndex,
+    if (mouseData) {
+      references.push({
+        kind: 'element',
+        selector: mouseData.selector,
+        x: mouseData.x,
+        y: mouseData.y,
+        width: mouseData.width,
+        height: mouseData.height,
       });
-    };
+    }
 
-    const flashScreen = async () => {
-      const flash = document.createElement('div');
-      flash.style.position = 'fixed';
-      flash.style.top = '0';
-      flash.style.left = '0';
-      flash.style.width = '100%';
-      flash.style.height = '100%';
-      flash.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
-      flash.style.zIndex = '9999';
-      flash.style.pointerEvents = 'none';
-      document.body.appendChild(flash);
+    try {
+      await sendChatMessage(newMessages, references, addResponseMessage);
+    } catch (e) {
+      toast.error('Error sending message');
+      console.error('Error sending message', e);
+    }
 
-      // Fade out and remove after 500ms
+    if (gNumAborts != numAbortsAtStart) {
+      return;
+    }
+
+    gActiveChatMessageTelemetry.finish();
+    clearActiveChat();
+
+    setActiveChatId(undefined);
+
+    setInput('');
+
+    textareaRef.current?.blur();
+
+    if (updatedRepository) {
+      const lastMessage = newMessages[newMessages.length - 1];
+      setApproveChangesMessageId(lastMessage.id);
+    } else {
+      simulationReset();
+    }
+  };
+
+  // Rewind far enough to erase the specified message.
+  const onRewind = async (messageId: string) => {
+    console.log('Rewinding', messageId);
+
+    const messageIndex = messages.findIndex((message) => message.id === messageId);
+
+    if (messageIndex < 0) {
+      toast.error('Rewind message not found');
+      return;
+    }
+
+    const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex);
+
+    if (!previousRepositoryId) {
+      toast.error('No repository ID found for rewind');
+      return;
+    }
+
+    setMessages(messages.slice(0, messageIndex));
+    simulationRepositoryUpdated(previousRepositoryId);
+
+    pingTelemetry('RewindChat', {
+      numMessages: messages.length,
+      rewindIndex: messageIndex,
+    });
+  };
+
+  const flashScreen = async () => {
+    const flash = document.createElement('div');
+    flash.style.position = 'fixed';
+    flash.style.top = '0';
+    flash.style.left = '0';
+    flash.style.width = '100%';
+    flash.style.height = '100%';
+    flash.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+    flash.style.zIndex = '9999';
+    flash.style.pointerEvents = 'none';
+    document.body.appendChild(flash);
+
+    // Fade out and remove after 500ms
+    setTimeout(() => {
+      flash.style.transition = 'opacity 0.5s';
+      flash.style.opacity = '0';
       setTimeout(() => {
-        flash.style.transition = 'opacity 0.5s';
-        flash.style.opacity = '0';
-        setTimeout(() => {
-          document.body.removeChild(flash);
-        }, 500);
-      }, 200);
-    };
+        document.body.removeChild(flash);
+      }, 500);
+    }, 200);
+  };
 
-    const onApproveChange = async (messageId: string) => {
-      console.log('ApproveChange', messageId);
+  const onApproveChange = async (messageId: string) => {
+    console.log('ApproveChange', messageId);
 
-      setApproveChangesMessageId(undefined);
+    setApproveChangesMessageId(undefined);
 
-      await flashScreen();
+    await flashScreen();
 
-      pingTelemetry('ApproveChange', {
-        numMessages: messages.length,
-      });
-    };
+    pingTelemetry('ApproveChange', {
+      numMessages: messages.length,
+    });
+  };
 
-    const onRejectChange = async (messageId: string, data: RejectChangeData) => {
-      console.log('RejectChange', messageId, data);
+  const onRejectChange = async (messageId: string, data: RejectChangeData) => {
+    console.log('RejectChange', messageId, data);
 
-      setApproveChangesMessageId(undefined);
+    setApproveChangesMessageId(undefined);
 
-      const message = messages.find((message) => message.id === messageId);
-      assert(message, 'Message not found');
-      assert(message == messages[messages.length - 1], 'Message must be the last message');
+    const message = messages.find((message) => message.id === messageId);
+    assert(message, 'Message not found');
+    assert(message == messages[messages.length - 1], 'Message must be the last message');
 
-      // Erase all messages since the last user message.
-      let rewindMessageId = message.id;
+    // Erase all messages since the last user message.
+    let rewindMessageId = message.id;
 
-      for (let i = messages.length - 2; i >= 0; i--) {
-        if (messages[i].role == 'user') {
-          break;
-        }
-
-        rewindMessageId = messages[i].id;
-      }
-      await onRewind(rewindMessageId);
-
-      let shareProjectSuccess = false;
-
-      if (data.shareProject) {
-        const feedbackData: any = {
-          explanation: data.explanation,
-          chatMessages: messages,
-        };
-
-        shareProjectSuccess = await submitFeedback(feedbackData);
+    for (let i = messages.length - 2; i >= 0; i--) {
+      if (messages[i].role == 'user') {
+        break;
       }
 
-      pingTelemetry('RejectChange', {
-        shareProject: data.shareProject,
-        shareProjectSuccess,
-        numMessages: messages.length,
-      });
-    };
+      rewindMessageId = messages[i].id;
+    }
+    await onRewind(rewindMessageId);
 
-    /**
-     * Handles the change event for the textarea and updates the input state.
-     * @param event - The change event from the textarea.
-     */
-    const onTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInput(event.target.value);
-    };
+    let shareProjectSuccess = false;
 
-    const [messageRef, scrollRef] = useSnapScroll();
+    if (data.shareProject) {
+      const feedbackData: any = {
+        explanation: data.explanation,
+        chatMessages: messages,
+      };
 
-    gLastChatMessages = messages;
+      shareProjectSuccess = await submitFeedback(feedbackData);
+    }
 
-    return (
-      <BaseChat
-        ref={animationScope}
-        textareaRef={textareaRef}
-        input={input}
-        showChat={showChat}
-        chatStarted={chatStarted}
-        isStreaming={isLoading}
-        sendMessage={sendMessage}
-        messageRef={messageRef}
-        scrollRef={scrollRef}
-        handleInputChange={(e) => {
-          onTextareaChange(e);
-        }}
-        handleStop={abort}
-        description={description}
-        importChat={importChat}
-        exportChat={exportChat}
-        messages={messages}
-        uploadedFiles={uploadedFiles}
-        setUploadedFiles={setUploadedFiles}
-        imageDataList={imageDataList}
-        setImageDataList={setImageDataList}
-        onRewind={onRewind}
-        approveChangesMessageId={approveChangesMessageId}
-        onApproveChange={onApproveChange}
-        onRejectChange={onRejectChange}
-      />
-    );
-  },
-);
+    pingTelemetry('RejectChange', {
+      shareProject: data.shareProject,
+      shareProjectSuccess,
+      numMessages: messages.length,
+    });
+  };
+
+  /**
+   * Handles the change event for the textarea and updates the input state.
+   * @param event - The change event from the textarea.
+   */
+  const onTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(event.target.value);
+  };
+
+  const [messageRef, scrollRef] = useSnapScroll();
+
+  gLastChatMessages = messages;
+
+  return (
+    <BaseChat
+      ref={animationScope}
+      textareaRef={textareaRef}
+      input={input}
+      showChat={showChat}
+      chatStarted={chatStarted}
+      isStreaming={isLoading}
+      sendMessage={sendMessage}
+      messageRef={messageRef}
+      scrollRef={scrollRef}
+      handleInputChange={(e) => {
+        onTextareaChange(e);
+      }}
+      handleStop={abort}
+      importChat={importChat}
+      messages={messages}
+      uploadedFiles={uploadedFiles}
+      setUploadedFiles={setUploadedFiles}
+      imageDataList={imageDataList}
+      setImageDataList={setImageDataList}
+      onRewind={onRewind}
+      approveChangesMessageId={approveChangesMessageId}
+      onApproveChange={onApproveChange}
+      onRejectChange={onRejectChange}
+    />
+  );
+});

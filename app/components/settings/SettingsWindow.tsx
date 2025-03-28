@@ -6,7 +6,6 @@ import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/component
 import { IconButton } from '~/components/ui/IconButton';
 import styles from './Settings.module.scss';
 import ConnectionsTab from './connections/ConnectionsTab';
-import DataTab from './data/DataTab';
 
 interface SettingsProps {
   open: boolean;
@@ -19,7 +18,6 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('data');
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
-    { id: 'data', label: 'Data', icon: 'i-ph:database', component: <DataTab /> },
     { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
   ];
 

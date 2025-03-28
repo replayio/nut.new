@@ -113,7 +113,8 @@
     "remix-island": "^0.2.0",
     "remix-utils": "^7.7.0",
     "shiki": "^1.24.0",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",

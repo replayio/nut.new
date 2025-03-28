@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import { createChat, getMessages, getNextId, setMessages } from './db';
+import { createChat, getMessages, setMessages } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import type { Message } from './message';
 
@@ -62,13 +62,15 @@ export function useChatHistory() {
         return;
       }
 
+      const title = currentChatTitle.get() ?? 'New Chat';
+
       if (!currentChatId.get()) {
-        const id = await createChat(currentChatTitle.get() ?? 'New Chat', initialMessages);
+        const id = await createChat(title, initialMessages);
         currentChatId.set(id);
         navigateChat(id);
       }
 
-      await setMessages(currentChatId.get() as string, messages, currentChatTitle.get());
+      await setMessages(currentChatId.get() as string, title, messages);
     },
     importChat,
   };

@@ -5,7 +5,8 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { database, deleteById, getAll, chatId, type ChatHistoryItem, useChatHistory } from '~/lib/persistence';
+import { deleteById, getAllChats, currentChatId } from '~/lib/persistence';
+import type { ChatContents } from '~/lib/persistence/db';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
@@ -35,13 +36,11 @@ const menuVariants = {
   },
 } satisfies Variants;
 
-type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
+type DialogContent = { type: 'delete'; item: ChatContents } | null;
 
 export const Menu = () => {
-  const db = database?.read();
-  const { duplicateCurrentChat, exportChat } = useChatHistory();
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatHistoryItem[]>([]);
+  const [list, setList] = useState<ChatContents[]>([]);
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -49,36 +48,31 @@ export const Menu = () => {
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
-    searchFields: ['description'],
+    searchFields: ['title'],
   });
 
   const loadEntries = useCallback(() => {
-    if (db) {
-      getAll(db)
-        .then((list) => list.filter((item) => item.urlId && item.description))
-        .then(setList)
-        .catch((error) => toast.error(error.message));
-    }
+    getAllChats()
+      .then(setList)
+      .catch((error) => toast.error(error.message));
   }, []);
 
-  const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItem) => {
+  const deleteItem = useCallback((event: React.UIEvent, item: ChatContents) => {
     event.preventDefault();
 
-    if (db) {
-      deleteById(db, item.id)
-        .then(() => {
-          loadEntries();
+    deleteById(item.id)
+      .then(() => {
+        loadEntries();
 
-          if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
-            window.location.pathname = '/';
-          }
-        })
-        .catch((error) => {
-          toast.error('Failed to delete conversation');
-          logger.error(error);
-        });
-    }
+        if (currentChatId.get() === item.id) {
+          // hard page navigation to clear the stores
+          window.location.pathname = '/';
+        }
+      })
+      .catch((error) => {
+        toast.error('Failed to delete conversation');
+        logger.error(error);
+      });
   }, []);
 
   const closeDialog = () => {
@@ -112,14 +106,9 @@ export const Menu = () => {
     };
   }, []);
 
-  const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
+  const handleDeleteClick = (event: React.UIEvent, item: ChatContents) => {
     event.preventDefault();
     setDialogContent({ type: 'delete', item });
-  };
-
-  const handleDuplicate = async (id: string) => {
-    await duplicateCurrentChat(id);
-    loadEntries(); // Reload the list after duplication
   };
 
   return (
@@ -179,13 +168,7 @@ export const Menu = () => {
                   {category}
                 </div>
                 {items.map((item) => (
-                  <HistoryItem
-                    key={item.id}
-                    item={item}
-                    exportChat={exportChat}
-                    onDelete={(event) => handleDeleteClick(event, item)}
-                    onDuplicate={() => handleDuplicate(item.id)}
-                  />
+                  <HistoryItem key={item.id} item={item} onDelete={(event) => handleDeleteClick(event, item)} />
                 ))}
               </div>
             ))}
@@ -196,7 +179,7 @@ export const Menu = () => {
                   <DialogDescription asChild>
                     <div>
                       <p>
-                        You are about to delete <strong>{dialogContent.item.description}</strong>.
+                        You are about to delete <strong>{dialogContent.item.title}</strong>.
                       </p>
                       <p className="mt-1">Are you sure you want to delete this chat?</p>
                     </div>

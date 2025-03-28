@@ -1,16 +1,10 @@
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import {
-  chatId as chatIdStore,
-  database,
-  description as descriptionStore,
-  getMessages,
-  updateChatDescription,
-} from '~/lib/persistence';
+import { currentChatId, currentChatTitle, getMessages, updateChatTitle } from '~/lib/persistence';
 
 interface EditChatDescriptionOptions {
-  initialDescription?: string;
+  initialTitle?: string;
   customChatId?: string;
   syncWithGlobalStore?: boolean;
 }
@@ -21,7 +15,7 @@ type EditChatDescriptionHook = {
   handleBlur: () => Promise<void>;
   handleSubmit: (event: React.FormEvent) => Promise<void>;
   handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => Promise<void>;
-  currentDescription: string;
+  currentTitle: string;
   toggleEditMode: () => void;
 };
 
@@ -39,15 +33,14 @@ type EditChatDescriptionHook = {
  * @param {boolean} options.syncWithGlobalStore - Flag to indicate global description store synchronization.
  * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
-export function useEditChatDescription({
-  initialDescription = descriptionStore.get()!,
+export function useEditChatTitle({
+  initialTitle = currentChatTitle.get()!,
   customChatId,
   syncWithGlobalStore,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
-  const db = database?.read();
-  const chatIdFromStore = useStore(chatIdStore);
+  const chatIdFromStore = useStore(currentChatId);
   const [editing, setEditing] = useState(false);
-  const [currentDescription, setCurrentDescription] = useState(initialDescription);
+  const [currentTitle, setCurrentTitle] = useState(initialTitle);
 
   const [chatId, setChatId] = useState<string>();
 
@@ -55,55 +48,55 @@ export function useEditChatDescription({
     setChatId(customChatId || chatIdFromStore);
   }, [customChatId, chatIdFromStore]);
   useEffect(() => {
-    setCurrentDescription(initialDescription);
-  }, [initialDescription]);
+    setCurrentTitle(initialTitle);
+  }, [initialTitle]);
 
   const toggleEditMode = useCallback(() => setEditing((prev) => !prev), []);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentDescription(e.target.value);
+    setCurrentTitle(e.target.value);
   }, []);
 
-  const fetchLatestDescription = useCallback(async () => {
-    if (!db || !chatId) {
-      return initialDescription;
+  const fetchLatestTitle = useCallback(async () => {
+    if (!chatId) {
+      return initialTitle;
     }
 
     try {
-      const chat = await getMessages(db, chatId);
-      return chat?.description || initialDescription;
+      const chat = await getMessages(chatId);
+      return chat?.title || initialTitle;
     } catch (error) {
       console.error('Failed to fetch latest description:', error);
-      return initialDescription;
+      return initialTitle;
     }
-  }, [db, chatId, initialDescription]);
+  }, [chatId, initialTitle]);
 
   const handleBlur = useCallback(async () => {
-    const latestDescription = await fetchLatestDescription();
-    setCurrentDescription(latestDescription);
+    const latestTitle = await fetchLatestTitle();
+    setCurrentTitle(latestTitle);
     toggleEditMode();
-  }, [fetchLatestDescription, toggleEditMode]);
+  }, [fetchLatestTitle, toggleEditMode]);
 
-  const isValidDescription = useCallback((desc: string): boolean => {
-    const trimmedDesc = desc.trim();
+  const isValidTitle = useCallback((title: string): boolean => {
+    const trimmedTitle = title.trim();
 
-    if (trimmedDesc === initialDescription) {
+    if (trimmedTitle === initialTitle) {
       toggleEditMode();
       return false; // No change, skip validation
     }
 
-    const lengthValid = trimmedDesc.length > 0 && trimmedDesc.length <= 100;
+    const lengthValid = trimmedTitle.length > 0 && trimmedTitle.length <= 100;
 
     // Allow letters, numbers, spaces, and common punctuation but exclude characters that could cause issues
-    const characterValid = /^[a-zA-Z0-9\s\-_.,!?()[\]{}'"]+$/.test(trimmedDesc);
+    const characterValid = /^[a-zA-Z0-9\s\-_.,!?()[\]{}'"]+$/.test(trimmedTitle);
 
     if (!lengthValid) {
-      toast.error('Description must be between 1 and 100 characters.');
+      toast.error('Title must be between 1 and 100 characters.');
       return false;
     }
 
     if (!characterValid) {
-      toast.error('Description can only contain letters, numbers, spaces, and basic punctuation.');
+      toast.error('Title can only contain letters, numbers, spaces, and basic punctuation.');
       return false;
     }
 
@@ -114,35 +107,30 @@ export function useEditChatDescription({
     async (event: React.FormEvent) => {
       event.preventDefault();
 
-      if (!isValidDescription(currentDescription)) {
+      if (!isValidTitle(currentTitle)) {
         return;
       }
 
       try {
-        if (!db) {
-          toast.error('Chat persistence is not available');
-          return;
-        }
-
         if (!chatId) {
           toast.error('Chat Id is not available');
           return;
         }
 
-        await updateChatDescription(db, chatId, currentDescription);
+        await updateChatTitle(chatId, currentTitle);
 
         if (syncWithGlobalStore) {
-          descriptionStore.set(currentDescription);
+          currentChatTitle.set(currentTitle);
         }
 
-        toast.success('Chat description updated successfully');
+        toast.success('Chat title updated successfully');
       } catch (error) {
-        toast.error('Failed to update chat description: ' + (error as Error).message);
+        toast.error('Failed to update chat title: ' + (error as Error).message);
       }
 
       toggleEditMode();
     },
-    [currentDescription, db, chatId, initialDescription, customChatId],
+    [currentTitle, chatId, customChatId],
   );
 
   const handleKeyDown = useCallback(
@@ -160,7 +148,7 @@ export function useEditChatDescription({
     handleBlur,
     handleSubmit,
     handleKeyDown,
-    currentDescription,
+    currentTitle,
     toggleEditMode,
   };
 }

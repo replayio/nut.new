@@ -97,7 +97,7 @@ export function ClientAuth() {
   }
 
   // Avatar URLs are disabled due to broken links from CORS issues.
-  const UseAvatarURL = false;
+  const useAvatarURL = false;
 
   return (
     <>
@@ -107,7 +107,7 @@ export function ClientAuth() {
             className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            {(UseAvatarURL && user.user_metadata?.avatar_url) ? (
+            {useAvatarURL && user.user_metadata?.avatar_url ? (
               <img
                 src={user.user_metadata.avatar_url}
                 alt="User avatar"
