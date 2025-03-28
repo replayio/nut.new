@@ -7,7 +7,6 @@ import { ToastContainerWrapper, Status, Keywords } from './problems';
 import { toast } from 'react-toastify';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { useStore } from '@nanostores/react';
 import {
   getProblem,
   updateProblem as backendUpdateProblem,

@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { submitProblem, BoltProblemStatus } from '~/lib/replay/Problems';
 import type { BoltProblemInput, BoltProblemSolution } from '~/lib/replay/Problems';
@@ -213,7 +213,6 @@ export function SaveProblem() {
             </div>
             <div style={{ marginTop: '10px' }}>
               <div className="grid grid-cols-[auto_1fr] gap-4 max-w-md mx-auto">
-
                 <div className="flex items-center">Title:</div>
                 <input
                   type="text"
