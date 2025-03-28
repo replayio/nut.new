@@ -11,6 +11,17 @@ export interface ChatContents {
   messages: Message[];
 }
 
+function databaseRowToChatContents(d: any): ChatContents {
+  return {
+    id: d.id,
+    createdAt: d.created_at,
+    updatedAt: d.updated_at,
+    title: d.title,
+    messages: d.messages,
+    repositoryId: d.repository_id,
+  };
+}
+
 export async function getAllChats(): Promise<ChatContents[]> {
   const { data, error } = await getSupabase().from('chats').select('*');
 
@@ -18,16 +29,7 @@ export async function getAllChats(): Promise<ChatContents[]> {
     throw error;
   }
 
-  return data.map((d) => {
-    return {
-      id: d.id,
-      createdAt: d.created_at,
-      updatedAt: d.updated_at,
-      title: d.title,
-      messages: d.messages,
-      repositoryId: d.repository_id,
-    };
-  });
+  return data.map(databaseRowToChatContents);
 }
 
 export async function setChatContents(id: string, title: string, messages: Message[]): Promise<void> {
@@ -60,8 +62,11 @@ export async function getChatContents(id: string): Promise<ChatContents> {
     throw error;
   }
 
-  console.log('CHAT_CONTENTS', data);
-  throw new Error('NYI');
+  if (data.length != 1) {
+    throw new Error('Unexpected chat contents returned');
+  }
+
+  return databaseRowToChatContents(data[0]);
 }
 
 export async function deleteById(id: string): Promise<void> {
