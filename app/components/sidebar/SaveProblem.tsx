@@ -2,8 +2,8 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { submitProblem, BoltProblemStatus } from '~/lib/replay/Problems';
-import type { BoltProblemInput, BoltProblemSolution } from '~/lib/replay/Problems';
+import { submitProblem, NutProblemStatus } from '~/lib/replay/Problems';
+import type { NutProblemInput, NutProblemSolution } from '~/lib/replay/Problems';
 import { getCurrentUser } from '~/lib/supabase/client';
 import { authModalStore } from '~/lib/stores/authModal';
 import { authStatusStore } from '~/lib/stores/auth';
@@ -39,18 +39,18 @@ async function saveProblem(
     return null;
   }
 
-  const solution: BoltProblemSolution = {
+  const solution: NutProblemSolution = {
     evaluator: undefined,
     ...reproData,
   };
 
-  const problem: BoltProblemInput = {
+  const problem: NutProblemInput = {
     version: 2,
     title,
     description,
     user_id: (await getCurrentUser())?.id || '',
     repositoryId,
-    status: BoltProblemStatus.Pending,
+    status: NutProblemStatus.Pending,
     solution,
   };
 

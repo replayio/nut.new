@@ -5,8 +5,8 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { Suspense, useEffect, useState } from 'react';
-import { listAllProblems, BoltProblemStatus } from '~/lib/replay/Problems';
-import type { BoltProblemDescription } from '~/lib/replay/Problems';
+import { listAllProblems, NutProblemStatus } from '~/lib/replay/Problems';
+import type { NutProblemDescription } from '~/lib/replay/Problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -45,15 +45,15 @@ export function ToastContainerWrapper() {
   );
 }
 
-export function Status({ status }: { status: BoltProblemStatus | undefined }) {
+export function Status({ status }: { status: NutProblemStatus | undefined }) {
   if (!status) {
-    status = BoltProblemStatus.Pending;
+    status = NutProblemStatus.Pending;
   }
 
-  const statusColors: Record<BoltProblemStatus, string> = {
-    [BoltProblemStatus.Pending]: 'bg-yellow-400 dark:text-yellow-400',
-    [BoltProblemStatus.Unsolved]: 'bg-orange-500 dark:text-orange-500',
-    [BoltProblemStatus.Solved]: 'bg-blue-500 dark:text-blue-500',
+  const statusColors: Record<NutProblemStatus, string> = {
+    [NutProblemStatus.Pending]: 'bg-yellow-400 dark:text-yellow-400',
+    [NutProblemStatus.Unsolved]: 'bg-orange-500 dark:text-orange-500',
+    [NutProblemStatus.Solved]: 'bg-blue-500 dark:text-blue-500',
   };
 
   return (
@@ -88,15 +88,15 @@ export function Keywords({ keywords }: { keywords: string[] | undefined }) {
   );
 }
 
-function getProblemStatus(problem: BoltProblemDescription): BoltProblemStatus {
-  return problem.status ?? BoltProblemStatus.Pending;
+function getProblemStatus(problem: NutProblemDescription): NutProblemStatus {
+  return problem.status ?? NutProblemStatus.Pending;
 }
 
 const Nothing = () => null;
 
 function ProblemsPage() {
-  const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
-  const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
+  const [problems, setProblems] = useState<NutProblemDescription[] | null>(null);
+  const [statusFilter, setStatusFilter] = useState<NutProblemStatus | 'all'>(NutProblemStatus.Solved);
 
   useEffect(() => {
     listAllProblems().then(setProblems);
@@ -119,7 +119,7 @@ function ProblemsPage() {
               <div className="mb-4">
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as BoltProblemStatus | 'all')}
+                  onChange={(e) => setStatusFilter(e.target.value as NutProblemStatus | 'all')}
                   className="appearance-none w-48 px-4 py-2.5 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-border text-bolt-content-primary hover:border-bolt-elements-border-hover focus:outline-none focus:ring-2 focus:ring-bolt-accent-primary/20 focus:border-bolt-accent-primary cursor-pointer relative pr-10"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
@@ -129,7 +129,7 @@ function ProblemsPage() {
                   }}
                 >
                   <option value="all">{`All Problems (${problems?.length ?? 0})`}</option>
-                  {Object.values(BoltProblemStatus).map((status) => {
+                  {Object.values(NutProblemStatus).map((status) => {
                     const count = problems?.filter((problem) => getProblemStatus(problem) === status).length ?? 0;
                     return (
                       <option key={status} value={status}>

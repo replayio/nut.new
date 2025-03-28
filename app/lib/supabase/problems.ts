@@ -2,7 +2,7 @@
 
 import { toast } from 'react-toastify';
 import { getSupabase, type Database } from './client';
-import type { BoltProblem, BoltProblemDescription, BoltProblemInput, BoltProblemStatus } from '~/lib/replay/Problems';
+import type { NutProblem, NutProblemDescription, NutProblemInput, NutProblemStatus } from '~/lib/replay/Problems';
 import { getNutIsAdmin } from '~/lib/replay/Problems';
 
 async function downloadBlob(bucket: string, path: string) {
@@ -17,7 +17,7 @@ async function downloadBlob(bucket: string, path: string) {
   return data.text();
 }
 
-export async function supabaseListAllProblems(): Promise<BoltProblemDescription[]> {
+export async function supabaseListAllProblems(): Promise<NutProblemDescription[]> {
   try {
     const { data, error } = await getSupabase()
       .from('problems')
@@ -28,7 +28,7 @@ export async function supabaseListAllProblems(): Promise<BoltProblemDescription[
       throw error;
     }
 
-    const problems: BoltProblemDescription[] = data.map((problem) => ({
+    const problems: NutProblemDescription[] = data.map((problem) => ({
       version: 1,
       problemId: problem.id,
       timestamp: new Date(problem.created_at).getTime(),
@@ -47,7 +47,7 @@ export async function supabaseListAllProblems(): Promise<BoltProblemDescription[
   }
 }
 
-export async function supabaseGetProblem(problemId: string): Promise<BoltProblem | null> {
+export async function supabaseGetProblem(problemId: string): Promise<NutProblem | null> {
   try {
     if (!problemId) {
       toast.error('Invalid problem ID');
@@ -115,7 +115,7 @@ export async function supabaseGetProblem(problemId: string): Promise<BoltProblem
       timestamp: new Date(data.created_at).getTime(),
       title: data.title,
       description: data.description,
-      status: data.status as BoltProblemStatus,
+      status: data.status as NutProblemStatus,
       keywords: data.keywords,
       repositoryId: data.repository_id,
       username,
@@ -140,13 +140,13 @@ export async function supabaseGetProblem(problemId: string): Promise<BoltProblem
   return null;
 }
 
-export async function supabaseSubmitProblem(problem: BoltProblemInput): Promise<string | null> {
+export async function supabaseSubmitProblem(problem: NutProblemInput): Promise<string | null> {
   try {
     const supabaseProblem = {
       id: undefined as any, // This will be set by Supabase
       title: problem.title,
       description: problem.description,
-      status: problem.status as BoltProblemStatus,
+      status: problem.status as NutProblemStatus,
       keywords: problem.keywords || [],
       repository_id: problem.repositoryId,
       user_id: problem.user_id,
@@ -183,7 +183,7 @@ export async function supabaseDeleteProblem(problemId: string): Promise<void | u
   }
 }
 
-export async function supabaseUpdateProblem(problemId: string, problem: BoltProblemInput): Promise<void> {
+export async function supabaseUpdateProblem(problemId: string, problem: NutProblemInput): Promise<void> {
   try {
     if (!getNutIsAdmin()) {
       toast.error('Admin user required');
