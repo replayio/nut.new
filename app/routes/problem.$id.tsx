@@ -14,7 +14,7 @@ import {
   deleteProblem as backendDeleteProblem,
   BoltProblemStatus,
 } from '~/lib/replay/Problems';
-import { useAdminStatus, usernameStore } from '~/lib/stores/user';
+import { useAdminStatus } from '~/lib/stores/user';
 import type { BoltProblem, BoltProblemComment } from '~/lib/replay/Problems';
 
 function Comments({ comments }: { comments: BoltProblemComment[] }) {
@@ -133,12 +133,10 @@ function UpdateProblemForms({
   updateProblem: UpdateProblemCallback;
   deleteProblem: DeleteProblemCallback;
 }) {
-  const username = useStore(usernameStore);
-
   const handleAddComment = (content: string) => {
     const newComment: BoltProblemComment = {
       timestamp: Date.now(),
-      username,
+      username: 'Anonymous',
       content,
     };
     updateProblem((problem) => {

@@ -28,13 +28,14 @@ import {
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '~/components/workbench/Preview';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
-import { anthropicNumFreeUsesCookieName, anthropicApiKeyCookieName, maxFreeUses } from '~/utils/freeUses';
-import { getNutLoginKey, submitFeedback } from '~/lib/replay/Problems';
+import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
+import { submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId } from '~/lib/persistence/useChatHistory';
 import type { Message } from '~/lib/persistence/message';
+import { useAuthStatus } from '~/lib/stores/auth';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -159,6 +160,7 @@ export const ChatImpl = memo(
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams, setSearchParams] = useSearchParams();
     const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
+    const { isLoggedIn } = useAuthStatus();
 
     // Input currently in the textarea.
     const [input, setInput] = useState('');
@@ -259,21 +261,13 @@ export const ChatImpl = memo(
 
       gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
 
-      const loginKey = getNutLoginKey();
-
-      const apiKeyCookie = Cookies.get(anthropicApiKeyCookieName);
-      const anthropicApiKey = apiKeyCookie?.length ? apiKeyCookie : undefined;
-
-      if (!loginKey && !anthropicApiKey) {
+      if (!isLoggedIn) {
         const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
         if (numFreeUses >= maxFreeUses) {
-          toast.error(
-            'All free uses consumed. Please set a login key or Anthropic API key in the "User Info" settings.',
-          );
+          toast.error('All free uses consumed. Please login to continue using Nut.');
           gActiveChatMessageTelemetry.abort('NoFreeUses');
           clearActiveChat();
-
           return;
         }
 
@@ -418,7 +412,6 @@ export const ChatImpl = memo(
       pingTelemetry('RewindChat', {
         numMessages: messages.length,
         rewindIndex: messageIndex,
-        loginKey: getNutLoginKey(),
       });
     };
 
@@ -453,7 +446,6 @@ export const ChatImpl = memo(
 
       pingTelemetry('ApproveChange', {
         numMessages: messages.length,
-        loginKey: getNutLoginKey(),
       });
     };
 
@@ -484,7 +476,6 @@ export const ChatImpl = memo(
         const feedbackData: any = {
           explanation: data.explanation,
           chatMessages: messages,
-          loginKey: getNutLoginKey(),
         };
 
         shareProjectSuccess = await submitFeedback(feedbackData);
@@ -494,7 +485,6 @@ export const ChatImpl = memo(
         shareProject: data.shareProject,
         shareProjectSuccess,
         numMessages: messages.length,
-        loginKey: getNutLoginKey(),
       });
     };
 

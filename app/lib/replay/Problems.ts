@@ -1,9 +1,6 @@
 // Accessors for the API to access saved problems.
 
-import { toast } from 'react-toastify';
-import { assert, sendCommandDedicatedClient } from './ReplayProtocolClient';
 import type { Message } from '~/lib/persistence/message';
-import Cookies from 'js-cookie';
 import {
   supabaseListAllProblems,
   supabaseGetProblem,
@@ -13,7 +10,6 @@ import {
   supabaseDeleteProblem,
 } from '~/lib/supabase/problems';
 import { getNutIsAdmin as getNutIsAdminFromSupabase } from '~/lib/supabase/client';
-import { updateIsAdmin, updateUsername } from '~/lib/stores/user';
 
 // Add global declaration for the problem property
 declare global {
@@ -92,10 +88,6 @@ export async function deleteProblem(problemId: string): Promise<void | undefined
   return supabaseDeleteProblem(problemId);
 }
 
-const nutLoginKeyCookieName = 'nutLoginKey';
-const nutIsAdminCookieName = 'nutIsAdmin';
-const nutUsernameCookieName = 'nutUsername';
-
 export async function updateProblem(problemId: string, problem: BoltProblemInput): Promise<BoltProblem | null> {
   await supabaseUpdateProblem(problemId, problem);
 
@@ -104,55 +96,8 @@ export async function updateProblem(problemId: string, problem: BoltProblemInput
   return updatedProblem;
 }
 
-export function getNutLoginKey(): string | undefined {
-  const cookieValue = Cookies.get(nutLoginKeyCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
-}
-
 export async function getNutIsAdmin(): Promise<boolean> {
   return getNutIsAdminFromSupabase();
-}
-
-interface UserInfo {
-  username: string;
-  loginKey: string;
-  details: string;
-  admin: boolean;
-}
-
-export async function saveNutLoginKey(key: string) {
-  const {
-    rval: { userInfo },
-  } = (await sendCommandDedicatedClient({
-    method: 'Recording.globalExperimentalCommand',
-    params: {
-      name: 'getUserInfo',
-      params: { loginKey: key },
-    },
-  })) as { rval: { userInfo: UserInfo } };
-  console.log('UserInfo', userInfo);
-
-  Cookies.set(nutLoginKeyCookieName, key);
-  setNutIsAdmin(userInfo.admin);
-}
-
-export function setNutIsAdmin(isAdmin: boolean) {
-  Cookies.set(nutIsAdminCookieName, isAdmin ? 'true' : 'false');
-
-  // Update the store
-  updateIsAdmin(isAdmin);
-}
-
-export function getUsername(): string | undefined {
-  const cookieValue = Cookies.get(nutUsernameCookieName);
-  return cookieValue?.length ? cookieValue : undefined;
-}
-
-export function saveUsername(username: string) {
-  Cookies.set(nutUsernameCookieName, username);
-
-  // Update the store
-  updateUsername(username);
 }
 
 export async function submitFeedback(feedback: any): Promise<boolean> {

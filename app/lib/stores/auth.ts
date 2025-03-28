@@ -9,13 +9,12 @@ export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
 export const isLoadingStore = atom<boolean>(true);
 
-// Auth status store for both Supabase and non-Supabase modes
 export const authStatusStore = {
   isLoggedIn: atom<boolean | null>(null),
 
   // Initialize auth status store
   async init() {
-    // For Supabase, subscribe to the userStore
+    // subscribe to the userStore
     userStore.listen((user) => {
       this.isLoggedIn.set(!!user);
     });

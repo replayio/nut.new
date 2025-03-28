@@ -1,27 +1,11 @@
 import { atom } from 'nanostores';
-import { getNutIsAdmin, getUsername } from '~/lib/replay/Problems';
+import { getNutIsAdmin } from '~/lib/replay/Problems';
 import { userStore } from './auth';
 import { useStore } from '@nanostores/react';
 import { useEffect } from 'react';
 
 // Store for admin status
 export const isAdminStore = atom<boolean>(false);
-
-// Store for username
-export const usernameStore = atom<string | undefined>(undefined);
-
-// Safe store updaters that check for browser environment
-export function updateIsAdmin(value: boolean) {
-  if (typeof window !== 'undefined') {
-    isAdminStore.set(value);
-  }
-}
-
-export function updateUsername(username: string | undefined) {
-  if (typeof window !== 'undefined') {
-    usernameStore.set(username);
-  }
-}
 
 export function useAdminStatus() {
   const isAdmin = useStore(isAdminStore);
@@ -48,9 +32,6 @@ export async function initializeUserStores() {
     // Initialize with current values
     const isAdmin = await getNutIsAdmin();
     isAdminStore.set(isAdmin);
-
-    const username = getUsername();
-    usernameStore.set(username);
 
     // Subscribe to user changes to update admin status
     return userStore.subscribe(async (user) => {

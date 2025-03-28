@@ -3,7 +3,7 @@
 import { toast } from 'react-toastify';
 import { getSupabase, type Database } from './client';
 import type { BoltProblem, BoltProblemDescription, BoltProblemInput, BoltProblemStatus } from '~/lib/replay/Problems';
-import { getUsername, getNutIsAdmin } from '~/lib/replay/Problems';
+import { getNutIsAdmin } from '~/lib/replay/Problems';
 
 async function downloadBlob(bucket: string, path: string) {
   const supabase = getSupabase();
@@ -225,7 +225,7 @@ export async function supabaseUpdateProblem(problemId: string, problem: BoltProb
           return {
             problem_id: problemId,
             content: comment.content,
-            username: comment.username || getUsername() || 'Anonymous',
+            username: comment.username || 'Anonymous',
           };
         });
 

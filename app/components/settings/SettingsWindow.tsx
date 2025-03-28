@@ -5,7 +5,6 @@ import { classNames } from '~/utils/classNames';
 import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/components/ui/Dialog';
 import { IconButton } from '~/components/ui/IconButton';
 import styles from './Settings.module.scss';
-import APIKeysTab from './providers/APIKeysTab';
 import { useSettings } from '~/lib/hooks/useSettings';
 import FeaturesTab from './features/FeaturesTab';
 import DebugTab from './debug/DebugTab';
@@ -26,7 +25,6 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
     { id: 'data', label: 'Data', icon: 'i-ph:database', component: <DataTab /> },
-    { id: 'apiKeys', label: 'User Info', icon: 'i-ph:key', component: <APIKeysTab /> },
     { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
     { id: 'features', label: 'Features', icon: 'i-ph:star', component: <FeaturesTab /> },
     ...(debug
