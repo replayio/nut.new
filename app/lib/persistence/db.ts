@@ -53,7 +53,7 @@ export async function getAllChats(): Promise<ChatContents[]> {
     return getLocalChats();
   }
 
-  const { data, error } = await getSupabase().from('chats').select('*');
+  const { data, error } = await getSupabase().from('chats').select('*').eq('deleted', false);
 
   if (error) {
     throw error;
@@ -67,10 +67,16 @@ export async function syncLocalChats(): Promise<void> {
   const localChats = getLocalChats();
 
   if (userId && localChats.length) {
-    for (const chat of localChats) {
-      await setChatContents(chat.id, chat.title, chat.messages);
+    try {
+      for (const chat of localChats) {
+        if (chat.title) {
+          await setChatContents(chat.id, chat.title, chat.messages);
+        }
+      }
+      setLocalChats(undefined);
+    } catch (error) {
+      console.error('Error syncing local chats', error);
     }
-    setLocalChats(undefined);
   }
 }
 
@@ -152,7 +158,7 @@ export async function deleteById(id: string): Promise<void> {
     return;
   }
 
-  const { error } = await getSupabase().from('chats').delete().eq('id', id);
+  const { error } = await getSupabase().from('chats').update({ deleted: true }).eq('id', id);
 
   if (error) {
     throw error;

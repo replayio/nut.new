@@ -4,14 +4,11 @@ CREATE TABLE IF NOT EXISTS public.chats (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   user_id UUID REFERENCES auth.users(id),
-
-  -- Available to all users with the chat ID
   title TEXT NOT NULL,
   repository_id UUID,
-
-  -- Available only to the owning user and admins
   messages JSONB DEFAULT '{}',
-  deploy_settings JSONB DEFAULT '{}'
+  deploy_settings JSONB DEFAULT '{}',
+  deleted BOOLEAN DEFAULT FALSE
 );
 
 -- Create updated_at trigger for chats table

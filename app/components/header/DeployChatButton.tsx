@@ -12,13 +12,17 @@ ReactModal.setAppElement('#root');
 
 // Component for deploying a chat to production.
 
+enum DeployStatus {
+  NotStarted,
+  Started,
+  Succeeded,
+}
+
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Whether the new deployment finished.
-  const [deployed, setDeployed] = useState<boolean>(false);
+  const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
 
   const handleOpenModal = async () => {
     const chatId = currentChatId.get();
@@ -30,7 +34,7 @@ export function DeployChatButton() {
     const existingSettings = await databaseGetChatDeploySettings(chatId);
 
     setIsModalOpen(true);
-    setDeployed(false);
+    setStatus(DeployStatus.NotStarted);
 
     if (existingSettings) {
       setDeploySettings(existingSettings);
@@ -40,9 +44,11 @@ export function DeployChatButton() {
   };
 
   const handleDeploy = async () => {
+    setError(null);
+
     const chatId = currentChatId.get();
     if (!chatId) {
-      toast.error('No chat open');
+      setError('No chat open');
       return;
     }
 
@@ -77,19 +83,20 @@ export function DeployChatButton() {
       return;
     }
 
-    toast.info('Starting deployment...');
+    setStatus(DeployStatus.Started);
 
     // Write out to the database before we start trying to deploy.
     await databaseUpdateChatDeploySettings(chatId, deploySettings);
 
     const result = await deployRepository(repositoryId, deploySettings);
+
+    console.log('DeploymentResult', repositoryId, deploySettings, result);
+
     if (result.error) {
+      setStatus(DeployStatus.NotStarted);
       setError(result.error);
       return;
     }
-
-    setDeployed(true);
-    toast.success('Deployment succeeded!');
 
     let newSettings = deploySettings;
 
@@ -108,10 +115,11 @@ export function DeployChatButton() {
       repositoryId,
     };
 
+    setDeploySettings(newSettings);
+    setStatus(DeployStatus.Succeeded);
+
     // Update the database with the new settings.
     await databaseUpdateChatDeploySettings(chatId, newSettings);
-
-    setDeploySettings(newSettings);
   };
 
   return (
@@ -128,11 +136,16 @@ export function DeployChatButton() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full z-50">
-            {deployed ? (
+            {status === DeployStatus.Succeeded ? (
               <>
-                <div className="text-center mb-2">Deployed Succeeded</div>
+                <div className="text-center mb-2">Deployment Succeeded</div>
                 <div className="text-center">
                   <div className="flex justify-center gap-2 mt-4">
+                    <a href={deploySettings?.siteURL} target="_blank" rel="noopener noreferrer">
+                      <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                        {deploySettings?.siteURL}
+                      </button>
+                    </a>
                     <button
                       onClick={() => {
                         setIsModalOpen(false);
@@ -150,6 +163,17 @@ export function DeployChatButton() {
                 <div className="text-center mb-4">
                   Deploy this chat's project to production.
                 </div>
+
+                {deploySettings?.siteURL && (
+                  <div className="text-center mb-4">
+                    <span className="text-sm text-gray-700">Existing site:</span>
+                    <a href={deploySettings?.siteURL} target="_blank" rel="noopener noreferrer">
+                      <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                        {deploySettings?.siteURL}
+                      </button>
+                    </a>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2 mb-4 items-center">
                   <label className="text-sm font-lg text-gray-700 text-right">Netlify Site ID (existing site):</label>
@@ -271,6 +295,12 @@ export function DeployChatButton() {
                     Cancel
                   </button>
                 </div>
+
+                {error && (
+                  <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                  </div>
+                )}
               </>
             )}
           </div>
