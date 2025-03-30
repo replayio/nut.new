@@ -43,10 +43,10 @@ export interface DeployResult {
 // Information about a chat's deployment saved to the database.
 export interface DeploySettingsDatabase extends DeploySettings {
   // Last repository which was deployed.
-  repositoryId: string;
+  repositoryId?: string;
 
   // URL of the deployed site.
-  siteURL: string;
+  siteURL?: string;
 }
 
 export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {
