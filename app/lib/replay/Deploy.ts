@@ -27,15 +27,26 @@ interface DeploySettingsSupabase {
   postgresURL: string;
 }
 
+// Deploy settings passed in to the protocol.
 export interface DeploySettings {
   netlify?: DeploySettingsNetlify;
   supabase?: DeploySettingsSupabase;
 }
 
+// Deploy result returned from the protocol.
 export interface DeployResult {
   error?: string;
   netlifySiteId?: string;
   siteURL?: string;
+}
+
+// Information about a chat's deployment saved to the database.
+export interface DeploySettingsDatabase extends DeploySettings {
+  // Last repository which was deployed.
+  repositoryId: string;
+
+  // URL of the deployed site.
+  siteURL: string;
 }
 
 export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {

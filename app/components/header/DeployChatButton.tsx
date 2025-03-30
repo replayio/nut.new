@@ -3,6 +3,9 @@ import ReactModal from 'react-modal';
 import { useState } from 'react';
 import { submitFeedback } from '~/lib/replay/Problems';
 import { getLastChatMessages } from '~/components/chat/Chat.client';
+import type { DeploySettings } from '~/lib/replay/Deploy';
+import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import { workbenchStore } from '~/lib/stores/workbench';
 
 ReactModal.setAppElement('#root');
 
@@ -13,7 +16,12 @@ export function DeployChatButton() {
   const [formData, setFormData] = useState({
     netlifySiteId: '',
     netlifyAccountSlug: '',
+    netlifySiteName: '',
+    supabaseDatabaseURL: '',
+    supabaseAnonKey: '',
+    supabasePostgresURL: '',
   });
+  const [error, setError] = useState<string | null>(null);
   const [deployed, setDeployed] = useState<boolean>(false);
 
   const handleOpenModal = () => {
@@ -21,11 +29,81 @@ export function DeployChatButton() {
     setFormData({
       netlifySiteId: '',
       netlifyAccountSlug: '',
+      netlifySiteName: '',
+      supabaseDatabaseURL: '',
+      supabaseAnonKey: '',
+      supabasePostgresURL: '',
     });
     setDeployed(false);
   };
 
   const handleDeploy = async () => {
+    const settings: DeploySettings = {};
+
+    if (formData.netlifySiteId) {
+      if (formData.netlifyAccountSlug) {
+        setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
+        return;
+      }
+      settings.netlify = {
+        siteId: formData.netlifySiteId,
+      };
+    } else if (formData.netlifyAccountSlug) {
+      const siteName = formData.netlifySiteName || `nut-site-${generateRandomId()}`;
+      settings.netlify = {
+        createInfo: {
+          accountSlug: formData.netlifyAccountSlug,
+          siteName,
+        },
+      };
+    }
+
+    if (formData.supabaseDatabaseURL || formData.supabaseAnonKey || formData.supabasePostgresURL) {
+      if (!formData.supabaseDatabaseURL) {
+        setError('Supabase Database URL is required');
+        return;
+      }
+      if (!formData.supabaseAnonKey) {
+        setError('Supabase Anonymous Key is required');
+        return;
+      }
+      if (!formData.supabasePostgresURL) {
+        setError('Supabase Postgres URL is required');
+        return;
+      }
+      settings.supabase = {
+        databaseURL: formData.supabaseDatabaseURL,
+        anonKey: formData.supabaseAnonKey,
+        postgresURL: formData.supabasePostgresURL,
+      };
+    }
+
+    const repositoryId = workbenchStore.repositoryId.get();
+    if (!repositoryId) {
+      setError('No repository ID found');
+      return;
+    }
+
+    toast.info('Starting deployment...');
+
+    const result = await deployRepository(repositoryId, settings);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setDeployed(true);
+    toast.success('Deployment succeeded!');
+
+    export interface DeployResult {
+      error?: string;
+      netlifySiteId?: string;
+      siteURL?: string;
+    }
+    
+    export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {
+    
+
     console.log("DEPLOY", formData);
     /*
     if (!formData.netlifySiteId) {
@@ -34,7 +112,6 @@ export function DeployChatButton() {
       return;
     }
 
-    toast.info('Submitting feedback...');
 
     const feedbackData: any = {
       description: formData.description,
@@ -123,6 +200,58 @@ export function DeployChatButton() {
                       setFormData((prev) => ({
                         ...prev,
                         netlifyAccountSlug: e.target.value,
+                      }));
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Netlify Site Name (new site):</label>
+                  <input
+                    name="netlifySiteName"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={formData.netlifySiteName}
+                    placeholder="my-chat-app..."
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        netlifySiteName: e.target.value,
+                      }));
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Supabase Database URL:</label>
+                  <input
+                    name="supabaseDatabaseURL"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={formData.supabaseDatabaseURL}
+                    placeholder="https://abc...def.supabase.co"
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        supabaseDatabaseURL: e.target.value,
+                      }));
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Supabase Anonymous Key:</label>
+                  <input
+                    name="supabaseAnonKey"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={formData.supabaseAnonKey}
+                    placeholder="ey..."
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        supabaseAnonKey: e.target.value,
+                      }));
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Supabase Postgres URL:</label>
+                  <input
+                    name="supabasePostgresURL"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={formData.supabasePostgresURL}
+                    placeholder="postgresql://postgres:<password>@db.abc...def.supabase.co:5432/postgres"
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        supabasePostgresURL: e.target.value,
                       }));
                     }}
                   />
