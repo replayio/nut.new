@@ -1,5 +1,7 @@
 // Client messages match the format used by the Nut protocol.
 
+import { generateId } from "~/utils/fileUtils";
+
 type MessageRole = 'user' | 'assistant';
 
 interface MessageBase {
@@ -35,4 +37,28 @@ export function getPreviousRepositoryId(messages: Message[], index: number): str
 // Get the repositoryId after applying some messages.
 export function getMessagesRepositoryId(messages: Message[]): string | undefined {
   return getPreviousRepositoryId(messages, messages.length);
+}
+
+// Return a couple messages for a new chat operating on a repository.
+export function createMessagesForRepository(title: string, repositoryId: string): Message[] {
+  const filesContent = `I've copied the "${title}" chat.`;
+
+  const userMessage: Message = {
+    role: 'user',
+    id: generateId(),
+    content: `Copy the "${title}" chat`,
+    type: 'text',
+  };
+
+  const filesMessage: Message = {
+    role: 'assistant',
+    content: filesContent,
+    id: generateId(),
+    repositoryId,
+    type: 'text',
+  };
+
+  const messages = [userMessage, filesMessage];
+
+  return messages;
 }

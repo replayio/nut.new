@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/lib/stores/logs';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { NutProblem } from '~/lib/replay/Problems';
 import { getProblem } from '~/lib/replay/Problems';
-import type { Message } from '~/lib/persistence/message';
+import { createMessagesForRepository, type Message } from '~/lib/persistence/message';
 
 interface LoadProblemButtonProps {
   className?: string;
@@ -48,8 +47,8 @@ export async function loadProblem(
   const { repositoryId, title: problemTitle } = problem;
 
   try {
-    const messages = createChatFromFolder('problem', repositoryId);
-    await importChat(`Problem: ${problemTitle}`, [...messages]);
+    const messages = createMessagesForRepository(`Problem: ${problemTitle}`, repositoryId);
+    await importChat(`Problem: ${problemTitle}`, messages);
 
     logStore.logSystem('Problem loaded successfully', {
       problemId,

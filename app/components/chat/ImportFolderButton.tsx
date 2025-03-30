@@ -8,7 +8,7 @@ import type { Message } from '~/lib/persistence/message';
 
 interface ImportFolderButtonProps {
   className?: string;
-  importChat?: (description: string, messages: Message[]) => Promise<void>;
+  importChat?: (title: string, messages: Message[]) => Promise<void>;
 }
 
 export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ className, importChat }) => {
@@ -85,7 +85,7 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       const messages = createChatFromFolder(folderName, repositoryId);
 
       if (importChat) {
-        await importChat(folderName, [...messages]);
+        await importChat(folderName, messages);
       }
 
       logStore.logSystem('Folder imported successfully', {

@@ -78,4 +78,4 @@ BEGIN
   FROM chats p
   WHERE p.id = chat_id;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

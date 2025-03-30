@@ -36,6 +36,7 @@ export async function getFileRepositoryContents(files: File[]): Promise<string> 
   return await zip.generateAsync({ type: 'base64' });
 }
 
+// TODO: Common up with createMessagesForRepository.
 export function createChatFromFolder(folderName: string, repositoryId: string): Message[] {
   const filesContent = `I've imported the contents of the "${folderName}" folder.`;
 
