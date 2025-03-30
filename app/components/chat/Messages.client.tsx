@@ -7,13 +7,14 @@ import { MessageContents } from './MessageContents';
 interface MessagesProps {
   id?: string;
   className?: string;
-  isStreaming?: boolean;
+  hasPendingMessage?: boolean;
+  pendingMessageStatus?: string;
   messages?: Message[];
   onRewind?: (messageId: string) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [], onRewind } = props;
+  const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [], onRewind } = props;
 
   return (
     <div id={id} ref={ref} className={props.className}>
@@ -30,9 +31,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                 data-testid="message"
                 key={index}
                 className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
-                  'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
+                  'bg-bolt-elements-messages-background': isUserMessage || !hasPendingMessage || (hasPendingMessage && !isLast),
                   'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
-                    isStreaming && isLast,
+                    hasPendingMessage && isLast,
                   'mt-4': !isFirst,
                 })}
               >
@@ -70,8 +71,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             );
           })
         : null}
-      {isStreaming && (
-        <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+      {hasPendingMessage && (
+        <div className="w-full text-bolt-elements-textSecondary flex items-center">
+          <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2 text-4xl"></span>
+          <span className="text-lg">{pendingMessageStatus ? `${pendingMessageStatus}...` : ''}</span>
+        </div>
       )}
     </div>
   );

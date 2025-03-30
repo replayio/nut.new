@@ -32,7 +32,8 @@ interface BaseChatProps {
   scrollRef?: RefCallback<HTMLDivElement> | undefined;
   showChat?: boolean;
   chatStarted?: boolean;
-  isStreaming?: boolean;
+  hasPendingMessage?: boolean;
+  pendingMessageStatus?: string;
   messages?: Message[];
   enhancingPrompt?: boolean;
   promptEnhanced?: boolean;
@@ -61,7 +62,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       scrollRef,
       showChat = true,
       chatStarted = false,
-      isStreaming = false,
+      hasPendingMessage = false,
+      pendingMessageStatus = '',
       input = '',
       handleInputChange,
 
@@ -211,7 +213,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     };
 
     const showApproveChange = (() => {
-      if (isStreaming) {
+      if (hasPendingMessage) {
         return false;
       }
 
@@ -288,7 +290,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                 event.preventDefault();
 
-                if (isStreaming) {
+                if (hasPendingMessage) {
                   handleStop?.();
                   return;
                 }
@@ -316,10 +318,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           <ClientOnly>
             {() => (
               <SendButton
-                show={(isStreaming || input.length > 0 || uploadedFiles.length > 0) && chatStarted}
-                isStreaming={isStreaming}
+                show={(hasPendingMessage || input.length > 0 || uploadedFiles.length > 0) && chatStarted}
+                hasPendingMessage={hasPendingMessage}
                 onClick={(event) => {
-                  if (isStreaming) {
+                  if (hasPendingMessage) {
                     handleStop?.();
                     return;
                   }
@@ -341,7 +343,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 isListening={isListening}
                 onStart={startListening}
                 onStop={stopListening}
-                disabled={isStreaming}
+                disabled={hasPendingMessage}
               />
             </div>
             {input.length > 3 ? (
@@ -386,7 +388,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       ref={messageRef}
                       className="flex flex-col w-full flex-1 max-w-chat pb-6 mx-auto z-1"
                       messages={messages}
-                      isStreaming={isStreaming}
+                      hasPendingMessage={hasPendingMessage}
+                      pendingMessageStatus={pendingMessageStatus}
                       onRewind={onRewind}
                     />
                   ) : null;
@@ -470,7 +473,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {!chatStarted && <div className="flex justify-center gap-2">{ImportButtons(importChat)}</div>}
             {!chatStarted &&
               ExamplePrompts((event, messageInput) => {
-                if (isStreaming) {
+                if (hasPendingMessage) {
                   handleStop?.();
                   return;
                 }

@@ -141,8 +141,10 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
    * This is set when the user has triggered a chat message and the response hasn't finished
    * being generated.
    */
-  const [activeChatId, setActiveChatId] = useState<string | undefined>(undefined);
-  const isLoading = activeChatId !== undefined;
+  const [pendingMessageId, setPendingMessageId] = useState<string | undefined>(undefined);
+
+  // Last status we heard for the pending message.
+  const [pendingMessageStatus, setPendingMessageStatus] = useState('');
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -182,7 +184,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     stop();
     gNumAborts++;
     chatStore.setKey('aborted', true);
-    setActiveChatId(undefined);
+    setPendingMessageId(undefined);
 
     if (gActiveChatMessageTelemetry) {
       gActiveChatMessageTelemetry.abort('StopButtonClicked');
@@ -223,7 +225,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     const _input = messageInput || input;
     const numAbortsAtStart = gNumAborts;
 
-    if (_input.length === 0 || isLoading) {
+    if (_input.length === 0 || pendingMessageId) {
       return;
     }
 
@@ -245,7 +247,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     }
 
     const chatId = generateRandomId();
-    setActiveChatId(chatId);
+    setPendingMessageId(chatId);
 
     const userMessage: Message = {
       id: `user-${chatId}`,
@@ -321,6 +323,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
 
     const onChatStatus = debounce((status: string) => {
       console.log('ChatStatus', status);
+      setPendingMessageStatus(status);
     }, 500);
 
     const references: ChatReference[] = [];
@@ -356,7 +359,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     gActiveChatMessageTelemetry.finish();
     clearActiveChat();
 
-    setActiveChatId(undefined);
+    setPendingMessageId(undefined);
 
     setInput('');
 
@@ -489,7 +492,8 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
       input={input}
       showChat={showChat}
       chatStarted={chatStarted}
-      isStreaming={isLoading}
+      hasPendingMessage={pendingMessageId !== undefined}
+      pendingMessageStatus={pendingMessageStatus}
       sendMessage={sendMessage}
       messageRef={messageRef}
       scrollRef={scrollRef}
