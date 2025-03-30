@@ -5,6 +5,9 @@ import { sendCommandDedicatedClient } from "./ReplayProtocolClient";
 
 // Deploy to a Netlify site.
 interface DeploySettingsNetlify {
+  // Authentication token for Netlify account.
+  authToken: string;
+
   // ID of any existing site to link to.
   siteId?: string;
 

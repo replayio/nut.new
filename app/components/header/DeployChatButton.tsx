@@ -52,6 +52,11 @@ export function DeployChatButton() {
       return;
     }
 
+    if (!deploySettings?.netlify?.authToken) {
+      setError('Netlify Auth Token is required');
+      return;
+    }
+
     if (deploySettings?.netlify?.siteId) {
       if (deploySettings.netlify.createInfo) {
         setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
@@ -60,6 +65,11 @@ export function DeployChatButton() {
     } else if (!deploySettings?.netlify?.createInfo) {
       setError('Either a Netlify Site ID or a Netlify Account Slug is required');
       return;
+    } else {
+      // Add a default site name if one isn't provided.
+      if (!deploySettings.netlify.createInfo?.siteName) {
+        deploySettings.netlify.createInfo.siteName = `nut-app-${generateRandomId()}`;
+      }
     }
 
     if (deploySettings?.supabase?.databaseURL || deploySettings?.supabase?.anonKey || deploySettings?.supabase?.postgresURL) {
@@ -104,7 +114,7 @@ export function DeployChatButton() {
     if (deploySettings?.netlify?.createInfo && result.netlifySiteId) {
       newSettings = {
         ...deploySettings,
-        netlify: { siteId: result.netlifySiteId },
+        netlify: { authToken: deploySettings.netlify.authToken, siteId: result.netlifySiteId },
       };
     }
 
@@ -176,6 +186,24 @@ export function DeployChatButton() {
                 )}
 
                 <div className="grid grid-cols-2 gap-2 mb-4 items-center">
+                  <label className="text-sm font-lg text-gray-700 text-right">Netlify Auth Token:</label>
+                  <input
+                    name="netlifyAuthToken"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={deploySettings?.netlify?.authToken}
+                    placeholder="nfp_..."
+                    onChange={(e) => {
+                      const netlify = {
+                        authToken: e.target.value,
+                        siteId: deploySettings?.netlify?.siteId || '',
+                        createInfo: deploySettings?.netlify?.createInfo || undefined,
+                      };
+                      setDeploySettings({
+                        ...deploySettings,
+                        netlify,
+                      });
+                    }}
+                  />
                   <label className="text-sm font-lg text-gray-700 text-right">Netlify Site ID (existing site):</label>
                   <input
                     name="netlifySiteId"
@@ -183,9 +211,14 @@ export function DeployChatButton() {
                     value={deploySettings?.netlify?.siteId}
                     placeholder="123e4567-..."
                     onChange={(e) => {
+                      const netlify = {
+                        authToken: deploySettings?.netlify?.authToken || '',
+                        siteId: e.target.value,
+                        createInfo: deploySettings?.netlify?.createInfo || undefined,
+                      };
                       setDeploySettings({
                         ...deploySettings,
-                        netlify: { ...deploySettings?.netlify, siteId: e.target.value },
+                        netlify,
                       });
                     }}
                   />
@@ -200,9 +233,14 @@ export function DeployChatButton() {
                         accountSlug: e.target.value,
                         siteName: deploySettings?.netlify?.createInfo?.siteName || '',
                       };
+                      const netlify = {
+                        authToken: deploySettings?.netlify?.authToken || '',
+                        siteId: deploySettings?.netlify?.siteId || '',
+                        createInfo,
+                      };
                       setDeploySettings({
                         ...deploySettings,
-                        netlify: { ...deploySettings?.netlify, createInfo },
+                        netlify,
                       });
                     }}
                   />
@@ -217,9 +255,14 @@ export function DeployChatButton() {
                         accountSlug: deploySettings?.netlify?.createInfo?.accountSlug || '',
                         siteName: e.target.value,
                       };
+                      const netlify = {
+                        authToken: deploySettings?.netlify?.authToken || '',
+                        siteId: deploySettings?.netlify?.siteId || '',
+                        createInfo,
+                      };
                       setDeploySettings({
                         ...deploySettings,
-                        netlify: { ...deploySettings?.netlify, createInfo },
+                        netlify,
                       });
                     }}
                   />
@@ -280,12 +323,20 @@ export function DeployChatButton() {
                 </div>
 
                 <div className="flex justify-center gap-2 mt-4">
-                  <button
-                    onClick={handleDeploy}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                  >
-                    Deploy
-                  </button>
+                  {status === DeployStatus.Started && (
+                    <div className="w-full text-bolt-elements-textSecondary flex items-center">
+                      <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2 text-4xl"></span>
+                    </div>
+                  )}
+
+                  {status === DeployStatus.NotStarted && (
+                    <button
+                      onClick={handleDeploy}
+                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                    >
+                      Deploy
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setIsModalOpen(false);
