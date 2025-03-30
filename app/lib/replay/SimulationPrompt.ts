@@ -28,7 +28,11 @@ interface ChatReferenceElement {
 
 export type ChatReference = ChatReferenceElement;
 
-type ChatResponsePartCallback = (message: Message) => void;
+interface ChatMessageCallbacks {
+  onResponsePart: (message: Message) => void;
+  onTitle: (title: string) => void;
+  onStatus: (status: string) => void;
+}
 
 class ChatManager {
   // Empty if this chat has been destroyed.
@@ -138,7 +142,7 @@ class ChatManager {
     });
   }
 
-  async sendChatMessage(messages: Message[], references: ChatReference[], onResponsePart: ChatResponsePartCallback) {
+  async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
     assert(this.client, 'Chat has been destroyed');
 
     this._pendingMessages++;
@@ -150,7 +154,27 @@ class ChatManager {
       ({ responseId: eventResponseId, message }: { responseId: string; message: Message }) => {
         if (responseId == eventResponseId) {
           console.log('ChatResponse', chatId, message);
-          onResponsePart(message);
+          callbacks.onResponsePart(message);
+        }
+      },
+    );
+
+    const removeTitleListener = this.client.listenForMessage(
+      'Nut.chatTitle',
+      ({ responseId: eventResponseId, title }: { responseId: string; title: string }) => {
+        if (responseId == eventResponseId) {
+          console.log('ChatTitle', title);
+          callbacks.onTitle(title);
+        }
+      },
+    );
+
+    const removeStatusListener = this.client.listenForMessage(
+      'Nut.chatStatus',
+      ({ responseId: eventResponseId, status }: { responseId: string; status: string }) => {
+        if (responseId == eventResponseId) {
+          console.log('ChatStatus', status);
+          callbacks.onStatus(status);
         }
       },
     );
@@ -167,6 +191,8 @@ class ChatManager {
     console.log('ChatMessageFinished', new Date().toISOString(), chatId);
 
     removeResponseListener();
+    removeTitleListener();
+    removeStatusListener();
 
     if (--this._pendingMessages == 0 && this._mustDestroyAfterChatFinishes) {
       this._destroy();
@@ -266,7 +292,7 @@ export function getLastSimulationChatReferences(): ChatReference[] | undefined {
 export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
-  onResponsePart: ChatResponsePartCallback,
+  callbacks: ChatMessageCallbacks,
 ) {
   if (!gChatManager) {
     gChatManager = new ChatManager();
@@ -275,5 +301,5 @@ export async function sendChatMessage(
   gLastSimulationChatMessages = messages;
   gLastSimulationChatReferences = references;
 
-  await gChatManager.sendChatMessage(messages, references, onResponsePart);
+  await gChatManager.sendChatMessage(messages, references, callbacks);
 }

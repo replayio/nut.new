@@ -10,7 +10,6 @@ export function ChatDescription() {
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({
       initialTitle,
-      syncWithGlobalStore: true,
     });
 
   if (!initialTitle) {

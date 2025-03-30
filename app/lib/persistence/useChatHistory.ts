@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import { createChat, getChatContents, setChatContents, getChatPublicData } from './db';
+import { createChat, getChatContents, setChatContents, getChatPublicData, databaseUpdateChatTitle } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createMessagesForRepository, type Message } from './message';
+import { debounce } from '~/utils/debounce';
 
+// These must be kept in sync.
 export const currentChatId = atom<string | undefined>(undefined);
 export const currentChatTitle = atom<string | undefined>(undefined);
 
@@ -60,21 +62,20 @@ export function useChatHistory() {
   return {
     ready,
     initialMessages,
-    storeMessageHistory: async (messages: Message[]) => {
+    storeMessageHistory: debounce(async (messages: Message[]) => {
       if (messages.length === 0) {
         return;
       }
 
-      const title = currentChatTitle.get() ?? 'New Chat';
-
       if (!currentChatId.get()) {
-        const id = await createChat(title, initialMessages);
+        const id = await createChat('New Chat', initialMessages);
         currentChatId.set(id);
+        currentChatTitle.set('New Chat');
         navigateChat(id);
       }
 
-      await setChatContents(currentChatId.get() as string, title, messages);
-    },
+      await setChatContents(currentChatId.get() as string, currentChatTitle.get() as string, messages);
+    }, 1000),
     importChat,
   };
 }
@@ -89,4 +90,11 @@ function navigateChat(nextId: string) {
   url.pathname = `/chat/${nextId}`;
 
   window.history.replaceState({}, '', url);
+}
+
+export async function handleChatTitleUpdate(id: string, title: string) {
+  await databaseUpdateChatTitle(id, title);
+  if (currentChatId.get() == id) {
+    currentChatTitle.set(title);
+  }
 }

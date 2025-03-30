@@ -1,12 +1,11 @@
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { currentChatId, currentChatTitle, getChatContents, updateChatTitle } from '~/lib/persistence';
+import { currentChatId, currentChatTitle, getChatContents, handleChatTitleUpdate } from '~/lib/persistence';
 
 interface EditChatDescriptionOptions {
   initialTitle?: string;
   customChatId?: string;
-  syncWithGlobalStore?: boolean;
 }
 
 type EditChatDescriptionHook = {
@@ -30,13 +29,11 @@ type EditChatDescriptionHook = {
  * @param {Object} options
  * @param {string} options.initialDescription - The current chat description.
  * @param {string} options.customChatId - Optional ID for updating the description via the sidebar.
- * @param {boolean} options.syncWithGlobalStore - Flag to indicate global description store synchronization.
  * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
 export function useEditChatTitle({
   initialTitle = currentChatTitle.get()!,
   customChatId,
-  syncWithGlobalStore,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
   const chatIdFromStore = useStore(currentChatId);
   const [editing, setEditing] = useState(false);
@@ -117,12 +114,7 @@ export function useEditChatTitle({
           return;
         }
 
-        await updateChatTitle(chatId, currentTitle);
-
-        if (syncWithGlobalStore) {
-          currentChatTitle.set(currentTitle);
-        }
-
+        await handleChatTitleUpdate(chatId, currentTitle);
         toast.success('Chat title updated successfully');
       } catch (error) {
         toast.error('Failed to update chat title: ' + (error as Error).message);

@@ -142,8 +142,3 @@ export function getSupabase() {
 
   return supabaseClientInstance;
 }
-
-// Helper function to check if Supabase is properly initialized
-export const isSupabaseInitialized = (): boolean => {
-  return Boolean(supabaseUrl && supabaseAnonKey);
-};

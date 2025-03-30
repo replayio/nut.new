@@ -4,6 +4,7 @@ import type { User, Session } from '@supabase/supabase-js';
 import { logStore } from './logs';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '~/lib/supabase/client';
+import { syncLocalChats } from '../persistence/db';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
@@ -68,6 +69,8 @@ export async function initializeAuth() {
         sessionStore.set(null);
         logStore.logSystem('User signed out');
       }
+
+      await syncLocalChats();
     });
 
     return () => {

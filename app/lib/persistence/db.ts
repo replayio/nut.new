@@ -48,18 +48,9 @@ function setLocalChats(chats: ChatContents[] | undefined): void {
 
 export async function getAllChats(): Promise<ChatContents[]> {
   const userId = await getCurrentUserId();
-  const localChats = getLocalChats();
 
   if (!userId) {
-    return localChats;
-  }
-
-  // Sync any local chats to the database and remove them locally.
-  if (localChats) {
-    for (const chat of localChats) {
-      await setChatContents(chat.id, chat.title, chat.messages);
-    }
-    setLocalChats(undefined);
+    return getLocalChats();
   }
 
   const { data, error } = await getSupabase().from('chats').select('*');
@@ -69,6 +60,18 @@ export async function getAllChats(): Promise<ChatContents[]> {
   }
 
   return data.map(databaseRowToChatContents);
+}
+
+export async function syncLocalChats(): Promise<void> {
+  const userId = await getCurrentUserId();
+  const localChats = getLocalChats();
+
+  if (userId && localChats.length) {
+    for (const chat of localChats) {
+      await setChatContents(chat.id, chat.title, chat.messages);
+    }
+    setLocalChats(undefined);
+  }
 }
 
 export async function setChatContents(id: string, title: string, messages: Message[]): Promise<void> {
@@ -162,7 +165,7 @@ export async function createChat(title: string, messages: Message[]): Promise<st
   return id;
 }
 
-export async function updateChatTitle(id: string, title: string): Promise<void> {
+export async function databaseUpdateChatTitle(id: string, title: string): Promise<void> {
   const chat = await getChatContents(id);
   assert(chat, 'Unknown chat');
 

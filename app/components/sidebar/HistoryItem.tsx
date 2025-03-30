@@ -20,7 +20,6 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
     useEditChatTitle({
       initialTitle: item.title,
       customChatId: item.id,
-      syncWithGlobalStore: isActiveChat,
     });
 
   const renderDescriptionForm = (

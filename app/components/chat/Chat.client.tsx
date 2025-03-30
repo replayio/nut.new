@@ -7,14 +7,13 @@ import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { useChatHistory } from '~/lib/persistence';
+import { currentChatId, handleChatTitleUpdate, useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
 import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { createSampler } from '~/utils/sampler';
 import {
   simulationAddData,
   simulationFinishData,
@@ -33,6 +32,7 @@ import type { RejectChangeData } from './ApproveChange';
 import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { useAuthStatus } from '~/lib/stores/auth';
+import { debounce } from '~/utils/debounce';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -111,24 +111,9 @@ export function Chat() {
   );
 }
 
-const processSampledMessages = createSampler(
-  (options: {
-    messages: Message[];
-    initialMessages: Message[];
-    storeMessageHistory: (messages: Message[]) => Promise<void>;
-  }) => {
-    const { messages, initialMessages, storeMessageHistory } = options;
-
-    if (messages.length > initialMessages.length) {
-      storeMessageHistory(messages).catch((error) => toast.error(error.message));
-    }
-  },
-  50,
-);
-
 interface ChatProps {
   initialMessages: Message[];
-  storeMessageHistory: (messages: Message[]) => Promise<void>;
+  storeMessageHistory: (messages: Message[]) => void;
   importChat: (description: string, messages: Message[]) => Promise<void>;
 }
 
@@ -190,12 +175,8 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
   }, []);
 
   useEffect(() => {
-    processSampledMessages({
-      messages,
-      initialMessages,
-      storeMessageHistory,
-    });
-  }, [messages, isLoading]);
+    storeMessageHistory(messages);
+  }, [messages]);
 
   const abort = () => {
     stop();
@@ -251,12 +232,14 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     if (!isLoggedIn) {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
+      /*
       if (numFreeUses >= maxFreeUses) {
         toast.error('All free uses consumed. Please login to continue using Nut.');
         gActiveChatMessageTelemetry.abort('NoFreeUses');
         clearActiveChat();
         return;
       }
+      */
 
       Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
     }
@@ -331,6 +314,15 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
       }
     };
 
+    const onChatTitle = (title: string) => {
+      console.log('ChatTitle', title);
+      handleChatTitleUpdate(currentChatId.get() as string, title);
+    };
+
+    const onChatStatus = debounce((status: string) => {
+      console.log('ChatStatus', status);
+    }, 500);
+
     const references: ChatReference[] = [];
 
     const mouseData = getCurrentMouseData();
@@ -347,7 +339,11 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     }
 
     try {
-      await sendChatMessage(newMessages, references, addResponseMessage);
+      await sendChatMessage(newMessages, references, {
+        onResponsePart: addResponseMessage,
+        onTitle: onChatTitle,
+        onStatus: onChatStatus,
+      });
     } catch (e) {
       toast.error('Error sending message');
       console.error('Error sending message', e);
