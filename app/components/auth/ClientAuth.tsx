@@ -88,6 +88,9 @@ export function ClientAuth() {
   const handleGoogleSignIn = async () => {
     const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
     });
     console.log('GoogleSignIn', error);
   };
