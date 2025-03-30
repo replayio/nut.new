@@ -98,6 +98,8 @@ export function DeployChatButton() {
     // Write out to the database before we start trying to deploy.
     await databaseUpdateChatDeploySettings(chatId, deploySettings);
 
+    console.log('DeploymentStarting', repositoryId, deploySettings);
+
     const result = await deployRepository(repositoryId, deploySettings);
 
     console.log('DeploymentResult', repositoryId, deploySettings, result);
@@ -176,7 +178,7 @@ export function DeployChatButton() {
 
                 {deploySettings?.siteURL && (
                   <div className="text-center mb-4">
-                    <span className="text-sm text-gray-700">Existing site:</span>
+                    <span className="text-lg text-gray-700 pr-2">Existing site:</span>
                     <a href={deploySettings?.siteURL} target="_blank" rel="noopener noreferrer">
                       <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
                         {deploySettings?.siteURL}
