@@ -37,7 +37,11 @@ export const SendButton = ({ show, hasPendingMessage, disabled, onClick }: SendB
           }}
         >
           <div className="text-lg">
-            {!hasPendingMessage ? <div className="i-ph:hand-fill"></div> : <div className="i-ph:stop-circle-bold"></div>}
+            {!hasPendingMessage ? (
+              <div className="i-ph:hand-fill"></div>
+            ) : (
+              <div className="i-ph:stop-circle-bold"></div>
+            )}
           </div>
         </motion.button>
       ) : null}

@@ -1,6 +1,6 @@
 // Client messages match the format used by the Nut protocol.
 
-import { generateId } from "~/utils/fileUtils";
+import { generateId } from '~/utils/fileUtils';
 
 type MessageRole = 'user' | 'assistant';
 

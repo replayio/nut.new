@@ -31,7 +31,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                 data-testid="message"
                 key={index}
                 className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
-                  'bg-bolt-elements-messages-background': isUserMessage || !hasPendingMessage || (hasPendingMessage && !isLast),
+                  'bg-bolt-elements-messages-background':
+                    isUserMessage || !hasPendingMessage || (hasPendingMessage && !isLast),
                   'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
                     hasPendingMessage && isLast,
                   'mt-4': !isFirst,

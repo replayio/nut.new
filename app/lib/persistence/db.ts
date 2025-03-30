@@ -1,4 +1,3 @@
-
 // When the user is not logged in, chats are kept in local storage.
 // Otherwise, they are kept in the database. The first time the user logs in,
 // any local chats are added to the database and then deleted.
@@ -28,10 +27,10 @@ function databaseRowToChatContents(d: any): ChatContents {
   };
 }
 
-const LocalStorageKey = 'nut-chats';
+const localStorageKey = 'nut-chats';
 
 function getLocalChats(): ChatContents[] {
-  const chatJSON = localStorage.getItem(LocalStorageKey);
+  const chatJSON = localStorage.getItem(localStorageKey);
   if (!chatJSON) {
     return [];
   }
@@ -40,9 +39,9 @@ function getLocalChats(): ChatContents[] {
 
 function setLocalChats(chats: ChatContents[] | undefined): void {
   if (chats) {
-    localStorage.setItem(LocalStorageKey, JSON.stringify(chats));
+    localStorage.setItem(localStorageKey, JSON.stringify(chats));
   } else {
-    localStorage.removeItem(LocalStorageKey);
+    localStorage.removeItem(localStorageKey);
   }
 }
 
@@ -78,7 +77,7 @@ export async function setChatContents(id: string, title: string, messages: Messa
   const userId = await getCurrentUserId();
 
   if (!userId) {
-    const localChats = getLocalChats().filter(c => c.id != id);
+    const localChats = getLocalChats().filter((c) => c.id != id);
     localChats.push({
       id,
       title,
@@ -127,7 +126,7 @@ export async function getChatContents(id: string): Promise<ChatContents | undefi
   const userId = await getCurrentUserId();
 
   if (!userId) {
-    return getLocalChats().find(c => c.id == id);
+    return getLocalChats().find((c) => c.id == id);
   }
 
   const { data, error } = await getSupabase().from('chats').select('*').eq('id', id);
@@ -147,7 +146,7 @@ export async function deleteById(id: string): Promise<void> {
   const userId = await getCurrentUserId();
 
   if (!userId) {
-    const localChats = getLocalChats().filter(c => c.id != id);
+    const localChats = getLocalChats().filter((c) => c.id != id);
     setLocalChats(localChats);
     return;
   }

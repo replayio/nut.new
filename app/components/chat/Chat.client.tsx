@@ -234,14 +234,12 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     if (!isLoggedIn) {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
-      /*
       if (numFreeUses >= maxFreeUses) {
         toast.error('All free uses consumed. Please login to continue using Nut.');
         gActiveChatMessageTelemetry.abort('NoFreeUses');
         clearActiveChat();
         return;
       }
-      */
 
       Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
     }
