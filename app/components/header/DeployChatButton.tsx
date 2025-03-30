@@ -12,6 +12,7 @@ export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     netlifySiteId: '',
+    netlifyAccountSlug: '',
   });
   const [deployed, setDeployed] = useState<boolean>(false);
 
@@ -19,6 +20,7 @@ export function DeployChatButton() {
     setIsModalOpen(true);
     setFormData({
       netlifySiteId: '',
+      netlifyAccountSlug: '',
     });
     setDeployed(false);
   };
@@ -97,17 +99,30 @@ export function DeployChatButton() {
                   Deploy this chat's project to production.
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Netlify Site ID (existing site):</label>
+                <div className="grid grid-cols-2 gap-2 mb-4 items-center">
+                  <label className="text-sm font-lg text-gray-700 text-right">Netlify Site ID (existing site):</label>
                   <input
                     name="netlifySiteId"
-                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 w-full border border-gray-300"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
                     value={formData.netlifySiteId}
-                    placeholder="1234567890"
+                    placeholder="123e4567-..."
                     onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         netlifySiteId: e.target.value,
+                      }));
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Netlify Account Slug (new site):</label>
+                  <input
+                    name="netlifyAccountSlug"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={formData.netlifyAccountSlug}
+                    placeholder="abc..."
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        netlifyAccountSlug: e.target.value,
                       }));
                     }}
                   />
