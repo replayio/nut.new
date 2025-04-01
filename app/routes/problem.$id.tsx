@@ -4,16 +4,9 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { ToastContainerWrapper, Status, Keywords } from './problems';
-import { toast } from 'react-toastify';
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams } from '@remix-run/react';
-import {
-  getProblem,
-  updateProblem as backendUpdateProblem,
-  deleteProblem as backendDeleteProblem,
-  NutProblemStatus,
-} from '~/lib/replay/Problems';
-import { useAdminStatus } from '~/lib/stores/user';
+import { getProblem, NutProblemStatus } from '~/lib/replay/Problems';
 import type { NutProblem, NutProblemComment } from '~/lib/replay/Problems';
 
 function Comments({ comments }: { comments: NutProblemComment[] }) {
@@ -61,211 +54,17 @@ function ProblemViewer({ problem }: { problem: NutProblem }) {
   );
 }
 
-interface UpdateProblemFormProps {
-  handleSubmit: (content: string) => void;
-  updateText: string;
-  placeholder: string;
-  inputType?: 'textarea' | 'select';
-  options?: { value: string; label: string }[];
-}
-
-function UpdateProblemForm(props: UpdateProblemFormProps) {
-  const { handleSubmit, updateText, placeholder, inputType = 'textarea', options = [] } = props;
-  const [value, setValue] = useState('');
-
-  const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (value.trim()) {
-      handleSubmit(value);
-      setValue('');
-    }
-  };
-
-  return (
-    <form onSubmit={onSubmitClicked} className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
-      {inputType === 'textarea' ? (
-        <textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={placeholder}
-          rows={4}
-          className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px]"
-          required
-        />
-      ) : (
-        <select
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className="w-full p-3 mb-3 bg-bolt-elements-background-depth-3 rounded-md border border-bolt-elements-background-depth-4 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          required
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      )}
-      <button
-        type="submit"
-        disabled={!value.trim()}
-        className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-      >
-        {updateText}
-      </button>
-    </form>
-  );
-}
-
-type DoUpdateCallback = (problem: NutProblem) => NutProblem;
-type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
-type DeleteProblemCallback = () => void;
-
-function UpdateProblemForms({
-  updateProblem,
-  deleteProblem,
-}: {
-  updateProblem: UpdateProblemCallback;
-  deleteProblem: DeleteProblemCallback;
-}) {
-  const handleAddComment = (content: string) => {
-    const newComment: NutProblemComment = {
-      timestamp: Date.now(),
-      username: 'Anonymous',
-      content,
-    };
-    updateProblem((problem) => {
-      const comments = [...(problem.comments || []), newComment];
-      return {
-        ...problem,
-        comments,
-      };
-    });
-  };
-
-  const handleSetTitle = (title: string) => {
-    updateProblem((problem) => ({
-      ...problem,
-      title,
-    }));
-  };
-
-  const handleSetDescription = (description: string) => {
-    updateProblem((problem) => ({
-      ...problem,
-      description,
-    }));
-  };
-
-  const handleSetStatus = (status: string) => {
-    const statusEnum = NutProblemStatus[status as keyof typeof NutProblemStatus];
-
-    if (!statusEnum) {
-      toast.error('Invalid status');
-      return;
-    }
-
-    updateProblem((problem) => ({
-      ...problem,
-      status: statusEnum,
-    }));
-  };
-
-  const handleSetKeywords = (keywordString: string) => {
-    const keywords = keywordString
-      .split(' ')
-      .map((keyword) => keyword.trim())
-      .filter((keyword) => keyword.length > 0);
-    updateProblem((problem) => ({
-      ...problem,
-      keywords,
-    }));
-  };
-
-  // Convert NutProblemStatus enum to options array for select
-  const statusOptions = Object.entries(NutProblemStatus).map(([key, _value]) => ({
-    value: key,
-    label: key,
-  }));
-
-  return (
-    <>
-      <UpdateProblemForm handleSubmit={handleAddComment} updateText="Add Comment" placeholder="Add a comment..." />
-      <UpdateProblemForm
-        handleSubmit={handleSetTitle}
-        updateText="Set Title"
-        placeholder="Set the title of the problem..."
-      />
-      <UpdateProblemForm
-        handleSubmit={handleSetDescription}
-        updateText="Set Description"
-        placeholder="Set the description of the problem..."
-      />
-      <UpdateProblemForm
-        handleSubmit={handleSetStatus}
-        updateText="Set Status"
-        placeholder="Select a status..."
-        inputType="select"
-        options={statusOptions}
-      />
-      <UpdateProblemForm
-        handleSubmit={handleSetKeywords}
-        updateText="Set Keywords"
-        placeholder="Set the keywords of the problem..."
-      />
-
-      <div className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
-        <button
-          onClick={deleteProblem}
-          className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 font-medium"
-        >
-          Delete Problem
-        </button>
-      </div>
-    </>
-  );
-}
-
 const Nothing = () => null;
 
 function ViewProblemPage() {
   const params = useParams();
   const problemId = params.id;
-  const { isAdmin } = useAdminStatus();
 
   if (typeof problemId !== 'string') {
     throw new Error('Problem ID is required');
   }
 
   const [problemData, setProblemData] = useState<NutProblem | null>(null);
-
-  const updateProblem = useCallback(
-    async (callback: DoUpdateCallback) => {
-      if (!problemData) {
-        toast.error('Problem data missing');
-        return;
-      }
-
-      const newProblem = callback(problemData);
-      const updatedProblem = await backendUpdateProblem(problemId, newProblem);
-
-      // If we got an updated problem back from the backend, use it to update the UI
-      if (updatedProblem) {
-        setProblemData(updatedProblem);
-      }
-    },
-    [problemData],
-  );
-
-  const deleteProblem = useCallback(async () => {
-    console.log('BackendDeleteProblem', problemId);
-    await backendDeleteProblem(problemId);
-    toast.success('Problem deleted');
-  }, [problemData]);
 
   useEffect(() => {
     getProblem(problemId).then(setProblemData);
@@ -288,7 +87,6 @@ function ViewProblemPage() {
               <ProblemViewer problem={problemData} />
             )}
           </div>
-          {isAdmin && problemData && <UpdateProblemForms updateProblem={updateProblem} deleteProblem={deleteProblem} />}
           <ToastContainerWrapper />
         </div>
       </TooltipProvider>

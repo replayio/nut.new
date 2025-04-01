@@ -6,7 +6,7 @@ import { getSupabase, getCurrentUserId } from '~/lib/supabase/client';
 import { v4 as uuid } from 'uuid';
 import { getMessagesRepositoryId, type Message } from './message';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
-import type { DeploySettingsDatabase } from '../replay/Deploy';
+import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 
 export interface ChatContents {
   id: string;
@@ -200,7 +200,10 @@ export async function databaseGetChatDeploySettings(id: string): Promise<DeployS
   return data[0].deploy_settings;
 }
 
-export async function databaseUpdateChatDeploySettings(id: string, deploySettings: DeploySettingsDatabase): Promise<void> {
+export async function databaseUpdateChatDeploySettings(
+  id: string,
+  deploySettings: DeploySettingsDatabase,
+): Promise<void> {
   const { error } = await getSupabase().from('chats').update({ deploy_settings: deploySettings }).eq('id', id);
 
   if (error) {

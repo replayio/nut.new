@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import { getNutIsAdmin } from '~/lib/replay/Problems';
+import { getNutIsAdmin } from '~/lib/supabase/client';
 import { userStore } from './auth';
 import { useStore } from '@nanostores/react';
 import { useEffect } from 'react';

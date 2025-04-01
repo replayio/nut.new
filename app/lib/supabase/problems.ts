@@ -3,7 +3,7 @@
 import { toast } from 'react-toastify';
 import { getSupabase, type Database } from './client';
 import type { NutProblem, NutProblemDescription, NutProblemInput, NutProblemStatus } from '~/lib/replay/Problems';
-import { getNutIsAdmin } from '~/lib/replay/Problems';
+import { getNutIsAdmin } from '~/lib/supabase/client';
 
 async function downloadBlob(bucket: string, path: string) {
   const supabase = getSupabase();

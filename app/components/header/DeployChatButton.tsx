@@ -72,7 +72,11 @@ export function DeployChatButton() {
       }
     }
 
-    if (deploySettings?.supabase?.databaseURL || deploySettings?.supabase?.anonKey || deploySettings?.supabase?.postgresURL) {
+    if (
+      deploySettings?.supabase?.databaseURL ||
+      deploySettings?.supabase?.anonKey ||
+      deploySettings?.supabase?.postgresURL
+    ) {
       if (!deploySettings.supabase.databaseURL) {
         setError('Supabase Database URL is required');
         return;
@@ -172,9 +176,7 @@ export function DeployChatButton() {
             ) : (
               <>
                 <h2 className="text-xl font-semibold text-center mb-4">Deploy</h2>
-                <div className="text-center mb-4">
-                  Deploy this chat's app to production.
-                </div>
+                <div className="text-center mb-4">Deploy this chat's app to production.</div>
 
                 {deploySettings?.siteURL && (
                   <div className="text-center mb-4">
@@ -349,11 +351,7 @@ export function DeployChatButton() {
                   </button>
                 </div>
 
-                {error && (
-                  <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                    {error}
-                  </div>
-                )}
+                {error && <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
               </>
             )}
           </div>

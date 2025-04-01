@@ -26,13 +26,13 @@ import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '~/components/workbench/Preview';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
-import { submitFeedback } from '~/lib/replay/Problems';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from './ApproveChange';
 import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
+import { supabaseSubmitFeedback } from '~/lib/supabase/problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -461,7 +461,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
         chatMessages: messages,
       };
 
-      shareProjectSuccess = await submitFeedback(feedbackData);
+      shareProjectSuccess = await supabaseSubmitFeedback(feedbackData);
     }
 
     pingTelemetry('RejectChange', {

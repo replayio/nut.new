@@ -1,7 +1,6 @@
-
 // State for deploying a chat to production.
 
-import { sendCommandDedicatedClient } from "./ReplayProtocolClient";
+import { sendCommandDedicatedClient } from './ReplayProtocolClient';
 
 // Deploy to a Netlify site.
 interface DeploySettingsNetlify {
@@ -53,13 +52,13 @@ export interface DeploySettingsDatabase extends DeploySettings {
 }
 
 export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {
-  const { result } = await sendCommandDedicatedClient({
+  const { result } = (await sendCommandDedicatedClient({
     method: 'Nut.deployRepository',
     params: {
       repositoryId,
       settings,
     },
-  }) as { result: DeployResult };
+  })) as { result: DeployResult };
 
   return result;
 }

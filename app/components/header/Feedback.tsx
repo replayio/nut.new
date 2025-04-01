@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
-import { submitFeedback } from '~/lib/replay/Problems';
+import { supabaseSubmitFeedback } from '~/lib/supabase/problems';
 import { getLastChatMessages } from '~/components/chat/Chat.client';
 
 ReactModal.setAppElement('#root');
@@ -47,7 +47,7 @@ export function Feedback() {
     }
 
     try {
-      const success = await submitFeedback(feedbackData);
+      const success = await supabaseSubmitFeedback(feedbackData);
 
       if (success) {
         setSubmitted(true);
