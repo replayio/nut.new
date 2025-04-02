@@ -7,7 +7,7 @@ import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { handleChatTitleUpdate, useChatHistory } from '~/lib/persistence';
+import { handleChatTitleUpdate, useChatHistory, type ResumeChatInfo } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
@@ -21,6 +21,7 @@ import {
   sendChatMessage,
   type ChatReference,
   simulationReset,
+  resumeChatMessage,
 } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '~/components/workbench/Preview';
@@ -73,12 +74,12 @@ setInterval(async () => {
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const { ready, initialMessages, storeMessageHistory, importChat } = useChatHistory();
+  const { ready, initialMessages, resumeChat, storeMessageHistory, importChat } = useChatHistory();
 
   return (
     <>
       {ready && (
-        <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} importChat={importChat} />
+        <ChatImpl initialMessages={initialMessages} resumeChat={resumeChat} storeMessageHistory={storeMessageHistory} importChat={importChat} />
       )}
       <ToastContainer
         closeButton={({ closeToast }) => {
@@ -113,6 +114,7 @@ export function Chat() {
 
 interface ChatProps {
   initialMessages: Message[];
+  resumeChat: ResumeChatInfo | undefined;
   storeMessageHistory: (messages: Message[]) => void;
   importChat: (description: string, messages: Message[]) => Promise<void>;
 }
@@ -125,7 +127,23 @@ async function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
 }
 
-export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat }: ChatProps) => {
+function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage.id == msg.id) {
+    messages.pop();
+    assert(lastMessage.type == 'text', 'Last message must be a text message');
+    assert(msg.type == 'text', 'Message must be a text message');
+    messages.push({
+      ...msg,
+      content: lastMessage.content + msg.content,
+    });
+  } else {
+    messages.push(msg);
+  }
+  return messages;
+}
+
+export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, storeMessageHistory, importChat }: ChatProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
@@ -145,6 +163,11 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
 
   // Last status we heard for the pending message.
   const [pendingMessageStatus, setPendingMessageStatus] = useState('');
+
+  // If we are listening to responses from a chat started in an earlier session,
+  // this will be set. This is equivalent to having a pending message but is
+  // handled differently.
+  const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(initialResumeChat);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -185,6 +208,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     gNumAborts++;
     chatStore.aborted.set(true);
     setPendingMessageId(undefined);
+    setResumeChat(undefined);
 
     if (gActiveChatMessageTelemetry) {
       gActiveChatMessageTelemetry.abort('StopButtonClicked');
@@ -225,7 +249,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     const _input = messageInput || input;
     const numAbortsAtStart = gNumAborts;
 
-    if (_input.length === 0 || pendingMessageId) {
+    if (_input.length === 0 || pendingMessageId || resumeChat) {
       return;
     }
 
@@ -287,22 +311,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
         return;
       }
 
-      newMessages = [...newMessages];
-
-      const lastMessage = newMessages[newMessages.length - 1];
-
-      if (lastMessage.id == msg.id) {
-        newMessages.pop();
-        assert(lastMessage.type == 'text', 'Last message must be a text message');
-        assert(msg.type == 'text', 'Message must be a text message');
-        newMessages.push({
-          ...msg,
-          content: lastMessage.content + msg.content,
-        });
-      } else {
-        newMessages.push(msg);
-      }
-
+      newMessages = mergeResponseMessage(msg, [...newMessages]);
       setMessages(newMessages);
 
       // Update the repository as soon as it has changed.
@@ -315,6 +324,10 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     };
 
     const onChatTitle = (title: string) => {
+      if (gNumAborts != numAbortsAtStart) {
+        return;
+      }
+
       console.log('ChatTitle', title);
       const currentChat = chatStore.currentChat.get();
       if (currentChat) {
@@ -323,6 +336,10 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     };
 
     const onChatStatus = debounce((status: string) => {
+      if (gNumAborts != numAbortsAtStart) {
+        return;
+      }
+
       console.log('ChatStatus', status);
       setPendingMessageStatus(status);
     }, 500);
@@ -373,6 +390,77 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
       simulationReset();
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      if (!initialResumeChat) {
+        return;
+      }
+
+      const numAbortsAtStart = gNumAborts;
+
+      const existingRepositoryId = getMessagesRepositoryId(messages);
+
+      let newMessages = messages;
+
+      // The response messages we get may overlap with the ones we already have.
+      // Look for this and remove any existing message when we receive the first
+      // piece of a response message.
+      //
+      // Messages we have already received a portion of a response for.
+      const hasReceivedResponse = new Set<string>();
+
+      const addResponseMessage = (msg: Message) => {
+        if (gNumAborts != numAbortsAtStart) {
+          return;
+        }
+
+        if (!hasReceivedResponse.has(msg.id)) {
+          hasReceivedResponse.add(msg.id);
+          newMessages = newMessages.filter(m => m.id != msg.id);
+        }
+
+        newMessages = mergeResponseMessage(msg, [...newMessages]);
+        setMessages(newMessages);
+
+        // Update the repository as soon as it has changed.
+        const responseRepositoryId = getMessagesRepositoryId(newMessages);
+
+        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+          simulationRepositoryUpdated(responseRepositoryId);
+        }
+      };
+
+      const onChatTitle = (title: string) => {
+        if (gNumAborts != numAbortsAtStart) {
+          return;
+        }
+
+        console.log('ChatTitle', title);
+        const currentChat = chatStore.currentChat.get();
+        if (currentChat) {
+          handleChatTitleUpdate(currentChat.id, title);
+        }
+      };
+
+      const onChatStatus = debounce((status: string) => {
+        if (gNumAborts != numAbortsAtStart) {
+          return;
+        }
+
+        console.log('ChatStatus', status);
+        setPendingMessageStatus(status);
+      }, 500);
+
+      await resumeChatMessage(initialResumeChat.protocolChatId, initialResumeChat.protocolChatResponseId, {
+        onResponsePart: addResponseMessage,
+        onTitle: onChatTitle,
+        onStatus: onChatStatus,
+      });
+
+      setResumeChat(undefined);
+    })();
+  }, [initialResumeChat]);
 
   // Rewind far enough to erase the specified message.
   const onRewind = async (messageId: string) => {
@@ -493,7 +581,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
       input={input}
       showChat={showChat}
       chatStarted={chatStarted}
-      hasPendingMessage={pendingMessageId !== undefined}
+      hasPendingMessage={pendingMessageId !== undefined || resumeChat !== undefined}
       pendingMessageStatus={pendingMessageStatus}
       sendMessage={sendMessage}
       messageRef={messageRef}

@@ -30,7 +30,7 @@ interface ChatReferenceElement {
 
 export type ChatReference = ChatReferenceElement;
 
-interface ChatMessageCallbacks {
+export interface ChatMessageCallbacks {
   onResponsePart: (message: Message) => void;
   onTitle: (title: string) => void;
   onStatus: (status: string) => void;
@@ -308,4 +308,47 @@ export async function sendChatMessage(
   gLastSimulationChatReferences = references;
 
   await gChatManager.sendChatMessage(messages, references, callbacks);
+}
+
+export async function resumeChatMessage(
+  chatId: string,
+  chatResponseId: string,
+  callbacks: ChatMessageCallbacks,
+) {
+  const client = new ProtocolClient();
+  await client.initialize();
+
+  try {
+    const removeResponseListener = client.listenForMessage(
+      'Nut.chatResponsePart',
+      ({ message }: { message: Message }) => {
+        callbacks.onResponsePart(message);
+      },
+    );
+
+    const removeTitleListener = client.listenForMessage(
+      'Nut.chatTitle',
+      ({ title }: { title: string }) => {
+        callbacks.onTitle(title);
+      },
+    );
+
+    const removeStatusListener = client.listenForMessage(
+      'Nut.chatStatus',
+      ({ status }: { status: string }) => {
+        callbacks.onStatus(status);
+      },
+    );
+
+    await client.sendCommand({
+      method: 'Nut.resumeChatMessage',
+      params: { chatId, chatResponseId },
+    });
+
+    removeResponseListener();
+    removeTitleListener();
+    removeStatusListener();
+  } finally {
+    client.close();
+  }
 }
