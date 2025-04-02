@@ -13,10 +13,14 @@ export const currentChatId = atom<string | undefined>(undefined);
 export const currentChatTitle = atom<string | undefined>(undefined);
 
 export function useChatHistory() {
-  const { id: mixedId, problemId } = useLoaderData<{ id?: string; problemId?: string }>() ?? {};
+  const {
+    id: mixedId,
+    problemId,
+    repositoryId,
+  } = useLoaderData<{ id?: string; problemId?: string; repositoryId?: string }>() ?? {};
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
-  const [ready, setReady] = useState<boolean>(!mixedId && !problemId);
+  const [ready, setReady] = useState<boolean>(!mixedId && !problemId && !repositoryId);
 
   const importChat = async (title: string, messages: Message[]) => {
     try {
@@ -31,6 +35,16 @@ export function useChatHistory() {
       }
     }
   };
+
+  const loadRepository = async (repositoryId: string) => {
+    const messages = createMessagesForRepository(`Repository: ${repositoryId}`, repositoryId);
+    await importChat(`Repository: ${repositoryId}`, messages);
+    toast.success('Repository loaded successfully');
+  };
+
+  const debouncedSetChatContents = debounce(async (messages: Message[]) => {
+    await setChatContents(currentChatId.get() as string, currentChatTitle.get() as string, messages);
+  }, 1000);
 
   useEffect(() => {
     (async () => {
@@ -51,6 +65,9 @@ export function useChatHistory() {
         } else if (problemId) {
           await loadProblem(problemId, importChat);
           setReady(true);
+        } else if (repositoryId) {
+          await loadRepository(repositoryId);
+          setReady(true);
         }
       } catch (error) {
         logStore.logError('Failed to load chat messages', error);
@@ -62,7 +79,7 @@ export function useChatHistory() {
   return {
     ready,
     initialMessages,
-    storeMessageHistory: debounce(async (messages: Message[]) => {
+    storeMessageHistory: async (messages: Message[]) => {
       if (messages.length === 0) {
         return;
       }
@@ -74,8 +91,8 @@ export function useChatHistory() {
         navigateChat(id);
       }
 
-      await setChatContents(currentChatId.get() as string, currentChatTitle.get() as string, messages);
-    }, 1000),
+      debouncedSetChatContents(messages);
+    },
     importChat,
   };
 }
