@@ -8,10 +8,6 @@ import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
 
-// These must be kept in sync.
-export const currentChatId = atom<string | undefined>(undefined);
-export const currentChatTitle = atom<string | undefined>(undefined);
-
 export function useChatHistory() {
   const {
     id: mixedId,

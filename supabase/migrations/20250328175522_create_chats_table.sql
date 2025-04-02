@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS public.chats (
   repository_id UUID,
   messages JSONB DEFAULT '{}',
   deploy_settings JSONB DEFAULT '{}',
-  deleted BOOLEAN DEFAULT FALSE
+  deleted BOOLEAN DEFAULT FALSE,
+  last_protocol_chat_id UUID,
+  last_protocol_chat_response_id TEXT
 );
 
 -- Create updated_at trigger for chats table
