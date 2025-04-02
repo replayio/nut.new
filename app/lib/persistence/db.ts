@@ -15,6 +15,8 @@ export interface ChatContents {
   title: string;
   repositoryId: string | undefined;
   messages: Message[];
+  lastProtocolChatId: string | undefined;
+  lastProtocolChatResponseId: string | undefined;
 }
 
 function databaseRowToChatContents(d: any): ChatContents {
@@ -25,6 +27,8 @@ function databaseRowToChatContents(d: any): ChatContents {
     title: d.title,
     messages: d.messages,
     repositoryId: d.repository_id,
+    lastProtocolChatId: d.last_protocol_chat_id,
+    lastProtocolChatResponseId: d.last_protocol_chat_response_id,
   };
 }
 
@@ -70,7 +74,7 @@ async function syncLocalChats(): Promise<void> {
     try {
       for (const chat of localChats) {
         if (chat.title) {
-          await setChatContents(chat.id, chat.title, chat.messages);
+          await setChatContents(chat);
         }
       }
       setLocalChats(undefined);
@@ -80,31 +84,29 @@ async function syncLocalChats(): Promise<void> {
   }
 }
 
-async function setChatContents(id: string, title: string, messages: Message[]): Promise<void> {
+async function setChatContents(chat: ChatContents) {
   const userId = await getCurrentUserId();
 
   if (!userId) {
-    const localChats = getLocalChats().filter((c) => c.id != id);
+    const localChats = getLocalChats().filter((c) => c.id != chat.id);
     localChats.push({
-      id,
-      title,
-      messages,
-      repositoryId: getMessagesRepositoryId(messages),
-      createdAt: new Date().toISOString(),
+      ...chat,
       updatedAt: new Date().toISOString(),
     });
     setLocalChats(localChats);
     return;
   }
 
-  const repositoryId = getMessagesRepositoryId(messages);
+  const repositoryId = getMessagesRepositoryId(chat.messages);
 
   const { error } = await getSupabase().from('chats').upsert({
-    id,
-    messages,
-    title,
+    id: chat.id,
+    messages: chat.messages,
+    title: chat.title,
     user_id: userId,
     repository_id: repositoryId,
+    last_protocol_chat_id: chat.lastProtocolChatId,
+    last_protocol_chat_response_id: chat.lastProtocolChatResponseId,
   });
 
   if (error) {
@@ -165,12 +167,20 @@ async function deleteChat(id: string): Promise<void> {
   }
 }
 
-async function createChat(title: string, messages: Message[]): Promise<string> {
-  const id = uuid();
-  await setChatContents(id, title, messages);
-  return id;
+async function createChat(title: string, messages: Message[]): Promise<ChatContents> {
+  const contents = {
+    id: uuid(),
+    title,
+    messages,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    repositoryId: getMessagesRepositoryId(messages),
+    lastProtocolChatId: undefined,
+    lastProtocolChatResponseId: undefined,
+  };
+  await setChatContents(contents);
+  return contents;
 }
-
 async function updateChatTitle(id: string, title: string): Promise<void> {
   const chat = await getChatContents(id);
   assert(chat, 'Unknown chat');
@@ -179,7 +189,7 @@ async function updateChatTitle(id: string, title: string): Promise<void> {
     throw new Error('Title cannot be empty');
   }
 
-  await setChatContents(id, title, chat.messages);
+  await setChatContents({ ...chat, title });
 }
 
 async function getChatDeploySettings(id: string): Promise<DeploySettingsDatabase | undefined> {

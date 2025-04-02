@@ -316,7 +316,10 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
 
     const onChatTitle = (title: string) => {
       console.log('ChatTitle', title);
-      handleChatTitleUpdate(chatStore.chatId.get() as string, title);
+      const currentChat = chatStore.currentChat.get();
+      if (currentChat) {
+        handleChatTitleUpdate(currentChat.id, title);
+      }
     };
 
     const onChatStatus = debounce((status: string) => {

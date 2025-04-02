@@ -8,6 +8,11 @@ import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
 
+export interface ResumeChatInfo {
+  protocolChatId: string;
+  protocolChatResponseId: string;
+}
+
 export function useChatHistory() {
   const {
     id: mixedId,
@@ -16,6 +21,7 @@ export function useChatHistory() {
   } = useLoaderData<{ id?: string; problemId?: string; repositoryId?: string }>() ?? {};
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
+  const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(undefined);
   const [ready, setReady] = useState<boolean>(!mixedId && !problemId && !repositoryId);
 
   const importChat = async (title: string, messages: Message[]) => {
@@ -39,7 +45,11 @@ export function useChatHistory() {
   };
 
   const debouncedSetChatContents = debounce(async (messages: Message[]) => {
-    await database.setChatContents(chatStore.chatId.get() as string, chatStore.chatTitle.get() as string, messages);
+    const chat = chatStore.currentChat.get();
+    if (!chat) {
+      return;
+    }
+    await database.setChatContents({ ...chat, messages });
   }, 1000);
 
   useEffect(() => {
@@ -49,8 +59,13 @@ export function useChatHistory() {
           const chatContents = await database.getChatContents(mixedId);
           if (chatContents) {
             setInitialMessages(chatContents.messages);
-            chatStore.chatTitle.set(chatContents.title);
-            chatStore.chatId.set(mixedId);
+            chatStore.currentChat.set(chatContents);
+            if (chatContents.lastProtocolChatId && chatContents.lastProtocolChatResponseId) {
+              setResumeChat({
+                protocolChatId: chatContents.lastProtocolChatId,
+                protocolChatResponseId: chatContents.lastProtocolChatResponseId,
+              });
+            }
             setReady(true);
             return;
           }
@@ -75,17 +90,17 @@ export function useChatHistory() {
   return {
     ready,
     initialMessages,
+    resumeChat,
     storeMessageHistory: async (messages: Message[]) => {
       if (messages.length === 0) {
         return;
       }
 
-      if (!chatStore.chatId.get()) {
+      if (!chatStore.currentChat.get()) {
         const title = 'New Chat';
-        const id = await database.createChat(title, initialMessages);
-        chatStore.chatId.set(id);
-        chatStore.chatTitle.set(title);
-        navigateChat(id);
+        const chat = await database.createChat(title, initialMessages);
+        chatStore.currentChat.set(chat);
+        navigateChat(chat.id);
       }
 
       debouncedSetChatContents(messages);
@@ -108,7 +123,8 @@ function navigateChat(nextId: string) {
 
 export async function handleChatTitleUpdate(id: string, title: string) {
   await database.updateChatTitle(id, title);
-  if (chatStore.chatId.get() == id) {
-    chatStore.chatTitle.set(title);
+  const currentChat = chatStore.currentChat.get();
+  if (currentChat?.id == id) {
+    chatStore.currentChat.set({ ...currentChat, title });
   }
 }

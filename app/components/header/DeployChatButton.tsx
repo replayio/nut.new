@@ -25,7 +25,7 @@ export function DeployChatButton() {
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
 
   const handleOpenModal = async () => {
-    const chatId = chatStore.chatId.get();
+    const chatId = chatStore.currentChat.get()?.id;
     if (!chatId) {
       toast.error('No chat open');
       return;
@@ -46,7 +46,7 @@ export function DeployChatButton() {
   const handleDeploy = async () => {
     setError(null);
 
-    const chatId = chatStore.chatId.get();
+    const chatId = chatStore.currentChat.get()?.id;
     if (!chatId) {
       setError('No chat open');
       return;

@@ -1,4 +1,3 @@
-import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { chatStore } from '~/lib/stores/chat';
@@ -34,18 +33,19 @@ type EditChatDescriptionHook = {
  * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
 export function useEditChatTitle({
-  initialTitle = chatStore.chatTitle.get()!,
+  initialTitle = chatStore.currentChat.get()?.title,
   customChatId,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
-  const chatIdFromStore = useStore(chatStore.chatId);
+  const currentChat = chatStore.currentChat.get();
+
   const [editing, setEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(initialTitle);
 
   const [chatId, setChatId] = useState<string>();
 
   useEffect(() => {
-    setChatId(customChatId || chatIdFromStore);
-  }, [customChatId, chatIdFromStore]);
+    setChatId(customChatId || currentChat?.id);
+  }, [customChatId, currentChat]);
   useEffect(() => {
     setCurrentTitle(initialTitle);
   }, [initialTitle]);
@@ -106,6 +106,10 @@ export function useEditChatTitle({
     async (event: React.FormEvent) => {
       event.preventDefault();
 
+      if (!currentTitle) {
+        return;
+      }
+
       if (!isValidTitle(currentTitle)) {
         return;
       }
@@ -142,7 +146,7 @@ export function useEditChatTitle({
     handleBlur,
     handleSubmit,
     handleKeyDown,
-    currentTitle,
+    currentTitle: currentTitle!,
     toggleEditMode,
   };
 }

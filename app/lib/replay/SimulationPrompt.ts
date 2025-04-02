@@ -185,7 +185,7 @@ class ChatManager {
 
     console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages, references }));
 
-    const id = chatStore.chatId.get();
+    const id = chatStore.currentChat.get()?.id;
     assert(id, 'Expected chat ID');
     database.updateChatLastMessage(id, chatId, responseId);
 

@@ -63,7 +63,7 @@ export const Menu = () => {
       .then(() => {
         loadEntries();
 
-        if (chatStore.chatId.get() === item.id) {
+        if (chatStore.currentChat.get()?.id === item.id) {
           // hard page navigation to clear the stores
           window.location.pathname = '/';
         }
