@@ -235,13 +235,10 @@ function startChat(repositoryId: string | undefined, pageData: SimulationData) {
  * Called when the repository has changed. We'll start a new chat
  * and update the remote development server.
  */
-export const simulationRepositoryUpdated = debounce(
-  (repositoryId: string) => {
-    startChat(repositoryId, []);
-    updateDevelopmentServer(repositoryId);
-  },
-  500,
-);
+export const simulationRepositoryUpdated = debounce((repositoryId: string) => {
+  startChat(repositoryId, []);
+  updateDevelopmentServer(repositoryId);
+}, 500);
 
 /*
  * Called when the page gathering interaction data has been reloaded. We'll
@@ -314,11 +311,7 @@ export async function sendChatMessage(
   await gChatManager.sendChatMessage(messages, references, callbacks);
 }
 
-export async function resumeChatMessage(
-  chatId: string,
-  chatResponseId: string,
-  callbacks: ChatMessageCallbacks,
-) {
+export async function resumeChatMessage(chatId: string, chatResponseId: string, callbacks: ChatMessageCallbacks) {
   const client = new ProtocolClient();
   await client.initialize();
 
@@ -330,19 +323,13 @@ export async function resumeChatMessage(
       },
     );
 
-    const removeTitleListener = client.listenForMessage(
-      'Nut.chatTitle',
-      ({ title }: { title: string }) => {
-        callbacks.onTitle(title);
-      },
-    );
+    const removeTitleListener = client.listenForMessage('Nut.chatTitle', ({ title }: { title: string }) => {
+      callbacks.onTitle(title);
+    });
 
-    const removeStatusListener = client.listenForMessage(
-      'Nut.chatStatus',
-      ({ status }: { status: string }) => {
-        callbacks.onStatus(status);
-      },
-    );
+    const removeStatusListener = client.listenForMessage('Nut.chatStatus', ({ status }: { status: string }) => {
+      callbacks.onStatus(status);
+    });
 
     await client.sendCommand({
       method: 'Nut.resumeChatMessage',
