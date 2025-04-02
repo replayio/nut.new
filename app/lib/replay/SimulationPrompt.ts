@@ -10,6 +10,7 @@ import { updateDevelopmentServer } from './DevelopmentServer';
 import type { Message } from '~/lib/persistence/message';
 import { database } from '~/lib/persistence/db';
 import { chatStore } from '~/lib/stores/chat';
+import { debounce } from '~/utils/debounce';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -234,10 +235,13 @@ function startChat(repositoryId: string | undefined, pageData: SimulationData) {
  * Called when the repository has changed. We'll start a new chat
  * and update the remote development server.
  */
-export function simulationRepositoryUpdated(repositoryId: string) {
-  startChat(repositoryId, []);
-  updateDevelopmentServer(repositoryId);
-}
+export const simulationRepositoryUpdated = debounce(
+  (repositoryId: string) => {
+    startChat(repositoryId, []);
+    updateDevelopmentServer(repositoryId);
+  },
+  500,
+);
 
 /*
  * Called when the page gathering interaction data has been reloaded. We'll

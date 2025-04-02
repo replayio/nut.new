@@ -308,13 +308,14 @@ export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, 
 
     runAnimation();
 
-    const existingRepositoryId = getMessagesRepositoryId(messages);
     let updatedRepository = false;
 
     const addResponseMessage = (msg: Message) => {
       if (gNumAborts != numAbortsAtStart) {
         return;
       }
+
+      const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
       newMessages = mergeResponseMessage(msg, [...newMessages]);
       setMessages(newMessages);
@@ -404,8 +405,6 @@ export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, 
 
       const numAbortsAtStart = gNumAborts;
 
-      const existingRepositoryId = getMessagesRepositoryId(messages);
-
       let newMessages = messages;
 
       // The response messages we get may overlap with the ones we already have.
@@ -424,6 +423,8 @@ export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, 
           hasReceivedResponse.add(msg.id);
           newMessages = newMessages.filter(m => m.id != msg.id);
         }
+
+        const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
         newMessages = mergeResponseMessage(msg, [...newMessages]);
         setMessages(newMessages);
