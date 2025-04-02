@@ -4,8 +4,8 @@ import { useState } from 'react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { databaseGetChatDeploySettings, databaseUpdateChatDeploySettings } from '~/lib/persistence/db';
-import { currentChatId } from '~/lib/persistence/useChatHistory';
+import { chatStore } from '~/lib/stores/chat';
+import { database } from '~/lib/persistence/db';
 import { deployRepository } from '~/lib/replay/Deploy';
 
 ReactModal.setAppElement('#root');
@@ -25,13 +25,13 @@ export function DeployChatButton() {
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
 
   const handleOpenModal = async () => {
-    const chatId = currentChatId.get();
+    const chatId = chatStore.chatId.get();
     if (!chatId) {
       toast.error('No chat open');
       return;
     }
 
-    const existingSettings = await databaseGetChatDeploySettings(chatId);
+    const existingSettings = await database.getChatDeploySettings(chatId);
 
     setIsModalOpen(true);
     setStatus(DeployStatus.NotStarted);
@@ -46,7 +46,7 @@ export function DeployChatButton() {
   const handleDeploy = async () => {
     setError(null);
 
-    const chatId = currentChatId.get();
+    const chatId = chatStore.chatId.get();
     if (!chatId) {
       setError('No chat open');
       return;
@@ -100,7 +100,7 @@ export function DeployChatButton() {
     setStatus(DeployStatus.Started);
 
     // Write out to the database before we start trying to deploy.
-    await databaseUpdateChatDeploySettings(chatId, deploySettings);
+    await database.updateChatDeploySettings(chatId, deploySettings);
 
     console.log('DeploymentStarting', repositoryId, deploySettings);
 
@@ -135,7 +135,7 @@ export function DeployChatButton() {
     setStatus(DeployStatus.Succeeded);
 
     // Update the database with the new settings.
-    await databaseUpdateChatDeploySettings(chatId, newSettings);
+    await database.updateChatDeploySettings(chatId, newSettings);
   };
 
   return (

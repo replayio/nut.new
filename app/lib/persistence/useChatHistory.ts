@@ -1,9 +1,9 @@
 import { useLoaderData } from '@remix-run/react';
 import { useState, useEffect } from 'react';
-import { atom } from 'nanostores';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
-import { createChat, getChatContents, setChatContents, getChatPublicData, databaseUpdateChatTitle } from './db';
+import { chatStore } from '~/lib/stores/chat';
+import { database } from './db';
 import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
@@ -20,7 +20,7 @@ export function useChatHistory() {
 
   const importChat = async (title: string, messages: Message[]) => {
     try {
-      const newId = await createChat(title, messages);
+      const newId = await database.createChat(title, messages);
       window.location.href = `/chat/${newId}`;
       toast.success('Chat imported successfully');
     } catch (error) {
@@ -39,23 +39,23 @@ export function useChatHistory() {
   };
 
   const debouncedSetChatContents = debounce(async (messages: Message[]) => {
-    await setChatContents(currentChatId.get() as string, currentChatTitle.get() as string, messages);
+    await database.setChatContents(chatStore.chatId.get() as string, chatStore.chatTitle.get() as string, messages);
   }, 1000);
 
   useEffect(() => {
     (async () => {
       try {
         if (mixedId) {
-          const chatContents = await getChatContents(mixedId);
+          const chatContents = await database.getChatContents(mixedId);
           if (chatContents) {
             setInitialMessages(chatContents.messages);
-            currentChatTitle.set(chatContents.title);
-            currentChatId.set(mixedId);
+            chatStore.chatTitle.set(chatContents.title);
+            chatStore.chatId.set(mixedId);
             setReady(true);
             return;
           }
 
-          const publicData = await getChatPublicData(mixedId);
+          const publicData = await database.getChatPublicData(mixedId);
           const messages = createMessagesForRepository(publicData.title, publicData.repositoryId);
           await importChat(publicData.title, messages);
         } else if (problemId) {
@@ -80,10 +80,11 @@ export function useChatHistory() {
         return;
       }
 
-      if (!currentChatId.get()) {
-        const id = await createChat('New Chat', initialMessages);
-        currentChatId.set(id);
-        currentChatTitle.set('New Chat');
+      if (!chatStore.chatId.get()) {
+        const title = 'New Chat';
+        const id = await database.createChat(title, initialMessages);
+        chatStore.chatId.set(id);
+        chatStore.chatTitle.set(title);
         navigateChat(id);
       }
 
@@ -106,8 +107,8 @@ function navigateChat(nextId: string) {
 }
 
 export async function handleChatTitleUpdate(id: string, title: string) {
-  await databaseUpdateChatTitle(id, title);
-  if (currentChatId.get() == id) {
-    currentChatTitle.set(title);
+  await database.updateChatTitle(id, title);
+  if (chatStore.chatId.get() == id) {
+    chatStore.chatTitle.set(title);
   }
 }

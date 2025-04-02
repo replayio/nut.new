@@ -8,7 +8,8 @@ import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import { updateDevelopmentServer } from './DevelopmentServer';
 import type { Message } from '~/lib/persistence/message';
-import { Database } from '../persistence/db';
+import { database } from '~/lib/persistence/db';
+import { chatStore } from '~/lib/stores/chat';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -36,9 +37,6 @@ interface ChatMessageCallbacks {
 }
 
 class ChatManager {
-  // ID of the associated database chat.
-  id: string;
-
   // Empty if this chat has been destroyed.
   client: ProtocolClient | undefined;
 
@@ -58,8 +56,7 @@ class ChatManager {
   private _pendingMessages = 0;
   private _mustDestroyAfterChatFinishes = false;
 
-  constructor(id: string) {
-    this.id = id;
+  constructor() {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
       assert(this.client, 'Chat has been destroyed');
@@ -188,7 +185,9 @@ class ChatManager {
 
     console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages, references }));
 
-    Database.updateChatLastMessage(this.id, chatId, responseId);
+    const id = chatStore.chatId.get();
+    assert(id, 'Expected chat ID');
+    database.updateChatLastMessage(id, chatId, responseId);
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',

@@ -200,10 +200,7 @@ async function getChatDeploySettings(id: string): Promise<DeploySettingsDatabase
   return data[0].deploy_settings;
 }
 
-async function updateChatDeploySettings(
-  id: string,
-  deploySettings: DeploySettingsDatabase,
-): Promise<void> {
+async function updateChatDeploySettings(id: string, deploySettings: DeploySettingsDatabase): Promise<void> {
   const { error } = await getSupabase().from('chats').update({ deploy_settings: deploySettings }).eq('id', id);
 
   if (error) {
@@ -211,15 +208,22 @@ async function updateChatDeploySettings(
   }
 }
 
-async function updateChatLastMessage(id: string, protocolChatId: string, protocolChatResponseId: string): Promise<void> {
-  const { error } = await getSupabase().from('chats').update({ last_protocol_chat_id: protocolChatId, last_protocol_chat_response_id: protocolChatResponseId }).eq('id', id);
+async function updateChatLastMessage(
+  id: string,
+  protocolChatId: string,
+  protocolChatResponseId: string,
+): Promise<void> {
+  const { error } = await getSupabase()
+    .from('chats')
+    .update({ last_protocol_chat_id: protocolChatId, last_protocol_chat_response_id: protocolChatResponseId })
+    .eq('id', id);
 
   if (error) {
     console.error('DatabaseUpdateChatLastMessageError', id, protocolChatId, protocolChatResponseId, error);
   }
 }
 
-export const Database = {
+export const database = {
   getAllChats,
   syncLocalChats,
   setChatContents,

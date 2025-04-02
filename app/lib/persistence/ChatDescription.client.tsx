@@ -2,10 +2,10 @@ import { useStore } from '@nanostores/react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
-import { currentChatTitle } from '~/lib/persistence';
+import { chatStore } from '~/lib/stores/chat';
 
 export function ChatDescription() {
-  const initialTitle = useStore(currentChatTitle)!;
+  const initialTitle = useStore(chatStore.chatTitle)!;
 
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({

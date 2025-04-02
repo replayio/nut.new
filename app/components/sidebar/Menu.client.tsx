@@ -5,8 +5,8 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { deleteById, getAllChats, currentChatId } from '~/lib/persistence';
-import type { ChatContents } from '~/lib/persistence/db';
+import { database, type ChatContents } from '~/lib/persistence/db';
+import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
@@ -49,7 +49,8 @@ export const Menu = () => {
   });
 
   const loadEntries = useCallback(() => {
-    getAllChats()
+    database
+      .getAllChats()
       .then(setList)
       .catch((error) => toast.error(error.message));
   }, []);
@@ -57,11 +58,12 @@ export const Menu = () => {
   const deleteItem = useCallback((event: React.UIEvent, item: ChatContents) => {
     event.preventDefault();
 
-    deleteById(item.id)
+    database
+      .deleteChat(item.id)
       .then(() => {
         loadEntries();
 
-        if (currentChatId.get() === item.id) {
+        if (chatStore.chatId.get() === item.id) {
           // hard page navigation to clear the stores
           window.location.pathname = '/';
         }

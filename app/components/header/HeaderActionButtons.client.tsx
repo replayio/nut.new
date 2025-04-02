@@ -8,7 +8,7 @@ interface HeaderActionButtonsProps {}
 
 export function HeaderActionButtons({}: HeaderActionButtonsProps) {
   const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const { showChat } = useStore(chatStore);
+  const showChat = useStore(chatStore.showChat);
 
   const isSmallViewport = useViewport(1024);
 
@@ -22,7 +22,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
           disabled={!canHideChat || isSmallViewport} // expand button is disabled on mobile as it's not needed
           onClick={() => {
             if (canHideChat) {
-              chatStore.setKey('showChat', !showChat);
+              chatStore.showChat.set(!showChat);
             }
           }}
         >
@@ -33,7 +33,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
           active={showWorkbench}
           onClick={() => {
             if (showWorkbench && !showChat) {
-              chatStore.setKey('showChat', true);
+              chatStore.showChat.set(true);
             }
 
             workbenchStore.showWorkbench.set(!showWorkbench);

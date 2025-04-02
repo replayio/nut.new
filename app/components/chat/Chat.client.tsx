@@ -7,7 +7,7 @@ import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { currentChatId, handleChatTitleUpdate, useChatHistory } from '~/lib/persistence';
+import { handleChatTitleUpdate, useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
@@ -148,7 +148,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-  const { showChat } = useStore(chatStore);
+  const showChat = useStore(chatStore.showChat);
 
   const [animationScope, animate] = useAnimate();
 
@@ -173,7 +173,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
   useEffect(() => {
-    chatStore.setKey('started', initialMessages.length > 0);
+    chatStore.started.set(initialMessages.length > 0);
   }, []);
 
   useEffect(() => {
@@ -183,7 +183,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
   const abort = () => {
     stop();
     gNumAborts++;
-    chatStore.setKey('aborted', true);
+    chatStore.aborted.set(true);
     setPendingMessageId(undefined);
 
     if (gActiveChatMessageTelemetry) {
@@ -216,7 +216,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
       animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
     ]);
 
-    chatStore.setKey('started', true);
+    chatStore.started.set(true);
 
     setChatStarted(true);
   };
@@ -275,7 +275,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
     await flushSimulationData();
     simulationFinishData();
 
-    chatStore.setKey('aborted', false);
+    chatStore.aborted.set(false);
 
     runAnimation();
 
@@ -316,7 +316,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory, importChat
 
     const onChatTitle = (title: string) => {
       console.log('ChatTitle', title);
-      handleChatTitleUpdate(currentChatId.get() as string, title);
+      handleChatTitleUpdate(chatStore.chatId.get() as string, title);
     };
 
     const onChatStatus = debounce((status: string) => {

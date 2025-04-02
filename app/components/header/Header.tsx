@@ -10,13 +10,13 @@ import { ClientAuth } from '~/components/auth/ClientAuth';
 import { DeployChatButton } from './DeployChatButton';
 
 export function Header() {
-  const chat = useStore(chatStore);
+  const chatStarted = useStore(chatStore.started);
 
   return (
     <header
       className={classNames('flex items-center justify-between p-5 border-b h-[var(--header-height)]', {
-        'border-transparent': !chat.started,
-        'border-bolt-elements-borderColor': chat.started,
+        'border-transparent': !chatStarted,
+        'border-bolt-elements-borderColor': chatStarted,
       })}
     >
       <div className="flex flex-1 items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
@@ -28,20 +28,20 @@ export function Header() {
       </div>
 
       <div className="flex-1 flex items-center ">
-        {chat.started && (
+        {chatStarted && (
           <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
             <ClientOnly>{() => <ChatDescription />}</ClientOnly>
           </span>
         )}
 
-        {chat.started && (
+        {chatStarted && (
           <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
             <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
           </span>
         )}
 
         <div className="flex items-center  gap-4">
-          {chat.started && (
+          {chatStarted && (
             <ClientOnly>
               {() => (
                 <div className="mr-1">

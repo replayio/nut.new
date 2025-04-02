@@ -1,7 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { currentChatId, currentChatTitle, getChatContents, handleChatTitleUpdate } from '~/lib/persistence';
+import { chatStore } from '~/lib/stores/chat';
+import { database } from '~/lib/persistence/db';
+import { handleChatTitleUpdate } from '~/lib/persistence/useChatHistory';
 
 interface EditChatDescriptionOptions {
   initialTitle?: string;
@@ -32,10 +34,10 @@ type EditChatDescriptionHook = {
  * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
 export function useEditChatTitle({
-  initialTitle = currentChatTitle.get()!,
+  initialTitle = chatStore.chatTitle.get()!,
   customChatId,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
-  const chatIdFromStore = useStore(currentChatId);
+  const chatIdFromStore = useStore(chatStore.chatId);
   const [editing, setEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(initialTitle);
 
@@ -60,7 +62,7 @@ export function useEditChatTitle({
     }
 
     try {
-      const chat = await getChatContents(chatId);
+      const chat = await database.getChatContents(chatId);
       return chat?.title || initialTitle;
     } catch (error) {
       console.error('Failed to fetch latest description:', error);
