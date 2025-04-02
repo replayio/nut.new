@@ -342,7 +342,7 @@ export async function resumeChatMessage(
 
     await client.sendCommand({
       method: 'Nut.resumeChatMessage',
-      params: { chatId, chatResponseId },
+      params: { chatId, responseId: chatResponseId },
     });
 
     removeResponseListener();

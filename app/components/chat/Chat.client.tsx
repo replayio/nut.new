@@ -7,7 +7,7 @@ import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { handleChatTitleUpdate, useChatHistory, type ResumeChatInfo } from '~/lib/persistence';
+import { database, handleChatTitleUpdate, useChatHistory, type ResumeChatInfo } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
@@ -209,6 +209,11 @@ export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, 
     chatStore.aborted.set(true);
     setPendingMessageId(undefined);
     setResumeChat(undefined);
+
+    const chatId = chatStore.currentChat.get()?.id;
+    if (chatId) {
+      database.updateChatLastMessage(chatId, null, null);
+    }
 
     if (gActiveChatMessageTelemetry) {
       gActiveChatMessageTelemetry.abort('StopButtonClicked');
@@ -452,13 +457,26 @@ export const ChatImpl = memo(({ initialMessages, resumeChat: initialResumeChat, 
         setPendingMessageStatus(status);
       }, 500);
 
-      await resumeChatMessage(initialResumeChat.protocolChatId, initialResumeChat.protocolChatResponseId, {
-        onResponsePart: addResponseMessage,
-        onTitle: onChatTitle,
-        onStatus: onChatStatus,
-      });
+      try {
+        await resumeChatMessage(initialResumeChat.protocolChatId, initialResumeChat.protocolChatResponseId, {
+          onResponsePart: addResponseMessage,
+          onTitle: onChatTitle,
+          onStatus: onChatStatus,
+        });
+      } catch (e) {
+        console.error('Error resuming chat', e);
+      }
+
+      if (gNumAborts != numAbortsAtStart) {
+        return;
+      }
 
       setResumeChat(undefined);
+
+      const chatId = chatStore.currentChat.get()?.id;
+      if (chatId) {
+        database.updateChatLastMessage(chatId, null, null);
+      }
     })();
   }, [initialResumeChat]);
 

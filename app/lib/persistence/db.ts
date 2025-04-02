@@ -220,8 +220,8 @@ async function updateChatDeploySettings(id: string, deploySettings: DeploySettin
 
 async function updateChatLastMessage(
   id: string,
-  protocolChatId: string,
-  protocolChatResponseId: string,
+  protocolChatId: string | null,
+  protocolChatResponseId: string | null,
 ): Promise<void> {
   const { error } = await getSupabase()
     .from('chats')
