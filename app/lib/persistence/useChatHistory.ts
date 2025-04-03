@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
 import { chatStore } from '~/lib/stores/chat';
 import { database } from './db';
-import { loadProblem } from '~/components/chat/LoadProblemButton';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
 
@@ -14,15 +13,11 @@ export interface ResumeChatInfo {
 }
 
 export function useChatHistory() {
-  const {
-    id: mixedId,
-    problemId,
-    repositoryId,
-  } = useLoaderData<{ id?: string; problemId?: string; repositoryId?: string }>() ?? {};
+  const { id: mixedId, repositoryId } = useLoaderData<{ id?: string; repositoryId?: string }>() ?? {};
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(undefined);
-  const [ready, setReady] = useState<boolean>(!mixedId && !problemId && !repositoryId);
+  const [ready, setReady] = useState<boolean>(!mixedId && !repositoryId);
 
   const importChat = async (title: string, messages: Message[]) => {
     try {
@@ -73,9 +68,6 @@ export function useChatHistory() {
           const publicData = await database.getChatPublicData(mixedId);
           const messages = createMessagesForRepository(publicData.title, publicData.repositoryId);
           await importChat(publicData.title, messages);
-        } else if (problemId) {
-          await loadProblem(problemId, importChat);
-          setReady(true);
         } else if (repositoryId) {
           await loadRepository(repositoryId);
           setReady(true);

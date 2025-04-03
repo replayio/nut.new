@@ -33,7 +33,7 @@ import { assert, generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
 import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
-import { supabaseSubmitFeedback } from '~/lib/supabase/problems';
+import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',

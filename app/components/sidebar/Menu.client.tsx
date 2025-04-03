@@ -122,12 +122,6 @@ export const Menu = () => {
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         <div className="flex gap-2 px-2 mb-0 ml-2.5">
           <a
-            href="/problems"
-            className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-          >
-            Problems
-          </a>
-          <a
             href="/about"
             className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
           >
