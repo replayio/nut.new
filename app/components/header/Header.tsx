@@ -25,6 +25,9 @@ export function Header() {
           <img src="/logo-styled.svg" alt="logo" className="w-[40px] inline-block rotate-90" />
         </a>
         <Feedback />
+        <a href="https://www.replay.io/discord" className="text-bolt-elements-accent underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+          <div className="i-ph:discord-logo-fill text-[1.3em]" />
+        </a>
       </div>
 
       <div className="flex-1 flex items-center ">

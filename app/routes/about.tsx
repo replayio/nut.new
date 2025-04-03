@@ -15,31 +15,14 @@ function AboutPage() {
           <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-200">About Nut</h1>
 
           <p className="mb-6">
-            Nut is an{' '}
-            <a
-              href="https://github.com/replayio/bolt"
-              className="text-bolt-elements-accent underline hover:no-underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              open source fork
-            </a>{' '}
-            of{' '}
-            <a
-              href="https://bolt.new"
-              className="text-bolt-elements-accent underline hover:no-underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Bolt.new
-            </a>{' '}
-            for helping you develop full stack apps using AI. AI developers frequently struggle with fixing even simple
-            bugs when they don't know the cause, and get stuck making ineffective changes over and over. We want to
-            crack these tough nuts, so to speak, so you can get back to building.
+            Nut is an agentic app builder for reliably developing full stack apps using AI.
+            When you ask Nut to build or change an app, it will do its best to get the code
+            changes right the first time. Afterwards it will check the app to make sure it's
+            working as expected, writing tests and fixing problems those tests uncover.
           </p>
 
           <p className="mb-6">
-            When you ask Nut to fix a bug, it creates a{' '}
+            You can also ask Nut to fix bugs. Nut will create a{' '}
             <a
               href="https://replay.io"
               className="text-bolt-elements-accent underline hover:no-underline"
@@ -54,13 +37,6 @@ function AboutPage() {
           </p>
 
           <p className="mb-6">
-            Nut.new is already pretty good at fixing problems, and we're working to make it better. We want it to
-            reliably fix anything you're seeing, as long as it has a clear explanation and the problem isn't too
-            complicated (AIs aren't magic). If it's doing poorly, let us know! Use the UI to leave us some private
-            feedback or save your project to our public set of problems where AIs struggle.
-          </p>
-
-          <p>
             Nut is being developed by the{' '}
             <a
               href="https://replay.io"
@@ -69,22 +45,21 @@ function AboutPage() {
               rel="noopener noreferrer"
             >
               Replay.io
-            </a>{' '}
-            team. We're offering unlimited free access to Nut.new for early adopters who can give us feedback we'll use
-            to improve Nut. Reach us at{' '}
-            <a href="mailto:hi@replay.io" className="text-bolt-elements-accent underline hover:no-underline">
-              hi@replay.io
-            </a>{' '}
-            or fill out our{' '}
+            </a>{' '} team.
+            We'd love to hear from you! Leave us some feedback at the top of the page,
+            join our{' '}
             <a
-              href="https://replay.io/contact"
+              href="https://www.replay.io/discord"
               className="text-bolt-elements-accent underline hover:no-underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              contact form
+              Discord
             </a>{' '}
-            to join our early adopter program.
+            or reach us at {' '}
+            <a href="mailto:hi@replay.io" className="text-bolt-elements-accent underline hover:no-underline">
+              hi@replay.io
+            </a>.
           </p>
         </div>
       </div>
