@@ -74,17 +74,12 @@ setInterval(async () => {
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const { ready, initialMessages, resumeChat, storeMessageHistory, importChat } = useChatHistory();
+  const { ready, initialMessages, resumeChat, storeMessageHistory } = useChatHistory();
 
   return (
     <>
       {ready && (
-        <ChatImpl
-          initialMessages={initialMessages}
-          resumeChat={resumeChat}
-          storeMessageHistory={storeMessageHistory}
-          importChat={importChat}
-        />
+        <ChatImpl initialMessages={initialMessages} resumeChat={resumeChat} storeMessageHistory={storeMessageHistory} />
       )}
       <ToastContainer
         closeButton={({ closeToast }) => {
@@ -121,7 +116,6 @@ interface ChatProps {
   initialMessages: Message[];
   resumeChat: ResumeChatInfo | undefined;
   storeMessageHistory: (messages: Message[]) => void;
-  importChat: (description: string, messages: Message[]) => Promise<void>;
 }
 
 let gNumAborts = 0;
@@ -149,7 +143,7 @@ function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
 }
 
 export const ChatImpl = memo((props: ChatProps) => {
-  const { initialMessages, resumeChat: initialResumeChat, storeMessageHistory, importChat } = props;
+  const { initialMessages, resumeChat: initialResumeChat, storeMessageHistory } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
@@ -616,7 +610,6 @@ export const ChatImpl = memo((props: ChatProps) => {
         onTextareaChange(e);
       }}
       handleStop={abort}
-      importChat={importChat}
       messages={messages}
       uploadedFiles={uploadedFiles}
       setUploadedFiles={setUploadedFiles}

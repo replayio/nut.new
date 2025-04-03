@@ -14,7 +14,6 @@ import { SendButton } from './SendButton.client';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 import styles from './BaseChat.module.scss';
-import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 
 import FilePreview from './FilePreview';
@@ -43,7 +42,6 @@ interface BaseChatProps {
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   _enhancingPrompt?: boolean;
   _enhancePrompt?: () => void;
-  importChat?: (title: string, messages: Message[]) => Promise<void>;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
@@ -69,7 +67,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
       sendMessage,
       handleStop,
-      importChat,
       uploadedFiles = [],
       setUploadedFiles,
       imageDataList = [],
@@ -470,7 +467,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {!rejectFormOpen && messageInput}
               </div>
             </div>
-            {!chatStarted && <div className="flex justify-center gap-2">{ImportButtons(importChat)}</div>}
             {!chatStarted &&
               ExamplePrompts((event, messageInput) => {
                 if (hasPendingMessage) {

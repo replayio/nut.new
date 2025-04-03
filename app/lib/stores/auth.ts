@@ -32,11 +32,18 @@ export async function initializeAuth() {
 
     isLoadingStore.set(true);
 
+    // In local testing we've seen problems where Supabase auth hangs.
+    const timeout = setTimeout(() => {
+      console.error('Timed out initializing auth');
+    }, 5000);
+
     // Get initial session
     const {
       data: { session },
       error,
     } = await getSupabase().auth.getSession();
+
+    clearTimeout(timeout);
 
     if (error) {
       throw error;

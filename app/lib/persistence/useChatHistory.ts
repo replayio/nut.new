@@ -26,8 +26,8 @@ export function useChatHistory() {
 
   const importChat = async (title: string, messages: Message[]) => {
     try {
-      const newId = await database.createChat(title, messages);
-      window.location.href = `/chat/${newId}`;
+      const chat = await database.createChat(title, messages);
+      window.location.href = `/chat/${chat.id}`;
       toast.success('Chat imported successfully');
     } catch (error) {
       if (error instanceof Error) {
@@ -105,7 +105,6 @@ export function useChatHistory() {
 
       debouncedSetChatContents(messages);
     },
-    importChat,
   };
 }
 
