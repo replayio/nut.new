@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   username TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
-  is_admin BOOLEAN DEFAULT FALSE NOT NULL
+  is_admin BOOLEAN DEFAULT FALSE NOT NULL,
+  peanuts_used INTEGER DEFAULT 0 NOT NULL,
+  peanuts_refunded INTEGER DEFAULT 0 NOT NULL
 );
 
 -- Create a trigger to update the updated_at column

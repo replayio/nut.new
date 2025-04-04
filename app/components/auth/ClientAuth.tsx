@@ -11,6 +11,7 @@ export function ClientAuth() {
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [usageData, setUsageData] = useState<{ peanuts_used: number; peanuts_refunded: number } | null>(null);
 
   useEffect(() => {
     async function getUser() {
@@ -36,6 +37,30 @@ export function ClientAuth() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    async function updateUsageData() {
+      try {
+        const { data, error } = await getSupabase()
+          .from('profiles')
+          .select('peanuts_used, peanuts_refunded')
+          .eq('id', user?.id)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        setUsageData(data);
+      } catch (error) {
+        console.error('Error fetching usage data:', error);
+      }
+    }
+
+    if (showDropdown) {
+      updateUsageData();
+    }
+  }, [showDropdown]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +144,15 @@ export function ClientAuth() {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded shadow-lg z-10">
+            <div className="absolute right-0 mt-2 py-2 whitespace-nowrap bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded shadow-lg z-10">
               <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
                 {user.email}
+              </div>
+              <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
+                {`Peanuts used: ${usageData?.peanuts_used ?? "..."}`}
+              </div>
+              <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
+                {`Peanuts refunded: ${usageData?.peanuts_refunded ?? "..."}`}
               </div>
               <button
                 onClick={handleSignOut}
