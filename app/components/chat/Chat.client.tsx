@@ -34,6 +34,7 @@ import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '
 import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
+import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -546,6 +547,17 @@ export const ChatImpl = memo((props: ChatProps) => {
     if (messageIndex < 0) {
       toast.error('Rewind message not found');
       return;
+    }
+
+    const message = messages.find((m) => m.id == messageId);
+
+    if (!message) {
+      toast.error('Message not found');
+      return;
+    }
+
+    if (message.peanuts) {
+      await supabaseAddRefund(message.peanuts);
     }
 
     const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex + 1);
