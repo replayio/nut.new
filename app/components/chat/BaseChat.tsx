@@ -20,7 +20,6 @@ import FilePreview from './FilePreview';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import type { RejectChangeData } from './ApproveChange';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
 import ApproveChange from './ApproveChange';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
@@ -212,8 +211,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
       for (let i = messages.length - 1; i >= 0; i--) {
         const message = messages[i];
-        if (message.repositoryId && message.peanuts && !message.approved) {
-          return message.id;
+        if (message.repositoryId && message.peanuts) {
+          return message.approved ? undefined : message.id;
         }
         if (message.role == 'user') {
           return undefined;
