@@ -149,10 +149,10 @@ export function ClientAuth() {
                 {user.email}
               </div>
               <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
-                {`Peanuts used: ${usageData?.peanuts_used ?? "..."}`}
+                {`Peanuts used: ${usageData?.peanuts_used ?? '...'}`}
               </div>
               <div className="px-4 py-2 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
-                {`Peanuts refunded: ${usageData?.peanuts_refunded ?? "..."}`}
+                {`Peanuts refunded: ${usageData?.peanuts_refunded ?? '...'}`}
               </div>
               <button
                 onClick={handleSignOut}

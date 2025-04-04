@@ -15,10 +15,9 @@ function AboutPage() {
           <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-200">About Nut</h1>
 
           <p className="mb-6">
-            Nut is an agentic app builder for reliably developing full stack apps using AI.
-            When you ask Nut to build or change an app, it will do its best to get the code
-            changes right the first time. Afterwards it will check the app to make sure it's
-            working as expected, writing tests and fixing problems those tests uncover.
+            Nut is an agentic app builder for reliably developing full stack apps using AI. When you ask Nut to build or
+            change an app, it will do its best to get the code changes right the first time. Afterwards it will check
+            the app to make sure it's working as expected, writing tests and fixing problems those tests uncover.
           </p>
 
           <p className="mb-6">
@@ -45,9 +44,8 @@ function AboutPage() {
               rel="noopener noreferrer"
             >
               Replay.io
-            </a>{' '} team.
-            We'd love to hear from you! Leave us some feedback at the top of the page,
-            join our{' '}
+            </a>{' '}
+            team. We'd love to hear from you! Leave us some feedback at the top of the page, join our{' '}
             <a
               href="https://www.replay.io/discord"
               className="text-bolt-elements-accent underline hover:no-underline"
@@ -56,10 +54,11 @@ function AboutPage() {
             >
               Discord
             </a>{' '}
-            or reach us at {' '}
+            or reach us at{' '}
             <a href="mailto:hi@replay.io" className="text-bolt-elements-accent underline hover:no-underline">
               hi@replay.io
-            </a>.
+            </a>
+            .
           </p>
         </div>
       </div>

@@ -9,20 +9,16 @@ export async function supabaseAddRefund(peanuts: number) {
   } = await supabase.auth.getUser();
   const userId = user?.id || null;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("peanuts_refunded")
-    .eq("id", userId)
-    .single();
+  const { data, error } = await supabase.from('profiles').select('peanuts_refunded').eq('id', userId).single();
 
   if (error) {
-    console.error("AddPeanutsRefund:ErrorFetchingData", { error });
+    console.error('AddPeanutsRefund:ErrorFetchingData', { error });
     return;
   }
 
   const currentPeanutsRefunded = data.peanuts_refunded;
-  if (typeof currentPeanutsRefunded !== "number") {
-    console.error("AddPeanutsRefund:InvalidPeanutsRefunded", { currentPeanutsRefunded });
+  if (typeof currentPeanutsRefunded !== 'number') {
+    console.error('AddPeanutsRefund:InvalidPeanutsRefunded', { currentPeanutsRefunded });
     return;
   }
 
@@ -31,9 +27,9 @@ export async function supabaseAddRefund(peanuts: number) {
   // Note: this is not atomic.
   // https://linear.app/replay/issue/PRO-1122/update-api-usage-atomically
   const { error: updateError } = await supabase
-    .from("profiles")
+    .from('profiles')
     .update({ peanuts_refunded: newPeanutsRefunded })
-    .eq("id", userId);
+    .eq('id', userId);
 
   if (updateError) {
     console.error('AddPeanutsRefund:ErrorUpdatingData', { updateError });

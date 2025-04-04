@@ -521,15 +521,17 @@ export const ChatImpl = memo((props: ChatProps) => {
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);
 
-    setMessages(messages.map((message) => {
-      if (message.id == messageId) {
-        return {
-          ...message,
-          approved: true,
-        };
-      }
-      return message;
-    }));
+    setMessages(
+      messages.map((message) => {
+        if (message.id == messageId) {
+          return {
+            ...message,
+            approved: true,
+          };
+        }
+        return message;
+      }),
+    );
 
     await flashScreen();
 

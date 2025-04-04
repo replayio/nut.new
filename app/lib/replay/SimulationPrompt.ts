@@ -11,7 +11,7 @@ import type { Message } from '~/lib/persistence/message';
 import { database } from '~/lib/persistence/db';
 import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
-import { getSupabase } from '../supabase/client';
+import { getSupabase } from '~/lib/supabase/client';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
