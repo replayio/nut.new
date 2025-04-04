@@ -245,7 +245,7 @@ function startChat(repositoryId: string | undefined, pageData: SimulationData) {
  * Called when the repository has changed. We'll start a new chat
  * and update the remote development server.
  */
-export const simulationRepositoryUpdated = debounce((repositoryId: string) => {
+export const simulationRepositoryUpdated = debounce((repositoryId: string | undefined) => {
   startChat(repositoryId, []);
   updateDevelopmentServer(repositoryId);
 }, 500);

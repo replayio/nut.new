@@ -225,6 +225,7 @@ export const ChatImpl = memo((props: ChatProps) => {
     gNumAborts++;
     chatStore.aborted.set(true);
     setPendingMessageId(undefined);
+    setPendingMessageStatus('');
     setResumeChat(undefined);
 
     const chatId = chatStore.currentChat.get()?.id;
@@ -564,9 +565,7 @@ export const ChatImpl = memo((props: ChatProps) => {
 
     setMessages(messages.slice(0, messageIndex + 1));
 
-    if (previousRepositoryId) {
-      simulationRepositoryUpdated(previousRepositoryId);
-    }
+    simulationRepositoryUpdated(previousRepositoryId);
 
     let shareProjectSuccess = false;
 

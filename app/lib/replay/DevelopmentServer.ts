@@ -56,19 +56,27 @@ class DevelopmentServerManager {
 
 let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
 
-export async function updateDevelopmentServer(repositoryId: string) {
+export async function updateDevelopmentServer(repositoryId: string | undefined) {
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryId);
 
-  workbenchStore.showWorkbench.set(true);
+  workbenchStore.showWorkbench.set(repositoryId !== undefined);
   workbenchStore.repositoryId.set(repositoryId);
   workbenchStore.previewURL.set(undefined);
   workbenchStore.previewError.set(false);
+
+  if (!repositoryId) {
+    return;
+  }
 
   if (!gActiveDevelopmentServer) {
     gActiveDevelopmentServer = new DevelopmentServerManager();
   }
 
   const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryId);
+
+  if (workbenchStore.repositoryId.get() != repositoryId) {
+    return;
+  }
 
   if (url) {
     workbenchStore.previewURL.set(url);
