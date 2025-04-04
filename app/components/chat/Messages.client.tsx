@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
+import type { Message } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 
 interface MessagesProps {
@@ -10,18 +10,16 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
-  onRewind?: (messageId: string) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [], onRewind } = props;
+  const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [] } = props;
 
   return (
     <div id={id} ref={ref} className={props.className}>
       {messages.length > 0
         ? messages.map((message, index) => {
-            const { role, id: messageId, repositoryId } = message;
-            const previousRepositoryId = getPreviousRepositoryId(messages, index);
+            const { role, repositoryId } = message;
             const isUserMessage = role === 'user';
             const isFirst = index === 0;
             const isLast = index === messages.length - 1;
@@ -51,16 +49,15 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   <div className="grid grid-col-1 w-full">
                     <MessageContents message={message} />
                   </div>
-                  {previousRepositoryId && repositoryId && onRewind && (
+                  {repositoryId && (
                     <div className="flex gap-2 flex-col lg:flex-row">
-                      <WithTooltip tooltip="Undo changes in this message">
+                      <WithTooltip tooltip="Start new chat from here">
                         <button
                           onClick={() => {
-                            onRewind(messageId);
+                            window.open(`/repository/${repositoryId}`, '_blank');
                           }}
-                          key="i-ph:arrow-u-up-left"
                           className={classNames(
-                            'i-ph:arrow-u-up-left',
+                            'i-ph:git-fork',
                             'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
                           )}
                         />

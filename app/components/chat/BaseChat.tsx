@@ -46,8 +46,6 @@ interface BaseChatProps {
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
-  onRewind?: (messageId: string) => void;
-  approveChangesMessageId?: string;
   onApproveChange?: (messageId: string) => void;
   onRejectChange?: (lastMessageId: string, data: RejectChangeData) => void;
 }
@@ -72,8 +70,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       imageDataList = [],
       setImageDataList,
       messages,
-      onRewind,
-      approveChangesMessageId,
       onApproveChange,
       onRejectChange,
     },
@@ -210,29 +206,20 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     };
 
     const showApproveChange = (() => {
-      if (hasPendingMessage) {
+      if (hasPendingMessage || !messages) {
         return false;
       }
 
-      if (!messages?.length) {
-        return false;
+      for (let i = messages.length - 1; i >= 0; i--) {
+        const message = messages[i];
+        if (message.repositoryId && message.peanuts && !message.approved) {
+          return true;
+        }
+        if (message.role == 'user') {
+          return false;
+        }
       }
-
-      const lastMessage = messages[messages.length - 1];
-
-      if (!lastMessage.repositoryId) {
-        return false;
-      }
-
-      if (!getPreviousRepositoryId(messages, messages.length - 1)) {
-        return false;
-      }
-
-      if (lastMessage.id != approveChangesMessageId) {
-        return false;
-      }
-
-      return true;
+      return false;
     })();
 
     let messageInput;
@@ -387,7 +374,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       messages={messages}
                       hasPendingMessage={hasPendingMessage}
                       pendingMessageStatus={pendingMessageStatus}
-                      onRewind={onRewind}
                     />
                   ) : null;
                 }}

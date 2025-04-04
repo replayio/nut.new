@@ -142,6 +142,22 @@ function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
   return messages;
 }
 
+// Get the index of the last message that will be present after rewinding.
+// This is the last message which is either a user message or has a repository change.
+function getRewindMessageIndexAfterReject(messages: Message[], messageId: string): number {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const { id, role, repositoryId } = messages[i];
+    if (role == 'user') {
+      return i;
+    }
+    if (repositoryId && id != messageId) {
+      return i;
+    }
+  }
+  console.error('No rewind message found', messages, messageId);
+  return -1;
+}
+
 export const ChatImpl = memo((props: ChatProps) => {
   const { initialMessages, resumeChat: initialResumeChat, storeMessageHistory } = props;
 
@@ -150,7 +166,6 @@ export const ChatImpl = memo((props: ChatProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams, setSearchParams] = useSearchParams();
-  const [approveChangesMessageId, setApproveChangesMessageId] = useState<string | undefined>(undefined);
   const { isLoggedIn } = useAuthStatus();
 
   // Input currently in the textarea.
@@ -390,10 +405,7 @@ export const ChatImpl = memo((props: ChatProps) => {
 
     textareaRef.current?.blur();
 
-    if (updatedRepository) {
-      const lastMessage = newMessages[newMessages.length - 1];
-      setApproveChangesMessageId(lastMessage.id);
-    } else {
+    if (!updatedRepository) {
       simulationReset();
     }
   };
@@ -482,33 +494,6 @@ export const ChatImpl = memo((props: ChatProps) => {
     })();
   }, [initialResumeChat]);
 
-  // Rewind far enough to erase the specified message.
-  const onRewind = async (messageId: string) => {
-    console.log('Rewinding', messageId);
-
-    const messageIndex = messages.findIndex((message) => message.id === messageId);
-
-    if (messageIndex < 0) {
-      toast.error('Rewind message not found');
-      return;
-    }
-
-    const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex);
-
-    if (!previousRepositoryId) {
-      toast.error('No repository ID found for rewind');
-      return;
-    }
-
-    setMessages(messages.slice(0, messageIndex));
-    simulationRepositoryUpdated(previousRepositoryId);
-
-    pingTelemetry('RewindChat', {
-      numMessages: messages.length,
-      rewindIndex: messageIndex,
-    });
-  };
-
   const flashScreen = async () => {
     const flash = document.createElement('div');
     flash.style.position = 'fixed';
@@ -534,7 +519,15 @@ export const ChatImpl = memo((props: ChatProps) => {
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);
 
-    setApproveChangesMessageId(undefined);
+    setMessages(messages.map((message) => {
+      if (message.id == messageId) {
+        return {
+          ...message,
+          approved: true,
+        };
+      }
+      return message;
+    }));
 
     await flashScreen();
 
@@ -546,23 +539,22 @@ export const ChatImpl = memo((props: ChatProps) => {
   const onRejectChange = async (messageId: string, data: RejectChangeData) => {
     console.log('RejectChange', messageId, data);
 
-    setApproveChangesMessageId(undefined);
+    // Find the last message that will be present after rewinding. This is the
+    // last message which is either a user message or has a repository change.
+    const messageIndex = getRewindMessageIndexAfterReject(messages, messageId);
 
-    const message = messages.find((message) => message.id === messageId);
-    assert(message, 'Message not found');
-    assert(message == messages[messages.length - 1], 'Message must be the last message');
-
-    // Erase all messages since the last user message.
-    let rewindMessageId = message.id;
-
-    for (let i = messages.length - 2; i >= 0; i--) {
-      if (messages[i].role == 'user') {
-        break;
-      }
-
-      rewindMessageId = messages[i].id;
+    if (messageIndex < 0) {
+      toast.error('Rewind message not found');
+      return;
     }
-    await onRewind(rewindMessageId);
+
+    const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex + 1);
+
+    setMessages(messages.slice(0, messageIndex + 1));
+
+    if (previousRepositoryId) {
+      simulationRepositoryUpdated(previousRepositoryId);
+    }
 
     let shareProjectSuccess = false;
 
@@ -615,8 +607,6 @@ export const ChatImpl = memo((props: ChatProps) => {
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}
       setImageDataList={setImageDataList}
-      onRewind={onRewind}
-      approveChangesMessageId={approveChangesMessageId}
       onApproveChange={onApproveChange}
       onRejectChange={onRejectChange}
     />
