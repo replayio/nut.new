@@ -11,6 +11,7 @@ import type { Message } from '~/lib/persistence/message';
 import { database } from '~/lib/persistence/db';
 import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
+import { getSupabase } from '../supabase/client';
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -63,6 +64,15 @@ class ChatManager {
       assert(this.client, 'Chat has been destroyed');
 
       await this.client.initialize();
+
+      const {
+        data: { user },
+      } = await getSupabase().auth.getUser();
+      const userId = user?.id || null;
+
+      if (userId) {
+        await this.client.sendCommand({ method: 'Nut.setUserId', params: { userId } });
+      }
 
       const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
 
