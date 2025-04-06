@@ -108,6 +108,7 @@ function navigateChat(nextId: string) {
    */
   const url = new URL(window.location.href);
   url.pathname = `/chat/${nextId}`;
+  url.search = '';
 
   window.history.replaceState({}, '', url);
 }
