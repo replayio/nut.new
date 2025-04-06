@@ -282,7 +282,7 @@ export const ChatImpl = memo((props: ChatProps) => {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
       if (numFreeUses >= maxFreeUses) {
-        toast.error('All free uses consumed. Please login to continue using Nut.');
+        toast.error('Please login to continue using Nut.');
         gActiveChatMessageTelemetry.abort('NoFreeUses');
         clearActiveChat();
         return;

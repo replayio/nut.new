@@ -12,6 +12,7 @@ import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
+import Cookies from 'js-cookie';
 
 const menuVariants = {
   closed: {
@@ -36,12 +37,15 @@ const menuVariants = {
 
 type DialogContent = { type: 'delete'; item: ChatContents } | null;
 
+const skipConfirmDeleteCookieName = 'skipConfirmDelete';
+
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatContents[]>([]);
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
@@ -76,6 +80,7 @@ export const Menu = () => {
 
   const closeDialog = () => {
     setDialogContent(null);
+    setSkipConfirmDeleteChecked(false);
   };
 
   useEffect(() => {
@@ -107,7 +112,14 @@ export const Menu = () => {
 
   const handleDeleteClick = (event: React.UIEvent, item: ChatContents) => {
     event.preventDefault();
-    setDialogContent({ type: 'delete', item });
+
+    const skipConfirmDelete = Cookies.get(skipConfirmDeleteCookieName);
+
+    if (skipConfirmDelete === 'true') {
+      deleteItem(event, item);
+    } else {
+      setDialogContent({ type: 'delete', item });
+    }
   };
 
   return (
@@ -174,6 +186,19 @@ export const Menu = () => {
                         You are about to delete <strong>{dialogContent.item.title}</strong>.
                       </p>
                       <p className="mt-1">Are you sure you want to delete this chat?</p>
+                      <div className="mt-4 flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="skipConfirmDelete"
+                          checked={skipConfirmDeleteChecked}
+                          onChange={(e) => {
+                            setSkipConfirmDeleteChecked(e.target.checked);
+                          }}
+                        />
+                        <label htmlFor="skipConfirmDelete" className="text-sm">
+                          Don't ask me again
+                        </label>
+                      </div>
                     </div>
                   </DialogDescription>
                   <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
@@ -185,6 +210,9 @@ export const Menu = () => {
                       onClick={(event) => {
                         deleteItem(event, dialogContent.item);
                         closeDialog();
+                        if (skipConfirmDeleteChecked) {
+                          Cookies.set(skipConfirmDeleteCookieName, 'true');
+                        }
                       }}
                     >
                       Delete
