@@ -33,8 +33,6 @@ interface BaseChatProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
-  enhancingPrompt?: boolean;
-  promptEnhanced?: boolean;
   input?: string;
   handleStop?: () => void;
   sendMessage?: (messageInput?: string) => void;
