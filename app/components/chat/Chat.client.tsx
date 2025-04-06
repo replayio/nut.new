@@ -196,8 +196,7 @@ export const ChatImpl = memo((props: ChatProps) => {
     const prompt = searchParams.get('prompt');
 
     if (prompt) {
-      setSearchParams({});
-      sendMessage(prompt);
+      setInput(prompt);
     }
   }, [searchParams]);
 
