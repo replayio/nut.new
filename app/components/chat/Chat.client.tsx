@@ -340,7 +340,6 @@ export const ChatImpl = memo((props: ChatProps) => {
 
       if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
         simulationRepositoryUpdated(responseRepositoryId);
-        updatedRepository = true;
       }
     };
 
@@ -387,8 +386,10 @@ export const ChatImpl = memo((props: ChatProps) => {
         onStatus: onChatStatus,
       });
     } catch (e) {
-      toast.error('Error sending message');
-      console.error('Error sending message', e);
+      if (gNumAborts == numAbortsAtStart) {
+        toast.error('Error sending message');
+        console.error('Error sending message', e);
+      }
     }
 
     if (gNumAborts != numAbortsAtStart) {
