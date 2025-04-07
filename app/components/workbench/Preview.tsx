@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { simulationReloaded } from '~/lib/replay/SimulationPrompt';
+import { simulationReloaded } from '~/lib/replay/ChatManager';
 import { PointSelector } from './PointSelector';
 
 type ResizeSide = 'left' | 'right' | null;

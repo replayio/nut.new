@@ -1,9 +1,10 @@
 import React from 'react';
 
 const EXAMPLE_PROMPTS = [
-  { text: 'Build a turn by turn directions app',
-    full: 'build an app to get turn by turn directions using the OpenStreetMap API. the directions should be in a clean and easy to read format showing a small map of the turn next to each step. do not show any complete map for the entire route. make sure the directions work on real locations, e.g. getting from santa cruz to san francisco should take about an hour and a half'
-   },
+  {
+    text: 'Build a turn by turn directions app',
+    full: 'build an app to get turn by turn directions using the OpenStreetMap API. the directions should be in a clean and easy to read format showing a small map of the turn next to each step. do not show any complete map for the entire route. make sure the directions work on real locations, e.g. getting from santa cruz to san francisco should take about an hour and a half',
+  },
   { text: 'Build a todo app' },
   { text: 'Build a simple blog' },
   { text: 'Make a space invaders game' },

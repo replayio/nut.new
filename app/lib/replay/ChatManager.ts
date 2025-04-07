@@ -1,6 +1,5 @@
 /*
- * Core logic for using simulation data from a remote recording to enhance
- * the AI developer prompt.
+ * Core logic for running and managing remote chats.
  */
 
 import type { SimulationData, SimulationPacket } from './SimulationData';
@@ -54,10 +53,6 @@ class ChatManager {
   // Simulation data for the page itself and any user interactions.
   pageData: SimulationData = [];
 
-  // State to ensure that the chat manager is not destroyed until all messages finish.
-  private _pendingMessages = 0;
-  private _mustDestroyAfterChatFinishes = false;
-
   constructor() {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
@@ -86,17 +81,21 @@ class ChatManager {
     return !!this.client;
   }
 
-  private _destroy() {
+  // Closes the remote connection and makes sure the backend chat has also shut down.
+  // If the client disconnects otherwise the backend chat will continue running.
+  async destroy() {
+    try {
+      const chatId = await this.chatIdPromise;
+      await this.client?.sendCommand({
+        method: 'Nut.finishChat',
+        params: { chatId },
+      });
+    } catch (e) {
+      console.error('Error finishing chat', e);
+    }
+
     this.client?.close();
     this.client = undefined;
-  }
-
-  destroyAfterChatFinishes() {
-    if (this._pendingMessages == 0) {
-      this._destroy();
-    } else {
-      this._mustDestroyAfterChatFinishes = true;
-    }
   }
 
   async setRepositoryId(repositoryId: string) {
@@ -158,8 +157,6 @@ class ChatManager {
   async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
     assert(this.client, 'Chat has been destroyed');
 
-    this._pendingMessages++;
-
     const responseId = `response-${generateRandomId()}`;
 
     const removeResponseListener = this.client.listenForMessage(
@@ -210,43 +207,52 @@ class ChatManager {
     removeResponseListener();
     removeTitleListener();
     removeStatusListener();
-
-    if (--this._pendingMessages == 0 && this._mustDestroyAfterChatFinishes) {
-      this._destroy();
-    }
   }
 }
 
-// There is only one chat active at a time.
-let gChatManager: ChatManager | undefined;
+// At most two chat managers can be running at any one time.
+//
+// After the user starts the app and interacts with it, we create a simulation
+// chat manager to keep track of the simulation data and stream it to the backend.
+//
+// After the user sends a message, any simulation chat manager is used for that
+// and becomes the message chat manager. If there is no simulation chat manager
+// we create a new one.
 
-function startChat(repositoryId: string | undefined, pageData: SimulationData) {
-  /*
-   * Any existing chat manager won't be used anymore for new messages, but it will
-   * not close until its messages actually finish and any future repository updates
-   * occur.
-   */
-  if (gChatManager) {
-    gChatManager.destroyAfterChatFinishes();
+// Chat manager associated with the latest repository and which we are sending
+// simulation data to. When we send a message it will be to this manager.
+let gSimulationChatManager: ChatManager | undefined;
+
+// Chat manager which is generating response messages for adding to the chat.
+// When we send a message, the simulation we switch to this chat manager.
+let gMessageChatManager: ChatManager | undefined;
+
+// Update the simulation chat manager to the specified repository and page data.
+function startSimulation(repositoryId: string | undefined, pageData: SimulationData) {
+  // Clear any existing simulation chat manager.
+  if (gSimulationChatManager) {
+    gSimulationChatManager.destroy();
   }
 
-  gChatManager = new ChatManager();
+  // Create a new simulation chat manager.
+  gSimulationChatManager = new ChatManager();
 
   if (repositoryId) {
-    gChatManager.setRepositoryId(repositoryId);
+    gSimulationChatManager.setRepositoryId(repositoryId);
   }
 
   if (pageData.length) {
-    gChatManager.addPageData(pageData);
+    gSimulationChatManager.addPageData(pageData);
   }
 }
 
 /*
- * Called when the repository has changed. We'll start a new chat
- * and update the remote development server.
+ * Called when the repository has changed. We'll update the simulation chat and
+ * the remote development server. The message chat manager is unaffected and
+ * can perform more repository updates.
  */
 export const simulationRepositoryUpdated = debounce((repositoryId: string | undefined) => {
-  startChat(repositoryId, []);
+  startSimulation(repositoryId, []);
   updateDevelopmentServer(repositoryId);
 }, 500);
 
@@ -255,43 +261,30 @@ export const simulationRepositoryUpdated = debounce((repositoryId: string | unde
  * start a new chat with the same repository contents as any existing chat.
  */
 export function simulationReloaded() {
-  assert(gChatManager, 'Expected to have an active chat');
+  assert(gSimulationChatManager, 'Expected to have an active simulation chat');
 
-  const repositoryId = gChatManager.repositoryId;
-  assert(repositoryId, 'Expected active chat to have repository ID');
+  const repositoryId = gSimulationChatManager.repositoryId;
+  assert(repositoryId, 'Expected active simulation chat to have repository ID');
 
-  startChat(repositoryId, []);
-}
-
-/*
- * Called when the current message has finished with no repository change.
- * We'll start a new chat with the same simulation data as the previous chat.
- */
-export function simulationReset() {
-  assert(gChatManager, 'Expected to have an active chat');
-  startChat(gChatManager.repositoryId, gChatManager.pageData);
+  startSimulation(repositoryId, []);
 }
 
 export function simulationAddData(data: SimulationData) {
-  assert(gChatManager, 'Expected to have an active chat');
-  gChatManager.addPageData(data);
+  assert(gSimulationChatManager, 'Expected to have an active simulation chat');
+  gSimulationChatManager.addPageData(data);
 }
 
 let gLastUserSimulationData: SimulationData | undefined;
 
 export function simulationFinishData() {
-  if (gChatManager) {
-    gChatManager.finishSimulationData();
-    gLastUserSimulationData = [...gChatManager.pageData];
+  if (gSimulationChatManager) {
+    gSimulationChatManager.finishSimulationData();
+    gLastUserSimulationData = [...gSimulationChatManager.pageData];
   }
 }
 
 export function getLastUserSimulationData(): SimulationData | undefined {
   return gLastUserSimulationData;
-}
-
-export function isSimulatingOrHasFinished(): boolean {
-  return gChatManager?.isValid() ?? false;
 }
 
 let gLastSimulationChatMessages: Message[] | undefined;
@@ -311,14 +304,26 @@ export async function sendChatMessage(
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
 ) {
-  if (!gChatManager) {
-    gChatManager = new ChatManager();
+  if (gMessageChatManager) {
+    gMessageChatManager.destroy();
   }
+
+  gMessageChatManager = gSimulationChatManager ?? new ChatManager();
+  gSimulationChatManager = undefined;
+
+  startSimulation(gMessageChatManager.repositoryId, gMessageChatManager.pageData);
 
   gLastSimulationChatMessages = messages;
   gLastSimulationChatReferences = references;
 
-  await gChatManager.sendChatMessage(messages, references, callbacks);
+  await gMessageChatManager.sendChatMessage(messages, references, callbacks);
+}
+
+export function abortChatMessage() {
+  if (gMessageChatManager) {
+    gMessageChatManager.destroy();
+    gMessageChatManager = undefined;
+  }
 }
 
 export async function resumeChatMessage(chatId: string, chatResponseId: string, callbacks: ChatMessageCallbacks) {
