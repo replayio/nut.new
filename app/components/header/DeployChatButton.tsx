@@ -75,6 +75,7 @@ export function DeployChatButton() {
     if (
       deploySettings?.supabase?.databaseURL ||
       deploySettings?.supabase?.anonKey ||
+      deploySettings?.supabase?.serviceRoleKey ||
       deploySettings?.supabase?.postgresURL
     ) {
       if (!deploySettings.supabase.databaseURL) {
@@ -83,6 +84,10 @@ export function DeployChatButton() {
       }
       if (!deploySettings.supabase.anonKey) {
         setError('Supabase Anonymous Key is required');
+        return;
+      }
+      if (!deploySettings.supabase.serviceRoleKey) {
+        setError('Supabase Service Role Key is required');
         return;
       }
       if (!deploySettings.supabase.postgresURL) {
@@ -280,6 +285,7 @@ export function DeployChatButton() {
                       const supabase = {
                         databaseURL: e.target.value,
                         anonKey: deploySettings?.supabase?.anonKey || '',
+                        serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
                         postgresURL: deploySettings?.supabase?.postgresURL || '',
                       };
                       setDeploySettings({
@@ -298,6 +304,26 @@ export function DeployChatButton() {
                       const supabase = {
                         databaseURL: deploySettings?.supabase?.databaseURL || '',
                         anonKey: e.target.value,
+                        serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
+                        postgresURL: deploySettings?.supabase?.postgresURL || '',
+                      };
+                      setDeploySettings({
+                        ...deploySettings,
+                        supabase,
+                      });
+                    }}
+                  />
+                  <label className="text-sm font-lg text-gray-700 text-right">Supabase Service Role Key:</label>
+                  <input
+                    name="supabaseServiceRoleKey"
+                    className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 py-2 border border-gray-300"
+                    value={deploySettings?.supabase?.serviceRoleKey}
+                    placeholder="ey..."
+                    onChange={(e) => {
+                      const supabase = {
+                        databaseURL: deploySettings?.supabase?.databaseURL || '',
+                        anonKey: deploySettings?.supabase?.anonKey || '',
+                        serviceRoleKey: e.target.value,
                         postgresURL: deploySettings?.supabase?.postgresURL || '',
                       };
                       setDeploySettings({
@@ -316,6 +342,7 @@ export function DeployChatButton() {
                       const supabase = {
                         databaseURL: deploySettings?.supabase?.databaseURL || '',
                         anonKey: deploySettings?.supabase?.anonKey || '',
+                        serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
                         postgresURL: e.target.value,
                       };
                       setDeploySettings({

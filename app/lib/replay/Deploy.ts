@@ -25,6 +25,9 @@ interface DeploySettingsSupabase {
   // Anonymous key for the Supabase project.
   anonKey: string;
 
+  // Service role key for the Supabase project.
+  serviceRoleKey: string;
+
   // Internal URL of the Postgres database, including password.
   postgresURL: string;
 }
