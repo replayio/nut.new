@@ -1,3 +1,4 @@
+import { pingTelemetry } from '../hooks/pingTelemetry';
 import { createInjectableFunction } from './injectable';
 
 const replayWsServer = 'wss://dispatch.replay.io';
@@ -181,6 +182,7 @@ export class ProtocolClient {
       if (result) {
         info.deferred.resolve(result);
       } else if (error) {
+        pingTelemetry('ProtocolError', { method: info.method, error });
         console.error('ProtocolError', info.method, id, error);
         info.deferred.reject(new ProtocolError(error));
       } else {

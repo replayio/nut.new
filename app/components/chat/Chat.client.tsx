@@ -474,6 +474,7 @@ export const ChatImpl = memo((props: ChatProps) => {
           onStatus: onChatStatus,
         });
       } catch (e) {
+        toast.error('Error resuming chat');
         console.error('Error resuming chat', e);
       }
 
