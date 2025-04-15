@@ -50,6 +50,11 @@ function setLocalChats(chats: ChatContents[] | undefined): void {
   }
 }
 
+// Chats we've deleted locally. We never return these from the database afterwards
+// to present a coherent view of the chats in case the chats are queried before the
+// delete finishes.
+const deletedChats = new Set<string>();
+
 async function getAllChats(): Promise<ChatContents[]> {
   const userId = await getCurrentUserId();
 
@@ -63,7 +68,8 @@ async function getAllChats(): Promise<ChatContents[]> {
     throw error;
   }
 
-  return data.map(databaseRowToChatContents);
+  const chats = data.map(databaseRowToChatContents);
+  return chats.filter(chat => !deletedChats.has(chat.id));
 }
 
 async function syncLocalChats(): Promise<void> {
@@ -152,6 +158,8 @@ async function getChatContents(id: string): Promise<ChatContents | undefined> {
 }
 
 async function deleteChat(id: string): Promise<void> {
+  deletedChats.add(id);
+
   const userId = await getCurrentUserId();
 
   if (!userId) {

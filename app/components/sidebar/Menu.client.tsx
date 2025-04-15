@@ -62,6 +62,9 @@ export const Menu = () => {
   const deleteItem = useCallback((event: React.UIEvent, item: ChatContents) => {
     event.preventDefault();
 
+    // Optimistically remove the item from the list while we update the database.
+    setList(list.filter((chat) => chat.id !== item.id));
+
     database
       .deleteChat(item.id)
       .then(() => {
@@ -76,7 +79,7 @@ export const Menu = () => {
         toast.error('Failed to delete conversation');
         logger.error(error);
       });
-  }, []);
+  }, [list]);
 
   const closeDialog = () => {
     setDialogContent(null);
