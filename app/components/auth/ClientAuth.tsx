@@ -156,7 +156,7 @@ export function ClientAuth() {
               </div>
               <button
                 onClick={handleSignOut}
-                className="block w-full text-left px-4 py-2 text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2"
+                className="block w-full text-left px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-bold"
               >
                 Sign Out
               </button>

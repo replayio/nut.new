@@ -33,13 +33,13 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
       <>
         <div
           className={classNames(
-            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg bg-red-50 mb-2',
+            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg bg-red-50 dark:bg-red-800 mb-2',
           )}
         >
           <textarea
             ref={textareaRef}
             className={classNames(
-              'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+              'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary dark:placeholder-white/70 bg-transparent text-sm',
               'transition-all duration-200',
               'hover:border-bolt-elements-focus',
             )}
