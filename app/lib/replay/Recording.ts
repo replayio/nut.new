@@ -1,4 +1,9 @@
 // Manage state around recording Preview behavior for generating a Replay recording.
+//
+// When updating this file the backend's injected script should be updated to match,
+// see injectedScript.ts.
+//
+// Note that to make this easier we don't use backticks ` in this file.
 
 import { createInjectableFunction } from './injectable';
 import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
@@ -208,7 +213,7 @@ const addRecordingMessageHandler = createInjectableFunction(
           };
         }
       }
-      throw new Error(`Unknown request type: ${request}`);
+      throw new Error("Unknown request type: " + request);
     }
 
     window.addEventListener('message', async (event) => {
@@ -234,10 +239,10 @@ const addRecordingMessageHandler = createInjectableFunction(
         height: rect.height,
 
         /*
-         * at times `event.clientX` and `event.clientY` can be slighly off in relation to the element's position
+         * at times event.clientX and event.clientY can be slighly off in relation to the element's position
          * it's possible that this position might lie outside the element's bounds
          * the difference likely comes from a subpixel rounding or hit target calculation in the browser
-         * it's possible that we should account for `event.width` and `event.height` here but clamping the values to the bounds of the element should be good enough
+         * it's possible that we should account for event.width and event.height here but clamping the values to the bounds of the element should be good enough
          */
         x: clamp(event.clientX - rect.x, 0, rect.width),
         y: clamp(event.clientY - rect.y, 0, rect.height),
@@ -264,7 +269,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       while (current) {
         // If element has an ID, use it as it's the most specific
         if (current.id) {
-          path.unshift(`#${current.id}`);
+          path.unshift("#" + current.id);
           break;
         }
 
@@ -279,7 +284,7 @@ const addRecordingMessageHandler = createInjectableFunction(
           const index = siblings.indexOf(current) + 1;
 
           if (siblings.filter((el) => el.tagName === current!.tagName).length > 1) {
-            selector += `:nth-child(${index})`;
+            selector += ":nth-child(" + index + ")";
           }
         }
 
@@ -354,7 +359,7 @@ const addRecordingMessageHandler = createInjectableFunction(
     );
 
     function onInterceptedOperation(_name: string) {
-      //console.log(`InterceptedOperation ${name}`);
+      //console.log("InterceptedOperation " + name);
     }
 
     function interceptProperty(obj: object, prop: string, interceptor: (basevalue: any) => any) {
@@ -365,7 +370,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       Object.defineProperty(obj, prop, {
         ...descriptor,
         get() {
-          onInterceptedOperation(`Getter:${prop}`);
+          onInterceptedOperation("Getter:" + prop);
 
           if (!interceptValue) {
             const baseValue = (descriptor?.get as any).call(obj);
@@ -526,7 +531,7 @@ const addRecordingMessageHandler = createInjectableFunction(
 
       return new Proxy(obj, {
         get(target, prop) {
-          onInterceptedOperation(`ProxyGetter:${name}.${String(prop)}`);
+          onInterceptedOperation("ProxyGetter:" + name + "." + String(prop));
 
           let value = target[prop];
 
@@ -542,7 +547,7 @@ const addRecordingMessageHandler = createInjectableFunction(
         },
 
         set(target, prop, value) {
-          onInterceptedOperation(`ProxySetter:${name}.${String(prop)}`);
+          onInterceptedOperation("ProxySetter:" + name + "." + String(prop));
           target[prop] = value;
 
           return true;
@@ -552,7 +557,7 @@ const addRecordingMessageHandler = createInjectableFunction(
 
     function createFunctionProxy(fn: any, name: string, handler?: (v: any, ...args: any[]) => any) {
       return (...args: any[]) => {
-        onInterceptedOperation(`FunctionCall:${name}`);
+        onInterceptedOperation("FunctionCall:" + name);
 
         const v = fn(...args);
 

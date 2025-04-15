@@ -1,86 +1,16 @@
-// Support using the Nut API for the development server.
+// Support managing state for the development server URL the preview is loading.
 
-import { assert, ProtocolClient } from './ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { recordingMessageHandlerScript } from './Recording';
 
-class DevelopmentServerManager {
-  // Empty if this chat has been destroyed.
-  client: ProtocolClient | undefined;
-
-  // Resolves when the chat has started.
-  chatIdPromise: Promise<string>;
-
-  constructor() {
-    this.client = new ProtocolClient();
-
-    this.chatIdPromise = (async () => {
-      assert(this.client, 'Chat has been destroyed');
-
-      await this.client.initialize();
-
-      const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
-
-      console.log('DevelopmentServerChat', new Date().toISOString(), chatId);
-
-      return chatId;
-    })();
-  }
-
-  destroy() {
-    this.client?.close();
-    this.client = undefined;
-  }
-
-  async setRepositoryContents(repositoryId: string): Promise<string | undefined> {
-    assert(this.client, 'Chat has been destroyed');
-
-    try {
-      const chatId = await this.chatIdPromise;
-      const { url } = (await this.client.sendCommand({
-        method: 'Nut.startDevelopmentServer',
-        params: {
-          chatId,
-          repositoryId,
-          injectedScript: recordingMessageHandlerScript,
-        },
-      })) as { url: string };
-
-      return url;
-    } catch (e) {
-      console.error('DevelopmentServerError', e);
-      return undefined;
-    }
-  }
+function getRepositoryURL(repositoryId: string) {
+  return `https://${repositoryId}.http.replay.io`;
 }
 
-let gActiveDevelopmentServer: DevelopmentServerManager | undefined;
+export async function updateDevelopmentServer(repositoryId: string) {
+  const repositoryURL = getRepositoryURL(repositoryId);
+  console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
 
-export async function updateDevelopmentServer(repositoryId: string | undefined) {
-  console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryId);
-
-  workbenchStore.showWorkbench.set(repositoryId !== undefined);
-  workbenchStore.repositoryId.set(repositoryId);
-  workbenchStore.previewURL.set(undefined);
-  workbenchStore.previewError.set(false);
-
-  if (!repositoryId) {
-    return;
-  }
-
-  if (!gActiveDevelopmentServer) {
-    gActiveDevelopmentServer = new DevelopmentServerManager();
-  }
-
-  const url = await gActiveDevelopmentServer.setRepositoryContents(repositoryId);
-
-  if (workbenchStore.repositoryId.get() != repositoryId) {
-    return;
-  }
-
-  if (url) {
-    workbenchStore.previewURL.set(url);
-  } else {
-    workbenchStore.previewError.set(true);
-  }
+  workbenchStore.showWorkbench.set(repositoryURL !== undefined);
+  workbenchStore.repositoryId.set(repositoryURL);
+  workbenchStore.previewURL.set(repositoryURL);
 }

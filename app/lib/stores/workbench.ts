@@ -7,9 +7,6 @@ export class WorkbenchStore {
   // Any available preview URL for the current repository.
   previewURL = atom<string | undefined>(undefined);
 
-  // Whether there was an error loading the preview.
-  previewError = atom<boolean>(false);
-
   showWorkbench: WritableAtom<boolean> = import.meta.hot?.data.showWorkbench ?? atom(false);
 
   constructor() {
