@@ -213,7 +213,7 @@ const addRecordingMessageHandler = createInjectableFunction(
           };
         }
       }
-      throw new Error("Unknown request type: " + request);
+      throw new Error('Unknown request type: ' + request);
     }
 
     window.addEventListener('message', async (event) => {
@@ -269,7 +269,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       while (current) {
         // If element has an ID, use it as it's the most specific
         if (current.id) {
-          path.unshift("#" + current.id);
+          path.unshift('#' + current.id);
           break;
         }
 
@@ -284,7 +284,7 @@ const addRecordingMessageHandler = createInjectableFunction(
           const index = siblings.indexOf(current) + 1;
 
           if (siblings.filter((el) => el.tagName === current!.tagName).length > 1) {
-            selector += ":nth-child(" + index + ")";
+            selector += ':nth-child(' + index + ')';
           }
         }
 
@@ -370,7 +370,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       Object.defineProperty(obj, prop, {
         ...descriptor,
         get() {
-          onInterceptedOperation("Getter:" + prop);
+          onInterceptedOperation('Getter:' + prop);
 
           if (!interceptValue) {
             const baseValue = (descriptor?.get as any).call(obj);
@@ -531,7 +531,7 @@ const addRecordingMessageHandler = createInjectableFunction(
 
       return new Proxy(obj, {
         get(target, prop) {
-          onInterceptedOperation("ProxyGetter:" + name + "." + String(prop));
+          onInterceptedOperation('ProxyGetter:' + name + '.' + String(prop));
 
           let value = target[prop];
 
@@ -547,7 +547,7 @@ const addRecordingMessageHandler = createInjectableFunction(
         },
 
         set(target, prop, value) {
-          onInterceptedOperation("ProxySetter:" + name + "." + String(prop));
+          onInterceptedOperation('ProxySetter:' + name + '.' + String(prop));
           target[prop] = value;
 
           return true;
@@ -557,7 +557,7 @@ const addRecordingMessageHandler = createInjectableFunction(
 
     function createFunctionProxy(fn: any, name: string, handler?: (v: any, ...args: any[]) => any) {
       return (...args: any[]) => {
-        onInterceptedOperation("FunctionCall:" + name);
+        onInterceptedOperation('FunctionCall:' + name);
 
         const v = fn(...args);
 

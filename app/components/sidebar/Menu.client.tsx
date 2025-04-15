@@ -59,27 +59,30 @@ export const Menu = () => {
       .catch((error) => toast.error(error.message));
   }, []);
 
-  const deleteItem = useCallback((event: React.UIEvent, item: ChatContents) => {
-    event.preventDefault();
+  const deleteItem = useCallback(
+    (event: React.UIEvent, item: ChatContents) => {
+      event.preventDefault();
 
-    // Optimistically remove the item from the list while we update the database.
-    setList(list.filter((chat) => chat.id !== item.id));
+      // Optimistically remove the item from the list while we update the database.
+      setList(list.filter((chat) => chat.id !== item.id));
 
-    database
-      .deleteChat(item.id)
-      .then(() => {
-        loadEntries();
+      database
+        .deleteChat(item.id)
+        .then(() => {
+          loadEntries();
 
-        if (chatStore.currentChat.get()?.id === item.id) {
-          // hard page navigation to clear the stores
-          window.location.pathname = '/';
-        }
-      })
-      .catch((error) => {
-        toast.error('Failed to delete conversation');
-        logger.error(error);
-      });
-  }, [list]);
+          if (chatStore.currentChat.get()?.id === item.id) {
+            // hard page navigation to clear the stores
+            window.location.pathname = '/';
+          }
+        })
+        .catch((error) => {
+          toast.error('Failed to delete conversation');
+          logger.error(error);
+        });
+    },
+    [list],
+  );
 
   const closeDialog = () => {
     setDialogContent(null);

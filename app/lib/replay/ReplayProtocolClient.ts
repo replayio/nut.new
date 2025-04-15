@@ -1,4 +1,4 @@
-import { pingTelemetry } from '../hooks/pingTelemetry';
+import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { createInjectableFunction } from './injectable';
 
 const replayWsServer = 'wss://dispatch.replay.io';

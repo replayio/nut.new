@@ -69,7 +69,7 @@ async function getAllChats(): Promise<ChatContents[]> {
   }
 
   const chats = data.map(databaseRowToChatContents);
-  return chats.filter(chat => !deletedChats.has(chat.id));
+  return chats.filter((chat) => !deletedChats.has(chat.id));
 }
 
 async function syncLocalChats(): Promise<void> {

@@ -27,7 +27,6 @@ export const Preview = memo(() => {
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
 
   const previewURL = useStore(workbenchStore.previewURL);
-  const previewError = useStore(workbenchStore.previewError);
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
@@ -278,9 +277,7 @@ export const Preview = memo(() => {
               />
             </>
           ) : (
-            <div className="flex w-full h-full justify-center items-center bg-white">
-              {previewError ? 'Failed to load preview' : 'Preview loading...'}
-            </div>
+            <div className="flex w-full h-full justify-center items-center bg-white">Preview loading...</div>
           )}
 
           {isDeviceModeOn && (

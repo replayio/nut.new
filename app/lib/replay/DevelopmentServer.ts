@@ -2,11 +2,15 @@
 
 import { workbenchStore } from '~/lib/stores/workbench';
 
-function getRepositoryURL(repositoryId: string) {
+function getRepositoryURL(repositoryId: string | undefined) {
+  if (!repositoryId) {
+    return undefined;
+  }
+
   return `https://${repositoryId}.http.replay.io`;
 }
 
-export async function updateDevelopmentServer(repositoryId: string) {
+export async function updateDevelopmentServer(repositoryId: string | undefined) {
   const repositoryURL = getRepositoryURL(repositoryId);
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
 
