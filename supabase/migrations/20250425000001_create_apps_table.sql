@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS public.apps (
   image_url TEXT,
   messages JSONB,
   protocol_chat_id UUID,
+  result TEXT,
+  app_id TEXT,
   deleted BOOLEAN DEFAULT FALSE,
 );
 

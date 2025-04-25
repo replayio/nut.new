@@ -4,7 +4,7 @@ import type { User, Session } from '@supabase/supabase-js';
 import { logStore } from './logs';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '~/lib/supabase/client';
-import { database } from '~/lib/persistence/db';
+import { database } from '~/lib/persistence/chats';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);

@@ -7,7 +7,7 @@ import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
 import { updateDevelopmentServer } from './DevelopmentServer';
 import type { Message } from '~/lib/persistence/message';
-import { database } from '~/lib/persistence/db';
+import { database } from '~/lib/persistence/chats';
 import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';

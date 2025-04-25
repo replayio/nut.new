@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { logStore } from '~/lib/stores/logs'; // Import logStore
 import { chatStore } from '~/lib/stores/chat';
-import { database } from './db';
+import { database } from './chats';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
 

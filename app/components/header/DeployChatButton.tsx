@@ -5,7 +5,7 @@ import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
-import { database } from '~/lib/persistence/db';
+import { database } from '~/lib/persistence/chats';
 import { deployRepository } from '~/lib/replay/Deploy';
 
 ReactModal.setAppElement('#root');

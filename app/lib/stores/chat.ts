@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { ChatContents } from '~/lib/persistence/db';
+import type { ChatContents } from '~/lib/persistence/chats';
 
 export class ChatStore {
   currentChat = atom<ChatContents | undefined>(undefined);

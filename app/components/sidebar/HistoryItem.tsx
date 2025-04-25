@@ -1,7 +1,7 @@
 import { useParams } from '@remix-run/react';
 import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
-import { type ChatContents } from '~/lib/persistence/db';
+import { type ChatContents } from '~/lib/persistence/chats';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { forwardRef, type ForwardedRef } from 'react';

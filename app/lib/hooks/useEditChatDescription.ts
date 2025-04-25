@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { chatStore } from '~/lib/stores/chat';
-import { database } from '~/lib/persistence/db';
+import { database } from '~/lib/persistence/chats';
 import { handleChatTitleUpdate } from '~/lib/persistence/useChatHistory';
 
 interface EditChatDescriptionOptions {

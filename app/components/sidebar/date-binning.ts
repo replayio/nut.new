@@ -1,5 +1,5 @@
 import { format, isAfter, isThisWeek, isThisYear, isToday, isYesterday, subDays } from 'date-fns';
-import type { ChatContents } from '~/lib/persistence/db';
+import type { ChatContents } from '~/lib/persistence/chats';
 
 type Bin = { category: string; items: ChatContents[] };
 
