@@ -9,8 +9,7 @@ export interface ChatMessage {
 
 export enum BuildAppOutcome {
   Success = 'success',
-  Failure = 'failure',
-  Processing = 'processing',
+  Error = 'error',
 }
 
 export interface BuildAppResult {
@@ -26,11 +25,9 @@ export interface BuildAppResult {
 
 function databaseRowToBuildAppResult(row: any): BuildAppResult {
   // Determine the outcome based on the result field
-  let outcome = BuildAppOutcome.Processing;
+  let outcome = BuildAppOutcome.Error;
   if (row.result === 'success') {
     outcome = BuildAppOutcome.Success;
-  } else if (row.result === 'failure') {
-    outcome = BuildAppOutcome.Failure;
   }
 
   return {

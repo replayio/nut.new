@@ -15,6 +15,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 
 import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
+import { ExampleLibraryApps } from '~/components/chat/ExampleLibraryApps';
 
 import FilePreview from './FilePreview';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
@@ -446,6 +447,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 }
 
                 handleSendMessage?.(event, messageInput);
+              })}
+            {!chatStarted &&
+              ExampleLibraryApps((event, messageInput) => {
+                throw new Error("NYI");
               })}
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
