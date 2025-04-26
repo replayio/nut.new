@@ -84,11 +84,11 @@ export const ExampleLibraryApps = () => {
             <div className={styles.hoverOverlay}>
               <div className={styles.hoverContent}>
                 <div className={styles.hoverInfo}>
-                  <div>Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes</div>
+                  <div>
+                    Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes
+                  </div>
                   <div>{app.totalPeanuts} peanuts</div>
-                  {app.outcome !== 'success' && (
-                    <div className={styles.warningText}>⚠️ Not all tests are passing</div>
-                  )}
+                  {app.outcome !== 'success' && <div className={styles.warningText}>⚠️ Not all tests are passing</div>}
                 </div>
               </div>
             </div>
