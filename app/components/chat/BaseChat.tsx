@@ -453,7 +453,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   Library
                 </div>
                 <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">
-                  Browse these apps for a place to start
+                  Browse these auto-generated apps for a place to start
                 </div>
                 <ExampleLibraryApps/>
               </>

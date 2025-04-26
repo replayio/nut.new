@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { importChat } from '~/lib/persistence/useChatHistory';
@@ -31,15 +31,14 @@ export const ExampleLibraryApps = () => {
     }
   }, [numApps]);
 
-  if (loading) {
-    return <div className={styles.loading}>Loading recent apps...</div>;
-  }
-
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
 
   if (apps.length === 0) {
+    if (loading) {
+      return <div className={styles.loading}>Loading recent apps...</div>;
+    }
     return <div className={styles.empty}>No recent apps found</div>;
   }
 
@@ -80,12 +79,19 @@ export const ExampleLibraryApps = () => {
           </div>
         ))}
       </div>
-      <button 
-        className={styles.loadMoreButton}
-        onClick={() => setNumApps(prev => prev + 12)}
-      >
-        Load More
-      </button>
+      {loading && <div className={styles.loading}>Loading recent apps...</div>}
+      {!loading && (
+        <div className={styles.buttonContainer}>
+          <button 
+            className={styles.loadMoreButton}
+            onClick={() => {
+              setNumApps(prev => prev + 12);
+            }}
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 }

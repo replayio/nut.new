@@ -61,7 +61,8 @@ async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult
       throw error;
     }
 
-    return data.map(databaseRowToBuildAppResult);
+    // Ignore apps that don't have a title or image.
+    return data.map(databaseRowToBuildAppResult).filter(app => app.title && app.imageDataURL);
   } catch (error) {
     console.error('Failed to get recent apps:', error);
     throw error;
