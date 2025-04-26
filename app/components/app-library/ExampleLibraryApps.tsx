@@ -5,11 +5,8 @@ import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { importChat } from '~/lib/persistence/useChatHistory';
 
-interface ExampleLibraryAppsProps {
-  numApps: number;
-}
-
-export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
+export const ExampleLibraryApps = () => {
+  const [numApps, setNumApps] = useState<number>(6);
   const [apps, setApps] = useState<BuildAppResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +26,10 @@ export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
       }
     }
 
-    fetchRecentApps();
-  }, []);
+    if (apps.length < numApps) {
+      fetchRecentApps();
+    }
+  }, [numApps]);
 
   if (loading) {
     return <div className={styles.loading}>Loading recent apps...</div>;
@@ -81,6 +80,12 @@ export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
           </div>
         ))}
       </div>
+      <button 
+        className={styles.loadMoreButton}
+        onClick={() => setNumApps(prev => prev + 12)}
+      >
+        Load More
+      </button>
     </div>
   );
 }
