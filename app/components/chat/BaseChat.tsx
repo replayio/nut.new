@@ -457,6 +457,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   Browse these apps for a place to start
                 </div>
                 <ExampleLibraryApps
+                  numApps={6}
                 />
               </>
             )}

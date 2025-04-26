@@ -6,9 +6,10 @@ import styles from './ExampleLibraryApps.module.scss';
 import { importChat } from '~/lib/persistence/useChatHistory';
 
 interface ExampleLibraryAppsProps {
+  numApps: number;
 }
 
-export const ExampleLibraryApps = ({}: ExampleLibraryAppsProps) => {
+export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
   const [apps, setApps] = useState<BuildAppResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export const ExampleLibraryApps = ({}: ExampleLibraryAppsProps) => {
     async function fetchRecentApps() {
       try {
         setLoading(true);
-        const recentApps = await getRecentApps(6); // Get apps from the last 6 hours
+        const recentApps = await getRecentApps(24);
         setApps(recentApps);
         setError(null);
       } catch (err) {
@@ -43,8 +44,7 @@ export const ExampleLibraryApps = ({}: ExampleLibraryAppsProps) => {
     return <div className={styles.empty}>No recent apps found</div>;
   }
 
-  // Take up to 6 apps to create a 3x2 grid
-  const displayApps = apps.slice(0, 6);
+  const displayApps = apps.slice(0, numApps);
 
   return (
     <div className={styles.container}>
