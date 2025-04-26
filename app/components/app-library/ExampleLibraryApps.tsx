@@ -18,7 +18,7 @@ export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
     async function fetchRecentApps() {
       try {
         setLoading(true);
-        const recentApps = await getRecentApps(24);
+        const recentApps = await getRecentApps(numApps);
         setApps(recentApps);
         setError(null);
       } catch (err) {
@@ -52,7 +52,7 @@ export const ExampleLibraryApps = ({ numApps }: ExampleLibraryAppsProps) => {
         {displayApps.map((app) => (
           <div 
             key={app.appId}
-            className={styles.appItem}
+            className={`${styles.appItem} ${app.outcome !== 'success' ? styles.appItemError : ''}`}
             onClick={() => {
               importChat(app.title ?? "Untitled App", app.messages.filter(msg => {
                 // Workaround an issue where the messages in the database include images

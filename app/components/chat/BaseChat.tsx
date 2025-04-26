@@ -439,26 +439,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {!rejectFormOpen && messageInput}
               </div>
             </div>
-            {!chatStarted &&
-              ExamplePrompts((event, messageInput) => {
-                if (hasPendingMessage) {
-                  handleStop?.();
-                  return;
-                }
-
-                handleSendMessage?.(event, messageInput);
-              })}
             {!chatStarted && (
               <>
+                {ExamplePrompts((event: React.UIEvent, messageInput?: string) => {
+                  if (hasPendingMessage) {
+                    handleStop?.();
+                    return;
+                  }
+
+                  handleSendMessage?.(event, messageInput);
+                })}
                 <div className="text-2xl lg:text-4xl font-bold text-bolt-elements-textPrimary mt-8 mb-4 animate-fade-in text-center max-w-chat mx-auto">
                   Library
                 </div>
                 <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">
                   Browse these apps for a place to start
                 </div>
-                <ExampleLibraryApps
-                  numApps={6}
-                />
+                <ExampleLibraryApps numApps={6} />
               </>
             )}
           </div>

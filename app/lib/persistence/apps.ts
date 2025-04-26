@@ -22,7 +22,7 @@ export interface BuildAppResult {
 function databaseRowToBuildAppResult(row: any): BuildAppResult {
   // Determine the outcome based on the result field
   let outcome = BuildAppOutcome.Error;
-  if (row.result === 'success') {
+  if (row.outcome === 'success') {
     outcome = BuildAppOutcome.Success;
   }
 
@@ -43,7 +43,7 @@ function databaseRowToBuildAppResult(row: any): BuildAppResult {
  * @param hours Number of hours to look back
  * @returns Array of BuildAppResult objects
  */
-export async function getRecentApps(hours: number): Promise<BuildAppResult[]> {
+async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult[]> {
   try {
     // Calculate the timestamp for X hours ago
     const hoursAgo = new Date();
@@ -66,4 +66,17 @@ export async function getRecentApps(hours: number): Promise<BuildAppResult[]> {
     console.error('Failed to get recent apps:', error);
     throw error;
   }
+}
+
+const HourRanges = [1, 2, 3, 6, 12, 24];
+
+export async function getRecentApps(numApps: number): Promise<BuildAppResult[]> {
+  let apps: BuildAppResult[] = [];
+  for (const range of HourRanges) {
+    apps = await getAppsCreatedInLastXHours(range);
+    if (apps.length >= numApps) {
+      return apps.slice(0, numApps);
+    }
+  }
+  return apps;
 }
