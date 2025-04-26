@@ -1,11 +1,7 @@
 // Functions for accessing the apps table in the database
 
 import { getSupabase } from '~/lib/supabase/client';
-
-export interface ChatMessage {
-  role: string;
-  content: string;
-}
+import type { Message } from './message';
 
 export enum BuildAppOutcome {
   Success = 'success',
@@ -17,7 +13,7 @@ export interface BuildAppResult {
   elapsedMinutes: number;
   totalPeanuts: number;
   imageDataURL: string | undefined;
-  messages: ChatMessage[];
+  messages: Message[];
   protocolChatId: string;
   outcome: BuildAppOutcome;
   appId: string;

@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { type ChatMessage } from '~/lib/persistence/apps';
+import { importChat } from '~/lib/persistence/useChatHistory';
 
 interface ExampleLibraryAppsProps {
-  onAppSelected: (messages: ChatMessage[]) => void;
 }
 
-export const ExampleLibraryApps = ({ onAppSelected }: ExampleLibraryAppsProps) => {
+export const ExampleLibraryApps = ({}: ExampleLibraryAppsProps) => {
   const [apps, setApps] = useState<BuildAppResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +53,16 @@ export const ExampleLibraryApps = ({ onAppSelected }: ExampleLibraryAppsProps) =
           <div 
             key={app.appId}
             className={styles.appItem}
-            onClick={() => onAppSelected(app.messages)}
+            onClick={() => {
+              importChat(app.title ?? "Untitled App", app.messages.filter(msg => {
+                // Workaround an issue where the messages in the database include images
+                // (used to generate the screenshots).
+                if (msg.role == 'assistant' && msg.type == 'image') {
+                  return false;
+                }
+                return true;
+              }));
+            }}
           >
             {app.imageDataURL ? (
               <img 

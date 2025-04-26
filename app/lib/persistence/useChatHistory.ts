@@ -12,26 +12,26 @@ export interface ResumeChatInfo {
   protocolChatResponseId: string;
 }
 
+export async function importChat(title: string, messages: Message[]) {
+  try {
+    const chat = await database.createChat(title, messages);
+    window.location.href = `/chat/${chat.id}`;
+    toast.success('Chat imported successfully');
+  } catch (error) {
+    if (error instanceof Error) {
+      toast.error('Failed to import chat: ' + error.message);
+    } else {
+      toast.error('Failed to import chat');
+    }
+  }
+}
+
 export function useChatHistory() {
   const { id: mixedId, repositoryId } = useLoaderData<{ id?: string; repositoryId?: string }>() ?? {};
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(undefined);
   const [ready, setReady] = useState<boolean>(!mixedId && !repositoryId);
-
-  const importChat = async (title: string, messages: Message[]) => {
-    try {
-      const chat = await database.createChat(title, messages);
-      window.location.href = `/chat/${chat.id}`;
-      toast.success('Chat imported successfully');
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error('Failed to import chat: ' + error.message);
-      } else {
-        toast.error('Failed to import chat');
-      }
-    }
-  };
 
   const loadRepository = async (repositoryId: string) => {
     const messages = createMessagesForRepository(`Repository: ${repositoryId}`, repositoryId);

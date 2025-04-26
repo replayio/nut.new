@@ -457,9 +457,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   Browse these apps for a place to start
                 </div>
                 <ExampleLibraryApps
-                  onAppSelected={(messages) => {
-                    throw new Error('NYI');
-                  }}
                 />
               </>
             )}
