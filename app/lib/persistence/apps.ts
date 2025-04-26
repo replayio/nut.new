@@ -62,18 +62,18 @@ async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult
     }
 
     // Ignore apps that don't have a title or image.
-    return data.map(databaseRowToBuildAppResult).filter(app => app.title && app.imageDataURL);
+    return data.map(databaseRowToBuildAppResult).filter((app) => app.title && app.imageDataURL);
   } catch (error) {
     console.error('Failed to get recent apps:', error);
     throw error;
   }
 }
 
-const HourRanges = [1, 2, 3, 6, 12, 24];
+const HOUR_RANGES = [1, 2, 3, 6, 12, 24];
 
 export async function getRecentApps(numApps: number): Promise<BuildAppResult[]> {
   let apps: BuildAppResult[] = [];
-  for (const range of HourRanges) {
+  for (const range of HOUR_RANGES) {
     apps = await getAppsCreatedInLastXHours(range);
     if (apps.length >= numApps) {
       return apps.slice(0, numApps);

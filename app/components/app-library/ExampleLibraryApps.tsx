@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { importChat } from '~/lib/persistence/useChatHistory';
@@ -48,44 +48,39 @@ export const ExampleLibraryApps = () => {
     <div className={styles.container}>
       <div className={styles.grid}>
         {displayApps.map((app) => (
-          <div 
+          <div
             key={app.appId}
             className={`${styles.appItem} ${app.outcome !== 'success' ? styles.appItemError : ''}`}
             onClick={() => {
-              importChat(app.title ?? "Untitled App", app.messages.filter(msg => {
-                // Workaround an issue where the messages in the database include images
-                // (used to generate the screenshots).
-                if (msg.role == 'assistant' && msg.type == 'image') {
-                  return false;
-                }
-                return true;
-              }));
+              importChat(
+                app.title ?? 'Untitled App',
+                app.messages.filter((msg) => {
+                  // Workaround an issue where the messages in the database include images
+                  // (used to generate the screenshots).
+                  if (msg.role == 'assistant' && msg.type == 'image') {
+                    return false;
+                  }
+                  return true;
+                }),
+              );
             }}
           >
             {app.imageDataURL ? (
-              <img 
-                src={app.imageDataURL} 
-                alt={app.title || 'App preview'} 
-                className={styles.previewImage}
-              />
+              <img src={app.imageDataURL} alt={app.title || 'App preview'} className={styles.previewImage} />
             ) : (
-              <div className={styles.placeholderImage}>
-                {app.title || 'No preview'}
-              </div>
+              <div className={styles.placeholderImage}>{app.title || 'No preview'}</div>
             )}
-            <div className={styles.appTitle}>
-              {app.title || 'Untitled App'}
-            </div>
+            <div className={styles.appTitle}>{app.title || 'Untitled App'}</div>
           </div>
         ))}
       </div>
       {loading && <div className={styles.loading}>Loading recent apps...</div>}
       {!loading && (
         <div className={styles.buttonContainer}>
-          <button 
+          <button
             className={styles.loadMoreButton}
             onClick={() => {
-              setNumApps(prev => prev + 12);
+              setNumApps((prev) => prev + 12);
             }}
           >
             Load More
@@ -94,4 +89,4 @@ export const ExampleLibraryApps = () => {
       )}
     </div>
   );
-}
+};
