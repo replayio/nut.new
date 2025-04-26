@@ -17,6 +17,7 @@ export interface BuildAppResult {
   protocolChatId: string;
   outcome: BuildAppOutcome;
   appId: string;
+  createdAt: string;
 }
 
 function databaseRowToBuildAppResult(row: any): BuildAppResult {
@@ -35,6 +36,7 @@ function databaseRowToBuildAppResult(row: any): BuildAppResult {
     protocolChatId: row.protocol_chat_id,
     outcome,
     appId: row.app_id,
+    createdAt: row.created_at,
   };
 }
 

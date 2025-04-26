@@ -14,7 +14,10 @@ export interface ResumeChatInfo {
 
 export async function importChat(title: string, messages: Message[]) {
   try {
-    const chat = await database.createChat(title, messages);
+    // Remove any peanuts when importing another chat, these are just for the current user.
+    const newMessages = messages.map((msg) => ({ ...msg, peanuts: undefined }));
+
+    const chat = await database.createChat(title, newMessages);
     window.location.href = `/chat/${chat.id}`;
     toast.success('Chat imported successfully');
   } catch (error) {

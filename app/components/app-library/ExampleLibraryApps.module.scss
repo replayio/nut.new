@@ -22,10 +22,15 @@
     transform 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
   cursor: pointer;
+  position: relative;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    .hoverOverlay {
+      opacity: 1;
+    }
   }
 }
 
@@ -93,6 +98,41 @@
   &:hover {
     background-color: #16a34a;
   }
+}
+
+.hoverOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.hoverContent {
+  padding: 1rem;
+  color: white;
+  text-align: center;
+}
+
+.hoverInfo {
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  > div {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.warningText {
+  color: #ffd700;
+  font-weight: 500;
+  margin-top: 0.5rem;
 }
 
 @media (max-width: 768px) {

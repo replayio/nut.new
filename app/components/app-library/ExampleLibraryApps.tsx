@@ -5,6 +5,16 @@ import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { importChat } from '~/lib/persistence/useChatHistory';
 
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  }).format(date);
+};
+
 export const ExampleLibraryApps = () => {
   const [numApps, setNumApps] = useState<number>(6);
   const [apps, setApps] = useState<BuildAppResult[]>([]);
@@ -71,6 +81,17 @@ export const ExampleLibraryApps = () => {
               <div className={styles.placeholderImage}>{app.title || 'No preview'}</div>
             )}
             <div className={styles.appTitle}>{app.title || 'Untitled App'}</div>
+            <div className={styles.hoverOverlay}>
+              <div className={styles.hoverContent}>
+                <div className={styles.hoverInfo}>
+                  <div>Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes</div>
+                  <div>{app.totalPeanuts} peanuts</div>
+                  {app.outcome !== 'success' && (
+                    <div className={styles.warningText}>⚠️ Not all tests are passing</div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
