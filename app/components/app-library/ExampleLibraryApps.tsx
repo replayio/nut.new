@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { importChat } from '~/lib/persistence/useChatHistory';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -58,22 +57,10 @@ export const ExampleLibraryApps = () => {
     <div className={styles.container}>
       <div className={styles.grid}>
         {displayApps.map((app) => (
-          <div
+          <a
             key={app.id}
+            href={`/app/${app.id}`}
             className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
-            onClick={() => {
-              importChat(
-                app.title ?? 'Untitled App',
-                app.messages.filter((msg) => {
-                  // Workaround an issue where the messages in the database include images
-                  // (used to generate the screenshots).
-                  if (msg.role == 'assistant' && msg.type == 'image') {
-                    return false;
-                  }
-                  return true;
-                }),
-              );
-            }}
           >
             {app.imageDataURL ? (
               <img src={app.imageDataURL} alt={app.title || 'App preview'} className={styles.previewImage} />
@@ -94,7 +81,7 @@ export const ExampleLibraryApps = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </a>
         ))}
       </div>
       {loading && <div className={styles.loading}>Loading recent apps...</div>}

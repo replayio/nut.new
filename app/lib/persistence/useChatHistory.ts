@@ -6,13 +6,14 @@ import { chatStore } from '~/lib/stores/chat';
 import { database } from './chats';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
+import { getAppById } from './apps';
 
 export interface ResumeChatInfo {
   protocolChatId: string;
   protocolChatResponseId: string;
 }
 
-export async function importChat(title: string, messages: Message[]) {
+async function importChat(title: string, messages: Message[]) {
   try {
     // Remove any peanuts when importing another chat, these are just for the current user.
     const newMessages = messages.map((msg) => ({ ...msg, peanuts: undefined }));
@@ -29,18 +30,29 @@ export async function importChat(title: string, messages: Message[]) {
   }
 }
 
+async function loadRepository(repositoryId: string) {
+  const messages = createMessagesForRepository(`Repository: ${repositoryId}`, repositoryId);
+  await importChat(`Repository: ${repositoryId}`, messages);
+  toast.success('Repository loaded successfully');
+}
+
+async function loadApp(appId: string) {
+  const app = await getAppById(appId);
+
+  await importChat(app.title ?? 'Untitled App', app.messages);
+  toast.success('App loaded successfully');
+}
+
 export function useChatHistory() {
-  const { id: mixedId, repositoryId } = useLoaderData<{ id?: string; repositoryId?: string }>() ?? {};
+  const {
+    id: mixedId,
+    repositoryId,
+    appId,
+  } = useLoaderData<{ id?: string; repositoryId?: string; appId?: string }>() ?? {};
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(undefined);
   const [ready, setReady] = useState<boolean>(!mixedId && !repositoryId);
-
-  const loadRepository = async (repositoryId: string) => {
-    const messages = createMessagesForRepository(`Repository: ${repositoryId}`, repositoryId);
-    await importChat(`Repository: ${repositoryId}`, messages);
-    toast.success('Repository loaded successfully');
-  };
 
   const debouncedSetChatContents = debounce(async (messages: Message[]) => {
     const chat = chatStore.currentChat.get();
@@ -73,6 +85,9 @@ export function useChatHistory() {
           await importChat(publicData.title, messages);
         } else if (repositoryId) {
           await loadRepository(repositoryId);
+          setReady(true);
+        } else if (appId) {
+          await loadApp(appId);
           setReady(true);
         }
       } catch (error) {

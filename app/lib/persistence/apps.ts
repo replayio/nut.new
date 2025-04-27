@@ -106,3 +106,14 @@ export async function getRecentApps(numApps: number): Promise<BuildAppResult[]> 
   }
   return apps;
 }
+
+export async function getAppById(id: string): Promise<BuildAppResult> {
+  const { data, error } = await getSupabase().from('apps').select('*').eq('id', id).single();
+
+  if (error) {
+    console.error('Error fetching app by id:', error);
+    throw error;
+  }
+
+  return databaseRowToBuildAppResult(data);
+}
