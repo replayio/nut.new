@@ -60,7 +60,7 @@ export const ExampleLibraryApps = () => {
         {displayApps.map((app) => (
           <div
             key={app.appId}
-            className={`${styles.appItem} ${app.outcome !== 'success' ? styles.appItemError : ''}`}
+            className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
             onClick={() => {
               importChat(
                 app.title ?? 'Untitled App',
@@ -87,8 +87,10 @@ export const ExampleLibraryApps = () => {
                   <div>
                     Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes
                   </div>
-                  <div>{app.totalPeanuts} peanuts</div>
-                  {app.outcome !== 'success' && <div className={styles.warningText}>⚠️ Not all tests are passing</div>}
+                  <div>{app.totalPeanuts} peanuts{app.outcome.hasDatabase ? ' (has database)' : ''}</div>
+                  {!app.outcome.testsPassed && (
+                    <div className={styles.warningText}>⚠️ Not all tests are passing</div>
+                  )}
                 </div>
               </div>
             </div>

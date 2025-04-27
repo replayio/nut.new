@@ -3,9 +3,9 @@
 import { getSupabase } from '~/lib/supabase/client';
 import type { Message } from './message';
 
-export enum BuildAppOutcome {
-  Success = 'success',
-  Error = 'error',
+export interface BuildAppOutcome {
+  testsPassed?: boolean;
+  hasDatabase?: boolean;
 }
 
 export interface BuildAppResult {
@@ -20,12 +20,33 @@ export interface BuildAppResult {
   createdAt: string;
 }
 
+function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
+  try {
+    const json = JSON.parse(outcome);
+    return {
+      testsPassed: !!json.testsPassed,
+      hasDatabase: !!json.hasDatabase,
+    }
+  } catch (error) {
+    // 2025/04/26: Watch for old formats for outcomes.
+    if (outcome === 'success') {
+      return {
+        testsPassed: true,
+      };
+    }
+    if (outcome === 'error') {
+      return {
+        testsPassed: false,
+      };
+    }
+    console.error('Failed to parse outcome:', error);
+    return {};
+  }
+}
+
 function databaseRowToBuildAppResult(row: any): BuildAppResult {
   // Determine the outcome based on the result field
-  let outcome = BuildAppOutcome.Error;
-  if (row.outcome === 'success') {
-    outcome = BuildAppOutcome.Success;
-  }
+  const outcome = parseBuildAppOutcome(row.outcome);
 
   return {
     title: row.title,

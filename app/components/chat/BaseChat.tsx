@@ -450,7 +450,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   handleSendMessage?.(event, messageInput);
                 })}
                 <div className="text-2xl lg:text-4xl font-bold text-bolt-elements-textPrimary mt-8 mb-4 animate-fade-in text-center max-w-chat mx-auto">
-                  Library
+                  Walk in the woods
                 </div>
                 <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">
                   Browse these auto-generated apps for a place to start
