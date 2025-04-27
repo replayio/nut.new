@@ -26,7 +26,7 @@ function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
     return {
       testsPassed: !!json.testsPassed,
       hasDatabase: !!json.hasDatabase,
-    }
+    };
   } catch (error) {
     // 2025/04/26: Watch for old formats for outcomes.
     if (outcome === 'success') {

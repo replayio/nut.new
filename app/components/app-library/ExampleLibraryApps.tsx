@@ -87,10 +87,10 @@ export const ExampleLibraryApps = () => {
                   <div>
                     Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes
                   </div>
-                  <div>{app.totalPeanuts} peanuts{app.outcome.hasDatabase ? ' (has database)' : ''}</div>
-                  {!app.outcome.testsPassed && (
-                    <div className={styles.warningText}>⚠️ Not all tests are passing</div>
-                  )}
+                  <div>
+                    {app.totalPeanuts} peanuts{app.outcome.hasDatabase ? ' (has database)' : ''}
+                  </div>
+                  {!app.outcome.testsPassed && <div className={styles.warningText}>⚠️ Not all tests are passing</div>}
                 </div>
               </div>
             </div>
