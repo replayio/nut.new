@@ -65,3 +65,14 @@ export async function deployRepository(repositoryId: string, settings: DeploySet
 
   return result;
 }
+
+export async function downloadRepository(repositoryId: string): Promise<string> {
+  const { repositoryContents } = (await sendCommandDedicatedClient({
+    method: 'Nut.getRepository',
+    params: {
+      repositoryId,
+    },
+  })) as { repositoryContents: string };
+
+  return repositoryContents;
+}

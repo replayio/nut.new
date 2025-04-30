@@ -8,6 +8,7 @@ import { Feedback } from './Feedback';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { DeployChatButton } from './DeployChatButton';
+import { DownloadButton } from './DownloadButton';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
@@ -43,9 +44,14 @@ export function Header() {
         )}
 
         {chatStarted && (
-          <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
-            <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
-          </span>
+          <>
+            <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
+              <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
+            </span>
+            <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
+              <ClientOnly>{() => <DownloadButton />}</ClientOnly>
+            </span>
+          </>
         )}
 
         <div className="flex items-center  gap-4">

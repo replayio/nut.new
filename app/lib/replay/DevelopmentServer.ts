@@ -15,6 +15,6 @@ export async function updateDevelopmentServer(repositoryId: string | undefined) 
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
 
   workbenchStore.showWorkbench.set(repositoryURL !== undefined);
-  workbenchStore.repositoryId.set(repositoryURL);
+  workbenchStore.repositoryId.set(repositoryId);
   workbenchStore.previewURL.set(repositoryURL);
 }
