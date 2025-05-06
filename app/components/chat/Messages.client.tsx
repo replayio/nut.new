@@ -3,7 +3,6 @@ import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
 import { parseTestResultsMessage, type Message, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 interface MessagesProps {
   id?: string;

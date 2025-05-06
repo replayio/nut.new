@@ -50,8 +50,15 @@ function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
 }
 
 const BUILD_APP_SUMMARY_COLUMNS = [
-  'id', 'title', 'prompt', 'elapsed_minutes', 'total_peanuts', 'image_url',
-  'outcome', 'app_id', 'created_at',
+  'id',
+  'title',
+  'prompt',
+  'elapsed_minutes',
+  'total_peanuts',
+  'image_url',
+  'outcome',
+  'app_id',
+  'created_at',
 ].join(',');
 
 function databaseRowToBuildAppSummary(row: any): BuildAppSummary {

@@ -27,10 +27,14 @@ export const ExampleLibraryApps = () => {
 
   const computeGridColumns = () => {
     const width = window.innerWidth;
-    if (width <= 480) return 1;
-    if (width <= 768) return 2;
+    if (width <= 480) {
+      return 1;
+    }
+    if (width <= 768) {
+      return 2;
+    }
     return 3;
-  }
+  };
 
   useEffect(() => {
     setGridColumns(computeGridColumns());
@@ -126,12 +130,12 @@ export const ExampleLibraryApps = () => {
         </div>
       </div>
     );
-  }
+  };
 
   const getTestResults = (appContents: BuildAppResult) => {
     const message = appContents.messages.findLast((message) => message.category === TEST_RESULTS_CATEGORY);
     return message ? parseTestResultsMessage(message) : [];
-  }
+  };
 
   const renderAppDetails = (appId: string, appContents: BuildAppResult | null) => {
     const app = apps.find((app) => app.id === appId);
@@ -146,18 +150,24 @@ export const ExampleLibraryApps = () => {
         <div className={styles.detailHeader}>
           <h3 className={styles.detailTitle}>{app.title}</h3>
           <div className={styles.detailActions}>
-            <button className={styles.actionButton} onClick={async () => {
-              const contents = appContents ?? await getAppById(appId);
-              const repositoryId = getMessagesRepositoryId(contents.messages);
-              if (repositoryId) {
-                window.open(`https://${repositoryId}.http.replay.io`, '_blank');
-              }
-            }}>
+            <button
+              className={styles.actionButton}
+              onClick={async () => {
+                const contents = appContents ?? (await getAppById(appId));
+                const repositoryId = getMessagesRepositoryId(contents.messages);
+                if (repositoryId) {
+                  window.open(`https://${repositoryId}.http.replay.io`, '_blank');
+                }
+              }}
+            >
               Load App
             </button>
-            <button className={styles.actionButton} onClick={() => {
-              window.open(`/app/${app.id}`, '_self');
-            }}>
+            <button
+              className={styles.actionButton}
+              onClick={() => {
+                window.open(`/app/${app.id}`, '_self');
+              }}
+            >
               Start Chat
             </button>
           </div>
@@ -165,27 +175,19 @@ export const ExampleLibraryApps = () => {
         <div className={styles.appDetails}>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Created:</span>
-            <span className={styles.detailValue}>
-              {new Date(app.createdAt).toLocaleString()}
-            </span>
+            <span className={styles.detailValue}>{new Date(app.createdAt).toLocaleString()}</span>
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Time:</span>
-            <span className={styles.detailValue}>
-              {app.elapsedMinutes} minutes
-            </span>
+            <span className={styles.detailValue}>{app.elapsedMinutes} minutes</span>
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Peanuts:</span>
-            <span className={styles.detailValue}>
-              {app.totalPeanuts}
-            </span>
+            <span className={styles.detailValue}>{app.totalPeanuts}</span>
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Database:</span>
-            <span className={styles.detailValue}>
-              {app.outcome.hasDatabase ? 'Present' : 'None'}
-            </span>
+            <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
           <div className="text-lg font-semibold mb-2">Test Results</div>
           {testResults && (
@@ -223,13 +225,9 @@ export const ExampleLibraryApps = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.grid}>
-        {beforeApps.map(renderApp)}
-      </div>
+      <div className={styles.grid}>{beforeApps.map(renderApp)}</div>
       {selectedAppId && renderAppDetails(selectedAppId, selectedAppContents)}
-      <div className={styles.grid}>
-        {afterApps.map(renderApp)}
-      </div>
+      <div className={styles.grid}>{afterApps.map(renderApp)}</div>
       {loading && <div className={styles.loading}>Loading recent apps...</div>}
       {!loading && (
         <div className={styles.buttonContainer}>
@@ -245,4 +243,4 @@ export const ExampleLibraryApps = () => {
       )}
     </div>
   );
-}
+};
