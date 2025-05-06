@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { type BuildAppSummary, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
+import { classNames } from '~/utils/classNames';
+import type { PlaywrightTestResult } from '~/lib/persistence/message';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -19,7 +21,7 @@ export const ExampleLibraryApps = () => {
   const [apps, setApps] = useState<BuildAppSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useState<BuildAppSummary | null>(null);
 
   useEffect(() => {
     async function fetchRecentApps() {
@@ -58,7 +60,7 @@ export const ExampleLibraryApps = () => {
     return (
       <div
         key={app.id}
-        onClick={() => setSelectedApp(app.id)}
+        onClick={() => setSelectedApp(app)}
         className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
       >
         {app.imageDataURL ? (
@@ -89,6 +91,58 @@ export const ExampleLibraryApps = () => {
       <div className={styles.grid}>
         {displayApps.map(renderApp)}
       </div>
+      {selectedApp && (
+        <div className={styles.detailView}>
+          <div className={styles.detailHeader}>
+            <h3 className={styles.detailTitle}>App Details</h3>
+            <div className={styles.detailActions}>
+              <button className={styles.actionButton} onClick={() => onLoadApp(selectedApp.id)}>
+                Load App
+              </button>
+              <button className={styles.actionButton} onClick={() => onStartNewChat(selectedApp.id)}>
+                Start Chat
+              </button>
+            </div>
+          </div>
+          <div className={styles.appDetails}>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Status:</span>
+              <div className={classNames(styles.statusIndicator, {
+                [styles.passed]: selectedApp.outcome.testsPassed === true,
+                [styles.failed]: selectedApp.outcome.testsPassed === false
+              })} />
+              <span className={styles.detailValue}>
+                {selectedApp.outcome.testsPassed === true ? 'Passed' : 
+                 selectedApp.outcome.testsPassed === false ? 'Failed' : 'Not Run'}
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Database:</span>
+              <span className={styles.detailValue}>
+                {selectedApp.outcome.hasDatabase ? 'Present' : 'Not Found'}
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Created:</span>
+              <span className={styles.detailValue}>
+                {new Date(selectedApp.createdAt).toLocaleString()}
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Time:</span>
+              <span className={styles.detailValue}>
+                {selectedApp.elapsedMinutes} minutes
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Peanuts:</span>
+              <span className={styles.detailValue}>
+                {selectedApp.totalPeanuts}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       {loading && <div className={styles.loading}>Loading recent apps...</div>}
       {!loading && (
         <div className={styles.buttonContainer}>
@@ -104,4 +158,4 @@ export const ExampleLibraryApps = () => {
       )}
     </div>
   );
-};
+}
