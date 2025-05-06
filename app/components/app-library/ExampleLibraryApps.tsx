@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { type BuildAppSummary, getRecentApps } from '~/lib/persistence/apps';
+import { useEffect, useState } from 'react';
+import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { classNames } from '~/utils/classNames';
-import type { PlaywrightTestResult } from '~/lib/persistence/message';
+import { parseTestResultsMessage, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -21,7 +21,8 @@ export const ExampleLibraryApps = () => {
   const [apps, setApps] = useState<BuildAppSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedApp, setSelectedApp] = useState<BuildAppSummary | null>(null);
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [selectedAppContents, setSelectedAppContents] = useState<BuildAppResult | null>(null);
   const [gridColumns, setGridColumns] = useState(1);
 
   const computeGridColumns = () => {
@@ -38,6 +39,15 @@ export const ExampleLibraryApps = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (selectedAppId) {
+        const app = await getAppById(selectedAppId);
+        setSelectedAppContents(app);
+      }
+    })();
+  }, [selectedAppId]);
 
   useEffect(() => {
     async function fetchRecentApps() {
@@ -74,8 +84,8 @@ export const ExampleLibraryApps = () => {
 
   let beforeApps = displayApps;
   let afterApps: BuildAppSummary[] = [];
-  if (selectedApp) {
-    let selectedIndex = displayApps.findIndex((app) => app.id === selectedApp.id);
+  if (selectedAppId) {
+    let selectedIndex = displayApps.findIndex((app) => app.id === selectedAppId);
     if (selectedIndex >= 0) {
       while ((selectedIndex + 1) % gridColumns != 0) {
         selectedIndex++;
@@ -89,7 +99,10 @@ export const ExampleLibraryApps = () => {
     return (
       <div
         key={app.id}
-        onClick={() => setSelectedApp(app.id == selectedApp?.id ? null : app)}
+        onClick={() => {
+          setSelectedAppId(app.id == selectedAppId ? null : app.id);
+          setSelectedAppContents(null);
+        }}
         className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
       >
         {app.imageDataURL ? (
@@ -115,7 +128,22 @@ export const ExampleLibraryApps = () => {
     );
   }
 
-  const renderAppDetails = (app: BuildAppSummary) => {
+  const getTestResults = (appContents: BuildAppResult) => {
+    const message = appContents.messages.findLast((message) => message.category === TEST_RESULTS_CATEGORY);
+    if (!message) {
+      return null;
+    }
+    return parseTestResultsMessage(message);
+  }
+
+  const renderAppDetails = (appId: string, appContents: BuildAppResult | null) => {
+    const app = apps.find((app) => app.id === appId);
+    if (!app) {
+      return null;
+    }
+
+    const testResults = appContents ? getTestResults(appContents) : null;
+
     return (
       <div className={styles.detailView}>
         <div className={styles.detailHeader}>
@@ -130,23 +158,6 @@ export const ExampleLibraryApps = () => {
           </div>
         </div>
         <div className={styles.appDetails}>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Status:</span>
-            <div className={classNames(styles.statusIndicator, {
-              [styles.passed]: app.outcome.testsPassed === true,
-              [styles.failed]: app.outcome.testsPassed === false
-            })} />
-            <span className={styles.detailValue}>
-              {app.outcome.testsPassed === true ? 'Passed' : 
-               app.outcome.testsPassed === false ? 'Failed' : 'Not Run'}
-            </span>
-          </div>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Database:</span>
-            <span className={styles.detailValue}>
-              {app.outcome.hasDatabase ? 'Present' : 'Not Found'}
-            </span>
-          </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Created:</span>
             <span className={styles.detailValue}>
@@ -165,6 +176,12 @@ export const ExampleLibraryApps = () => {
               {app.totalPeanuts}
             </span>
           </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Database:</span>
+            <span className={styles.detailValue}>
+              {app.outcome.hasDatabase ? 'Present' : 'None'}
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -175,7 +192,7 @@ export const ExampleLibraryApps = () => {
       <div className={styles.grid}>
         {beforeApps.map(renderApp)}
       </div>
-      {selectedApp && renderAppDetails(selectedApp)}
+      {selectedAppId && renderAppDetails(selectedAppId, selectedAppContents)}
       <div className={styles.grid}>
         {afterApps.map(renderApp)}
       </div>

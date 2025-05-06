@@ -1,7 +1,7 @@
 import React, { Suspense, useState } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { parseTestResultsMessage, type Message } from '~/lib/persistence/message';
+import { parseTestResultsMessage, type Message, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 
@@ -37,8 +37,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   };
 
   const renderTestResults = (message: Message, index: number) => {
-    assert(message.type === 'text');
-    const testResults = parseTestResultsMessage(message.content);
+    const testResults = parseTestResultsMessage(message);
 
     return (
       <div
@@ -91,7 +90,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       }
       const showDetails = showDetailMessageIds.includes(lastUserResponse.id);
 
-      if (message.category === 'TestResults') {
+      if (message.category === TEST_RESULTS_CATEGORY) {
         // The default view only shows the last test results for each user response.
         if (!isLastTestResults(index) && !showDetails) {
           return null;

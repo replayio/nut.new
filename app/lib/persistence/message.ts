@@ -81,9 +81,15 @@ export interface PlaywrightTestResult {
   recordingId?: string;
 }
 
-export function parseTestResultsMessage(contents: string): PlaywrightTestResult[] {
+export const TEST_RESULTS_CATEGORY = 'TestResults';
+
+export function parseTestResultsMessage(message: Message): PlaywrightTestResult[] {
+  if (message.type !== 'text') {
+    return [];
+  }
+
   const results: PlaywrightTestResult[] = [];
-  const lines = contents.split('\n');
+  const lines = message.content.split('\n');
   for (const line of lines) {
     const match = line.match(/TestResult (.*?) (.*?) (.*)/);
     if (!match) {

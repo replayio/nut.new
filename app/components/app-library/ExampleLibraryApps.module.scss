@@ -147,7 +147,8 @@
 }
 
 .detailView {
-  margin-top: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   padding: 1.5rem;
   background-color: var(--bg-card);
   border-radius: 8px;
@@ -218,19 +219,4 @@
 
 .detailValue {
   color: var(--text-secondary);
-}
-
-.statusIndicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid black;
-
-  &.passed {
-    background-color: #22c55e;
-  }
-
-  &.failed {
-    background-color: #ef4444;
-  }
 }
