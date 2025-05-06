@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { type BuildAppSummary, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { classNames } from '~/utils/classNames';
@@ -22,6 +22,22 @@ export const ExampleLibraryApps = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<BuildAppSummary | null>(null);
+  const [gridColumns, setGridColumns] = useState(1);
+
+  const computeGridColumns = () => {
+    const width = window.innerWidth;
+    if (width <= 480) return 1;
+    if (width <= 768) return 2;
+    return 3;
+  }
+
+  useEffect(() => {
+    setGridColumns(computeGridColumns());
+
+    const handleResize = () => setGridColumns(computeGridColumns());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     async function fetchRecentApps() {
@@ -56,15 +72,24 @@ export const ExampleLibraryApps = () => {
 
   const displayApps = apps.slice(0, numApps);
 
-  const selectedIndex = displayApps.findIndex((app) => app.id === selectedApp?.id);
-  const beforeApps = selectedIndex >= 0 ? displayApps.slice(0, selectedIndex + 1) : displayApps;
-  const afterApps = selectedIndex >= 0 ? displayApps.slice(selectedIndex + 1) : [];
+  let beforeApps = displayApps;
+  let afterApps: BuildAppSummary[] = [];
+  if (selectedApp) {
+    let selectedIndex = displayApps.findIndex((app) => app.id === selectedApp.id);
+    if (selectedIndex >= 0) {
+      while ((selectedIndex + 1) % gridColumns != 0) {
+        selectedIndex++;
+      }
+      beforeApps = displayApps.slice(0, selectedIndex + 1);
+      afterApps = displayApps.slice(selectedIndex + 1);
+    }
+  }
 
   const renderApp = (app: BuildAppSummary) => {
     return (
       <div
         key={app.id}
-        onClick={() => setSelectedApp(app)}
+        onClick={() => setSelectedApp(app.id == selectedApp?.id ? null : app)}
         className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
       >
         {app.imageDataURL ? (
@@ -94,7 +119,7 @@ export const ExampleLibraryApps = () => {
     return (
       <div className={styles.detailView}>
         <div className={styles.detailHeader}>
-          <h3 className={styles.detailTitle}>App Details</h3>
+          <h3 className={styles.detailTitle}>{app.title}</h3>
           <div className={styles.detailActions}>
             <button className={styles.actionButton} onClick={() => onLoadApp(app.id)}>
               Load App
