@@ -8,11 +8,25 @@ import { getMessagesRepositoryId, type Message } from './message';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 
-export interface ChatContents {
+export interface ChatSummary {
   id: string;
   createdAt: string;
   updatedAt: string;
   title: string;
+}
+
+const ChatSummaryColumns = ['id', 'created_at', 'updated_at', 'title', 'deleted'].join(',');
+
+function databaseRowToChatSummary(d: any): ChatSummary {
+  return {
+    id: d.id,
+    createdAt: d.created_at,
+    updatedAt: d.updated_at,
+    title: d.title,
+  };
+}
+
+export interface ChatContents extends ChatSummary {
   repositoryId: string | undefined;
   messages: Message[];
   lastProtocolChatId: string | undefined;
@@ -21,10 +35,7 @@ export interface ChatContents {
 
 function databaseRowToChatContents(d: any): ChatContents {
   return {
-    id: d.id,
-    createdAt: d.created_at,
-    updatedAt: d.updated_at,
-    title: d.title,
+    ...databaseRowToChatSummary(d),
     messages: d.messages,
     repositoryId: d.repository_id,
     lastProtocolChatId: d.last_protocol_chat_id,
@@ -55,14 +66,14 @@ function setLocalChats(chats: ChatContents[] | undefined): void {
 // delete finishes.
 const deletedChats = new Set<string>();
 
-async function getAllChats(): Promise<ChatContents[]> {
+async function getAllChats(): Promise<ChatSummary[]> {
   const userId = await getCurrentUserId();
 
   if (!userId) {
     return getLocalChats();
   }
 
-  const { data, error } = await getSupabase().from('chats').select('*').eq('deleted', false);
+  const { data, error } = await getSupabase().from('chats').select(ChatSummaryColumns).eq('deleted', false);
 
   if (error) {
     throw error;
