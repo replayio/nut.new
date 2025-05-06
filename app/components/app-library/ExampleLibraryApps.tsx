@@ -56,6 +56,10 @@ export const ExampleLibraryApps = () => {
 
   const displayApps = apps.slice(0, numApps);
 
+  const selectedIndex = displayApps.findIndex((app) => app.id === selectedApp?.id);
+  const beforeApps = selectedIndex >= 0 ? displayApps.slice(0, selectedIndex + 1) : displayApps;
+  const afterApps = selectedIndex >= 0 ? displayApps.slice(selectedIndex + 1) : [];
+
   const renderApp = (app: BuildAppSummary) => {
     return (
       <div
@@ -86,63 +90,70 @@ export const ExampleLibraryApps = () => {
     );
   }
 
+  const renderAppDetails = (app: BuildAppSummary) => {
+    return (
+      <div className={styles.detailView}>
+        <div className={styles.detailHeader}>
+          <h3 className={styles.detailTitle}>App Details</h3>
+          <div className={styles.detailActions}>
+            <button className={styles.actionButton} onClick={() => onLoadApp(app.id)}>
+              Load App
+            </button>
+            <button className={styles.actionButton} onClick={() => onStartNewChat(app.id)}>
+              Start Chat
+            </button>
+          </div>
+        </div>
+        <div className={styles.appDetails}>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Status:</span>
+            <div className={classNames(styles.statusIndicator, {
+              [styles.passed]: app.outcome.testsPassed === true,
+              [styles.failed]: app.outcome.testsPassed === false
+            })} />
+            <span className={styles.detailValue}>
+              {app.outcome.testsPassed === true ? 'Passed' : 
+               app.outcome.testsPassed === false ? 'Failed' : 'Not Run'}
+            </span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Database:</span>
+            <span className={styles.detailValue}>
+              {app.outcome.hasDatabase ? 'Present' : 'Not Found'}
+            </span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Created:</span>
+            <span className={styles.detailValue}>
+              {new Date(app.createdAt).toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Time:</span>
+            <span className={styles.detailValue}>
+              {app.elapsedMinutes} minutes
+            </span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Peanuts:</span>
+            <span className={styles.detailValue}>
+              {app.totalPeanuts}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.grid}>
-        {displayApps.map(renderApp)}
+        {beforeApps.map(renderApp)}
       </div>
-      {selectedApp && (
-        <div className={styles.detailView}>
-          <div className={styles.detailHeader}>
-            <h3 className={styles.detailTitle}>App Details</h3>
-            <div className={styles.detailActions}>
-              <button className={styles.actionButton} onClick={() => onLoadApp(selectedApp.id)}>
-                Load App
-              </button>
-              <button className={styles.actionButton} onClick={() => onStartNewChat(selectedApp.id)}>
-                Start Chat
-              </button>
-            </div>
-          </div>
-          <div className={styles.appDetails}>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Status:</span>
-              <div className={classNames(styles.statusIndicator, {
-                [styles.passed]: selectedApp.outcome.testsPassed === true,
-                [styles.failed]: selectedApp.outcome.testsPassed === false
-              })} />
-              <span className={styles.detailValue}>
-                {selectedApp.outcome.testsPassed === true ? 'Passed' : 
-                 selectedApp.outcome.testsPassed === false ? 'Failed' : 'Not Run'}
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Database:</span>
-              <span className={styles.detailValue}>
-                {selectedApp.outcome.hasDatabase ? 'Present' : 'Not Found'}
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Created:</span>
-              <span className={styles.detailValue}>
-                {new Date(selectedApp.createdAt).toLocaleString()}
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Time:</span>
-              <span className={styles.detailValue}>
-                {selectedApp.elapsedMinutes} minutes
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Peanuts:</span>
-              <span className={styles.detailValue}>
-                {selectedApp.totalPeanuts}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      {selectedApp && renderAppDetails(selectedApp)}
+      <div className={styles.grid}>
+        {afterApps.map(renderApp)}
+      </div>
       {loading && <div className={styles.loading}>Loading recent apps...</div>}
       {!loading && (
         <div className={styles.buttonContainer}>
