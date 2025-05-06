@@ -1,8 +1,9 @@
 import React, { Suspense, useState } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import type { Message } from '~/lib/persistence/message';
+import { parseTestResultsMessage, type Message } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 interface MessagesProps {
   id?: string;
@@ -16,6 +17,44 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [] } = props;
   const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
 
+  const getLastUserResponse = (index: number) => {
+    return messages.findLast((message, messageIndex) => messageIndex < index && message.category === 'UserResponse');
+  };
+
+  // Return whether the test results at index are the last for the associated user response.
+  const isLastTestResults = (index: number) => {
+    let lastIndex = -1;
+    for (let i = index; i < messages.length; i++) {
+      const { category } = messages[i];
+      if (category === 'UserResponse') {
+        return lastIndex === index;
+      }
+      if (category === 'TestResults') {
+        lastIndex = i;
+      }
+    }
+    return lastIndex === index;
+  };
+
+  const renderTestResults = (message: Message, index: number) => {
+    assert(message.type === 'text');
+    const testResults = parseTestResultsMessage(message.content);
+
+    return (
+      <div
+        data-testid="message"
+        key={index}
+        className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background')}
+      >
+        <div className="flex flex-col gap-2">
+          {testResults.map((result) => (
+            <div key={result.title}>{result.title}</div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderMessage = (message: Message, index: number) => {
     const { role, repositoryId } = message;
     const isUserMessage = role === 'user';
@@ -23,7 +62,23 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     const isLast = index === messages.length - 1;
 
     if (!isUserMessage && message.category !== 'UserResponse') {
-      return null;
+      const lastUserResponse = getLastUserResponse(index);
+      if (!lastUserResponse) {
+        return null;
+      }
+
+      if (message.category === 'TestResults') {
+        // Only show the last test results for each user response.
+        if (!isLastTestResults(index)) {
+          return null;
+        }
+        return renderTestResults(message);
+      } else {
+        const showDetails = showDetailMessageIds.includes(lastUserResponse.id);
+        if (!showDetails) {
+          return null;
+        }
+      }
     }
 
     return (
@@ -52,7 +107,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             <MessageContents message={message} />
           </div>
           {!isUserMessage && message.category === 'UserResponse' && showDetailMessageIds.includes(message.id) && (
-            <div className="flex gap-2 flex-col lg:flex-row">
+            <div className="flex items-center justify-center bg-green-800 p-2 rounded-lg h-fit -mt-1.5">
               <WithTooltip tooltip="Hide chat details">
                 <button
                   onClick={() => {
@@ -60,14 +115,14 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   }}
                   className={classNames(
                     'i-ph:list-dashes',
-                    'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                    'text-xl text-white hover:text-bolt-elements-textPrimary transition-colors'
                   )}
                 />
               </WithTooltip>
             </div>
           )}
           {!isUserMessage && message.category === 'UserResponse' && !showDetailMessageIds.includes(message.id) && (
-            <div className="flex gap-2 flex-col lg:flex-row">
+            <div className="flex items-center justify-center p-2 rounded-lg h-fit -mt-1.5">
               <WithTooltip tooltip="Show chat details">
                 <button
                   onClick={() => {
@@ -75,7 +130,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   }}
                   className={classNames(
                     'i-ph:list-dashes',
-                    'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                    'text-xl hover:text-bolt-elements-textPrimary transition-colors'
                   )}
                 />
               </WithTooltip>

@@ -68,3 +68,33 @@ export function createMessagesForRepository(title: string, repositoryId: string)
 
   return messages;
 }
+
+export enum PlaywrightTestStatus {
+  Pass = "Pass",
+  Fail = "Fail",
+  NotRun = "NotRun",
+}
+
+export interface PlaywrightTestResult {
+  title: string;
+  status: PlaywrightTestStatus;
+  recordingId?: string;
+}
+
+export function parseTestResultsMessage(contents: string): PlaywrightTestResult[] {
+  const results: PlaywrightTestResult[] = [];
+  const lines = contents.split("\n");
+  for (const line of lines) {
+    const match = line.match(/TestResult (.*?) (.*?) (.*)/);
+    if (!match) {
+      continue;
+    }
+    const [status, recordingId, title] = match.slice(1);
+    results.push({
+      status: status as PlaywrightTestStatus,
+      title,
+      recordingId: recordingId == "NoRecording" ? undefined : recordingId,
+    });
+  }
+  return results;
+}
