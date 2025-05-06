@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { type BuildAppResult, getRecentApps } from '~/lib/persistence/apps';
+import { type BuildAppSummary, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 
 const formatDate = (date: Date) => {
@@ -16,7 +16,7 @@ const formatDate = (date: Date) => {
 
 export const ExampleLibraryApps = () => {
   const [numApps, setNumApps] = useState<number>(6);
-  const [apps, setApps] = useState<BuildAppResult[]>([]);
+  const [apps, setApps] = useState<BuildAppSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

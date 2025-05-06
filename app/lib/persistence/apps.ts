@@ -8,17 +8,21 @@ export interface BuildAppOutcome {
   hasDatabase?: boolean;
 }
 
-export interface BuildAppResult {
+export interface BuildAppSummary {
   id: string;
   title: string | undefined;
+  prompt: string | undefined;
   elapsedMinutes: number;
   totalPeanuts: number;
   imageDataURL: string | undefined;
-  messages: Message[];
-  protocolChatId: string;
   outcome: BuildAppOutcome;
   appId: string;
   createdAt: string;
+}
+
+export interface BuildAppResult extends BuildAppSummary {
+  messages: Message[];
+  protocolChatId: string;
 }
 
 function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
@@ -45,21 +49,32 @@ function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
   }
 }
 
-function databaseRowToBuildAppResult(row: any): BuildAppResult {
-  // Determine the outcome based on the result field
+const BUILD_APP_SUMMARY_COLUMNS = [
+  'id', 'title', 'prompt', 'elapsed_minutes', 'total_peanuts', 'image_url',
+  'outcome', 'app_id', 'created_at',
+].join(',');
+
+function databaseRowToBuildAppSummary(row: any): BuildAppSummary {
   const outcome = parseBuildAppOutcome(row.outcome);
 
   return {
     id: row.id,
     title: row.title,
+    prompt: row.prompt,
     elapsedMinutes: row.elapsed_minutes || 0,
     totalPeanuts: row.total_peanuts || 0,
     imageDataURL: row.image_url,
-    messages: row.messages || [],
-    protocolChatId: row.protocol_chat_id,
     outcome,
     appId: row.app_id,
     createdAt: row.created_at,
+  };
+}
+
+function databaseRowToBuildAppResult(row: any): BuildAppResult {
+  return {
+    ...databaseRowToBuildAppSummary(row),
+    messages: row.messages || [],
+    protocolChatId: row.protocol_chat_id,
   };
 }
 
@@ -68,7 +83,7 @@ function databaseRowToBuildAppResult(row: any): BuildAppResult {
  * @param hours Number of hours to look back
  * @returns Array of BuildAppResult objects
  */
-async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult[]> {
+async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppSummary[]> {
   try {
     // Calculate the timestamp for X hours ago
     const hoursAgo = new Date();
@@ -76,7 +91,7 @@ async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult
 
     const { data, error } = await getSupabase()
       .from('apps')
-      .select('*')
+      .select(BUILD_APP_SUMMARY_COLUMNS)
       .eq('deleted', false)
       .gte('created_at', hoursAgo.toISOString())
       .order('created_at', { ascending: false });
@@ -87,7 +102,7 @@ async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult
     }
 
     // Ignore apps that don't have a title or image.
-    return data.map(databaseRowToBuildAppResult).filter((app) => app.title && app.imageDataURL);
+    return data.map(databaseRowToBuildAppSummary).filter((app) => app.title && app.imageDataURL);
   } catch (error) {
     console.error('Failed to get recent apps:', error);
     throw error;
@@ -96,8 +111,8 @@ async function getAppsCreatedInLastXHours(hours: number): Promise<BuildAppResult
 
 const HOUR_RANGES = [1, 2, 3, 6, 12, 24];
 
-export async function getRecentApps(numApps: number): Promise<BuildAppResult[]> {
-  let apps: BuildAppResult[] = [];
+export async function getRecentApps(numApps: number): Promise<BuildAppSummary[]> {
+  let apps: BuildAppSummary[] = [];
   for (const range of HOUR_RANGES) {
     apps = await getAppsCreatedInLastXHours(range);
     if (apps.length >= numApps) {
