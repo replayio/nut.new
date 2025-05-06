@@ -47,8 +47,27 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background')}
       >
         <div className="flex flex-col gap-2">
+          <div className="text-lg font-semibold mb-2">Test Results</div>
           {testResults.map((result) => (
-            <div key={result.title}>{result.title}</div>
+            <div key={result.title} className="flex items-center gap-2">
+              <div className={classNames('w-3 h-3 rounded-full border border-black', {
+                'bg-green-500': result.status === 'Pass',
+                'bg-red-500': result.status === 'Fail',
+                'bg-gray-300': result.status === 'NotRun'
+              })} />
+              {result.recordingId ? (
+                <a 
+                  href={`https://app.replay.io/recording/${result.recordingId}`}
+                  className="underline hover:text-blue-600"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {result.title}
+                </a>
+              ) : (
+                <div>{result.title}</div>
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -66,15 +85,15 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       if (!lastUserResponse) {
         return null;
       }
+      const showDetails = showDetailMessageIds.includes(lastUserResponse.id);
 
       if (message.category === 'TestResults') {
-        // Only show the last test results for each user response.
-        if (!isLastTestResults(index)) {
+        // The default view only shows the last test results for each user response.
+        if (!isLastTestResults(index) && !showDetails) {
           return null;
         }
-        return renderTestResults(message);
+        return renderTestResults(message, index);
       } else {
-        const showDetails = showDetailMessageIds.includes(lastUserResponse.id);
         if (!showDetails) {
           return null;
         }
