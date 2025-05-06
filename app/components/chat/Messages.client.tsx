@@ -44,19 +44,23 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       <div
         data-testid="message"
         key={index}
-        className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background')}
+        className={classNames(
+          'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background',
+        )}
       >
         <div className="flex flex-col gap-2">
           <div className="text-lg font-semibold mb-2">Test Results</div>
           {testResults.map((result) => (
             <div key={result.title} className="flex items-center gap-2">
-              <div className={classNames('w-3 h-3 rounded-full border border-black', {
-                'bg-green-500': result.status === 'Pass',
-                'bg-red-500': result.status === 'Fail',
-                'bg-gray-300': result.status === 'NotRun'
-              })} />
+              <div
+                className={classNames('w-3 h-3 rounded-full border border-black', {
+                  'bg-green-500': result.status === 'Pass',
+                  'bg-red-500': result.status === 'Fail',
+                  'bg-gray-300': result.status === 'NotRun',
+                })}
+              />
               {result.recordingId ? (
-                <a 
+                <a
                   href={`https://app.replay.io/recording/${result.recordingId}`}
                   className="underline hover:text-blue-600"
                   target="_blank"
@@ -105,8 +109,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         data-testid="message"
         key={index}
         className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
-          'bg-bolt-elements-messages-background':
-            isUserMessage || !hasPendingMessage || (hasPendingMessage && !isLast),
+          'bg-bolt-elements-messages-background': isUserMessage || !hasPendingMessage || (hasPendingMessage && !isLast),
           'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
             hasPendingMessage && isLast,
           'mt-4': !isFirst,
@@ -134,7 +137,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   }}
                   className={classNames(
                     'i-ph:list-dashes',
-                    'text-xl text-white hover:text-bolt-elements-textPrimary transition-colors'
+                    'text-xl text-white hover:text-bolt-elements-textPrimary transition-colors',
                   )}
                 />
               </WithTooltip>
@@ -149,7 +152,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   }}
                   className={classNames(
                     'i-ph:list-dashes',
-                    'text-xl hover:text-bolt-elements-textPrimary transition-colors'
+                    'text-xl hover:text-bolt-elements-textPrimary transition-colors',
                   )}
                 />
               </WithTooltip>
@@ -177,9 +180,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
 
   return (
     <div id={id} ref={ref} className={props.className}>
-      {messages.length > 0
-        ? messages.map(renderMessage)
-        : null}
+      {messages.length > 0 ? messages.map(renderMessage) : null}
       {hasPendingMessage && (
         <div className="w-full text-bolt-elements-textSecondary flex items-center">
           <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2 text-4xl"></span>

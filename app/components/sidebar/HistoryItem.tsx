@@ -1,13 +1,13 @@
 import { useParams } from '@remix-run/react';
 import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
-import { type ChatContents } from '~/lib/persistence/chats';
+import { type ChatSummary } from '~/lib/persistence/chats';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { forwardRef, type ForwardedRef } from 'react';
 
 interface HistoryItemProps {
-  item: ChatContents;
+  item: ChatSummary;
   onDelete?: (event: React.UIEvent) => void;
   onDuplicate?: (id: string) => void;
 }

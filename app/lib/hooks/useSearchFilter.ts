@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { debounce } from '~/utils/debounce';
-import type { ChatContents } from '~/lib/persistence/chats';
+import type { ChatSummary } from '~/lib/persistence/chats';
 
 interface UseSearchFilterOptions {
-  items: ChatContents[];
-  searchFields?: (keyof ChatContents)[];
+  items: ChatSummary[];
+  searchFields?: (keyof ChatSummary)[];
   debounceMs?: number;
 }
 

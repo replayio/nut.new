@@ -15,7 +15,7 @@ export interface ChatSummary {
   title: string;
 }
 
-const ChatSummaryColumns = ['id', 'created_at', 'updated_at', 'title', 'deleted'].join(',');
+const CHAT_SUMMARY_COLUMNS = ['id', 'created_at', 'updated_at', 'title', 'deleted'].join(',');
 
 function databaseRowToChatSummary(d: any): ChatSummary {
   return {
@@ -73,13 +73,13 @@ async function getAllChats(): Promise<ChatSummary[]> {
     return getLocalChats();
   }
 
-  const { data, error } = await getSupabase().from('chats').select(ChatSummaryColumns).eq('deleted', false);
+  const { data, error } = await getSupabase().from('chats').select(CHAT_SUMMARY_COLUMNS).eq('deleted', false);
 
   if (error) {
     throw error;
   }
 
-  const chats = data.map(databaseRowToChatContents);
+  const chats = data.map(databaseRowToChatSummary);
   return chats.filter((chat) => !deletedChats.has(chat.id));
 }
 

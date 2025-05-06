@@ -70,9 +70,9 @@ export function createMessagesForRepository(title: string, repositoryId: string)
 }
 
 export enum PlaywrightTestStatus {
-  Pass = "Pass",
-  Fail = "Fail",
-  NotRun = "NotRun",
+  Pass = 'Pass',
+  Fail = 'Fail',
+  NotRun = 'NotRun',
 }
 
 export interface PlaywrightTestResult {
@@ -83,7 +83,7 @@ export interface PlaywrightTestResult {
 
 export function parseTestResultsMessage(contents: string): PlaywrightTestResult[] {
   const results: PlaywrightTestResult[] = [];
-  const lines = contents.split("\n");
+  const lines = contents.split('\n');
   for (const line of lines) {
     const match = line.match(/TestResult (.*?) (.*?) (.*)/);
     if (!match) {
@@ -93,7 +93,7 @@ export function parseTestResultsMessage(contents: string): PlaywrightTestResult[
     results.push({
       status: status as PlaywrightTestStatus,
       title,
-      recordingId: recordingId == "NoRecording" ? undefined : recordingId,
+      recordingId: recordingId == 'NoRecording' ? undefined : recordingId,
     });
   }
   return results;

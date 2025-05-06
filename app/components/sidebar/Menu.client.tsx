@@ -5,7 +5,7 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { database, type ChatContents } from '~/lib/persistence/chats';
+import { database, type ChatSummary } from '~/lib/persistence/chats';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
@@ -35,13 +35,13 @@ const menuVariants = {
   },
 } satisfies Variants;
 
-type DialogContent = { type: 'delete'; item: ChatContents } | null;
+type DialogContent = { type: 'delete'; item: ChatSummary } | null;
 
 const skipConfirmDeleteCookieName = 'skipConfirmDelete';
 
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatContents[]>([]);
+  const [list, setList] = useState<ChatSummary[]>([]);
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -60,7 +60,7 @@ export const Menu = () => {
   }, []);
 
   const deleteItem = useCallback(
-    (event: React.UIEvent, item: ChatContents) => {
+    (event: React.UIEvent, item: ChatSummary) => {
       event.preventDefault();
 
       // Optimistically remove the item from the list while we update the database.
@@ -116,7 +116,7 @@ export const Menu = () => {
     };
   }, []);
 
-  const handleDeleteClick = (event: React.UIEvent, item: ChatContents) => {
+  const handleDeleteClick = (event: React.UIEvent, item: ChatSummary) => {
     event.preventDefault();
 
     const skipConfirmDelete = Cookies.get(skipConfirmDeleteCookieName);
