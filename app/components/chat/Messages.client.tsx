@@ -22,6 +22,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     const isFirst = index === 0;
     const isLast = index === messages.length - 1;
 
+    if (!isUserMessage && message.category !== 'UserResponse') {
+      return null;
+    }
+
     return (
       <div
         data-testid="message"
@@ -47,7 +51,22 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           <div className="grid grid-col-1 w-full">
             <MessageContents message={message} />
           </div>
-          {message.category === 'UserResponse' && (
+          {!isUserMessage && message.category === 'UserResponse' && showDetailMessageIds.includes(message.id) && (
+            <div className="flex gap-2 flex-col lg:flex-row">
+              <WithTooltip tooltip="Hide chat details">
+                <button
+                  onClick={() => {
+                    setShowDetailMessageIds(showDetailMessageIds.filter((id) => id !== message.id));
+                  }}
+                  className={classNames(
+                    'i-ph:list-dashes',
+                    'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                  )}
+                />
+              </WithTooltip>
+            </div>
+          )}
+          {!isUserMessage && message.category === 'UserResponse' && !showDetailMessageIds.includes(message.id) && (
             <div className="flex gap-2 flex-col lg:flex-row">
               <WithTooltip tooltip="Show chat details">
                 <button
