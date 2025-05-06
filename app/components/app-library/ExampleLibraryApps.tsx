@@ -179,9 +179,9 @@ export const ExampleLibraryApps = () => {
               {app.outcome.hasDatabase ? 'Present' : 'None'}
             </span>
           </div>
+          <div className="text-lg font-semibold mb-2">Test Results</div>
           {testResults && (
             <div className="flex flex-col gap-2">
-              <div className="text-lg font-semibold mb-2">Test Results</div>
               {testResults.map((result) => (
                 <div key={result.title} className="flex items-center gap-2">
                   <div
@@ -207,6 +207,7 @@ export const ExampleLibraryApps = () => {
               ))}
             </div>
           )}
+          {!testResults && <div>Loading...</div>}
         </div>
       </div>
     );
