@@ -19,6 +19,7 @@ export const ExampleLibraryApps = () => {
   const [apps, setApps] = useState<BuildAppSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchRecentApps() {
@@ -53,36 +54,40 @@ export const ExampleLibraryApps = () => {
 
   const displayApps = apps.slice(0, numApps);
 
+  const renderApp = (app: BuildAppSummary) => {
+    return (
+      <div
+        key={app.id}
+        onClick={() => setSelectedApp(app.id)}
+        className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
+      >
+        {app.imageDataURL ? (
+          <img src={app.imageDataURL} alt={app.title || 'App preview'} className={styles.previewImage} />
+        ) : (
+          <div className={styles.placeholderImage}>{app.title || 'No preview'}</div>
+        )}
+        <div className={styles.appTitle}>{app.title || 'Untitled App'}</div>
+        <div className={styles.hoverOverlay}>
+          <div className={styles.hoverContent}>
+            <div className={styles.hoverInfo}>
+              <div>
+                Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes
+              </div>
+              <div>
+                {app.totalPeanuts} peanuts{app.outcome.hasDatabase ? ' (has database)' : ''}
+              </div>
+              {!app.outcome.testsPassed && <div className={styles.warningText}>⚠️ Not all tests are passing</div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.grid}>
-        {displayApps.map((app) => (
-          <a
-            key={app.id}
-            href={`/app/${app.id}`}
-            className={`${styles.appItem} ${!app.outcome.testsPassed ? styles.appItemError : ''}`}
-          >
-            {app.imageDataURL ? (
-              <img src={app.imageDataURL} alt={app.title || 'App preview'} className={styles.previewImage} />
-            ) : (
-              <div className={styles.placeholderImage}>{app.title || 'No preview'}</div>
-            )}
-            <div className={styles.appTitle}>{app.title || 'Untitled App'}</div>
-            <div className={styles.hoverOverlay}>
-              <div className={styles.hoverContent}>
-                <div className={styles.hoverInfo}>
-                  <div>
-                    Created at {formatDate(new Date(app.createdAt))} in {Math.round(app.elapsedMinutes)} minutes
-                  </div>
-                  <div>
-                    {app.totalPeanuts} peanuts{app.outcome.hasDatabase ? ' (has database)' : ''}
-                  </div>
-                  {!app.outcome.testsPassed && <div className={styles.warningText}>⚠️ Not all tests are passing</div>}
-                </div>
-              </div>
-            </div>
-          </a>
-        ))}
+        {displayApps.map(renderApp)}
       </div>
       {loading && <div className={styles.loading}>Loading recent apps...</div>}
       {!loading && (
