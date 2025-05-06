@@ -156,7 +156,7 @@ export const ExampleLibraryApps = () => {
               Load App
             </button>
             <button className={styles.actionButton} onClick={() => {
-              window.open(`/app/${app.id}`);
+              window.open(`/app/${app.id}`, '_self');
             }}>
               Start Chat
             </button>
