@@ -84,7 +84,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     const isFirst = index === 0;
     const isLast = index === messages.length - 1;
 
-    if (!isUserMessage && message.category !== 'UserResponse') {
+    if (!isUserMessage && message.category && message.category !== 'UserResponse') {
       const lastUserResponse = getLastUserResponse(index);
       if (!lastUserResponse) {
         return null;
