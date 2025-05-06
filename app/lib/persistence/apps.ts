@@ -123,7 +123,9 @@ export async function getRecentApps(numApps: number): Promise<BuildAppSummary[]>
 }
 
 export async function getAppById(id: string): Promise<BuildAppResult> {
+  console.log('GetAppByIdStart', id);
   const { data, error } = await getSupabase().from('apps').select('*').eq('id', id).single();
+  console.log('GetAppByIdDone', id);
 
   if (error) {
     console.error('Error fetching app by id:', error);

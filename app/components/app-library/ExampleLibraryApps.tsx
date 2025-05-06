@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { parseTestResultsMessage, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
+import { getMessagesRepositoryId, parseTestResultsMessage, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
 import { classNames } from '~/utils/classNames';
 
 const formatDate = (date: Date) => {
@@ -146,10 +146,18 @@ export const ExampleLibraryApps = () => {
         <div className={styles.detailHeader}>
           <h3 className={styles.detailTitle}>{app.title}</h3>
           <div className={styles.detailActions}>
-            <button className={styles.actionButton} onClick={() => onLoadApp(app.id)}>
+            <button className={styles.actionButton} onClick={async () => {
+              const contents = appContents ?? await getAppById(appId);
+              const repositoryId = getMessagesRepositoryId(contents.messages);
+              if (repositoryId) {
+                window.open(`https://${repositoryId}.http.replay.io`, '_blank');
+              }
+            }}>
               Load App
             </button>
-            <button className={styles.actionButton} onClick={() => onStartNewChat(app.id)}>
+            <button className={styles.actionButton} onClick={() => {
+              window.open(`/app/${app.id}`);
+            }}>
               Start Chat
             </button>
           </div>
