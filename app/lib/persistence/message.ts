@@ -9,6 +9,7 @@ interface MessageBase {
   role: MessageRole;
   repositoryId?: string;
   peanuts?: number;
+  category?: string;
 
   // Not part of the protocol, indicates whether the user has explicitly approved
   // the message. Once approved, the approve/reject UI is not shown again for the message.
