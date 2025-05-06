@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { parseTestResultsMessage, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { classNames } from '~/utils/classNames';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -130,10 +130,7 @@ export const ExampleLibraryApps = () => {
 
   const getTestResults = (appContents: BuildAppResult) => {
     const message = appContents.messages.findLast((message) => message.category === TEST_RESULTS_CATEGORY);
-    if (!message) {
-      return null;
-    }
-    return parseTestResultsMessage(message);
+    return message ? parseTestResultsMessage(message) : [];
   }
 
   const renderAppDetails = (appId: string, appContents: BuildAppResult | null) => {
@@ -182,6 +179,34 @@ export const ExampleLibraryApps = () => {
               {app.outcome.hasDatabase ? 'Present' : 'None'}
             </span>
           </div>
+          {testResults && (
+            <div className="flex flex-col gap-2">
+              <div className="text-lg font-semibold mb-2">Test Results</div>
+              {testResults.map((result) => (
+                <div key={result.title} className="flex items-center gap-2">
+                  <div
+                    className={classNames('w-3 h-3 rounded-full border border-black', {
+                      'bg-green-500': result.status === 'Pass',
+                      'bg-red-500': result.status === 'Fail',
+                      'bg-gray-300': result.status === 'NotRun',
+                    })}
+                  />
+                  {result.recordingId ? (
+                    <a
+                      href={`https://app.replay.io/recording/${result.recordingId}`}
+                      className="underline hover:text-blue-600"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {result.title}
+                    </a>
+                  ) : (
+                    <div>{result.title}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
