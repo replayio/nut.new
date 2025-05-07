@@ -68,26 +68,13 @@ const deletedChats = new Set<string>();
 
 async function getAllChats(): Promise<ChatSummary[]> {
   const userId = await getCurrentUserId();
-
-  if (!userId) {
-    return getLocalChats();
-  }
-
-  const { data, error } = await getSupabase().from('chats').select(CHAT_SUMMARY_COLUMNS).eq('deleted', false);
-
-  if (error) {
-    throw error;
-  }
-
-  const chats = data.map(databaseRowToChatSummary);
-  return chats.filter((chat) => !deletedChats.has(chat.id));
-}
-
-async function syncLocalChats(): Promise<void> {
-  const userId = await getCurrentUserId();
   const localChats = getLocalChats();
 
-  if (userId && localChats.length) {
+  if (!userId) {
+    return localChats;
+  }
+
+  if (localChats.length) {
     try {
       for (const chat of localChats) {
         if (chat.title) {
@@ -99,6 +86,15 @@ async function syncLocalChats(): Promise<void> {
       console.error('Error syncing local chats', error);
     }
   }
+
+  const { data, error } = await getSupabase().from('chats').select(CHAT_SUMMARY_COLUMNS).eq('deleted', false);
+
+  if (error) {
+    throw error;
+  }
+
+  const chats = data.map(databaseRowToChatSummary);
+  return chats.filter((chat) => !deletedChats.has(chat.id));
 }
 
 async function setChatContents(chat: ChatContents) {
@@ -254,7 +250,6 @@ async function updateChatLastMessage(
 
 export const database = {
   getAllChats,
-  syncLocalChats,
   setChatContents,
   getChatPublicData,
   getChatContents,

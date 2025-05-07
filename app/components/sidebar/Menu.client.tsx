@@ -41,18 +41,19 @@ const skipConfirmDeleteCookieName = 'skipConfirmDelete';
 
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatSummary[]>([]);
+  const [list, setList] = useState<ChatSummary[] | null>(null);
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
-    items: list,
+    items: list ?? [],
     searchFields: ['title'],
   });
 
   const loadEntries = useCallback(() => {
+    setList(null);
     database
       .getAllChats()
       .then(setList)
@@ -64,7 +65,7 @@ export const Menu = () => {
       event.preventDefault();
 
       // Optimistically remove the item from the list while we update the database.
-      setList(list.filter((chat) => chat.id !== item.id));
+      setList((list ?? []).filter((chat) => chat.id !== item.id));
 
       database
         .deleteChat(item.id)
@@ -168,7 +169,7 @@ export const Menu = () => {
         <div className="flex-1 overflow-auto pl-4 pr-5 pb-5">
           {filteredList.length === 0 && (
             <div className="pl-2 text-bolt-elements-textTertiary">
-              {list.length === 0 ? 'No previous conversations' : 'No matches found'}
+              {list ? (list.length === 0 ? 'No previous conversations' : 'No matches found') : 'Loading...'}
             </div>
           )}
           <DialogRoot open={dialogContent !== null}>
