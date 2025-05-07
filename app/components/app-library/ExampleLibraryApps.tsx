@@ -16,7 +16,11 @@ const formatDate = (date: Date) => {
   }).format(date);
 };
 
-export const ExampleLibraryApps = () => {
+interface ExampleLibraryAppsProps {
+  filterText: string;
+}
+
+export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
   const [numApps, setNumApps] = useState<number>(6);
   const [apps, setApps] = useState<BuildAppSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,10 +58,15 @@ export const ExampleLibraryApps = () => {
   }, [selectedAppId]);
 
   useEffect(() => {
+    setApps([]);
+    setNumApps(6);
+  }, [filterText]);
+
+  useEffect(() => {
     async function fetchRecentApps() {
       try {
         setLoading(true);
-        const recentApps = await getRecentApps(numApps);
+        const recentApps = await getRecentApps(numApps, filterText);
         setApps(recentApps);
         setError(null);
       } catch (err) {
@@ -68,10 +77,8 @@ export const ExampleLibraryApps = () => {
       }
     }
 
-    if (apps.length < numApps) {
-      fetchRecentApps();
-    }
-  }, [numApps]);
+    fetchRecentApps();
+  }, [numApps, filterText]);
 
   if (error) {
     return <div className={styles.error}>{error}</div>;

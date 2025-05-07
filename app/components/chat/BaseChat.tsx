@@ -78,6 +78,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
+    const [pendingFilterText, setPendingFilterText] = useState('');
     const [filterText, setFilterText] = useState('');
 
     useEffect(() => {
@@ -459,7 +460,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 <div className="placeholder-bolt-elements-textTertiary" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                   <input 
                     type="text" 
-                    placeholder="Filter" 
+                    placeholder="Filter"
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        setFilterText(pendingFilterText);
+                      }
+                    }}
+                    onChange={(event) => {
+                      setPendingFilterText(event.target.value);
+                    }}
                     style={{
                       width: '200px',
                       padding: '0.5rem',
@@ -471,7 +480,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     }}
                   />
                 </div>
-                <ExampleLibraryApps />
+                <ExampleLibraryApps filterText={filterText} />
               </>
             )}
           </div>

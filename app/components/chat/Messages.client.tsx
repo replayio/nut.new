@@ -43,7 +43,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         data-testid="message"
         key={index}
         className={classNames(
-          'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background',
+          'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
         )}
       >
         <div className="flex flex-col gap-2">
