@@ -133,12 +133,7 @@ export function getSupabase() {
   }
 
   // Create and cache the Supabase client
-  supabaseClientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  });
+  supabaseClientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
   return supabaseClientInstance;
 }
