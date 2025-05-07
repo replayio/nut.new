@@ -5,7 +5,7 @@ import { logStore } from './logs';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '~/lib/supabase/client';
 import { database } from '~/lib/persistence/chats';
-import { pingTelemetry } from '../hooks/pingTelemetry';
+import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);

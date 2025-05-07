@@ -2,7 +2,7 @@
 
 import { getSupabase } from '~/lib/supabase/client';
 import type { Message } from './message';
-import { pingTelemetry } from '../hooks/pingTelemetry';
+import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 
 export interface BuildAppOutcome {
   testsPassed?: boolean;
