@@ -2,6 +2,7 @@
 
 import { getSupabase } from '~/lib/supabase/client';
 import type { Message } from './message';
+import { pingTelemetry } from '../hooks/pingTelemetry';
 
 export interface BuildAppOutcome {
   testsPassed?: boolean;
@@ -131,7 +132,16 @@ export async function getRecentApps(numApps: number): Promise<BuildAppSummary[]>
 
 export async function getAppById(id: string): Promise<BuildAppResult> {
   console.log('GetAppByIdStart', id);
+
+  // In local testing we've seen problems where this query hangs.
+  const timeout = setTimeout(() => {
+    pingTelemetry('GetAppByIdTimeout', {});
+  }, 5000);
+
   const { data, error } = await getSupabase().from('apps').select('*').eq('id', id).single();
+
+  clearTimeout(timeout);
+
   console.log('GetAppByIdDone', id);
 
   if (error) {

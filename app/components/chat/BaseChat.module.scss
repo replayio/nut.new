@@ -45,3 +45,20 @@
   fill: url(#shine-gradient);
   mix-blend-mode: overlay;
 }
+
+.filterInput {
+  margin-bottom: 1rem;
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &::placeholder {
+      color: var(--text-secondary);
+    }
+  }
+}

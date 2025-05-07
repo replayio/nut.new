@@ -5,6 +5,7 @@ import { logStore } from './logs';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '~/lib/supabase/client';
 import { database } from '~/lib/persistence/chats';
+import { pingTelemetry } from '../hooks/pingTelemetry';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
@@ -36,6 +37,7 @@ export async function initializeAuth() {
     // Handle this by using a timeout to ensure we don't wait indefinitely.
     const timeoutPromise = new Promise<{ data: { session: Session | null }; error?: AuthError }>((resolve) => {
       setTimeout(() => {
+        pingTelemetry('AuthTimeout', {});
         resolve({
           data: { session: null },
           error: new AuthError('Timed out initializing auth'),

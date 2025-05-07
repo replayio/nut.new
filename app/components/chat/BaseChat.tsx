@@ -78,6 +78,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
+    const [filterText, setFilterText] = useState('');
 
     useEffect(() => {
       console.log(transcript);
@@ -454,6 +455,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 </div>
                 <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">
                   Browse these auto-generated apps for a place to start
+                </div>
+                <div className={styles.filterInput} style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Filter" 
+                    style={{
+                      width: '200px',
+                      padding: '0.5rem',
+                      marginTop: '0.5rem',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      fontSize: '0.9rem',
+                      textAlign: 'left',
+                    }}
+                  />
                 </div>
                 <ExampleLibraryApps />
               </>
