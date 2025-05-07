@@ -148,7 +148,7 @@ export const ExampleLibraryApps = () => {
     return (
       <div className={styles.detailView}>
         <div className={styles.detailHeader}>
-          <h3 className={styles.detailTitle}>{app.title}</h3>
+          <h3 className={`${styles.detailTitle} text-bolt-elements-textPrimary`}>{app.title}</h3>
           <div className={styles.detailActions}>
             <button
               className={styles.actionButton}
@@ -172,7 +172,7 @@ export const ExampleLibraryApps = () => {
             </button>
           </div>
         </div>
-        <div className={styles.appDetails}>
+        <div className={`${styles.appDetails} text-bolt-elements-textPrimary`}>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Created:</span>
             <span className={styles.detailValue}>{new Date(app.createdAt).toLocaleString()}</span>
@@ -189,13 +189,13 @@ export const ExampleLibraryApps = () => {
             <span className={styles.detailLabel}>Database:</span>
             <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
-          <div className="text-lg font-semibold mb-2">Test Results</div>
+          <div className="text-lg font-semibold mb-2 text-bolt-elements-textPrimary">Test Results</div>
           {testResults && (
             <div className="flex flex-col gap-2">
               {testResults.map((result) => (
                 <div key={result.title} className="flex items-center gap-2">
                   <div
-                    className={classNames('w-3 h-3 rounded-full border border-black', {
+                    className={classNames('w-3 h-3 rounded-full border border-bolt-elements-borderColor', {
                       'bg-green-500': result.status === 'Pass',
                       'bg-red-500': result.status === 'Fail',
                       'bg-gray-300': result.status === 'NotRun',
@@ -204,20 +204,20 @@ export const ExampleLibraryApps = () => {
                   {result.recordingId ? (
                     <a
                       href={`https://app.replay.io/recording/${result.recordingId}`}
-                      className="underline hover:text-blue-600"
+                      className="text-bolt-elements-textPrimary hover:text-bolt-elements-textSecondary"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {result.title}
                     </a>
                   ) : (
-                    <div>{result.title}</div>
+                    <div className="text-bolt-elements-textPrimary">{result.title}</div>
                   )}
                 </div>
               ))}
             </div>
           )}
-          {!testResults && <div>Loading...</div>}
+          {!testResults && <div className="text-bolt-elements-textPrimary">Loading...</div>}
         </div>
       </div>
     );

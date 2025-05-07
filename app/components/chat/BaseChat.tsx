@@ -456,7 +456,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">
                   Browse these auto-generated apps for a place to start
                 </div>
-                <div className={styles.filterInput} style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                <div className="placeholder-bolt-elements-textTertiary" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                   <input 
                     type="text" 
                     placeholder="Filter" 
