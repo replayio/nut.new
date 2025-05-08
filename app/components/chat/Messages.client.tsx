@@ -16,8 +16,18 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [] } = props;
   const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
 
+  // Get the last user response before a given message, or null if there is
+  // no user response between this and the last user message.
   const getLastUserResponse = (index: number) => {
-    return messages.findLast((message, messageIndex) => messageIndex < index && message.category === 'UserResponse');
+    for (let i = index - 1; i >= 0; i--) {
+      if (messages[i].category === 'UserResponse') {
+        return messages[i];
+      }
+      if (messages[i].role === 'user') {
+        return null;
+      }
+    }
+    return null;
   };
 
   // Return whether the test results at index are the last for the associated user response.
@@ -84,10 +94,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
 
     if (!isUserMessage && message.category && message.category !== 'UserResponse') {
       const lastUserResponse = getLastUserResponse(index);
-      if (!lastUserResponse) {
-        return null;
-      }
-      const showDetails = showDetailMessageIds.includes(lastUserResponse.id);
+      const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
       if (message.category === TEST_RESULTS_CATEGORY) {
         // The default view only shows the last test results for each user response.
@@ -95,10 +102,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           return null;
         }
         return renderTestResults(message, index);
-      } else {
-        if (!showDetails) {
-          return null;
-        }
+      } else if (!showDetails) {
+        return null;
       }
     }
 

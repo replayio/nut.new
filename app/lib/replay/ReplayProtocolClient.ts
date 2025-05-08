@@ -94,7 +94,7 @@ export class ProtocolClient {
   openDeferred = createDeferred<void>();
   eventListeners = new Map<string, Set<EventListener>>();
   nextMessageId = 1;
-  pendingCommands = new Map<number, { method: string; deferred: Deferred<any> }>();
+  pendingCommands = new Map<number, { method: string; deferred: Deferred<any>; errorHandled: boolean }>();
   socket: WebSocket;
 
   constructor() {
@@ -141,10 +141,10 @@ export class ProtocolClient {
     };
   }
 
-  sendCommand(args: { method: string; params: any; sessionId?: string }) {
+  sendCommand(args: { method: string; params: any; sessionId?: string; errorHandled?: boolean }) {
     const id = this.nextMessageId++;
 
-    const { method, params, sessionId } = args;
+    const { method, params, sessionId, errorHandled = false } = args;
     logDebug('Sending command', { id, method, params, sessionId });
 
     const command = {
@@ -157,7 +157,7 @@ export class ProtocolClient {
     this.socket.send(JSON.stringify(command));
 
     const deferred = createDeferred();
-    this.pendingCommands.set(id, { method, deferred });
+    this.pendingCommands.set(id, { method, deferred, errorHandled });
 
     return deferred.promise;
   }
@@ -182,8 +182,12 @@ export class ProtocolClient {
       if (result) {
         info.deferred.resolve(result);
       } else if (error) {
-        pingTelemetry('ProtocolError', { method: info.method, error });
-        console.error('ProtocolError', info.method, id, error);
+        if (info.errorHandled) {
+          console.log('ProtocolErrorHandled', info.method, id, error);
+        } else {
+          pingTelemetry('ProtocolError', { method: info.method, error });
+          console.error('ProtocolError', info.method, id, error);
+        }
         info.deferred.reject(new ProtocolError(error));
       } else {
         info.deferred.reject(new Error('Channel error'));

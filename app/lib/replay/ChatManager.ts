@@ -11,6 +11,11 @@ import { database } from '~/lib/persistence/chats';
 import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
+import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+
+// We report to telemetry if we start a message and don't get any response
+// before this timeout.
+const ChatResponseTimeoutMs = 20_000;
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -53,6 +58,9 @@ class ChatManager {
   // Simulation data for the page itself and any user interactions.
   pageData: SimulationData = [];
 
+  // Whether there were any errors in commands related to the simulation.
+  private hadSimulationError = false;
+
   constructor() {
     this.client = new ProtocolClient();
     this.chatIdPromise = (async () => {
@@ -89,6 +97,7 @@ class ChatManager {
       await this.client?.sendCommand({
         method: 'Nut.finishChat',
         params: { chatId },
+        errorHandled: true,
       });
     } catch (e) {
       console.error('Error finishing chat', e);
@@ -105,16 +114,21 @@ class ChatManager {
     const packet = createRepositoryIdPacket(repositoryId);
 
     const chatId = await this.chatIdPromise;
-    await this.client.sendCommand({
-      method: 'Nut.addSimulation',
-      params: {
-        chatId,
-        version: simulationDataVersion,
-        simulationData: [packet],
-        completeData: false,
-        saveRecording: true,
-      },
-    });
+    try {
+      await this.client.sendCommand({
+        method: 'Nut.addSimulation',
+        params: {
+          chatId,
+          version: simulationDataVersion,
+          simulationData: [packet],
+          completeData: false,
+          saveRecording: true,
+        },
+      });
+    } catch (e) {
+      console.log('Error adding simulation', e);
+      this.hadSimulationError = true;
+    }
   }
 
   async addPageData(data: SimulationData) {
@@ -135,10 +149,16 @@ class ChatManager {
 
     console.log('ChatAddPageData', new Date().toISOString(), chatId, data.length);
 
-    await this.client.sendCommand({
-      method: 'Nut.addSimulationData',
-      params: { chatId, simulationData: data },
-    });
+    try {
+      await this.client.sendCommand({
+        method: 'Nut.addSimulationData',
+        params: { chatId, simulationData: data },
+        errorHandled: true,
+      });
+    } catch (e) {
+      console.log('Error adding simulation data', e);
+      this.hadSimulationError = true;
+    }
   }
 
   async finishSimulationData() {
@@ -148,14 +168,56 @@ class ChatManager {
     this.simulationFinished = true;
 
     const chatId = await this.chatIdPromise;
-    await this.client.sendCommand({
-      method: 'Nut.finishSimulationData',
-      params: { chatId },
-    });
+    try {
+      await this.client.sendCommand({
+        method: 'Nut.finishSimulationData',
+        params: { chatId },
+        errorHandled: true,
+      });
+    } catch (e) {
+      console.log('Error finishing simulation data', e);
+      this.hadSimulationError = true;
+    }
+  }
+
+  // If we encounter a backend error during simulation the problem is likely that
+  // the underlying resources running the simulation were destroyed. Start a new
+  // chat and add all the simulation data again, which doesn't let us stream the
+  // data up but will work at least.
+  async regenerateChat() {
+    assert(this.client, 'Chat has been destroyed');
+
+    const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
+    console.log('RegenerateSimulationChat', new Date().toISOString(), chatId);
+
+    this.chatIdPromise = Promise.resolve(chatId);
+
+    if (this.repositoryId) {
+      const packet = createRepositoryIdPacket(this.repositoryId);
+
+      await this.client.sendCommand({
+        method: 'Nut.addSimulation',
+        params: {
+          chatId,
+          simulationData: [packet, ...this.pageData],
+          completeData: true,
+          saveRecording: true,
+        },
+      });
+    }
   }
 
   async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
     assert(this.client, 'Chat has been destroyed');
+
+    const timeout = setTimeout(() => {
+      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
+    }, ChatResponseTimeoutMs);
+
+    if (this.hadSimulationError) {
+      this.hadSimulationError = false;
+      await this.regenerateChat();
+    }
 
     const responseId = `response-${generateRandomId()}`;
 
@@ -164,6 +226,7 @@ class ChatManager {
       ({ responseId: eventResponseId, message }: { responseId: string; message: Message }) => {
         if (responseId == eventResponseId) {
           console.log('ChatResponse', chatId, message);
+          clearTimeout(timeout);
           callbacks.onResponsePart(message);
         }
       },
