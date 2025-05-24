@@ -171,7 +171,7 @@ export default function App() {
       <ClientOnly>
         <ThemeProvider />
         <AuthProvider data={data} />
-        <main className="">{isLoading ? <div></div> : <Outlet />}</main>
+        <main className="h-full">{isLoading ? <div></div> : <Outlet />}</main>
         <ToastContainer position="bottom-right" theme={theme} />
         <AuthModal />
       </ClientOnly>
