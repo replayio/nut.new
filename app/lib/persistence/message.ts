@@ -80,6 +80,10 @@ export function createMessagesForRepository(title: string, repositoryId: string)
   return messages;
 }
 
+// Category for the initial response made to every user message.
+// All messages up to the next UserResponse are responding to this message.
+export const USER_RESPONSE_CATEGORY = 'UserResponse';
+
 export enum PlaywrightTestStatus {
   Pass = 'Pass',
   Fail = 'Fail',
@@ -162,6 +166,26 @@ export function parseSearchArboretumResult(message: Message): BestAppFeatureResu
     return bestAppFeatureResult;
   } catch (e) {
     console.error('Failed to parse best app feature result message', e);
+    return undefined;
+  }
+}
+
+// Message sent when a feature has finished being implemented.
+export const FEATURE_DONE_CATEGORY = 'FeatureDone';
+
+export interface FeatureDoneResult {
+  implementedFeatureIndex: number;
+  featureDescription: string;
+}
+
+export function parseFeatureDoneMessage(message: Message): FeatureDoneResult | undefined {
+  try {
+    assert(message.type === 'text', 'Message is not a text message');
+    const featureDoneResult = JSON.parse(message.content) as FeatureDoneResult;
+    assert(featureDoneResult.featureDescription, 'Missing feature description');
+    return featureDoneResult;
+  } catch (e) {
+    console.error('Failed to parse feature done message', e);
     return undefined;
   }
 }

@@ -10,6 +10,9 @@ import {
   SEARCH_ARBORETUM_CATEGORY,
   type AppDescription,
   parseSearchArboretumResult,
+  FEATURE_DONE_CATEGORY,
+  parseFeatureDoneMessage,
+  USER_RESPONSE_CATEGORY,
 } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 
@@ -21,7 +24,7 @@ interface MessagesProps {
   messages?: Message[];
 }
 
-function renderAppFeatures(message: Message, index: number) {
+function renderAppFeatures(allMessages: Message[], message: Message, index: number) {
   let arboretumDescription: AppDescription | undefined;
   let appDescription: AppDescription | undefined;
   switch (message.category) {
@@ -40,6 +43,19 @@ function renderAppFeatures(message: Message, index: number) {
 
   if (!appDescription) {
     return null;
+  }
+
+  const finishedFeatures = new Set<string>();
+  for (let i = index; i < allMessages.length; i++) {
+    if (allMessages[i].category == USER_RESPONSE_CATEGORY) {
+      break;
+    }
+    if (allMessages[i].category == FEATURE_DONE_CATEGORY) {
+      const result = parseFeatureDoneMessage(allMessages[i]);
+      if (result) {
+        finishedFeatures.add(result.featureDescription);
+      }
+    }
   }
 
   return (
@@ -65,7 +81,8 @@ function renderAppFeatures(message: Message, index: number) {
           <div key={feature} className="flex items-center gap-2">
             <div
               className={classNames('w-3 h-3 rounded-full border border-black', {
-                'bg-gray-300': true,
+                'bg-gray-300': !finishedFeatures.has(feature),
+                'bg-green-500': finishedFeatures.has(feature),
               })}
             />
             <div>{feature}</div>
@@ -117,6 +134,25 @@ function renderTestResults(message: Message, index: number) {
   );
 }
 
+function renderFeatureDone(message: Message, index: number) {
+  const result = parseFeatureDoneMessage(message);
+  if (!result) {
+    return null;
+  }
+  return (
+    <div
+      data-testid="message"
+      key={index}
+      className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary')}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="text-lg font-semibold mb-2">Feature Done</div>
+        <div>{result.featureDescription}</div>
+      </div>
+    </div>
+  );
+}
+
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
   const { id, hasPendingMessage = false, pendingMessageStatus = '', messages = [] } = props;
   const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
@@ -125,7 +161,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   // no user response between this and the last user message.
   const getLastUserResponse = (index: number) => {
     for (let i = index - 1; i >= 0; i--) {
-      if (messages[i].category === 'UserResponse') {
+      if (messages[i].category === USER_RESPONSE_CATEGORY) {
         return messages[i];
       }
       if (messages[i].role === 'user') {
@@ -140,10 +176,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     let lastIndex = -1;
     for (let i = index; i < messages.length; i++) {
       const { category } = messages[i];
-      if (category === 'UserResponse') {
+      if (category === USER_RESPONSE_CATEGORY) {
         return lastIndex === index;
       }
-      if (category === 'TestResults') {
+      if (category === TEST_RESULTS_CATEGORY) {
         lastIndex = i;
       }
     }
@@ -153,7 +189,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const hasLaterSearchArboretumMessage = (index: number) => {
     for (let i = index + 1; i < messages.length; i++) {
       const { category } = messages[i];
-      if (category === 'UserResponse') {
+      if (category === USER_RESPONSE_CATEGORY) {
         return false;
       }
       if (category === SEARCH_ARBORETUM_CATEGORY) {
@@ -169,7 +205,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     const isFirst = index === 0;
     const isLast = index === messages.length - 1;
 
-    if (!isUserMessage && message.category && message.category !== 'UserResponse') {
+    if (!isUserMessage && message.category && message.category !== USER_RESPONSE_CATEGORY) {
       const lastUserResponse = getLastUserResponse(index);
       const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
@@ -179,7 +215,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
         if (hasLaterSearchArboretumMessage(index) && !showDetails) {
           return null;
         }
-        return renderAppFeatures(message, index);
+        return renderAppFeatures(messages, message, index);
       }
 
       if (message.category === TEST_RESULTS_CATEGORY) {
@@ -191,7 +227,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       }
 
       if (message.category === SEARCH_ARBORETUM_CATEGORY) {
-        return renderAppFeatures(message, index);
+        return renderAppFeatures(messages, message, index);
+      }
+
+      if (message.category === FEATURE_DONE_CATEGORY && showDetails) {
+        return renderFeatureDone(message, index);
       }
 
       if (!showDetails) {
