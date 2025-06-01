@@ -7,6 +7,9 @@ import {
   TEST_RESULTS_CATEGORY,
   DESCRIBE_APP_CATEGORY,
   parseDescribeAppMessage,
+  SEARCH_ARBORETUM_CATEGORY,
+  type AppDescription,
+  parseSearchArboretumResult,
 } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 
@@ -18,8 +21,23 @@ interface MessagesProps {
   messages?: Message[];
 }
 
-function renderDescribeApp(message: Message, index: number) {
-  const appDescription = parseDescribeAppMessage(message);
+function renderAppFeatures(message: Message, index: number) {
+  let arboretumDescription: AppDescription | undefined;
+  let appDescription: AppDescription | undefined;
+  switch (message.category) {
+    case DESCRIBE_APP_CATEGORY:
+      appDescription = parseDescribeAppMessage(message);
+      break;
+    case SEARCH_ARBORETUM_CATEGORY: {
+      const result = parseSearchArboretumResult(message);
+      if (result) {
+        arboretumDescription = result.arboretumDescription;
+        appDescription = result.revisedDescription;
+      }
+      break;
+    }
+  }
+
   if (!appDescription) {
     return null;
   }
@@ -35,6 +53,13 @@ function renderDescribeApp(message: Message, index: number) {
       <div className="flex flex-col gap-2">
         <div className="text-lg font-semibold mb-2">Development Plan</div>
         <div>{appDescription.description}</div>
+        {arboretumDescription && (
+          <>
+            <div className="text-lg font-semibold mb-2">Prebuilt App</div>
+            <div>I found a prebuilt app that will be a good starting point:</div>
+            <div>{arboretumDescription.description}</div>
+          </>
+        )}
         <div className="text-lg font-semibold mb-2">Features</div>
         {appDescription.features.map((feature) => (
           <div key={feature} className="flex items-center gap-2">
@@ -125,6 +150,19 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     return lastIndex === index;
   };
 
+  const hasLaterSearchArboretumMessage = (index: number) => {
+    for (let i = index + 1; i < messages.length; i++) {
+      const { category } = messages[i];
+      if (category === 'UserResponse') {
+        return false;
+      }
+      if (category === SEARCH_ARBORETUM_CATEGORY) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const renderMessage = (message: Message, index: number) => {
     const { role, repositoryId } = message;
     const isUserMessage = role === 'user';
@@ -136,7 +174,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
       if (message.category === DESCRIBE_APP_CATEGORY) {
-        return renderDescribeApp(message, index);
+        // We only render the DescribeApp if there is no later arboretum match,
+        // which will be rendered instead.
+        if (hasLaterSearchArboretumMessage(index) && !showDetails) {
+          return null;
+        }
+        return renderAppFeatures(message, index);
       }
 
       if (message.category === TEST_RESULTS_CATEGORY) {
@@ -145,6 +188,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           return null;
         }
         return renderTestResults(message, index);
+      }
+
+      if (message.category === SEARCH_ARBORETUM_CATEGORY) {
+        return renderAppFeatures(message, index);
       }
 
       if (!showDetails) {

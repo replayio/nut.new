@@ -29,12 +29,22 @@ export interface MessageImage extends MessageBase {
 
 export type Message = MessageText | MessageImage;
 
+function ignoreMessageRepositoryId(message: Message) {
+  if (message.category === SEARCH_ARBORETUM_CATEGORY) {
+    // Repositories associated with Arboretum search results have details abstracted
+    // and shouldn't be displayed in the UI. We should get a new message shortly
+    // afterwards with the repository instantiated for details in this request.
+    return true;
+  }
+  return false;
+}
+
 // Get the repositoryId before any changes in the message at the given index.
 export function getPreviousRepositoryId(messages: Message[], index: number): string | undefined {
   for (let i = index - 1; i >= 0; i--) {
     const message = messages[i];
 
-    if (message.repositoryId) {
+    if (message.repositoryId && !ignoreMessageRepositoryId(message)) {
       return message.repositoryId;
     }
   }
@@ -128,6 +138,30 @@ export function parseDescribeAppMessage(message: Message): AppDescription | unde
     return appDescription;
   } catch (e) {
     console.error('Failed to parse describe app message', e);
+    return undefined;
+  }
+}
+
+// Message sent when a match was found in the arboretum.
+// Contents are a JSON-stringified ArboretumMatch.
+export const SEARCH_ARBORETUM_CATEGORY = 'SearchArboretum';
+
+export interface BestAppFeatureResult {
+  arboretumRepositoryId: string;
+  arboretumDescription: AppDescription;
+  revisedDescription: AppDescription;
+}
+
+export function parseSearchArboretumResult(message: Message): BestAppFeatureResult | undefined {
+  try {
+    assert(message.type === 'text', 'Message is not a text message');
+    const bestAppFeatureResult = JSON.parse(message.content) as BestAppFeatureResult;
+    assert(bestAppFeatureResult.arboretumRepositoryId, 'Missing arboretum repository id');
+    assert(bestAppFeatureResult.arboretumDescription, 'Missing arboretum description');
+    assert(bestAppFeatureResult.revisedDescription, 'Missing revised description');
+    return bestAppFeatureResult;
+  } catch (e) {
+    console.error('Failed to parse best app feature result message', e);
     return undefined;
   }
 }
