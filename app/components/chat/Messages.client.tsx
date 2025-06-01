@@ -143,7 +143,9 @@ function renderFeatureDone(message: Message, index: number) {
     <div
       data-testid="message"
       key={index}
-      className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary')}
+      className={classNames(
+        'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
+      )}
     >
       <div className="flex flex-col gap-2">
         <div className="text-lg font-semibold mb-2">Feature Done</div>
