@@ -196,7 +196,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     });
 
     await storeMessageHistory(newMessages);
-    
+
     if (!chatStore.currentChat.get()) {
       toast.error('Failed to initialize chat');
       setPendingMessageId(undefined);

@@ -1,7 +1,13 @@
 import React, { Suspense, useState } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { parseTestResultsMessage, type Message, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
+import {
+  parseTestResultsMessage,
+  type Message,
+  TEST_RESULTS_CATEGORY,
+  DESCRIBE_APP_CATEGORY,
+  parseDescribeAppMessage,
+} from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 
 interface MessagesProps {
@@ -10,6 +16,80 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+}
+
+function renderDescribeApp(message: Message, index: number) {
+  const appDescription = parseDescribeAppMessage(message);
+  if (!appDescription) {
+    return null;
+  }
+
+  return (
+    <div
+      data-testid="message"
+      key={index}
+      className={classNames(
+        'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
+      )}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="text-lg font-semibold mb-2">Development Plan</div>
+        <div>{appDescription.description}</div>
+        <div className="text-lg font-semibold mb-2">Features</div>
+        {appDescription.features.map((feature) => (
+          <div key={feature} className="flex items-center gap-2">
+            <div
+              className={classNames('w-3 h-3 rounded-full border border-black', {
+                'bg-gray-300': true,
+              })}
+            />
+            <div>{feature}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderTestResults(message: Message, index: number) {
+  const testResults = parseTestResultsMessage(message);
+
+  return (
+    <div
+      data-testid="message"
+      key={index}
+      className={classNames(
+        'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
+      )}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="text-lg font-semibold mb-2">Test Results</div>
+        {testResults.map((result) => (
+          <div key={result.title} className="flex items-center gap-2">
+            <div
+              className={classNames('w-3 h-3 rounded-full border border-black', {
+                'bg-green-500': result.status === 'Pass',
+                'bg-red-500': result.status === 'Fail',
+                'bg-gray-300': result.status === 'NotRun',
+              })}
+            />
+            {result.recordingId ? (
+              <a
+                href={`https://app.replay.io/recording/${result.recordingId}`}
+                className="underline hover:text-blue-600"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {result.title}
+              </a>
+            ) : (
+              <div>{result.title}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
@@ -45,47 +125,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
     return lastIndex === index;
   };
 
-  const renderTestResults = (message: Message, index: number) => {
-    const testResults = parseTestResultsMessage(message);
-
-    return (
-      <div
-        data-testid="message"
-        key={index}
-        className={classNames(
-          'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
-        )}
-      >
-        <div className="flex flex-col gap-2">
-          <div className="text-lg font-semibold mb-2">Test Results</div>
-          {testResults.map((result) => (
-            <div key={result.title} className="flex items-center gap-2">
-              <div
-                className={classNames('w-3 h-3 rounded-full border border-black', {
-                  'bg-green-500': result.status === 'Pass',
-                  'bg-red-500': result.status === 'Fail',
-                  'bg-gray-300': result.status === 'NotRun',
-                })}
-              />
-              {result.recordingId ? (
-                <a
-                  href={`https://app.replay.io/recording/${result.recordingId}`}
-                  className="underline hover:text-blue-600"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {result.title}
-                </a>
-              ) : (
-                <div>{result.title}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   const renderMessage = (message: Message, index: number) => {
     const { role, repositoryId } = message;
     const isUserMessage = role === 'user';
@@ -96,13 +135,19 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       const lastUserResponse = getLastUserResponse(index);
       const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
+      if (message.category === DESCRIBE_APP_CATEGORY) {
+        return renderDescribeApp(message, index);
+      }
+
       if (message.category === TEST_RESULTS_CATEGORY) {
         // The default view only shows the last test results for each user response.
         if (!isLastTestResults(index) && !showDetails) {
           return null;
         }
         return renderTestResults(message, index);
-      } else if (!showDetails) {
+      }
+
+      if (!showDetails) {
         return null;
       }
     }

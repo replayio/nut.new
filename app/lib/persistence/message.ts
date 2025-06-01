@@ -1,6 +1,7 @@
 // Client messages match the format used by the Nut protocol.
 
 import { generateId } from '~/utils/fileUtils';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 type MessageRole = 'user' | 'assistant';
 
@@ -81,6 +82,7 @@ export interface PlaywrightTestResult {
   recordingId?: string;
 }
 
+// Message sent whenever tests have been run.
 export const TEST_RESULTS_CATEGORY = 'TestResults';
 
 export function parseTestResultsMessage(message: Message): PlaywrightTestResult[] {
@@ -103,4 +105,29 @@ export function parseTestResultsMessage(message: Message): PlaywrightTestResult[
     });
   }
   return results;
+}
+
+// Message sent after the initial user response to describe the app's features.
+// Contents are a JSON-stringified AppDescription.
+export const DESCRIBE_APP_CATEGORY = 'DescribeApp';
+
+export interface AppDescription {
+  // Short description of the app's overall purpose.
+  description: string;
+
+  // Short descriptions of each feature of the app, in the order they should be implemented.
+  features: string[];
+}
+
+export function parseDescribeAppMessage(message: Message): AppDescription | undefined {
+  try {
+    assert(message.type === 'text', 'Message is not a text message');
+    const appDescription = JSON.parse(message.content) as AppDescription;
+    assert(appDescription.description, 'Missing description');
+    assert(appDescription.features, 'Missing features');
+    return appDescription;
+  } catch (e) {
+    console.error('Failed to parse describe app message', e);
+    return undefined;
+  }
 }

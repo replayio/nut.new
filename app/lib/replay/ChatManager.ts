@@ -262,7 +262,7 @@ class ChatManager {
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',
-      params: { chatId, responseId, mode: "BuildAppIncremental", messages, references },
+      params: { chatId, responseId, mode: 'BuildAppIncremental', messages, references },
     });
 
     console.log('ChatMessageFinished', new Date().toISOString(), chatId);
