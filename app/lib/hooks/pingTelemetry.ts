@@ -10,7 +10,7 @@ export async function pingTelemetry(event: string, data: any) {
   fetch('/api/ping-telemetry', {
     method: 'POST',
     body: JSON.stringify(requestBody),
-  });
+  }).catch(() => {});
 }
 
 // Manage telemetry events for a single chat message.
