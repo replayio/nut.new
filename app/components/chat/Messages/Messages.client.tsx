@@ -247,7 +247,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         if (category === USER_RESPONSE_CATEGORY) {
           return false;
         }
-        if (category === SEARCH_ARBORETUM_CATEGORY) {
+        // Only return on successful searches. Failed searches do not have
+        // a valid result.
+        if (category === SEARCH_ARBORETUM_CATEGORY && parseSearchArboretumResult(messages[i])) {
           return true;
         }
       }
