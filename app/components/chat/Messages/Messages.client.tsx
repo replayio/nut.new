@@ -16,6 +16,10 @@ import {
 } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
+import PlanChecker from './components/PlanChecker';
+import { usePlanCheckerVisibility } from '~/lib/stores/planChecker';
+
+
 
 interface MessagesProps {
   id?: string;
@@ -23,11 +27,88 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string) => void;
 }
+
+const FeaturesList = ({ features }: { features: string[] }) => {
+  const [completedFeatures, setCompletedFeatures] = useState(new Set<string>());
+  const [failedFeature, setFailedFeature] = useState<string | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const startFeatureAnimation = (startIndex: number) => {
+    features.slice(startIndex).forEach((feature, index) => {
+      setTimeout(() => {
+        if (index + startIndex === 4) { // 5th feature (0-based index)
+          setFailedFeature(feature);
+          return;
+        }
+        setCompletedFeatures(prev => new Set([...prev, feature]));
+      }, (index + 1) * 4000);
+    });
+  };
+
+  const handleRetry = (feature: string) => {
+    setFailedFeature(null);
+    setCompletedFeatures(prev => {
+      const newSet = new Set(prev);
+      newSet.add(feature);
+      return newSet;
+    });
+    const featureIndex = features.indexOf(feature);
+    startFeatureAnimation(featureIndex + 1);
+  };
+
+  useEffect(() => {
+    startFeatureAnimation(0);
+  }, [features]);
+
+  return (
+    <>
+      {features.map((feature) => (
+        <div key={feature} className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-5 h-5 flex items-center justify-center"
+              onMouseEnter={() => failedFeature === feature && setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              onClick={() => failedFeature === feature && handleRetry(feature)}
+            >
+              {failedFeature === feature ? (
+                isHovering ? (
+                  <div className="i-ph:arrows-clockwise text-yellow-500 text-xl cursor-pointer" />
+                ) : (
+                  <div className="i-ph:x-circle-fill text-red-500 text-xl" />
+                )
+              ) : completedFeatures.has(feature) ? (
+                <div className="i-ph:check-circle-fill text-green-500 text-xl" />
+              ) : (
+                <div className="w-3 h-3 rounded-full border border-black bg-gray-300" />
+              )}
+            </div>
+            <div>{feature}</div>
+          </div>
+          {completedFeatures.has(feature) && (
+            <div className="ml-7 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full border border-black bg-green-500" />
+                <div className="text-sm">Implementation completed</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full border border-black bg-green-500" />
+                <div className="text-sm">Tests passing</div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </>
+  );
+};
 
 function renderAppFeatures(allMessages: Message[], message: Message, index: number) {
   let arboretumDescription: AppDescription | undefined;
   let appDescription: AppDescription | undefined;
+  
   switch (message.category) {
     case DESCRIBE_APP_CATEGORY:
       appDescription = parseDescribeAppMessage(message);
@@ -44,19 +125,6 @@ function renderAppFeatures(allMessages: Message[], message: Message, index: numb
 
   if (!appDescription) {
     return null;
-  }
-
-  const finishedFeatures = new Set<string>();
-  for (let i = index; i < allMessages.length; i++) {
-    if (allMessages[i].category == USER_RESPONSE_CATEGORY) {
-      break;
-    }
-    if (allMessages[i].category == FEATURE_DONE_CATEGORY) {
-      const result = parseFeatureDoneMessage(allMessages[i]);
-      if (result) {
-        finishedFeatures.add(result.featureDescription);
-      }
-    }
   }
 
   return (
@@ -77,18 +145,8 @@ function renderAppFeatures(allMessages: Message[], message: Message, index: numb
             <div>{arboretumDescription.description}</div>
           </>
         )}
-        <div className="text-lg font-semibold mb-2">Features</div>
-        {appDescription.features.map((feature) => (
-          <div key={feature} className="flex items-center gap-2">
-            <div
-              className={classNames('w-3 h-3 rounded-full border border-black', {
-                'bg-gray-300': !finishedFeatures.has(feature),
-                'bg-green-500': finishedFeatures.has(feature),
-              })}
-            />
-            <div>{feature}</div>
-          </div>
-        ))}
+        <div className="text-lg font-semibold mb-2">Build Steps</div>
+        <FeaturesList features={appDescription.features} />
       </div>
     </div>
   );
@@ -157,11 +215,12 @@ function renderFeatureDone(message: Message, index: number) {
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '' }, ref) => {
+  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '', handleSendMessage }, ref) => {
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
-
+    const { isPlanCheckerVisible } = usePlanCheckerVisibility();
+  
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {
         containerRef.current = element;
@@ -259,6 +318,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       const isUserMessage = role === 'user';
       const isFirst = index === 0;
       const isLast = index === messages.length - 1;
+      console.log('Message Check', message);
 
       if (!isUserMessage && message.category && message.category !== USER_RESPONSE_CATEGORY) {
         const lastUserResponse = getLastUserResponse(index);
@@ -268,24 +328,31 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           // We only render the DescribeApp if there is no later arboretum match,
           // which will be rendered instead.
           if (hasLaterSearchArboretumMessage(index) && !showDetails) {
+            console.log('No Render App Features', message.category);
             return null;
           }
+          console.log('Render App Features', message.category);
           return renderAppFeatures(messages, message, index);
         }
 
         if (message.category === TEST_RESULTS_CATEGORY) {
           // The default view only shows the last test results for each user response.
           if (!isLastTestResults(index) && !showDetails) {
+            console.log('No Render Test Results', message.category);
             return null;
           }
+          console.log('Render Test Results', message.category);
           return renderTestResults(message, index);
         }
 
         if (message.category === SEARCH_ARBORETUM_CATEGORY) {
-          return renderAppFeatures(messages, message, index);
+          console.log('Render Search Arboretum', message.category);
+          return null;
+          // return renderAppFeatures(messages, message, index);
         }
 
         if (message.category === FEATURE_DONE_CATEGORY && showDetails) {
+          console.log('Render Feature Done', message.category);
           return renderFeatureDone(message, index);
         }
 
@@ -294,6 +361,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         }
       }
 
+      console.log('Render Message', message);
       return (
         <div
           data-testid="message"
@@ -375,7 +443,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           ref={setRefs}
           className={classNames('absolute inset-0 overflow-y-auto', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
         >
-          {messages.length > 0 ? messages.map(renderMessage) : null}
+          {messages.length > 0 && messages[0] && renderMessage(messages[0], 0)}
+          {isPlanCheckerVisible && <PlanChecker handleSendMessage={handleSendMessage} />}
+          {messages.length > 1 ? messages.slice(1).map(renderMessage) : null}
           {hasPendingMessage && (
             <div className="w-full text-bolt-elements-textSecondary flex items-center">
               <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2 text-4xl"></span>

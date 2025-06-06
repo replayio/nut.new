@@ -32,6 +32,7 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import flushSimulationData from '~/components/chat/ChatComponent/functions/flushSimulation';
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
+import { showPlanCheckerStore, promptMessageStore } from '~/lib/stores/planChecker';
 
 interface ChatProps {
   initialMessages: Message[];
@@ -248,6 +249,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         return;
       }
 
+      console.log('ChatStatus Check 1', status);
       console.log('ChatStatus', status);
       setPendingMessageStatus(status);
     }, 500);
@@ -267,16 +269,35 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
-    try {
-      await sendChatMessage(newMessages, references, {
-        onResponsePart: addResponseMessage,
-        onTitle: onChatTitle,
-        onStatus: onChatStatus,
+    console.log('Prompt Message', promptMessageStore.get());
+    console.log('Messages', messages);
+    console.log('new Message', newMessages);
+
+    if (messages.length < 1) {
+      showPlanCheckerStore.set(true);
+    }
+    
+    if (promptMessageStore.get().length > 0) {
+      if (newMessages.length > 0) {
+        newMessages.pop();
+      }
+      newMessages.push({
+        id: `user-${chatId}`,
+        role: 'user',
+        type: 'text',
+        content: promptMessageStore.get(),
       });
-    } catch (e) {
-      if (gNumAborts == numAbortsAtStart) {
-        toast.error('Error sending message');
-        console.error('Error sending message', e);
+      try {
+        await sendChatMessage(newMessages, references, {
+          onResponsePart: addResponseMessage,
+          onTitle: onChatTitle,
+          onStatus: onChatStatus,
+        });
+      } catch (e) {
+        if (gNumAborts == numAbortsAtStart) {
+          toast.error('Error sending message');
+          console.error('Error sending message', e);
+        }
       }
     }
 
@@ -345,6 +366,7 @@ const ChatImplementer = memo((props: ChatProps) => {
           return;
         }
 
+        console.log('ChatStatus Check 2', status);
         console.log('ChatStatus', status);
         setPendingMessageStatus(status);
       }, 500);

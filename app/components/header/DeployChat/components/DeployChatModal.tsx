@@ -1,4 +1,4 @@
-import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
+import { DeployStatus } from '~/components/header/DeployChat/DeployChat';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;

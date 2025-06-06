@@ -4,10 +4,10 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import { Feedback } from './Feedback/FeedbackButton';
+import { Feedback } from './Feedback/Feedback';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth/ClientAuth';
-import { DeployChatButton } from './DeployChat/DeployChatButton';
+import { DeployChatButton } from './DeployChat/DeployChat';
 import { DownloadButton } from './DownloadButton';
 
 export function Header() {
