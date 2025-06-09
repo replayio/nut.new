@@ -141,7 +141,32 @@ const gMockChat: Message[] | undefined =
 ;
 
 // Add any status events to emit here!
-const gMockStatus: MockChatStatus[] | undefined = undefined;
+const gMockStatus: MockChatStatus[] | undefined = [
+  {
+    "time": "2025-06-08T22:21:10.661Z",
+    "status": "Running tests...",
+  },
+  {
+    "time": "2025-06-08T22:21:20.436Z",
+    "status": "Adding the next feature...",
+  },
+  {
+    "time": "2025-06-08T22:21:25.436Z",
+    "status": "Feature added, running tests...",
+  },
+  {
+    "time": "2025-06-08T22:21:30.254Z",
+    "status": "Fixing test failure...",
+  },
+  {
+    "time": "2025-06-08T22:21:35.254Z",
+    "status": "App updated, running tests...",
+  },
+  {
+    "time": "2025-06-08T22:21:40.254Z",
+    "status": "All features completed",
+  },
+];
 
 interface MockChatStatus {
   time: string;
