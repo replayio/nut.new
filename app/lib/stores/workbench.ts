@@ -14,10 +14,6 @@ export class WorkbenchStore {
       import.meta.hot.data.showWorkbench = this.showWorkbench;
     }
   }
-
-  setShowWorkbench(show: boolean) {
-    this.showWorkbench.set(show);
-  }
 }
 
 export const workbenchStore = new WorkbenchStore();

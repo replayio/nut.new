@@ -4,6 +4,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { simulationReloaded } from '~/lib/replay/ChatManager';
 import { PointSelector } from './PointSelector';
+import { chatStore } from '~/lib/stores/chat';
 
 type ResizeSide = 'left' | 'right' | null;
 
@@ -27,6 +28,7 @@ export const Preview = memo(() => {
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
 
   const previewURL = useStore(workbenchStore.previewURL);
+  const showChat = useStore(chatStore.showChat);
 
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
