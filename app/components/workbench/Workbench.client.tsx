@@ -36,6 +36,7 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const showChat = useStore(chatStore.showChat);
+  const pendingMessageStatus = useStore(chatStore.pendingMessageStatus);
 
   const isSmallViewport = useViewport(1024);
 
@@ -65,9 +66,10 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
               </div>
             </div>
           </div>
-          {!showChat && (
+          {!showChat && pendingMessageStatus && (
             <div className="absolute top-0 right-18 left-1/2 bg-green-100 px-4 py-3 rounded-md shadow-sm border border-bolt-elements-borderColor">
-              Hello World  asdfsfdds fsd dfs dfs
+              <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2"></span>
+              <span>{pendingMessageStatus ? `${pendingMessageStatus}...` : ''}</span>
             </div>
           )}
         </div>

@@ -67,13 +67,12 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const [pendingMessageId, setPendingMessageId] = useState<string | undefined>(undefined);
 
-  const [pendingMessageStatus, setPendingMessageStatus] = useState('');
-
   const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(initialResumeChat);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const showChat = useStore(chatStore.showChat);
+  const pendingMessageStatus = useStore(chatStore.pendingMessageStatus);
 
   const [animationScope, animate] = useAnimate();
 
@@ -108,7 +107,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     gNumAborts++;
     chatStore.aborted.set(true);
     setPendingMessageId(undefined);
-    setPendingMessageStatus('');
+    chatStore.pendingMessageStatus.set('');
     setResumeChat(undefined);
 
     const chatId = chatStore.currentChat.get()?.id;
@@ -250,7 +249,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       }
 
       console.log('ChatStatus', status);
-      setPendingMessageStatus(status);
+      chatStore.pendingMessageStatus.set(status);
     }, 500);
 
     const references: ChatReference[] = [];
@@ -347,7 +346,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         }
 
         console.log('ChatStatus', status);
-        setPendingMessageStatus(status);
+        chatStore.pendingMessageStatus.set(status);
       }, 500);
 
       try {
