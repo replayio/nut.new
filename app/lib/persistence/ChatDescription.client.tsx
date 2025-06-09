@@ -19,18 +19,23 @@ export function ChatDescription() {
   }
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center max-w-400">
       {editing ? (
         <form onSubmit={handleSubmit} className="flex items-center justify-center">
           <input
             type="text"
-            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2 w-fit"
+            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2 w-fit text-ellipsis"
             autoFocus
             value={currentTitle}
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            style={{ width: `${Math.max(currentTitle.length * 8, 100)}px` }}
+            style={{
+              width: `${Math.min(Math.max(currentTitle.length * 8, 100), 400)}px`,
+              maxWidth: '400px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
           />
           <TooltipProvider>
             <WithTooltip tooltip="Save title">
@@ -46,7 +51,7 @@ export function ChatDescription() {
         </form>
       ) : (
         <>
-          {currentTitle}
+          <div className="max-w-[400px] truncate">{currentTitle}</div>
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
               <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent ml-2">
