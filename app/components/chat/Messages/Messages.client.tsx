@@ -44,7 +44,7 @@ function renderAppSummary(message: Message, index: number) {
             <div>{feature.description}</div>
           </div>
         ))}
-        <div className="text-lg font-semibold mb-2">Test Results</div>
+        {appSummary.tests.length > 0 && <div className="text-lg font-semibold mb-2">Test Results</div>}
         {appSummary.tests.map((test) => (
           <div key={test.title} className="flex items-center gap-2">
             <div
