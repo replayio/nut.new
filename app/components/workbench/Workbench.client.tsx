@@ -66,7 +66,7 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
             </div>
           </div>
           {!showChat && (
-            <div className="absolute top-0 right-18 bg-green-100 px-4 py-3 rounded-md shadow-sm border border-bolt-elements-borderColor">
+            <div className="absolute top-0 right-18 left-1/2 bg-green-100 px-4 py-3 rounded-md shadow-sm border border-bolt-elements-borderColor">
               Hello World  asdfsfdds fsd dfs dfs
             </div>
           )}
