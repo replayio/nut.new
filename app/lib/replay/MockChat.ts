@@ -193,6 +193,8 @@ export function usingMockChat() {
   return !!gMockChat;
 }
 
+const Factor = 2;
+
 export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
   assert(gMockChat, 'Mock chat is not defined');
 
@@ -203,7 +205,7 @@ export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
 
   for (const status of gMockStatus || []) {
     const delta = Math.max(Date.parse(status.time) - currentTime, 0);
-    waitForTime(delta).then(() => callbacks.onStatus(status.status));
+    waitForTime(delta * Factor).then(() => callbacks.onStatus(status.status));
   }
 
   for (const message of gMockChat) {
@@ -214,7 +216,7 @@ export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
     if (message.createTime) {
       const messageTime = Date.parse(message.createTime);
       if (messageTime > currentTime) {
-        await waitForTime(messageTime - currentTime);
+        await waitForTime((messageTime - currentTime) * Factor);
         currentTime = messageTime;
       }
     }
