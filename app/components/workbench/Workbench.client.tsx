@@ -8,6 +8,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview';
 import useViewport from '~/lib/hooks';
+import { chatStore } from '~/lib/stores/chat';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -34,6 +35,7 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
+  const showChat = useStore(chatStore.showChat);
 
   const isSmallViewport = useViewport(1024);
 
@@ -63,6 +65,11 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
               </div>
             </div>
           </div>
+          {!showChat && (
+            <div className="absolute top-0 right-18 bg-green-100 px-4 py-3 rounded-md shadow-sm border border-bolt-elements-borderColor">
+              Hello World  asdfsfdds fsd dfs dfs
+            </div>
+          )}
         </div>
       </motion.div>
     )
