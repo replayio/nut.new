@@ -32,6 +32,7 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import flushSimulationData from '~/components/chat/ChatComponent/functions/flushSimulation';
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
+import { usingMockChat } from '~/lib/replay/MockChat';
 
 interface ChatProps {
   initialMessages: Message[];
@@ -160,7 +161,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
 
-    if (!isLoggedIn) {
+    if (!isLoggedIn && !usingMockChat()) {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
       if (numFreeUses >= maxFreeUses) {
