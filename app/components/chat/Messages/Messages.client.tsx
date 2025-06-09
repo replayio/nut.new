@@ -35,31 +35,37 @@ const FeaturesList = ({ features }: { features: string[] }) => {
   const [failedFeature, setFailedFeature] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState(false);
 
-  const startFeatureAnimation = (startIndex: number) => {
-    features.slice(startIndex).forEach((feature, index) => {
-      setTimeout(() => {
-        if (index + startIndex === 4) { // 5th feature (0-based index)
-          setFailedFeature(feature);
-          return;
-        }
-        setCompletedFeatures(prev => new Set([...prev, feature]));
-      }, (index + 1) * 4000);
-    });
+  const startFeatureAnimation = (startIndex: number, isRetry: boolean = false) => {
+    let currentIndex = startIndex;
+    const interval = setInterval(() => {
+      const feature = features[currentIndex];
+      if (!feature) {
+        clearInterval(interval);
+        return;
+      }
+
+      if (currentIndex === 4 && !isRetry) { // Only fail the 5th feature on first attempt
+        setFailedFeature(feature);
+        clearInterval(interval);
+        return;
+      }
+
+      setCompletedFeatures(prev => new Set([...prev, feature]));
+      currentIndex++;
+    }, 4000);
+
+    return () => clearInterval(interval);
   };
 
   const handleRetry = (feature: string) => {
     setFailedFeature(null);
-    setCompletedFeatures(prev => {
-      const newSet = new Set(prev);
-      newSet.add(feature);
-      return newSet;
-    });
     const featureIndex = features.indexOf(feature);
-    startFeatureAnimation(featureIndex + 1);
+    startFeatureAnimation(featureIndex, true); // Pass true to indicate this is a retry
   };
 
   useEffect(() => {
-    startFeatureAnimation(0);
+    const cleanup = startFeatureAnimation(0, false);
+    return cleanup;
   }, [features]);
 
   return (
@@ -91,11 +97,11 @@ const FeaturesList = ({ features }: { features: string[] }) => {
             <div className="ml-7 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full border border-black bg-green-500" />
-                <div className="text-sm">Implementation completed</div>
+                <div className="text-sm">Test 1 passing</div>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full border border-black bg-green-500" />
-                <div className="text-sm">Tests passing</div>
+                <div className="text-sm">Test 2 passing</div>
               </div>
             </div>
           )}

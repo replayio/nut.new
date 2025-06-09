@@ -109,7 +109,7 @@ const PlanChecker = ({ handleSendMessage }: { handleSendMessage?: (event: React.
           ))}
         </div>
 
-        <div className="mt-6 p-4 bg-bolt-elements-messages-background rounded-lg border border-bolt-elements-textSecondary/20">
+        {/* <div className="mt-6 p-4 bg-bolt-elements-messages-background rounded-lg border border-bolt-elements-textSecondary/20">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="font-medium">Add Feature</h3>
           </div>
@@ -125,7 +125,7 @@ const PlanChecker = ({ handleSendMessage }: { handleSendMessage?: (event: React.
             <span className="i-ph:send-simple" />
             Add
           </button>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2 mt-4 justify-between">
           <div className="flex items-center gap-2">
             If this looks good, click "Submit" and I will get started.
