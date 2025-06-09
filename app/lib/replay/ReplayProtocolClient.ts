@@ -27,7 +27,7 @@ export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; 
 }
 
 export function waitForTime(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function uint8ArrayToBase64(data: Uint8Array) {
