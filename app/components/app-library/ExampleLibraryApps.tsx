@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } from '~/lib/persistence/apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { getMessagesRepositoryId, parseTestResultsMessage, TEST_RESULTS_CATEGORY } from '~/lib/persistence/message';
+import { getMessagesRepositoryId } from '~/lib/persistence/message';
 import { classNames } from '~/utils/classNames';
+import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
+import { parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -139,9 +141,9 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
     );
   };
 
-  const getTestResults = (appContents: BuildAppResult) => {
-    const message = appContents.messages.findLast((message) => message.category === TEST_RESULTS_CATEGORY);
-    return message ? parseTestResultsMessage(message) : [];
+  const getAppSummary = (appContents: BuildAppResult) => {
+    const message = appContents.messages.findLast((message) => message.category === APP_SUMMARY_CATEGORY);
+    return message ? parseAppSummaryMessage(message) : null;
   };
 
   const renderAppDetails = (appId: string, appContents: BuildAppResult | null) => {
@@ -150,7 +152,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
       return null;
     }
 
-    const testResults = appContents ? getTestResults(appContents) : null;
+    const appSummary = appContents ? getAppSummary(appContents) : null;
 
     return (
       <div className={styles.detailView}>
@@ -197,34 +199,34 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
             <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
           <div className="text-lg font-semibold mb-2 text-bolt-elements-textPrimary">Test Results</div>
-          {testResults && (
+          {appSummary?.tests.length && (
             <div className="flex flex-col gap-2">
-              {testResults.map((result) => (
-                <div key={result.title} className="flex items-center gap-2">
+              {appSummary.tests.map((test) => (
+                <div key={test.title} className="flex items-center gap-2">
                   <div
                     className={classNames('w-3 h-3 rounded-full border border-bolt-elements-borderColor', {
-                      'bg-green-500': result.status === 'Pass',
-                      'bg-red-500': result.status === 'Fail',
-                      'bg-gray-300': result.status === 'NotRun',
+                      'bg-green-500': test.status === 'Pass',
+                      'bg-red-500': test.status === 'Fail',
+                      'bg-gray-300': test.status === 'NotRun',
                     })}
                   />
-                  {result.recordingId ? (
+                  {test.recordingId ? (
                     <a
-                      href={`https://app.replay.io/recording/${result.recordingId}`}
+                      href={`https://app.replay.io/recording/${test.recordingId}`}
                       className="text-bolt-elements-textPrimary hover:text-bolt-elements-textSecondary"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {result.title}
+                      {test.title}
                     </a>
                   ) : (
-                    <div className="text-bolt-elements-textPrimary">{result.title}</div>
+                    <div className="text-bolt-elements-textPrimary">{test.title}</div>
                   )}
                 </div>
               ))}
             </div>
           )}
-          {!testResults && <div className="text-bolt-elements-textPrimary">Loading...</div>}
+          {!appSummary && <div className="text-bolt-elements-textPrimary">Loading...</div>}
         </div>
       </div>
     );
