@@ -8,6 +8,10 @@ export function disableTelemetry() {
 
 // We do this to work around CORS insanity.
 export async function pingTelemetry(event: string, data: any) {
+  if (gDisableTelemetry) {
+    return;
+  }
+
   const requestBody: any = {
     event: 'NutChat.' + event,
     data,
@@ -32,10 +36,6 @@ export class ChatMessageTelemetry {
   }
 
   private _ping(event: string, data: any = {}) {
-    if (gDisableTelemetry) {
-      return;
-    }
-
     pingTelemetry(event, {
       ...data,
       messageId: this.id,
