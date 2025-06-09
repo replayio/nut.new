@@ -140,6 +140,14 @@ const gMockChat: Message[] | undefined =
 ]
 ;
 
+// Add any status events to emit here!
+const gMockStatus: MockChatStatus[] | undefined = undefined;
+
+interface MockChatStatus {
+  time: string;
+  status: string;
+}
+
 if (gMockChat) {
   disableTelemetry();
 }
@@ -155,6 +163,11 @@ export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
 
   assert(gMockChat[0].createTime, 'Mock chat first message must have a create time');
   let currentTime = Date.parse(gMockChat[0].createTime);
+
+  for (const status of gMockStatus || []) {
+    const delta = Math.max(Date.parse(status.time) - currentTime, 0);
+    waitForTime(delta).then(() => callbacks.onStatus(status.status));
+  }
 
   for (const message of gMockChat) {
     if (message.role === 'user') {
