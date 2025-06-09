@@ -1,5 +1,11 @@
 // FIXME ping telemetry server directly instead of going through the backend.
 
+let gDisableTelemetry = false;
+
+export function disableTelemetry() {
+  gDisableTelemetry = true;
+}
+
 // We do this to work around CORS insanity.
 export async function pingTelemetry(event: string, data: any) {
   const requestBody: any = {
@@ -26,6 +32,10 @@ export class ChatMessageTelemetry {
   }
 
   private _ping(event: string, data: any = {}) {
+    if (gDisableTelemetry) {
+      return;
+    }
+
     pingTelemetry(event, {
       ...data,
       messageId: this.id,

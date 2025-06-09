@@ -12,6 +12,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { sendChatMessageMocked, usingMockChat } from './MockChat';
 
 // We report to telemetry if we start a message and don't get any response
 // before this timeout.
@@ -367,6 +368,11 @@ export async function sendChatMessage(
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
 ) {
+  if (usingMockChat()) {
+    await sendChatMessageMocked(callbacks);
+    return;
+  }
+
   if (gMessageChatManager) {
     gMessageChatManager.destroy();
   }

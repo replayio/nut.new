@@ -26,6 +26,10 @@ export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; 
   return { promise, resolve: resolve!, reject: reject! };
 }
 
+export function waitForTime(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function uint8ArrayToBase64(data: Uint8Array) {
   let str = '';
 
