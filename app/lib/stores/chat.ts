@@ -7,6 +7,7 @@ export class ChatStore {
   started = atom<boolean>(false);
   aborted = atom<boolean>(false);
   showChat = atom<boolean>(true);
+  pendingMessageStatus = atom<string>('');
 }
 
 export const chatStore = new ChatStore();
