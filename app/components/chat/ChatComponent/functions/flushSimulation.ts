@@ -1,6 +1,6 @@
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { simulationAddData } from '~/lib/replay/ChatManager';
-import { getCurrentIFrame } from '~/components/workbench/Preview';
+import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 
 async function flushSimulationData() {
   //console.log("FlushSimulationData");

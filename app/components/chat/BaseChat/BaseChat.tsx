@@ -202,7 +202,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} messages={messages} />}</ClientOnly>
         </div>
       </div>
     );

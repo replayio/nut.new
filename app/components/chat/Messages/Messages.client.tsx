@@ -4,7 +4,7 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { type Message, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
-import { APP_SUMMARY_CATEGORY, parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 
 interface MessagesProps {
   id?: string;
@@ -12,65 +12,6 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
-}
-
-function renderAppSummary(message: Message, index: number) {
-  const appSummary = parseAppSummaryMessage(message);
-
-  if (!appSummary) {
-    return null;
-  }
-
-  return (
-    <div
-      data-testid="message"
-      key={index}
-      className={classNames(
-        'flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)] mt-4 bg-bolt-elements-messages-background text-bolt-elements-textPrimary',
-      )}
-    >
-      <div className="flex flex-col gap-2">
-        <div className="text-lg font-semibold mb-2">Development Plan</div>
-        <div>{appSummary.description}</div>
-        <div className="text-lg font-semibold mb-2">Features</div>
-        {appSummary.features.map((feature) => (
-          <div key={feature.id} className="flex items-center gap-2">
-            <div
-              className={classNames('w-3 h-3 rounded-full border border-black', {
-                'bg-gray-300': !feature.done,
-                'bg-green-500': feature.done,
-              })}
-            />
-            <div>{feature.description}</div>
-          </div>
-        ))}
-        {appSummary.tests.length > 0 && <div className="text-lg font-semibold mb-2">Test Results</div>}
-        {appSummary.tests.map((test) => (
-          <div key={test.title} className="flex items-center gap-2">
-            <div
-              className={classNames('w-3 h-3 rounded-full border border-black', {
-                'bg-green-500': test.status === 'Pass',
-                'bg-red-500': test.status === 'Fail',
-                'bg-gray-300': test.status === 'NotRun',
-              })}
-            />
-            {test.recordingId ? (
-              <a
-                href={`https://app.replay.io/recording/${test.recordingId}`}
-                className="underline hover:text-blue-600"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {test.title}
-              </a>
-            ) : (
-              <div>{test.title}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
@@ -143,20 +84,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       return null;
     };
 
-    // Return whether the app summary at index is the last for the associated user response.
-    const isLastAppSummary = (index: number) => {
-      let lastIndex = -1;
-      for (let i = index; i < messages.length; i++) {
-        const { category } = messages[i];
-        if (category === USER_RESPONSE_CATEGORY) {
-          return lastIndex === index;
-        }
-        if (category === APP_SUMMARY_CATEGORY) {
-          lastIndex = i;
-        }
-      }
-      return lastIndex === index;
-    };
+
 
     const renderMessage = (message: Message, index: number) => {
       const { role, repositoryId } = message;
@@ -169,11 +97,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
         if (message.category === APP_SUMMARY_CATEGORY) {
-          // The default view only shows the last app summary for each user response.
-          if (!isLastAppSummary(index) && !showDetails) {
-            return null;
-          }
-          return renderAppSummary(message, index);
+          // App summaries are now shown in the preview area, not in chat
+          return null;
         }
 
         if (!showDetails) {
