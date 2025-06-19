@@ -33,7 +33,7 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
       <>
         <div
           className={classNames(
-            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg bg-red-50 dark:bg-red-800 mb-2',
+            'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg mb-2',
           )}
         >
           <textarea
@@ -70,9 +70,20 @@ const ApproveChange: React.FC<ApproveChangeProps> = ({ rejectFormOpen, setReject
             onChange={(event) => setShareProject(event.target.checked)}
             className="rounded border-red-300 text-red-500 focus:ring-red-500"
           />
-          <label htmlFor="share-project" className="text-sm text-red-600">
+          <label htmlFor="share-project" className="text-sm text-bolt-elements-textSecondary">
             Share project details with Nut team
           </label>
+        </div>
+        <div className="flex flex-col items-center gap-2 w-full mb-2">
+          <h2 className="text-sm text-bolt-elements-textPrimary">Or</h2>
+          <a
+            className="text-sm text-green-500 hover:text-green-600 transition-colors cursor-pointer"
+            href="https://cal.com/filip"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Schedule a call with the Nut Team to discuss your issue or feedback
+          </a>
         </div>
 
         <div className="flex items-center gap-1 w-full h-[30px] pt-2">

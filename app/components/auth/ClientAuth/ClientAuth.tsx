@@ -13,6 +13,32 @@ export function ClientAuth() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [usageData, setUsageData] = useState<{ peanuts_used: number; peanuts_refunded: number } | null>(null);
 
+  const addIntercomUser = async (userEmail: string) => {
+    try {
+      const response = await fetch('/api/intercom', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add user to Intercom');
+      }
+
+      console.log('New contact created in Intercom');
+    } catch (error) {
+      console.error('Error adding user to Intercom:', error);
+      // Don't throw here - we don't want to block the sign-up flow if Intercom fails
+      toast.error('Failed to sync with Intercom (non-critical)');
+    }
+  };
+
   useEffect(() => {
     async function getUser() {
       try {
@@ -149,7 +175,7 @@ export function ClientAuth() {
             onClick={(e) => e.stopPropagation()}
           >
             {isSignUp ? (
-              <SignUpForm onToggleForm={() => setIsSignUp(false)} />
+              <SignUpForm addIntercomUser={addIntercomUser} onToggleForm={() => setIsSignUp(false)} />
             ) : (
               <SignInForm onToggleForm={() => setIsSignUp(true)} />
             )}
