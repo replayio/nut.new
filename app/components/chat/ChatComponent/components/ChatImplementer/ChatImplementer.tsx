@@ -176,6 +176,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     const chatId = generateRandomId();
     setPendingMessageId(chatId);
+    setPendingMessageStatus('');
 
     const userMessage: Message = {
       id: `user-${chatId}`,
