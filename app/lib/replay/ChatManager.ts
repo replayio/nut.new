@@ -63,31 +63,33 @@ class ChatManager {
   private hadSimulationError = false;
 
   constructor() {
-    this.client = new ProtocolClient();
-    this.chatIdPromise = (async () => {
-      assert(this.client, 'Chat has been destroyed');
-
-      await this.client.initialize();
-
-      const {
-        data: { user },
-      } = await getSupabase().auth.getUser();
-      const userId = user?.id || null;
-
-      if (userId) {
-        await this.client.sendCommand({ method: 'Nut.setUserId', params: { userId } });
-      }
-
-      const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
-
-      console.log('ChatStarted', new Date().toISOString(), chatId);
-
-      return chatId;
-    })();
+    this.chatIdPromise = this.resetChat();
   }
 
   isValid() {
     return !!this.client;
+  }
+
+  private async resetChat() {
+    this.client?.close();
+    this.client = new ProtocolClient();
+
+    await this.client.initialize();
+
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+    const userId = user?.id || null;
+
+    if (userId) {
+      await this.client.sendCommand({ method: 'Nut.setUserId', params: { userId } });
+    }
+
+    const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
+
+    console.log('ChatStarted', new Date().toISOString(), chatId);
+
+    return chatId;
   }
 
   // Closes the remote connection and makes sure the backend chat has also shut down.
@@ -188,10 +190,8 @@ class ChatManager {
   async regenerateChat() {
     assert(this.client, 'Chat has been destroyed');
 
-    const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
-    console.log('RegenerateSimulationChat', new Date().toISOString(), chatId);
-
-    this.chatIdPromise = Promise.resolve(chatId);
+    this.chatIdPromise = this.resetChat();
+    const chatId = await this.chatIdPromise;
 
     if (this.repositoryId) {
       const packet = createRepositoryIdPacket(this.repositoryId);
@@ -211,14 +211,16 @@ class ChatManager {
   async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
     assert(this.client, 'Chat has been destroyed');
 
-    const timeout = setTimeout(() => {
-      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
-    }, ChatResponseTimeoutMs);
-
-    if (this.hadSimulationError) {
+    if (this.client.closed || this.hadSimulationError) {
+      this.client.close();
+      this.client = new ProtocolClient();
       this.hadSimulationError = false;
       await this.regenerateChat();
     }
+
+    const timeout = setTimeout(() => {
+      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
+    }, ChatResponseTimeoutMs);
 
     const responseId = `response-${generateRandomId()}`;
 

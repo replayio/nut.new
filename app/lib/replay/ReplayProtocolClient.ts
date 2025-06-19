@@ -103,6 +103,8 @@ export class ProtocolClient {
   pendingCommands = new Map<number, { method: string; deferred: Deferred<any>; errorHandled: boolean }>();
   socket: WebSocket;
 
+  closed = false;
+
   constructor() {
     this.trace(`Creating for ${replayWsServer}`);
 
@@ -134,6 +136,7 @@ export class ProtocolClient {
       info.deferred.reject(new Error('Client destroyed'));
     }
     this.pendingCommands.clear();
+    this.closed = true;
   }
 
   listenForMessage(method: string, callback: (params: any) => void) {
@@ -165,6 +168,10 @@ export class ProtocolClient {
       sessionId,
     };
 
+    if (this.closed) {
+      pingTelemetry('SendCommandClosedSocket', { method });
+    }
+
     this.socket.send(JSON.stringify(command));
 
     const deferred = createDeferred();
@@ -175,10 +182,12 @@ export class ProtocolClient {
 
   onSocketClose = () => {
     this.trace('Socket closed');
+    this.closed = true;
   };
 
   onSocketError = (error: any) => {
     this.trace(`Socket error ${error}`);
+    this.closed = true;
   };
 
   onSocketMessage = (event: MessageEvent) => {
