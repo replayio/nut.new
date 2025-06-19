@@ -196,15 +196,21 @@ class ChatManager {
     if (this.repositoryId) {
       const packet = createRepositoryIdPacket(this.repositoryId);
 
-      await this.client.sendCommand({
-        method: 'Nut.addSimulation',
-        params: {
-          chatId,
-          simulationData: [packet, ...this.pageData],
-          completeData: true,
-          saveRecording: true,
-        },
-      });
+      try {
+        await this.client.sendCommand({
+          method: 'Nut.addSimulation',
+          params: {
+            chatId,
+            version: simulationDataVersion,
+            simulationData: [packet, ...this.pageData],
+            completeData: true,
+            saveRecording: true,
+          },
+        });
+      } catch (e) {
+        // Simulation will error if for example the repository doesn't build.
+        console.error('RegenerateChatError', e);
+      }
     }
   }
 
