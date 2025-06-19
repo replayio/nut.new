@@ -2,6 +2,9 @@
 
 let gDisableTelemetry = false;
 
+// Timeouts for pinging telemetry if we don't get response messages fast enough.
+const TelemetryTimeoutMs = 5000;
+
 export function disableTelemetry() {
   gDisableTelemetry = true;
 }
@@ -29,25 +32,51 @@ export class ChatMessageTelemetry {
   id: string;
   numMessages: number;
 
+  private timeouts: NodeJS.Timeout[] = [];
+
   constructor(numMessages: number) {
     this.id = Math.random().toString(36).substring(2, 15);
     this.numMessages = numMessages;
-    this._ping('StartMessage');
+    this.ping('Start', { numMessages });
+    this.startTimeout('Start');
   }
 
-  private _ping(event: string, data: any = {}) {
-    pingTelemetry(event, {
+  private ping(event: string, data: any = {}) {
+    pingTelemetry('Message.' + event, {
       ...data,
       messageId: this.id,
       numMessages: this.numMessages,
     });
   }
 
-  finish() {
-    this._ping('FinishMessage');
+  private startTimeout(reason: string) {
+    const timeout = setTimeout(() => {
+      this.ping('Timeout', { reason });
+    }, TelemetryTimeoutMs);
+    this.timeouts.push(timeout);
+  }
+
+  private clearTimeouts() {
+    this.timeouts.forEach(clearTimeout);
+    this.timeouts.length = 0;
+  }
+
+  finish(lastNumMessages: number, normal: boolean) {
+    this.clearTimeouts();
+    this.ping(normal ? 'Finish' : 'Error');
+
+    // Ping if we got no responses but also a normal finish.
+    if (lastNumMessages == this.numMessages && normal) {
+      this.ping('NoResponse');
+    }
   }
 
   abort(reason: string) {
-    this._ping('AbortMessage', { reason });
+    this.clearTimeouts();
+    this.ping('Abort', { reason });
+  }
+
+  onResponseMessage() {
+    this.startTimeout('Response');
   }
 }

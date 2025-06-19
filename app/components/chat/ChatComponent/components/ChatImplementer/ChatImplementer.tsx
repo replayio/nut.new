@@ -37,14 +37,14 @@ import { usingMockChat } from '~/lib/replay/MockChat';
 interface ChatProps {
   initialMessages: Message[];
   resumeChat: ResumeChatInfo | undefined;
-  storeMessageHistory: (messages: Message[]) => void;
+  storeMessageHistory: (messages: Message[]) => Promise<void>;
 }
 
 let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
-async function clearActiveChat() {
+function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
 }
 
@@ -221,6 +221,8 @@ const ChatImplementer = memo((props: ChatProps) => {
         return;
       }
 
+      gActiveChatMessageTelemetry?.onResponseMessage();
+
       const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
       newMessages = mergeResponseMessage(msg, [...newMessages]);
@@ -269,12 +271,14 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
+    let normalFinish = false;
     try {
       await sendChatMessage(newMessages, references, {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,
         onStatus: onChatStatus,
       });
+      normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {
         toast.error('Error sending message');
@@ -286,7 +290,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       return;
     }
 
-    gActiveChatMessageTelemetry.finish();
+    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, normalFinish);
     clearActiveChat();
 
     setPendingMessageId(undefined);

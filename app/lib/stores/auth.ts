@@ -36,7 +36,6 @@ export async function initializeAuth() {
     // Handle this by using a timeout to ensure we don't wait indefinitely.
     const timeoutPromise = new Promise<{ data: { session: Session | null }; error?: AuthError }>((resolve) => {
       setTimeout(() => {
-        pingTelemetry('AuthTimeout', {});
         resolve({
           data: { session: null },
           error: new AuthError('Timed out initializing auth'),
@@ -53,6 +52,7 @@ export async function initializeAuth() {
     } = authRes;
 
     if (error) {
+      pingTelemetry('Auth.Error', { message: error.message });
       throw error;
     }
 
