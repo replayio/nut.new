@@ -33,8 +33,8 @@ function renderAppSummary(message: Message, index: number) {
         <div className="text-lg font-semibold mb-2">Development Plan</div>
         <div>{appSummary.description}</div>
         <div className="text-lg font-semibold mb-2">Features</div>
-        {appSummary.features.map((feature) => (
-          <div key={feature.id} className="flex items-center gap-2">
+        {appSummary.features.map((feature, index) => (
+          <div key={index} className="flex items-center gap-2">
             <div
               className={classNames('w-3 h-3 rounded-full border border-black', {
                 'bg-gray-300': !feature.done,
@@ -44,8 +44,8 @@ function renderAppSummary(message: Message, index: number) {
             <div>{feature.description}</div>
           </div>
         ))}
-        {appSummary.tests.length > 0 && <div className="text-lg font-semibold mb-2">Test Results</div>}
-        {appSummary.tests.map((test) => (
+        {appSummary.tests?.length && <div className="text-lg font-semibold mb-2">Test Results</div>}
+        {appSummary.tests?.map((test) => (
           <div key={test.title} className="flex items-center gap-2">
             <div
               className={classNames('w-3 h-3 rounded-full border border-black', {

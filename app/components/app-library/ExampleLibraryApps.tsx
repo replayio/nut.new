@@ -199,7 +199,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
             <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
           <div className="text-lg font-semibold mb-2 text-bolt-elements-textPrimary">Test Results</div>
-          {appSummary?.tests.length && (
+          {appSummary?.tests?.length && (
             <div className="flex flex-col gap-2">
               {appSummary.tests.map((test) => (
                 <div key={test.title} className="flex items-center gap-2">
