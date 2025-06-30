@@ -112,6 +112,20 @@ const FeedbackModal = ({
                     Cancel
                   </button>
                 </div>
+                <div className="flex flex-col justify-center gap-3 mt-6">
+                  <h2 className="text-2xl font-bold mt-6 text-bolt-elements-textPrimary text-center">Or</h2>
+                  <h4 className="text-xl font-bold mb-4 mt-6 text-bolt-elements-textPrimary text-center">
+                    <a
+                      className="text-green-500 hover:text-green-600 transition-colors cursor-pointer"
+                      href="https://cal.com/filip"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Schedule a call with the Nut Team to discuss an issue or give feedback.
+                    </a>
+                  </h4>
+                  <div className="text-center"></div>
+                </div>
               </>
             )}
           </div>

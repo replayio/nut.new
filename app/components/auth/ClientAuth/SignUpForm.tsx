@@ -6,13 +6,15 @@ import { GoogleIcon } from '~/components/icons/google-icon';
 
 interface SignUpFormProps {
   onToggleForm: () => void;
+  addIntercomUser: (userEmail: string) => void;
 }
 
-export function SignUpForm({ onToggleForm }: SignUpFormProps) {
+export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,11 @@ export function SignUpForm({ onToggleForm }: SignUpFormProps) {
     setIsProcessing(true);
 
     try {
-      const { error } = await getSupabase().auth.signUp({ email, password });
+      const { data, error } = await getSupabase().auth.signUp({ email, password });
+
+      if (data.user?.email && isChecked) {
+        addIntercomUser(data.user.email);
+      }
 
       if (error) {
         throw error;
@@ -44,8 +50,17 @@ export function SignUpForm({ onToggleForm }: SignUpFormProps) {
     const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'google',
     });
+
     if (error) {
       toast.error(error.message || 'Failed to sign in with Google');
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+    if (user?.email && isChecked) {
+      addIntercomUser(user.email);
     }
   };
 
@@ -125,6 +140,33 @@ export function SignUpForm({ onToggleForm }: SignUpFormProps) {
           {isProcessing ? 'Processing...' : 'Create Account'}
         </button>
       </form>
+
+      <div className="flex justify-center items-center gap-2 my-6">
+        <div className="relative flex items-center">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={isChecked}
+            onChange={() => setIsChecked(!isChecked)}
+            className="peer appearance-none h-4 w-4 rounded border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 cursor-pointer checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <svg
+            className="absolute left-0 w-4 h-4 pointer-events-none opacity-0 peer-checked:opacity-100 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <label className="text-bolt-elements-textSecondary cursor-pointer" htmlFor="terms">
+          I agree to receive update emails from Nut.
+        </label>
+      </div>
 
       <p className="mt-6 text-center text-bolt-elements-textSecondary">
         Already have an account?{' '}

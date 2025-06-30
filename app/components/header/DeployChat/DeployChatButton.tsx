@@ -6,7 +6,7 @@ import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/chats';
-import { deployRepository } from '~/lib/replay/Deploy';
+import { deployRepository, downloadRepository } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
 
 ReactModal.setAppElement('#root');
@@ -22,14 +22,61 @@ export function DeployChatButton() {
   const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
+  const [databaseFound, setDatabaseFound] = useState(false);
+
+  const handleCheckDatabase = async () => {
+    const repositoryId = workbenchStore.repositoryId.get();
+    if (!repositoryId) {
+      toast.error('No repository ID found');
+      return;
+    }
+
+    try {
+      const repositoryContents = await downloadRepository(repositoryId);
+
+      // Convert base64 to blob
+      const byteCharacters = atob(repositoryContents);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/zip' });
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (!event.target?.result) {
+          setIsModalOpen(false);
+          toast.error('Could not read repository contents');
+          return;
+        }
+
+        const zipContents = event.target.result as string;
+        const directoryToFind = 'supabase';
+
+        if (zipContents.includes(directoryToFind)) {
+          setDatabaseFound(true);
+        } else {
+          setDatabaseFound(false);
+        }
+      };
+
+      reader.readAsText(blob);
+    } catch (error) {
+      setIsModalOpen(false);
+      console.error('Error downloading repository:', error);
+      toast.error('Failed to download repository');
+    }
+  };
 
   const handleOpenModal = async () => {
     const chatId = chatStore.currentChat.get()?.id;
     if (!chatId) {
-      toast.error('No chat open');
+      toast.error('No chat ID found');
       return;
     }
 
+    await handleCheckDatabase();
     const existingSettings = await database.getChatDeploySettings(chatId);
 
     setIsModalOpen(true);
@@ -146,11 +193,10 @@ export function DeployChatButton() {
     <>
       <button
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={() => {
-          handleOpenModal();
-        }}
+        onClick={handleOpenModal}
       >
-        Deploy
+        <div className="i-ph:rocket-launch-fill text-[1.3em]" />
+        Deploy App
       </button>
       <DeployChatModal
         isModalOpen={isModalOpen}
@@ -160,6 +206,7 @@ export function DeployChatButton() {
         setDeploySettings={setDeploySettings}
         error={error}
         handleDeploy={handleDeploy}
+        databaseFound={databaseFound}
       />
     </>
   );

@@ -33,18 +33,19 @@ import flushSimulationData from '~/components/chat/ChatComponent/functions/flush
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 import { usingMockChat } from '~/lib/replay/MockChat';
+import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 
 interface ChatProps {
   initialMessages: Message[];
   resumeChat: ResumeChatInfo | undefined;
-  storeMessageHistory: (messages: Message[]) => void;
+  storeMessageHistory: (messages: Message[]) => Promise<void>;
 }
 
 let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
-async function clearActiveChat() {
+function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
 }
 
@@ -67,7 +68,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const [pendingMessageId, setPendingMessageId] = useState<string | undefined>(undefined);
 
-  const [pendingMessageStatus, setPendingMessageStatus] = useState('');
+  const pendingMessageStatus = useStore(pendingMessageStatusStore);
 
   const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(initialResumeChat);
 
@@ -108,7 +109,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     gNumAborts++;
     chatStore.aborted.set(true);
     setPendingMessageId(undefined);
-    setPendingMessageStatus('');
+    clearPendingMessageStatus();
     setResumeChat(undefined);
 
     const chatId = chatStore.currentChat.get()?.id;
@@ -176,6 +177,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     const chatId = generateRandomId();
     setPendingMessageId(chatId);
+    setPendingMessageStatus('');
 
     const userMessage: Message = {
       id: `user-${chatId}`,
@@ -219,6 +221,8 @@ const ChatImplementer = memo((props: ChatProps) => {
       if (gNumAborts != numAbortsAtStart) {
         return;
       }
+
+      gActiveChatMessageTelemetry?.onResponseMessage();
 
       const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
@@ -268,12 +272,14 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
+    let normalFinish = false;
     try {
       await sendChatMessage(newMessages, references, {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,
         onStatus: onChatStatus,
       });
+      normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {
         toast.error('Error sending message');
@@ -285,7 +291,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       return;
     }
 
-    gActiveChatMessageTelemetry.finish();
+    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, normalFinish);
     clearActiveChat();
 
     setPendingMessageId(undefined);
