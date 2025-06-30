@@ -1,4 +1,5 @@
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { createScopedLogger } from '~/utils/logger';
 import { createInjectableFunction } from './injectable';
 
 const replayWsServer = 'wss://dispatch.replay.io';
@@ -26,6 +27,10 @@ export function defer<T>(): { promise: Promise<T>; resolve: (value: T) => void; 
   return { promise, resolve: resolve!, reject: reject! };
 }
 
+export function waitForTime(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function uint8ArrayToBase64(data: Uint8Array) {
   let str = '';
 
@@ -48,10 +53,6 @@ export const stringToBase64 = createInjectableFunction({ uint8ArrayToBase64 }, (
 
   return uint8ArrayToBase64(data);
 });
-
-function logDebug(msg: string, _tags: Record<string, any> = {}) {
-  //console.log(msg, JSON.stringify(tags));
-}
 
 class ProtocolError extends Error {
   protocolCode;
@@ -90,15 +91,22 @@ function createDeferred<T>(): Deferred<T> {
 
 type EventListener = (params: any) => void;
 
+const logger = createScopedLogger('ReplayProtocolClient');
+
+let gNextClientId = 1;
+
 export class ProtocolClient {
+  clientId = gNextClientId++;
   openDeferred = createDeferred<void>();
   eventListeners = new Map<string, Set<EventListener>>();
   nextMessageId = 1;
   pendingCommands = new Map<number, { method: string; deferred: Deferred<any>; errorHandled: boolean }>();
   socket: WebSocket;
 
+  closed = false;
+
   constructor() {
-    logDebug(`Creating WebSocket for ${replayWsServer}`);
+    this.trace(`Creating for ${replayWsServer}`);
 
     this.socket = new WebSocket(replayWsServer);
 
@@ -108,8 +116,12 @@ export class ProtocolClient {
     this.socket.addEventListener('message', this.onSocketMessage);
 
     this.listenForMessage('Recording.sessionError', (error: any) => {
-      logDebug(`Session error ${error}`);
+      this.trace(`Session error: ${error}`);
     });
+  }
+
+  trace(msg: string, tags: Record<string, any> = {}) {
+    logger.trace(`ReplayClient:${this.clientId}`, msg, JSON.stringify(tags));
   }
 
   initialize() {
@@ -117,12 +129,14 @@ export class ProtocolClient {
   }
 
   close() {
+    this.trace(`Closing`);
     this.socket.close();
 
     for (const info of this.pendingCommands.values()) {
       info.deferred.reject(new Error('Client destroyed'));
     }
     this.pendingCommands.clear();
+    this.closed = true;
   }
 
   listenForMessage(method: string, callback: (params: any) => void) {
@@ -145,7 +159,7 @@ export class ProtocolClient {
     const id = this.nextMessageId++;
 
     const { method, params, sessionId, errorHandled = false } = args;
-    logDebug('Sending command', { id, method, params, sessionId });
+    this.trace('Sending command', { id, method, params, sessionId });
 
     const command = {
       id,
@@ -153,6 +167,10 @@ export class ProtocolClient {
       params,
       sessionId,
     };
+
+    if (this.closed) {
+      pingTelemetry('SendCommandClosedSocket', { method });
+    }
 
     this.socket.send(JSON.stringify(command));
 
@@ -163,11 +181,13 @@ export class ProtocolClient {
   }
 
   onSocketClose = () => {
-    logDebug('Socket closed');
+    this.trace('Socket closed');
+    this.closed = true;
   };
 
   onSocketError = (error: any) => {
-    logDebug(`Socket error ${error}`);
+    this.trace(`Socket error ${error}`);
+    this.closed = true;
   };
 
   onSocketMessage = (event: MessageEvent) => {
@@ -199,12 +219,12 @@ export class ProtocolClient {
         callbacks.forEach((callback) => callback(params));
       }
     } else {
-      logDebug('Received message without a handler', { method, params });
+      this.trace('Received message without a handler', { method, params });
     }
   };
 
   onSocketOpen = async () => {
-    logDebug('Socket opened');
+    this.trace('Socket opened');
     this.openDeferred.resolve();
   };
 }

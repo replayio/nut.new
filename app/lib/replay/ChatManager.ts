@@ -12,6 +12,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { sendChatMessageMocked, usingMockChat } from './MockChat';
 
 // We report to telemetry if we start a message and don't get any response
 // before this timeout.
@@ -62,31 +63,33 @@ class ChatManager {
   private hadSimulationError = false;
 
   constructor() {
-    this.client = new ProtocolClient();
-    this.chatIdPromise = (async () => {
-      assert(this.client, 'Chat has been destroyed');
-
-      await this.client.initialize();
-
-      const {
-        data: { user },
-      } = await getSupabase().auth.getUser();
-      const userId = user?.id || null;
-
-      if (userId) {
-        await this.client.sendCommand({ method: 'Nut.setUserId', params: { userId } });
-      }
-
-      const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
-
-      console.log('ChatStarted', new Date().toISOString(), chatId);
-
-      return chatId;
-    })();
+    this.chatIdPromise = this.resetChat();
   }
 
   isValid() {
     return !!this.client;
+  }
+
+  private async resetChat() {
+    this.client?.close();
+    this.client = new ProtocolClient();
+
+    await this.client.initialize();
+
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+    const userId = user?.id || null;
+
+    if (userId) {
+      await this.client.sendCommand({ method: 'Nut.setUserId', params: { userId } });
+    }
+
+    const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
+
+    console.log('ChatStarted', new Date().toISOString(), chatId);
+
+    return chatId;
   }
 
   // Closes the remote connection and makes sure the backend chat has also shut down.
@@ -187,37 +190,43 @@ class ChatManager {
   async regenerateChat() {
     assert(this.client, 'Chat has been destroyed');
 
-    const { chatId } = (await this.client.sendCommand({ method: 'Nut.startChat', params: {} })) as { chatId: string };
-    console.log('RegenerateSimulationChat', new Date().toISOString(), chatId);
-
-    this.chatIdPromise = Promise.resolve(chatId);
+    this.chatIdPromise = this.resetChat();
+    const chatId = await this.chatIdPromise;
 
     if (this.repositoryId) {
       const packet = createRepositoryIdPacket(this.repositoryId);
 
-      await this.client.sendCommand({
-        method: 'Nut.addSimulation',
-        params: {
-          chatId,
-          simulationData: [packet, ...this.pageData],
-          completeData: true,
-          saveRecording: true,
-        },
-      });
+      try {
+        await this.client.sendCommand({
+          method: 'Nut.addSimulation',
+          params: {
+            chatId,
+            version: simulationDataVersion,
+            simulationData: [packet, ...this.pageData],
+            completeData: true,
+            saveRecording: true,
+          },
+        });
+      } catch (e) {
+        // Simulation will error if for example the repository doesn't build.
+        console.error('RegenerateChatError', e);
+      }
     }
   }
 
   async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
     assert(this.client, 'Chat has been destroyed');
 
-    const timeout = setTimeout(() => {
-      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
-    }, ChatResponseTimeoutMs);
-
-    if (this.hadSimulationError) {
+    if (this.client.closed || this.hadSimulationError) {
+      this.client.close();
+      this.client = new ProtocolClient();
       this.hadSimulationError = false;
       await this.regenerateChat();
     }
+
+    const timeout = setTimeout(() => {
+      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
+    }, ChatResponseTimeoutMs);
 
     const responseId = `response-${generateRandomId()}`;
 
@@ -369,6 +378,11 @@ export async function sendChatMessage(
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
 ) {
+  if (usingMockChat()) {
+    await sendChatMessageMocked(callbacks);
+    return;
+  }
+
   if (gMessageChatManager) {
     gMessageChatManager.destroy();
   }

@@ -51,6 +51,7 @@ export function DownloadButton() {
         onClick={handleDownload}
       >
         <div className="i-ph:download-fill text-[1.3em]" />
+        Download Repo
       </button>
     </>
   );
