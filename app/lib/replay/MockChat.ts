@@ -709,8 +709,7 @@ const gMockChat: Message[] | undefined =
     "category": "FeatureDone",
     "createTime": "2025-06-08T22:21:40.387Z"
   }
-]
-;
+];
 
 // Add any status events to emit here!
 const gMockStatus: MockChatStatus[] | undefined = [
@@ -757,6 +756,11 @@ interface MockChatStatus {
   status: string;
 }
 
+const gMockTitle = {
+  "time": "2025-06-08T22:20:51.521Z",
+  "title": "TODO App",
+};
+
 if (gMockChat) {
   disableTelemetry();
 }
@@ -778,6 +782,11 @@ export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
   for (const status of gMockStatus || []) {
     const delta = Math.max(Date.parse(status.time) - currentTime, 0);
     waitForTime(delta * Factor).then(() => callbacks.onStatus(status.status));
+  }
+
+  if (gMockTitle) {
+    const delta = Math.max(Date.parse(gMockTitle.time) - currentTime, 0);
+    waitForTime(delta * Factor).then(() => callbacks.onTitle(gMockTitle.title));
   }
 
   for (const message of gMockChat) {
