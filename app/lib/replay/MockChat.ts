@@ -10,6 +10,8 @@ import type { ChatMessageCallbacks } from './ChatManager';
 import { disableTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type AppSummary, PlaywrightTestStatus } from '../persistence/messageAppSummary';
 
+const RepositoryId = 'ae239567-22f6-46fa-9b23-90a9e515fbf2';
+
 // Add your mock chat messages here!
 const gMockChat: Message[] | undefined =
 [
@@ -256,8 +258,7 @@ const gMockChat: Message[] | undefined =
       } as AppSummary
     ),
     "category": "AppSummary",
-    "repositoryId": "a4c22d5f-eb7f-47a3-9d93-fe1829d28b07",
-    "repositoryURL": "https://a4c22d5f-eb7f-47a3-9d93-fe1829d28b07.http.replay.io/",
+    "repositoryId": RepositoryId,
     "createTime": "2025-06-08T22:21:00.661Z",
   },
   {
@@ -268,8 +269,7 @@ const gMockChat: Message[] | undefined =
     "peanuts": 52,
     "category": "InstantiateApp",
     "createTime": "2025-06-08T22:21:10.661Z",
-    "repositoryId": "767f2e2d-4e14-4db0-9a5b-43c1d7833f89",
-    "repositoryURL": "https://767f2e2d-4e14-4db0-9a5b-43c1d7833f89.http.replay.io/",
+    "repositoryId": RepositoryId,
   },
   {
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#8",
@@ -405,8 +405,7 @@ const gMockChat: Message[] | undefined =
     "peanuts": 58,
     "category": "AddFeature",
     "createTime": "2025-06-08T22:21:21.607Z",
-    "repositoryId": "f59e22b4-83ad-4a56-8ffc-a96432941944",
-    "repositoryURL": "https://f59e22b4-83ad-4a56-8ffc-a96432941944.http.replay.io/"
+    "repositoryId": RepositoryId
   },
   {
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#13",
@@ -560,8 +559,7 @@ const gMockChat: Message[] | undefined =
     "peanuts": 31,
     "category": "RevertChange",
     "createTime": "2025-06-08T22:21:32.892Z",
-    "repositoryId": "767f2e2d-4e14-4db0-9a5b-43c1d7833f89",
-    "repositoryURL": "https://767f2e2d-4e14-4db0-9a5b-43c1d7833f89.http.replay.io/"
+    "repositoryId": RepositoryId
   },
   {
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#18",
@@ -571,8 +569,7 @@ const gMockChat: Message[] | undefined =
     "peanuts": 57,
     "category": "RevertChange",
     "createTime": "2025-06-08T22:21:33.773Z",
-    "repositoryId": "d1459ee3-2646-4aa0-ae66-bbe4b52ffade",
-    "repositoryURL": "https://d1459ee3-2646-4aa0-ae66-bbe4b52ffade.http.replay.io/"
+    "repositoryId": RepositoryId
   },
   {
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#19",
