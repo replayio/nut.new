@@ -8,6 +8,7 @@ import { assert, waitForTime } from '~/lib/replay/ReplayProtocolClient';
 import type { Message } from '~/lib/persistence/message';
 import type { ChatMessageCallbacks } from './ChatManager';
 import { disableTelemetry } from '~/lib/hooks/pingTelemetry';
+import { type AppSummary, PlaywrightTestStatus } from '../persistence/messageAppSummary';
 
 // Add your mock chat messages here!
 const gMockChat: Message[] | undefined =
@@ -31,16 +32,230 @@ const gMockChat: Message[] | undefined =
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#2",
     "role": "assistant",
     "type": "text",
-    "content": "{\n  \"description\": \"A task management application that allows users to create, organize, and track their daily tasks and to-do items.\",\n  \"features\": [\n    \"Create a main page with a header and input field for adding new todo items.\",\n    \"Allow users to add new todo items by typing in the input field and pressing enter or clicking an add button.\",\n    \"Display all todo items in a list below the input field.\",\n    \"Add a checkbox next to each todo item to mark it as completed or incomplete.\",\n    \"Add a delete button next to each todo item to remove it from the list.\",\n    \"Save todo items to local storage so they persist when the page is refreshed.\",\n    \"Add the ability to edit existing todo items by clicking on them.\",\n    \"Show completed tasks with strikethrough text or different styling to distinguish them from incomplete tasks.\",\n    \"Add filter options to view all tasks, only active tasks, or only completed tasks.\",\n    \"Display a counter showing the number of active (incomplete) tasks remaining.\",\n    \"Add a \\\"Clear Completed\\\" button to remove all completed tasks at once.\"\n  ],\n  \"abstractions\": []\n}",
-    "category": "DescribeApp",
+    "content": JSON.stringify(
+      {
+        description: 'A task management application that allows users to create, organize, and track their daily tasks and to-do items.',
+        features: [
+          {
+            description: 'Create a main page with a header and input field for adding new todo items.',
+            done: false
+          },
+          {
+            description: 'Allow users to add new todo items by typing in the input field and pressing enter or clicking an add button.',
+            done: false
+          },
+          {
+            description: 'Display all todo items in a list below the input field.',
+            done: false
+          },
+          {
+            description: 'Add a checkbox next to each todo item to mark it as completed or incomplete.',
+            done: false
+          },
+          {
+            description: 'Add a delete button next to each todo item to remove it from the list.',
+            done: false
+          },
+          {
+            description: 'Save todo items to local storage so they persist when the page is refreshed.',
+            done: false
+          },
+          {
+            description: 'Add the ability to edit existing todo items by clicking on them.',
+            done: false
+          },
+          {
+            description: 'Show completed tasks with strikethrough text or different styling to distinguish them from incomplete tasks.',
+            done: false
+          },
+          {
+            description: 'Add filter options to view all tasks, only active tasks, or only completed tasks.',
+            done: false
+          },
+          {
+            description: 'Display a counter showing the number of active (incomplete) tasks remaining.',
+            done: false
+          },
+          {
+            description: 'Add a "Clear Completed" button to remove all completed tasks at once.',
+            done: false
+          }
+        ],
+        abstractions: [],
+        tests: [
+          {
+            title: 'should display header and allows adding new items',
+            featureIndex: 0,
+          },
+          {
+            title: 'should add item by typing and pressing enter',
+            featureIndex: 1,
+          },
+          {
+            title: 'should add item by clicking add button',
+            featureIndex: 1,
+          },
+          {
+            title: 'should display multiple items in list format',
+            featureIndex: 2,
+          },
+          {
+            title: 'should allow marking items as completed with checkbox',
+            featureIndex: 3,
+          },
+          {
+            title: 'should have visual styling differentiation',
+            featureIndex: 3,
+          },
+          {
+            title: 'should delete individual items from the list',
+            featureIndex: 4,
+          },
+          {
+            title: 'should persist in local storage after page refresh',
+            featureIndex: 5,
+          },
+          {
+            title: 'should remain deleted after page refresh',
+            featureIndex: 5,
+          },
+          {
+            title: 'should allow editing task text by clicking on it',
+            featureIndex: 6,
+          },
+          {
+            title: 'should cancel editing when pressing Escape',
+            featureIndex: 6,
+          },
+          {
+            title: 'should filter items by all, active, and completed',
+            featureIndex: 8,
+          },
+          {
+            title: 'should display remaining incomplete items counter',
+            featureIndex: 9,
+          },
+          {
+            title: 'Clear completed button should not be present',
+            featureIndex: 10,
+          },
+        ],
+      } as AppSummary
+    ),
+    "category": "AppSummary",
     "createTime": "2025-06-08T22:20:50.521Z"
   },
   {
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#5",
     "role": "assistant",
     "type": "text",
-    "content": "{\n  \"arboretumRepositoryId\": \"a4c22d5f-eb7f-47a3-9d93-fe1829d28b07\",\n  \"arboretumDescription\": {\n    \"description\": \"A simple [ItemType] application that allows users to manage their daily [ItemTypePlural] by adding, completing, and organizing [ItemType] items.\",\n    \"features\": [\n      \"Create a main page with a header and input field to add new [ItemType]s\",\n      \"Allow users to add [ItemType]s to a list by typing in the input field and pressing enter or clicking an add button\",\n      \"Display all [ItemType]s in a list format below the input field\",\n      \"Allow users to edit existing [ItemType]s by clicking on the text\",\n      \"Allow users to mark [ItemType]s as completed by clicking a checkbox next to each [ItemType]\",\n      \"Allow users to delete individual [ItemType]s from the list\",\n      \"Add visual styling to differentiate completed [ItemType]s from incomplete ones (such as strikethrough text)\",\n      \"Persist [ItemType]s to local storage so they remain when the page is refreshed\",\n      \"Add a counter showing the number of remaining incomplete [ItemType]s\",\n      \"Add filter options to view all [ItemType]s, only active [ItemType]s, or only completed [ItemType]s\"\n    ],\n    \"abstractions\": []\n  },\n  \"revisedDescription\": {\n    \"description\": \"A task management application that allows users to create, organize, and track their daily tasks and to-do items.\",\n    \"features\": [\n      \"Add a \\\"Clear Completed\\\" button that removes all completed items from the list at once.\"\n    ],\n    \"abstractions\": []\n  }\n}",
-    "category": "SearchArboretum",
+    "content": JSON.stringify(
+      {
+        description: 'A task management application that allows users to create, organize, and track their daily tasks and to-do items.',
+        features: [
+          {
+            description: 'Create a main page with a header and input field to add new [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Allow users to add [ItemType]s to a list by typing in the input field and pressing enter or clicking an add button',
+            done: true,
+          },
+          {
+            description: 'Display all [ItemType]s in a list format below the input field',
+            done: true,
+          },
+          {
+            description: 'Allow users to edit existing [ItemType]s by clicking on the text',
+            done: true,
+          },
+          {
+            description: 'Allow users to delete individual [ItemType]s from the list',
+            done: true,
+          },
+          {
+            description: 'Add visual styling to differentiate completed [ItemType]s from incomplete ones (such as strikethrough text)',
+            done: true,
+          },
+          {
+            description: 'Persist [ItemType]s to local storage so they remain when the page is refreshed',
+            done: true,
+          },
+          {
+            description: 'Add a counter showing the number of remaining incomplete [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add filter options to view all [ItemType]s, only active [ItemType]s, or only completed [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add a "Clear Completed" button that removes all completed items from the list at once.',
+            done: false,
+          }
+        ],
+        abstractions: [],
+        tests: [
+          {
+            title: 'should display header and allows adding new items',
+            featureIndex: 0,
+          },
+          {
+            title: 'should add item by typing and pressing enter',
+            featureIndex: 1,
+          },
+          {
+            title: 'should add item by clicking add button',
+            featureIndex: 1,
+          },
+          {
+            title: 'should display multiple items in list format',
+            featureIndex: 2,
+          },
+          {
+            title: 'should allow marking items as completed with checkbox',
+            featureIndex: 2,
+          },
+          {
+            title: 'should allow editing task text by clicking on it',
+            featureIndex: 3,
+          },
+          {
+            title: 'should cancel editing when pressing Escape',
+            featureIndex: 3,
+          },
+          {
+            title: 'should delete individual items from the list',
+            featureIndex: 4,
+          },
+          {
+            title: 'should have visual styling differentiation',
+            featureIndex: 5,
+          },
+          {
+            title: 'should persist in local storage after page refresh',
+            featureIndex: 6,
+          },
+          {
+            title: 'should remain deleted after page refresh',
+            featureIndex: 6,
+          },
+          {
+            title: 'should display remaining incomplete items counter',
+            featureIndex: 7,
+          },
+          {
+            title: 'should filter items by all, active, and completed',
+            featureIndex: 8,
+          },
+          {
+            title: 'clear completed button removes all completed items',
+            featureIndex: 9,
+          },
+        ],
+      } as AppSummary
+    ),
+    "category": "AppSummary",
     "repositoryId": "a4c22d5f-eb7f-47a3-9d93-fe1829d28b07",
     "repositoryURL": "https://a4c22d5f-eb7f-47a3-9d93-fe1829d28b07.http.replay.io/",
     "createTime": "2025-06-08T22:21:00.661Z",
@@ -60,8 +275,126 @@ const gMockChat: Message[] | undefined =
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#8",
     "role": "assistant",
     "type": "text",
-    "content": "TestResult Pass 48fc1322-8ebd-42ba-b842-932530168f74 should add item by typing and pressing enter\n\nTestResult Pass b40e2e71-6271-42e0-9b7a-8d547955c3d6 should add item by clicking add button\n\nTestResult Pass 2f1e729e-0c98-47fc-9fa6-f0df3c98c6a5 should allow marking items as completed with checkbox\n\nTestResult Pass be0193e5-7818-4b59-8d7b-6c81706fd1dc should delete individual items from the list\n\nTestResult Pass 8f4b3b31-39a6-4273-9f36-d849b4fef589 should allow editing task text by clicking on it\n\nTestResult Pass 1a3c47dc-a5c9-46e5-9c57-447eeb8f9119 should cancel editing when pressing Escape\n\nTestResult Pass d71cd700-c628-4e5e-90f8-1c7b471c32c0 should filter items by all, active, and completed\n\nTestResult Pass 2744a112-5023-4d11-a05d-595b13e47d92 displays multiple items in list format\n\nTestResult Pass e1cfaa58-4018-41d3-b719-85e4eb85d256 completed items should have visual styling differentiation\n\nTestResult Pass 48fad426-50b7-495d-9f1b-1669c766ef43 items persist in local storage after page refresh\n\nTestResult Pass dacc8561-60b7-4387-ad7d-14369182992f deleted items remain deleted after page refresh\n\nTestResult Pass 6fa6d73c-055a-4d15-b669-e6a1985c4b2c main page displays header and allows adding new items\n\nTestResult Pass 347c093e-0e6a-4e29-99a9-341a9a2601f8 Clear completed button should not be present\n\nTestResult Pass 3d16b6c9-1763-436e-9bfe-fd1ff9d14ade displays remaining incomplete items counter\n\n",
-    "category": "TestResults",
+    "content": JSON.stringify(
+      {
+        description: 'A task management application that allows users to create, organize, and track their daily tasks and to-do items.',
+        features: [
+          {
+            description: 'Create a main page with a header and input field to add new [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Allow users to add [ItemType]s to a list by typing in the input field and pressing enter or clicking an add button',
+            done: true,
+          },
+          {
+            description: 'Display all [ItemType]s in a list format below the input field',
+            done: true,
+          },
+          {
+            description: 'Allow users to edit existing [ItemType]s by clicking on the text',
+            done: true,
+          },
+          {
+            description: 'Allow users to delete individual [ItemType]s from the list',
+            done: true,
+          },
+          {
+            description: 'Add visual styling to differentiate completed [ItemType]s from incomplete ones (such as strikethrough text)',
+            done: true,
+          },
+          {
+            description: 'Persist [ItemType]s to local storage so they remain when the page is refreshed',
+            done: true,
+          },
+          {
+            description: 'Add a counter showing the number of remaining incomplete [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add filter options to view all [ItemType]s, only active [ItemType]s, or only completed [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add a "Clear Completed" button that removes all completed items from the list at once.',
+            done: false,
+          }
+        ],
+        abstractions: [],
+        tests: [
+          {
+            title: 'should display header and allows adding new items',
+            featureIndex: 0,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by typing and pressing enter',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by clicking add button',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display multiple items in list format',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow marking items as completed with checkbox',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow editing task text by clicking on it',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should cancel editing when pressing Escape',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should delete individual items from the list',
+            featureIndex: 4,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should have visual styling differentiation',
+            featureIndex: 5,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should persist in local storage after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should remain deleted after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display remaining incomplete items counter',
+            featureIndex: 7,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should filter items by all, active, and completed',
+            featureIndex: 8,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'clear completed button removes all completed items',
+            featureIndex: 9,
+          },
+        ],
+      } as AppSummary
+    ),
+    "category": "AppSummary",
     "createTime": "2025-06-08T22:21:20.436Z"
   },
   {
@@ -79,8 +412,128 @@ const gMockChat: Message[] | undefined =
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#13",
     "role": "assistant",
     "type": "text",
-    "content": "TestResult Pass f6b0d6f7-67a9-4b5a-bd54-d78b04ac0c0c should add item by typing and pressing enter\n\nTestResult Pass b9ae0a6c-e2c5-481b-8423-f26d4be52d0b should add item by clicking add button\n\nTestResult Pass a7bf9937-d5ac-479a-88b6-bb31ae9f4fca should allow marking items as completed with checkbox\n\nTestResult Pass 498800af-e62f-4b1a-ace7-48e551301aa8 should delete individual items from the list\n\nTestResult Pass 6ed2ad30-21b4-4a6b-b62c-c451d4a69d2d should allow editing task text by clicking on it\n\nTestResult Pass 840eeb44-95bb-49a6-826f-9665772e9e68 should cancel editing when pressing Escape\n\nTestResult Pass c56befdc-7a44-44ac-92d1-e4a7192cd4f7 should filter items by all, active, and completed\n\nTestResult Pass 8b6e6785-f01b-4e19-856a-750d249e9018 displays multiple items in list format\n\nTestResult Pass d5022ddc-52a5-41d3-b3d5-e23017fe5d4b completed items should have visual styling differentiation\n\nTestResult Pass 220171cc-456b-4ace-874e-2783b31e88bf items persist in local storage after page refresh\n\nTestResult Pass 49a27d3f-dbec-4217-b15d-d95925ffbd8c deleted items remain deleted after page refresh\n\nTestResult Pass 9f36288a-66fe-43fa-b416-d00ff55a5a22 main page displays header and allows adding new items\n\nTestResult Fail a46bb7c8-d139-47b5-b941-eccd2146399c Clear completed button should not be present\n\nTestResult NotRun NoRecording displays remaining incomplete items counter\n\n",
-    "category": "TestResults",
+    "content": JSON.stringify(
+      {
+        description: 'A task management application that allows users to create, organize, and track their daily tasks and to-do items.',
+        features: [
+          {
+            description: 'Create a main page with a header and input field to add new [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Allow users to add [ItemType]s to a list by typing in the input field and pressing enter or clicking an add button',
+            done: true,
+          },
+          {
+            description: 'Display all [ItemType]s in a list format below the input field',
+            done: true,
+          },
+          {
+            description: 'Allow users to edit existing [ItemType]s by clicking on the text',
+            done: true,
+          },
+          {
+            description: 'Allow users to delete individual [ItemType]s from the list',
+            done: true,
+          },
+          {
+            description: 'Add visual styling to differentiate completed [ItemType]s from incomplete ones (such as strikethrough text)',
+            done: true,
+          },
+          {
+            description: 'Persist [ItemType]s to local storage so they remain when the page is refreshed',
+            done: true,
+          },
+          {
+            description: 'Add a counter showing the number of remaining incomplete [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add filter options to view all [ItemType]s, only active [ItemType]s, or only completed [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add a "Clear Completed" button that removes all completed items from the list at once.',
+            done: false,
+          }
+        ],
+        abstractions: [],
+        tests: [
+          {
+            title: 'should display header and allows adding new items',
+            featureIndex: 0,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by typing and pressing enter',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by clicking add button',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display multiple items in list format',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow marking items as completed with checkbox',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow editing task text by clicking on it',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should cancel editing when pressing Escape',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should delete individual items from the list',
+            featureIndex: 4,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should have visual styling differentiation',
+            featureIndex: 5,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should persist in local storage after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should remain deleted after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display remaining incomplete items counter',
+            featureIndex: 7,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should filter items by all, active, and completed',
+            featureIndex: 8,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'clear completed button removes all completed items',
+            featureIndex: 9,
+            status: PlaywrightTestStatus.Fail,
+            recordingId: 'a46bb7c8-d139-47b5-b941-eccd2146399c',
+          },
+        ],
+      } as AppSummary
+    ),
+    "category": "AppSummary",
     "createTime": "2025-06-08T22:21:30.254Z"
   },
   {
@@ -125,8 +578,127 @@ const gMockChat: Message[] | undefined =
     "id": "operator-run-78d309ed-50ad-44ad-bc18-6609c6ef1d2e#19",
     "role": "assistant",
     "type": "text",
-    "content": "TestResult Pass 4b3da283-d6fb-4bcb-a105-f9771dca8229 should add item by typing and pressing enter\n\nTestResult Pass c68954d7-25e4-4db0-94dd-b6113a870201 should add item by clicking add button\n\nTestResult Pass 538ec367-b442-4fa6-8dc5-966879a25d84 should allow marking items as completed with checkbox\n\nTestResult Pass 1a9bf9b9-a0a5-4ffb-a559-863416ef675c should delete individual items from the list\n\nTestResult Pass b418f9e8-a3c1-4d00-a1f9-fa2f4eef8b6c should allow editing task text by clicking on it\n\nTestResult Pass 81b3e668-e36b-4aa1-8606-10715f4fc122 should cancel editing when pressing Escape\n\nTestResult Pass 97386d8a-77da-43f9-80dc-5f44148cbaad should filter items by all, active, and completed\n\nTestResult Pass 1d123774-f033-474f-ad06-292345e0063a displays multiple items in list format\n\nTestResult Pass 2c58c30d-4ab8-42bd-b99a-c5a83eae51dc completed items should have visual styling differentiation\n\nTestResult Pass 50b71315-e05a-40dc-9466-e338739b396f items persist in local storage after page refresh\n\nTestResult Pass 021130c5-47cb-4a96-8728-661af5f267a5 deleted items remain deleted after page refresh\n\nTestResult Pass 24d7b791-8d97-4882-94c2-da8828c5b927 main page displays header and allows adding new items\n\nTestResult Pass 63a71596-98c7-4631-8f23-4004b910dccd displays remaining incomplete items counter\n\nTestResult Pass 241fe41b-a4d0-4a8b-abbe-fabd76e9c9e2 clear completed button removes all completed items\n\n",
-    "category": "TestResults",
+    "content": JSON.stringify(
+      {
+        description: 'A task management application that allows users to create, organize, and track their daily tasks and to-do items.',
+        features: [
+          {
+            description: 'Create a main page with a header and input field to add new [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Allow users to add [ItemType]s to a list by typing in the input field and pressing enter or clicking an add button',
+            done: true,
+          },
+          {
+            description: 'Display all [ItemType]s in a list format below the input field',
+            done: true,
+          },
+          {
+            description: 'Allow users to edit existing [ItemType]s by clicking on the text',
+            done: true,
+          },
+          {
+            description: 'Allow users to delete individual [ItemType]s from the list',
+            done: true,
+          },
+          {
+            description: 'Add visual styling to differentiate completed [ItemType]s from incomplete ones (such as strikethrough text)',
+            done: true,
+          },
+          {
+            description: 'Persist [ItemType]s to local storage so they remain when the page is refreshed',
+            done: true,
+          },
+          {
+            description: 'Add a counter showing the number of remaining incomplete [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add filter options to view all [ItemType]s, only active [ItemType]s, or only completed [ItemType]s',
+            done: true,
+          },
+          {
+            description: 'Add a "Clear Completed" button that removes all completed items from the list at once.',
+            done: true,
+          }
+        ],
+        abstractions: [],
+        tests: [
+          {
+            title: 'should display header and allows adding new items',
+            featureIndex: 0,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by typing and pressing enter',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should add item by clicking add button',
+            featureIndex: 1,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display multiple items in list format',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow marking items as completed with checkbox',
+            featureIndex: 2,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should allow editing task text by clicking on it',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should cancel editing when pressing Escape',
+            featureIndex: 3,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should delete individual items from the list',
+            featureIndex: 4,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should have visual styling differentiation',
+            featureIndex: 5,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should persist in local storage after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should remain deleted after page refresh',
+            featureIndex: 6,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should display remaining incomplete items counter',
+            featureIndex: 7,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'should filter items by all, active, and completed',
+            featureIndex: 8,
+            status: PlaywrightTestStatus.Pass,
+          },
+          {
+            title: 'clear completed button removes all completed items',
+            featureIndex: 9,
+            status: PlaywrightTestStatus.Pass,
+          },
+        ],
+      } as AppSummary
+    ),
+    "category": "AppSummary",
     "createTime": "2025-06-08T22:21:40.381Z"
   },
   {
@@ -156,23 +728,23 @@ const gMockStatus: MockChatStatus[] | undefined = [
   },
   {
     "time": "2025-06-08T22:21:10.661Z",
-    "status": "Running tests...",
+    "status": "Running tests",
   },
   {
     "time": "2025-06-08T22:21:20.436Z",
-    "status": "Adding the next feature...",
+    "status": "Adding the next feature",
   },
   {
     "time": "2025-06-08T22:21:25.436Z",
-    "status": "Feature added, running tests...",
+    "status": "Feature added, running tests",
   },
   {
     "time": "2025-06-08T22:21:30.254Z",
-    "status": "Fixing test failure...",
+    "status": "Fixing test failure",
   },
   {
     "time": "2025-06-08T22:21:35.254Z",
-    "status": "App updated, running tests...",
+    "status": "App updated, running tests",
   },
   {
     "time": "2025-06-08T22:21:40.254Z",
