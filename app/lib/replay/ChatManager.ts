@@ -43,35 +43,52 @@ export interface ChatMessageCallbacks {
   onStatus: (status: string) => void;
 }
 
+// Options specified when sending a chat message.
+interface ChatMessageOptions {
+  messages: Message[];
+  references: ChatReference[];
+  callbacks: ChatMessageCallbacks;
+  simulationData?: SimulationData;
+}
+
+// Manager for a single chat message. Each chat message is sent off and generates
+// a stream of responses before finishing. For now we do not allow multiple chat
+// messages to be running at the same time.
 class ChatManager {
-  // Empty if this chat has been destroyed.
+  // Empty if there is no active message.
   client: ProtocolClient | undefined;
 
-  // Resolves when the chat has started.
-  chatIdPromise: Promise<string>;
+  // Empty if there is no active message.
+  chatIdPromise: Promise<string> | undefined;
 
-  // Whether all simulation data has been sent.
-  simulationFinished?: boolean;
+  constructor() {}
 
-  // Any repository ID we specified for this chat.
-  repositoryId?: string;
-
-  // Simulation data for the page itself and any user interactions.
-  pageData: SimulationData = [];
-
-  // Whether there were any errors in commands related to the simulation.
-  private hadSimulationError = false;
-
-  constructor() {
-    this.chatIdPromise = this.resetChat();
-  }
-
-  isValid() {
+  isRunning() {
     return !!this.client;
   }
 
-  private async resetChat() {
+  // Closes the remote connection and makes sure the backend chat has also shut down.
+  // If the client disconnects otherwise the backend chat will continue running.
+  async destroy() {
+    if (this.chatIdPromise) {
+      try {
+        const chatId = await this.chatIdPromise;
+        await this.client?.sendCommand({
+          method: 'Nut.finishChat',
+          params: { chatId },
+          errorHandled: true,
+        });
+      } catch (e) {
+        console.error('Error finishing chat', e);
+      }
+    }
+
     this.client?.close();
+    this.client = undefined;
+  }
+
+  private async startChat() {
+    assert(!this.client, 'Chat is running');
     this.client = new ProtocolClient();
 
     await this.client.initialize();
@@ -92,140 +109,30 @@ class ChatManager {
     return chatId;
   }
 
-  // Closes the remote connection and makes sure the backend chat has also shut down.
-  // If the client disconnects otherwise the backend chat will continue running.
-  async destroy() {
-    try {
-      const chatId = await this.chatIdPromise;
-      await this.client?.sendCommand({
-        method: 'Nut.finishChat',
-        params: { chatId },
-        errorHandled: true,
-      });
-    } catch (e) {
-      console.error('Error finishing chat', e);
-    }
-
-    this.client?.close();
-    this.client = undefined;
-  }
-
-  async setRepositoryId(repositoryId: string) {
-    assert(this.client, 'Chat has been destroyed');
-    this.repositoryId = repositoryId;
-
-    const packet = createRepositoryIdPacket(repositoryId);
+  async sendMessage(options: ChatMessageOptions) {
+    this.chatIdPromise = this.startChat();
 
     const chatId = await this.chatIdPromise;
-    try {
-      await this.client.sendCommand({
+    assert(this.client, 'Expected chat client');
+
+    if (options.simulationData) {
+      this.client.sendCommand({
         method: 'Nut.addSimulation',
         params: {
           chatId,
           version: simulationDataVersion,
-          simulationData: [packet],
-          completeData: false,
+          simulationData: options.simulationData,
+          completeData: true,
           saveRecording: true,
         },
-      });
-    } catch (e) {
-      console.log('Error adding simulation', e);
-      this.hadSimulationError = true;
-    }
-  }
-
-  async addPageData(data: SimulationData) {
-    assert(this.client, 'Chat has been destroyed');
-    assert(this.repositoryId, 'Expected repository ID');
-
-    this.pageData.push(...data);
-
-    /*
-     * If page data comes in while we are waiting for the chat to finish
-     * we remember it but don't update the existing chat.
-     */
-    if (this.simulationFinished) {
-      return;
-    }
-
-    const chatId = await this.chatIdPromise;
-
-    console.log('ChatAddPageData', new Date().toISOString(), chatId, data.length);
-
-    try {
-      await this.client.sendCommand({
-        method: 'Nut.addSimulationData',
-        params: { chatId, simulationData: data },
-        errorHandled: true,
-      });
-    } catch (e) {
-      console.log('Error adding simulation data', e);
-      this.hadSimulationError = true;
-    }
-  }
-
-  async finishSimulationData() {
-    assert(this.client, 'Chat has been destroyed');
-    assert(!this.simulationFinished, 'Simulation has been finished');
-
-    this.simulationFinished = true;
-
-    const chatId = await this.chatIdPromise;
-    try {
-      await this.client.sendCommand({
-        method: 'Nut.finishSimulationData',
-        params: { chatId },
-        errorHandled: true,
-      });
-    } catch (e) {
-      console.log('Error finishing simulation data', e);
-      this.hadSimulationError = true;
-    }
-  }
-
-  // If we encounter a backend error during simulation the problem is likely that
-  // the underlying resources running the simulation were destroyed. Start a new
-  // chat and add all the simulation data again, which doesn't let us stream the
-  // data up but will work at least.
-  async regenerateChat() {
-    assert(this.client, 'Chat has been destroyed');
-
-    this.chatIdPromise = this.resetChat();
-    const chatId = await this.chatIdPromise;
-
-    if (this.repositoryId) {
-      const packet = createRepositoryIdPacket(this.repositoryId);
-
-      try {
-        await this.client.sendCommand({
-          method: 'Nut.addSimulation',
-          params: {
-            chatId,
-            version: simulationDataVersion,
-            simulationData: [packet, ...this.pageData],
-            completeData: true,
-            saveRecording: true,
-          },
-        });
-      } catch (e) {
+      }).catch((e) => {
         // Simulation will error if for example the repository doesn't build.
         console.error('RegenerateChatError', e);
-      }
-    }
-  }
-
-  async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
-    assert(this.client, 'Chat has been destroyed');
-
-    if (this.client.closed || this.hadSimulationError) {
-      this.client.close();
-      this.client = new ProtocolClient();
-      this.hadSimulationError = false;
-      await this.regenerateChat();
+      });
     }
 
     const timeout = setTimeout(() => {
-      pingTelemetry('ChatMessageTimeout', { hasRepository: !!this.repositoryId });
+      pingTelemetry('ChatMessageTimeout', {});
     }, ChatResponseTimeoutMs);
 
     const responseId = `response-${generateRandomId()}`;
@@ -236,7 +143,7 @@ class ChatManager {
         if (responseId == eventResponseId) {
           console.log('ChatResponse', chatId, message);
           clearTimeout(timeout);
-          callbacks.onResponsePart(message);
+          options.callbacks.onResponsePart(message);
         }
       },
     );
@@ -246,7 +153,7 @@ class ChatManager {
       ({ responseId: eventResponseId, title }: { responseId: string; title: string }) => {
         if (responseId == eventResponseId) {
           console.log('ChatTitle', title);
-          callbacks.onTitle(title);
+          options.callbacks.onTitle(title);
         }
       },
     );
@@ -256,14 +163,12 @@ class ChatManager {
       ({ responseId: eventResponseId, status }: { responseId: string; status: string }) => {
         if (responseId == eventResponseId) {
           console.log('ChatStatus', status);
-          callbacks.onStatus(status);
+          options.callbacks.onStatus(status);
         }
       },
     );
 
-    const chatId = await this.chatIdPromise;
-
-    console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages, references }));
+    console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages: options.messages, references: options.references }));
 
     const id = chatStore.currentChat.get()?.id;
     assert(id, 'Expected chat ID');
@@ -271,7 +176,7 @@ class ChatManager {
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',
-      params: { chatId, responseId, mode: 'BuildAppIncremental', messages, references },
+      params: { chatId, responseId, mode: 'BuildAppIncremental', messages: options.messages, references: options.references },
     });
 
     console.log('ChatMessageFinished', new Date().toISOString(), chatId);
@@ -282,82 +187,9 @@ class ChatManager {
   }
 }
 
-// At most two chat managers can be running at any one time.
-//
-// After the user starts the app and interacts with it, we create a simulation
-// chat manager to keep track of the simulation data and stream it to the backend.
-//
-// After the user sends a message, any simulation chat manager is used for that
-// and becomes the message chat manager. If there is no simulation chat manager
-// we create a new one.
-
-// Chat manager associated with the latest repository and which we are sending
-// simulation data to. When we send a message it will be to this manager.
-let gSimulationChatManager: ChatManager | undefined;
-
 // Chat manager which is generating response messages for adding to the chat.
 // When we send a message, the simulation we switch to this chat manager.
 let gMessageChatManager: ChatManager | undefined;
-
-// Update the simulation chat manager to the specified repository and page data.
-function startSimulation(repositoryId: string | undefined, pageData: SimulationData) {
-  // Clear any existing simulation chat manager.
-  if (gSimulationChatManager) {
-    gSimulationChatManager.destroy();
-  }
-
-  // Create a new simulation chat manager.
-  gSimulationChatManager = new ChatManager();
-
-  if (repositoryId) {
-    gSimulationChatManager.setRepositoryId(repositoryId);
-  }
-
-  if (pageData.length) {
-    gSimulationChatManager.addPageData(pageData);
-  }
-}
-
-/*
- * Called when the repository has changed. We'll update the simulation chat and
- * the remote development server. The message chat manager is unaffected and
- * can perform more repository updates.
- */
-export const simulationRepositoryUpdated = debounce((repositoryId: string | undefined) => {
-  startSimulation(repositoryId, []);
-  updateDevelopmentServer(repositoryId);
-}, 500);
-
-/*
- * Called when the page gathering interaction data has been reloaded. We'll
- * start a new chat with the same repository contents as any existing chat.
- */
-export function simulationReloaded() {
-  assert(gSimulationChatManager, 'Expected to have an active simulation chat');
-
-  const repositoryId = gSimulationChatManager.repositoryId;
-  assert(repositoryId, 'Expected active simulation chat to have repository ID');
-
-  startSimulation(repositoryId, []);
-}
-
-export function simulationAddData(data: SimulationData) {
-  assert(gSimulationChatManager, 'Expected to have an active simulation chat');
-  gSimulationChatManager.addPageData(data);
-}
-
-let gLastUserSimulationData: SimulationData | undefined;
-
-export function simulationFinishData() {
-  if (gSimulationChatManager) {
-    gSimulationChatManager.finishSimulationData();
-    gLastUserSimulationData = [...gSimulationChatManager.pageData];
-  }
-}
-
-export function getLastUserSimulationData(): SimulationData | undefined {
-  return gLastUserSimulationData;
-}
 
 let gLastSimulationChatMessages: Message[] | undefined;
 
@@ -375,6 +207,7 @@ export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
+  simulationData: SimulationData | undefined
 ) {
   if (usingMockChat()) {
     await sendChatMessageMocked(callbacks);
@@ -385,15 +218,17 @@ export async function sendChatMessage(
     gMessageChatManager.destroy();
   }
 
-  gMessageChatManager = gSimulationChatManager ?? new ChatManager();
-  gSimulationChatManager = undefined;
-
-  startSimulation(gMessageChatManager.repositoryId, gMessageChatManager.pageData);
+  gMessageChatManager = new ChatManager();
 
   gLastSimulationChatMessages = messages;
   gLastSimulationChatReferences = references;
 
-  await gMessageChatManager.sendChatMessage(messages, references, callbacks);
+  await gMessageChatManager.sendMessage({
+    messages,
+    references,
+    callbacks,
+    simulationData,
+  });
 }
 
 export function abortChatMessage() {
