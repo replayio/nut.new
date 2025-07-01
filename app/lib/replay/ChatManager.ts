@@ -5,16 +5,14 @@
 import type { SimulationData, SimulationPacket } from './SimulationData';
 import { simulationDataVersion } from './SimulationData';
 import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
-import { updateDevelopmentServer } from './DevelopmentServer';
 import type { Message } from '~/lib/persistence/message';
 import { database } from '~/lib/persistence/chats';
 import { chatStore } from '~/lib/stores/chat';
-import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
 import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
-import { workbenchStore } from '../stores/workbench';
+import { workbenchStore } from '~/lib/stores/workbench';
 
 // We report to telemetry if we start a message and don't get any response
 // before this timeout.
@@ -118,19 +116,21 @@ class ChatManager {
     assert(this.client, 'Expected chat client');
 
     if (options.simulationData) {
-      this.client.sendCommand({
-        method: 'Nut.addSimulation',
-        params: {
-          chatId,
-          version: simulationDataVersion,
-          simulationData: options.simulationData,
-          completeData: true,
-          saveRecording: true,
-        },
-      }).catch((e) => {
-        // Simulation will error if for example the repository doesn't build.
-        console.error('RegenerateChatError', e);
-      });
+      this.client
+        .sendCommand({
+          method: 'Nut.addSimulation',
+          params: {
+            chatId,
+            version: simulationDataVersion,
+            simulationData: options.simulationData,
+            completeData: true,
+            saveRecording: true,
+          },
+        })
+        .catch((e) => {
+          // Simulation will error if for example the repository doesn't build.
+          console.error('RegenerateChatError', e);
+        });
     }
 
     const timeout = setTimeout(() => {
@@ -170,7 +170,12 @@ class ChatManager {
       },
     );
 
-    console.log('ChatSendMessage', new Date().toISOString(), chatId, JSON.stringify({ messages: options.messages, references: options.references }));
+    console.log(
+      'ChatSendMessage',
+      new Date().toISOString(),
+      chatId,
+      JSON.stringify({ messages: options.messages, references: options.references }),
+    );
 
     const id = chatStore.currentChat.get()?.id;
     assert(id, 'Expected chat ID');
@@ -178,7 +183,13 @@ class ChatManager {
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',
-      params: { chatId, responseId, mode: 'BuildAppIncremental', messages: options.messages, references: options.references },
+      params: {
+        chatId,
+        responseId,
+        mode: 'BuildAppIncremental',
+        messages: options.messages,
+        references: options.references,
+      },
     });
 
     console.log('ChatMessageFinished', new Date().toISOString(), chatId);
@@ -208,7 +219,7 @@ export function getLastSimulationChatReferences(): ChatReference[] | undefined {
 export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
-  callbacks: ChatMessageCallbacks
+  callbacks: ChatMessageCallbacks,
 ) {
   if (usingMockChat()) {
     await sendChatMessageMocked(callbacks);

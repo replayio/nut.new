@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { simulationReloaded } from '~/lib/replay/ChatManager';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
 import PlanningView from './components/PlanningView';
@@ -70,7 +69,6 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
 
   const reloadPreview = () => {
     if (iframeRef.current) {
-      simulationReloaded();
       iframeRef.current.src = iframeRef.current.src;
     }
 

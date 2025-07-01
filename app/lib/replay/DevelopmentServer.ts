@@ -12,7 +12,7 @@ function getRepositoryURL(repositoryId: string | undefined) {
 }
 
 export const updateDevelopmentServer = debounce((repositoryId: string | undefined) => {
-  const repositoryURL = getRepositoryURL(repositoryId); 
+  const repositoryURL = getRepositoryURL(repositoryId);
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
 
   workbenchStore.showWorkbench.set(repositoryURL !== undefined);

@@ -3,19 +3,20 @@ import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 import { waitForTime } from '~/lib/replay/ReplayProtocolClient';
 import { createScopedLogger } from '~/utils/logger';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import type { SimulationData } from '~/lib/replay/SimulationData';
 
 // Maximum time to wait for simulation data for the iframe.
 const FlushSimulationTimeoutMs = 2000;
 
 const logger = createScopedLogger('FlushSimulation');
 
-export async function flushSimulationData() {
+export async function flushSimulationData(): Promise<SimulationData | undefined> {
   logger.trace('Start');
 
   const iframe = getCurrentIFrame();
 
   if (!iframe) {
-    return;
+    return undefined;
   }
 
   const simulationData = await Promise.race([
@@ -28,11 +29,11 @@ export async function flushSimulationData() {
 
   if (!simulationData) {
     pingTelemetry('FlushSimulation.Timeout', {});
-    return;
+    return undefined;
   }
 
   if (!simulationData.length) {
-    return;
+    return undefined;
   }
 
   logger.trace('Done', simulationData.length);
