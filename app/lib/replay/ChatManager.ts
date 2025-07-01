@@ -13,6 +13,8 @@ import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
+import { workbenchStore } from '../stores/workbench';
 
 // We report to telemetry if we start a message and don't get any response
 // before this timeout.
@@ -206,12 +208,22 @@ export function getLastSimulationChatReferences(): ChatReference[] | undefined {
 export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
-  callbacks: ChatMessageCallbacks,
-  simulationData: SimulationData | undefined
+  callbacks: ChatMessageCallbacks
 ) {
   if (usingMockChat()) {
     await sendChatMessageMocked(callbacks);
     return;
+  }
+
+  let simulationData: SimulationData | undefined;
+
+  const repositoryId = workbenchStore.repositoryId.get();
+  if (repositoryId) {
+    simulationData = await flushSimulationData();
+    if (simulationData) {
+      const packet = createRepositoryIdPacket(repositoryId);
+      simulationData.unshift(packet);
+    }
   }
 
   if (gMessageChatManager) {

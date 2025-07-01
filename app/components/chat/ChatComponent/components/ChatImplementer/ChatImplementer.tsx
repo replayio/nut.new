@@ -11,8 +11,6 @@ import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
 import {
-  simulationFinishData,
-  simulationRepositoryUpdated,
   sendChatMessage,
   type ChatReference,
   abortChatMessage,
@@ -29,11 +27,12 @@ import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
-import flushSimulationData from '~/components/chat/ChatComponent/functions/flushSimulation';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
+import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 
 interface ChatProps {
   initialMessages: Message[];
@@ -90,7 +89,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     const repositoryId = getMessagesRepositoryId(initialMessages);
 
     if (repositoryId) {
-      simulationRepositoryUpdated(repositoryId);
+      updateDevelopmentServer(repositoryId);
     }
   }, [initialMessages]);
 
@@ -210,9 +209,6 @@ const ChatImplementer = memo((props: ChatProps) => {
     setUploadedFiles([]);
     setImageDataList([]);
 
-    await flushSimulationData();
-    simulationFinishData();
-
     chatStore.aborted.set(false);
 
     runAnimation();
@@ -232,7 +228,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       const responseRepositoryId = getMessagesRepositoryId(newMessages);
 
       if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-        simulationRepositoryUpdated(responseRepositoryId);
+        updateDevelopmentServer(responseRepositoryId);
       }
     };
 
@@ -331,7 +327,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         const responseRepositoryId = getMessagesRepositoryId(newMessages);
 
         if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-          simulationRepositoryUpdated(responseRepositoryId);
+          updateDevelopmentServer(responseRepositoryId);
         }
       };
 
@@ -427,7 +423,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     setMessages(messages.slice(0, messageIndex + 1));
 
-    simulationRepositoryUpdated(previousRepositoryId);
+    updateDevelopmentServer(previousRepositoryId);
 
     let shareProjectSuccess = false;
 
