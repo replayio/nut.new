@@ -163,6 +163,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
 
+    /*
     if (!isLoggedIn && !usingMockChat()) {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
@@ -175,6 +176,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
     }
+    */
 
     const chatId = generateRandomId();
     setPendingMessageId(chatId);
