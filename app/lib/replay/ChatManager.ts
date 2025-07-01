@@ -13,6 +13,10 @@ import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
+import { APP_SUMMARY_CATEGORY } from '../persistence/messageAppSummary';
+import { setInitialAppSummary } from '../stores/appSummary';
+import { finishChat, isFirstChatMessageStore, setFirstChatMessage } from '~/lib/stores/chatProgress';
+import { useRef } from 'react';
 
 // We report to telemetry if we start a message and don't get any response
 // before this timeout.
@@ -41,6 +45,46 @@ export interface ChatMessageCallbacks {
   onResponsePart: (message: Message) => void;
   onTitle: (title: string) => void;
   onStatus: (status: string) => void;
+}
+
+export enum ChatMode {
+  // Default mode, builds or extends the app from the available user input.
+  //
+  // If the user is reporting a bug then will use the provided simulation data
+  // to work on a fix.
+  //
+  // Otherwise:
+  //
+  // 1. If there is no AppSummary message provided then a new one will
+  //    be created from the user input. If there is an AppSummary it may be revised.
+  //
+  // 2. When building a new app a prebuilt Arboretum app will be selected as
+  //    a starting point if possible.
+  //
+  // 3. Will then work on developing the features one by one until tests pass and it
+  //    can start on the next feature.
+  BuildApp = "BuildApp",
+
+  // Build an abstracted application for adding to the Arboretum.
+  BuildAppArboretum = "BuildAppArboretum",
+
+  // Build a new application without using the Arboretum.
+  BuildAppFromScratch = "BuildAppFromScratch",
+
+  // Analyze any provided recording.
+  AnalyzeRecording = "AnalyzeRecording",
+
+  // Follow the bug fixing steps of the BuildApp workflow.
+  FixBug = "FixBug",
+
+  // Follows step 1 of the BuildApp workflow.
+  PlanApp = "PlanApp",
+
+  // Follows step 2 of the BuildApp workflow.
+  SearchArboretum = "SearchArboretum",
+
+  // Follows step 3 of the BuildApp workflow.
+  DevelopApp = "DevelopApp",
 }
 
 class ChatManager {
@@ -214,7 +258,7 @@ class ChatManager {
     }
   }
 
-  async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks) {
+  async sendChatMessage(messages: Message[], references: ChatReference[], callbacks: ChatMessageCallbacks, mode: ChatMode) {
     assert(this.client, 'Chat has been destroyed');
 
     if (this.client.closed || this.hadSimulationError) {
@@ -235,6 +279,9 @@ class ChatManager {
       ({ responseId: eventResponseId, message }: { responseId: string; message: Message }) => {
         if (responseId == eventResponseId) {
           console.log('ChatResponse', chatId, message);
+          if (message.category === APP_SUMMARY_CATEGORY && message.type === 'text') {
+            setInitialAppSummary(message.content);
+          }
           clearTimeout(timeout);
           callbacks.onResponsePart(message);
         }
@@ -271,7 +318,7 @@ class ChatManager {
 
     await this.client.sendCommand({
       method: 'Nut.sendChatMessage',
-      params: { chatId, responseId, mode: 'BuildAppIncremental', messages, references },
+      params: { chatId, responseId, mode, messages, references },
     });
 
     console.log('ChatMessageFinished', new Date().toISOString(), chatId);
@@ -279,6 +326,13 @@ class ChatManager {
     removeResponseListener();
     removeTitleListener();
     removeStatusListener();
+    
+    // Check if this is the first message and finish accordingly
+    const isFirst = isFirstChatMessageStore.get();
+    if (isFirst) {
+      setFirstChatMessage(false); // Mark that first message is done
+    }
+    finishChat();
   }
 }
 
@@ -375,6 +429,7 @@ export async function sendChatMessage(
   messages: Message[],
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
+  mode: ChatMode
 ) {
   if (usingMockChat()) {
     await sendChatMessageMocked(callbacks);
@@ -393,7 +448,7 @@ export async function sendChatMessage(
   gLastSimulationChatMessages = messages;
   gLastSimulationChatReferences = references;
 
-  await gMessageChatManager.sendChatMessage(messages, references, callbacks);
+  await gMessageChatManager.sendChatMessage(messages, references, callbacks, mode);
 }
 
 export function abortChatMessage() {

@@ -94,7 +94,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         const lastUserResponse = getLastUserResponse(index);
         const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
 
-        if (message.category === APP_SUMMARY_CATEGORY) {
+        if (!message.category || message.category !== 'UserResponse') {
           // App summaries are now shown in the preview area, not in chat
           return null;
         }

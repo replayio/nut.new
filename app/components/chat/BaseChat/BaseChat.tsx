@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useState } from 'react';
+import React, { type RefCallback, useCallback, useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -19,6 +19,7 @@ import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { Arboretum } from './components/Arboretum/Arboretum';
 import { useArboretumVisibility } from '~/lib/stores/settings';
+import { ChatMode } from '~/lib/replay/ChatManager';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -33,7 +34,7 @@ interface BaseChatProps {
   messages?: Message[];
   input?: string;
   handleStop?: () => void;
-  sendMessage?: (messageInput?: string) => void;
+  sendMessage?: (messageInput?: string, chatMode?: ChatMode) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -93,9 +94,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
+    const handleSendMessage = (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => {
       if (sendMessage) {
-        sendMessage(messageInput);
+        sendMessage(messageInput, chatMode);
         abortListening();
 
         if (handleInputChange) {
@@ -196,7 +197,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage(event, messageInput);
+                  handleSendMessage(event, messageInput, ChatMode.BuildApp);
                 })}
                 {isArboretumVisible && <Arboretum />}
               </>

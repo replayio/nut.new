@@ -16,7 +16,7 @@ export function getCurrentIFrame() {
 }
 
 interface PreviewProps {
-  activeTab: 'planning' | 'testing' | 'preview';
+  activeTab: 'planning' | 'prebuilt' | 'testing' | 'preview';
   appSummary: AppSummary | null;
   messages?: Message[];
 }
@@ -235,6 +235,8 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
+          <PlanningView appSummary={appSummary} />
+        ) : activeTab === 'prebuilt' ? (
           <PlanningView appSummary={appSummary} />
         ) : activeTab === 'testing' ? (
           <TestingView appSummary={appSummary} />

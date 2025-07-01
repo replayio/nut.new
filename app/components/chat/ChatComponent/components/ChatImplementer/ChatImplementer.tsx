@@ -17,6 +17,7 @@ import {
   type ChatReference,
   abortChatMessage,
   resumeChatMessage,
+  ChatMode,
 } from '~/lib/replay/ChatManager';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
@@ -34,6 +35,7 @@ import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/fu
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
+import { chatProgressStore, isFirstChatMessageStore } from '~/lib/stores/chatProgress';
 
 interface ChatProps {
   initialMessages: Message[];
@@ -77,6 +79,9 @@ const ChatImplementer = memo((props: ChatProps) => {
   const showChat = useStore(chatStore.showChat);
 
   const [animationScope, animate] = useAnimate();
+
+  const isChatInProgress = useStore(chatProgressStore);
+  const isFirstChatMessage = useStore(isFirstChatMessageStore);
 
   useEffect(() => {
     const prompt = searchParams.get('prompt');
@@ -152,7 +157,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput?: string) => {
+  const sendMessage = async (messageInput?: string, chatMode: ChatMode = ChatMode.BuildApp) => {
     const _input = messageInput || input;
     const numAbortsAtStart = gNumAborts;
 
@@ -278,7 +283,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,
         onStatus: onChatStatus,
-      });
+      }, chatMode);
       normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {

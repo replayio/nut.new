@@ -10,8 +10,9 @@ import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
+import { getLatestAppSummary, parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
+import { initialAppSummaryStore, prebuiltAppSummaryStore } from '~/lib/stores/appSummary';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -40,7 +41,7 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const currentChat = useStore(chatStore.currentChat);
-  const [activeTab, setActiveTab] = useState<'planning' | 'preview'>('planning');
+  const [activeTab, setActiveTab] = useState<'planning' | 'prebuilt' | 'preview'>('planning');
 
   const hasSeenPreviewRef = useRef(false);
   const hasSeenProjectPlanRef = useRef(false);
@@ -48,6 +49,8 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
   const isSmallViewport = useViewport(1024);
 
   const appSummary = getLatestAppSummary(messages ?? []);
+  // const appSummary = parseAppSummaryMessage(useStore(initialAppSummaryStore));
+  // const prebuiltAppSummary = parseAppSummaryMessage(useStore(prebuiltAppSummaryStore));
 
   // Debug logging
   console.log('AppSummary debug:', {
@@ -77,6 +80,7 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
   const tabOptions = {
     options: [
       { value: 'planning' as const, text: 'Planning' },
+      { value: 'prebuilt' as const, text: 'Prebuilt' },
       { value: 'preview' as const, text: 'Preview' },
     ],
   };

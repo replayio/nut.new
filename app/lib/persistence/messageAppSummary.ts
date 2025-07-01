@@ -122,7 +122,7 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
 }
 
 // Get the latest app summary from messages (use passed messages, not store)
-export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
+export const getLatestAppSummary = (message: Message[]): AppSummary | null => {
   if (!messages) {
     return null;
   }
