@@ -143,6 +143,7 @@ class ChatManager {
       'Nut.chatResponsePart',
       ({ responseId: eventResponseId, message }: { responseId: string; message: Message }) => {
         if (responseId == eventResponseId) {
+          console.log('ChatResponse Check 1', responseId, eventResponseId);
           console.log('ChatResponse', chatId, message);
           clearTimeout(timeout);
           options.callbacks.onResponsePart(message);
@@ -164,6 +165,7 @@ class ChatManager {
       'Nut.chatStatus',
       ({ responseId: eventResponseId, status }: { responseId: string; status: string }) => {
         if (responseId == eventResponseId) {
+          console.log('ChatStatus Check 3', status);
           console.log('ChatStatus', status);
           options.callbacks.onStatus(status);
         }

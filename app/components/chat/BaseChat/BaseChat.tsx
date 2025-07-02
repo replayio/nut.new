@@ -167,6 +167,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {() => {
                   return chatStarted ? (
                     <Messages
+                      handleSendMessage={handleSendMessage}
                       ref={messageRef}
                       messages={messages}
                       hasPendingMessage={hasPendingMessage}

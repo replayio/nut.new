@@ -4,6 +4,10 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { type Message, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
+import PlanChecker from './components/PlanChecker';
+import { usePlanCheckerVisibility } from '~/lib/stores/planChecker';
+
+
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 
 interface MessagesProps {
@@ -12,14 +16,16 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '' }, ref) => {
+  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '', handleSendMessage }, ref) => {
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
-
+    const { isPlanCheckerVisible } = usePlanCheckerVisibility();
+  
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {
         containerRef.current = element;
@@ -89,6 +95,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       const isUserMessage = role === 'user';
       const isFirst = index === 0;
       const isLast = index === messages.length - 1;
+      console.log('Message Check', message);
 
       if (!isUserMessage && message.category && message.category !== USER_RESPONSE_CATEGORY) {
         const lastUserResponse = getLastUserResponse(index);
@@ -104,6 +111,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         }
       }
 
+      console.log('Render Message', message);
       return (
         <div
           data-testid="message"
@@ -185,7 +193,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           ref={setRefs}
           className={classNames('absolute inset-0 overflow-y-auto', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
         >
-          {messages.length > 0 ? messages.map(renderMessage) : null}
+          {messages.length > 0 && messages[0] && renderMessage(messages[0], 0)}
+          {isPlanCheckerVisible && <PlanChecker handleSendMessage={handleSendMessage} />}
+          {messages.length > 1 ? messages.slice(1).map(renderMessage) : null}
           {hasPendingMessage && (
             <div className="w-full text-bolt-elements-textSecondary flex items-center">
               <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em] mr-2 text-4xl"></span>

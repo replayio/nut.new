@@ -24,6 +24,7 @@ import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
+import { showPlanCheckerStore, promptMessageStore } from '~/lib/stores/planChecker';
 import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
@@ -155,6 +156,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
 
+    /*
     if (!isLoggedIn && !usingMockChat()) {
       const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
@@ -167,6 +169,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
     }
+    */
 
     const chatId = generateRandomId();
     setPendingMessageId(chatId);
@@ -243,6 +246,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         return;
       }
 
+      console.log('ChatStatus Check 1', status);
       console.log('ChatStatus', status);
       setPendingMessageStatus(status);
     }, 500);
@@ -262,18 +266,35 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
-    let normalFinish = false;
-    try {
-      await sendChatMessage(newMessages, references, {
-        onResponsePart: addResponseMessage,
-        onTitle: onChatTitle,
-        onStatus: onChatStatus,
+    console.log('Prompt Message', promptMessageStore.get());
+    console.log('Messages', messages);
+    console.log('new Message', newMessages);
+
+    if (messages.length < 1) {
+      showPlanCheckerStore.set(true);
+    }
+    
+    if (promptMessageStore.get().length > 0) {
+      if (newMessages.length > 0) {
+        newMessages.pop();
+      }
+      newMessages.push({
+        id: `user-${chatId}`,
+        role: 'user',
+        type: 'text',
+        content: promptMessageStore.get(),
       });
-      normalFinish = true;
-    } catch (e) {
-      if (gNumAborts == numAbortsAtStart) {
-        toast.error('Error sending message');
-        console.error('Error sending message', e);
+      try {
+        await sendChatMessage(newMessages, references, {
+          onResponsePart: addResponseMessage,
+          onTitle: onChatTitle,
+          onStatus: onChatStatus,
+        });
+      } catch (e) {
+        if (gNumAborts == numAbortsAtStart) {
+          toast.error('Error sending message');
+          console.error('Error sending message', e);
+        }
       }
     }
 
@@ -281,7 +302,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       return;
     }
 
-    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, normalFinish);
+    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, false);
     clearActiveChat();
 
     setPendingMessageId(undefined);
@@ -342,6 +363,7 @@ const ChatImplementer = memo((props: ChatProps) => {
           return;
         }
 
+        console.log('ChatStatus Check 2', status);
         console.log('ChatStatus', status);
         setPendingMessageStatus(status);
       }, 500);
