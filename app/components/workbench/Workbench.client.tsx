@@ -51,7 +51,14 @@ export const Workbench = memo(({ chatStarted, handleSendMessage, messages }: Wor
 
   const isSmallViewport = useViewport(1024);
 
-  const appSummary = getFirstAppSummary(messages ?? []);
+  const [hiddenTab, setHiddenTab] = useState<'planning' | 'prebuilt' | null>(null);
+  const [useLatestAppSummary, setUseLatestAppSummary] = useState(false);
+
+  // Switch between getFirstAppSummary and getLatestAppSummary based on state
+  const appSummary = useLatestAppSummary 
+    ? getLatestPrebuiltAppSummary(messages ?? []) 
+    : getFirstAppSummary(messages ?? []);
+  
   const prebuiltAppSummary = getLatestPrebuiltAppSummary(messages ?? []);
 
   const appSummaryContent = useStore(initialAppSummaryStore);
@@ -78,16 +85,31 @@ export const Workbench = memo(({ chatStarted, handleSendMessage, messages }: Wor
   useEffect(() => {
     if (showWorkbench && !hasSeenPreviewRef.current) {
       hasSeenPreviewRef.current = true;
-      setActiveTab('preview');
+      setActiveTab('planning');
     }
   }, [showWorkbench]);
 
+  // Function to handle tab selection and hiding
+  const handleTabSelection = (sourceTab: 'planning' | 'prebuilt') => {
+    // Hide the opposite tab
+    setHiddenTab(sourceTab === 'planning' ? 'prebuilt' : 'planning');
+    
+    // If planning tab was used, switch to latest app summary
+    if (sourceTab === 'planning') {
+      setUseLatestAppSummary(true);
+    }
+    
+    // Switch to preview tab after clicking
+    setActiveTab('preview');
+  };
+
+  // Filter tab options based on hidden tabs
   const tabOptions = {
     options: [
       { value: 'planning' as const, text: 'Planning' },
       ...(prebuiltAppSummary ? [{ value: 'prebuilt' as const, text: 'Prebuilt' }] : []),
       { value: 'preview' as const, text: 'Preview' },
-    ],
+    ].filter(option => option.value !== hiddenTab),
   };
 
   return (
@@ -132,6 +154,7 @@ export const Workbench = memo(({ chatStarted, handleSendMessage, messages }: Wor
                   prebuiltAppSummary={prebuiltAppSummary}
                   prebuiltAppSummaryContent={prebuiltAppSummaryContent}
                   handleSendMessage={handleSendMessage}
+                  onTabSelection={handleTabSelection}
                 />
               </div>
             </div>

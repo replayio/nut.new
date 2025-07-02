@@ -6,11 +6,12 @@ interface PlanningViewProps {
   appSummary: AppSummary | null;
   appSummaryContent: string;
   handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  onTabSelection?: () => void;
 }
 
 
 
-const PlanningView = ({ appSummary, appSummaryContent, handleSendMessage }: PlanningViewProps) => {
+const PlanningView = ({ appSummary, appSummaryContent, handleSendMessage, onTabSelection }: PlanningViewProps) => {
   // Group tests by feature index (matching the array index of features)
   const testsByFeature = appSummary?.tests?.reduce(
     (acc, test) => {
@@ -41,7 +42,10 @@ const PlanningView = ({ appSummary, appSummaryContent, handleSendMessage }: Plan
         {appSummaryContent && handleSendMessage && (
           <div className="mb-8">
             <button
-              onClick={(e) => handleSendMessage(e, appSummaryContent, ChatMode.DevelopApp)}
+              onClick={(e) => {
+                handleSendMessage(e, appSummaryContent, ChatMode.DevelopApp);
+                onTabSelection?.();
+              }}
               className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg border border-green-600 transition-colors"
             >
               Continue Development From Here

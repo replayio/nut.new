@@ -24,9 +24,10 @@ interface PreviewProps {
   prebuiltAppSummary: AppSummary | null;
   prebuiltAppSummaryContent: string;
   messages?: Message[];
+  onTabSelection?: (sourceTab: 'planning' | 'prebuilt') => void;
 }
 
-export const Preview = memo(({ activeTab, appSummary, prebuiltAppSummary, appSummaryContent, prebuiltAppSummaryContent, handleSendMessage }: PreviewProps) => {
+export const Preview = memo(({ activeTab, appSummary, prebuiltAppSummary, appSummaryContent, prebuiltAppSummaryContent, handleSendMessage, onTabSelection }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -240,9 +241,19 @@ export const Preview = memo(({ activeTab, appSummary, prebuiltAppSummary, appSum
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
-          <PlanningView appSummary={appSummary} appSummaryContent={appSummaryContent} handleSendMessage={handleSendMessage} />
+          <PlanningView 
+            appSummary={appSummary} 
+            appSummaryContent={appSummaryContent} 
+            handleSendMessage={handleSendMessage}
+            onTabSelection={() => onTabSelection?.('planning')}
+          />
         ) : activeTab === 'prebuilt' ? (
-          <PlanningView appSummary={prebuiltAppSummary} appSummaryContent={prebuiltAppSummaryContent} handleSendMessage={handleSendMessage} />
+          <PlanningView 
+            appSummary={prebuiltAppSummary} 
+            appSummaryContent={prebuiltAppSummaryContent} 
+            handleSendMessage={handleSendMessage}
+            onTabSelection={() => onTabSelection?.('prebuilt')}
+          />
         ) : activeTab === 'testing' ? (
           <TestingView appSummary={appSummary} />
         ) : (
