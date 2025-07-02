@@ -8,6 +8,7 @@ import type { Message } from '~/lib/persistence/message';
 import PlanningView from './components/PlanningView';
 import TestingView from './components/TestingView';
 import AppView, { type ResizeSide } from './components/AppView';
+import { ChatMode } from '~/lib/replay/ChatManager';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -18,10 +19,14 @@ export function getCurrentIFrame() {
 interface PreviewProps {
   activeTab: 'planning' | 'prebuilt' | 'testing' | 'preview';
   appSummary: AppSummary | null;
+  appSummaryContent: string;
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  prebuiltAppSummary: AppSummary | null;
+  prebuiltAppSummaryContent: string;
   messages?: Message[];
 }
 
-export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
+export const Preview = memo(({ activeTab, appSummary, prebuiltAppSummary, appSummaryContent, prebuiltAppSummaryContent, handleSendMessage }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -235,9 +240,9 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
-          <PlanningView appSummary={appSummary} />
+          <PlanningView appSummary={appSummary} appSummaryContent={appSummaryContent} handleSendMessage={handleSendMessage} />
         ) : activeTab === 'prebuilt' ? (
-          <PlanningView appSummary={appSummary} />
+          <PlanningView appSummary={prebuiltAppSummary} appSummaryContent={prebuiltAppSummaryContent} handleSendMessage={handleSendMessage} />
         ) : activeTab === 'testing' ? (
           <TestingView appSummary={appSummary} />
         ) : (

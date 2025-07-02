@@ -3,9 +3,12 @@
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { Message } from './message';
 import type { DatabaseSchema } from './databaseSchema';
+import { setInitialAppSummary, setPrebuiltAppSummary } from '../stores/appSummary';
 
 // Message sent whenever the app summary is updated.
 export const APP_SUMMARY_CATEGORY = 'AppSummary';
+
+export const ARBORETUM_APP_CATEGORY = 'ArboretumApp';
 
 export enum PlaywrightTestStatus {
   Pass = 'Pass',
@@ -110,7 +113,7 @@ export interface AppSummary {
 
 export function parseAppSummaryMessage(message: Message): AppSummary | undefined {
   try {
-    assert(message.category === APP_SUMMARY_CATEGORY, 'Message is not an app summary message');
+    assert(message.category === APP_SUMMARY_CATEGORY || message.category === ARBORETUM_APP_CATEGORY, 'Message is not an app summary message');
     assert(message.type === 'text', 'Message is not a text message');
     const appSummary = JSON.parse(message.content) as AppSummary;
     assert(appSummary.description, 'Missing app description');
@@ -122,7 +125,7 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
 }
 
 // Get the latest app summary from messages (use passed messages, not store)
-export const getLatestAppSummary = (message: Message[]): AppSummary | null => {
+export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
   if (!messages) {
     return null;
   }
@@ -133,8 +136,48 @@ export const getLatestAppSummary = (message: Message[]): AppSummary | null => {
     .reverse()
     .find((message) => message.category === APP_SUMMARY_CATEGORY);
 
+  setInitialAppSummary(appSummaryMessage?.type === 'text' ? appSummaryMessage?.content : '');
+
   if (!appSummaryMessage) {
     return null;
   }
+  return parseAppSummaryMessage(appSummaryMessage) || null;
+};
+
+// Get the first app summary from messages (use passed messages, not store)
+export const getFirstAppSummary = (messages: Message[]): AppSummary | null => {
+  if (!messages) {
+    return null;
+  }
+
+  // Find the last message with APP_SUMMARY_CATEGORY
+  const appSummaryMessage = messages
+    .slice()
+    .find((message) => message.category === APP_SUMMARY_CATEGORY);
+
+  setInitialAppSummary(appSummaryMessage?.type === 'text' ? appSummaryMessage?.content : '');
+
+  if (!appSummaryMessage) {
+    return null;
+  }
+  return parseAppSummaryMessage(appSummaryMessage) || null;
+};
+
+export const getLatestPrebuiltAppSummary = (messages: Message[]): AppSummary | null => {
+  if (!messages) {
+    return null;
+  }
+
+  const appSummaryMessage = messages
+    .slice()
+    .reverse()
+    .find((message) => message.category === ARBORETUM_APP_CATEGORY);
+
+  setPrebuiltAppSummary(appSummaryMessage?.type === 'text' ? appSummaryMessage?.content : '');
+
+  if (!appSummaryMessage) {
+    return null;
+  }
+
   return parseAppSummaryMessage(appSummaryMessage) || null;
 };

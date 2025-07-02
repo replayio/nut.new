@@ -152,7 +152,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             }
 
             console.log('send message message input enter', event);
-            handleSendMessage(event, undefined, ChatMode.PlanApp);
+            handleSendMessage(event, undefined, ChatMode.PlanAppSearchArboretum);
           }
         }}
         value={input}
@@ -178,7 +178,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
               if (input.length > 0 || uploadedFiles.length > 0) {
                 console.log('send message message input send button', event);
-                handleSendMessage(event, undefined, ChatMode.PlanApp);
+                handleSendMessage(event, undefined, ChatMode.PlanAppSearchArboretum);
               }
             }}
           />

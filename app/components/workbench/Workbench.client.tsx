@@ -10,12 +10,15 @@ import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { getLatestAppSummary, parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import { getFirstAppSummary, getLatestPrebuiltAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
-import { initialAppSummaryStore, prebuiltAppSummaryStore } from '~/lib/stores/appSummary';
+import { prebuiltAppSummaryStore } from '~/lib/stores/appSummary';
+import { initialAppSummaryStore } from '~/lib/stores/appSummary';
+import type { ChatMode } from '~/lib/replay/ChatManager';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
   messages?: Message[];
 }
 
@@ -36,7 +39,7 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, handleSendMessage, messages }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -48,9 +51,11 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
 
   const isSmallViewport = useViewport(1024);
 
-  const appSummary = getLatestAppSummary(messages ?? []);
-  // const appSummary = parseAppSummaryMessage(useStore(initialAppSummaryStore));
-  // const prebuiltAppSummary = parseAppSummaryMessage(useStore(prebuiltAppSummaryStore));
+  const appSummary = getFirstAppSummary(messages ?? []);
+  const prebuiltAppSummary = getLatestPrebuiltAppSummary(messages ?? []);
+
+  const appSummaryContent = useStore(initialAppSummaryStore);
+  const prebuiltAppSummaryContent = useStore(prebuiltAppSummaryStore);
 
   // Debug logging
   console.log('AppSummary debug:', {
@@ -80,7 +85,7 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
   const tabOptions = {
     options: [
       { value: 'planning' as const, text: 'Planning' },
-      { value: 'prebuilt' as const, text: 'Prebuilt' },
+      ...(prebuiltAppSummary ? [{ value: 'prebuilt' as const, text: 'Prebuilt' }] : []),
       { value: 'preview' as const, text: 'Preview' },
     ],
   };
@@ -119,7 +124,15 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
                 />
               </div>
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} appSummary={appSummary} messages={messages} />
+                <Preview
+                  activeTab={activeTab}
+                  appSummary={appSummary}
+                  appSummaryContent={appSummaryContent}
+                  messages={messages}
+                  prebuiltAppSummary={prebuiltAppSummary}
+                  prebuiltAppSummaryContent={prebuiltAppSummaryContent}
+                  handleSendMessage={handleSendMessage}
+                />
               </div>
             </div>
           </div>

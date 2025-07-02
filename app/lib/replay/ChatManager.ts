@@ -13,8 +13,8 @@ import { debounce } from '~/utils/debounce';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
-import { APP_SUMMARY_CATEGORY } from '../persistence/messageAppSummary';
-import { setInitialAppSummary } from '../stores/appSummary';
+import { APP_SUMMARY_CATEGORY, ARBORETUM_APP_CATEGORY } from '../persistence/messageAppSummary';
+import { setInitialAppSummary, setPrebuiltAppSummary } from '../stores/appSummary';
 import { finishChat, isFirstChatMessageStore, setFirstChatMessage } from '~/lib/stores/chatProgress';
 import { useRef } from 'react';
 
@@ -82,6 +82,9 @@ export enum ChatMode {
 
   // Follows step 2 of the BuildApp workflow.
   SearchArboretum = "SearchArboretum",
+
+  // Performs steps 1 and 2 of the BuildApp workflow in sequence.
+  PlanAppSearchArboretum = "PlanAppSearchArboretum",
 
   // Follows step 3 of the BuildApp workflow.
   DevelopApp = "DevelopApp",
@@ -279,9 +282,6 @@ class ChatManager {
       ({ responseId: eventResponseId, message }: { responseId: string; message: Message }) => {
         if (responseId == eventResponseId) {
           console.log('ChatResponse', chatId, message);
-          if (message.category === APP_SUMMARY_CATEGORY && message.type === 'text') {
-            setInitialAppSummary(message.content);
-          }
           clearTimeout(timeout);
           callbacks.onResponsePart(message);
         }

@@ -1,7 +1,16 @@
 import { classNames } from '~/utils/classNames';
 import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import { ChatMode } from '~/lib/replay/ChatManager';
 
-const PlanningView = ({ appSummary }: { appSummary: AppSummary | null }) => {
+interface PlanningViewProps {
+  appSummary: AppSummary | null;
+  appSummaryContent: string;
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+}
+
+
+
+const PlanningView = ({ appSummary, appSummaryContent, handleSendMessage }: PlanningViewProps) => {
   // Group tests by feature index (matching the array index of features)
   const testsByFeature = appSummary?.tests?.reduce(
     (acc, test) => {
@@ -23,12 +32,22 @@ const PlanningView = ({ appSummary }: { appSummary: AppSummary | null }) => {
   return (
     <div className="h-full overflow-auto bg-transparent p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">Planning</div>
+        <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">Planned Features and Tests</div>
 
         <div className="mb-8">
           <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
           <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
         </div>
+        {appSummaryContent && handleSendMessage && (
+          <div className="mb-8">
+            <button
+              onClick={(e) => handleSendMessage(e, appSummaryContent, ChatMode.DevelopApp)}
+              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg border border-green-600 transition-colors"
+            >
+              Continue Development From Here
+            </button>
+          </div>
+        )}
 
         <div className="mb-8">
           <div className="text-lg font-semibold mb-4 text-bolt-elements-textPrimary">Features</div>
