@@ -15,8 +15,8 @@ import type { Message } from '~/lib/persistence/message';
 import type { ChatMode } from '~/lib/replay/ChatManager';
 import { ClientOnly } from 'remix-utils/client-only';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import { DeployChatButton } from '../header/DeployChat/DeployChatButton';
-import { DownloadButton } from '../header/DownloadButton';
+import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
+import { DownloadButton } from '~/components/header/DownloadButton';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -124,7 +124,6 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
                       <ClientOnly>{() => <ChatDescription />}</ClientOnly>
                     </span>
                   )}
-
                 </div>
                 <div className="flex">
                   {chatStarted && (

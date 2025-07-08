@@ -249,9 +249,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                         onClick={() => startEditing(index, feature.description)}
                       >
                         <span className="flex-1">{feature.description}</span>
-                        <button
-                          className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 bg-transparent hover:bg-transparent"
-                        >
+                        <button className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 bg-transparent hover:bg-transparent">
                           <div className="i-ph:pencil-simple text-xl text-bolt-elements-textPrimary" />
                         </button>
                       </div>
