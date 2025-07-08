@@ -159,7 +159,7 @@ export function ClientAuth() {
             setShowAuthModal(true);
             setIsSignUp(false);
           }}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-bold"
+          className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 font-medium transition-colors shadow-lg"
         >
           Sign In
         </button>

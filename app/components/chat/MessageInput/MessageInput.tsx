@@ -4,12 +4,13 @@ import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
+import { ChatMode } from '~/lib/replay/ChatManager';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
@@ -150,7 +151,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event);
+            handleSendMessage(event, undefined, ChatMode.PlanApp);
           }
         }}
         value={input}
@@ -175,7 +176,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               }
 
               if (input.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event);
+                handleSendMessage(event, undefined, ChatMode.PlanApp);
               }
             }}
           />

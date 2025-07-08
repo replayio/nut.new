@@ -8,23 +8,29 @@ import { database } from '~/lib/persistence/chats';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, abortChatMessage, resumeChatMessage } from '~/lib/replay/ChatManager';
+import {
+  sendChatMessage,
+  type ChatReference,
+  abortChatMessage,
+  resumeChatMessage,
+  ChatMode,
+} from '~/lib/replay/ChatManager';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
-import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
+// import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
 import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
-import { useAuthStatus } from '~/lib/stores/auth';
+// import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
 import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
-import { usingMockChat } from '~/lib/replay/MockChat';
+// import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 
@@ -56,7 +62,7 @@ const ChatImplementer = memo((props: ChatProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams] = useSearchParams();
-  const { isLoggedIn } = useAuthStatus();
+  // const { isLoggedIn } = useAuthStatus();
   const [input, setInput] = useState('');
 
   const [pendingMessageId, setPendingMessageId] = useState<string | undefined>(undefined);
@@ -145,7 +151,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput?: string) => {
+  const sendMessage = async (messageInput?: string, chatMode?: ChatMode) => {
     const _input = messageInput || input;
     const numAbortsAtStart = gNumAborts;
 
@@ -155,18 +161,18 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
 
-    if (!isLoggedIn && !usingMockChat()) {
-      const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
+    // if (!isLoggedIn && !usingMockChat()) {
+    //   const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
 
-      if (numFreeUses >= maxFreeUses) {
-        toast.error('Please login to continue using Nut.');
-        gActiveChatMessageTelemetry.abort('NoFreeUses');
-        clearActiveChat();
-        return;
-      }
+    //   if (numFreeUses >= maxFreeUses) {
+    //     toast.error('Please login to continue using Nut.');
+    //     gActiveChatMessageTelemetry.abort('NoFreeUses');
+    //     clearActiveChat();
+    //     return;
+    //   }
 
-      Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
-    }
+    //   Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
+    // }
 
     const chatId = generateRandomId();
     setPendingMessageId(chatId);
@@ -264,11 +270,16 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     let normalFinish = false;
     try {
-      await sendChatMessage(newMessages, references, {
-        onResponsePart: addResponseMessage,
-        onTitle: onChatTitle,
-        onStatus: onChatStatus,
-      });
+      await sendChatMessage(
+        newMessages,
+        references,
+        {
+          onResponsePart: addResponseMessage,
+          onTitle: onChatTitle,
+          onStatus: onChatStatus,
+        },
+        chatMode,
+      );
       normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {
