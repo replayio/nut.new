@@ -168,7 +168,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
               setActiveTab?.('preview');
             }}
           >
-            Submit Plan
+            Submit Plan and Develop App
           </button>
         </div>
 
