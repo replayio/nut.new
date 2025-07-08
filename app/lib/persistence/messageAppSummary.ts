@@ -13,22 +13,93 @@ export enum PlaywrightTestStatus {
   NotRun = 'NotRun',
 }
 
-// Describes an app feature.
-export interface AppFeature {
-  // Short description of the feature.
+// Details of the app have a short name and a one sentence description.
+export interface AppDetail {
+  name: string;
+  description: string;
+}
+
+// Describes the contents of a page in the app.
+export interface AppPage {
+  // Path to this page in the app. '/' for the root page, may include wildcards.
+  path: string;
+
+  // One sentence description of the page.
   description: string;
 
-  // Set when the feature has been implemented and all tests pass.
-  done: boolean;
+  // All components on the page. Name is the component class or function name.
+  components: AppDetail[];
+}
+
+// Kinds of APIs a feature can define or use.
+export enum AppAPIKind {
+  // A serverless function which is defined in the backend and called by the frontend.
+  ServerlessFunction = 'ServerlessFunction',
+
+  // A function defined in library code and called by frontend components.
+  Frontend = 'Frontend',
+
+  // A function defined in library code and called by backend functions.
+  Backend = 'Backend',
+}
+
+// An API defined or used by a feature.
+export interface AppAPI extends AppDetail {
+  kind: AppAPIKind;
+}
+
+// The status of a feature describes its implementation and whether associated components
+// should be functional.
+export enum AppFeatureStatus {
+  // Not started, all components will be non-functional.
+  NotStarted = 'NotStarted',
+
+  // Finished and tests pass, all components will be (or ought to be) functional.
+  Done = 'Done',
+
+  // Implementation has started but components may not be functional yet.
+  InProgress = 'InProgress',
+}
+
+export interface AppFeature {
+  // Short name for the feature.
+  name: string;
+
+  // Current status of the feature.
+  status: AppFeatureStatus;
+
+  // Any existing feature in the Arboretum which will be used to implement this one.
+  arboretumRepositoryId?: string;
+
+  // One sentence description of the feature.
+  description: string;
+
+  // One paragraph summary of the feature's requirements.
+  summary: string;
+
+  // Names of any components which the feature implements.
+  componentNames?: string[];
+
+  // Any APIs defined by other features and used by this feature.
+  usedAPIs?: AppAPI[];
+
+  // Any APIs defined by this feature.
+  definedAPIs?: AppAPI[];
+
+  // Any database changes needed by the feature.
+  databaseChange?: DatabaseSchema;
+
+  // Any secrets required by backend APIs in the feature.
+  // Names are environment variables.
+  secrets?: AppDetail[];
+
+  // Tests for functionality added by the feature.
+  tests?: AppTest[];
 }
 
 // Describes a planned or implemented playwright test.
 export interface AppTest {
-  // Title of the test.
   title: string;
-
-  // Any feature associated with this test.
-  featureIndex?: number;
 
   // Set after the test has been implemented.
   status?: PlaywrightTestStatus;
@@ -37,74 +108,22 @@ export interface AppTest {
   recordingId?: string;
 }
 
-// Describes a backend serverless function API which the app requires.
-export interface AppBackendAPI {
-  // First feature which depends on this API.
-  featureIndex?: number;
-
-  // Name of the backend function.
-  name: string;
-
-  // Short description of the backend function.
-  description: string;
-}
-
-// Describes a change to the database schema.
-export interface AppDatabaseChange {
-  // First feature which depends on this database change.
-  featureIndex?: number;
-
-  // Database schema change, incremental with previous changes.
-  schema: DatabaseSchema;
-}
-
-// In some cases details of an app are abstracted away to make them easier to reuse.
-//
-// Abstractions are always enclosed with [brackets] in abstracted app descriptions,
-// prompts and the app UIs.
-//
-// For example, a "Todo List" app and a "Grocery List" app can be abstracted the same
-// way as a "[Something] List" app where "Something" = "Todo" or "Grocery" when
-// instantiating the two apps.
-//
-// Apps in the Arboretum are always abstracted, and when building for the Arboretum
-// we abstract away features when possible early on.
-//
-// Apps built for normal clients (not for the Arboretum) are always instantiated.
-// After finding an app in the Arboretum it will be instantiated before being returned.
-export interface AppAbstraction {
-  // Name of the abstraction as referred to in the abstracted description.
-  name: string;
-
-  // Value in the original client messages which this abstraction represents.
-  representation: string;
-}
-
 export interface AppSummary {
   // Short and high level description of the app.
   description: string;
 
-  // Any abstractions in use by this app.
-  abstractions: AppAbstraction[];
+  // Filled in by PlanApp:Start phase.
+  pages?: AppPage[];
+  navigation?: string;
 
-  // All the app's features.
-  features: AppFeature[];
+  // Filled in by PlanApp:DescribeFeatures phase.
+  features?: AppFeature[];
 
-  // Any available details about the app's implementation plan.
-  tests?: AppTest[];
-  backendAPIs?: AppBackendAPI[];
-  databaseChanges?: AppDatabaseChange[];
-
-  // Any planned feature for which initial code changes have been made but not
-  // all tests are passing yet.
-  inProgressFeatureIndex?: number;
-
-  // The repository being described, if available. Currently only set for client messages.
+  // The repository being described, if available.
   repositoryId?: string;
 
   // Version string of the repository: Major.Minor.Patch
   // The version advances every time the app changes.
-  // Currently only set for client messages.
   version?: string;
 }
 
@@ -114,9 +133,10 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
     assert(message.type === 'text', 'Message is not a text message');
     const appSummary = JSON.parse(message.content) as AppSummary;
     assert(appSummary.description, 'Missing app description');
+    assert(appSummary.pages, 'Missing app pages');
     return appSummary;
   } catch (e) {
-    console.error('Failed to parse feature done message', e);
+    console.error('Failed to parse app summary message', e);
     return undefined;
   }
 }

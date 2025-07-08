@@ -5,8 +5,7 @@ import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } 
 import styles from './ExampleLibraryApps.module.scss';
 import { getMessagesRepositoryId } from '~/lib/persistence/message';
 import { classNames } from '~/utils/classNames';
-import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
-import { parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY, parseAppSummaryMessage, type AppTest } from '~/lib/persistence/messageAppSummary';
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
@@ -154,6 +153,11 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
 
     const appSummary = appContents ? getAppSummary(appContents) : null;
 
+    const allTests: AppTest[] = [];
+    for (const { tests } of appSummary?.features ?? []) {
+      allTests.push(...(tests ?? []));
+    }
+
     return (
       <div className={styles.detailView}>
         <div className={styles.detailHeader}>
@@ -199,9 +203,9 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
             <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
           <div className="text-lg font-semibold mb-2 text-bolt-elements-textPrimary">Test Results</div>
-          {appSummary?.tests?.length && (
+          {allTests.length && (
             <div className="flex flex-col gap-2">
-              {appSummary.tests.map((test) => (
+              {allTests.map((test) => (
                 <div key={test.title} className="flex items-center gap-2">
                   <div
                     className={classNames('w-3 h-3 rounded-full border border-bolt-elements-borderColor', {

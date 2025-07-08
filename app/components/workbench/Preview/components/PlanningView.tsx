@@ -1,25 +1,7 @@
 import { classNames } from '~/utils/classNames';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 
 const PlanningView = ({ appSummary }: { appSummary: AppSummary | null }) => {
-  // Group tests by feature index (matching the array index of features)
-  const testsByFeature = appSummary?.tests?.reduce(
-    (acc, test) => {
-      // @ts-ignore - featureIndex exists in the data but not in the type
-      const featureIndex = test.featureIndex;
-      if (featureIndex === undefined) {
-        return acc;
-      }
-
-      if (!acc[featureIndex]) {
-        acc[featureIndex] = [];
-      }
-      acc[featureIndex].push(test);
-      return acc;
-    },
-    {} as Record<number, typeof appSummary.tests>,
-  );
-
   return (
     <div className="h-full overflow-auto bg-transparent p-6">
       <div className="max-w-4xl mx-auto">
@@ -33,8 +15,9 @@ const PlanningView = ({ appSummary }: { appSummary: AppSummary | null }) => {
         <div className="mb-8">
           <div className="text-lg font-semibold mb-4 text-bolt-elements-textPrimary">Features</div>
           <div className="space-y-6">
-            {appSummary?.features.map((feature, index) => {
-              const featureTests = testsByFeature?.[index] || [];
+            {appSummary?.features?.map((feature, index) => {
+              const featureTests = feature.tests ?? [];
+              const done = feature.status == AppFeatureStatus.Done;
 
               return (
                 <div
@@ -44,19 +27,19 @@ const PlanningView = ({ appSummary }: { appSummary: AppSummary | null }) => {
                   <div className="flex items-center gap-3 p-3 border-b border-bolt-elements-borderColor">
                     <div
                       className={classNames('w-4 h-4 rounded-full border-2', {
-                        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !feature.done,
-                        'bg-green-500 border-green-500': feature.done,
+                        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !done,
+                        'bg-green-500 border-green-500': done,
                       })}
                     />
                     <div
                       className={classNames('flex-1', {
-                        'text-bolt-elements-textSecondary': !feature.done,
-                        'text-bolt-elements-textPrimary': feature.done,
+                        'text-bolt-elements-textSecondary': !done,
+                        'text-bolt-elements-textPrimary': done,
                       })}
                     >
                       {feature.description}
                     </div>
-                    {feature.done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
+                    {done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
                   </div>
 
                   {featureTests.length > 0 && (

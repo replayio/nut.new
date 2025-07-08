@@ -1,7 +1,12 @@
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import type { AppSummary, AppTest } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
 
 const TestingView = ({ appSummary }: { appSummary: AppSummary | null }) => {
+  const allTests: AppTest[] = [];
+  for (const { tests } of appSummary?.features ?? []) {
+    allTests.push(...(tests ?? []));
+  }
+
   return (
     <div className="h-full overflow-auto bg-transparent p-6">
       <div className="max-w-4xl mx-auto">
@@ -10,7 +15,7 @@ const TestingView = ({ appSummary }: { appSummary: AppSummary | null }) => {
         <div className="space-y-3">
           <div className="text-lg font-semibold mb-4 text-bolt-elements-textPrimary">Tests</div>
           <div className="space-y-2">
-            {appSummary?.tests?.map((test, testIdx) => (
+            {allTests.map((test, testIdx) => (
               <div
                 key={testIdx}
                 className="flex items-center gap-3 p-3 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor"

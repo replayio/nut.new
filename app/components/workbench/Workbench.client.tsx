@@ -49,13 +49,6 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
 
   const appSummary = getLatestAppSummary(messages ?? []);
 
-  // Debug logging
-  console.log('AppSummary debug:', {
-    hasAppSummary: !!appSummary,
-    tests: appSummary?.tests,
-    testsLength: appSummary?.tests?.length,
-  });
-
   useEffect(() => {
     if (hasSeenProjectPlanRef.current) {
       return;
