@@ -252,7 +252,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                           onClick={() => startEditing(index, feature.description)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 bg-transparent hover:bg-transparent"
                         >
-                          <div className="i-ph:pencil-simple text-xl text-white" />
+                          <div className="i-ph:pencil-simple text-xl text-bolt-elements-textPrimary" />
                         </button>
                       </div>
                     )}
