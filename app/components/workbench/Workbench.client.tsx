@@ -125,7 +125,13 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
                 />
               </div>
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} appSummary={appSummary} handleSendMessage={handleSendMessage} messages={messages} setActiveTab={setActiveTab} />
+                <Preview
+                  activeTab={activeTab}
+                  appSummary={appSummary}
+                  handleSendMessage={handleSendMessage}
+                  messages={messages}
+                  setActiveTab={setActiveTab}
+                />
               </div>
             </div>
           </div>

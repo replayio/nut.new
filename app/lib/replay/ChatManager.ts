@@ -68,31 +68,31 @@ export enum ChatMode {
   //
   // 3. Will then work on developing the features one by one until tests pass and it
   //    can start on the next feature.
-  BuildApp = "BuildApp",
+  BuildApp = 'BuildApp',
 
   // Build an abstracted application for adding to the Arboretum.
-  BuildAppArboretum = "BuildAppArboretum",
+  BuildAppArboretum = 'BuildAppArboretum',
 
   // Build a new application without using the Arboretum.
-  BuildAppFromScratch = "BuildAppFromScratch",
+  BuildAppFromScratch = 'BuildAppFromScratch',
 
   // Analyze any provided recording.
-  AnalyzeRecording = "AnalyzeRecording",
+  AnalyzeRecording = 'AnalyzeRecording',
 
   // Follow the bug fixing steps of the BuildApp workflow.
-  FixBug = "FixBug",
+  FixBug = 'FixBug',
 
   // Follows step 1 of the BuildApp workflow.
-  PlanApp = "PlanApp",
+  PlanApp = 'PlanApp',
 
   // Follows step 2 of the BuildApp workflow.
-  SearchArboretum = "SearchArboretum",
+  SearchArboretum = 'SearchArboretum',
 
   // Performs steps 1 and 2 of the BuildApp workflow in sequence.
-  PlanAppSearchArboretum = "PlanAppSearchArboretum",
+  PlanAppSearchArboretum = 'PlanAppSearchArboretum',
 
   // Follows step 3 of the BuildApp workflow.
-  DevelopApp = "DevelopApp",
+  DevelopApp = 'DevelopApp',
 }
 
 // Manager for a single chat message. Each chat message is sent off and generates

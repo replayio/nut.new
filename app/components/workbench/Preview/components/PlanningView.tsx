@@ -10,14 +10,13 @@ interface PlanningViewProps {
   setActiveTab?: (tab: 'planning' | 'preview') => void;
 }
 
-
 const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningViewProps) => {
   // State to track selected features (using Set for efficient lookups)
   const [selectedFeatures, setSelectedFeatures] = useState<Set<number>>(new Set());
-  
+
   // State for additional features added by user
   const [additionalFeatures, setAdditionalFeatures] = useState<Array<{ description: string; done: boolean }>>([]);
-  
+
   // State for editing features
   const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
@@ -27,10 +26,8 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
 
   // Combine original features with additional features, applying overrides
   const allFeatures = [
-    ...(appSummary?.features || []).map((feature, index) => 
-      featureOverrides[index] || feature
-    ),
-    ...additionalFeatures
+    ...(appSummary?.features || []).map((feature, index) => featureOverrides[index] || feature),
+    ...additionalFeatures,
   ];
 
   // Select all features by default when appSummary becomes available
@@ -43,10 +40,10 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   // Update selected features when additional features are added
   useEffect(() => {
     if (additionalFeatures.length > 0) {
-      setSelectedFeatures(prev => {
+      setSelectedFeatures((prev) => {
         const newSet = new Set(prev);
         // Add the new feature indices to selected features
-        for (let i = (appSummary?.features?.length || 0); i < allFeatures.length; i++) {
+        for (let i = appSummary?.features?.length || 0; i < allFeatures.length; i++) {
           newSet.add(i);
         }
         return newSet;
@@ -58,14 +55,14 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   const handleAddFeature = (featureDescription: string) => {
     const newFeature = {
       description: featureDescription,
-      done: false
+      done: false,
     };
-    setAdditionalFeatures(prev => [...prev, newFeature]);
+    setAdditionalFeatures((prev) => [...prev, newFeature]);
   };
 
   // Toggle feature selection
   const toggleFeatureSelection = (featureIndex: number) => {
-    setSelectedFeatures(prev => {
+    setSelectedFeatures((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(featureIndex)) {
         newSet.delete(featureIndex);
@@ -101,28 +98,26 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   // Handle editing features
   const handleEditFeature = (featureIndex: number, newDescription: string) => {
     const originalFeaturesLength = appSummary?.features?.length || 0;
-    
+
     if (featureIndex < originalFeaturesLength) {
       // Editing an original feature - use override
-      setFeatureOverrides(prev => ({
+      setFeatureOverrides((prev) => ({
         ...prev,
         [featureIndex]: {
           description: newDescription,
-          done: appSummary?.features?.[featureIndex]?.done || false
-        }
+          done: appSummary?.features?.[featureIndex]?.done || false,
+        },
       }));
     } else {
       // Editing an additional feature
       const additionalIndex = featureIndex - originalFeaturesLength;
-      setAdditionalFeatures(prev => 
-        prev.map((feature, index) => 
-          index === additionalIndex 
-            ? { ...feature, description: newDescription }
-            : feature
-        )
+      setAdditionalFeatures((prev) =>
+        prev.map((feature, index) =>
+          index === additionalIndex ? { ...feature, description: newDescription } : feature,
+        ),
       );
     }
-    
+
     setEditingFeatureIndex(null);
     setEditingValue('');
   };
@@ -146,23 +141,26 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
           <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
           <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
         </div>
-        
+
         <div className="flex justify-center mb-8">
-          <button 
-            className="bg-green-500 text-white px-4 py-2 rounded-md" 
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-md"
             onClick={(e) => {
-              if (!appSummary) return;
-              
+              if (!appSummary) {
+                return;
+              }
+
               const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
-              const filteredFeatures = selectedFeaturesArray.map(index => allFeatures[index]);
-              const filteredTests = appSummary.tests?.filter(test => 
-                test.featureIndex !== undefined && selectedFeatures.has(test.featureIndex)
-              ) || [];
-              
+              const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
+              const filteredTests =
+                appSummary.tests?.filter(
+                  (test) => test.featureIndex !== undefined && selectedFeatures.has(test.featureIndex),
+                ) || [];
+
               const filteredAppSummary = {
                 ...appSummary,
                 features: filteredFeatures,
-                tests: filteredTests
+                tests: filteredTests,
               };
 
               console.log('filteredAppSummary', filteredAppSummary);
@@ -181,7 +179,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
               {selectedFeatures.size} of {allFeatures.length} selected
             </div>
           </div>
-          
+
           <div className="space-y-6">
             {allFeatures.map((feature, index) => {
               const featureTests = testsByFeature?.[index] || [];
@@ -197,23 +195,22 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                       className={classNames(
                         'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
                         {
-                          'border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 hover:bg-bolt-elements-background-depth-1': !selectedFeatures.has(index),
+                          'border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 hover:bg-bolt-elements-background-depth-1':
+                            !selectedFeatures.has(index),
                           'border-green-500 bg-green-500 hover:bg-green-600': selectedFeatures.has(index),
-                        }
+                        },
                       )}
                     >
-                      {selectedFeatures.has(index) && (
-                        <div className="i-ph:check-bold text-white text-sm" />
-                      )}
+                      {selectedFeatures.has(index) && <div className="i-ph:check-bold text-white text-sm" />}
                     </button>
-                    
+
                     <div
                       className={classNames('w-4 h-4 rounded-full border-2', {
                         'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !feature.done,
                         'bg-green-500 border-green-500': feature.done,
                       })}
                     />
-                    
+
                     {editingFeatureIndex === index ? (
                       <div className="flex-1 flex items-center gap-2">
                         <input
@@ -244,7 +241,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                         </button>
                       </div>
                     ) : (
-                      <div 
+                      <div
                         className={classNames('flex-1 flex items-center group', {
                           'text-bolt-elements-textSecondary': !feature.done,
                           'text-bolt-elements-textPrimary': feature.done,
@@ -259,7 +256,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                         </button>
                       </div>
                     )}
-                    
+
                     {feature.done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
                   </div>
 
@@ -275,10 +272,12 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                                 test.status === 'NotRun',
                             })}
                           />
-                          <div className={classNames("flex-1", {
-                            'text-bolt-elements-textPrimary': test.status === 'Pass',
-                            'text-bolt-elements-textSecondary': test.status !== 'Pass',
-                          })}>
+                          <div
+                            className={classNames('flex-1', {
+                              'text-bolt-elements-textPrimary': test.status === 'Pass',
+                              'text-bolt-elements-textSecondary': test.status !== 'Pass',
+                            })}
+                          >
                             {test.recordingId ? (
                               <a
                                 href={`https://app.replay.io/recording/${test.recordingId}`}
@@ -313,7 +312,6 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
               );
             })}
           </div>
-          
         </div>
       </div>
       <div className=" w-full sticky left-0 bottom-[-25px] mt-6 bg-bolt-elements-background-depth-1 p-4 border-t border-bolt-elements-borderColor shadow-lg">

@@ -42,22 +42,20 @@ export const AddFeatureInput: React.FC<AddFeatureInputProps> = ({ onAddFeature }
       />
       <div className="flex justify-between items-center text-sm p-4 pt-2">
         <div className="text-xs text-bolt-elements-textTertiary">
-          Press <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Enter</kbd> to add feature
+          Press <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Enter</kbd> to add
+          feature
         </div>
         <button
           onClick={handleSubmit}
           disabled={!input.trim()}
-          className={classNames(
-            'px-3 py-1.5 rounded text-sm font-medium transition-all',
-            {
-              'bg-green-500 hover:bg-green-600 text-white': !!input.trim(),
-              'bg-bolt-elements-background-depth-3 text-bolt-elements-textTertiary cursor-not-allowed': !input.trim(),
-            }
-          )}
+          className={classNames('px-3 py-1.5 rounded text-sm font-medium transition-all', {
+            'bg-green-500 hover:bg-green-600 text-white': !!input.trim(),
+            'bg-bolt-elements-background-depth-3 text-bolt-elements-textTertiary cursor-not-allowed': !input.trim(),
+          })}
         >
           Add Feature
         </button>
       </div>
     </div>
   );
-}; 
+};

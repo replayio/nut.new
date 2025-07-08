@@ -3,7 +3,7 @@
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { Message } from './message';
 import type { DatabaseSchema } from './databaseSchema';
-import { setInitialAppSummary } from '../stores/appSummary';
+import { setInitialAppSummary } from '~/lib/stores/appSummary';
 
 // Message sent whenever the app summary is updated.
 export const APP_SUMMARY_CATEGORY = 'AppSummary';
