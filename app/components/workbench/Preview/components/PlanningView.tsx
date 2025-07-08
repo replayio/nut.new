@@ -197,7 +197,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                         {
                           'border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 hover:bg-bolt-elements-background-depth-1':
                             !selectedFeatures.has(index),
-                          'border-green-500 bg-green-500 hover:bg-green-600': selectedFeatures.has(index),
+                          'border-blue-500 bg-blue-500 hover:bg-blue-600': selectedFeatures.has(index),
                         },
                       )}
                     >
