@@ -242,14 +242,14 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                       </div>
                     ) : (
                       <div
-                        className={classNames('flex-1 flex items-center group', {
+                        className={classNames('flex-1 flex items-center group cursor-pointer', {
                           'text-bolt-elements-textSecondary': !feature.done,
                           'text-bolt-elements-textPrimary': feature.done,
                         })}
+                        onClick={() => startEditing(index, feature.description)}
                       >
                         <span className="flex-1">{feature.description}</span>
                         <button
-                          onClick={() => startEditing(index, feature.description)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 bg-transparent hover:bg-transparent"
                         >
                           <div className="i-ph:pencil-simple text-xl text-bolt-elements-textPrimary" />
