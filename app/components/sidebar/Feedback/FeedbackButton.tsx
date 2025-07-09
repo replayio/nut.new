@@ -12,6 +12,6 @@ const Feedback = () => {
       Feedback
     </button>
   );
-}
+};
 
 export default Feedback;

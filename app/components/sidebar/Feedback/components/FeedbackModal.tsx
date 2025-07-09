@@ -51,9 +51,7 @@ const GlobalFeedbackModal = () => {
       <div className="bg-bolt-elements-background-depth-1 rounded-lg p-8 border border-bolt-elements-borderColor">
         {submitted ? (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">
-              Feedback Submitted
-            </h2>
+            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Feedback Submitted</h2>
             <div className="text-center">
               <p className="text-bolt-elements-textSecondary mb-6">
                 Thank you for your feedback! We appreciate your input.
@@ -70,17 +68,13 @@ const GlobalFeedbackModal = () => {
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">
-              Share Your Feedback
-            </h2>
+            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Share Your Feedback</h2>
             <div className="text-center mb-6 text-bolt-elements-textSecondary">
               Let us know how Nut is doing or report any issues you've encountered.
             </div>
 
             <div className="mb-6">
-              <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
-                Your Feedback:
-              </label>
+              <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">Your Feedback:</label>
               <textarea
                 name="description"
                 className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-[120px]"
@@ -146,6 +140,6 @@ const GlobalFeedbackModal = () => {
       </div>
     </ReactModal>
   );
-}
+};
 
 export default GlobalFeedbackModal;
