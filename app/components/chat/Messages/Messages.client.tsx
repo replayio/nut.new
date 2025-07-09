@@ -100,6 +100,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           return null;
         }
 
+        if (message.category === DISCOVERY_RATING_CATEGORY) {
+          return null;
+        }
+
         if (!showDetails) {
           return null;
         }

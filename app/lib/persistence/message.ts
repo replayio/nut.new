@@ -87,6 +87,9 @@ interface DiscoveryRating {
   rating: number;
 }
 
+// Discovery ratings are on a scale from 0 to 10.
+export const MAX_DISCOVERY_RATING = 10;
+
 export function getDiscoveryRating(messages: Message[]): number {
   const discoveryRatingMessage = messages.findLast(message => message.category === DISCOVERY_RATING_CATEGORY);
   if (!discoveryRatingMessage) {

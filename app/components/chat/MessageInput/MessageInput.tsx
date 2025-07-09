@@ -10,7 +10,7 @@ export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent, messageInput?: string) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean) => void;
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
@@ -157,7 +157,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event, fullInput);
+            handleSendMessage(event, fullInput, false);
           }
         }}
         value={input}
@@ -183,19 +183,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               }
 
               if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event, fullInput);
+                handleSendMessage(event, fullInput, false);
               }
             }}
           />
           {startPlanningRating > 0 && <StartPlanningButton
             onClick={(event) => {
-              if (hasPendingMessage) {
-                handleStop();
-                return;
-              }
-
               if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event, fullInput);
+                handleSendMessage(event, fullInput, true);
               }
             }}
             rating={startPlanningRating}
