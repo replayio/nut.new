@@ -4,7 +4,6 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import { Feedback } from './Feedback/FeedbackButton';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth/ClientAuth';
 import { DeployChatButton } from './DeployChat/DeployChatButton';
@@ -22,12 +21,8 @@ export function Header() {
         'border-bolt-elements-borderColor': chatStarted,
       })}
     >
-      <div className="flex flex-1 items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
-        <div data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-3xl" />
-        <a href="/" className="text-3xl font-semibold text-accent flex items-center">
-          <img src="/logo-styled.svg" alt="logo" className="w-[30px] inline-block rotate-90" />
-        </a>
-        <Feedback />
+      <div className="flex flex-1 items-center gap-4 z-logo text-bolt-elements-textPrimary cursor-pointer">
+        <div data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-2xl" />
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a
@@ -36,7 +31,7 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <div className="i-ph:discord-logo-fill text-3xl" />
+              <div className="i-ph:discord-logo-fill text-2xl" />
             </a>
           </WithTooltip>
         </TooltipProvider>

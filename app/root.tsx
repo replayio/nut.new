@@ -14,7 +14,7 @@ import { initializeUserStores } from './lib/stores/user';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/remix';
 import { AuthModal } from './components/auth/AuthModal';
-
+import GlobalFeedbackModal from './components/sidebar/Feedback/components/FeedbackModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
@@ -209,6 +209,7 @@ export default function App() {
           transition={toastAnimation}
         />
         <AuthModal />
+        <GlobalFeedbackModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />

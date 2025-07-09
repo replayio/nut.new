@@ -13,6 +13,7 @@ import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import Cookies from 'js-cookie';
+import Feedback from './Feedback/FeedbackButton';
 
 const menuVariants = {
   closed: {
@@ -232,6 +233,7 @@ export const Menu = () => {
         </div>
         <div className="flex items-center justify-between border-t border-bolt-elements-borderColor p-4">
           <SettingsButton onClick={() => setIsSettingsOpen(true)} />
+          <Feedback />
           <ThemeSwitch />
         </div>
       </div>
