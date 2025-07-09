@@ -52,7 +52,7 @@ export const Markdown = memo((props: MarkdownProps) => {
       input: ({checked, ...props}) => {
         if (onCheckboxChange) {
           // remove `disabled` so it becomes interactive
-          props.disabled = false;
+          props = { ...props, disabled: false };
         }
 
         const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

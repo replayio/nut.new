@@ -1,6 +1,7 @@
 // Client messages match the format used by the Nut protocol.
 
 import { generateId } from '~/utils/fileUtils';
+import { assert } from '~/lib/replay/ReplayProtocolClient';
 
 type MessageRole = 'user' | 'assistant';
 
@@ -80,3 +81,18 @@ export const DISCOVERY_RESPONSE_CATEGORY = 'DiscoveryResponse';
 
 // Category used to update the discovery rating after each response.
 export const DISCOVERY_RATING_CATEGORY = 'DiscoveryRating';
+
+// JSON stringified contents of a discovery rating message.
+interface DiscoveryRating {
+  rating: number;
+}
+
+export function getDiscoveryRating(messages: Message[]): number {
+  const discoveryRatingMessage = messages.findLast(message => message.category === DISCOVERY_RATING_CATEGORY);
+  if (!discoveryRatingMessage) {
+    return 0;
+  }
+  assert(discoveryRatingMessage.type === 'text', 'Discovery rating message is not a text message');
+  const info: DiscoveryRating = JSON.parse(discoveryRatingMessage.content);
+  return info.rating;
+}

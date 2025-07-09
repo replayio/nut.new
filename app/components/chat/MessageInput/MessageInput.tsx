@@ -4,6 +4,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
+import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -23,6 +24,7 @@ export interface MessageInputProps {
   minHeight?: number;
   maxHeight?: number;
   checkedBoxes?: string[];
+  startPlanningRating?: number;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -43,6 +45,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   minHeight = 76,
   maxHeight = 200,
   checkedBoxes,
+  startPlanningRating = 0,
 }) => {
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -96,7 +99,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map(box => `CHECKED: ${box}`).join('\n')}` : '');
+  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map(box => `Checked: ${box}`).join('\n')}` : '');
 
   return (
     <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
@@ -169,6 +172,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       />
       <ClientOnly>
         {() => (
+          <>
           <SendButton
             show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
             hasPendingMessage={hasPendingMessage}
@@ -183,6 +187,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               }
             }}
           />
+          {startPlanningRating > 0 && <StartPlanningButton
+            onClick={(event) => {
+              if (hasPendingMessage) {
+                handleStop();
+                return;
+              }
+
+              if (fullInput.length > 0 || uploadedFiles.length > 0) {
+                handleSendMessage(event, fullInput);
+              }
+            }}
+            rating={startPlanningRating}
+          />}
+          </>
         )}
       </ClientOnly>
       <div className="flex justify-between items-center text-sm p-4 pt-2">
