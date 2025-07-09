@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useState } from 'react';
+import React, { type RefCallback, useCallback, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -98,6 +98,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
+    // This doesn't seem like it should be necessary, but we get stale messages
+    // in the onLastMessageCheckboxChange callback for some reason that prevents
+    // multiple checkboxes from being checked otherwise.
+    const messagesRef = useRef<Message[]>(messages || []);
+
     const handleSendMessage = (event: React.UIEvent, messageInput: string, startPlanning: boolean) => {
       if (sendMessage) {
         sendMessage(messageInput, startPlanning);
@@ -132,7 +137,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const onLastMessageCheckboxChange = (contents: string, checked: boolean) => {
       if (messages && setMessages) {
-        setMessages(messages.map(message => {
+        const newMessages = messagesRef.current.map(message => {
           if (message.type == 'text') {
             const oldBox = checked ? `[ ]` : `[x]`;
             const newBox = checked ? `[x]` : `[ ]`;
@@ -142,7 +147,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             }
           }
           return message;
-        }));
+        });
+        messagesRef.current = newMessages;
+        setMessages(newMessages);
       }
       if (checked) {
         setCheckedBoxes([...checkedBoxes, contents]);
