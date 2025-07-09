@@ -12,10 +12,11 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '' }, ref) => {
+  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '', onLastMessageCheckboxChange }, ref) => {
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -106,9 +107,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
       let onCheckboxChange = undefined;
       if (isActiveDiscoveryResponse(messages, message)) {
-        onCheckboxChange = (contents: string, checked: boolean) => {
-          console.log("CHECKBOX", contents, checked);
-        };
+        onCheckboxChange = onLastMessageCheckboxChange;
       }
 
       return (

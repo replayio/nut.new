@@ -93,6 +93,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
+    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
+
     const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
       if (sendMessage) {
         sendMessage(messageInput);
@@ -124,7 +126,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       return undefined;
     })();
 
-    const messageInputProps = {
+    const onLastMessageCheckboxChange = (contents: string, checked: boolean) => {
+      if (checked) {
+        setCheckedBoxes([...checkedBoxes, contents]);
+      } else {
+        setCheckedBoxes(checkedBoxes.filter(box => box !== contents));
+      }
+    };
+
+    const messageInputProps: MessageInputProps = {
       textareaRef,
       input,
       handleInputChange,
@@ -141,6 +151,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
+      checkedBoxes,
     };
 
     const baseChat = (
@@ -171,6 +182,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       messages={messages}
                       hasPendingMessage={hasPendingMessage}
                       pendingMessageStatus={pendingMessageStatus}
+                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
                     />
                   ) : null;
                 }}
@@ -186,7 +198,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 setRejectFormOpen={setRejectFormOpen}
                 onApproveChange={onApproveChange}
                 onRejectChange={onRejectChange}
-                messageInputProps={messageInputProps as MessageInputProps}
+                messageInputProps={messageInputProps}
               />
             </div>
             {!chatStarted && (

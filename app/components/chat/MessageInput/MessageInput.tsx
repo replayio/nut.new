@@ -9,7 +9,7 @@ export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput?: string) => void;
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
@@ -22,6 +22,7 @@ export interface MessageInputProps {
   onStopListening?: () => void;
   minHeight?: number;
   maxHeight?: number;
+  checkedBoxes?: string[];
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -41,6 +42,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   onStopListening = () => {},
   minHeight = 76,
   maxHeight = 200,
+  checkedBoxes,
 }) => {
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -93,6 +95,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       }
     }
   };
+
+  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map(box => `CHECKED: ${box}`).join('\n')}` : '');
 
   return (
     <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
@@ -150,7 +154,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event);
+            handleSendMessage(event, fullInput);
           }
         }}
         value={input}
@@ -166,7 +170,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       <ClientOnly>
         {() => (
           <SendButton
-            show={(hasPendingMessage || input.length > 0 || uploadedFiles.length > 0) && chatStarted}
+            show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
             hasPendingMessage={hasPendingMessage}
             onClick={(event) => {
               if (hasPendingMessage) {
@@ -174,8 +178,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return;
               }
 
-              if (input.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event);
+              if (fullInput.length > 0 || uploadedFiles.length > 0) {
+                handleSendMessage(event, fullInput);
               }
             }}
           />

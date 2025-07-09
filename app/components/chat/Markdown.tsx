@@ -55,14 +55,13 @@ export const Markdown = memo((props: MarkdownProps) => {
           props.disabled = false;
         }
 
-        console.log("WTF", props);
-
         const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
           if (onCheckboxChange) {
-            onCheckboxChange(children, event.target.checked);
+            const text = event.target.parentElement!.innerText.trim();
+            onCheckboxChange(text, event.target.checked);
           }
         };
-        
+
         return <input type="checkbox" checked={checked} onChange={handleChange} {...props} />
       },
     } satisfies Components;
