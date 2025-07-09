@@ -111,15 +111,9 @@ $code-font-size: 13px;
 
   :is(ul, ol) {
     @include not-inside-actions {
-      padding-left: 2em;
+      padding-left: 0.5em;
       margin-block-start: 0;
       margin-block-end: 16px;
-    }
-  }
-
-  ul {
-    @include not-inside-actions {
-      list-style-type: disc;
     }
   }
 

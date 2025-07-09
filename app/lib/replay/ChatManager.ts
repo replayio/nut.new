@@ -43,8 +43,14 @@ export interface ChatMessageCallbacks {
   onStatus: (status: string) => void;
 }
 
+export enum ChatMode {
+  BuildApp = 'BuildApp',
+  Discovery = 'Discovery',
+}
+
 // Options specified when sending a chat message.
 interface ChatMessageOptions {
+  mode: ChatMode;
   messages: Message[];
   references: ChatReference[];
   callbacks: ChatMessageCallbacks;
@@ -186,7 +192,7 @@ class ChatManager {
       params: {
         chatId,
         responseId,
-        mode: 'BuildAppIncremental',
+        mode: options.mode,
         messages: options.messages,
         references: options.references,
       },
@@ -217,6 +223,7 @@ export function getLastSimulationChatReferences(): ChatReference[] | undefined {
 }
 
 export async function sendChatMessage(
+  mode: ChatMode,
   messages: Message[],
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
@@ -247,6 +254,7 @@ export async function sendChatMessage(
   gLastSimulationChatReferences = references;
 
   await gMessageChatManager.sendMessage({
+    mode,
     messages,
     references,
     callbacks,

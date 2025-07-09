@@ -46,6 +46,11 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
 
         return <pre {...rest}>{children}</pre>;
       },
+      input: ({checked, ...props}) => {
+        // remove `disabled` so it becomes interactive
+        props.disabled = false;
+        return <input type="checkbox" checked={checked} {...props} />
+      },
     } satisfies Components;
   }, []);
 

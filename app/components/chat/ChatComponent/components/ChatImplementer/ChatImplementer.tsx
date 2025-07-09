@@ -10,7 +10,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, abortChatMessage, resumeChatMessage } from '~/lib/replay/ChatManager';
+import { sendChatMessage, type ChatReference, abortChatMessage, resumeChatMessage, ChatMode } from '~/lib/replay/ChatManager';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -262,9 +262,11 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
+    const mode = getMessagesRepositoryId(newMessages) ? ChatMode.BuildApp : ChatMode.Discovery;
+
     let normalFinish = false;
     try {
-      await sendChatMessage(newMessages, references, {
+      await sendChatMessage(mode, newMessages, references, {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,
         onStatus: onChatStatus,
