@@ -74,3 +74,9 @@ export function createMessagesForRepository(title: string, repositoryId: string)
 // Category for the initial response made to every user message.
 // All messages up to the next UserResponse are responding to this message.
 export const USER_RESPONSE_CATEGORY = 'UserResponse';
+
+// Category used when sending a chat message in discovery mode.
+export const DISCOVERY_RESPONSE_CATEGORY = 'DiscoveryResponse';
+
+// Category used to update the discovery rating after each response.
+export const DISCOVERY_RATING_CATEGORY = 'DiscoveryRating';

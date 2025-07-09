@@ -1,7 +1,7 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { type Message, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
+import { type Message, USER_RESPONSE_CATEGORY, DISCOVERY_RESPONSE_CATEGORY, DISCOVERY_RATING_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
@@ -104,6 +104,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         }
       }
 
+      let onCheckboxChange = undefined;
+      if (isActiveDiscoveryResponse(messages, message)) {
+        onCheckboxChange = (contents: string, checked: boolean) => {
+          console.log("CHECKBOX", contents, checked);
+        };
+      }
+
       return (
         <div
           data-testid="message"
@@ -127,7 +134,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               </div>
             )}
             <div className="grid grid-col-1 w-full">
-              <MessageContents message={message} />
+              <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
             </div>
             {!isUserMessage && message.category === 'UserResponse' && showDetailMessageIds.includes(message.id) && (
               <div className="flex items-center justify-center bg-green-800 p-2 rounded-lg h-fit -mt-1.5">
@@ -183,3 +190,15 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     );
   },
 );
+
+function isActiveDiscoveryResponse(messages: Message[], message: Message) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].category === DISCOVERY_RESPONSE_CATEGORY) {
+      return message.id === messages[i].id;
+    }
+    if (messages[i].category != DISCOVERY_RATING_CATEGORY) {
+      return false;
+    }
+  }
+  return false;
+}
