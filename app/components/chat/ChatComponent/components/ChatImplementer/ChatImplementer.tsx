@@ -468,6 +468,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       }}
       handleStop={abort}
       messages={messages}
+      setMessages={setMessages}
       uploadedFiles={uploadedFiles}
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}

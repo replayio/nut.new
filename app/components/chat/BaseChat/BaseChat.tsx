@@ -31,6 +31,7 @@ interface BaseChatProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  setMessages?: (messages: Message[]) => void;
   input?: string;
   handleStop?: () => void;
   sendMessage?: (messageInput?: string) => void;
@@ -68,6 +69,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       imageDataList = [],
       setImageDataList,
       messages,
+      setMessages,
       onApproveChange,
       onRejectChange,
     },
@@ -99,6 +101,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (sendMessage) {
         sendMessage(messageInput);
         abortListening();
+        setCheckedBoxes([]);
 
         if (handleInputChange) {
           const syntheticEvent = {
@@ -127,6 +130,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     })();
 
     const onLastMessageCheckboxChange = (contents: string, checked: boolean) => {
+      if (messages && setMessages) {
+        setMessages(messages.map(message => {
+          if (message.type == 'text') {
+            const oldBox = checked ? `[ ]` : `[x]`;
+            const newBox = checked ? `[x]` : `[ ]`;
+            const newContent = message.content.replace(`${oldBox} ${contents}`, `${newBox} ${contents}`);
+            if (newContent != message.content) {
+              return { ...message, content: newContent };
+            }
+          }
+          return message;
+        }));
+      }
       if (checked) {
         setCheckedBoxes([...checkedBoxes, contents]);
       } else {
