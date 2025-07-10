@@ -190,7 +190,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             {startPlanningRating > 0 && (
               <StartPlanningButton
                 onClick={(event) => {
-                  handleSendMessage(event, fullInput + `. Start planning the app based on these requirements.`, true);
+                  const message = (fullInput + '\n\nStart planning the app based on these requirements.').trim();
+                  handleSendMessage(event, message, true);
                 }}
                 rating={startPlanningRating}
               />

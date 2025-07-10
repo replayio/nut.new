@@ -137,8 +137,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       if (messages && setMessages) {
-        console.log(`ON_LAST_MESSAGE_CHECKBOX_CHANGE`, checkboxText, checked);
-        console.log(`MESSAGES`, JSON.stringify(messagesRef.current, null, 2));
         const newMessages = messagesRef.current.map((message) => {
           if (message.type == 'text') {
             const oldBox = checked ? `[ ]` : `[x]`;
