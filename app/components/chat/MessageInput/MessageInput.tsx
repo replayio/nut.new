@@ -99,14 +99,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map((box) => `Checked: ${box}`).join('\n')}` : '');
+  const fullInput = `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
 
   return (
     <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
+      <div className="flex flex-col text-bolt-elements-textPrimary text-sm p-4 pb-0 pt-2">
+        {checkedBoxes?.map((text) => (
+          <div className="flex items-center gap-2 pb-2" key={text}>
+            <div className="i-ph:check-circle text-xl"></div>
+            <div>{text}</div>
+          </div>
+        ))}
+      </div>
       <textarea
         ref={textareaRef}
         className={classNames(
-          'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+          'w-full pl-4 pt-2 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
           'transition-all duration-200',
           'hover:border-bolt-elements-focus',
         )}
@@ -193,7 +201,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   const message = (fullInput + '\n\nStart planning the app based on these requirements.').trim();
                   handleSendMessage(event, message, true);
                 }}
-                rating={startPlanningRating}
               />
             )}
           </>

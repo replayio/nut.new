@@ -205,7 +205,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           })}
         >
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
-            {!chatStarted && <IntroSection />}
+            {!chatStarted && (
+              <>
+                <IntroSection />
+              </>
+            )}
             <div
               className={classNames('px-2 sm:px-6', {
                 'h-full flex flex-col': chatStarted,

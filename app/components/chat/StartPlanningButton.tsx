@@ -4,14 +4,13 @@ import WithTooltip from '~/components/ui/Tooltip';
 
 interface StartPlanningButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  rating?: number;
 }
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const StartPlanningButton = ({ rating = 0, onClick }: StartPlanningButtonProps) => {
-  const className = `absolute flex justify-center items-center top-[60px] right-[22px] p-2 bg-blue-500 hover:bg-blue-600 color-white rounded-md h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed`;
-  const tooltipText = 'Start Planning';
+export const StartPlanningButton = ({ onClick }: StartPlanningButtonProps) => {
+  const className = `absolute flex justify-center items-center bottom-[50px] right-[22px] p-2 bg-blue-500 hover:bg-blue-600 color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed`;
+  const tooltipText = 'Start Planning Now';
 
   return (
     <AnimatePresence>
@@ -29,7 +28,7 @@ export const StartPlanningButton = ({ rating = 0, onClick }: StartPlanningButton
               onClick?.(event);
             }}
           >
-            <div className="text-lg">{`Start Planning: ${rating * 10}%`}</div>
+            <div className="i-ph:rocket-launch text-xl"></div>
           </motion.button>
         </WithTooltip>
       </TooltipProvider>

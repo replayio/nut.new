@@ -95,7 +95,13 @@ export const ChatPromptContainer: React.FC<ChatPromptContainerProps> = ({
           onReject={(data) => onRejectChange?.(approveChangeMessageId, data)}
         />
       )}
+      <div className="flex justify-between items-center"></div>
       {!rejectFormOpen && <MessageInput {...messageInputProps} />}
+      {messageInputProps.startPlanningRating && (
+        <div className="text-sm text-bolt-elements-textPrimary flex justify-end mt-2">
+          Planning {(messageInputProps?.startPlanningRating ?? 0) * 10}% Ready
+        </div>
+      )}
     </div>
   );
 };

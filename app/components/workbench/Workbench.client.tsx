@@ -12,6 +12,10 @@ import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
+import { ClientOnly } from 'remix-utils/client-only';
+import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
+import { DownloadButton } from '~/components/header/DownloadButton';
+import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -97,7 +101,25 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
             <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
               <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
-                <div className="ml-auto" />
+                <div className="flex-1 flex items-center justify-center">
+                  {chatStarted && (
+                    <span className="px-4 truncate text-center text-bolt-elements-textPrimary">
+                      <ClientOnly>{() => <ChatDescription />}</ClientOnly>
+                    </span>
+                  )}
+                </div>
+                <div className="flex">
+                  {chatStarted && (
+                    <>
+                      <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
+                        <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
+                      </span>
+                      <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
+                        <ClientOnly>{() => <DownloadButton />}</ClientOnly>
+                      </span>
+                    </>
+                  )}
+                </div>
                 <IconButton
                   icon="i-ph:x-circle"
                   className="-mr-1"
