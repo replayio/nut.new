@@ -135,15 +135,22 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       return undefined;
     })();
 
-    const onLastMessageCheckboxChange = (contents: string, checked: boolean) => {
+    const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       if (messages && setMessages) {
+        console.log(`ON_LAST_MESSAGE_CHECKBOX_CHANGE`, checkboxText, checked);
+        console.log(`MESSAGES`, JSON.stringify(messagesRef.current, null, 2));
         const newMessages = messagesRef.current.map(message => {
           if (message.type == 'text') {
             const oldBox = checked ? `[ ]` : `[x]`;
             const newBox = checked ? `[x]` : `[ ]`;
-            const newContent = message.content.replace(`${oldBox} ${contents}`, `${newBox} ${contents}`);
-            if (newContent != message.content) {
-              return { ...message, content: newContent };
+            const lines = message.content.split('\n');
+            const matchingLineIndex = lines.findIndex(line => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText));
+            if (matchingLineIndex >= 0) {
+              lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
+              return {
+                ...message,
+                content: lines.join('\n').trim(),
+              };
             }
           }
           return message;
@@ -152,9 +159,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setMessages(newMessages);
       }
       if (checked) {
-        checkedBoxesRef.current = [...checkedBoxesRef.current, contents];
+        checkedBoxesRef.current = [...checkedBoxesRef.current, checkboxText];
       } else {
-        checkedBoxesRef.current = checkedBoxesRef.current.filter(box => box !== contents);
+        checkedBoxesRef.current = checkedBoxesRef.current.filter(box => box !== checkboxText);
       }
     };
 
@@ -252,3 +259,22 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     return <Tooltip.Provider delayDuration={200}>{baseChat}</Tooltip.Provider>;
   },
 );
+
+function lineIncludesNoMarkdown(line: string, text: string) {
+  // Remove markdown formatting characters from both strings
+  const stripMarkdown = (str: string) => {
+    return str
+      .replace(/[*_`~]/g, '') // Remove asterisks, underscores, backticks, tildes
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // Replace markdown links with just the text
+      .replace(/^#+\s*/g, '') // Remove heading markers
+      .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold markers
+      .replace(/\*([^*]+)\*/g, '$1') // Remove italic markers
+      .replace(/`([^`]+)`/g, '$1') // Remove inline code markers
+      .replace(/~~([^~]+)~~/g, '$1'); // Remove strikethrough markers
+  };
+
+  const strippedLine = stripMarkdown(line);
+  const strippedText = stripMarkdown(text);
+  
+  return strippedLine.includes(strippedText);
+}
