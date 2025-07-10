@@ -96,18 +96,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
-
-    // This doesn't seem like it should be necessary, but we get stale messages
+    // These refs don't seem like they should be necessary, but we get stale messages
     // in the onLastMessageCheckboxChange callback for some reason that prevents
     // multiple checkboxes from being checked otherwise.
-    const messagesRef = useRef<Message[]>(messages || []);
+    const messagesRef = useRef<Message[]>([]);
+    messagesRef.current = messages || [];
+    const checkedBoxesRef = useRef<string[]>([]);
 
     const handleSendMessage = (event: React.UIEvent, messageInput: string, startPlanning: boolean) => {
       if (sendMessage) {
         sendMessage(messageInput, startPlanning);
         abortListening();
-        setCheckedBoxes([]);
+        checkedBoxesRef.current = [];
 
         if (handleInputChange) {
           const syntheticEvent = {
@@ -152,9 +152,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setMessages(newMessages);
       }
       if (checked) {
-        setCheckedBoxes([...checkedBoxes, contents]);
+        checkedBoxesRef.current = [...checkedBoxesRef.current, contents];
       } else {
-        setCheckedBoxes(checkedBoxes.filter(box => box !== contents));
+        checkedBoxesRef.current = checkedBoxesRef.current.filter(box => box !== contents);
       }
     };
 
@@ -180,7 +180,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
-      checkedBoxes,
+      checkedBoxes: checkedBoxesRef.current,
       startPlanningRating,
     };
 

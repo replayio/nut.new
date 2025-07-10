@@ -180,7 +180,7 @@ class ChatManager {
       'ChatSendMessage',
       new Date().toISOString(),
       chatId,
-      JSON.stringify({ messages: options.messages, references: options.references }),
+      JSON.stringify({ mode: options.mode, messages: options.messages, references: options.references }),
     );
 
     const id = chatStore.currentChat.get()?.id;

@@ -189,9 +189,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           />
           {startPlanningRating > 0 && <StartPlanningButton
             onClick={(event) => {
-              if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event, fullInput, true);
-              }
+              handleSendMessage(event, fullInput + `. Start planning the app based on the above requirements.`, true);
             }}
             rating={startPlanningRating}
           />}

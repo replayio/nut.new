@@ -269,7 +269,8 @@ const ChatImplementer = memo((props: ChatProps) => {
     // we either max out the discovery rating or the user forced us to start planning.
     if (!getMessagesRepositoryId(newMessages) &&
         !getLatestAppSummary(newMessages) &&
-        (!startPlanning || getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING)) {
+        !startPlanning &&
+        getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
       mode = ChatMode.Discovery;
     }
 
