@@ -8,7 +8,7 @@ const EXAMPLE_PROMPTS = [
   { text: 'Build a todo app' },
   {
     text: 'Build a grocery tracker',
-    full: 'build an app for helping my family keep track of groceries. users should be able to save their username in the settings and add groceries to a shared list of what needs to be purchased. each grocery shows the name of the user who added it. users should be able to click a button to start a grocery trip, then be able to check off items as they\'re purchased. when the grocery trip is finalized with another button, all the purchased groceries will be removed from the list. store all data in a database.',
+    full: "build an app for helping my family keep track of groceries. users should be able to save their username in the settings and add groceries to a shared list of what needs to be purchased. each grocery shows the name of the user who added it. users should be able to click a button to start a grocery trip, then be able to check off items as they're purchased. when the grocery trip is finalized with another button, all the purchased groceries will be removed from the list. store all data in a database.",
   },
 ];
 

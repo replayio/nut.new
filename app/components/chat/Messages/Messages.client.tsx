@@ -1,7 +1,12 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { type Message, USER_RESPONSE_CATEGORY, DISCOVERY_RESPONSE_CATEGORY, DISCOVERY_RATING_CATEGORY } from '~/lib/persistence/message';
+import {
+  type Message,
+  USER_RESPONSE_CATEGORY,
+  DISCOVERY_RESPONSE_CATEGORY,
+  DISCOVERY_RATING_CATEGORY,
+} from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';

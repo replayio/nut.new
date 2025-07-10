@@ -99,7 +99,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map(box => `Checked: ${box}`).join('\n')}` : '');
+  const fullInput = input + (checkedBoxes ? `\n\n${checkedBoxes.map((box) => `Checked: ${box}`).join('\n')}` : '');
 
   return (
     <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
@@ -173,26 +173,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       <ClientOnly>
         {() => (
           <>
-          <SendButton
-            show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
-            hasPendingMessage={hasPendingMessage}
-            onClick={(event) => {
-              if (hasPendingMessage) {
-                handleStop();
-                return;
-              }
+            <SendButton
+              show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
+              hasPendingMessage={hasPendingMessage}
+              onClick={(event) => {
+                if (hasPendingMessage) {
+                  handleStop();
+                  return;
+                }
 
-              if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event, fullInput, false);
-              }
-            }}
-          />
-          {startPlanningRating > 0 && <StartPlanningButton
-            onClick={(event) => {
-              handleSendMessage(event, fullInput + `. Start planning the app based on these requirements.`, true);
-            }}
-            rating={startPlanningRating}
-          />}
+                if (fullInput.length > 0 || uploadedFiles.length > 0) {
+                  handleSendMessage(event, fullInput, false);
+                }
+              }}
+            />
+            {startPlanningRating > 0 && (
+              <StartPlanningButton
+                onClick={(event) => {
+                  handleSendMessage(event, fullInput + `. Start planning the app based on these requirements.`, true);
+                }}
+                rating={startPlanningRating}
+              />
+            )}
           </>
         )}
       </ClientOnly>

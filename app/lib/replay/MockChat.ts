@@ -33,7 +33,7 @@ export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
 
   console.log('Using mock chat', gMockChat);
 
-  const startTime = gMockChat.find(msg => msg.createTime)?.createTime;
+  const startTime = gMockChat.find((msg) => msg.createTime)?.createTime;
   assert(startTime, 'Mock chat must have a start time');
   let currentTime = Date.parse(startTime);
 

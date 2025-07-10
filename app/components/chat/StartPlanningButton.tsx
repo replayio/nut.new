@@ -29,9 +29,7 @@ export const StartPlanningButton = ({ rating = 0, onClick }: StartPlanningButton
               onClick?.(event);
             }}
           >
-            <div className="text-lg">
-              {`Start Planning: ${rating * 10}%`}
-            </div>
+            <div className="text-lg">{`Start Planning: ${rating * 10}%`}</div>
           </motion.button>
         </WithTooltip>
       </TooltipProvider>

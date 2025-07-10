@@ -49,7 +49,7 @@ export const Markdown = memo((props: MarkdownProps) => {
 
         return <pre {...rest}>{children}</pre>;
       },
-      input: ({checked, ...props}) => {
+      input: ({ checked, ...props }) => {
         if (onCheckboxChange) {
           // remove `disabled` so it becomes interactive
           props = { ...props, disabled: false };
@@ -62,7 +62,7 @@ export const Markdown = memo((props: MarkdownProps) => {
           }
         };
 
-        return <input type="checkbox" checked={checked ?? false} onChange={handleChange} {...props} />
+        return <input type="checkbox" checked={checked ?? false} onChange={handleChange} {...props} />;
       },
     } satisfies Components;
   }, []);

@@ -10,13 +10,25 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, abortChatMessage, resumeChatMessage, ChatMode } from '~/lib/replay/ChatManager';
+import {
+  sendChatMessage,
+  type ChatReference,
+  abortChatMessage,
+  resumeChatMessage,
+  ChatMode,
+} from '~/lib/replay/ChatManager';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
-import { getDiscoveryRating, getMessagesRepositoryId, getPreviousRepositoryId, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
+import {
+  getDiscoveryRating,
+  getMessagesRepositoryId,
+  getPreviousRepositoryId,
+  MAX_DISCOVERY_RATING,
+  type Message,
+} from '~/lib/persistence/message';
 import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
@@ -267,10 +279,12 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     // If we don't have a plan or repository yet, stay in the Discovery mode until
     // we either max out the discovery rating or the user forced us to start planning.
-    if (!getMessagesRepositoryId(newMessages) &&
-        !getLatestAppSummary(newMessages) &&
-        !startPlanning &&
-        getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
+    if (
+      !getMessagesRepositoryId(newMessages) &&
+      !getLatestAppSummary(newMessages) &&
+      !startPlanning &&
+      getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING
+    ) {
       mode = ChatMode.Discovery;
     }
 

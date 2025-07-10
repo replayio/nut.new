@@ -139,12 +139,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (messages && setMessages) {
         console.log(`ON_LAST_MESSAGE_CHECKBOX_CHANGE`, checkboxText, checked);
         console.log(`MESSAGES`, JSON.stringify(messagesRef.current, null, 2));
-        const newMessages = messagesRef.current.map(message => {
+        const newMessages = messagesRef.current.map((message) => {
           if (message.type == 'text') {
             const oldBox = checked ? `[ ]` : `[x]`;
             const newBox = checked ? `[x]` : `[ ]`;
             const lines = message.content.split('\n');
-            const matchingLineIndex = lines.findIndex(line => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText));
+            const matchingLineIndex = lines.findIndex(
+              (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
+            );
             if (matchingLineIndex >= 0) {
               lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
               return {
@@ -161,7 +163,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (checked) {
         checkedBoxesRef.current = [...checkedBoxesRef.current, checkboxText];
       } else {
-        checkedBoxesRef.current = checkedBoxesRef.current.filter(box => box !== checkboxText);
+        checkedBoxesRef.current = checkedBoxesRef.current.filter((box) => box !== checkboxText);
       }
     };
 
@@ -275,6 +277,6 @@ function lineIncludesNoMarkdown(line: string, text: string) {
 
   const strippedLine = stripMarkdown(line);
   const strippedText = stripMarkdown(text);
-  
+
   return strippedLine.includes(strippedText);
 }

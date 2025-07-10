@@ -15,7 +15,9 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
     case 'text':
       return (
         <div data-testid="message-content" className="overflow-hidden pt-[4px]">
-          <Markdown html onCheckboxChange={onCheckboxChange}>{message.content}</Markdown>
+          <Markdown html onCheckboxChange={onCheckboxChange}>
+            {message.content}
+          </Markdown>
         </div>
       );
     case 'image':

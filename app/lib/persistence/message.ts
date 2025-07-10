@@ -91,7 +91,7 @@ interface DiscoveryRating {
 export const MAX_DISCOVERY_RATING = 10;
 
 export function getDiscoveryRating(messages: Message[]): number {
-  const discoveryRatingMessage = messages.findLast(message => message.category === DISCOVERY_RATING_CATEGORY);
+  const discoveryRatingMessage = messages.findLast((message) => message.category === DISCOVERY_RATING_CATEGORY);
   if (!discoveryRatingMessage) {
     return 0;
   }
