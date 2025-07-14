@@ -8,6 +8,7 @@ import PlanView from './components/PlanView/PlanView';
 import TestingView from './components/TestingView';
 import AppView, { type ResizeSide } from './components/AppView';
 import type { ChatMode } from '~/lib/replay/ChatManager';
+import Pages from './components/Pages';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -16,11 +17,11 @@ export function getCurrentIFrame() {
 }
 
 interface PreviewProps {
-  activeTab: 'planning' | 'testing' | 'preview';
+  activeTab: 'planning' | 'layout' | 'preview';
   appSummary: AppSummary | null;
   handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   messages?: Message[];
-  setActiveTab?: (tab: 'planning' | 'preview') => void;
+  setActiveTab?: (tab: 'planning' | 'layout' | 'preview') => void;
 }
 
 export const Preview = memo(({ activeTab, appSummary, handleSendMessage, setActiveTab }: PreviewProps) => {
@@ -237,8 +238,8 @@ export const Preview = memo(({ activeTab, appSummary, handleSendMessage, setActi
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
           <PlanView appSummary={appSummary} handleSendMessage={handleSendMessage} setActiveTab={setActiveTab} />
-        ) : activeTab === 'testing' ? (
-          <TestingView appSummary={appSummary} />
+        ) : activeTab === 'layout' ? (
+          <Pages appSummary={appSummary} />
         ) : (
           <AppView
             activeTab={activeTab}

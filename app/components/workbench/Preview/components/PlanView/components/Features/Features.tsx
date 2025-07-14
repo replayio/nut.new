@@ -260,28 +260,28 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
       </div>
       <div className="flex w-full sticky left-0 bottom-[125px] p-4  justify-center items-center">
         <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
-                onClick={(e) => {
-                if (!appSummary) {
-                    return;
-                }
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+          onClick={(e) => {
+          if (!appSummary) {
+              return;
+          }
 
-                const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
-                const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
+          const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
+          const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
 
-                const filteredAppSummary = {
-                    ...appSummary,
-                    features: filteredFeatures,
-                };
+          const filteredAppSummary = {
+              ...appSummary,
+              features: filteredFeatures,
+          };
 
-                handleSendMessage?.(e, JSON.stringify(filteredAppSummary), true, ChatMode.DevelopApp);
-                setActiveTab?.('preview');
-                }}
-            >
-                <div className="i-ph:rocket-launch text-xl"></div>
-                Develop App
-            </button>
-        </div>
+          handleSendMessage?.(e, JSON.stringify(filteredAppSummary), true, ChatMode.DevelopApp);
+          setActiveTab?.('preview');
+          }}
+        >
+          <div className="i-ph:rocket-launch text-xl"></div>
+          Develop App
+        </button>
+      </div>
       <div className=" w-full sticky left-0 bottom-[-25px] bg-bolt-elements-background-depth-1 p-4 border-t border-bolt-elements-borderColor shadow-lg">
         <AddFeatureInput onAddFeature={handleAddFeature} />
       </div>

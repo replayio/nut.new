@@ -2,17 +2,36 @@ import React from 'react';
 import { classNames } from '~/utils/classNames';
 
 interface JumpToBottomProps {
+  position?: {
+    bottom?: number;
+    top?: number;
+    left?: number;
+    right?: number;
+  };
   visible: boolean;
   onClick: () => void;
 }
 
-export const JumpToBottom: React.FC<JumpToBottomProps> = ({ visible, onClick }) => {
+export const JumpToBottom: React.FC<JumpToBottomProps> = ({ onClick, position, visible }) => {
   if (!visible) {
     return null;
   }
 
+  const positionStyle = position ? {
+    bottom: position.bottom ? `${position.bottom}px` : undefined,
+    top: position.top ? `${position.top}px` : undefined,
+    left: position.left ? `${position.left}px` : undefined,
+    right: position.right ? `${position.right}px` : undefined,
+  } : {};
+
   return (
-    <div className="absolute left-0 right-0 bottom-5 flex justify-center pointer-events-none">
+    <div 
+      className={classNames(
+        "absolute left-0 right-0 flex justify-center pointer-events-none",
+        !position ? "bottom-5" : "" // Only apply bottom-5 if no custom position is provided
+      )}
+      style={positionStyle}
+    >
       <button
         onClick={onClick}
         className={classNames(
