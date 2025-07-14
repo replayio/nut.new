@@ -29,7 +29,6 @@ import {
   MAX_DISCOVERY_RATING,
   type Message,
 } from '~/lib/persistence/message';
-import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { supabaseAddRefund } from '~/lib/supabase/peanuts';

@@ -26,7 +26,9 @@ export const AddFeatureInput: React.FC<AddFeatureInputProps> = ({ onAddFeature }
 
   return (
     <TooltipProvider>
-      <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
+      <div
+        className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}
+      >
         <textarea
           className={classNames(
             'w-full pl-4 pt-4 pr-4 pb-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
@@ -52,10 +54,14 @@ export const AddFeatureInput: React.FC<AddFeatureInputProps> = ({ onAddFeature }
             <button
               onClick={handleSubmit}
               disabled={!input.trim()}
-              className={classNames('absolute flex justify-center items-center bottom-[50px] right-[22px] p-2 color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed', {
-                'bg-green-500 hover:bg-green-600 text-white': !!input.trim(),
-                'bg-bolt-elements-background-depth-3 text-bolt-elements-textTertiary cursor-not-allowed': !input.trim(),
-              })}
+              className={classNames(
+                'absolute flex justify-center items-center bottom-[50px] right-[22px] p-2 color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed',
+                {
+                  'bg-green-500 hover:bg-green-600 text-white': !!input.trim(),
+                  'bg-bolt-elements-background-depth-3 text-bolt-elements-textTertiary cursor-not-allowed':
+                    !input.trim(),
+                },
+              )}
             >
               <div className="i-ph:arrow-up text-xl"></div>
             </button>

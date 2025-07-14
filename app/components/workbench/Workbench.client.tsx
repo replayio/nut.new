@@ -78,8 +78,8 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
     if (appSummary?.pages && !hasSetLayoutTabRef.current) {
       hasSetLayoutTabRef.current = true;
       setActiveTab('layout');
-    } 
-    
+    }
+
     if (appSummary?.features && !hasSetPlanningTabRef.current) {
       hasSetPlanningTabRef.current = true;
       setActiveTab('planning');

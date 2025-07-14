@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
 import { ChatMode } from '~/lib/replay/ChatManager';
 import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
-import { AddFeatureInput } from '../AddFeatureInput';
+import { AddFeatureInput } from '~/components/workbench/Preview/components/PlanView/components/AddFeatureInput';
 import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
@@ -118,7 +118,7 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
   };
 
   return (
-    <div >
+    <div>
       <div>
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -206,16 +206,12 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
                     {done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
                   </div>
 
-                  {feature.databaseChange && feature.databaseChange.tables && feature.databaseChange.tables.length > 0 && (
-                    <DatabaseChanges feature={feature} />
-                  )}
+                  {feature.databaseChange &&
+                    feature.databaseChange.tables &&
+                    feature.databaseChange.tables.length > 0 && <DatabaseChanges feature={feature} />}
 
-                  {feature.definedAPIs && feature.definedAPIs.length > 0 && (
-                    <DefinedApis feature={feature} />
-                  )}
-                  {feature.tests && feature.tests.length > 0 && (
-                   <Tests featureTests={feature.tests} />
-                  )}
+                  {feature.definedAPIs && feature.definedAPIs.length > 0 && <DefinedApis feature={feature} />}
+                  {feature.tests && feature.tests.length > 0 && <Tests featureTests={feature.tests} />}
                 </div>
               );
             })}
@@ -226,20 +222,20 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
           onClick={(e) => {
-          if (!appSummary) {
+            if (!appSummary) {
               return;
-          }
+            }
 
-          const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
-          const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
+            const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
+            const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
 
-          const filteredAppSummary = {
+            const filteredAppSummary = {
               ...appSummary,
               features: filteredFeatures,
-          };
+            };
 
-          handleSendMessage?.(e, JSON.stringify(filteredAppSummary), true, ChatMode.DevelopApp);
-          setActiveTab?.('preview');
+            handleSendMessage?.(e, JSON.stringify(filteredAppSummary), true, ChatMode.DevelopApp);
+            setActiveTab?.('preview');
           }}
         >
           <div className="i-ph:rocket-launch text-xl"></div>

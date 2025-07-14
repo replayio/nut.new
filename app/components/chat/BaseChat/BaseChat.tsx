@@ -104,7 +104,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     messagesRef.current = messages || [];
     const checkedBoxesRef = useRef<string[]>([]);
 
-    const handleSendMessage = (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => {
+    const handleSendMessage = (
+      event: React.UIEvent,
+      messageInput: string,
+      startPlanning: boolean,
+      chatMode?: ChatMode,
+    ) => {
       if (sendMessage) {
         sendMessage(messageInput, startPlanning, chatMode);
         abortListening();

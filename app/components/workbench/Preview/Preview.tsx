@@ -5,7 +5,6 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
 import PlanView from './components/PlanView/PlanView';
-import TestingView from './components/TestingView';
 import AppView, { type ResizeSide } from './components/AppView';
 import type { ChatMode } from '~/lib/replay/ChatManager';
 import Pages from './components/Pages';

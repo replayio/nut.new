@@ -17,18 +17,20 @@ export const JumpToBottom: React.FC<JumpToBottomProps> = ({ onClick, position, v
     return null;
   }
 
-  const positionStyle = position ? {
-    bottom: position.bottom ? `${position.bottom}px` : undefined,
-    top: position.top ? `${position.top}px` : undefined,
-    left: position.left ? `${position.left}px` : undefined,
-    right: position.right ? `${position.right}px` : undefined,
-  } : {};
+  const positionStyle = position
+    ? {
+        bottom: position.bottom ? `${position.bottom}px` : undefined,
+        top: position.top ? `${position.top}px` : undefined,
+        left: position.left ? `${position.left}px` : undefined,
+        right: position.right ? `${position.right}px` : undefined,
+      }
+    : {};
 
   return (
-    <div 
+    <div
       className={classNames(
-        "absolute left-0 right-0 flex justify-center pointer-events-none",
-        !position ? "bottom-5" : "" // Only apply bottom-5 if no custom position is provided
+        'absolute left-0 right-0 flex justify-center pointer-events-none',
+        !position ? 'bottom-5' : '', // Only apply bottom-5 if no custom position is provided
       )}
       style={positionStyle}
     >
