@@ -109,7 +109,7 @@ async function getAppsCreatedInLastXHours(hours: number, filterText: string): Pr
     hoursAgo.setHours(hoursAgo.getHours() - hours);
 
     const { data, error } = await getSupabase()
-      .from('apps')
+      .from('arboretum_apps')
       .select(BUILD_APP_SUMMARY_COLUMNS)
       .eq('deleted', false)
       .gte('created_at', hoursAgo.toISOString())
@@ -149,7 +149,7 @@ export async function getAppById(id: string): Promise<BuildAppResult> {
     pingTelemetry('GetAppByIdTimeout', {});
   }, 5000);
 
-  const { data, error } = await getSupabase().from('apps').select('*').eq('id', id).single();
+  const { data, error } = await getSupabase().from('arboretum_apps').select('*').eq('id', id).single();
 
   clearTimeout(timeout);
 
