@@ -275,7 +275,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
-    let mode = ChatMode.BuildApp;
+    let mode = chatMode ?? ChatMode.BuildApp;
 
     // If we don't have a plan or repository yet, stay in the Discovery mode until
     // we either max out the discovery rating or the user forced us to start planning.
@@ -290,6 +290,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     let normalFinish = false;
     try {
+      console.log('Sending message with mode', mode);
       await sendChatMessage(mode, newMessages, references, {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,

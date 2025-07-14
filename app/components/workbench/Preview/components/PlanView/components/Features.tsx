@@ -4,13 +4,13 @@ import { ChatMode } from '~/lib/replay/ChatManager';
 import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { AddFeatureInput } from './AddFeatureInput';
 
-interface PlanningViewProps {
+interface FeaturesProps {
   appSummary: AppSummary | null;
   handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   setActiveTab?: (tab: 'planning' | 'preview') => void;
 }
 
-const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningViewProps) => {
+const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps) => {
   // State to track selected features (using Set for efficient lookups)
   const [selectedFeatures, setSelectedFeatures] = useState<Set<number>>(new Set());
 
@@ -115,40 +115,8 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   };
 
   return (
-    <div className="h-full overflow-auto bg-transparent p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">Planning</div>
-
-        <div className="mb-8">
-          <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
-          <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
-        </div>
-
-        <div className="flex justify-center mb-8">
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded-md"
-            onClick={(e) => {
-              if (!appSummary) {
-                return;
-              }
-
-              const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
-              const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
-
-              const filteredAppSummary = {
-                ...appSummary,
-                features: filteredFeatures,
-              };
-
-              console.log('filteredAppSummary', filteredAppSummary);
-              handleSendMessage?.(e, JSON.stringify(filteredAppSummary), false, ChatMode.DevelopApp);
-              setActiveTab?.('preview');
-            }}
-          >
-            Submit Plan and Develop App
-          </button>
-        </div>
-
+    <div >
+      <div>
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="text-lg font-semibold text-bolt-elements-textPrimary">Features</div>
@@ -290,11 +258,35 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
           </div>
         </div>
       </div>
-      <div className=" w-full sticky left-0 bottom-[-25px] mt-6 bg-bolt-elements-background-depth-1 p-4 border-t border-bolt-elements-borderColor shadow-lg">
+      <div className="flex w-full sticky left-0 bottom-[125px] p-4  justify-center items-center">
+        <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                onClick={(e) => {
+                if (!appSummary) {
+                    return;
+                }
+
+                const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
+                const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
+
+                const filteredAppSummary = {
+                    ...appSummary,
+                    features: filteredFeatures,
+                };
+
+                handleSendMessage?.(e, JSON.stringify(filteredAppSummary), true, ChatMode.DevelopApp);
+                setActiveTab?.('preview');
+                }}
+            >
+                <div className="i-ph:rocket-launch text-xl"></div>
+                Develop App
+            </button>
+        </div>
+      <div className=" w-full sticky left-0 bottom-[-25px] bg-bolt-elements-background-depth-1 p-4 border-t border-bolt-elements-borderColor shadow-lg">
         <AddFeatureInput onAddFeature={handleAddFeature} />
       </div>
     </div>
   );
 };
 
-export default PlanningView;
+export default Features;

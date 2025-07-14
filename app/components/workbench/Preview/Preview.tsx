@@ -4,7 +4,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
-import PlanningView from './components/PlanningView';
+import PlanView from './components/PlanView/PlanView';
 import TestingView from './components/TestingView';
 import AppView, { type ResizeSide } from './components/AppView';
 import type { ChatMode } from '~/lib/replay/ChatManager';
@@ -236,7 +236,7 @@ export const Preview = memo(({ activeTab, appSummary, handleSendMessage, setActi
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
-          <PlanningView appSummary={appSummary} handleSendMessage={handleSendMessage} setActiveTab={setActiveTab} />
+          <PlanView appSummary={appSummary} handleSendMessage={handleSendMessage} setActiveTab={setActiveTab} />
         ) : activeTab === 'testing' ? (
           <TestingView appSummary={appSummary} />
         ) : (

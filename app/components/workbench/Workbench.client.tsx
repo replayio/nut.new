@@ -61,7 +61,7 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
       return;
     }
 
-    if (currentChat?.title && currentChat.title !== 'New Chat' && !showWorkbench) {
+    if (currentChat?.title && currentChat.title !== 'New Chat' && !showWorkbench && appSummary) {
       hasSeenProjectPlanRef.current = true;
       workbenchStore.showWorkbench.set(true);
     }
@@ -70,11 +70,11 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
   useEffect(() => {
     if (showWorkbench && !hasSeenPreviewRef.current) {
       hasSeenPreviewRef.current = true;
-      chatStore.showChat.set(false);
     }
   }, [showWorkbench]);
 
   useEffect(() => {
+    console.log('workbench appSummary', appSummary);
     if (appSummary && !hasSetPlanningTabRef.current) {
       hasSetPlanningTabRef.current = true;
       setActiveTab('planning');
