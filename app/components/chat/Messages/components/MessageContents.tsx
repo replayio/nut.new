@@ -7,14 +7,17 @@ import type { Message } from '~/lib/persistence/message';
 
 interface MessageContentsProps {
   message: Message;
+  onCheckboxChange?: (contents: string, checked: boolean) => void;
 }
 
-export function MessageContents({ message }: MessageContentsProps) {
+export function MessageContents({ message, onCheckboxChange }: MessageContentsProps) {
   switch (message.type) {
     case 'text':
       return (
         <div data-testid="message-content" className="overflow-hidden pt-[4px]">
-          <Markdown html>{message.content}</Markdown>
+          <Markdown html onCheckboxChange={onCheckboxChange}>
+            {message.content}
+          </Markdown>
         </div>
       );
     case 'image':

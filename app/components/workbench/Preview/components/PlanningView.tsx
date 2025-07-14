@@ -6,7 +6,7 @@ import { AddFeatureInput } from './AddFeatureInput';
 
 interface PlanningViewProps {
   appSummary: AppSummary | null;
-  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   setActiveTab?: (tab: 'planning' | 'preview') => void;
 }
 
@@ -141,7 +141,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
               };
 
               console.log('filteredAppSummary', filteredAppSummary);
-              handleSendMessage?.(e, JSON.stringify(filteredAppSummary), ChatMode.DevelopApp);
+              handleSendMessage?.(e, JSON.stringify(filteredAppSummary), false, ChatMode.DevelopApp);
               setActiveTab?.('preview');
             }}
           >

@@ -22,8 +22,14 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
-import { getMessagesRepositoryId, getPreviousRepositoryId, type Message } from '~/lib/persistence/message';
-// import { useAuthStatus } from '~/lib/stores/auth';
+import {
+  getDiscoveryRating,
+  getMessagesRepositoryId,
+  getPreviousRepositoryId,
+  MAX_DISCOVERY_RATING,
+  type Message,
+} from '~/lib/persistence/message';
+import { useAuthStatus } from '~/lib/stores/auth';
 import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { supabaseAddRefund } from '~/lib/supabase/peanuts';
@@ -33,6 +39,7 @@ import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
+import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 
 interface ChatProps {
   initialMessages: Message[];
@@ -151,11 +158,10 @@ const ChatImplementer = memo((props: ChatProps) => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput?: string, chatMode?: ChatMode) => {
-    const _input = messageInput || input;
+  const sendMessage = async (messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => {
     const numAbortsAtStart = gNumAborts;
 
-    if (_input.length === 0 || pendingMessageId || resumeChat) {
+    if (messageInput.length === 0 || pendingMessageId || resumeChat) {
       return;
     }
 
@@ -180,9 +186,10 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     const userMessage: Message = {
       id: `user-${chatId}`,
+      createTime: new Date().toISOString(),
       role: 'user',
       type: 'text',
-      content: _input,
+      content: messageInput,
     };
 
     let newMessages = [...messages, userMessage];
@@ -268,18 +275,26 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
+    let mode = ChatMode.BuildApp;
+
+    // If we don't have a plan or repository yet, stay in the Discovery mode until
+    // we either max out the discovery rating or the user forced us to start planning.
+    if (
+      !getMessagesRepositoryId(newMessages) &&
+      !getLatestAppSummary(newMessages) &&
+      !startPlanning &&
+      getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING
+    ) {
+      mode = ChatMode.Discovery;
+    }
+
     let normalFinish = false;
     try {
-      await sendChatMessage(
-        newMessages,
-        references,
-        {
-          onResponsePart: addResponseMessage,
-          onTitle: onChatTitle,
-          onStatus: onChatStatus,
-        },
-        chatMode,
-      );
+      await sendChatMessage(mode, newMessages, references, {
+        onResponsePart: addResponseMessage,
+        onTitle: onChatTitle,
+        onStatus: onChatStatus,
+      });
       normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {
@@ -477,6 +492,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       }}
       handleStop={abort}
       messages={messages}
+      setMessages={setMessages}
       uploadedFiles={uploadedFiles}
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}

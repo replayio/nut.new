@@ -45,6 +45,7 @@ export interface ChatMessageCallbacks {
 
 // Options specified when sending a chat message.
 interface ChatMessageOptions {
+  mode: ChatMode;
   messages: Message[];
   references: ChatReference[];
   callbacks: ChatMessageCallbacks;
@@ -78,6 +79,8 @@ export enum ChatMode {
 
   // Analyze any provided recording.
   AnalyzeRecording = 'AnalyzeRecording',
+
+  Discovery = 'Discovery',
 
   // Follow the bug fixing steps of the BuildApp workflow.
   FixBug = 'FixBug',
@@ -218,7 +221,7 @@ class ChatManager {
       'ChatSendMessage',
       new Date().toISOString(),
       chatId,
-      JSON.stringify({ messages: options.messages, references: options.references }),
+      JSON.stringify({ mode: options.mode, messages: options.messages, references: options.references }),
     );
 
     const id = chatStore.currentChat.get()?.id;
@@ -230,7 +233,7 @@ class ChatManager {
       params: {
         chatId,
         responseId,
-        mode: options.chatMode ?? ChatMode.BuildApp,
+        mode: options.mode,
         messages: options.messages,
         references: options.references,
       },
@@ -261,6 +264,7 @@ export function getLastSimulationChatReferences(): ChatReference[] | undefined {
 }
 
 export async function sendChatMessage(
+  mode: ChatMode,
   messages: Message[],
   references: ChatReference[],
   callbacks: ChatMessageCallbacks,
@@ -292,6 +296,7 @@ export async function sendChatMessage(
   gLastSimulationChatReferences = references;
 
   await gMessageChatManager.sendMessage({
+    mode,
     messages,
     references,
     callbacks,

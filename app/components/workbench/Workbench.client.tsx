@@ -14,14 +14,14 @@ import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
 import type { ChatMode } from '~/lib/replay/ChatManager';
 import { ClientOnly } from 'remix-utils/client-only';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
 import { DownloadButton } from '~/components/header/DownloadButton';
+import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
   messages?: Message[];
-  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
 }
 
 const workbenchVariants = {

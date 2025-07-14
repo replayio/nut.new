@@ -2,13 +2,13 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useState } from 'react';
+import React, { type RefCallback, useCallback, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { type Message } from '~/lib/persistence/message';
+import { getDiscoveryRating, getMessagesRepositoryId, type Message } from '~/lib/persistence/message';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
@@ -20,6 +20,7 @@ import { type MessageInputProps } from '~/components/chat/MessageInput/MessageIn
 import { Arboretum } from './components/Arboretum/Arboretum';
 import { useArboretumVisibility } from '~/lib/stores/settings';
 import { ChatMode } from '~/lib/replay/ChatManager';
+import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -32,9 +33,10 @@ interface BaseChatProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  setMessages?: (messages: Message[]) => void;
   input?: string;
   handleStop?: () => void;
-  sendMessage?: (messageInput?: string, chatMode?: ChatMode) => void;
+  sendMessage?: (messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -69,6 +71,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       imageDataList = [],
       setImageDataList,
       messages,
+      setMessages,
       onApproveChange,
       onRejectChange,
     },
@@ -94,10 +97,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const handleSendMessage = (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => {
+    // These refs don't seem like they should be necessary, but we get stale messages
+    // in the onLastMessageCheckboxChange callback for some reason that prevents
+    // multiple checkboxes from being checked otherwise.
+    const messagesRef = useRef<Message[]>([]);
+    messagesRef.current = messages || [];
+    const checkedBoxesRef = useRef<string[]>([]);
+
+    const handleSendMessage = (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => {
       if (sendMessage) {
-        sendMessage(messageInput, chatMode);
+        sendMessage(messageInput, startPlanning, chatMode);
         abortListening();
+        checkedBoxesRef.current = [];
 
         if (handleInputChange) {
           const syntheticEvent = {
@@ -125,7 +136,42 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       return undefined;
     })();
 
-    const messageInputProps = {
+    const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
+      if (messages && setMessages) {
+        const newMessages = messagesRef.current.map((message) => {
+          if (message.type == 'text') {
+            const oldBox = checked ? `[ ]` : `[x]`;
+            const newBox = checked ? `[x]` : `[ ]`;
+            const lines = message.content.split('\n');
+            const matchingLineIndex = lines.findIndex(
+              (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
+            );
+            if (matchingLineIndex >= 0) {
+              lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
+              return {
+                ...message,
+                content: lines.join('\n').trim(),
+              };
+            }
+          }
+          return message;
+        });
+        messagesRef.current = newMessages;
+        setMessages(newMessages);
+      }
+      if (checked) {
+        checkedBoxesRef.current = [...checkedBoxesRef.current, checkboxText];
+      } else {
+        checkedBoxesRef.current = checkedBoxesRef.current.filter((box) => box !== checkboxText);
+      }
+    };
+
+    let startPlanningRating = 0;
+    if (!hasPendingMessage && !getLatestAppSummary(messages || []) && !getMessagesRepositoryId(messages || [])) {
+      startPlanningRating = getDiscoveryRating(messages || []);
+    }
+
+    const messageInputProps: MessageInputProps = {
       textareaRef,
       input,
       handleInputChange,
@@ -142,6 +188,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
+      checkedBoxes: checkedBoxesRef.current,
+      startPlanningRating,
     };
 
     const baseChat = (
@@ -158,7 +206,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           })}
         >
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
-            {!chatStarted && <IntroSection />}
+            {!chatStarted && (
+              <>
+                <IntroSection />
+              </>
+            )}
             <div
               className={classNames('px-2 sm:px-6', {
                 'h-full flex flex-col': chatStarted,
@@ -172,6 +224,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       messages={messages}
                       hasPendingMessage={hasPendingMessage}
                       pendingMessageStatus={pendingMessageStatus}
+                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
                     />
                   ) : null;
                 }}
@@ -187,17 +240,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 setRejectFormOpen={setRejectFormOpen}
                 onApproveChange={onApproveChange}
                 onRejectChange={onRejectChange}
-                messageInputProps={messageInputProps as MessageInputProps}
+                messageInputProps={messageInputProps}
               />
             </div>
             {!chatStarted && (
               <>
-                {ExamplePrompts((event: React.UIEvent, messageInput?: string) => {
+                {ExamplePrompts((event: React.UIEvent, messageInput: string) => {
                   if (hasPendingMessage) {
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage(event, messageInput, ChatMode.PlanApp);
+                  handleSendMessage(event, messageInput, false, ChatMode.PlanApp);
                 })}
                 {isArboretumVisible && <Arboretum />}
               </>
@@ -213,3 +266,22 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     return <Tooltip.Provider delayDuration={200}>{baseChat}</Tooltip.Provider>;
   },
 );
+
+function lineIncludesNoMarkdown(line: string, text: string) {
+  // Remove markdown formatting characters from both strings
+  const stripMarkdown = (str: string) => {
+    return str
+      .replace(/[*_`~]/g, '') // Remove asterisks, underscores, backticks, tildes
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // Replace markdown links with just the text
+      .replace(/^#+\s*/g, '') // Remove heading markers
+      .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold markers
+      .replace(/\*([^*]+)\*/g, '$1') // Remove italic markers
+      .replace(/`([^`]+)`/g, '$1') // Remove inline code markers
+      .replace(/~~([^~]+)~~/g, '$1'); // Remove strikethrough markers
+  };
+
+  const strippedLine = stripMarkdown(line);
+  const strippedText = stripMarkdown(text);
+
+  return strippedLine.includes(strippedText);
+}

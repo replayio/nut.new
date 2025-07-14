@@ -18,7 +18,7 @@ export function getCurrentIFrame() {
 interface PreviewProps {
   activeTab: 'planning' | 'testing' | 'preview';
   appSummary: AppSummary | null;
-  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   messages?: Message[];
   setActiveTab?: (tab: 'planning' | 'preview') => void;
 }

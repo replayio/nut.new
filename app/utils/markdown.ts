@@ -14,6 +14,7 @@ export const allowedHTMLElements = [
   'dd',
   'del',
   'details',
+  'input',
   'div',
   'dl',
   'dt',

@@ -13,9 +13,12 @@ interface MarkdownProps {
   children: string;
   html?: boolean;
   limitedMarkdown?: boolean;
+  onCheckboxChange?: (contents: string, checked: boolean) => void;
 }
 
-export const Markdown = memo(({ children, html = false, limitedMarkdown = false }: MarkdownProps) => {
+export const Markdown = memo((props: MarkdownProps) => {
+  const { children, html = false, limitedMarkdown = false, onCheckboxChange } = props;
+
   logger.trace('Render');
 
   const components = useMemo(() => {
@@ -45,6 +48,21 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
         }
 
         return <pre {...rest}>{children}</pre>;
+      },
+      input: ({ checked, ...props }) => {
+        if (onCheckboxChange) {
+          // remove `disabled` so it becomes interactive
+          props = { ...props, disabled: false };
+        }
+
+        const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+          if (onCheckboxChange) {
+            const text = event.target.parentElement!.innerText.trim();
+            onCheckboxChange(text, event.target.checked);
+          }
+        };
+
+        return <input type="checkbox" checked={checked ?? false} onChange={handleChange} {...props} />;
       },
     } satisfies Components;
   }, []);

@@ -5,12 +5,13 @@ import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/ChatManager';
+import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent, messageInput?: string, chatMode?: ChatMode) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
@@ -23,6 +24,8 @@ export interface MessageInputProps {
   onStopListening?: () => void;
   minHeight?: number;
   maxHeight?: number;
+  checkedBoxes?: string[];
+  startPlanningRating?: number;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -42,6 +45,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   onStopListening = () => {},
   minHeight = 76,
   maxHeight = 200,
+  checkedBoxes,
+  startPlanningRating = 0,
 }) => {
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -95,12 +100,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  const fullInput =
+    `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
+
   return (
     <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
+      <div className="flex flex-col text-bolt-elements-textPrimary text-sm p-4 pb-0 pt-2">
+        {checkedBoxes?.map((text) => (
+          <div className="flex items-center gap-2 pb-2" key={text}>
+            <div className="i-ph:check-circle text-xl"></div>
+            <div>{text}</div>
+          </div>
+        ))}
+      </div>
       <textarea
         ref={textareaRef}
         className={classNames(
-          'w-full pl-4 pt-4 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+          'w-full pl-4 pt-2 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
           'transition-all duration-200',
           'hover:border-bolt-elements-focus',
         )}
@@ -151,7 +167,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event, undefined, ChatMode.PlanApp);
+            handleSendMessage(event, fullInput, false, ChatMode.PlanApp);
           }
         }}
         value={input}
@@ -166,20 +182,30 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       />
       <ClientOnly>
         {() => (
-          <SendButton
-            show={(hasPendingMessage || input.length > 0 || uploadedFiles.length > 0) && chatStarted}
-            hasPendingMessage={hasPendingMessage}
-            onClick={(event) => {
-              if (hasPendingMessage) {
-                handleStop();
-                return;
-              }
+          <>
+            <SendButton
+              show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
+              hasPendingMessage={hasPendingMessage}
+              onClick={(event) => {
+                if (hasPendingMessage) {
+                  handleStop();
+                  return;
+                }
 
-              if (input.length > 0 || uploadedFiles.length > 0) {
-                handleSendMessage(event, undefined, ChatMode.PlanApp);
-              }
-            }}
-          />
+                if (fullInput.length > 0 || uploadedFiles.length > 0) {
+                  handleSendMessage(event, fullInput, false, ChatMode.PlanApp);
+                }
+              }}
+            />
+            {startPlanningRating > 0 && (
+              <StartPlanningButton
+                onClick={(event) => {
+                  const message = (fullInput + '\n\nStart planning the app based on these requirements.').trim();
+                  handleSendMessage(event, message, true, ChatMode.PlanApp);
+                }}
+              />
+            )}
+          </>
         )}
       </ClientOnly>
       <div className="flex justify-between items-center text-sm p-4 pt-2">

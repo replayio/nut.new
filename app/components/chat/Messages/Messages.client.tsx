@@ -1,7 +1,12 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { classNames } from '~/utils/classNames';
 import WithTooltip from '~/components/ui/Tooltip';
-import { type Message, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
+import {
+  type Message,
+  USER_RESPONSE_CATEGORY,
+  DISCOVERY_RESPONSE_CATEGORY,
+  DISCOVERY_RATING_CATEGORY,
+} from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
@@ -12,10 +17,11 @@ interface MessagesProps {
   hasPendingMessage?: boolean;
   pendingMessageStatus?: string;
   messages?: Message[];
+  onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '' }, ref) => {
+  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '', onLastMessageCheckboxChange }, ref) => {
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -99,9 +105,18 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           return null;
         }
 
+        if (message.category === DISCOVERY_RATING_CATEGORY) {
+          return null;
+        }
+
         if (!showDetails) {
           return null;
         }
+      }
+
+      let onCheckboxChange = undefined;
+      if (isActiveDiscoveryResponse(messages, message)) {
+        onCheckboxChange = onLastMessageCheckboxChange;
       }
 
       return (
@@ -127,7 +142,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               </div>
             )}
             <div className="grid grid-col-1 w-full">
-              <MessageContents message={message} />
+              <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
             </div>
             {!isUserMessage && message.category === 'UserResponse' && showDetailMessageIds.includes(message.id) && (
               <div className="flex items-center justify-center bg-green-800 p-2 rounded-lg h-fit -mt-1.5">
@@ -144,21 +159,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
                 </WithTooltip>
               </div>
             )}
-            {/* {!isUserMessage && message.category === 'UserResponse' && !showDetailMessageIds.includes(message.id) && (
-              <div className="flex items-center justify-center p-2 rounded-lg h-fit -mt-1.5">
-                <WithTooltip tooltip="Show chat details">
-                  <button
-                    onClick={() => {
-                      setShowDetailMessageIds([...showDetailMessageIds, message.id]);
-                    }}
-                    className={classNames(
-                      'i-ph:list-dashes',
-                      'text-xl hover:text-bolt-elements-textPrimary transition-colors',
-                    )}
-                  />
-                </WithTooltip>
-              </div>
-            )} */}
             {repositoryId && (
               <div className="flex gap-2 flex-col lg:flex-row">
                 <WithTooltip tooltip="Start new chat from here">
@@ -198,3 +198,15 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     );
   },
 );
+
+function isActiveDiscoveryResponse(messages: Message[], message: Message) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].category === DISCOVERY_RESPONSE_CATEGORY) {
+      return message.id === messages[i].id;
+    }
+    if (messages[i].category != DISCOVERY_RATING_CATEGORY) {
+      return false;
+    }
+  }
+  return false;
+}

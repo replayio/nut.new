@@ -3,12 +3,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
-// import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-// import { Feedback } from './Feedback/FeedbackButton';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth/ClientAuth';
-// import { DeployChatButton } from './DeployChat/DeployChatButton';
-// import { DownloadButton } from './DownloadButton';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 
@@ -22,12 +18,8 @@ export function Header() {
         'border-bolt-elements-borderColor': chatStarted,
       })}
     >
-      <div className="flex flex-1 items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
+      <div className="flex flex-1 items-center gap-4 z-logo text-bolt-elements-textPrimary cursor-pointer">
         <div data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-2xl" />
-        {/* <a href="/" className="text-3xl font-semibold text-accent flex items-center">
-          <img src="/logo-styled.svg" alt="logo" className="w-[30px] inline-block rotate-90" />
-        </a> */}
-        {/* <Feedback /> */}
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a
@@ -43,24 +35,7 @@ export function Header() {
       </div>
 
       <div className="flex-1 flex justify-end">
-        {/* {chatStarted && (
-          <span className="px-4 truncate text-center text-bolt-elements-textPrimary">
-            <ClientOnly>{() => <ChatDescription />}</ClientOnly>
-          </span>
-        )}
-
-        {chatStarted && (
-          <>
-            <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
-              <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
-            </span>
-            <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
-              <ClientOnly>{() => <DownloadButton />}</ClientOnly>
-            </span>
-          </>
-        )} */}
-
-        <div className="flex items-center  gap-4">
+        <div className="flex items-center gap-4">
           {chatStarted && (
             <ClientOnly>
               {() => (
