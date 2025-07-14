@@ -289,7 +289,6 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     let normalFinish = false;
     try {
-      console.log('Sending message with mode', mode);
       await sendChatMessage(mode, newMessages, references, {
         onResponsePart: addResponseMessage,
         onTitle: onChatTitle,

@@ -25,8 +25,6 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
   const [editingValue, setEditingValue] = useState<string>('');
   const [featureOverrides, setFeatureOverrides] = useState<Record<number, AppFeature>>({});
 
-  console.log('appSummary', appSummary);
-
   // Combine original features with additional features, applying overrides
   const allFeatures: AppFeature[] = [
     ...(appSummary?.features || []).map((feature, index) => featureOverrides[index] || feature),

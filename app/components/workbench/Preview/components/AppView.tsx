@@ -32,7 +32,6 @@ const AppView = ({
   setSelectionPoint: (selectionPoint: { x: number; y: number } | null) => void;
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
-  console.log('appSummary', appSummary);
   return (
     <div
       style={{
