@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
 import { ChatMode } from '~/lib/replay/ChatManager';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { AddFeatureInput } from './AddFeatureInput';
 
 interface PlanningViewProps {
@@ -15,17 +15,17 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   const [selectedFeatures, setSelectedFeatures] = useState<Set<number>>(new Set());
 
   // State for additional features added by user
-  const [additionalFeatures, setAdditionalFeatures] = useState<Array<{ description: string; done: boolean }>>([]);
+  const [additionalFeatures, setAdditionalFeatures] = useState<Array<AppFeature>>([]);
 
   // State for editing features
   const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
-  const [featureOverrides, setFeatureOverrides] = useState<Record<number, { description: string; done: boolean }>>({});
+  const [featureOverrides, setFeatureOverrides] = useState<Record<number, AppFeature>>({});
 
   console.log('appSummary', appSummary);
 
   // Combine original features with additional features, applying overrides
-  const allFeatures = [
+  const allFeatures: AppFeature[] = [
     ...(appSummary?.features || []).map((feature, index) => featureOverrides[index] || feature),
     ...additionalFeatures,
   ];
@@ -55,7 +55,9 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
   const handleAddFeature = (featureDescription: string) => {
     const newFeature = {
       description: featureDescription,
-      done: false,
+      status: AppFeatureStatus.NotStarted,
+      name: '',
+      summary: '',
     };
     setAdditionalFeatures((prev) => [...prev, newFeature]);
   };
@@ -73,28 +75,6 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
     });
   };
 
-  useEffect(() => {
-    console.log('selectedFeatures', selectedFeatures);
-  }, [selectedFeatures]);
-
-  // Group tests by feature index (matching the array index of features)
-  const testsByFeature = appSummary?.tests?.reduce(
-    (acc, test) => {
-      // @ts-ignore - featureIndex exists in the data but not in the type
-      const featureIndex = test.featureIndex;
-      if (featureIndex === undefined) {
-        return acc;
-      }
-
-      if (!acc[featureIndex]) {
-        acc[featureIndex] = [];
-      }
-      acc[featureIndex].push(test);
-      return acc;
-    },
-    {} as Record<number, typeof appSummary.tests>,
-  );
-
   // Handle editing features
   const handleEditFeature = (featureIndex: number, newDescription: string) => {
     const originalFeaturesLength = appSummary?.features?.length || 0;
@@ -104,8 +84,10 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
       setFeatureOverrides((prev) => ({
         ...prev,
         [featureIndex]: {
+          name: appSummary?.features?.[featureIndex]?.name ?? '',
+          summary: appSummary?.features?.[featureIndex]?.summary ?? '',
           description: newDescription,
-          done: appSummary?.features?.[featureIndex]?.done || false,
+          status: appSummary?.features?.[featureIndex]?.status ?? AppFeatureStatus.NotStarted,
         },
       }));
     } else {
@@ -152,15 +134,10 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
 
               const selectedFeaturesArray = Array.from(selectedFeatures).sort((a, b) => a - b);
               const filteredFeatures = selectedFeaturesArray.map((index) => allFeatures[index]);
-              const filteredTests =
-                appSummary.tests?.filter(
-                  (test) => test.featureIndex !== undefined && selectedFeatures.has(test.featureIndex),
-                ) || [];
 
               const filteredAppSummary = {
                 ...appSummary,
                 features: filteredFeatures,
-                tests: filteredTests,
               };
 
               console.log('filteredAppSummary', filteredAppSummary);
@@ -182,7 +159,8 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
 
           <div className="space-y-6">
             {allFeatures.map((feature, index) => {
-              const featureTests = testsByFeature?.[index] || [];
+              const featureTests = feature.tests ?? [];
+              const done = feature.status === AppFeatureStatus.Done;
 
               return (
                 <div
@@ -206,8 +184,8 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
 
                     <div
                       className={classNames('w-4 h-4 rounded-full border-2', {
-                        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !feature.done,
-                        'bg-green-500 border-green-500': feature.done,
+                        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !done,
+                        'bg-green-500 border-green-500': done,
                       })}
                     />
 
@@ -243,8 +221,8 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                     ) : (
                       <div
                         className={classNames('flex-1 flex items-center group cursor-pointer', {
-                          'text-bolt-elements-textSecondary': !feature.done,
-                          'text-bolt-elements-textPrimary': feature.done,
+                          'text-bolt-elements-textSecondary': !done,
+                          'text-bolt-elements-textPrimary': done,
                         })}
                         onClick={() => startEditing(index, feature.description)}
                       >
@@ -255,7 +233,7 @@ const PlanningView = ({ appSummary, handleSendMessage, setActiveTab }: PlanningV
                       </div>
                     )}
 
-                    {feature.done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
+                    {done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
                   </div>
 
                   {featureTests.length > 0 && (
