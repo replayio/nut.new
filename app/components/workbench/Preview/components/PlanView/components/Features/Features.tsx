@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
 import { ChatMode } from '~/lib/replay/ChatManager';
 import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
-import { AddFeatureInput } from './AddFeatureInput';
+import { AddFeatureInput } from '../AddFeatureInput';
+import Tests from './components/Tests';
+import DefinedApis from './components/DefinedApis';
+import DatabaseChanges from './components/DatabaseChanges';
 
 interface FeaturesProps {
   appSummary: AppSummary | null;
@@ -127,7 +130,6 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
 
           <div className="space-y-6">
             {allFeatures.map((feature, index) => {
-              const featureTests = feature.tests ?? [];
               const done = feature.status === AppFeatureStatus.Done;
 
               return (
@@ -204,127 +206,15 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
                     {done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
                   </div>
 
-                  {/* Database Changes Section */}
                   {feature.databaseChange && feature.databaseChange.tables && feature.databaseChange.tables.length > 0 && (
-                    <div className="border-t border-bolt-elements-borderColor">
-                      <div className="p-3">
-                        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
-                          Database Schema Changes
-                        </div>
-                        <div className="space-y-3">
-                          {feature.databaseChange.tables.map((table, tableIdx) => (
-                            <div key={tableIdx} className="bg-bolt-elements-background-depth-1 rounded-lg p-3 border border-bolt-elements-borderColor">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
-                                  {table.name}
-                                </span>
-                                <span className="text-xs text-bolt-elements-textSecondary">
-                                  ({table.columns?.length || 0} columns)
-                                </span>
-                              </div>
-                              
-                              {table.columns && table.columns.length > 0 && (
-                                <div className="space-y-1">
-                                  {table.columns.map((column, colIdx) => (
-                                    <div key={colIdx} className="flex items-center gap-2 text-xs">
-                                      <div className="w-1 h-1 bg-bolt-elements-textSecondary rounded-full"></div>
-                                      <span className="font-mono text-bolt-elements-textPrimary">
-                                        {column.name}
-                                      </span>
-                                      <span className="text-bolt-elements-textSecondary">
-                                        {column.type}
-                                      </span>
-                                      {column.nullable && (
-                                        <span className="text-orange-500 text-xs">nullable</span>
-                                      )}
-                                      {column.foreignTableId && (
-                                        <span className="text-blue-500 text-xs">
-                                          → {column.foreignTableId}
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <DatabaseChanges feature={feature} />
                   )}
 
-                  {/* Defined APIs Section */}
                   {feature.definedAPIs && feature.definedAPIs.length > 0 && (
-                    <div className="border-t border-bolt-elements-borderColor">
-                      <div className="p-3">
-                        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
-                          Defined APIs ({feature.definedAPIs.length})
-                        </div>
-                        <div className="space-y-2">
-                          {feature.definedAPIs.map((api, apiIdx) => (
-                            <div key={apiIdx} className="bg-bolt-elements-background-depth-1 rounded-lg p-3 border border-bolt-elements-borderColor">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
-                                  {api.name}
-                                </span>
-                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                                  {api.kind}
-                                </span>
-                              </div>
-                              
-                              {api.description && (
-                                <div className="text-xs text-bolt-elements-textSecondary">
-                                  {api.description}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <DefinedApis feature={feature} />
                   )}
-
-                  {/* Tests Section */}
-                  {featureTests.length > 0 && (
-                    <div className="border-t border-bolt-elements-borderColor">
-                      <div className="p-3">
-                        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
-                          Feature Tests ({featureTests.length})
-                        </div>
-                        <div className="space-y-2">
-                          {featureTests.map((test, testIdx) => (
-                            <div key={testIdx} className="flex items-center gap-3 p-2 bg-bolt-elements-background-depth-1 rounded border border-bolt-elements-borderColor">
-                              <div
-                                className={classNames('w-3 h-3 rounded-full border-2 flex-shrink-0', {
-                                  'bg-green-500 border-green-500': test.status === 'Pass',
-                                  'bg-red-500 border-red-500': test.status === 'Fail',
-                                  'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor':
-                                    test.status === 'NotRun',
-                                })}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <span className="text-sm text-bolt-elements-textPrimary block truncate">
-                                  {test.title}
-                                </span>
-                              </div>
-                              <div
-                                className={classNames('text-xs font-medium px-2 py-1 rounded flex-shrink-0', {
-                                  'text-green-700 bg-green-100': test.status === 'Pass',
-                                  'text-red-700 bg-red-100': test.status === 'Fail',
-                                  'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3': test.status === 'NotRun',
-                                })}
-                              >
-                                {test.status === 'Pass' && 'PASS'}
-                                {test.status === 'Fail' && 'FAIL'}
-                                {test.status === 'NotRun' && 'PENDING'}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                  {feature.tests && feature.tests.length > 0 && (
+                   <Tests featureTests={feature.tests} />
                   )}
                 </div>
               );
