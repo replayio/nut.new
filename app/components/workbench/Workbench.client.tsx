@@ -89,7 +89,7 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
   const tabOptions = {
     options: [
       { value: 'layout' as const, text: 'Layout' },
-      { value: 'planning' as const, text: 'Planning' },
+      ...(appSummary?.features ? [{ value: 'planning' as const, text: 'Planning' }] : []),
       { value: 'preview' as const, text: 'Preview' },
     ],
   };
