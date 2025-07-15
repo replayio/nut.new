@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import WithTooltip from '../ui/Tooltip';
+import WithTooltip from '~/components/ui/Tooltip';
 
 ReactModal.setAppElement('#root');
 

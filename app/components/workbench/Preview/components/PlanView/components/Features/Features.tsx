@@ -195,13 +195,15 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
                       </div>
                     )}
 
-                    {done ? <div className="text-green-500 text-sm font-medium">✓ Complete</div> :
-                      feature.status === AppFeatureStatus.InProgress ? (
-                        <div
-                          className={classNames('w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin')}
-                        />
-                      ) : null
-                    }
+                    {done ? (
+                      <div className="text-green-500 text-sm font-medium">✓ Complete</div>
+                    ) : feature.status === AppFeatureStatus.InProgress ? (
+                      <div
+                        className={classNames(
+                          'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+                        )}
+                      />
+                    ) : null}
                   </div>
 
                   {feature.databaseChange &&
