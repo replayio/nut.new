@@ -127,10 +127,10 @@ export const Workbench = memo(({ chatStarted, messages, handleSendMessage }: Wor
                 <div className="flex">
                   {chatStarted && (
                     <>
-                      <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
+                      <span className="flex-1 min-w-fit px-2 truncate text-center text-bolt-elements-textPrimary">
                         <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
                       </span>
-                      <span className="flex-1 min-w-fit px-4 truncate text-center text-bolt-elements-textPrimary">
+                      <span className="flex-1 min-w-fit px-2 truncate text-center text-bolt-elements-textPrimary">
                         <ClientOnly>{() => <DownloadButton />}</ClientOnly>
                       </span>
                     </>

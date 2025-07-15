@@ -2,6 +2,8 @@ import ReactModal from 'react-modal';
 import { toast } from 'react-toastify';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { downloadRepository } from '~/lib/replay/Deploy';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import WithTooltip from '../ui/Tooltip';
 
 ReactModal.setAppElement('#root');
 
@@ -46,13 +48,16 @@ export function DownloadButton() {
 
   return (
     <>
-      <button
-        className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={handleDownload}
-      >
-        <div className="i-ph:download-fill text-[1.3em]" />
-        Download Repo
-      </button>
+      <TooltipProvider>
+        <WithTooltip tooltip="Download Code">
+          <button
+            className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+            onClick={handleDownload}
+          >
+            <div className="i-ph:download-fill text-[1.3em]" />
+          </button>
+        </WithTooltip>
+      </TooltipProvider>
     </>
   );
 }

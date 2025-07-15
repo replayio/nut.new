@@ -16,6 +16,7 @@ interface FeaturesProps {
 const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps) => {
   // State to track selected features (using Set for efficient lookups)
   const [selectedFeatures, setSelectedFeatures] = useState<Set<number>>(new Set());
+  console.log('appSummary', appSummary);
 
   // State for additional features added by user
   const [additionalFeatures, setAdditionalFeatures] = useState<Array<AppFeature>>([]);
@@ -150,13 +151,6 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
                       {selectedFeatures.has(index) && <div className="i-ph:check-bold text-white text-sm" />}
                     </button>
 
-                    <div
-                      className={classNames('w-4 h-4 rounded-full border-2', {
-                        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor': !done,
-                        'bg-green-500 border-green-500': done,
-                      })}
-                    />
-
                     {editingFeatureIndex === index ? (
                       <div className="flex-1 flex items-center gap-2">
                         <input
@@ -201,7 +195,13 @@ const Features = ({ appSummary, handleSendMessage, setActiveTab }: FeaturesProps
                       </div>
                     )}
 
-                    {done && <div className="text-green-500 text-sm font-medium">✓ Complete</div>}
+                    {done ? <div className="text-green-500 text-sm font-medium">✓ Complete</div> :
+                      feature.status === AppFeatureStatus.InProgress ? (
+                        <div
+                          className={classNames('w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin')}
+                        />
+                      ) : null
+                    }
                   </div>
 
                   {feature.databaseChange &&

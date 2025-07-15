@@ -18,7 +18,7 @@ const DefinedApis = ({ feature }: DefinedApisProps) => {
               className="bg-bolt-elements-background-depth-1 rounded-lg p-3 border border-bolt-elements-borderColor"
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                 <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">{api.name}</span>
                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
                   {api.kind}

@@ -195,7 +195,6 @@ export function DeployChatButton() {
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
         onClick={handleOpenModal}
       >
-        <div className="i-ph:rocket-launch-fill text-[1.3em]" />
         Deploy App
       </button>
       <DeployChatModal
