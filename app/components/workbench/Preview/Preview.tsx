@@ -3,10 +3,8 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
-import type { Message } from '~/lib/persistence/message';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
-import type { ChatMode } from '~/lib/replay/ChatManager';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -17,12 +15,9 @@ export function getCurrentIFrame() {
 interface PreviewProps {
   activeTab: 'planning' | 'preview';
   appSummary: AppSummary | null;
-  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
-  messages?: Message[];
-  setActiveTab?: (tab: 'planning' | 'preview') => void;
 }
 
-export const Preview = memo(({ activeTab, appSummary, handleSendMessage, setActiveTab }: PreviewProps) => {
+export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -235,7 +230,7 @@ export const Preview = memo(({ activeTab, appSummary, handleSendMessage, setActi
 
       <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
-          <PlanView appSummary={appSummary} handleSendMessage={handleSendMessage} setActiveTab={setActiveTab} />
+          <PlanView appSummary={appSummary} />
         ) : (
           <AppView
             activeTab={activeTab}

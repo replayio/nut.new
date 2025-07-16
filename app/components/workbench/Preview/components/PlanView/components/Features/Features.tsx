@@ -49,9 +49,12 @@ const Features = ({ appSummary }: FeaturesProps) => {
                   key={index}
                   className="rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor overflow-hidden"
                 >
-                  <div onClick={() => toggleFeatureCollapse(index)} className="flex justify-between items-center p-3 border-b border-bolt-elements-borderColor cursor-pointer">
-                    <div className='flex items-center gap-3'>
-                      <div className='w-6 h-6 flex items-center justify-center'>
+                  <div
+                    onClick={() => toggleFeatureCollapse(index)}
+                    className="flex justify-between items-center p-3 border-b border-bolt-elements-borderColor cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 flex items-center justify-center">
                         {isCollapsed ? (
                           <div className="i-ph:caret-down text-bolt-elements-textPrimary text-base font-bold" />
                         ) : (
@@ -59,11 +62,9 @@ const Features = ({ appSummary }: FeaturesProps) => {
                         )}
                       </div>
 
-                      <div className='gap-2'>
-                        <div className='text-bolt-elements-textPrimary text-base font-bold'>{feature.name}</div>
-                        <div
-                          className='flex-1 flex items-center group text-bolt-elements-textSecondary'
-                        >
+                      <div className="gap-2">
+                        <div className="text-bolt-elements-textPrimary text-base font-bold">{feature.name}</div>
+                        <div className="flex-1 flex items-center group text-bolt-elements-textSecondary">
                           <span className="flex-1">{feature.description}</span>
                         </div>
                       </div>

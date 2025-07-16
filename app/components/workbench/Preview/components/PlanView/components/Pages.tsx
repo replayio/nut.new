@@ -11,7 +11,7 @@ const Pages = ({ appSummary }: PagesProps) => {
   return (
     <div>
       <div className="space-y-4 mb-8">
-      <div className="text-lg font-semibold text-bolt-elements-textPrimary">Page Layouts</div>
+        <div className="text-lg font-semibold text-bolt-elements-textPrimary">Page Layouts</div>
 
         {appSummary?.pages?.length === 0 ? (
           <div className="text-sm text-bolt-elements-textSecondary italic">No pages defined</div>
