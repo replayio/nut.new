@@ -64,7 +64,7 @@ export async function deployRepository(repositoryId: string, settings: DeploySet
 }
 
 export async function downloadRepository(repositoryId: string): Promise<string> {
-  const { repositoryContents } = await callNutAPI('get-repository', {
+  const { repositoryContents } = await callNutAPI('get-repository-contents', {
     repositoryId,
   });
 
