@@ -53,7 +53,7 @@ async function getAllAppEntries(): Promise<AppEntry[]> {
   if (localAppIds.length) {
     try {
       for (const appId of localAppIds) {
-        await setAppOwner(appId, userId);
+        await setAppOwner(appId);
       }
       setLocalAppIds(undefined);
     } catch (error) {
@@ -61,24 +61,17 @@ async function getAllAppEntries(): Promise<AppEntry[]> {
     }
   }
 
-  const { entries } = await callNutAPI('get-user-app-entries', {
-    userId,
-  });
+  const { entries } = await callNutAPI('get-user-app-entries', {});
 
   return entries.filter((entry: AppEntry) => !deletedAppIds.has(entry.id));
 }
 
-async function setAppOwner(appId: string, userId: string): Promise<void> {
-  await callNutAPI('set-app-owner', { appId, userId });
+async function setAppOwner(appId: string): Promise<void> {
+  await callNutAPI('set-app-owner', { appId });
 }
 
 async function getAppContents(appId: string): Promise<AppSummary | undefined> {
-  const userId = await getCurrentUserId();
-
-  const { appSummary } = await callNutAPI('get-app-summary', {
-    userId,
-    appId,
-  });
+  const { appSummary } = await callNutAPI('get-app-summary', { appId });
   return appSummary;
 }
 
@@ -90,19 +83,14 @@ async function deleteApp(appId: string): Promise<void> {
   if (!userId) {
     const localAppIds = getLocalAppIds().filter((id) => id != appId);
     setLocalAppIds(localAppIds);
-    return;
   }
 
-  await callNutAPI('delete-app', {
-    userId,
-    appId,
-  });
+  await callNutAPI('delete-app', { appId });
 }
 
 async function createApp(): Promise<string> {
-  const userId = await getCurrentUserId();
-  const { appId } = await callNutAPI('create-app', { userId });
-  if (!userId) {
+  const { appId } = await callNutAPI('create-app', {});
+  if (!appId) {
     const localAppIds = getLocalAppIds();
     localAppIds.push(appId);
     setLocalAppIds(localAppIds);
@@ -122,31 +110,26 @@ async function updateAppTitle(appId: string, title: string): Promise<void> {
     throw new Error('Title cannot be empty');
   }
 
-  const userId = await getCurrentUserId();
-  await callNutAPI('set-app-title', { userId, appId, title });
+  await callNutAPI('set-app-title', { appId, title });
 }
 
 async function getAppDeploySettings(appId: string): Promise<DeploySettingsDatabase | undefined> {
   console.log('DatabaseGetAppDeploySettingsStart', appId);
 
-  const userId = await getCurrentUserId();
-  const { deploySettings } = await callNutAPI('get-app-deploy-settings', { userId, appId });
+  const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
   return deploySettings;
 }
 
 async function setAppDeploySettings(appId: string, deploySettings: DeploySettingsDatabase): Promise<void> {
-  const userId = await getCurrentUserId();
-  await callNutAPI('set-app-deploy-settings', { userId, appId, deploySettings });
+  await callNutAPI('set-app-deploy-settings', { appId, deploySettings });
 }
 
 async function abortAppChats(appId: string): Promise<void> {
-  const userId = await getCurrentUserId();
-  await callNutAPI('abort-app-chats', { userId, appId });
+  await callNutAPI('abort-app-chats', { appId });
 }
 
 async function getInitialMessages(appId: string): Promise<Message[]> {
-  const userId = await getCurrentUserId();
-  const { messages } = await callNutAPI('get-initial-messages', { userId, appId });
+  const { messages } = await callNutAPI('get-initial-messages', { appId });
   return messages;
 }
 
