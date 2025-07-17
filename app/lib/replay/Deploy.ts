@@ -1,6 +1,6 @@
 // State for deploying a chat to production.
 
-import { sendCommandDedicatedClient } from './ReplayProtocolClient';
+import { callNutAPI } from './NutAPI';
 
 // Deploy to a Netlify site.
 interface DeploySettingsNetlify {
@@ -55,24 +55,18 @@ export interface DeploySettingsDatabase extends DeploySettings {
 }
 
 export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {
-  const { result } = (await sendCommandDedicatedClient({
-    method: 'Nut.deployRepository',
-    params: {
-      repositoryId,
-      settings,
-    },
-  })) as { result: DeployResult };
+  const { result } = await callNutAPI('deploy-repository', {
+    repositoryId,
+    settings,
+  });
 
   return result;
 }
 
 export async function downloadRepository(repositoryId: string): Promise<string> {
-  const { repositoryContents } = (await sendCommandDedicatedClient({
-    method: 'Nut.getRepository',
-    params: {
-      repositoryId,
-    },
-  })) as { repositoryContents: string };
+  const { repositoryContents } = await callNutAPI('get-repository', {
+    repositoryId,
+  });
 
   return repositoryContents;
 }
