@@ -12,10 +12,9 @@ import { useSearchParams } from '@remix-run/react';
 import {
   sendChatMessage,
   type ChatReference,
-  abortChatMessage,
   resumeChatMessage,
   ChatMode,
-} from '~/lib/replay/ChatManager';
+} from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -127,7 +126,6 @@ const ChatImplementer = memo((props: ChatProps) => {
     if (gActiveChatMessageTelemetry) {
       gActiveChatMessageTelemetry.abort('StopButtonClicked');
       clearActiveChat();
-      abortChatMessage();
     }
   };
 
@@ -323,8 +321,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   useEffect(() => {
     (async () => {
-      const appId = chatStore.currentAppId.get();
-      if (!appId) {
+      if (!chatStore.currentAppId.get()) {
         return;
       }
 
@@ -376,7 +373,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       try {
         setHasPendingMessage(true);
-        await resumeChatMessage(appId, {
+        await resumeChatMessage({
           onResponsePart: addResponseMessage,
           onTitle: onChatTitle,
           onStatus: onChatStatus,

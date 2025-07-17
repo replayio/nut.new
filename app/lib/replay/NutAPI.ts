@@ -1,4 +1,5 @@
 
+import { getCurrentUserId } from "~/lib/supabase/client";
 
 type ResponseCallback = (response: any) => void;
 
@@ -10,12 +11,18 @@ type ResponseCallback = (response: any) => void;
 // Otherwise, the response is returned as a JSON object.
 
 export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback): Promise<any> {
+  const userId = await getCurrentUserId();
+
   const url = `https://dispatch.replay.io/nut/${method}`;
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    "x-user-id": userId ?? "",
+  };
+
   const fetchOptions: RequestInit = {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(request),
   };
 
