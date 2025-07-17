@@ -269,7 +269,7 @@ const addRecordingMessageHandler = createInjectableFunction(
       while (current) {
         // If element has an ID, use it as it's the most specific
         if (current.id) {
-          path.unshift('#' + current.id);
+          path.unshift('#' + CSS.escape(current.id));
           break;
         }
 
