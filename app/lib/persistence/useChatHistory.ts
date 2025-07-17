@@ -6,7 +6,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { database } from './chats';
 import { createMessagesForRepository, type Message } from './message';
 import { debounce } from '~/utils/debounce';
-import { getAppById } from './apps';
+import { getArboretumAppById } from './arboretum_apps';
 
 export interface ResumeChatInfo {
   protocolChatId: string;
@@ -37,7 +37,7 @@ async function loadRepository(repositoryId: string) {
 }
 
 async function loadApp(appId: string) {
-  const app = await getAppById(appId);
+  const app = await getArboretumAppById(appId);
 
   await importChat(app.title ?? 'Untitled App', app.messages);
   toast.success('App loaded successfully');

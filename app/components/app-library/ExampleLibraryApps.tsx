@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { type BuildAppResult, type BuildAppSummary, getAppById, getRecentApps } from '~/lib/persistence/apps';
+import {
+  type BuildAppResult,
+  type BuildAppSummary,
+  getArboretumAppById,
+  getRecentArboretumApps,
+} from '~/lib/persistence/arboretum_apps';
 import styles from './ExampleLibraryApps.module.scss';
 import { getMessagesRepositoryId } from '~/lib/persistence/message';
 import { classNames } from '~/utils/classNames';
@@ -52,7 +57,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
   useEffect(() => {
     (async () => {
       if (selectedAppId) {
-        const app = await getAppById(selectedAppId);
+        const app = await getArboretumAppById(selectedAppId);
         setSelectedAppContents(app);
       }
     })();
@@ -67,7 +72,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
     async function fetchRecentApps() {
       try {
         setLoading(true);
-        const recentApps = await getRecentApps(numApps, filterText);
+        const recentApps = await getRecentArboretumApps(numApps, filterText);
         setApps(recentApps);
         setError(null);
       } catch (err) {
@@ -166,7 +171,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
             <button
               className={styles.actionButton}
               onClick={async () => {
-                const contents = appContents ?? (await getAppById(appId));
+                const contents = appContents ?? (await getArboretumAppById(appId));
                 const repositoryId = getMessagesRepositoryId(contents.messages);
                 if (repositoryId) {
                   window.open(`https://${repositoryId}.http.replay.io`, '_blank');

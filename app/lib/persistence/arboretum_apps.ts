@@ -130,7 +130,7 @@ async function getAppsCreatedInLastXHours(hours: number, filterText: string): Pr
 
 const HOUR_RANGES = [1, 2, 3, 6, 12, 24, 72];
 
-export async function getRecentApps(numApps: number, filterText: string): Promise<BuildAppSummary[]> {
+export async function getRecentArboretumApps(numApps: number, filterText: string): Promise<BuildAppSummary[]> {
   let apps: BuildAppSummary[] = [];
   for (const range of HOUR_RANGES) {
     apps = await getAppsCreatedInLastXHours(range, filterText);
@@ -141,7 +141,7 @@ export async function getRecentApps(numApps: number, filterText: string): Promis
   return apps;
 }
 
-export async function getAppById(id: string): Promise<BuildAppResult> {
+export async function getArboretumAppById(id: string): Promise<BuildAppResult> {
   console.log('GetAppByIdStart', id);
 
   // In local testing we've seen problems where this query hangs.
