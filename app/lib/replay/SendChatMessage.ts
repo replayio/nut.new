@@ -113,7 +113,7 @@ export async function sendChatMessage(
   mode: ChatMode,
   messages: Message[],
   references: ChatReference[],
-  callbacks: ChatMessageCallbacks
+  callbacks: ChatMessageCallbacks,
 ) {
   if (usingMockChat()) {
     await sendChatMessageMocked(callbacks);

@@ -69,7 +69,7 @@ async function getAllAppEntries(): Promise<AppEntry[]> {
 }
 
 async function setAppOwner(appId: string, userId: string): Promise<void> {
-  await callNutAPI("set-app-owner", { appId, userId });
+  await callNutAPI('set-app-owner', { appId, userId });
 }
 
 async function getAppContents(appId: string): Promise<AppSummary | undefined> {

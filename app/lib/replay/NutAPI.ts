@@ -1,5 +1,4 @@
-
-import { getCurrentUserId } from "~/lib/supabase/client";
+import { getCurrentUserId } from '~/lib/supabase/client';
 
 type ResponseCallback = (response: any) => void;
 
@@ -16,12 +15,12 @@ export async function callNutAPI(method: string, request: any, responseCallback?
   const url = `https://dispatch.replay.io/nut/${method}`;
 
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    "x-user-id": userId ?? "",
+    'Content-Type': 'application/json',
+    'x-user-id': userId ?? '',
   };
 
   const fetchOptions: RequestInit = {
-    method: "POST",
+    method: 'POST',
     headers,
     body: JSON.stringify(request),
   };
@@ -30,17 +29,19 @@ export async function callNutAPI(method: string, request: any, responseCallback?
     // Use native fetch for streaming
     const response = await fetch(url, fetchOptions);
     if (!response.body) {
-      throw new Error("No response body for streaming");
+      throw new Error('No response body for streaming');
     }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
+    let buffer = '';
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       buffer += decoder.decode(value, { stream: true });
       let newlineIdx;
-      while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
         const line = buffer.slice(0, newlineIdx).trim();
         buffer = buffer.slice(newlineIdx + 1);
         if (line) {
@@ -52,6 +53,7 @@ export async function callNutAPI(method: string, request: any, responseCallback?
     if (buffer.trim()) {
       responseCallback(JSON.parse(buffer.trim()));
     }
+    return undefined;
   } else {
     // Use native fetch for non-streaming
     const response = await fetch(url, fetchOptions);

@@ -33,7 +33,7 @@ export function uint8ArrayToBase64(data: Uint8Array) {
 
   return btoa(str);
 }
- 
+
 export function stringToBase64(inputString: string) {
   if (typeof inputString !== 'string') {
     throw new TypeError('Input must be a string.');

@@ -9,12 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import {
-  sendChatMessage,
-  type ChatReference,
-  resumeChatMessage,
-  ChatMode,
-} from '~/lib/replay/SendChatMessage';
+import { sendChatMessage, type ChatReference, resumeChatMessage, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -211,6 +206,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
         navigateApp(appId);
       } catch (e) {
+        console.error('Failed to initialize chat', e);
         toast.error('Failed to initialize chat');
         setHasPendingMessage(false);
         return;

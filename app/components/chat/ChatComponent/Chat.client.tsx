@@ -29,14 +29,6 @@ export function Chat() {
       }
     })();
   }, []);
-    
-  return (
-    <>
-      {ready && (
-        <ChatImplementer
-          initialMessages={initialMessages}
-        />
-      )}
-    </>
-  );
+
+  return <>{ready && <ChatImplementer initialMessages={initialMessages} />}</>;
 }
