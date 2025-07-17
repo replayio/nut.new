@@ -41,7 +41,6 @@ import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 
 interface ChatProps {
   initialMessages: Message[];
-  storeMessageHistory: (messages: Message[]) => Promise<void>;
 }
 
 let gNumAborts = 0;
@@ -58,8 +57,20 @@ export function getLastChatMessages() {
   return gLastChatMessages;
 }
 
+function navigateApp(nextId: string) {
+  /**
+   * FIXME: Using the intended navigate function causes a rerender for <Chat /> that breaks the app.
+   *
+   * `navigate(`/app/${nextId}`, { replace: true });`
+   */
+  const url = new URL(window.location.href);
+  url.pathname = `/app/${nextId}`;
+  url.search = '';
+  window.history.replaceState({}, '', url);
+}
+
 const ChatImplementer = memo((props: ChatProps) => {
-  const { initialMessages, storeMessageHistory } = props;
+  const { initialMessages } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
@@ -100,10 +111,6 @@ const ChatImplementer = memo((props: ChatProps) => {
   useEffect(() => {
     chatStore.started.set(initialMessages.length > 0);
   }, []);
-
-  useEffect(() => {
-    storeMessageHistory(messages);
-  }, [messages]);
 
   const abort = () => {
     stop();
@@ -198,12 +205,17 @@ const ChatImplementer = memo((props: ChatProps) => {
       newMessages.push(imageMessage);
     });
 
-    await storeMessageHistory(newMessages);
-
     if (!chatStore.currentAppId.get()) {
-      toast.error('Failed to initialize chat');
-      setHasPendingMessage(false);
-      return;
+      try {
+        const appId = await database.createApp();
+        chatStore.currentAppId.set(appId);
+
+        navigateApp(appId);
+      } catch (e) {
+        toast.error('Failed to initialize chat');
+        setHasPendingMessage(false);
+        return;
+      }
     }
 
     setMessages(newMessages);

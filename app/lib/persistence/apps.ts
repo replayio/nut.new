@@ -6,6 +6,7 @@ import { getCurrentUserId } from '~/lib/supabase/client';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import type { AppSummary } from './messageAppSummary';
+import type { Message } from './message';
 
 // Basic information about an app for showing in the library.
 export interface AppEntry {
@@ -136,6 +137,12 @@ async function abortAppChats(appId: string): Promise<void> {
   await callNutAPI('abort-app-chats', { userId, appId });
 }
 
+async function getInitialMessages(appId: string): Promise<Message[]> {
+  const userId = await getCurrentUserId();
+  const { messages } = await callNutAPI('get-initial-messages', { userId, appId });
+  return messages;
+}
+
 export const database = {
   getAllAppEntries,
   getAppContents,
@@ -145,4 +152,5 @@ export const database = {
   getAppDeploySettings,
   setAppDeploySettings,
   abortAppChats,
+  getInitialMessages,
 };
