@@ -1,85 +1,56 @@
-// When the user is not logged in, chats are kept in local storage.
-// Otherwise, they are kept in the database. The first time the user logs in,
-// any local chats are added to the database and then deleted.
+// All apps are stored in the database. Before logging in or creating an account
+// we store the IDs of any apps created in local storage. The first time the user logs in,
+// any local apps are associated with the user and then local storage is cleared.
 
-import { getSupabase, getCurrentUserId } from '~/lib/supabase/client';
+import { getCurrentUserId } from '~/lib/supabase/client';
 import { v4 as uuid } from 'uuid';
 import { getMessagesRepositoryId, type Message } from './message';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 
-export interface ChatSummary {
+export interface AppSummary {
   id: string;
   createdAt: string;
   updatedAt: string;
   title: string;
 }
 
-const CHAT_SUMMARY_COLUMNS = ['id', 'created_at', 'updated_at', 'title', 'deleted'].join(',');
+const localStorageKey = 'nut-apps';
 
-function databaseRowToChatSummary(d: any): ChatSummary {
-  return {
-    id: d.id,
-    createdAt: d.created_at,
-    updatedAt: d.updated_at,
-    title: d.title,
-  };
-}
-
-export interface ChatContents extends ChatSummary {
-  repositoryId: string | undefined;
-  messages: Message[];
-  lastProtocolChatId: string | undefined;
-  lastProtocolChatResponseId: string | undefined;
-}
-
-function databaseRowToChatContents(d: any): ChatContents {
-  return {
-    ...databaseRowToChatSummary(d),
-    messages: d.messages,
-    repositoryId: d.repository_id,
-    lastProtocolChatId: d.last_protocol_chat_id,
-    lastProtocolChatResponseId: d.last_protocol_chat_response_id,
-  };
-}
-
-const localStorageKey = 'nut-chats';
-
-function getLocalChats(): ChatContents[] {
-  const chatJSON = localStorage.getItem(localStorageKey);
-  if (!chatJSON) {
+function getLocalAppIds(): string[] {
+  const appIdsJSON = localStorage.getItem(localStorageKey);
+  if (!appIdsJSON) {
     return [];
   }
-  return JSON.parse(chatJSON);
+  return JSON.parse(appIdsJSON);
 }
 
-function setLocalChats(chats: ChatContents[] | undefined): void {
-  if (chats) {
-    localStorage.setItem(localStorageKey, JSON.stringify(chats));
+function setLocalAppIds(appIds: string[] | undefined): void {
+  if (appIds?.length) {
+    localStorage.setItem(localStorageKey, JSON.stringify(appIds));
   } else {
     localStorage.removeItem(localStorageKey);
   }
 }
 
-// Chats we've deleted locally. We never return these from the database afterwards
-// to present a coherent view of the chats in case the chats are queried before the
+// Apps we've deleted locally. We never return these from the database afterwards
+// to present a coherent view of the apps in case the apps are queried before the
 // delete finishes.
-const deletedChats = new Set<string>();
+const deletedAppIds = new Set<string>();
 
-async function getAllChats(): Promise<ChatSummary[]> {
+async function getAllAppIds(): Promise<string[]> {
   const userId = await getCurrentUserId();
-  const localChats = getLocalChats();
+  const localAppIds = getLocalAppIds();
 
   if (!userId) {
-    return localChats;
+    return localAppIds;
   }
 
-  if (localChats.length) {
+  if (localAppIds.length) {
     try {
-      for (const chat of localChats) {
-        if (chat.title) {
-          await setChatContents(chat);
-        }
+      for (const appId of localAppIds) {
+        await setAppOwner(appId, userId);
       }
       setLocalChats(undefined);
     } catch (error) {
@@ -95,6 +66,10 @@ async function getAllChats(): Promise<ChatSummary[]> {
 
   const chats = data.map(databaseRowToChatSummary);
   return chats.filter((chat) => !deletedChats.has(chat.id));
+}
+
+async function setAppOwner(appId: string, userId: string): Promise<void> {
+  await callNutAPI("set-app-owner", { appId, userId });
 }
 
 async function setChatContents(chat: ChatContents) {
