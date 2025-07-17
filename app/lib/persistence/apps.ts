@@ -110,6 +110,13 @@ async function createApp(): Promise<string> {
   return appId;
 }
 
+async function getAppTitle(appId: string): Promise<string> {
+  const { entries } = await callNutAPI('get-app-entries', {
+    appIds: [appId],
+  });
+  return entries[0].title;
+}
+
 async function updateAppTitle(appId: string, title: string): Promise<void> {
   if (!title.trim()) {
     throw new Error('Title cannot be empty');
@@ -148,6 +155,7 @@ export const database = {
   getAppContents,
   deleteApp,
   createApp,
+  getAppTitle,
   updateAppTitle,
   getAppDeploySettings,
   setAppDeploySettings,

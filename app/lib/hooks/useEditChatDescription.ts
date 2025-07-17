@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { chatStore } from '~/lib/stores/chat';
-import { database } from '~/lib/persistence/chats';
-import { handleChatTitleUpdate } from '~/lib/persistence/useChatHistory';
+import { database } from '~/lib/persistence/apps';
 
 interface EditChatDescriptionOptions {
   initialTitle?: string;
-  customChatId?: string;
+  customAppId?: string;
 }
 
 type EditChatDescriptionHook = {
@@ -33,19 +32,20 @@ type EditChatDescriptionHook = {
  * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
 export function useEditChatTitle({
-  initialTitle = chatStore.currentChat.get()?.title,
-  customChatId,
+  initialTitle = chatStore.appTitle.get(),
+  customAppId,
 }: EditChatDescriptionOptions): EditChatDescriptionHook {
-  const currentChat = chatStore.currentChat.get();
+  const currentAppId = chatStore.currentAppId.get();
 
   const [editing, setEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(initialTitle);
 
-  const [chatId, setChatId] = useState<string>();
+  const [appId, setAppId] = useState<string>();
 
   useEffect(() => {
-    setChatId(customChatId || currentChat?.id);
-  }, [customChatId, currentChat]);
+    setAppId(customAppId || currentAppId);
+  }, [customAppId, currentAppId]);
+
   useEffect(() => {
     setCurrentTitle(initialTitle);
   }, [initialTitle]);
@@ -57,18 +57,18 @@ export function useEditChatTitle({
   }, []);
 
   const fetchLatestTitle = useCallback(async () => {
-    if (!chatId) {
+    if (!appId) {
       return initialTitle;
     }
 
     try {
-      const chat = await database.getChatContents(chatId);
-      return chat?.title || initialTitle;
+      const title = await database.getAppTitle(appId);
+      return title || initialTitle;
     } catch (error) {
       console.error('Failed to fetch latest description:', error);
       return initialTitle;
     }
-  }, [chatId, initialTitle]);
+  }, [appId, initialTitle]);
 
   const handleBlur = useCallback(async () => {
     const latestTitle = await fetchLatestTitle();
@@ -115,20 +115,20 @@ export function useEditChatTitle({
       }
 
       try {
-        if (!chatId) {
-          toast.error('Chat Id is not available');
+        if (!appId) {
+          toast.error('App Id is not available');
           return;
         }
 
-        await handleChatTitleUpdate(chatId, currentTitle);
-        toast.success('Chat title updated successfully');
+        await database.updateAppTitle(appId, currentTitle);
+        toast.success('App title updated successfully');
       } catch (error) {
         toast.error('Failed to update chat title: ' + (error as Error).message);
       }
 
       toggleEditMode();
     },
-    [currentTitle, chatId, customChatId],
+    [currentTitle, appId, customAppId],
   );
 
   const handleKeyDown = useCallback(
