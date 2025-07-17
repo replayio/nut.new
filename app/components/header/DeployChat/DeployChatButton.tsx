@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
-import { generateRandomId } from '~/lib/replay/NutUtils';
+import { generateRandomId } from '~/utils/nut';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';

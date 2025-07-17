@@ -4,9 +4,9 @@
 
 import type { SimulationData, SimulationPacket } from './SimulationData';
 import { simulationDataVersion } from './SimulationData';
-import { assert, generateRandomId, ProtocolClient } from './ReplayProtocolClient';
+import { assert, generateRandomId } from '~/utils/nut';
 import type { Message } from '~/lib/persistence/message';
-import { database } from '~/lib/persistence/chats';
+import { database } from '~/lib/persistence/apps';
 import { chatStore } from '~/lib/stores/chat';
 import { getSupabase } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';

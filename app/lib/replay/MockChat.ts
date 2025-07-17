@@ -4,7 +4,7 @@
  * development, testing, demos etc.
  */
 
-import { assert, waitForTime } from '~/lib/replay/ReplayProtocolClient';
+import { assert, waitForTime } from '~/utils/nut';
 import type { Message } from '~/lib/persistence/message';
 import type { ChatMessageCallbacks } from './ChatManager';
 import { disableTelemetry } from '~/lib/hooks/pingTelemetry';

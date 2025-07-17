@@ -19,7 +19,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({
       initialTitle: item.title,
-      customChatId: item.id,
+      customAppId: item.id,
     });
 
   const renderDescriptionForm = (

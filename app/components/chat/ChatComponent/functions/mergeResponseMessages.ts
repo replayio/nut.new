@@ -1,5 +1,5 @@
 import type { Message } from '~/lib/persistence/message';
-import { assert } from '~/lib/replay/NutUtils';
+import { assert } from '~/utils/nut';
 
 function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
   const lastMessage = messages[messages.length - 1];

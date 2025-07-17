@@ -1,6 +1,6 @@
 // Routines for parsing the current state of the app from backend messages.
 
-import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { assert } from '~/utils/nut';
 import type { Message } from './message';
 import type { DatabaseSchema } from './databaseSchema';
 import { setInitialAppSummary } from '~/lib/stores/appSummary';

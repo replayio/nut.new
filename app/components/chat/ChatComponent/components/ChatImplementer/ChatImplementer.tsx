@@ -20,7 +20,7 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
-import { generateRandomId } from '~/lib/replay/NutUtils';
+import { generateRandomId } from '~/utils/nut';
 import {
   getDiscoveryRating,
   getMessagesRepositoryId,

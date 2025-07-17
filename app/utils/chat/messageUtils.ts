@@ -1,4 +1,4 @@
-import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { assert } from '~/utils/nut';
 import type { Message } from '~/lib/persistence/message';
 
 let gLastChatMessages: Message[] | undefined;
