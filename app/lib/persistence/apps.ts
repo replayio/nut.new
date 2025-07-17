@@ -131,6 +131,11 @@ async function setAppDeploySettings(appId: string, deploySettings: DeploySetting
   await callNutAPI('set-app-deploy-settings', { userId, appId, deploySettings });
 }
 
+async function abortAppChats(appId: string): Promise<void> {
+  const userId = await getCurrentUserId();
+  await callNutAPI('abort-app-chats', { userId, appId });
+}
+
 export const database = {
   getAllAppEntries,
   getAppContents,
@@ -139,4 +144,5 @@ export const database = {
   updateAppTitle,
   getAppDeploySettings,
   setAppDeploySettings,
+  abortAppChats,
 };

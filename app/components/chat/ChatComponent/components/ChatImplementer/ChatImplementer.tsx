@@ -3,8 +3,7 @@ import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
-import { handleChatTitleUpdate, type ResumeChatInfo } from '~/lib/persistence';
-import { database } from '~/lib/persistence/chats';
+import { database } from '~/lib/persistence/apps';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
@@ -21,7 +20,7 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
-import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import { generateRandomId } from '~/lib/replay/NutUtils';
 import {
   getDiscoveryRating,
   getMessagesRepositoryId,
@@ -42,7 +41,6 @@ import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 
 interface ChatProps {
   initialMessages: Message[];
-  resumeChat: ResumeChatInfo | undefined;
   storeMessageHistory: (messages: Message[]) => Promise<void>;
 }
 
@@ -117,9 +115,9 @@ const ChatImplementer = memo((props: ChatProps) => {
     clearPendingMessageStatus();
     setResumeChat(undefined);
 
-    const chatId = chatStore.currentChat.get()?.id;
-    if (chatId) {
-      database.updateChatLastMessage(chatId, null, null);
+    const appId = chatStore.currentAppId.get();
+    if (appId) {
+      database.abortAppChats(appId);
     }
 
     if (gActiveChatMessageTelemetry) {
@@ -205,7 +203,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     await storeMessageHistory(newMessages);
 
-    if (!chatStore.currentChat.get()) {
+    if (!chatStore.currentAppId.get()) {
       toast.error('Failed to initialize chat');
       setPendingMessageId(undefined);
       return;
@@ -244,10 +242,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       }
 
       console.log('ChatTitle', title);
-      const currentChat = chatStore.currentChat.get();
-      if (currentChat) {
-        handleChatTitleUpdate(currentChat.id, title);
-      }
+      chatStore.appTitle.set(title);
     };
 
     const onChatStatus = debounce((status: string) => {
@@ -356,10 +351,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         }
 
         console.log('ChatTitle', title);
-        const currentChat = chatStore.currentChat.get();
-        if (currentChat) {
-          handleChatTitleUpdate(currentChat.id, title);
-        }
+        chatStore.appTitle.set(title);
       };
 
       const onChatStatus = debounce((status: string) => {
