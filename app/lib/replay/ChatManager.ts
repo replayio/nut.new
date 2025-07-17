@@ -312,7 +312,7 @@ export function abortChatMessage() {
   }
 }
 
-export async function resumeChatMessage(chatId: string, chatResponseId: string, callbacks: ChatMessageCallbacks) {
+export async function resumeChatMessage(appId: string, callbacks: ChatMessageCallbacks) {
   const client = new ProtocolClient();
   await client.initialize();
 

@@ -59,7 +59,7 @@ export function getLastChatMessages() {
 }
 
 const ChatImplementer = memo((props: ChatProps) => {
-  const { initialMessages, resumeChat: initialResumeChat, storeMessageHistory } = props;
+  const { initialMessages, storeMessageHistory } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
@@ -69,11 +69,9 @@ const ChatImplementer = memo((props: ChatProps) => {
   // const { isLoggedIn } = useAuthStatus();
   const [input, setInput] = useState('');
 
-  const [pendingMessageId, setPendingMessageId] = useState<string | undefined>(undefined);
+  const [hasPendingMessage, setHasPendingMessage] = useState<boolean>(false);
 
   const pendingMessageStatus = useStore(pendingMessageStatusStore);
-
-  const [resumeChat, setResumeChat] = useState<ResumeChatInfo | undefined>(initialResumeChat);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -111,9 +109,8 @@ const ChatImplementer = memo((props: ChatProps) => {
     stop();
     gNumAborts++;
     chatStore.aborted.set(true);
-    setPendingMessageId(undefined);
+    setHasPendingMessage(false);
     clearPendingMessageStatus();
-    setResumeChat(undefined);
 
     const appId = chatStore.currentAppId.get();
     if (appId) {
@@ -158,7 +155,7 @@ const ChatImplementer = memo((props: ChatProps) => {
   const sendMessage = async (messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => {
     const numAbortsAtStart = gNumAborts;
 
-    if (messageInput.length === 0 || pendingMessageId || resumeChat) {
+    if (messageInput.length === 0 || hasPendingMessage) {
       return;
     }
 
@@ -178,7 +175,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     // }
 
     const chatId = generateRandomId();
-    setPendingMessageId(chatId);
+    setHasPendingMessage(true);
     setPendingMessageStatus('');
 
     const userMessage: Message = {
@@ -205,7 +202,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     if (!chatStore.currentAppId.get()) {
       toast.error('Failed to initialize chat');
-      setPendingMessageId(undefined);
+      setHasPendingMessage(false);
       return;
     }
 
@@ -304,7 +301,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, normalFinish);
     clearActiveChat();
 
-    setPendingMessageId(undefined);
+    setHasPendingMessage(false);
 
     setInput('');
 
@@ -313,7 +310,8 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   useEffect(() => {
     (async () => {
-      if (!initialResumeChat) {
+      const appId = chatStore.currentAppId.get();
+      if (!appId) {
         return;
       }
 
@@ -364,7 +362,8 @@ const ChatImplementer = memo((props: ChatProps) => {
       }, 500);
 
       try {
-        await resumeChatMessage(initialResumeChat.protocolChatId, initialResumeChat.protocolChatResponseId, {
+        setHasPendingMessage(true);
+        await resumeChatMessage(appId, {
           onResponsePart: addResponseMessage,
           onTitle: onChatTitle,
           onStatus: onChatStatus,
@@ -378,14 +377,9 @@ const ChatImplementer = memo((props: ChatProps) => {
         return;
       }
 
-      setResumeChat(undefined);
-
-      const chatId = chatStore.currentChat.get()?.id;
-      if (chatId) {
-        database.updateChatLastMessage(chatId, null, null);
-      }
+      setHasPendingMessage(false);
     })();
-  }, [initialResumeChat]);
+  }, []);
 
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);
@@ -473,7 +467,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       input={input}
       showChat={showChat}
       chatStarted={chatStarted}
-      hasPendingMessage={pendingMessageId !== undefined || resumeChat !== undefined}
+      hasPendingMessage={hasPendingMessage}
       pendingMessageStatus={pendingMessageStatus}
       sendMessage={sendMessage}
       messageRef={messageRef}
