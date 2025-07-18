@@ -11,6 +11,11 @@ import { flushSimulationData } from '~/components/chat/ChatComponent/functions/f
 import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 
+// Whether to send simulation data with chat messages.
+// For now this is disabled while we design a better UX and messaging around reporting
+// bugs in Nut apps.
+const ENABLE_SIMULATION = false;
+
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
     kind: 'repositoryId',
@@ -126,7 +131,7 @@ export async function sendChatMessage(
   let simulationData: SimulationData | undefined;
 
   const repositoryId = workbenchStore.repositoryId.get();
-  if (repositoryId) {
+  if (repositoryId && ENABLE_SIMULATION) {
     simulationData = await flushSimulationData();
     if (simulationData) {
       const packet = createRepositoryIdPacket(repositoryId);
