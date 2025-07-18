@@ -9,7 +9,7 @@ import type { AppSummary } from './messageAppSummary';
 import type { Message } from './message';
 
 // Basic information about an app for showing in the library.
-export interface AppEntry {
+export interface AppLibraryEntry {
   id: string;
   createdAt: string;
   updatedAt: string;
@@ -39,15 +39,15 @@ function setLocalAppIds(appIds: string[] | undefined): void {
 // delete finishes.
 const deletedAppIds = new Set<string>();
 
-async function getAllAppEntries(): Promise<AppEntry[]> {
+async function getAllAppEntries(): Promise<AppLibraryEntry[]> {
   const userId = await getCurrentUserId();
   const localAppIds = getLocalAppIds();
 
   if (!userId) {
-    const { entries } = await callNutAPI('get-app-entries', {
-      appIds: localAppIds,
-    });
-    return entries;
+    return Promise.all(localAppIds.map(async (appId) => {
+      const { entry } = await callNutAPI('get-app-entry', { appId });
+      return entry;
+    }));
   }
 
   if (localAppIds.length) {
@@ -63,7 +63,7 @@ async function getAllAppEntries(): Promise<AppEntry[]> {
 
   const { entries } = await callNutAPI('get-user-app-entries', {});
 
-  return entries.filter((entry: AppEntry) => !deletedAppIds.has(entry.id));
+  return entries.filter((entry: AppLibraryEntry) => !deletedAppIds.has(entry.id));
 }
 
 async function setAppOwner(appId: string): Promise<void> {
@@ -99,10 +99,8 @@ async function createApp(): Promise<string> {
 }
 
 async function getAppTitle(appId: string): Promise<string> {
-  const { entries } = await callNutAPI('get-app-entries', {
-    appIds: [appId],
-  });
-  return entries[0].title;
+  const { entry } = await callNutAPI('get-app-entry', { appId });
+  return entry.title;
 }
 
 async function updateAppTitle(appId: string, title: string): Promise<void> {
