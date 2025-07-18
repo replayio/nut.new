@@ -51,7 +51,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       {editing ? (
         renderDescriptionForm
       ) : (
-        <a href={`/chat/${item.id}`} className="flex w-full relative truncate block">
+        <a href={`/app/${item.id}`} className="flex w-full relative truncate block">
           {item.title}
           <div
             className={classNames(

@@ -6,6 +6,7 @@ import { logStore } from '~/lib/stores/logs';
 import type { Message } from '~/lib/persistence/message';
 import { database } from '~/lib/persistence/apps';
 import { toast } from 'react-toastify';
+import mergeResponseMessage from './functions/mergeResponseMessages';
 
 export function Chat() {
   renderLogger.trace('Chat');
@@ -19,7 +20,11 @@ export function Chat() {
     (async () => {
       try {
         if (appId) {
-          const messages = await database.getInitialMessages(appId);
+          const rawMessages = await database.getInitialMessages(appId);
+          let messages: Message[] = [];
+          for (const rawMessage of rawMessages) {
+            messages = mergeResponseMessage(rawMessage, messages);
+          }
           setInitialMessages(messages);
           setReady(true);
         }

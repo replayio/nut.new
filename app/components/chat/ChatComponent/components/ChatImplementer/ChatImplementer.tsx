@@ -230,7 +230,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
-      newMessages = mergeResponseMessage(msg, [...newMessages]);
+      newMessages = mergeResponseMessage(msg, newMessages);
       setMessages(newMessages);
 
       const responseRepositoryId = getMessagesRepositoryId(newMessages);
@@ -339,7 +339,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
         const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
-        newMessages = mergeResponseMessage(msg, [...newMessages]);
+        newMessages = mergeResponseMessage(msg, newMessages);
         setMessages(newMessages);
 
         const responseRepositoryId = getMessagesRepositoryId(newMessages);

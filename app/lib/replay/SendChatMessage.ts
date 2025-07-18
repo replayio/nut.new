@@ -96,19 +96,18 @@ interface NutChatRequest {
 
 function getChatResponseCallback(callbacks: ChatMessageCallbacks) {
   return (response: any) => {
-    const json = JSON.parse(response);
-    switch (json.kind) {
+    switch (response.kind) {
       case 'message':
-        callbacks.onResponsePart(json.message);
+        callbacks.onResponsePart(response.message);
         break;
       case 'title':
-        callbacks.onTitle(json.title);
+        callbacks.onTitle(response.title);
         break;
       case 'status':
-        callbacks.onStatus(json.status);
+        callbacks.onStatus(response.status);
         break;
       default:
-        console.error('Unknown chat response:', json);
+        console.error('Unknown chat response:', response);
         break;
     }
   };
@@ -148,7 +147,12 @@ export async function sendChatMessage(
   };
 
   const responseCallback = getChatResponseCallback(callbacks);
-  await callNutAPI('chat', params, responseCallback);
+  try {
+    await callNutAPI('chat', params, responseCallback);
+  } catch (error) {
+    console.error('chat message error', error, String(error));
+    throw error;
+  }
 }
 
 export async function resumeChatMessage(callbacks: ChatMessageCallbacks) {

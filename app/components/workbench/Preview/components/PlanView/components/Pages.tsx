@@ -7,7 +7,6 @@ interface PagesProps {
 }
 
 const Pages = ({ appSummary }: PagesProps) => {
-  console.log(appSummary);
   return (
     <div>
       <div className="space-y-4 mb-8">
@@ -46,7 +45,7 @@ const Pages = ({ appSummary }: PagesProps) => {
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {page.components.map((component, componentIndex) => (
-                        <TooltipProvider>
+                        <TooltipProvider key={componentIndex}>
                           <WithTooltip tooltip={component.description}>
                             <span
                               key={componentIndex}

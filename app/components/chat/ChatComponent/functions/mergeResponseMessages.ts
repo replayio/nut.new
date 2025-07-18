@@ -2,6 +2,10 @@ import type { Message } from '~/lib/persistence/message';
 import { assert } from '~/utils/nut';
 
 function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
+  if (!messages.length) {
+    return [msg];
+  }
+  messages = [...messages];
   const lastMessage = messages[messages.length - 1];
   if (lastMessage.id == msg.id) {
     messages.pop();
