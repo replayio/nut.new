@@ -156,5 +156,5 @@ export async function resumeChatMessage(callbacks: ChatMessageCallbacks) {
   assert(appId, 'No app id');
 
   const responseCallback = getChatResponseCallback(callbacks);
-  await callNutAPI('resume-chats', { appId }, responseCallback);
+  await callNutAPI('resume-chat', { appId }, responseCallback);
 }
