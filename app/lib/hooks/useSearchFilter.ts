@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { debounce } from '~/utils/debounce';
-import type { AppEntry } from '~/lib/persistence/apps';
+import type { AppLibraryEntry } from '~/lib/persistence/apps';
 
 interface UseSearchFilterOptions {
-  items: AppEntry[];
-  searchFields?: (keyof AppEntry)[];
+  items: AppLibraryEntry[];
+  searchFields?: (keyof AppLibraryEntry)[];
   debounceMs?: number;
 }
 

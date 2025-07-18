@@ -5,7 +5,6 @@
 import { getCurrentUserId } from '~/lib/supabase/client';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { callNutAPI } from '~/lib/replay/NutAPI';
-import type { AppSummary } from './messageAppSummary';
 import type { Message } from './message';
 
 // Basic information about an app for showing in the library.
@@ -44,10 +43,12 @@ async function getAllAppEntries(): Promise<AppLibraryEntry[]> {
   const localAppIds = getLocalAppIds();
 
   if (!userId) {
-    return Promise.all(localAppIds.map(async (appId) => {
-      const { entry } = await callNutAPI('get-app-entry', { appId });
-      return entry;
-    }));
+    return Promise.all(
+      localAppIds.map(async (appId) => {
+        const { entry } = await callNutAPI('get-app-entry', { appId });
+        return entry;
+      }),
+    );
   }
 
   if (localAppIds.length) {
@@ -68,11 +69,6 @@ async function getAllAppEntries(): Promise<AppLibraryEntry[]> {
 
 async function setAppOwner(appId: string): Promise<void> {
   await callNutAPI('set-app-owner', { appId });
-}
-
-async function getAppContents(appId: string): Promise<AppSummary | undefined> {
-  const { appSummary } = await callNutAPI('get-app-summary', { appId });
-  return appSummary;
 }
 
 async function deleteApp(appId: string): Promise<void> {
@@ -133,7 +129,6 @@ async function getInitialMessages(appId: string): Promise<Message[]> {
 
 export const database = {
   getAllAppEntries,
-  getAppContents,
   deleteApp,
   createApp,
   getAppTitle,
