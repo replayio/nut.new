@@ -10,11 +10,14 @@ import { sendChatMessageMocked, usingMockChat } from './MockChat';
 import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
+import { createScopedLogger } from '~/utils/logger';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
 // bugs in Nut apps.
 const ENABLE_SIMULATION = false;
+
+const logger = createScopedLogger('ChatMessage');
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
   return {
@@ -96,6 +99,7 @@ interface NutChatRequest {
 
 function getChatResponseCallback(callbacks: ChatMessageCallbacks) {
   return (response: any) => {
+    logger.debug('chatResponse', response);
     switch (response.kind) {
       case 'message':
         callbacks.onResponsePart(response.message);
@@ -123,6 +127,8 @@ export async function sendChatMessage(
     await sendChatMessageMocked(callbacks);
     return;
   }
+
+  logger.debug('sendChatMessage', mode, messages, references);
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
@@ -153,6 +159,8 @@ export async function sendChatMessage(
     console.error('chat message error', error, String(error));
     throw error;
   }
+
+  logger.debug('sendChatMessage finished');
 }
 
 export async function resumeChatMessage(callbacks: ChatMessageCallbacks) {
