@@ -47,16 +47,13 @@ export interface DeployResult {
 
 // Information about a chat's deployment saved to the database.
 export interface DeploySettingsDatabase extends DeploySettings {
-  // Last repository which was deployed.
-  repositoryId?: string;
-
   // URL of the deployed site.
   siteURL?: string;
 }
 
-export async function deployRepository(repositoryId: string, settings: DeploySettings): Promise<DeployResult> {
-  const { result } = await callNutAPI('deploy-repository', {
-    repositoryId,
+export async function deployApp(appId: string, settings: DeploySettings): Promise<DeployResult> {
+  const { result } = await callNutAPI('deploy-app', {
+    appId,
     settings,
   });
 

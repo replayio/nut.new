@@ -6,7 +6,7 @@ import { generateRandomId } from '~/utils/nut';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import { deployRepository, downloadRepository } from '~/lib/replay/Deploy';
+import { deployApp, downloadRepository } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
 
 ReactModal.setAppElement('#root');
@@ -142,22 +142,16 @@ export function DeployChatButton() {
       }
     }
 
-    const repositoryId = workbenchStore.repositoryId.get();
-    if (!repositoryId) {
-      setError('No repository ID found');
-      return;
-    }
-
     setStatus(DeployStatus.Started);
 
     // Write out to the database before we start trying to deploy.
     await database.setAppDeploySettings(appId, deploySettings);
 
-    console.log('DeploymentStarting', repositoryId, deploySettings);
+    console.log('DeploymentStarting', appId, deploySettings);
 
-    const result = await deployRepository(repositoryId, deploySettings);
+    const result = await deployApp(appId, deploySettings);
 
-    console.log('DeploymentResult', repositoryId, deploySettings, result);
+    console.log('DeploymentResult', appId, deploySettings, result);
 
     if (result.error) {
       setStatus(DeployStatus.NotStarted);
@@ -179,7 +173,6 @@ export function DeployChatButton() {
     newSettings = {
       ...newSettings,
       siteURL: result.siteURL,
-      repositoryId,
     };
 
     setDeploySettings(newSettings);
