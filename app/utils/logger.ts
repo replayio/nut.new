@@ -49,8 +49,7 @@ const showAllLogs: string[] = [];
 function log(level: DebugLevel, scope: string | undefined, messages: any[]) {
   const levelOrder: DebugLevel[] = ['trace', 'debug', 'info', 'warn', 'error'];
 
-  if (levelOrder.indexOf(level) < levelOrder.indexOf(currentLevel) &&
-      !showAllLogs.includes(scope ?? '')) {
+  if (levelOrder.indexOf(level) < levelOrder.indexOf(currentLevel) && !showAllLogs.includes(scope ?? '')) {
     return;
   }
 
