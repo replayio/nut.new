@@ -1,0 +1,65 @@
+import { getCurrentUserId } from '~/lib/supabase/client';
+
+type ResponseCallback = (response: any) => void;
+
+// Call the Nut API with the specified method and params.
+//
+// If a response callback is provided, responses are expected to be newline-delimited JSON
+// and the callback will be called with each entry.
+//
+// Otherwise, the response is returned as a JSON object.
+
+export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback): Promise<any> {
+  const userId = await getCurrentUserId();
+
+  const url = `https://dispatch.replay.io/nut/${method}`;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'x-user-id': userId ?? '',
+  };
+
+  const fetchOptions: RequestInit = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  };
+
+  if (responseCallback) {
+    // Use native fetch for streaming
+    const response = await fetch(url, fetchOptions);
+    if (!response.body) {
+      throw new Error('No response body for streaming');
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      let newlineIdx;
+      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, newlineIdx).trim();
+        buffer = buffer.slice(newlineIdx + 1);
+        if (line) {
+          responseCallback(JSON.parse(line));
+        }
+      }
+    }
+    // Handle any trailing data after the last newline
+    if (buffer.trim()) {
+      responseCallback(JSON.parse(buffer.trim()));
+    }
+    return undefined;
+  } else {
+    // Use native fetch for non-streaming
+    const response = await fetch(url, fetchOptions);
+    if (!response.ok) {
+      throw new Error(`NutAPI error: ${response.status}`);
+    }
+    return response.json();
+  }
+}

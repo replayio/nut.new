@@ -1,8 +1,8 @@
 import { atom } from 'nanostores';
-import type { ChatContents } from '~/lib/persistence/chats';
 
 export class ChatStore {
-  currentChat = atom<ChatContents | undefined>(undefined);
+  currentAppId = atom<string | undefined>(undefined);
+  appTitle = atom<string | undefined>(undefined);
 
   started = atom<boolean>(false);
   aborted = atom<boolean>(false);
@@ -10,3 +10,6 @@ export class ChatStore {
 }
 
 export const chatStore = new ChatStore();
+
+// Title used for new apps.
+export const DefaultTitle = 'New App';

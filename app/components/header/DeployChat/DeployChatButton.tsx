@@ -2,11 +2,11 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
-import { generateRandomId } from '~/lib/replay/ReplayProtocolClient';
+import { generateRandomId } from '~/utils/nut';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
-import { database } from '~/lib/persistence/chats';
-import { deployRepository, downloadRepository } from '~/lib/replay/Deploy';
+import { database } from '~/lib/persistence/apps';
+import { deployApp, downloadRepository } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
 
 ReactModal.setAppElement('#root');
@@ -70,14 +70,14 @@ export function DeployChatButton() {
   };
 
   const handleOpenModal = async () => {
-    const chatId = chatStore.currentChat.get()?.id;
-    if (!chatId) {
-      toast.error('No chat ID found');
+    const appId = chatStore.currentAppId.get();
+    if (!appId) {
+      toast.error('No app ID found');
       return;
     }
 
     await handleCheckDatabase();
-    const existingSettings = await database.getChatDeploySettings(chatId);
+    const existingSettings = await database.getAppDeploySettings(appId);
 
     setIsModalOpen(true);
     setStatus(DeployStatus.NotStarted);
@@ -92,9 +92,9 @@ export function DeployChatButton() {
   const handleDeploy = async () => {
     setError(null);
 
-    const chatId = chatStore.currentChat.get()?.id;
-    if (!chatId) {
-      setError('No chat open');
+    const appId = chatStore.currentAppId.get();
+    if (!appId) {
+      setError('No app open');
       return;
     }
 
@@ -142,22 +142,16 @@ export function DeployChatButton() {
       }
     }
 
-    const repositoryId = workbenchStore.repositoryId.get();
-    if (!repositoryId) {
-      setError('No repository ID found');
-      return;
-    }
-
     setStatus(DeployStatus.Started);
 
     // Write out to the database before we start trying to deploy.
-    await database.updateChatDeploySettings(chatId, deploySettings);
+    await database.setAppDeploySettings(appId, deploySettings);
 
-    console.log('DeploymentStarting', repositoryId, deploySettings);
+    console.log('DeploymentStarting', appId, deploySettings);
 
-    const result = await deployRepository(repositoryId, deploySettings);
+    const result = await deployApp(appId, deploySettings);
 
-    console.log('DeploymentResult', repositoryId, deploySettings, result);
+    console.log('DeploymentResult', appId, deploySettings, result);
 
     if (result.error) {
       setStatus(DeployStatus.NotStarted);
@@ -179,14 +173,13 @@ export function DeployChatButton() {
     newSettings = {
       ...newSettings,
       siteURL: result.siteURL,
-      repositoryId,
     };
 
     setDeploySettings(newSettings);
     setStatus(DeployStatus.Succeeded);
 
     // Update the database with the new settings.
-    await database.updateChatDeploySettings(chatId, newSettings);
+    await database.setAppDeploySettings(appId, newSettings);
   };
 
   return (

@@ -5,8 +5,7 @@ import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { chatStore } from '~/lib/stores/chat';
 
 export function ChatDescription() {
-  const currentChat = useStore(chatStore.currentChat);
-  const initialTitle = currentChat?.title;
+  const initialTitle = useStore(chatStore.appTitle);
 
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({

@@ -6,7 +6,7 @@
 // Note that to make this easier we don't use backticks ` in this file.
 
 import { createInjectableFunction } from './injectable';
-import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
+import { assert, stringToBase64, uint8ArrayToBase64 } from '~/utils/nut';
 import type {
   IndexedDBAccess,
   LocalStorageAccess,

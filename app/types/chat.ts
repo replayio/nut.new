@@ -1,11 +1,8 @@
 import type { Message, MessageImage, MessageText } from '~/lib/persistence/message';
-import type { ResumeChatInfo } from '~/lib/persistence/useChatHistory';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
 
 export interface ChatProps {
   initialMessages: Message[];
-  resumeChat: ResumeChatInfo | undefined;
-  storeMessageHistory: (messages: Message[]) => void;
 }
 
 export interface ChatImplProps extends ChatProps {
@@ -14,7 +11,7 @@ export interface ChatImplProps extends ChatProps {
 }
 
 // Re-export types we need
-export type { Message, MessageImage, MessageText, ResumeChatInfo };
+export type { Message, MessageImage, MessageText };
 
 export interface UserMessage extends MessageText {
   role: 'user';

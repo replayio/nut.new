@@ -5,7 +5,7 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { database, type ChatSummary } from '~/lib/persistence/chats';
+import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
@@ -36,13 +36,13 @@ const menuVariants = {
   },
 } satisfies Variants;
 
-type DialogContent = { type: 'delete'; item: ChatSummary } | null;
+type DialogContent = { type: 'delete'; item: AppLibraryEntry } | null;
 
 const skipConfirmDeleteCookieName = 'skipConfirmDelete';
 
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatSummary[] | null>(null);
+  const [list, setList] = useState<AppLibraryEntry[] | null>(null);
   const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -56,24 +56,24 @@ export const Menu = () => {
   const loadEntries = useCallback(() => {
     setList(null);
     database
-      .getAllChats()
+      .getAllAppEntries()
       .then(setList)
       .catch((error) => toast.error(error.message));
   }, []);
 
   const deleteItem = useCallback(
-    (event: React.UIEvent, item: ChatSummary) => {
+    (event: React.UIEvent, item: AppLibraryEntry) => {
       event.preventDefault();
 
       // Optimistically remove the item from the list while we update the database.
       setList((list ?? []).filter((chat) => chat.id !== item.id));
 
       database
-        .deleteChat(item.id)
+        .deleteApp(item.id)
         .then(() => {
           loadEntries();
 
-          if (chatStore.currentChat.get()?.id === item.id) {
+          if (chatStore.currentAppId.get() === item.id) {
             // hard page navigation to clear the stores
             window.location.pathname = '/';
           }
@@ -118,7 +118,7 @@ export const Menu = () => {
     };
   }, []);
 
-  const handleDeleteClick = (event: React.UIEvent, item: ChatSummary) => {
+  const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
 
     const skipConfirmDelete = Cookies.get(skipConfirmDeleteCookieName);

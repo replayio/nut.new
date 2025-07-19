@@ -1,7 +1,7 @@
 // Client messages match the format used by the Nut protocol.
 
 import { generateId } from '~/utils/fileUtils';
-import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { assert } from '~/utils/nut';
 
 type MessageRole = 'user' | 'assistant';
 

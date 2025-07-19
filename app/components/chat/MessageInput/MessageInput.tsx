@@ -4,7 +4,7 @@ import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
-import { ChatMode } from '~/lib/replay/ChatManager';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
 
 export interface MessageInputProps {

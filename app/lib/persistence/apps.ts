@@ -1,164 +1,140 @@
-// Functions for accessing the apps table in the database
+// All apps are stored in the database. Before logging in or creating an account
+// we store the IDs of any apps created in local storage. The first time the user logs in,
+// any local apps are associated with the user and then local storage is cleared.
 
-import { getSupabase } from '~/lib/supabase/client';
+import { getCurrentUserId } from '~/lib/supabase/client';
+import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 import type { Message } from './message';
-import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 
-export interface BuildAppOutcome {
-  testsPassed?: boolean;
-  hasDatabase?: boolean;
-}
-
-export interface BuildAppSummary {
+// Basic information about an app for showing in the library.
+export interface AppLibraryEntry {
   id: string;
-  title: string | undefined;
-  prompt: string | undefined;
-  elapsedMinutes: number;
-  totalPeanuts: number;
-  imageDataURL: string | undefined;
-  outcome: BuildAppOutcome;
-  appId: string;
   createdAt: string;
+  updatedAt: string;
+  title: string;
 }
 
-export interface BuildAppResult extends BuildAppSummary {
-  messages: Message[];
-  protocolChatId: string;
+const localStorageKey = 'nut-apps';
+
+function getLocalAppIds(): string[] {
+  const appIdsJSON = localStorage.getItem(localStorageKey);
+  if (!appIdsJSON) {
+    return [];
+  }
+  return JSON.parse(appIdsJSON);
 }
 
-function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
-  try {
-    const json = JSON.parse(outcome);
-    return {
-      testsPassed: !!json.testsPassed,
-      hasDatabase: !!json.hasDatabase,
-    };
-  } catch (error) {
-    // 2025/04/26: Watch for old formats for outcomes.
-    if (outcome === 'success') {
-      return {
-        testsPassed: true,
-      };
-    }
-    if (outcome === 'error') {
-      return {
-        testsPassed: false,
-      };
-    }
-    console.error('Failed to parse outcome:', error);
-    return {};
+function setLocalAppIds(appIds: string[] | undefined): void {
+  if (appIds?.length) {
+    localStorage.setItem(localStorageKey, JSON.stringify(appIds));
+  } else {
+    localStorage.removeItem(localStorageKey);
   }
 }
 
-const BUILD_APP_SUMMARY_COLUMNS = [
-  'id',
-  'title',
-  'prompt',
-  'elapsed_minutes',
-  'total_peanuts',
-  'image_url',
-  'outcome',
-  'app_id',
-  'created_at',
-].join(',');
+// Apps we've deleted locally. We never return these from the database afterwards
+// to present a coherent view of the apps in case the apps are queried before the
+// delete finishes.
+const deletedAppIds = new Set<string>();
 
-function databaseRowToBuildAppSummary(row: any): BuildAppSummary {
-  const outcome = parseBuildAppOutcome(row.outcome);
+async function getAllAppEntries(): Promise<AppLibraryEntry[]> {
+  const userId = await getCurrentUserId();
+  const localAppIds = getLocalAppIds();
 
-  return {
-    id: row.id,
-    title: row.title,
-    prompt: row.prompt,
-    elapsedMinutes: row.elapsed_minutes || 0,
-    totalPeanuts: row.total_peanuts || 0,
-    imageDataURL: row.image_url,
-    outcome,
-    appId: row.app_id,
-    createdAt: row.created_at,
-  };
-}
-
-function databaseRowToBuildAppResult(row: any): BuildAppResult {
-  return {
-    ...databaseRowToBuildAppSummary(row),
-    messages: row.messages || [],
-    protocolChatId: row.protocol_chat_id,
-  };
-}
-
-function appMatchesFilter(app: BuildAppSummary, filterText: string): boolean {
-  // Always filter out apps that didn't get up and running.
-  if (!app.title || !app.imageDataURL) {
-    return false;
+  if (!userId) {
+    return Promise.all(
+      localAppIds.map(async (appId) => {
+        const { entry } = await callNutAPI('get-app-entry', { appId });
+        return entry;
+      }),
+    );
   }
 
-  const text = `${app.title} ${app.prompt}`.toLowerCase();
-  const words = filterText.toLowerCase().split(' ');
-  return words.every((word) => text.includes(word));
-}
-
-/**
- * Get all apps created within the last X hours
- * @param hours Number of hours to look back
- * @returns Array of BuildAppResult objects
- */
-async function getAppsCreatedInLastXHours(hours: number, filterText: string): Promise<BuildAppSummary[]> {
-  try {
-    // Calculate the timestamp for X hours ago
-    const hoursAgo = new Date();
-    hoursAgo.setHours(hoursAgo.getHours() - hours);
-
-    const { data, error } = await getSupabase()
-      .from('arboretum_apps')
-      .select(BUILD_APP_SUMMARY_COLUMNS)
-      .eq('deleted', false)
-      .gte('created_at', hoursAgo.toISOString())
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching recent apps:', error);
-      throw error;
-    }
-
-    // Ignore apps that don't have a title or image.
-    return data.map(databaseRowToBuildAppSummary).filter((app) => appMatchesFilter(app, filterText));
-  } catch (error) {
-    console.error('Failed to get recent apps:', error);
-    throw error;
-  }
-}
-
-const HOUR_RANGES = [1, 2, 3, 6, 12, 24, 72];
-
-export async function getRecentApps(numApps: number, filterText: string): Promise<BuildAppSummary[]> {
-  let apps: BuildAppSummary[] = [];
-  for (const range of HOUR_RANGES) {
-    apps = await getAppsCreatedInLastXHours(range, filterText);
-    if (apps.length >= numApps) {
-      return apps.slice(0, numApps);
+  if (localAppIds.length) {
+    try {
+      for (const appId of localAppIds) {
+        await setAppOwner(appId);
+      }
+      setLocalAppIds(undefined);
+    } catch (error) {
+      console.error('Error syncing local apps', error);
     }
   }
-  return apps;
+
+  const { entries } = await callNutAPI('get-user-app-entries', {});
+
+  return entries.filter((entry: AppLibraryEntry) => !deletedAppIds.has(entry.id));
 }
 
-export async function getAppById(id: string): Promise<BuildAppResult> {
-  console.log('GetAppByIdStart', id);
+async function setAppOwner(appId: string): Promise<void> {
+  await callNutAPI('set-app-owner', { appId });
+}
 
-  // In local testing we've seen problems where this query hangs.
-  const timeout = setTimeout(() => {
-    pingTelemetry('GetAppByIdTimeout', {});
-  }, 5000);
+async function deleteApp(appId: string): Promise<void> {
+  deletedAppIds.add(appId);
 
-  const { data, error } = await getSupabase().from('arboretum_apps').select('*').eq('id', id).single();
+  const userId = await getCurrentUserId();
 
-  clearTimeout(timeout);
-
-  console.log('GetAppByIdDone', id);
-
-  if (error) {
-    console.error('Error fetching app by id:', error);
-    throw error;
+  if (!userId) {
+    const localAppIds = getLocalAppIds().filter((id) => id != appId);
+    setLocalAppIds(localAppIds);
   }
 
-  return databaseRowToBuildAppResult(data);
+  await callNutAPI('delete-app', { appId });
 }
+
+async function createApp(): Promise<string> {
+  const { appId } = await callNutAPI('create-app', {});
+  if (!appId) {
+    const localAppIds = getLocalAppIds();
+    localAppIds.push(appId);
+    setLocalAppIds(localAppIds);
+  }
+  return appId;
+}
+
+async function getAppTitle(appId: string): Promise<string> {
+  const { entry } = await callNutAPI('get-app-entry', { appId });
+  return entry.title;
+}
+
+async function updateAppTitle(appId: string, title: string): Promise<void> {
+  if (!title.trim()) {
+    throw new Error('Title cannot be empty');
+  }
+
+  await callNutAPI('set-app-title', { appId, title });
+}
+
+async function getAppDeploySettings(appId: string): Promise<DeploySettingsDatabase | undefined> {
+  console.log('DatabaseGetAppDeploySettingsStart', appId);
+
+  const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
+  return deploySettings;
+}
+
+async function setAppDeploySettings(appId: string, deploySettings: DeploySettingsDatabase): Promise<void> {
+  await callNutAPI('set-app-deploy-settings', { appId, deploySettings });
+}
+
+async function abortAppChats(appId: string): Promise<void> {
+  await callNutAPI('abort-app-chats', { appId });
+}
+
+async function getInitialMessages(appId: string): Promise<Message[]> {
+  const { messages } = await callNutAPI('get-initial-messages', { appId });
+  return messages;
+}
+
+export const database = {
+  getAllAppEntries,
+  deleteApp,
+  createApp,
+  getAppTitle,
+  updateAppTitle,
+  getAppDeploySettings,
+  setAppDeploySettings,
+  abortAppChats,
+  getInitialMessages,
+};

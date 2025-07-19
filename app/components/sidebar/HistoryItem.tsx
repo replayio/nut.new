@@ -1,13 +1,13 @@
 import { useParams } from '@remix-run/react';
 import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
-import { type ChatSummary } from '~/lib/persistence/chats';
+import { type AppLibraryEntry } from '~/lib/persistence/apps';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { forwardRef, type ForwardedRef } from 'react';
 
 interface HistoryItemProps {
-  item: ChatSummary;
+  item: AppLibraryEntry;
   onDelete?: (event: React.UIEvent) => void;
   onDuplicate?: (id: string) => void;
 }
@@ -19,7 +19,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({
       initialTitle: item.title,
-      customChatId: item.id,
+      customAppId: item.id,
     });
 
   const renderDescriptionForm = (
@@ -51,7 +51,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       {editing ? (
         renderDescriptionForm
       ) : (
-        <a href={`/chat/${item.id}`} className="flex w-full relative truncate block">
+        <a href={`/app/${item.id}`} className="flex w-full relative truncate block">
           {item.title}
           <div
             className={classNames(

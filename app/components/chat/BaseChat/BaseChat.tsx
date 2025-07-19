@@ -19,7 +19,7 @@ import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { Arboretum } from './components/Arboretum/Arboretum';
 import { useArboretumVisibility } from '~/lib/stores/settings';
-import { ChatMode } from '~/lib/replay/ChatManager';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 
 export const TEXTAREA_MIN_HEIGHT = 76;

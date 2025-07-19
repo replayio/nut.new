@@ -1,4 +1,4 @@
-import { assert } from './ReplayProtocolClient';
+import { assert } from '~/utils/nut';
 
 type UnknownFunction = (...args: never) => unknown;
 

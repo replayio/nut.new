@@ -1,9 +1,9 @@
 import { format, isAfter, isThisWeek, isThisYear, isToday, isYesterday, subDays } from 'date-fns';
-import type { ChatSummary } from '~/lib/persistence/chats';
+import type { AppLibraryEntry } from '~/lib/persistence/apps';
 
-type Bin = { category: string; items: ChatSummary[] };
+type Bin = { category: string; items: AppLibraryEntry[] };
 
-export function binDates(_list: ChatSummary[]) {
+export function binDates(_list: AppLibraryEntry[]) {
   const list = [..._list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
   const binLookup: Record<string, Bin> = {};

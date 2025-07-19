@@ -44,10 +44,12 @@ function setLevel(level: DebugLevel) {
   currentLevel = level;
 }
 
+const showAllLogs: string[] = [];
+
 function log(level: DebugLevel, scope: string | undefined, messages: any[]) {
   const levelOrder: DebugLevel[] = ['trace', 'debug', 'info', 'warn', 'error'];
 
-  if (levelOrder.indexOf(level) < levelOrder.indexOf(currentLevel)) {
+  if (levelOrder.indexOf(level) < levelOrder.indexOf(currentLevel) && !showAllLogs.includes(scope ?? '')) {
     return;
   }
 
