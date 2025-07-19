@@ -17,9 +17,6 @@ import { createScopedLogger } from '~/utils/logger';
 // bugs in Nut apps.
 const ENABLE_SIMULATION = false;
 
-// Default number of workers to use for chat messages.
-const WORKER_COUNT = 3;
-
 const logger = createScopedLogger('ChatMessage');
 
 function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
@@ -154,7 +151,6 @@ export async function sendChatMessage(
     messages,
     references,
     simulationData,
-    workerCount: WORKER_COUNT,
   };
 
   const responseCallback = getChatResponseCallback(callbacks);
