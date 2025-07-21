@@ -12,6 +12,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import type { ChatResponse } from '~/lib/persistence/response';
+import { addAppResponse, filterOnResponseCallback } from './ResponseFilter';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -131,7 +132,7 @@ export async function sendChatMessage(
   };
 
   try {
-    await callNutAPI('chat', params, onResponse);
+    await callNutAPI('chat', params, filterOnResponseCallback(onResponse));
   } catch (error) {
     console.error('chat message error', error, String(error));
     throw error;
@@ -143,7 +144,7 @@ export async function sendChatMessage(
 // Get all existing responses for the app.
 export async function getExistingAppResponses(appId: string): Promise<ChatResponse[]> {
   const { responses } = await callNutAPI('get-app-responses', { appId });
-  return responses;
+  return responses.filter((response: ChatResponse) => addAppResponse(response));
 }
 
 // Stream any responses from chat messages that were sent previously
@@ -152,5 +153,5 @@ export async function resumeChatMessage(onResponse: ChatResponseCallback) {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  await callNutAPI('resume-chat', { appId }, onResponse);
+  await callNutAPI('resume-chat', { appId }, filterOnResponseCallback(onResponse));
 }
