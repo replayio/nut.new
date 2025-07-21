@@ -107,7 +107,7 @@ export async function sendChatMessage(
     return;
   }
 
-  logger.debug('sendChatMessage', mode, messages, references);
+  logger.debug('sendChatMessage', JSON.stringify({ mode, messages, references }));
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');

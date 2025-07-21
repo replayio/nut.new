@@ -6,14 +6,20 @@
 
 import type { ChatResponse } from '~/lib/persistence/response';
 import type { ChatResponseCallback } from './SendChatMessage';
+import { createScopedLogger } from '~/utils/logger';
+
+const logger = createScopedLogger('ChatResponses');
 
 const gResponsesByTime = new Map<string, ChatResponse[]>();
 
 export function addAppResponse(response: ChatResponse) {
   let existing = gResponsesByTime.get(response.time);
   if (existing && existing.some((r) => JSON.stringify(r) == JSON.stringify(response))) {
+    logger.debug('duplicateResponse', JSON.stringify(response));
     return false;
   }
+
+  logger.debug('onResponse', JSON.stringify(response));
 
   if (!existing) {
     existing = [];

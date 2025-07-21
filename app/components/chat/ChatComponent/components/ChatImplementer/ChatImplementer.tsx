@@ -248,8 +248,11 @@ const ChatImplementer = memo((props: ChatProps) => {
         case 'status':
           setPendingMessageStatus(response.status);
           break;
-        case 'done':
         case 'error':
+          toast.error('Error sending message');
+          console.error('Error sending message', response.error);
+          break;
+        case 'done':
         case 'aborted':
           break;
         default:
@@ -286,22 +289,13 @@ const ChatImplementer = memo((props: ChatProps) => {
       mode = ChatMode.Discovery;
     }
 
-    let normalFinish = false;
-    try {
-      await sendChatMessage(mode, newMessages, references, onResponse);
-      normalFinish = true;
-    } catch (e) {
-      if (gNumAborts == numAbortsAtStart) {
-        toast.error('Error sending message');
-        console.error('Error sending message', e);
-      }
-    }
+    await sendChatMessage(mode, newMessages, references, onResponse);
 
     if (gNumAborts != numAbortsAtStart) {
       return;
     }
 
-    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, normalFinish);
+    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, true);
     clearActiveChat();
 
     setHasPendingMessage(false);
