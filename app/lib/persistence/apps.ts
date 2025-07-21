@@ -5,8 +5,6 @@
 import { getCurrentUserId } from '~/lib/supabase/client';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { callNutAPI } from '~/lib/replay/NutAPI';
-import type { Message } from './message';
-import type { ChatResponse } from './response';
 
 // Basic information about an app for showing in the library.
 export interface AppLibraryEntry {

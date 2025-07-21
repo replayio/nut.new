@@ -321,8 +321,6 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       let newMessages = messages;
 
-      const hasReceivedResponse = new Set<string>();
-
       const onResponse = (response: ChatResponse) => {
         if (gNumAborts != numAbortsAtStart) {
           return;

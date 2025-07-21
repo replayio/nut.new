@@ -4,14 +4,14 @@
 // or the backend we filter them here to make sure the same response is never reported
 // multiple times.
 
-import type { ChatResponse } from "../persistence/response";
-import type { ChatResponseCallback } from "./SendChatMessage";
+import type { ChatResponse } from '~/lib/persistence/response';
+import type { ChatResponseCallback } from './SendChatMessage';
 
 const gResponsesByTime = new Map<string, ChatResponse[]>();
 
 export function addAppResponse(response: ChatResponse) {
   let existing = gResponsesByTime.get(response.time);
-  if (existing && existing.some(r => JSON.stringify(r) == JSON.stringify(response))) {
+  if (existing && existing.some((r) => JSON.stringify(r) == JSON.stringify(response))) {
     return false;
   }
 
