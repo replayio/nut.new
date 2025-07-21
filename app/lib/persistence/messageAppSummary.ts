@@ -55,11 +55,20 @@ export enum AppFeatureStatus {
   // Not started, all components will be non-functional.
   NotStarted = 'NotStarted',
 
-  // Finished and tests pass, all components will be (or ought to be) functional.
-  Done = 'Done',
+  // Implementation has started on implementing the feature's functionality.
+  ImplementationInProgress = 'ImplementationInProgress',
 
-  // Implementation has started but components may not be functional yet.
-  InProgress = 'InProgress',
+  // Functionality has been implemented but the app has not been validated.
+  Implemented = 'Implemented',
+
+  // Validation has started to test the feature's functionality.
+  ValidationInProgress = 'ValidationInProgress',
+
+  // Validation has completed and all tests pass. The feature should be functional.
+  Validated = 'Validated',
+
+  // The feature is implemented but we've given up on validating it.
+  ValidationFailed = 'ValidationFailed',
 }
 
 export interface AppFeature {

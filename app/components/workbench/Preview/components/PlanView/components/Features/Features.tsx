@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
-import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppFeature, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
@@ -31,6 +31,30 @@ const Features = ({ appSummary }: FeaturesProps) => {
     });
   };
 
+  const renderFeatureStatus = (feature: AppFeature) => {
+    switch (feature.status) {
+      case AppFeatureStatus.NotStarted:
+        break;
+      case AppFeatureStatus.ImplementationInProgress:
+        return (
+          <div
+            className={classNames(
+              'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+            )}
+          />
+        );
+      case AppFeatureStatus.Implemented:
+        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Implemented</div>;
+      case AppFeatureStatus.ValidationInProgress:
+        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Implemented, testing...</div>;
+      case AppFeatureStatus.Validated:
+        return <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓ Tests Pass</div>;
+      case AppFeatureStatus.ValidationFailed:
+        return <div className="text-red-500 text-sm font-medium whitespace-nowrap">✗ Failed</div>;
+    }
+    return null;
+  };
+
   return (
     <div>
       <div>
@@ -41,7 +65,6 @@ const Features = ({ appSummary }: FeaturesProps) => {
 
           <div className="space-y-6">
             {appSummary?.features?.map((feature, index) => {
-              const done = feature.status === AppFeatureStatus.Done;
               const isCollapsed = collapsedFeatures.has(index);
 
               return (
@@ -70,15 +93,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
                       </div>
                     </div>
 
-                    {done ? (
-                      <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓ Complete</div>
-                    ) : feature.status === AppFeatureStatus.InProgress ? (
-                      <div
-                        className={classNames(
-                          'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
-                        )}
-                      />
-                    ) : null}
+                    {renderFeatureStatus(feature)}
                   </div>
 
                   <AnimatePresence>
