@@ -32,9 +32,10 @@ import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
+import type { ChatResponse } from '~/lib/persistence/response';
 
 interface ChatProps {
-  initialMessages: Message[];
+  initialResponses: ChatResponse[];
 }
 
 let gNumAborts = 0;
@@ -64,10 +65,10 @@ function navigateApp(nextId: string) {
 }
 
 const ChatImplementer = memo((props: ChatProps) => {
-  const { initialMessages } = props;
+  const { initialResponses } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
+  const [chatStarted, setChatStarted] = useState(initialResponses.length > 0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams] = useSearchParams();
@@ -78,7 +79,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const pendingMessageStatus = useStore(pendingMessageStatusStore);
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const showChat = useStore(chatStore.showChat);
 
@@ -98,7 +99,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     if (repositoryId) {
       updateDevelopmentServer(repositoryId);
     }
-  }, [initialMessages]);
+  }, [initialResponses]);
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
@@ -221,42 +222,42 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     runAnimation();
 
-    const addResponseMessage = (msg: Message) => {
+    const onResponse = (response: ChatResponse) => {
       if (gNumAborts != numAbortsAtStart) {
         return;
       }
 
-      gActiveChatMessageTelemetry?.onResponseMessage();
+      switch (response.kind) {
+        case 'message': {
+          gActiveChatMessageTelemetry?.onResponseMessage();
 
-      const existingRepositoryId = getMessagesRepositoryId(newMessages);
+          const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
-      newMessages = mergeResponseMessage(msg, newMessages);
-      setMessages(newMessages);
+          newMessages = mergeResponseMessage(response.message, newMessages);
+          setMessages(newMessages);
 
-      const responseRepositoryId = getMessagesRepositoryId(newMessages);
+          const responseRepositoryId = getMessagesRepositoryId(newMessages);
 
-      if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-        updateDevelopmentServer(responseRepositoryId);
+          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+            updateDevelopmentServer(responseRepositoryId);
+          }
+          break;
+        }
+        case 'title':
+          chatStore.appTitle.set(response.title);
+          break;
+        case 'status':
+          setPendingMessageStatus(response.status);
+          break;
+        case 'done':
+        case 'error':
+        case 'aborted':
+          break;
+        default:
+          console.error('Unknown chat response:', response);
+          break;
       }
     };
-
-    const onChatTitle = (title: string) => {
-      if (gNumAborts != numAbortsAtStart) {
-        return;
-      }
-
-      console.log('ChatTitle', title);
-      chatStore.appTitle.set(title);
-    };
-
-    const onChatStatus = debounce((status: string) => {
-      if (gNumAborts != numAbortsAtStart) {
-        return;
-      }
-
-      console.log('ChatStatus', status);
-      setPendingMessageStatus(status);
-    }, 500);
 
     const references: ChatReference[] = [];
 
@@ -288,11 +289,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     let normalFinish = false;
     try {
-      await sendChatMessage(mode, newMessages, references, {
-        onResponsePart: addResponseMessage,
-        onTitle: onChatTitle,
-        onStatus: onChatStatus,
-      });
+      await sendChatMessage(mode, newMessages, references, onResponse);
       normalFinish = true;
     } catch (e) {
       if (gNumAborts == numAbortsAtStart) {
@@ -327,53 +324,44 @@ const ChatImplementer = memo((props: ChatProps) => {
 
       const hasReceivedResponse = new Set<string>();
 
-      const addResponseMessage = (msg: Message) => {
+      const onResponse = (response: ChatResponse) => {
         if (gNumAborts != numAbortsAtStart) {
           return;
         }
 
-        if (!hasReceivedResponse.has(msg.id)) {
-          hasReceivedResponse.add(msg.id);
-          newMessages = newMessages.filter((m) => m.id != msg.id);
-        }
+        switch (response.kind) {
+          case 'message': {
+            const existingRepositoryId = getMessagesRepositoryId(newMessages);
 
-        const existingRepositoryId = getMessagesRepositoryId(newMessages);
+            newMessages = mergeResponseMessage(response.message, newMessages);
+            setMessages(newMessages);
 
-        newMessages = mergeResponseMessage(msg, newMessages);
-        setMessages(newMessages);
+            const responseRepositoryId = getMessagesRepositoryId(newMessages);
 
-        const responseRepositoryId = getMessagesRepositoryId(newMessages);
-
-        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-          updateDevelopmentServer(responseRepositoryId);
+            if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+              updateDevelopmentServer(responseRepositoryId);
+            }
+            break;
+          }
+          case 'title':
+            chatStore.appTitle.set(response.title);
+            break;
+          case 'status':
+            setPendingMessageStatus(response.status);
+            break;
+          case 'done':
+          case 'error':
+          case 'aborted':
+            break;
+          default:
+            console.error('Unknown chat response:', response);
+            break;
         }
       };
-
-      const onChatTitle = (title: string) => {
-        if (gNumAborts != numAbortsAtStart) {
-          return;
-        }
-
-        console.log('ChatTitle', title);
-        chatStore.appTitle.set(title);
-      };
-
-      const onChatStatus = debounce((status: string) => {
-        if (gNumAborts != numAbortsAtStart) {
-          return;
-        }
-
-        console.log('ChatStatus', status);
-        setPendingMessageStatus(status);
-      }, 500);
 
       try {
         setHasPendingMessage(true);
-        await resumeChatMessage({
-          onResponsePart: addResponseMessage,
-          onTitle: onChatTitle,
-          onStatus: onChatStatus,
-        });
+        await resumeChatMessage(onResponse);
       } catch (e) {
         toast.error('Error resuming chat');
         console.error('Error resuming chat', e);

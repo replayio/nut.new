@@ -11,6 +11,7 @@ import { flushSimulationData } from '~/components/chat/ChatComponent/functions/f
 import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
+import type { ChatResponse } from '~/lib/persistence/response';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -38,11 +39,7 @@ interface ChatReferenceElement {
 
 export type ChatReference = ChatReferenceElement;
 
-export interface ChatMessageCallbacks {
-  onResponsePart: (message: Message) => void;
-  onTitle: (title: string) => void;
-  onStatus: (status: string) => void;
-}
+export type ChatResponseCallback = (response: ChatResponse) => void;
 
 export enum ChatMode {
   // Default mode, builds or extends the app from the available user input.
@@ -98,34 +95,14 @@ interface NutChatRequest {
   workerCount?: number;
 }
 
-function getChatResponseCallback(callbacks: ChatMessageCallbacks) {
-  return (response: any) => {
-    logger.debug('chatResponse', response);
-    switch (response.kind) {
-      case 'message':
-        callbacks.onResponsePart(response.message);
-        break;
-      case 'title':
-        callbacks.onTitle(response.title);
-        break;
-      case 'status':
-        callbacks.onStatus(response.status);
-        break;
-      default:
-        console.error('Unknown chat response:', response);
-        break;
-    }
-  };
-}
-
 export async function sendChatMessage(
   mode: ChatMode,
   messages: Message[],
   references: ChatReference[],
-  callbacks: ChatMessageCallbacks,
+  onResponse: ChatResponseCallback,
 ) {
   if (usingMockChat()) {
-    await sendChatMessageMocked(callbacks);
+    await sendChatMessageMocked(onResponse);
     return;
   }
 
@@ -153,9 +130,8 @@ export async function sendChatMessage(
     simulationData,
   };
 
-  const responseCallback = getChatResponseCallback(callbacks);
   try {
-    await callNutAPI('chat', params, responseCallback);
+    await callNutAPI('chat', params, onResponse);
   } catch (error) {
     console.error('chat message error', error, String(error));
     throw error;
@@ -164,10 +140,9 @@ export async function sendChatMessage(
   logger.debug('sendChatMessage finished');
 }
 
-export async function resumeChatMessage(callbacks: ChatMessageCallbacks) {
+export async function resumeChatMessage(onResponse: ChatResponseCallback) {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  const responseCallback = getChatResponseCallback(callbacks);
-  await callNutAPI('resume-chat', { appId }, responseCallback);
+  await callNutAPI('resume-chat', { appId }, onResponse);
 }
