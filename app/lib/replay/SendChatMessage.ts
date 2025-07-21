@@ -140,6 +140,14 @@ export async function sendChatMessage(
   logger.debug('sendChatMessage finished');
 }
 
+// Get all existing responses for the app.
+export async function getExistingAppResponses(appId: string): Promise<ChatResponse[]> {
+  const { responses } = await callNutAPI('get-app-responses', { appId });
+  return responses;
+}
+
+// Stream any responses from chat messages that were sent previously
+// and are still in progress.
 export async function resumeChatMessage(onResponse: ChatResponseCallback) {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');

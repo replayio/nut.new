@@ -123,11 +123,6 @@ async function abortAppChats(appId: string): Promise<void> {
   await callNutAPI('abort-app-chats', { appId });
 }
 
-async function getAppResponses(appId: string): Promise<ChatResponse[]> {
-  const { responses } = await callNutAPI('get-app-responses', { appId });
-  return responses;
-}
-
 export const database = {
   getAllAppEntries,
   deleteApp,
@@ -137,5 +132,4 @@ export const database = {
   getAppDeploySettings,
   setAppDeploySettings,
   abortAppChats,
-  getAppResponses,
 };

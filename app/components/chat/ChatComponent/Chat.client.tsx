@@ -3,14 +3,15 @@ import ChatImplementer from './components/ChatImplementer/ChatImplementer';
 import { useLoaderData } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import { logStore } from '~/lib/stores/logs';
-import { database } from '~/lib/persistence/apps';
 import { toast } from 'react-toastify';
-import type { ChatResponse } from '~/lib/persistence/response';
+import type { Message } from '~/lib/persistence/message';
+import mergeResponseMessage from './functions/mergeResponseMessages';
+import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
 
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const [initialResponses, setInitialResponses] = useState<ChatResponse[]>([]);
+  const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const { id: appId } = useLoaderData<{ id?: string }>() ?? {};
 
   const [ready, setReady] = useState<boolean>(!appId);
@@ -19,8 +20,14 @@ export function Chat() {
     (async () => {
       try {
         if (appId) {
-          const responses = await database.getAppResponses(appId);
-          setInitialResponses(responses);
+          const responses = await getExistingAppResponses(appId);
+          let messages: Message[] = [];
+          for (const response of responses) {
+            if (response.kind == 'message') {
+              messages = mergeResponseMessage(response.message, messages);
+            }
+          }
+          setInitialMessages(messages);
           setReady(true);
         }
       } catch (error) {
@@ -30,5 +37,5 @@ export function Chat() {
     })();
   }, []);
 
-  return <>{ready && <ChatImplementer initialResponses={initialResponses} />}</>;
+  return <>{ready && <ChatImplementer initialMessages={initialMessages} />}</>;
 }

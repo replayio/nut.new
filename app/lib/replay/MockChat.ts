@@ -5,56 +5,42 @@
  */
 
 import { assert, waitForTime } from '~/utils/nut';
-import type { Message } from '~/lib/persistence/message';
-import type { ChatMessageCallbacks } from './SendChatMessage';
 import { disableTelemetry } from '~/lib/hooks/pingTelemetry';
+import type { ChatResponseCallback } from './SendChatMessage';
+import type { ChatResponse } from '~/lib/persistence/response';
 
 // Add your mock chat messages here!
-const gMockChat: Message[] | undefined = undefined;
+const gMockResponses: ChatResponse[] | undefined = undefined;
 
-// Add any status events to emit here!
-const gMockStatus: MockChatStatus[] | undefined = undefined;
-
-interface MockChatStatus {
-  time: string;
-  status: string;
-}
-
-if (gMockChat) {
+if (gMockResponses) {
   disableTelemetry();
 }
 
 export function usingMockChat() {
-  return !!gMockChat;
+  return !!gMockResponses;
 }
 
-export async function sendChatMessageMocked(callbacks: ChatMessageCallbacks) {
-  assert(gMockChat, 'Mock chat is not defined');
+export async function sendChatMessageMocked(onResponse: ChatResponseCallback) {
+  assert(gMockResponses, 'Mock chat is not defined');
 
-  console.log('Using mock chat', gMockChat);
+  console.log('Using mock chat', gMockResponses);
 
-  const startTime = gMockChat.find((msg) => msg.createTime)?.createTime;
+  const startTime = gMockResponses[0].time;
   assert(startTime, 'Mock chat must have a start time');
   let currentTime = Date.parse(startTime);
 
-  for (const status of gMockStatus || []) {
-    const delta = Math.max(Date.parse(status.time) - currentTime, 0);
-    waitForTime(delta).then(() => callbacks.onStatus(status.status));
+  for (const response of gMockResponses) {
+    const delta = Math.max(Date.parse(response.time) - currentTime, 0);
+    waitForTime(delta).then(() => onResponse(response));
   }
 
-  for (const message of gMockChat) {
-    if (message.role === 'user') {
-      continue;
+  for (const response of gMockResponses) {
+    const responseTime = Date.parse(response.time);
+    if (responseTime > currentTime) {
+      await waitForTime(responseTime - currentTime);
+      currentTime = responseTime;
     }
 
-    if (message.createTime) {
-      const messageTime = Date.parse(message.createTime);
-      if (messageTime > currentTime) {
-        await waitForTime(messageTime - currentTime);
-        currentTime = messageTime;
-      }
-    }
-
-    callbacks.onResponsePart(message);
+    onResponse(response);
   }
 }

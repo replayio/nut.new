@@ -22,7 +22,6 @@ import {
   MAX_DISCOVERY_RATING,
   type Message,
 } from '~/lib/persistence/message';
-import { debounce } from '~/utils/debounce';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
@@ -35,7 +34,7 @@ import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { ChatResponse } from '~/lib/persistence/response';
 
 interface ChatProps {
-  initialResponses: ChatResponse[];
+  initialMessages: Message[];
 }
 
 let gNumAborts = 0;
@@ -65,10 +64,10 @@ function navigateApp(nextId: string) {
 }
 
 const ChatImplementer = memo((props: ChatProps) => {
-  const { initialResponses } = props;
+  const { initialMessages } = props;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [chatStarted, setChatStarted] = useState(initialResponses.length > 0);
+  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams] = useSearchParams();
@@ -99,7 +98,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     if (repositoryId) {
       updateDevelopmentServer(repositoryId);
     }
-  }, [initialResponses]);
+  }, [initialMessages]);
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
