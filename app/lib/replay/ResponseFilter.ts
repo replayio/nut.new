@@ -7,14 +7,32 @@
 import type { ChatResponse } from '~/lib/persistence/response';
 import type { ChatResponseCallback } from './SendChatMessage';
 import { createScopedLogger } from '~/utils/logger';
+import { APP_SUMMARY_CATEGORY } from '../persistence/messageAppSummary';
+import { assert } from '~/utils/nut';
 
 const logger = createScopedLogger('ChatResponses');
 
 const gResponsesByTime = new Map<string, ChatResponse[]>();
 
+function responseMatches(a: ChatResponse, b: ChatResponse) {
+  // Special case AppSummary messages. These are generated from different places in the
+  // backend and might not be exactly identical after JSON.stringify. Compare the summaries
+  // themselves.
+  if (a.kind == 'message' && b.kind == 'message') {
+    const aMessage = a.message;
+    const bMessage = b.message;
+    if (aMessage.category == APP_SUMMARY_CATEGORY && bMessage.category == APP_SUMMARY_CATEGORY) {
+      assert(aMessage.type == 'text' && bMessage.type == 'text', 'AppSummary messages must be text');
+      return aMessage.content === bMessage.content;
+    }
+  }
+
+  return JSON.stringify(a) == JSON.stringify(b);
+}
+
 export function addAppResponse(response: ChatResponse) {
   let existing = gResponsesByTime.get(response.time);
-  if (existing && existing.some((r) => JSON.stringify(r) == JSON.stringify(response))) {
+  if (existing && existing.some((r) => responseMatches(r, response))) {
     logger.trace('duplicateResponse', JSON.stringify(response));
     return false;
   }

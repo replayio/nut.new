@@ -11,6 +11,7 @@ import { flushSimulationData } from '~/components/chat/ChatComponent/functions/f
 import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
+import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { addAppResponse, clearAppResponses, filterOnResponseCallback } from './ResponseFilter';
 
@@ -138,8 +139,9 @@ export async function sendChatMessage(
   try {
     await callNutAPI('chat', params, filterOnResponseCallback(onResponse));
   } catch (error) {
-    console.error('chat message error', error, String(error));
-    throw error;
+    // If the connection drops we resume any in progress chat messages.
+    console.log('sendChatMessage error, retrying', error);
+    await resumeChatMessage(onResponse);
   }
 
   logger.debug('sendChatMessage finished');
@@ -158,5 +160,15 @@ export async function resumeChatMessage(onResponse: ChatResponseCallback) {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  await callNutAPI('resume-chat', { appId }, filterOnResponseCallback(onResponse));
+  while (true) {
+    try {
+      await callNutAPI('resume-chat', { appId }, filterOnResponseCallback(onResponse));
+      break;
+    } catch (error) {
+      // Retry with a delay until the message finishes successfully.
+      console.log('resumeChatMessage error, retrying', error);
+      await waitForTime(5000);
+      continue;
+    }
+  }
 }
