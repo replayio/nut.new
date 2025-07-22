@@ -7,7 +7,7 @@
 import type { ChatResponse } from '~/lib/persistence/response';
 import type { ChatResponseCallback } from './SendChatMessage';
 import { createScopedLogger } from '~/utils/logger';
-import { APP_SUMMARY_CATEGORY } from '../persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { assert } from '~/utils/nut';
 
 const logger = createScopedLogger('ChatResponses');
