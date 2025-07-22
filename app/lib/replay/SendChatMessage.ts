@@ -12,7 +12,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import type { ChatResponse } from '~/lib/persistence/response';
-import { addAppResponse, filterOnResponseCallback } from './ResponseFilter';
+import { addAppResponse, clearAppResponses, filterOnResponseCallback } from './ResponseFilter';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -143,6 +143,7 @@ export async function sendChatMessage(
 
 // Get all existing responses for the app.
 export async function getExistingAppResponses(appId: string): Promise<ChatResponse[]> {
+  clearAppResponses();
   const { responses } = await callNutAPI('get-app-responses', { appId });
   return responses.filter((response: ChatResponse) => addAppResponse(response));
 }

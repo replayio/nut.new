@@ -78,7 +78,7 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const pendingMessageStatus = useStore(pendingMessageStatusStore);
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const showChat = useStore(chatStore.showChat);
 

@@ -36,3 +36,7 @@ export function filterOnResponseCallback(onResponse: ChatResponseCallback) {
     }
   };
 }
+
+export function clearAppResponses() {
+  gResponsesByTime.clear();
+}
