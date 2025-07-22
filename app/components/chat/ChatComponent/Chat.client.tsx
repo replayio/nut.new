@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import type { Message } from '~/lib/persistence/message';
 import mergeResponseMessage from './functions/mergeResponseMessages';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
+import { chatStore } from '~/lib/stores/chat';
+import { database } from '~/lib/persistence/apps';
 
 export function Chat() {
   renderLogger.trace('Chat');
@@ -20,6 +22,7 @@ export function Chat() {
     (async () => {
       try {
         if (appId) {
+          const title = await database.getAppTitle(appId);
           const responses = await getExistingAppResponses(appId);
           let messages: Message[] = [];
           for (const response of responses) {
@@ -27,6 +30,8 @@ export function Chat() {
               messages = mergeResponseMessage(response.message, messages);
             }
           }
+          chatStore.currentAppId.set(appId);
+          chatStore.appTitle.set(title);
           setInitialMessages(messages);
           setReady(true);
         }

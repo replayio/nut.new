@@ -205,6 +205,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                   handleSendMessage(event, message, true, ChatMode.BuildApp);
                 }}
+                hasAppSummary={false}
+              />
+            )}
+            {hasAppSummary && !hasPendingMessage && (
+              <StartPlanningButton
+                onClick={(event) => {
+                  const message = 'Continue building the app.';
+                  handleSendMessage(event, message, true, ChatMode.DevelopApp);
+                }}
+                hasAppSummary={true}
               />
             )}
           </>

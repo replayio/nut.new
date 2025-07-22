@@ -4,7 +4,7 @@
 
 import type { SimulationData, SimulationPacket } from './SimulationData';
 import { assert } from '~/utils/nut';
-import type { Message } from '~/lib/persistence/message';
+import { type Message, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { chatStore } from '~/lib/stores/chat';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
 import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
@@ -96,6 +96,10 @@ interface NutChatRequest {
   workerCount?: number;
 }
 
+function shouldSendMessage(message: Message) {
+  return message.role == 'user' || message.category == USER_RESPONSE_CATEGORY;
+}
+
 export async function sendChatMessage(
   mode: ChatMode,
   messages: Message[],
@@ -126,7 +130,7 @@ export async function sendChatMessage(
   const params: NutChatRequest = {
     appId: chatStore.currentAppId.get(),
     mode,
-    messages,
+    messages: messages.filter(shouldSendMessage),
     references,
     simulationData,
   };
