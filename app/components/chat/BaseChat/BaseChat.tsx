@@ -171,8 +171,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
+    const hasAppSummary = !!getLatestAppSummary(messages || []);
+
     let startPlanningRating = 0;
-    if (!hasPendingMessage && !getLatestAppSummary(messages || [])) {
+    if (!hasPendingMessage && !hasAppSummary) {
       startPlanningRating = getDiscoveryRating(messages || []);
     }
 
@@ -184,6 +186,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       handleStop,
       hasPendingMessage,
       chatStarted,
+      hasAppSummary,
       uploadedFiles,
       setUploadedFiles,
       imageDataList,

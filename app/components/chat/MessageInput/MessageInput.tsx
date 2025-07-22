@@ -15,6 +15,7 @@ export interface MessageInputProps {
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
+  hasAppSummary?: boolean;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
@@ -36,6 +37,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   handleStop = () => {},
   hasPendingMessage = false,
   chatStarted = false,
+  hasAppSummary = false,
   uploadedFiles = [],
   setUploadedFiles = () => {},
   imageDataList = [],
@@ -177,7 +179,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           minHeight,
           maxHeight,
         }}
-        placeholder={chatStarted ? 'How can we help you?' : 'What do you want to build?'}
+        placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
         translate="no"
       />
       <ClientOnly>
@@ -231,3 +233,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     </div>
   );
 };
+
+function getPlaceholderText(chatStarted: boolean, hasAppSummary: boolean) {
+  if (!chatStarted) {
+    // There is no app and no messages have been sent yet.
+    return 'What do you want to build?';
+  }
+
+  if (!hasAppSummary) {
+    // We've started discovery but haven't started building yet.
+    return "Is there anything else you'd like me to know?";
+  }
+
+  // We have an app that is being iterated on.
+  return 'How can we help you?';
+}
