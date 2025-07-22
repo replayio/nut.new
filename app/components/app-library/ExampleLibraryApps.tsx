@@ -8,7 +8,6 @@ import {
   getRecentArboretumApps,
 } from '~/lib/persistence/arboretum_apps';
 import styles from './ExampleLibraryApps.module.scss';
-import { getMessagesRepositoryId } from '~/lib/persistence/message';
 import { classNames } from '~/utils/classNames';
 import { APP_SUMMARY_CATEGORY, parseAppSummaryMessage, type AppTest } from '~/lib/persistence/messageAppSummary';
 
@@ -167,28 +166,6 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
       <div className={styles.detailView}>
         <div className={styles.detailHeader}>
           <h3 className={`${styles.detailTitle} text-bolt-elements-textPrimary`}>{app.title}</h3>
-          <div className={styles.detailActions}>
-            <button
-              className={styles.actionButton}
-              onClick={async () => {
-                const contents = appContents ?? (await getArboretumAppById(appId));
-                const repositoryId = getMessagesRepositoryId(contents.messages);
-                if (repositoryId) {
-                  window.open(`https://${repositoryId}.http.replay.io`, '_blank');
-                }
-              }}
-            >
-              Load App
-            </button>
-            <button
-              className={styles.actionButton}
-              onClick={() => {
-                window.open(`/app/${app.id}`, '_self');
-              }}
-            >
-              Start Chat
-            </button>
-          </div>
         </div>
         <div className={`${styles.appDetails} text-bolt-elements-textPrimary`}>
           <div className={styles.detailRow}>

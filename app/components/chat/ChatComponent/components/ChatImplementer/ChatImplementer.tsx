@@ -15,17 +15,9 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { generateRandomId } from '~/utils/nut';
-import {
-  getDiscoveryRating,
-  getMessagesRepositoryId,
-  getPreviousRepositoryId,
-  MAX_DISCOVERY_RATING,
-  type Message,
-} from '~/lib/persistence/message';
+import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
-import { supabaseAddRefund } from '~/lib/supabase/peanuts';
 import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
-import getRewindMessageIndexAfterReject from '~/components/chat/ChatComponent/functions/getRewindMessageIndexAfterReject';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
@@ -93,7 +85,7 @@ const ChatImplementer = memo((props: ChatProps) => {
   }, [searchParams]);
 
   useEffect(() => {
-    const repositoryId = getMessagesRepositoryId(initialMessages);
+    const repositoryId = getLatestAppSummary(initialMessages)?.repositoryId;
 
     if (repositoryId) {
       updateDevelopmentServer(repositoryId);
@@ -230,12 +222,12 @@ const ChatImplementer = memo((props: ChatProps) => {
         case 'message': {
           gActiveChatMessageTelemetry?.onResponseMessage();
 
-          const existingRepositoryId = getMessagesRepositoryId(newMessages);
+          const existingRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
 
           newMessages = mergeResponseMessage(response.message, newMessages);
           setMessages(newMessages);
 
-          const responseRepositoryId = getMessagesRepositoryId(newMessages);
+          const responseRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
 
           if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
             updateDevelopmentServer(responseRepositoryId);
@@ -278,14 +270,9 @@ const ChatImplementer = memo((props: ChatProps) => {
 
     let mode = chatMode ?? ChatMode.BuildApp;
 
-    // If we don't have a plan or repository yet, stay in the Discovery mode until
+    // If we don't have a plan yet, stay in the Discovery mode until
     // we either max out the discovery rating or the user forced us to start planning.
-    if (
-      !getMessagesRepositoryId(newMessages) &&
-      !getLatestAppSummary(newMessages) &&
-      !startPlanning &&
-      getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING
-    ) {
+    if (!getLatestAppSummary(newMessages) && !startPlanning && getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
       mode = ChatMode.Discovery;
     }
 
@@ -322,12 +309,12 @@ const ChatImplementer = memo((props: ChatProps) => {
 
         switch (response.kind) {
           case 'message': {
-            const existingRepositoryId = getMessagesRepositoryId(newMessages);
+            const existingRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
 
             newMessages = mergeResponseMessage(response.message, newMessages);
             setMessages(newMessages);
 
-            const responseRepositoryId = getMessagesRepositoryId(newMessages);
+            const responseRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
 
             if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
               updateDevelopmentServer(responseRepositoryId);
@@ -390,30 +377,6 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const onRejectChange = async (messageId: string, data: RejectChangeData) => {
     console.log('RejectChange', messageId, data);
-
-    const messageIndex = getRewindMessageIndexAfterReject(messages, messageId);
-
-    if (messageIndex < 0) {
-      toast.error('Rewind message not found');
-      return;
-    }
-
-    const message = messages.find((m) => m.id == messageId);
-
-    if (!message) {
-      toast.error('Message not found');
-      return;
-    }
-
-    if (message.peanuts) {
-      await supabaseAddRefund(message.peanuts);
-    }
-
-    const previousRepositoryId = getPreviousRepositoryId(messages, messageIndex + 1);
-
-    setMessages(messages.slice(0, messageIndex + 1));
-
-    updateDevelopmentServer(previousRepositoryId);
 
     let shareProjectSuccess = false;
 

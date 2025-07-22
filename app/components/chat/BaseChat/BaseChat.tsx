@@ -8,7 +8,7 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { getDiscoveryRating, getMessagesRepositoryId, type Message } from '~/lib/persistence/message';
+import { getDiscoveryRating, type Message } from '~/lib/persistence/message';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
@@ -172,7 +172,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     };
 
     let startPlanningRating = 0;
-    if (!hasPendingMessage && !getLatestAppSummary(messages || []) && !getMessagesRepositoryId(messages || [])) {
+    if (!hasPendingMessage && !getLatestAppSummary(messages || [])) {
       startPlanningRating = getDiscoveryRating(messages || []);
     }
 
