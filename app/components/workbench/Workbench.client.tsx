@@ -9,14 +9,12 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
-import { chatStore } from '~/lib/stores/chat';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { Message } from '~/lib/persistence/message';
 import { ClientOnly } from 'remix-utils/client-only';
 import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
 import { DownloadButton } from '~/components/header/DownloadButton';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import { DefaultTitle } from '~/lib/stores/chat';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -44,7 +42,6 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const currentTitle = useStore(chatStore.appTitle);
   const [activeTab, setActiveTab] = useState<'planning' | 'preview'>('planning');
 
   const hasSeenPreviewRef = useRef(false);
@@ -60,11 +57,11 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
       return;
     }
 
-    if (currentTitle && currentTitle !== DefaultTitle && !showWorkbench && appSummary) {
+    if (!showWorkbench && appSummary) {
       hasSeenProjectPlanRef.current = true;
       workbenchStore.showWorkbench.set(true);
     }
-  }, [currentTitle, showWorkbench]);
+  }, [appSummary, showWorkbench]);
 
   useEffect(() => {
     if (showWorkbench && !hasSeenPreviewRef.current) {

@@ -15,11 +15,11 @@ const gResponsesByTime = new Map<string, ChatResponse[]>();
 export function addAppResponse(response: ChatResponse) {
   let existing = gResponsesByTime.get(response.time);
   if (existing && existing.some((r) => JSON.stringify(r) == JSON.stringify(response))) {
-    logger.debug('duplicateResponse', JSON.stringify(response));
+    logger.trace('duplicateResponse', JSON.stringify(response));
     return false;
   }
 
-  logger.debug('onResponse', JSON.stringify(response));
+  logger.trace('onResponse', JSON.stringify(response));
 
   if (!existing) {
     existing = [];

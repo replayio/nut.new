@@ -122,11 +122,9 @@ export interface AppSummary {
   // Short and high level description of the app.
   description: string;
 
-  // Filled in by PlanApp:Start phase.
   pages?: AppPage[];
   navigation?: string;
-
-  // Filled in by PlanApp:DescribeFeatures phase.
+  mockupStatus?: AppFeatureStatus;
   features?: AppFeature[];
 
   // The repository being described, if available.
@@ -169,3 +167,23 @@ export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
   }
   return parseAppSummaryMessage(appSummaryMessage) || null;
 };
+
+function isFeatureStatusImplemented(status?: AppFeatureStatus) {
+  return status && status != AppFeatureStatus.NotStarted && status != AppFeatureStatus.ImplementationInProgress;
+}
+
+export function getLatestAppRepositoryId(messages: Message[]) {
+  const appSummary = getLatestAppSummary(messages);
+  if (!appSummary) {
+    return undefined;
+  }
+  // Ignore repositories if no mockup or features have been completed.
+  // This will be an incomplete skeleton app we don't want to show.
+  if (
+    !isFeatureStatusImplemented(appSummary.mockupStatus) &&
+    !appSummary.features?.some((f) => isFeatureStatusImplemented(f.status))
+  ) {
+    return undefined;
+  }
+  return appSummary.repositoryId;
+}

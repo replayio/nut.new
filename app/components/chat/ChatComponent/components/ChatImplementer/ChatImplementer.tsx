@@ -22,7 +22,7 @@ import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
-import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
+import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { ChatResponse } from '~/lib/persistence/response';
 
 interface ChatProps {
@@ -222,12 +222,12 @@ const ChatImplementer = memo((props: ChatProps) => {
         case 'message': {
           gActiveChatMessageTelemetry?.onResponseMessage();
 
-          const existingRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
+          const existingRepositoryId = getLatestAppRepositoryId(newMessages);
 
           newMessages = mergeResponseMessage(response.message, newMessages);
           setMessages(newMessages);
 
-          const responseRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
+          const responseRepositoryId = getLatestAppRepositoryId(newMessages);
 
           if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
             updateDevelopmentServer(responseRepositoryId);
@@ -309,12 +309,12 @@ const ChatImplementer = memo((props: ChatProps) => {
 
         switch (response.kind) {
           case 'message': {
-            const existingRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
+            const existingRepositoryId = getLatestAppRepositoryId(newMessages);
 
             newMessages = mergeResponseMessage(response.message, newMessages);
             setMessages(newMessages);
 
-            const responseRepositoryId = getLatestAppSummary(newMessages)?.repositoryId;
+            const responseRepositoryId = getLatestAppRepositoryId(newMessages);
 
             if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
               updateDevelopmentServer(responseRepositoryId);
