@@ -203,13 +203,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const baseChat = (
       <div
         ref={ref}
-        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden p-6')}
+        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div
           ref={scrollRef}
-          className={classNames('w-full h-full flex flex-col lg:flex-row', {
+          className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden p-6', {
             'overflow-y-auto': !chatStarted,
           })}
         >

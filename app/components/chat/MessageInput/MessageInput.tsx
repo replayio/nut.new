@@ -118,7 +118,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       <textarea
         ref={textareaRef}
         className={classNames(
-          'w-full pl-4 pt-2 pr-25 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+          'w-full pl-4 pt-2 pr-20 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
           'transition-all duration-200',
           'hover:border-bolt-elements-focus',
         )}

@@ -108,7 +108,7 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
         >
           <div className="absolute inset-0 px-2 lg:px-6">
             <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
-              <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
+              {!isSmallViewport && <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
                 <div className="flex-1 flex items-center justify-center">
                   {chatStarted && (
@@ -137,7 +137,7 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
                     workbenchStore.showWorkbench.set(false);
                   }}
                 />
-              </div>
+              </div>}
               <div className="relative flex-1 overflow-hidden">
                 <Preview activeTab={activeTab} appSummary={appSummary} />
               </div>

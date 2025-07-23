@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth/ClientAuth';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
@@ -19,7 +20,7 @@ export function Header() {
       })}
     >
       <div className="flex flex-1 items-center gap-4 z-logo text-bolt-elements-textPrimary cursor-pointer">
-        <div data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-2xl" />
+        <div onClick={() => sidebarMenuStore.toggle()} data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-2xl" />
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a

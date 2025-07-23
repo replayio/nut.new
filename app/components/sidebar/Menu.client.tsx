@@ -14,6 +14,8 @@ import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import Cookies from 'js-cookie';
 import Feedback from './Feedback/FeedbackButton';
+import { useStore } from '@nanostores/react';
+import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 
 const menuVariants = {
   closed: {
@@ -43,7 +45,7 @@ const skipConfirmDeleteCookieName = 'skipConfirmDelete';
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<AppLibraryEntry[] | null>(null);
-  const [open, setOpen] = useState(false);
+  const isOpen = useStore(sidebarMenuStore.isOpen);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
@@ -92,31 +94,31 @@ export const Menu = () => {
   };
 
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       loadEntries();
     }
-  }, [open]);
+  }, [isOpen]);
 
-  useEffect(() => {
-    const enterThreshold = 40;
-    const exitThreshold = 40;
+  // useEffect(() => {
+  //   const enterThreshold = 40;
+  //   const exitThreshold = 40;
 
-    function onMouseMove(event: MouseEvent) {
-      if (event.pageX < enterThreshold) {
-        setOpen(true);
-      }
+  //   function onMouseMove(event: MouseEvent) {
+  //     if (event.pageX < enterThreshold) {
+  //       sidebarMenuStore.open();
+  //     }
 
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
-      }
-    }
+  //     if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
+  //       sidebarMenuStore.close();
+  //     }
+  //   }
 
-    window.addEventListener('mousemove', onMouseMove);
+  //   window.addEventListener('mousemove', onMouseMove);
 
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('mousemove', onMouseMove);
+  //   };
+  // }, []);
 
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
@@ -134,7 +136,7 @@ export const Menu = () => {
     <motion.div
       ref={menuRef}
       initial="closed"
-      animate={open ? 'open' : 'closed'}
+      animate={isOpen ? 'open' : 'closed'}
       variants={menuVariants}
       className="flex selection-accent flex-col side-menu fixed top-0 w-[350px] h-full bg-bolt-elements-background-depth-2 border-r rounded-r-3xl border-bolt-elements-borderColor z-sidebar shadow-xl shadow-bolt-elements-sidebar-dropdownShadow text-sm"
     >
