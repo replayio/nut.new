@@ -16,6 +16,7 @@ import Cookies from 'js-cookie';
 import Feedback from './Feedback/FeedbackButton';
 import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
+import useViewport from '~/lib/hooks';
 
 const menuVariants = {
   closed: {
@@ -49,7 +50,7 @@ export const Menu = () => {
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
-
+  const isSmallViewport = useViewport(1024);
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
@@ -99,26 +100,30 @@ export const Menu = () => {
     }
   }, [isOpen]);
 
-  // useEffect(() => {
-  //   const enterThreshold = 40;
-  //   const exitThreshold = 40;
+  useEffect(() => {
+    if (isSmallViewport) {
+      return;
+    }
 
-  //   function onMouseMove(event: MouseEvent) {
-  //     if (event.pageX < enterThreshold) {
-  //       sidebarMenuStore.open();
-  //     }
+    const enterThreshold = 40;
+    const exitThreshold = 40;
 
-  //     if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-  //       sidebarMenuStore.close();
-  //     }
-  //   }
+    function onMouseMove(event: MouseEvent) {
+      if (event.pageX < enterThreshold) {
+        sidebarMenuStore.open();
+      }
 
-  //   window.addEventListener('mousemove', onMouseMove);
+      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
+        sidebarMenuStore.close();
+      }
+    }
 
-  //   return () => {
-  //     window.removeEventListener('mousemove', onMouseMove);
-  //   };
-  // }, []);
+    window.addEventListener('mousemove', onMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+    };
+  }, []);
 
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
