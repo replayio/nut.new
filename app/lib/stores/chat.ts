@@ -10,6 +10,3 @@ export class ChatStore {
 }
 
 export const chatStore = new ChatStore();
-
-// Title used for new apps.
-export const DefaultTitle = 'New App';

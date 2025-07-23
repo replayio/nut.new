@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { chatStore, DefaultTitle } from '~/lib/stores/chat';
+import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
@@ -194,7 +194,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       try {
         const appId = await database.createApp();
         chatStore.currentAppId.set(appId);
-        chatStore.appTitle.set(DefaultTitle);
+        chatStore.appTitle.set('New App');
 
         navigateApp(appId);
       } catch (e) {
