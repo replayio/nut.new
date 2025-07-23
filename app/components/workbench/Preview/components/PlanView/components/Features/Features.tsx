@@ -4,6 +4,8 @@ import { AppFeatureStatus, type AppFeature, type AppSummary } from '~/lib/persis
 import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
+import Components from './components/Components';
+import Events from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FeaturesProps {
@@ -110,8 +112,10 @@ const Features = ({ appSummary }: FeaturesProps) => {
                 feature.databaseChange.tables &&
                 feature.databaseChange.tables.length > 0 && <DatabaseChanges feature={feature} />}
 
+              {feature?.componentNames && feature.componentNames.length > 0 && <Components summary={appSummary!} feature={feature} />}
               {feature?.definedAPIs && feature.definedAPIs.length > 0 && <DefinedApis feature={feature} />}
               {feature?.tests && feature.tests.length > 0 && <Tests featureTests={feature.tests} />}
+              <Events featureName={name} />
             </motion.div>
           )}
         </AnimatePresence>
