@@ -100,6 +100,57 @@ export const Menu = () => {
     }
   }, [isOpen]);
 
+  // Touch/swipe gesture handling for mobile
+  useEffect(() => {
+    if (!isSmallViewport) {
+      return;
+    }
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartX = event.changedTouches[0].screenX;
+      touchStartY = event.changedTouches[0].screenY;
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      touchEndX = event.changedTouches[0].screenX;
+      touchEndY = event.changedTouches[0].screenY;
+      
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      const minSwipeDistance = 100;
+      const maxVerticalDistance = 100;
+
+      // Only process horizontal swipes (ignore mostly vertical swipes)
+      if (Math.abs(deltaY) > maxVerticalDistance) {
+        return;
+      }
+
+      // Right swipe from left edge to open menu
+      if (deltaX > minSwipeDistance && touchStartX < 50 && !isOpen) {
+        sidebarMenuStore.open();
+      }
+      
+      // Left swipe to close menu when it's open
+      if (deltaX < -minSwipeDistance && isOpen) {
+        sidebarMenuStore.close();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isSmallViewport, isOpen]);
+
+  // Mouse hover handling for desktop
   useEffect(() => {
     if (isSmallViewport) {
       return;
@@ -123,7 +174,7 @@ export const Menu = () => {
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
     };
-  }, []);
+  }, [isSmallViewport, isOpen]);
 
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
