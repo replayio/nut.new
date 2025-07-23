@@ -1,12 +1,45 @@
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import {
+  type AppSummary,
+  type AppDetail,
+  AppFeatureStatus,
+  isFeatureStatusImplemented,
+} from '~/lib/persistence/messageAppSummary';
+import { classNames } from '~/utils/classNames';
 
 interface PagesProps {
   appSummary: AppSummary | null;
 }
 
 const Pages = ({ appSummary }: PagesProps) => {
+  const renderComponent = (component: AppDetail, index: number) => {
+    const feature = appSummary?.features?.find((feature) => feature.componentNames?.includes(component.name));
+
+    return (
+      <TooltipProvider key={index}>
+        <WithTooltip tooltip={component.description}>
+          <span
+            key={index}
+            className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded border border-bolt-elements-borderColor"
+          >
+            {component.name}
+            {feature?.status == AppFeatureStatus.ImplementationInProgress && (
+              <div
+                className={classNames(
+                  'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+                )}
+              />
+            )}
+            {isFeatureStatusImplemented(feature?.status ?? AppFeatureStatus.NotStarted) && (
+              <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓</div>
+            )}
+          </span>
+        </WithTooltip>
+      </TooltipProvider>
+    );
+  };
+
   return (
     <div>
       <div className="space-y-4 mb-8">
@@ -43,20 +76,7 @@ const Pages = ({ appSummary }: PagesProps) => {
                     <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider">
                       Page Components
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {page.components.map((component, componentIndex) => (
-                        <TooltipProvider key={componentIndex}>
-                          <WithTooltip tooltip={component.description}>
-                            <span
-                              key={componentIndex}
-                              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded border border-bolt-elements-borderColor"
-                            >
-                              {component.name}
-                            </span>
-                          </WithTooltip>
-                        </TooltipProvider>
-                      ))}
-                    </div>
+                    <div className="flex flex-wrap gap-1">{page.components.map(renderComponent)}</div>
                   </div>
                 )}
               </div>

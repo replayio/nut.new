@@ -19,7 +19,7 @@ export default [
       'array-bracket-spacing': ['error', 'never'],
       'object-curly-newline': ['error', { consistent: true }],
       'keyword-spacing': ['error', { before: true, after: true }],
-      'consistent-return': 'error',
+      'consistent-return': 'off',
       semi: ['error', 'always'],
       curly: ['error'],
       'no-eval': ['error'],

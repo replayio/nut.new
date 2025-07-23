@@ -20,10 +20,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
 
   useEffect(() => {
     if (appSummary?.features) {
-      setCollapsedFeatures(new Set([
-        MockupFeatureIndex,
-        ...appSummary.features.map((_, index) => index)
-      ]));
+      setCollapsedFeatures(new Set([MockupFeatureIndex, ...appSummary.features.map((_, index) => index)]));
     }
   }, [appSummary]);
 
@@ -68,8 +65,10 @@ const Features = ({ appSummary }: FeaturesProps) => {
     const isCollapsed = collapsedFeatures.has(index);
 
     const name = feature ? feature.name : 'Mockup';
-    const description = feature ? feature.description : 'Build a mockup of the app with a complete UI but nothing working.';
-    const status = feature ? feature.status : appSummary?.mockupStatus ?? AppFeatureStatus.NotStarted;
+    const description = feature
+      ? feature.description
+      : 'Build a mockup of the app with a complete UI but nothing working.';
+    const status = feature ? feature.status : (appSummary?.mockupStatus ?? AppFeatureStatus.NotStarted);
 
     return (
       <div
@@ -108,11 +107,13 @@ const Features = ({ appSummary }: FeaturesProps) => {
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             >
-              {feature?.databaseChange &&
-                feature.databaseChange.tables &&
-                feature.databaseChange.tables.length > 0 && <DatabaseChanges feature={feature} />}
+              {feature?.databaseChange && feature.databaseChange.tables && feature.databaseChange.tables.length > 0 && (
+                <DatabaseChanges feature={feature} />
+              )}
 
-              {feature?.componentNames && feature.componentNames.length > 0 && <Components summary={appSummary!} feature={feature} />}
+              {feature?.componentNames && feature.componentNames.length > 0 && (
+                <Components summary={appSummary!} feature={feature} />
+              )}
               {feature?.definedAPIs && feature.definedAPIs.length > 0 && <DefinedApis feature={feature} />}
               {feature?.tests && feature.tests.length > 0 && <Tests featureTests={feature.tests} />}
               <Events featureName={feature?.name} />
@@ -131,9 +132,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
         <div className="text-lg font-semibold text-bolt-elements-textPrimary">Features</div>
       </div>
 
-      <div className="space-y-6">
-        {appSummary?.features?.map((feature, index) => renderFeature(feature, index))}
-      </div>
+      <div className="space-y-6">{appSummary?.features?.map((feature, index) => renderFeature(feature, index))}</div>
     </div>
   );
 };

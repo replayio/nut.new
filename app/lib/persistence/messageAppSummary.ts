@@ -168,7 +168,7 @@ export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
   return parseAppSummaryMessage(appSummaryMessage) || null;
 };
 
-function isFeatureStatusImplemented(status?: AppFeatureStatus) {
+export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
   return status && status != AppFeatureStatus.NotStarted && status != AppFeatureStatus.ImplementationInProgress;
 }
 

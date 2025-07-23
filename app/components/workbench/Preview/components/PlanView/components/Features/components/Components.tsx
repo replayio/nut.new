@@ -13,7 +13,7 @@ function getComponentDescription(summary: AppSummary, componentName: string) {
       }
     }
   }
-  return "Unknown component";
+  return 'Unknown component';
 }
 
 const Components = ({ summary, feature }: ComponentsProps) => {

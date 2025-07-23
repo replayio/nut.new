@@ -38,7 +38,7 @@ const Events = ({ featureName }: EventsProps) => {
       return base.slice(0, -2).trim();
     }
     return base;
-  }
+  };
 
   const renderEventContents = (response: ChatResponse) => {
     switch (response.kind) {
@@ -57,11 +57,9 @@ const Events = ({ featureName }: EventsProps) => {
     const { event } = response;
     switch (event.name) {
       case 'start-feature':
-        return event.why == "implement"
-          ? "Writing the feature"
-          : "Writing tests";
+        return event.why == 'implement' ? 'Writing the feature' : 'Writing tests';
       case 'start-mockup':
-        return "Writing the mockup";
+        return 'Writing the mockup';
       case 'run-tests':
         return 'Running tests';
       case 'test-failure':
@@ -77,17 +75,17 @@ const Events = ({ featureName }: EventsProps) => {
         }
         return 'A test failed';
       case 'analyze-test-failure':
-        return "Analyzing the test failure";
+        return 'Analyzing the test failure';
       case 'fix-test-failure':
-        return "Fixing the test failure";
+        return 'Fixing the test failure';
       case 'merge-changes':
-        return "Merging changes from another worker";
+        return 'Merging changes from another worker';
       case 'resolve-merge-conflict':
-        return "Resolving merge conflict";
+        return 'Resolving merge conflict';
       case 'land-changes':
-        return "Landing changes";
+        return 'Landing changes';
     }
-  }
+  };
 
   const renderEvent = (event: ChatResponse, index: number) => {
     const time = renderTime(event.time);
@@ -101,7 +99,7 @@ const Events = ({ featureName }: EventsProps) => {
         </span>
       </div>
     );
-  }
+  };
 
   const renderWorkerEvents = (events: ChatResponse[], index: number) => {
     return (
@@ -112,9 +110,9 @@ const Events = ({ featureName }: EventsProps) => {
         {events.map(renderEvent)}
       </div>
     );
-  }
+  };
 
   return workerEvents.map(renderWorkerEvents);
-}
+};
 
 export default Events;
