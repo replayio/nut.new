@@ -65,6 +65,16 @@ const Events = ({ featureName }: EventsProps) => {
       case 'run-tests':
         return 'Running tests';
       case 'test-failure':
+        if (event.title && event.recordingId) {
+          return (
+            <div>
+              A test failed:{' '}
+              <a href={`https://app.replay.io/recording/${event.recordingId}`} className="text-blue-500">
+                {event.title}
+              </a>
+            </div>
+          );
+        }
         return 'A test failed';
       case 'analyze-test-failure':
         return "Analyzing the test failure";
