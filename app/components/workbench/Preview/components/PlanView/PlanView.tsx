@@ -20,7 +20,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
             </div>
             {appSummary?.pages && <Pages appSummary={appSummary} />}
           </div>
-          {appSummary?.features && (
+          {(appSummary?.features || appSummary?.mockupStatus) && (
             <div className="mt-auto">
               <Features appSummary={appSummary} />
             </div>

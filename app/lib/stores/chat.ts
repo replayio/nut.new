@@ -26,6 +26,6 @@ export function isResponseEvent(response: ChatResponse) {
   }
 }
 
-export function addResponse(response: ChatResponse) {
+export function addResponseEvent(response: ChatResponse) {
   chatStore.events.set([...chatStore.events.get(), response]);
 }

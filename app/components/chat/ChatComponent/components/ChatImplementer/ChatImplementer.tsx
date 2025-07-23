@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { chatStore } from '~/lib/stores/chat';
+import { addResponseEvent, chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
@@ -234,6 +234,9 @@ const ChatImplementer = memo((props: ChatProps) => {
           }
           break;
         }
+        case 'app-event':
+          addResponseEvent(response);
+          break;
         case 'title':
           chatStore.appTitle.set(response.title);
           break;
@@ -321,6 +324,9 @@ const ChatImplementer = memo((props: ChatProps) => {
             }
             break;
           }
+          case 'app-event':
+            addResponseEvent(response);
+            break;
           case 'title':
             chatStore.appTitle.set(response.title);
             break;
