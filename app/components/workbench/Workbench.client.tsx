@@ -19,6 +19,7 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 interface WorkspaceProps {
   chatStarted?: boolean;
   messages?: Message[];
+  mobileActiveTab?: 'chat' | 'planning' | 'preview';
 }
 
 const workbenchVariants = {
@@ -38,7 +39,7 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -51,6 +52,14 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
   const isSmallViewport = useViewport(1024);
 
   const appSummary = getLatestAppSummary(messages ?? []);
+
+  useEffect(() => {
+    if (mobileActiveTab === 'planning') {
+      setActiveTab('planning');
+    } else if (mobileActiveTab === 'preview') {
+      setActiveTab('preview');
+    }
+  }, [mobileActiveTab]);
 
   useEffect(() => {
     if (hasSeenProjectPlanRef.current) {
@@ -97,8 +106,10 @@ export const Workbench = memo(({ chatStarted, messages }: WorkspaceProps) => {
       >
         <div
           className={classNames(
-            'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
+            'fixed w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
             {
+              'top-[calc(var(--header-height)+0.75rem)] bottom-16': isSmallViewport,
+              'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
               'w-full': isSmallViewport,
               'left-0': showWorkbench && isSmallViewport,
               'left-[var(--workbench-left)]': showWorkbench,

@@ -5,6 +5,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
+import useViewport from '~/lib/hooks';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -31,7 +32,7 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number } | null>(null);
 
   const previewURL = useStore(workbenchStore.previewURL);
-
+  const isSmallViewport = useViewport(1024);
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
 
@@ -212,7 +213,7 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
         </div>
 
         {/* Device mode toggle button - only show in preview tab */}
-        {activeTab === 'preview' && (
+        {activeTab === 'preview' && !isSmallViewport && (
           <IconButton
             icon="i-ph:devices"
             onClick={toggleDeviceMode}
