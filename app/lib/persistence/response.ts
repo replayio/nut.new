@@ -27,7 +27,7 @@ interface ChatResponseStatus extends ChatResponseBase {
 }
 
 // Progress was made while developing the app.
-export interface ChatResponseAppEvent extends ChatResponseBase {
+interface ChatResponseAppEvent extends ChatResponseBase {
   kind: 'app-event';
   event: AppEvent;
 }

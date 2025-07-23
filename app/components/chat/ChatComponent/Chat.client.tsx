@@ -7,9 +7,9 @@ import { toast } from 'react-toastify';
 import type { Message } from '~/lib/persistence/message';
 import mergeResponseMessage from './functions/mergeResponseMessages';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
-import { chatStore } from '~/lib/stores/chat';
+import { chatStore, isResponseEvent } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import type { ChatResponseAppEvent } from '~/lib/persistence/response';
+import type { ChatResponse } from '~/lib/persistence/response';
 
 export function Chat() {
   renderLogger.trace('Chat');
@@ -20,28 +20,28 @@ export function Chat() {
   const [ready, setReady] = useState<boolean>(!appId);
 
   useEffect(() => {
+    if (!appId) {
+      return;
+    }
     (async () => {
       try {
-        if (appId) {
-          const title = await database.getAppTitle(appId);
-          const responses = await getExistingAppResponses(appId);
-          let messages: Message[] = [];
-          const appEvents: ChatResponseAppEvent[] = [];
-          for (const response of responses) {
-            switch (response.kind) {
-              case 'message':
-                messages = mergeResponseMessage(response.message, messages);
-                break;
-              case 'app-event':
-                appEvents.push(response);
-                break;
-            }
+        const title = await database.getAppTitle(appId);
+        const responses = await getExistingAppResponses(appId);
+        let messages: Message[] = [];
+        const eventResponses: ChatResponse[] = [];
+        for (const response of responses) {
+          if (response.kind == 'message') {
+            messages = mergeResponseMessage(response.message, messages);
           }
-          chatStore.currentAppId.set(appId);
-          chatStore.appTitle.set(title);
-          setInitialMessages(messages);
-          setReady(true);
+          if (isResponseEvent(response)) {
+            eventResponses.push(response);
+          }
         }
+        chatStore.currentAppId.set(appId);
+        chatStore.appTitle.set(title);
+        chatStore.events.set(eventResponses);
+        setInitialMessages(messages);
+        setReady(true);
       } catch (error) {
         logStore.logError('Failed to load chat messages', error);
         toast.error((error as any).message);

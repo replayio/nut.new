@@ -6,43 +6,43 @@
 // produced the event, the time and so on.
 
 interface AppEventStartFeature {
-  name: "start-feature";
+  name: 'start-feature';
   featureName: string;
-  why: "implement" | "validate";
+  why: 'implement' | 'validate';
 }
 
 interface AppEventStartMockup {
-  name: "start-mockup";
+  name: 'start-mockup';
 }
 
 interface AppEventRunTests {
-  name: "run-tests";
+  name: 'run-tests';
 }
 
 interface AppEventsTestFailure {
-  name: "test-failure";
+  name: 'test-failure';
   title?: string;
   recordingId?: string;
 }
 
 interface AppEventAnalyzeTestFailure {
-  name: "analyze-test-failure";
+  name: 'analyze-test-failure';
 }
 
 interface AppEventFixTestFailure {
-  name: "fix-test-failure";
+  name: 'fix-test-failure';
 }
 
 interface AppEventMergeChanges {
-  name: "merge-changes";
+  name: 'merge-changes';
 }
 
 interface AppEventResolveMergeConflict {
-  name: "resolve-merge-conflict";
+  name: 'resolve-merge-conflict';
 }
 
 interface AppEventLandChanges {
-  name: "land-changes";
+  name: 'land-changes';
   iteration: number;
   oldRepositoryId: string;
   newRepositoryId: string;
