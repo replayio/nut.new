@@ -100,7 +100,6 @@ export const Menu = () => {
     }
   }, [isOpen]);
 
-  // Touch/swipe gesture handling for mobile
   useEffect(() => {
     if (!isSmallViewport) {
       return;
@@ -122,20 +121,17 @@ export const Menu = () => {
       
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
-      const minSwipeDistance = 100;
-      const maxVerticalDistance = 100;
+      const minSwipeDistance = 50;
+      const maxVerticalDistance = 50;
 
-      // Only process horizontal swipes (ignore mostly vertical swipes)
       if (Math.abs(deltaY) > maxVerticalDistance) {
         return;
       }
 
-      // Right swipe from left edge to open menu
-      if (deltaX > minSwipeDistance && touchStartX < 50 && !isOpen) {
+      if (deltaX > minSwipeDistance && !isOpen) {
         sidebarMenuStore.open();
       }
       
-      // Left swipe to close menu when it's open
       if (deltaX < -minSwipeDistance && isOpen) {
         sidebarMenuStore.close();
       }
