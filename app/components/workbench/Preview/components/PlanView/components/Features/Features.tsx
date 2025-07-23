@@ -46,7 +46,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
       case AppFeatureStatus.Implemented:
         return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Implemented</div>;
       case AppFeatureStatus.ValidationInProgress:
-        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Implemented, testing...</div>;
+        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Testing...</div>;
       case AppFeatureStatus.Validated:
         return <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓ Tests Pass</div>;
       case AppFeatureStatus.ValidationFailed:
