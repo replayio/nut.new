@@ -33,7 +33,11 @@ const Events = ({ featureName }: EventsProps) => {
 
   const renderTime = (time: string) => {
     const date = new Date(time);
-    return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+    const base = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    if (base.endsWith('AM') || base.endsWith('PM')) {
+      return base.slice(0, -2).trim();
+    }
+    return base;
   }
 
   const renderEventContents = (response: ChatResponse) => {
@@ -61,16 +65,6 @@ const Events = ({ featureName }: EventsProps) => {
       case 'run-tests':
         return 'Running tests';
       case 'test-failure':
-        if (event.title && event.recordingId) {
-          return (
-            <div>
-              A test failed:
-                <a href={`https://app.replay.io/recording/${event.recordingId}`}>
-                  {event.title}
-                </a>
-            </div>
-          );
-        }
         return 'A test failed';
       case 'analyze-test-failure':
         return "Analyzing the test failure";
