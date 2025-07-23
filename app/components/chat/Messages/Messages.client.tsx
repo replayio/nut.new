@@ -10,6 +10,7 @@ import {
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
+import useViewport from '~/lib/hooks';
 
 interface MessagesProps {
   id?: string;
@@ -25,6 +26,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const isSmallViewport = useViewport(1024);
 
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {
@@ -183,7 +185,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       <div className="relative flex-1 min-h-0">
         <div
           ref={setRefs}
-          className={classNames('absolute inset-0 overflow-y-auto', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
+          className={classNames('absolute inset-0 overflow-y-auto flex flex-col w-full max-w-chat mx-auto', {
+            'pb-20': isSmallViewport, // Extra padding for sticky chat input on mobile
+            'pb-6': !isSmallViewport, // Normal padding on desktop
+          })}
         >
           {messages.length > 0 ? messages.map(renderMessage) : null}
           {hasPendingMessage && (

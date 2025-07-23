@@ -1,4 +1,5 @@
 import React from 'react';
+import useViewport from '~/lib/hooks/useViewport';
 import { classNames } from '~/utils/classNames';
 
 interface JumpToBottomProps {
@@ -13,6 +14,7 @@ interface JumpToBottomProps {
 }
 
 export const JumpToBottom: React.FC<JumpToBottomProps> = ({ onClick, position, visible }) => {
+  const isSmallViewport = useViewport(1024);
   if (!visible) {
     return null;
   }
@@ -30,7 +32,7 @@ export const JumpToBottom: React.FC<JumpToBottomProps> = ({ onClick, position, v
     <div
       className={classNames(
         'absolute left-0 right-0 flex justify-center pointer-events-none',
-        !position ? 'bottom-5' : '', // Only apply bottom-5 if no custom position is provided
+        isSmallViewport ? 'bottom-17' : !position ? 'bottom-5' : '',
       )}
       style={positionStyle}
     >
