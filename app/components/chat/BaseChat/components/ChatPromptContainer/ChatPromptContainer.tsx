@@ -6,7 +6,6 @@ import { ClientOnly } from 'remix-utils/client-only';
 import ApproveChange from '~/components/chat/ApproveChange';
 import { MessageInput } from '~/components/chat/MessageInput/MessageInput';
 import styles from '~/components/chat/BaseChat/BaseChat.module.scss';
-import useViewport from '~/lib/hooks/useViewport';
 
 interface ChatPromptContainerProps {
   chatStarted: boolean;
@@ -36,15 +35,13 @@ export const ChatPromptContainer: React.FC<ChatPromptContainerProps> = ({
   messageInputProps,
 }) => {
   const startPlanningRating = messageInputProps.startPlanningRating ?? 0;
-  const isSmallViewport = useViewport(1024);
 
   return (
     <div
       className={classNames(
         'bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
         {
-          'sticky bottom-14': chatStarted && isSmallViewport,
-          'sticky bottom-2': chatStarted && !isSmallViewport,
+          'sticky bottom-2': chatStarted,
         },
       )}
     >

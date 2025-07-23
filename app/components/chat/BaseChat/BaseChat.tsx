@@ -221,7 +221,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         ref={ref}
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
-        style={isSmallViewport ? { height: '100vh', maxHeight: '100vh' } : undefined}
+        style={isSmallViewport ? { height: 'calc(100vh - 52px)', maxHeight: 'calc(100vh - 52px)' } : undefined}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div
