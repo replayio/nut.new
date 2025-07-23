@@ -120,7 +120,9 @@ export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: Works
           <div className={classNames("absolute inset-0", {
             'lg:px-6': !isSmallViewport,
           })}>
-            <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
+            <div className={classNames("h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm overflow-hidden", {
+              'rounded-lg': !isSmallViewport,
+            })}>
               {!isSmallViewport && <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
                 <div className="flex-1 flex items-center justify-center">
