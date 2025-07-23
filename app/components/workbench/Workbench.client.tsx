@@ -108,7 +108,7 @@ export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: Works
           className={classNames(
             'fixed w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
             {
-              'top-[calc(var(--header-height)+0.75rem)] bottom-16': isSmallViewport,
+              'top-[calc(var(--header-height)+0rem)] bottom-13': isSmallViewport,
               'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
               'w-full': isSmallViewport,
               'left-0': showWorkbench && isSmallViewport,
@@ -117,7 +117,9 @@ export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: Works
             },
           )}
         >
-          <div className="absolute inset-0 px-2 lg:px-6">
+          <div className={classNames("absolute inset-0", {
+            'lg:px-6': !isSmallViewport,
+          })}>
             <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
               {!isSmallViewport && <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
