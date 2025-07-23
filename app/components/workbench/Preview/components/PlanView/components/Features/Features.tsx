@@ -39,7 +39,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
         return (
           <div
             className={classNames(
-              'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+              'min-w-4 min-h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
             )}
           />
         );
