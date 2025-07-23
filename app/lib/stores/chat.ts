@@ -20,6 +20,7 @@ export function isResponseEvent(response: ChatResponse) {
     case 'app-event':
     case 'done':
     case 'error':
+    case 'aborted':
       return true;
     default:
       return false;

@@ -115,7 +115,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
               {feature?.componentNames && feature.componentNames.length > 0 && <Components summary={appSummary!} feature={feature} />}
               {feature?.definedAPIs && feature.definedAPIs.length > 0 && <DefinedApis feature={feature} />}
               {feature?.tests && feature.tests.length > 0 && <Tests featureTests={feature.tests} />}
-              <Events featureName={name} />
+              <Events featureName={feature?.name} />
             </motion.div>
           )}
         </AnimatePresence>
