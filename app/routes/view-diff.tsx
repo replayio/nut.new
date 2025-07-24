@@ -1,9 +1,25 @@
 import { useSearchParams } from "@remix-run/react";
+import { downloadRepository } from "~/lib/replay/Deploy";
+import { useEffect } from "react";
 
 function RepositoryDiff() {
   const [searchParams] = useSearchParams();
   const oldRepositoryId = searchParams.get("old");
   const newRepositoryId = searchParams.get("new");
+
+  useEffect(() => {
+    (async () => {
+      if (!oldRepositoryId || !newRepositoryId) {
+        return;
+      }
+
+      const oldRepositoryContents = await downloadRepository(oldRepositoryId);
+      const newRepositoryContents = await downloadRepository(newRepositoryId);
+
+      console.log(oldRepositoryContents);
+      console.log(newRepositoryContents);
+    })();
+  }, [oldRepositoryId, newRepositoryId]);
 
   return (
     <div className="p-6">
