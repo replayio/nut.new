@@ -87,7 +87,12 @@ const Events = ({ featureName }: EventsProps) => {
         return (
           <div>
             Landing changes{' '}
-            <a href={`/view-diff?old=${oldRepositoryId}&new=${newRepositoryId}`} className="text-blue-500" target="_blank" rel="noopener noreferrer">
+            <a
+              href={`/view-diff?old=${oldRepositoryId}&new=${newRepositoryId}`}
+              className="text-blue-500"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View diff
             </a>
           </div>
@@ -111,10 +116,17 @@ const Events = ({ featureName }: EventsProps) => {
   };
 
   const renderWorkerEvents = (events: ChatResponse[], index: number) => {
+    let peanuts = 0;
+    for (const event of events) {
+      if (event.kind == 'app-event' && event.peanuts && event.peanuts > peanuts) {
+        peanuts = event.peanuts;
+      }
+    }
+
     return (
       <div key={index} className="border-t border-bolt-elements-borderColor mb-1">
         <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
-          Worker {index + 1}
+          Worker {index + 1} ({peanuts} peanuts)
         </div>
         {events.map(renderEvent)}
       </div>

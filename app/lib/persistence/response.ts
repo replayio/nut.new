@@ -30,6 +30,9 @@ interface ChatResponseStatus extends ChatResponseBase {
 interface ChatResponseAppEvent extends ChatResponseBase {
   kind: 'app-event';
   event: AppEvent;
+
+  // Total number of peanuts spent on the chat so far.
+  peanuts?: number;
 }
 
 // Generated when the chat message has an error.
