@@ -221,14 +221,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         ref={ref}
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
-        style={isSmallViewport ? { height: 'calc(100vh - 106px)', maxHeight: 'calc(100vh - 106px)' } : undefined}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'py-2 px-4': isSmallViewport,
+            'pt-2 pb-15 px-4': isSmallViewport, // Mobile nav is ~80px, so pb-20 (5rem = 80px)
             'p-6': !isSmallViewport,
           })}
         >

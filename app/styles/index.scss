@@ -11,6 +11,23 @@ html,
 body {
   height: 100%;
   width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Modern dynamic viewport height with fallback */
+.app-height {
+  height: 100vh; /* Fallback for very old browsers */
+  height: var(--app-height, 100vh); /* JavaScript fallback for older browsers */
+  height: 100dvh; /* Modern browsers - respects dynamic UI */
+}
+
+/* Support for iOS safe areas */
+@supports (padding: env(safe-area-inset-top)) {
+  .app-height {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 :root {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header } from '~/components/header/Header';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 
@@ -7,11 +7,29 @@ interface PageContainerProps {
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
+  // Fallback for older browsers that don't support dvh
+  useEffect(() => {
+    const setAppHeight = () => {
+      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+    };
+    
+    setAppHeight();
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    
+    return () => {
+      window.removeEventListener('resize', setAppHeight);
+      window.removeEventListener('orientationchange', setAppHeight);
+    };
+  }, []);
+
   return (
-    <div className="h-full w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black overflow-hidden fixed top-0 left-0 right-0 bottom-0">
+    <div 
+      className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black overflow-hidden app-height"
+    >
       <Header />
       <BackgroundRays />
-      <div className="flex-1 calc(h-full - 54px) w-full page-content">{children}</div>
+      <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
     </div>
   );
 };
