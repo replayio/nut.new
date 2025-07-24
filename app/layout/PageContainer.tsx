@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { Header } from '~/components/header/Header';
 import BackgroundRays from '~/components/ui/BackgroundRays';
+import useViewport from '~/lib/hooks/useViewport';
 
 interface PageContainerProps {
   children: React.ReactNode;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
+  const isSmallViewport = useViewport(1024);
   // Fallback for older browsers that don't support dvh
   useEffect(() => {
     const setAppHeight = () => {
@@ -29,7 +31,12 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
     >
       <Header />
       <BackgroundRays />
-      <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
+      <div
+        className="flex-1 w-full page-content"
+        style={{
+          height: isSmallViewport ? 'calc(100% - 106px)' : '100%',
+        }}
+      >{children}</div>
     </div>
   );
 };
