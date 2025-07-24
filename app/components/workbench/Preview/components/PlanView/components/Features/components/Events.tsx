@@ -7,13 +7,13 @@ interface EventsProps {
 }
 
 function responseStartsFeature(response: ChatResponse, featureName: string | undefined): boolean {
-  if (response.kind != 'app-event') {
+  if (response.kind !== 'app-event') {
     return false;
   }
   if (featureName) {
-    return response.event.name == 'start-feature' && response.event.featureName == featureName;
+    return response.event.name === 'start-feature' && response.event.featureName === featureName;
   }
-  return response.event.name == 'start-mockup';
+  return response.event.name === 'start-mockup';
 }
 
 // Return separate streams of events for each worker which has operated on the feature.
@@ -24,7 +24,7 @@ function groupWorkerEvents(eventResponses: ChatResponse[], featureName: string |
       chatIds.push(response.chatId);
     }
   }
-  return chatIds.map((chatId) => eventResponses.filter((response) => response.chatId == chatId));
+  return chatIds.map((chatId) => eventResponses.filter((response) => response.chatId === chatId));
 }
 
 const Events = ({ featureName }: EventsProps) => {
@@ -51,13 +51,13 @@ const Events = ({ featureName }: EventsProps) => {
       default:
         break;
     }
-    if (response.kind != 'app-event') {
+    if (response.kind !== 'app-event') {
       return 'unknown';
     }
     const { event } = response;
     switch (event.name) {
       case 'start-feature':
-        return event.why == 'implement' ? 'Writing the feature' : 'Writing tests';
+        return event.why === 'implement' ? 'Writing the feature' : 'Writing tests';
       case 'start-mockup':
         return 'Writing the mockup';
       case 'run-tests':
@@ -66,8 +66,8 @@ const Events = ({ featureName }: EventsProps) => {
         if (event.title && event.recordingId) {
           return (
             <div>
-              A test failed:{' '}
-              <a href={`https://app.replay.io/recording/${event.recordingId}`} className="text-blue-500">
+              A test failed:
+              <a href={`https://app.replay.io/recording/${event.recordingId}`} className="pl-1 text-blue-500">
                 {event.title}
               </a>
             </div>
@@ -86,10 +86,10 @@ const Events = ({ featureName }: EventsProps) => {
         const { oldRepositoryId, newRepositoryId } = event;
         return (
           <div>
-            Landing changes{' '}
+            Landing changes
             <a
               href={`/view-diff?old=${oldRepositoryId}&new=${newRepositoryId}`}
-              className="text-blue-500"
+              className="pl-1 text-blue-500"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -104,11 +104,12 @@ const Events = ({ featureName }: EventsProps) => {
   const renderEvent = (event: ChatResponse, index: number) => {
     const time = renderTime(event.time);
     return (
-      <div key={index} className="flex items-center gap-2">
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-black-100 text-black-700 rounded">
+      <div key={index} className="flex items-center gap-2 pl-3">
+        <div className="w-1 h-1 bg-bolt-elements-textSecondary rounded-full" />
+        <span className="inline-flex items-center py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded">
           {time}
         </span>
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-black-100 text-black-700 rounded">
+        <span className="inline-flex items-center py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded">
           {renderEventContents(event)}
         </span>
       </div>
@@ -118,14 +119,14 @@ const Events = ({ featureName }: EventsProps) => {
   const renderWorkerEvents = (events: ChatResponse[], index: number) => {
     let peanuts = 0;
     for (const event of events) {
-      if (event.kind == 'app-event' && event.peanuts && event.peanuts > peanuts) {
+      if (event.kind === 'app-event' && event.peanuts && event.peanuts > peanuts) {
         peanuts = event.peanuts;
       }
     }
 
     return (
       <div key={index} className="border-t border-bolt-elements-borderColor mb-1">
-        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
+        <div className="pl-2 pt-2 text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-1">
           Worker {index + 1} ({peanuts} peanuts)
         </div>
         {events.map(renderEvent)}

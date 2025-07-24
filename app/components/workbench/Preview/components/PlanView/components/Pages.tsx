@@ -25,14 +25,18 @@ const Pages = ({ appSummary }: PagesProps) => {
           >
             {component.name}
             {feature?.status == AppFeatureStatus.ImplementationInProgress && (
-              <div
-                className={classNames(
-                  'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
-                )}
-              />
+              <div className="pl-2">
+                <div
+                  className={classNames(
+                    'min-w-4 min-h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+                  )}
+                />
+              </div>
             )}
             {isFeatureStatusImplemented(feature?.status ?? AppFeatureStatus.NotStarted) && (
-              <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓</div>
+              <div className="text-green-500 text-sm font-medium whitespace-nowrap pl-2">
+                <div className="i-ph:check-bold" />
+              </div>
             )}
           </span>
         </WithTooltip>
@@ -42,7 +46,7 @@ const Pages = ({ appSummary }: PagesProps) => {
 
   return (
     <div>
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-2">
         <div className="text-lg font-semibold text-bolt-elements-textPrimary">Page Layouts</div>
 
         {appSummary?.pages?.length === 0 ? (

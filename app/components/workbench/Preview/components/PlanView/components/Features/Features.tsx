@@ -12,7 +12,6 @@ interface FeaturesProps {
   appSummary: AppSummary | null;
 }
 
-// Collapsed status for the mockup pseudo-feature.
 const MockupFeatureIndex = -1;
 
 const Features = ({ appSummary }: FeaturesProps) => {
@@ -49,13 +48,33 @@ const Features = ({ appSummary }: FeaturesProps) => {
           />
         );
       case AppFeatureStatus.Implemented:
-        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Implemented</div>;
+        return (
+          <div className="text-gray-500 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-1">
+            <div className="i-ph:check-bold" />
+            Implemented
+          </div>
+        );
       case AppFeatureStatus.ValidationInProgress:
-        return <div className="text-gray-500 text-sm font-medium whitespace-nowrap">✓ Testing...</div>;
+        return (
+          <div className="text-gray-500 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-1">
+            <div className="i-ph:spinner-gap-fill animate-spin" />
+            Testing...
+          </div>
+        );
       case AppFeatureStatus.Validated:
-        return <div className="text-green-500 text-sm font-medium whitespace-nowrap">✓ Tests Pass</div>;
+        return (
+          <div className="text-green-500 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-1">
+            <div className="i-ph:check-bold" />
+            Tests Passed
+          </div>
+        );
       case AppFeatureStatus.ValidationFailed:
-        return <div className="text-red-500 text-sm font-medium whitespace-nowrap">✗ Failed</div>;
+        return (
+          <div className="text-red-500 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-1">
+            <div className="i-ph:x-bold" />
+            Failed
+          </div>
+        );
     }
     return null;
   };
@@ -67,13 +86,13 @@ const Features = ({ appSummary }: FeaturesProps) => {
     const name = feature ? feature.name : 'Mockup';
     const description = feature
       ? feature.description
-      : 'Build a mockup of the app with a complete UI but nothing working.';
+      : 'Builds a mockup of the app with a complete UI but no functionality.';
     const status = feature ? feature.status : (appSummary?.mockupStatus ?? AppFeatureStatus.NotStarted);
 
     return (
       <div
         key={index}
-        className="rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor overflow-hidden"
+        className="rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor overflow-hidden mb-4 mt-1"
       >
         <div
           onClick={() => toggleFeatureCollapse(index)}
