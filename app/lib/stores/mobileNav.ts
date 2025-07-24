@@ -18,4 +18,4 @@ export class MobileNavStore {
   }
 }
 
-export const mobileNavStore = new MobileNavStore(); 
+export const mobileNavStore = new MobileNavStore();

@@ -100,9 +100,10 @@ export const Menu = () => {
     }
   }, [isOpen]);
 
+  // Touch/swipe gesture handling for mobile
   useEffect(() => {
     if (!isSmallViewport) {
-      return;
+      return undefined;
     }
 
     let touchStartX = 0;
@@ -118,7 +119,7 @@ export const Menu = () => {
     const handleTouchEnd = (event: TouchEvent) => {
       touchEndX = event.changedTouches[0].screenX;
       touchEndY = event.changedTouches[0].screenY;
-      
+
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
       const minSwipeDistance = 50;
@@ -131,7 +132,7 @@ export const Menu = () => {
       if (deltaX > minSwipeDistance && !isOpen) {
         sidebarMenuStore.open();
       }
-      
+
       if (deltaX < -minSwipeDistance && isOpen) {
         sidebarMenuStore.close();
       }
@@ -149,7 +150,7 @@ export const Menu = () => {
   // Mouse hover handling for desktop
   useEffect(() => {
     if (isSmallViewport) {
-      return;
+      return undefined;
     }
 
     const enterThreshold = 40;

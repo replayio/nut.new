@@ -26,4 +26,4 @@ export class SidebarMenuStore {
   }
 }
 
-export const sidebarMenuStore = new SidebarMenuStore(); 
+export const sidebarMenuStore = new SidebarMenuStore();

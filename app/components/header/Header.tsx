@@ -20,7 +20,11 @@ export function Header() {
       })}
     >
       <div className="flex flex-1 items-center gap-4 z-logo text-bolt-elements-textPrimary cursor-pointer">
-        <div onClick={() => sidebarMenuStore.toggle()} data-testid="sidebar-icon" className="i-ph:sidebar-simple-duotone text-2xl" />
+        <div
+          onClick={() => sidebarMenuStore.toggle()}
+          data-testid="sidebar-icon"
+          className="i-ph:sidebar-simple-duotone text-2xl"
+        />
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a

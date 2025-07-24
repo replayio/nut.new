@@ -14,11 +14,11 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
     const setAppHeight = () => {
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
     };
-    
+
     setAppHeight();
     window.addEventListener('resize', setAppHeight);
     window.addEventListener('orientationchange', setAppHeight);
-    
+
     return () => {
       window.removeEventListener('resize', setAppHeight);
       window.removeEventListener('orientationchange', setAppHeight);
@@ -26,9 +26,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
   }, []);
 
   return (
-    <div 
-      className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black overflow-hidden app-height"
-    >
+    <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black overflow-hidden app-height">
       <Header />
       <BackgroundRays />
       <div
@@ -36,7 +34,9 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
         style={{
           height: isSmallViewport ? 'calc(100% - 106px)' : '100%',
         }}
-      >{children}</div>
+      >
+        {children}
+      </div>
     </div>
   );
 };
