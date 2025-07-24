@@ -179,7 +179,7 @@ export default function App() {
       <ClientOnly>
         <ThemeProvider />
         <AuthProvider data={data} />
-        <main className="h-full min-h-screen">{isLoading ? <div></div> : <Outlet />}</main>
+        <main className="h-full">{isLoading ? <div></div> : <Outlet />}</main>
         <ToastContainer
           closeButton={({ closeToast }) => {
             return (

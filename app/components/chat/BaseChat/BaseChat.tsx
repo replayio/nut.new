@@ -232,7 +232,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             'p-6': !isSmallViewport,
           })}
         >
-          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full py-2')}>
+          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full', {
+            'py-2': isSmallViewport,
+          })}>
             {!chatStarted && (
               <>
                 <IntroSection />
