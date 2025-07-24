@@ -41,7 +41,7 @@ interface BaseChatProps {
   setMessages?: (messages: Message[]) => void;
   input?: string;
   handleStop?: () => void;
-  sendMessage?: (messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
+  sendMessage?: (messageInput: string, chatMode?: ChatMode) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -120,14 +120,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     messagesRef.current = messages || [];
     const checkedBoxesRef = useRef<string[]>([]);
 
-    const handleSendMessage = (
-      event: React.UIEvent,
-      messageInput: string,
-      startPlanning: boolean,
-      chatMode?: ChatMode,
-    ) => {
+    const handleSendMessage = (event: React.UIEvent, messageInput: string, chatMode?: ChatMode) => {
       if (sendMessage) {
-        sendMessage(messageInput, startPlanning, chatMode);
+        sendMessage(messageInput, chatMode);
         abortListening();
         checkedBoxesRef.current = [];
 
@@ -281,7 +276,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage(event, messageInput, false, ChatMode.Discovery);
+                  handleSendMessage(event, messageInput, ChatMode.Discovery);
                 })}
                 {isArboretumVisible && <Arboretum />}
               </>
