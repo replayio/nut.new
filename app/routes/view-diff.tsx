@@ -2,6 +2,7 @@ import { useSearchParams } from "@remix-run/react";
 import { downloadRepository } from "~/lib/replay/Deploy";
 import { useEffect, useState } from "react";
 import JSZip from "jszip";
+import { diffLines } from "diff";
 
 interface FileDiff {
   path: string;
@@ -16,53 +17,21 @@ interface RepositoryFiles {
 }
 
 function computeDiff(oldContent: string, newContent: string): string {
-  const oldLines = oldContent.split('\n');
-  const newLines = newContent.split('\n');
+  const diffResult = diffLines(oldContent, newContent, {
+    ignoreCase: false,
+    ignoreWhitespace: false
+  });
   
   let diff = '';
-  let i = 0, j = 0;
-  
-  while (i < oldLines.length || j < newLines.length) {
-    if (i < oldLines.length && j < newLines.length && oldLines[i] === newLines[j]) {
-      diff += ` ${oldLines[i]}\n`;
-      i++;
-      j++;
+  diffResult.forEach(part => {
+    if (part.added) {
+      diff += part.value.split('\n').map(line => `+${line}`).join('\n') + '\n';
+    } else if (part.removed) {
+      diff += part.value.split('\n').map(line => `-${line}`).join('\n') + '\n';
     } else {
-      // Find the next common line
-      let found = false;
-      for (let k = 1; k <= 3; k++) {
-        if (i + k < oldLines.length && j < newLines.length && oldLines[i + k] === newLines[j]) {
-          // Remove lines
-          for (let l = 0; l < k; l++) {
-            diff += `-${oldLines[i + l]}\n`;
-          }
-          i += k;
-          found = true;
-          break;
-        }
-        if (i < oldLines.length && j + k < newLines.length && oldLines[i] === newLines[j + k]) {
-          // Add lines
-          for (let l = 0; l < k; l++) {
-            diff += `+${newLines[j + l]}\n`;
-          }
-          j += k;
-          found = true;
-          break;
-        }
-      }
-      
-      if (!found) {
-        if (i < oldLines.length) {
-          diff += `-${oldLines[i]}\n`;
-          i++;
-        }
-        if (j < newLines.length) {
-          diff += `+${newLines[j]}\n`;
-          j++;
-        }
-      }
+      diff += part.value.split('\n').map(line => ` ${line}`).join('\n') + '\n';
     }
-  }
+  });
   
   return diff;
 }
