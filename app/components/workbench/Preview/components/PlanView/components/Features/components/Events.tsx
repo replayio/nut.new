@@ -82,8 +82,17 @@ const Events = ({ featureName }: EventsProps) => {
         return 'Merging changes from another worker';
       case 'resolve-merge-conflict':
         return 'Resolving merge conflict';
-      case 'land-changes':
-        return 'Landing changes';
+      case 'land-changes': {
+        const { oldRepositoryId, newRepositoryId } = event;
+        return (
+          <div>
+            Landing changes{' '}
+            <a href={`/view-diff?old=${oldRepositoryId}&new=${newRepositoryId}`} className="text-blue-500" target="_blank" rel="noopener noreferrer">
+              View diff
+            </a>
+          </div>
+        );
+      }
     }
   };
 
