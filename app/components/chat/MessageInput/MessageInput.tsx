@@ -11,7 +11,7 @@ export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent, messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => void;
+  handleSendMessage?: (event: React.UIEvent, messageInput: string, mode: ChatMode | undefined) => void;
   handleStop?: () => void;
   hasPendingMessage?: boolean;
   chatStarted?: boolean;
@@ -169,7 +169,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event, fullInput, false, ChatMode.Discovery);
+            handleSendMessage(event, fullInput, undefined);
           }
         }}
         value={input}
@@ -195,7 +195,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }
 
                 if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                  handleSendMessage(event, fullInput, false, ChatMode.Discovery);
+                  handleSendMessage(event, fullInput, undefined);
                 }
               }}
             />
@@ -203,7 +203,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               <StartPlanningButton
                 onClick={(event) => {
                   const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                  handleSendMessage(event, message, true, ChatMode.BuildApp);
+                  handleSendMessage(event, message, ChatMode.BuildApp);
                 }}
                 hasAppSummary={false}
               />
@@ -212,7 +212,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               <StartPlanningButton
                 onClick={(event) => {
                   const message = 'Continue building the app.';
-                  handleSendMessage(event, message, true, ChatMode.DevelopApp);
+                  handleSendMessage(event, message, ChatMode.DevelopApp);
                 }}
                 hasAppSummary={true}
               />

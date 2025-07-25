@@ -144,7 +144,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput: string, startPlanning: boolean, chatMode?: ChatMode) => {
+  const sendMessage = async (messageInput: string, chatMode?: ChatMode) => {
     const numAbortsAtStart = gNumAborts;
 
     if (messageInput.length === 0 || hasPendingMessage) {
@@ -271,12 +271,15 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
-    let mode = chatMode ?? ChatMode.BuildApp;
-
-    // If we don't have a plan yet, stay in the Discovery mode until
-    // we either max out the discovery rating or the user forced us to start planning.
-    if (!getLatestAppSummary(newMessages) && !startPlanning && getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
-      mode = ChatMode.Discovery;
+    let mode = chatMode;
+    if (!mode) {
+      // If we don't have a plan yet, stay in the Discovery mode until
+      // we either max out the discovery rating or the user forced us to start planning.
+      if (!getLatestAppSummary(newMessages) && getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
+        mode = ChatMode.Discovery;
+      } else {
+        mode = ChatMode.BuildApp;
+      }
     }
 
     await sendChatMessage(mode, newMessages, references, onResponse);
