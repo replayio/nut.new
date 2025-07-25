@@ -82,6 +82,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
+    const appSummary = getLatestAppSummary(messages ?? []);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
     const { isArboretumVisible } = useArboretumVisibility();
@@ -227,7 +228,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'pt-2 pb-15 px-4': isSmallViewport, // Mobile nav is ~80px, so pb-20 (5rem = 80px)
+            'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
+            'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
             'p-6': !isSmallViewport,
           })}
         >
@@ -288,10 +290,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             )}
           </div>
           <ClientOnly>
-            {() => <Workbench chatStarted={chatStarted} messages={messages} mobileActiveTab={mobileActiveTab} />}
+            {() => (
+              <Workbench chatStarted={chatStarted} appSummary={appSummary ?? undefined} mobileActiveTab={mobileActiveTab} />
+            )}
           </ClientOnly>
         </div>
-        {isSmallViewport && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {(isSmallViewport && appSummary) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
       </div>
     );
 

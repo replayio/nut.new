@@ -9,8 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
-import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
-import type { Message } from '~/lib/persistence/message';
+import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 import { ClientOnly } from 'remix-utils/client-only';
 import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
 import { DownloadButton } from '~/components/header/DownloadButton';
@@ -18,7 +17,7 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  messages?: Message[];
+  appSummary?: AppSummary;
   mobileActiveTab?: 'chat' | 'planning' | 'preview';
 }
 
@@ -39,7 +38,7 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -50,8 +49,6 @@ export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: Works
   const hasSetPlanningTabRef = useRef(false);
 
   const isSmallViewport = useViewport(1024);
-
-  const appSummary = getLatestAppSummary(messages ?? []);
 
   useEffect(() => {
     if (mobileActiveTab === 'planning') {
@@ -163,7 +160,7 @@ export const Workbench = memo(({ chatStarted, messages, mobileActiveTab }: Works
                 </div>
               )}
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} appSummary={appSummary} />
+                <Preview activeTab={activeTab} appSummary={appSummary ?? null} />
               </div>
             </div>
           </div>

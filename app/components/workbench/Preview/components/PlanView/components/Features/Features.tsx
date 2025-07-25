@@ -147,9 +147,11 @@ const Features = ({ appSummary }: FeaturesProps) => {
     <div className="mb-8">
       {appSummary?.mockupStatus && renderFeature(undefined, MockupFeatureIndex)}
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-lg font-semibold text-bolt-elements-textPrimary">Features</div>
-      </div>
+      {appSummary?.features && appSummary?.features.length > 0 && (
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-lg font-semibold text-bolt-elements-textPrimary">Features</div>
+        </div>
+      )}
 
       <div className="space-y-6">{appSummary?.features?.map((feature, index) => renderFeature(feature, index))}</div>
     </div>
