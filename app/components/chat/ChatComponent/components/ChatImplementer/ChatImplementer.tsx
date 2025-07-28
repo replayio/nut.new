@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { addChatMessage, chatStore, doAbortChat, doListenAppResponses, doSendMessage } from '~/lib/stores/chat';
+import { addChatMessage, chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';

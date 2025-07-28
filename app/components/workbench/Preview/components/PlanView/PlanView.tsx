@@ -13,9 +13,7 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
   return (
     appSummary?.features?.length &&
     appSummary.features.some(
-      (feature) =>
-        feature.status != AppFeatureStatus.Validated &&
-        feature.status != AppFeatureStatus.ValidationFailed
+      (feature) => feature.status != AppFeatureStatus.Validated && feature.status != AppFeatureStatus.ValidationFailed,
     )
   );
 }
