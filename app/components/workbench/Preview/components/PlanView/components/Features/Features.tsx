@@ -116,9 +116,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
             </div>
           </div>
 
-          <div className="flex-shrink-0">
-            {renderFeatureStatus(status)}
-          </div>
+          <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
         </div>
 
         <AnimatePresence>

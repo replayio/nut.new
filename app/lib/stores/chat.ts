@@ -140,7 +140,7 @@ export async function doListenAppResponses() {
     switch (response.kind) {
       case 'message': {
         // Ignore messages that we already know about.
-        if (chatStore.messages.get().some(m => m.id == response.message.id)) {
+        if (chatStore.messages.get().some((m) => m.id == response.message.id)) {
           return;
         }
 

@@ -20,7 +20,9 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
 
 const PlanView = ({ appSummary }: PlanViewProps) => {
   const listenResponses = useStore(chatStore.listenResponses);
-  const completedFeatures = appSummary?.features?.filter((feature) => feature.status === AppFeatureStatus.Validated).length;
+  const completedFeatures = appSummary?.features?.filter(
+    (feature) => feature.status === AppFeatureStatus.Validated,
+  ).length;
   const totalFeatures = appSummary?.features?.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
 
