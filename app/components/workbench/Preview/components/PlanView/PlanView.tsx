@@ -9,11 +9,13 @@ import WithTooltip from '~/components/ui/Tooltip';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
+  onContinueBuilding: () => void;
+  onAbort: () => void;
 }
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-const PlanView = ({ appSummary }: PlanViewProps) => {
+const PlanView = ({ appSummary, onContinueBuilding, onAbort }: PlanViewProps) => {
   const listenResponses = useStore(chatStore.listenResponses);
 
   return (
@@ -27,6 +29,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                   <TooltipProvider>
                     <WithTooltip tooltip={"Continue Building"}>
                       <motion.button
+                        className="bg-blue-500 hover:bg-blue-600"
                         title={"Continue Building"}
                         transition={{ ease: customEasingFn, duration: 0.17 }}
                         initial={{ opacity: 0, y: 10 }}
@@ -34,16 +37,37 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                         exit={{ opacity: 0, y: 10 }}
                         onClick={(event) => {
                           event.preventDefault();
-                          console.log("CONTINUE_BUILDING");
+                          onContinueBuilding();
                         }}
                       >
                         <div className="i-ph:rocket-launch text-xl"></div>
                       </motion.button>
                     </WithTooltip>
                   </TooltipProvider>
-                </AnimatePresence>
-            
-            )}
+                </AnimatePresence>          
+              )}
+              {listenResponses && appSummary?.features?.length && (
+                <AnimatePresence>
+                  <TooltipProvider>
+                    <WithTooltip tooltip={"Stop Building"}>
+                      <motion.button
+                        className="bg-red-500 hover:bg-red-600"
+                        title={"Stop Building"}
+                        transition={{ ease: customEasingFn, duration: 0.17 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          onAbort();
+                        }}
+                      >
+                        <div className="i-ph:stop-circle-bold text-xl"></div>
+                      </motion.button>
+                    </WithTooltip>
+                  </TooltipProvider>
+                </AnimatePresence>          
+              )}
             <div className="mb-8">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>

@@ -80,6 +80,7 @@ const ChatImplementer = memo(() => {
     gNumAborts++;
     chatStore.aborted.set(true);
     chatStore.hasPendingMessage.set(false);
+    chatStore.listenResponses.set(false);
     clearPendingMessageStatus();
 
     const appId = chatStore.currentAppId.get();
@@ -273,6 +274,8 @@ const ChatImplementer = memo(() => {
     setInput('');
 
     textareaRef.current?.blur();
+
+    doListenAppResponses();
   };
 
   const doListenAppResponses = async () => {
