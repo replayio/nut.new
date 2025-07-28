@@ -6,7 +6,7 @@ import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
-import { chatStore, doAbortChat } from '~/lib/stores/chat';
+import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { getDiscoveryRating } from '~/lib/persistence/message';
@@ -15,6 +15,8 @@ export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleSendMessage?: (messageInput: string, mode: ChatMode | undefined) => void;
+  handleStop?: () => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
@@ -31,6 +33,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   textareaRef,
   input = '',
   handleInputChange = () => {},
+  handleSendMessage = () => {},
+  handleStop = () => {},
   uploadedFiles = [],
   setUploadedFiles = () => {},
   imageDataList = [],
@@ -163,7 +167,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             event.preventDefault();
 
             if (hasPendingMessage) {
-              doAbortChat();
+              handleStop();
               return;
             }
 
@@ -171,7 +175,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            doSendMessage(fullInput, undefined);
+            handleSendMessage(fullInput, undefined);
           }
         }}
         value={input}
@@ -191,12 +195,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
               onClick={() => {
                 if (hasPendingMessage) {
-                  doAbortChat();
+                  handleStop();
                   return;
                 }
 
                 if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                  doSendMessage(fullInput, undefined);
+                  handleSendMessage(fullInput, undefined);
                 }
               }}
             />
@@ -204,7 +208,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               <StartPlanningButton
                 onClick={() => {
                   const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                  doSendMessage(message, ChatMode.BuildApp);
+                  handleSendMessage(message, ChatMode.BuildApp);
                 }}
               />
             )}

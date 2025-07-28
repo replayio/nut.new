@@ -2,20 +2,15 @@ import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import Pages from './components/Pages';
 import Features from './components/Features/Features';
 import { useStore } from '@nanostores/react';
-import { chatStore } from '~/lib/stores/chat';
-import { AnimatePresence, motion, cubicBezier } from 'framer-motion';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
-import WithTooltip from '~/components/ui/Tooltip';
+import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
+import { cubicBezier } from 'framer-motion';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
-  onContinueBuilding: () => void;
-  onAbort: () => void;
 }
 
-const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
-
-const PlanView = ({ appSummary, onContinueBuilding, onAbort }: PlanViewProps) => {
+const PlanView = ({ appSummary }: PlanViewProps) => {
   const listenResponses = useStore(chatStore.listenResponses);
 
   return (
@@ -24,38 +19,38 @@ const PlanView = ({ appSummary, onContinueBuilding, onAbort }: PlanViewProps) =>
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div className="flex-1">
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
-              {!listenResponses && appSummary?.features?.length && (
-                <button
-                  className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200 w-full text-left cursor-pointer"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    onContinueBuilding();
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="i-ph:rocket-launch text-xl text-blue-600"></div>
-                    <div>
-                      <div className="font-medium text-blue-900">Continue Building</div>
-                    </div>
+            {!listenResponses && appSummary?.features?.length && (
+              <button
+                className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200 w-full text-left cursor-pointer"
+                onClick={(event) => {
+                  event.preventDefault();
+                  doSendMessage(ChatMode.DevelopApp, []);
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="i-ph:rocket-launch text-xl text-blue-600"></div>
+                  <div>
+                    <div className="font-medium text-blue-900">Continue Building</div>
                   </div>
-                </button>
-              )}
-              {listenResponses && appSummary?.features?.length && (
-                <button
-                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200 w-full text-left cursor-pointer"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    onAbort();
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="i-ph:stop-circle-bold text-xl text-red-600"></div>
-                    <div>
-                      <div className="font-medium text-red-900">Building in Progress</div>
-                    </div>
+                </div>
+              </button>
+            )}
+            {listenResponses && appSummary?.features?.length && (
+              <button
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200 w-full text-left cursor-pointer"
+                onClick={(event) => {
+                  event.preventDefault();
+                  doAbortChat();
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="i-ph:stop-circle-bold text-xl text-red-600"></div>
+                  <div>
+                    <div className="font-medium text-red-900">Building in Progress</div>
                   </div>
-                </button>
-              )}
+                </div>
+              </button>
+            )}
             <div className="mb-8">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>

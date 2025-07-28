@@ -64,7 +64,7 @@ export function doAbortChat() {
   if (appId) {
     database.abortAppChats(appId);
   }
-};
+}
 
 export async function doSendMessage(mode: ChatMode, messages: Message[], references?: ChatReference[]) {
   const numAbortsAtStart = chatStore.numAborts.get();
@@ -121,7 +121,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   chatStore.hasPendingMessage.set(false);
 
   doListenAppResponses();
-};
+}
 
 export async function doListenAppResponses() {
   if (!chatStore.currentAppId.get()) {
@@ -184,4 +184,4 @@ export async function doListenAppResponses() {
   }
 
   chatStore.listenResponses.set(false);
-};
+}

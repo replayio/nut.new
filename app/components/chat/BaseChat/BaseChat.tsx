@@ -138,7 +138,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
-    const handleSendMessage = (event: React.UIEvent, messageInput: string, chatMode?: ChatMode) => {
+    const handleSendMessage = (messageInput: string, chatMode?: ChatMode) => {
       if (sendMessage) {
         sendMessage(messageInput, chatMode);
         abortListening();
@@ -274,7 +274,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage(event, messageInput, ChatMode.Discovery);
+                  handleSendMessage(messageInput, ChatMode.Discovery);
                 })}
                 {isArboretumVisible && <Arboretum />}
               </>

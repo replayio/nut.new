@@ -4,12 +4,12 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { addChatMessage, addResponseEvent, chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
+import { addChatMessage, chatStore, doAbortChat, doListenAppResponses, doSendMessage } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
+import { sendChatMessage, type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -18,10 +18,8 @@ import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/pe
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
-import { setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
-import type { ChatResponse } from '~/lib/persistence/response';
 import { generateRandomId } from '~/utils/nut';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
@@ -111,8 +109,6 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (messageInput: string, chatMode?: ChatMode) => {
-    const numAbortsAtStart = chatStore.numAborts.get();
-
     if (messageInput.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
     }
@@ -200,148 +196,19 @@ const ChatImplementer = memo(() => {
       }
     }
 
+    const numAbortsAtStart = chatStore.numAborts.get();
+
     await doSendMessage(mode, messages, references);
+
+    if (chatStore.numAborts.get() != numAbortsAtStart) {
+      return;
+    }
 
     gActiveChatMessageTelemetry.finish(messages.length, true);
     clearActiveChat();
 
     setInput('');
     textareaRef.current?.blur();
-  };
-
-  const doListenAppResponses = async () => {
-    if (!chatStore.currentAppId.get()) {
-      return;
-    }
-
-    if (chatStore.listenResponses.get()) {
-      return;
-    }
-    chatStore.listenResponses.set(true);
-
-    const numAbortsAtStart = gNumAborts;
-
-    const onResponse = (response: ChatResponse) => {
-      if (gNumAborts != numAbortsAtStart) {
-        return;
-      }
-
-      switch (response.kind) {
-        case 'message': {
-          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          addChatMessage(response.message);
-
-          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-            updateDevelopmentServer(responseRepositoryId);
-          }
-          break;
-        }
-        case 'app-event':
-          addResponseEvent(response);
-          break;
-        case 'title':
-          chatStore.appTitle.set(response.title);
-          break;
-        case 'status':
-          setPendingMessageStatus(response.status);
-          break;
-        case 'done':
-        case 'error':
-        case 'aborted':
-          break;
-        default:
-          console.error('Unknown chat response:', response);
-          break;
-      }
-    };
-
-    try {
-      await listenAppResponses(onResponse);
-    } catch (e) {
-      toast.error('Error resuming chat');
-      console.error('Error resuming chat', e);
-    }
-
-    if (gNumAborts != numAbortsAtStart) {
-      return;
-    }
-  
-    chatStore.hasPendingMessage.set(false);
-
-    setInput('');
-
-    textareaRef.current?.blur();
-
-    doListenAppResponses();
-  };
-
-  const doListenAppResponses = async () => {
-    if (!chatStore.currentAppId.get()) {
-      return;
-    }
-
-    if (chatStore.listenResponses.get()) {
-      return;
-    }
-    chatStore.listenResponses.set(true);
-
-    const numAbortsAtStart = gNumAborts;
-
-    const onResponse = (response: ChatResponse) => {
-      if (gNumAborts != numAbortsAtStart) {
-        return;
-      }
-
-      switch (response.kind) {
-        case 'message': {
-          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          addChatMessage(response.message);
-
-          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-            updateDevelopmentServer(responseRepositoryId);
-          }
-          break;
-        }
-        case 'app-event':
-          addResponseEvent(response);
-          break;
-        case 'title':
-          chatStore.appTitle.set(response.title);
-          break;
-        case 'status':
-          setPendingMessageStatus(response.status);
-          break;
-        case 'done':
-        case 'error':
-        case 'aborted':
-          break;
-        default:
-          console.error('Unknown chat response:', response);
-          break;
-      }
-    };
-
-    try {
-      await listenAppResponses(onResponse);
-    } catch (e) {
-      toast.error('Error resuming chat');
-      console.error('Error resuming chat', e);
-    }
-
-    if (gNumAborts != numAbortsAtStart) {
-      return;
-    }
-
-
-    chatStore.listenResponses.set(false);
-  
-    chatStore.listenResponses.set(false);
   };
 
   // Always check for ongoing work when we first start the chat.
