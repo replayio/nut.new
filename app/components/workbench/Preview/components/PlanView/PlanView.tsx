@@ -1,4 +1,4 @@
-import { type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import Pages from './components/Pages';
 import Features from './components/Features/Features';
 import { useStore } from '@nanostores/react';
@@ -7,6 +7,17 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
+}
+
+function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
+  return (
+    appSummary?.features?.length &&
+    appSummary.features.some(
+      (feature) =>
+        feature.status != AppFeatureStatus.Validated &&
+        feature.status != AppFeatureStatus.ValidationFailed
+    )
+  );
 }
 
 const PlanView = ({ appSummary }: PlanViewProps) => {
@@ -18,7 +29,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div className="flex-1">
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
-            {!listenResponses && appSummary?.features?.length && (
+            {!listenResponses && appSummaryHasPendingFeature(appSummary) && (
               <button
                 className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200 w-full text-left cursor-pointer"
                 onClick={(event) => {

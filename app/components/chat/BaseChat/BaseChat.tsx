@@ -98,7 +98,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           }, 1000);
         }
       }
-    }, [hasPendingMessage, appSummary, messages]);
+    }, [hasPendingMessage, listenResponses, appSummary, messages]);
 
     useEffect(() => {
       if (showWorkbench && mobileActiveTab === 'chat') {

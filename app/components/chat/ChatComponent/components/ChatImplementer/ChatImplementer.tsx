@@ -213,11 +213,6 @@ const ChatImplementer = memo(() => {
     textareaRef.current?.blur();
   };
 
-  // Always check for ongoing work when we first start the chat.
-  useEffect(() => {
-    doListenAppResponses();
-  }, []);
-
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);
 

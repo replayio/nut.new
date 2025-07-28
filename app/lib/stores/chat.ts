@@ -169,12 +169,16 @@ export async function doListenAppResponses() {
     }
   };
 
+  console.log('ListenAppResponsesStart');
+
   try {
     await listenAppResponses(onResponse);
   } catch (e) {
     toast.error('Error listing to app responses');
     console.error('Error listing to app response', e);
   }
+
+  console.log('ListenAppResponsesDone');
 
   if (chatStore.numAborts.get() != numAbortsAtStart) {
     return;

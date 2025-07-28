@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import type { Message } from '~/lib/persistence/message';
 import mergeResponseMessage from './functions/mergeResponseMessages';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
-import { chatStore, isResponseEvent } from '~/lib/stores/chat';
+import { chatStore, doListenAppResponses, isResponseEvent } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import type { ChatResponse } from '~/lib/persistence/response';
 
@@ -41,6 +41,10 @@ export function Chat() {
         chatStore.events.set(eventResponses);
         chatStore.messages.set(messages);
         chatStore.started.set(chatStore.messages.get().length > 0);
+
+        // Always check for ongoing work when we first start the chat.
+        doListenAppResponses();
+
         setReady(true);
       } catch (error) {
         logStore.logError('Failed to load chat messages', error);
