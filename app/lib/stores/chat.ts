@@ -3,13 +3,10 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import type { Message } from '~/lib/persistence/message';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { clearPendingMessageStatus } from './status';
-import { database } from '../persistence/apps';
-import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
-import { generateRandomId } from '~/utils/nut';
 import { setPendingMessageStatus } from './status';
-import { getLatestAppSummary, getLatestAppRepositoryId } from '~/lib/persistence/messageAppSummary';
-import { getDiscoveryRating, MAX_DISCOVERY_RATING } from '~/lib/persistence/message';
+import { getLatestAppRepositoryId } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 

@@ -3,7 +3,6 @@ import Pages from './components/Pages';
 import Features from './components/Features/Features';
 import { useStore } from '@nanostores/react';
 import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
-import { cubicBezier } from 'framer-motion';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface PlanViewProps {

@@ -9,7 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
+import { type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -168,6 +168,8 @@ const ChatImplementer = memo(() => {
     setUploadedFiles([]);
     setImageDataList([]);
 
+    runAnimation();
+
     const references: ChatReference[] = [];
 
     const mouseData = getCurrentMouseData();
@@ -277,6 +279,7 @@ const ChatImplementer = memo(() => {
       showChat={showChat}
       chatStarted={chatStarted}
       sendMessage={sendMessage}
+      handleStop={abort}
       messageRef={messageRef}
       scrollRef={scrollRef}
       handleInputChange={(e) => {
