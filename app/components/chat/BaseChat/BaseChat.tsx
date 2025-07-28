@@ -88,22 +88,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const mobileActiveTab = useStore(mobileNavStore.activeTab);
     const isSmallViewport = useViewport(1024);
 
-    const [lastMessageTimestamp, setLastMessageTimestamp] = useState<number>(0);
-
     useEffect(() => {
       if (!hasPendingMessage && !listenResponses && appSummary && messages && messages.length > 0) {
         const lastMessage = messages[messages.length - 1];
-        const currentTimestamp = Date.now();
 
-        if (lastMessage.role === 'assistant' && currentTimestamp !== lastMessageTimestamp) {
-          setLastMessageTimestamp(currentTimestamp);
-
+        if (lastMessage.role === 'assistant') {
           setTimeout(() => {
             statusModalStore.open();
           }, 1000);
         }
       }
-    }, [hasPendingMessage, appSummary, messages, lastMessageTimestamp]);
+    }, [hasPendingMessage, appSummary, messages]);
 
     useEffect(() => {
       if (showWorkbench && mobileActiveTab === 'chat') {
