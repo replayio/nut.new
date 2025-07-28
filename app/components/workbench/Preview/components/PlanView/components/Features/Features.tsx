@@ -41,11 +41,13 @@ const Features = ({ appSummary }: FeaturesProps) => {
         break;
       case AppFeatureStatus.ImplementationInProgress:
         return (
-          <div
-            className={classNames(
-              'min-w-4 min-h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
-            )}
-          />
+          <div className="flex items-center pl-2">
+            <div
+              className={classNames(
+                'min-w-4 min-h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin',
+              )}
+            />
+          </div>
         );
       case AppFeatureStatus.Implemented:
         return (
@@ -79,7 +81,6 @@ const Features = ({ appSummary }: FeaturesProps) => {
     return null;
   };
 
-  // Render a feature, or undefined for the mockup.
   const renderFeature = (feature: AppFeature | undefined, index: number) => {
     const isCollapsed = collapsedFeatures.has(index);
 
@@ -98,8 +99,8 @@ const Features = ({ appSummary }: FeaturesProps) => {
           onClick={() => toggleFeatureCollapse(index)}
           className="flex justify-between items-center p-3 border-b border-bolt-elements-borderColor cursor-pointer"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 flex items-center justify-center">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
               {isCollapsed ? (
                 <div className="i-ph:caret-down text-bolt-elements-textPrimary text-base font-bold" />
               ) : (
@@ -107,15 +108,17 @@ const Features = ({ appSummary }: FeaturesProps) => {
               )}
             </div>
 
-            <div className="gap-2">
+            <div className="gap-2 min-w-0 flex-1">
               <div className="text-bolt-elements-textPrimary text-base font-bold">{name}</div>
-              <div className="flex-1 flex items-center group text-bolt-elements-textSecondary">
-                <span className="flex-1">{description}</span>
+              <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
+                <span>{description}</span>
               </div>
             </div>
           </div>
 
-          {renderFeatureStatus(status)}
+          <div className="flex-shrink-0">
+            {renderFeatureStatus(status)}
+          </div>
         </div>
 
         <AnimatePresence>

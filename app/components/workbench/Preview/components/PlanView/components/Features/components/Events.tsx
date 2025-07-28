@@ -18,13 +18,13 @@ function responseStartsFeature(response: ChatResponse, featureName: string | und
 
 // Return separate streams of events for each worker which has operated on the feature.
 function groupWorkerEvents(eventResponses: ChatResponse[], featureName: string | undefined): ChatResponse[][] {
-  const chatIds: string[] = [];
+  const chatIds: Set<string> = new Set();
   for (const response of eventResponses) {
     if (response.chatId && responseStartsFeature(response, featureName)) {
-      chatIds.push(response.chatId);
+      chatIds.add(response.chatId);
     }
   }
-  return chatIds.map((chatId) => eventResponses.filter((response) => response.chatId === chatId));
+  return Array.from(chatIds).map((chatId) => eventResponses.filter((response) => response.chatId === chatId));
 }
 
 const Events = ({ featureName }: EventsProps) => {

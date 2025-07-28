@@ -20,6 +20,9 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
 
 const PlanView = ({ appSummary }: PlanViewProps) => {
   const listenResponses = useStore(chatStore.listenResponses);
+  const completedFeatures = appSummary?.features?.filter((feature) => feature.status === AppFeatureStatus.Validated).length;
+  const totalFeatures = appSummary?.features?.length;
+  const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
 
   return (
     <div className="relative h-full w-full">
@@ -27,37 +30,41 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div className="flex-1">
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
-            {!listenResponses && appSummaryHasPendingFeature(appSummary) && (
-              <button
-                className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200 w-full text-left cursor-pointer"
-                onClick={(event) => {
-                  event.preventDefault();
-                  doSendMessage(ChatMode.DevelopApp, []);
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="i-ph:rocket-launch text-xl text-blue-600"></div>
-                  <div>
-                    <div className="font-medium text-blue-900">Continue Building</div>
+            {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
+              <div className="flex justify-center items-center">
+                <button
+                  className="mb-6 p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    doSendMessage(ChatMode.DevelopApp, []);
+                  }}
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="i-ph:rocket-launch text-xl text-white"></div>
+                    <div>
+                      <div className="font-medium text-white">Continue Building</div>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             )}
             {listenResponses && appSummary?.features?.length && (
-              <button
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200 w-full text-left cursor-pointer"
-                onClick={(event) => {
-                  event.preventDefault();
-                  doAbortChat();
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="i-ph:stop-circle-bold text-xl text-red-600"></div>
-                  <div>
-                    <div className="font-medium text-red-900">Building in Progress</div>
+              <div className="flex justify-center items-center">
+                <button
+                  className="mb-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    doAbortChat();
+                  }}
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="i-ph:stop-circle-bold text-xl text-white"></div>
+                    <div>
+                      <div className="font-medium text-white">Build in Progress (Click to Stop)</div>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             )}
             <div className="mb-8">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>

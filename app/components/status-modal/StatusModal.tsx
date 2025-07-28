@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { statusModalStore } from '~/lib/stores/statusModal';
 import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 
 interface StatusModalProps {
   appSummary: AppSummary;
@@ -17,7 +17,9 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
   const features = appSummary.features || [];
   const completedFeatures = features.filter(
     (feature) =>
-      feature.status === 'Implemented' || feature.status === 'Validated' || feature.status === 'ValidationFailed',
+      feature.status === AppFeatureStatus.Implemented ||
+      feature.status === AppFeatureStatus.Validated ||
+      feature.status === AppFeatureStatus.ValidationFailed,
   ).length;
   const totalFeatures = features.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures > 0;

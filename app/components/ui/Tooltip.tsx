@@ -11,6 +11,7 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
   maxWidth?: number;
   delay?: number;
+  forceOpen?: boolean;
 }
 
 const WithTooltip = forwardRef(
@@ -25,11 +26,12 @@ const WithTooltip = forwardRef(
       position = 'top',
       maxWidth = 250,
       delay = 0,
+      forceOpen = false,
     }: TooltipProps,
     _ref: ForwardedRef<HTMLElement>,
   ) => {
     return (
-      <Tooltip.Root delayDuration={delay}>
+      <Tooltip.Root delayDuration={delay} open={forceOpen ? true : undefined}>
         <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Content

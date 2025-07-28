@@ -210,6 +210,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                   handleSendMessage(message, ChatMode.BuildApp);
                 }}
+                startPlanningRating={startPlanningRating}
               />
             )}
           </>
