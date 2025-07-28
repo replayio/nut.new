@@ -1,10 +1,11 @@
+import { useStore } from '@nanostores/react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
+import { chatStore } from '~/lib/stores/chat';
 
 interface SendButtonProps {
   show: boolean;
-  hasPendingMessage?: boolean;
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onImagesSelected?: (images: File[]) => void;
@@ -12,7 +13,8 @@ interface SendButtonProps {
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const SendButton = ({ show, hasPendingMessage, disabled, onClick }: SendButtonProps) => {
+export const SendButton = ({ show, disabled, onClick }: SendButtonProps) => {
+  const hasPendingMessage = useStore(chatStore.hasPendingMessage);
   const className = `absolute flex justify-center items-center bottom-[95px] right-[22px] p-1 ${
     hasPendingMessage ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
   } color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed`;

@@ -170,22 +170,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
-    const hasAppSummary = !!getLatestAppSummary(messages || []);
-
-    let startPlanningRating = 0;
-    if (!hasPendingMessage && !hasAppSummary) {
-      startPlanningRating = getDiscoveryRating(messages || []);
-    }
-
     const messageInputProps: MessageInputProps = {
       textareaRef,
       input,
       handleInputChange,
       handleSendMessage,
       handleStop,
-      hasPendingMessage,
-      chatStarted,
-      hasAppSummary,
       uploadedFiles,
       setUploadedFiles,
       imageDataList,
@@ -196,7 +186,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
       checkedBoxes: checkedBoxesRef.current,
-      startPlanningRating,
     };
 
     const baseChat = (
