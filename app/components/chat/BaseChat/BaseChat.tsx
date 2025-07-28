@@ -24,9 +24,11 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
+import { statusModalStore } from '~/lib/stores/statusModal';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
+import { StatusModal } from '~/components/status-modal/StatusModal';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -85,6 +87,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const mobileActiveTab = useStore(mobileNavStore.activeTab);
     const isSmallViewport = useViewport(1024);
 
+    const [lastMessageTimestamp, setLastMessageTimestamp] = useState<number>(0);
+
+    useEffect(() => {
+      if (!hasPendingMessage && appSummary && messages && messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        const currentTimestamp = Date.now();
+
+        if (lastMessage.role === 'assistant' && currentTimestamp !== lastMessageTimestamp) {
+          setLastMessageTimestamp(currentTimestamp);
+
+          setTimeout(() => {
+            statusModalStore.open();
+          }, 1000);
+        }
+      }
+    }, [hasPendingMessage, appSummary, messages, lastMessageTimestamp]);
+
     useEffect(() => {
       if (showWorkbench && mobileActiveTab === 'chat') {
         mobileNavStore.setActiveTab('planning');
@@ -110,6 +129,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     });
 
     const checkedBoxesRef = useRef<string[]>([]);
+
+    const handleContinueBuilding = () => {
+      if (sendMessage) {
+        const message = 'Continue building the app.';
+        sendMessage(message, ChatMode.DevelopApp);
+      }
+    };
 
     const handleSendMessage = (event: React.UIEvent, messageInput: string, chatMode?: ChatMode) => {
       if (sendMessage) {
@@ -264,6 +290,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}
       </div>
     );
 
