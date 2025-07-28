@@ -10,21 +10,24 @@ import {
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
+import { useStore } from '@nanostores/react';
+import { chatStore } from '~/lib/stores/chat';
+import { pendingMessageStatusStore } from '~/lib/stores/status';
 
 interface MessagesProps {
   id?: string;
   className?: string;
-  hasPendingMessage?: boolean;
-  pendingMessageStatus?: string;
-  messages?: Message[];
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ messages = [], hasPendingMessage = false, pendingMessageStatus = '', onLastMessageCheckboxChange }, ref) => {
+  ({ onLastMessageCheckboxChange }, ref) => {
     const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const messages = useStore(chatStore.messages);
+    const hasPendingMessage = useStore(chatStore.hasPendingMessage);
+    const pendingMessageStatus = useStore(pendingMessageStatusStore);
 
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {

@@ -76,6 +76,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     ref,
   ) => {
     const messages = useStore(chatStore.messages);
+    const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const appSummary = getLatestAppSummary(messages);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
@@ -108,11 +109,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    // These refs don't seem like they should be necessary, but we get stale messages
-    // in the onLastMessageCheckboxChange callback for some reason that prevents
-    // multiple checkboxes from being checked otherwise.
-    const messagesRef = useRef<Message[]>([]);
-    messagesRef.current = messages || [];
     const checkedBoxesRef = useRef<string[]>([]);
 
     const handleSendMessage = (event: React.UIEvent, messageInput: string, chatMode?: ChatMode) => {
@@ -148,28 +144,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     })();
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
-      if (messages && setMessages) {
-        const newMessages = messagesRef.current.map((message) => {
-          if (message.type == 'text') {
-            const oldBox = checked ? `[ ]` : `[x]`;
-            const newBox = checked ? `[x]` : `[ ]`;
-            const lines = message.content.split('\n');
-            const matchingLineIndex = lines.findIndex(
-              (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
-            );
-            if (matchingLineIndex >= 0) {
-              lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
-              return {
-                ...message,
-                content: lines.join('\n').trim(),
-              };
-            }
+      const newMessages = chatStore.messages.get().map((message) => {
+        if (message.type == 'text') {
+          const oldBox = checked ? `[ ]` : `[x]`;
+          const newBox = checked ? `[x]` : `[ ]`;
+          const lines = message.content.split('\n');
+          const matchingLineIndex = lines.findIndex(
+            (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
+          );
+          if (matchingLineIndex >= 0) {
+            lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
+            return {
+              ...message,
+              content: lines.join('\n').trim(),
+            };
           }
-          return message;
-        });
-        messagesRef.current = newMessages;
-        setMessages(newMessages);
-      }
+        }
+        return message;
+      });
+      chatStore.messages.set(newMessages);
       if (checked) {
         checkedBoxesRef.current = [...checkedBoxesRef.current, checkboxText];
       } else {
@@ -243,9 +236,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   return chatStarted ? (
                     <Messages
                       ref={messageRef}
-                      messages={messages}
-                      hasPendingMessage={hasPendingMessage}
-                      pendingMessageStatus={pendingMessageStatus}
                       onLastMessageCheckboxChange={onLastMessageCheckboxChange}
                     />
                   ) : null;

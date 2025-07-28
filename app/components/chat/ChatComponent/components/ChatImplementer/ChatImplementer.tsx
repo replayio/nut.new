@@ -19,7 +19,7 @@ import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/pe
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
-import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
+import { setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { ChatResponse } from '~/lib/persistence/response';
@@ -46,15 +46,12 @@ function navigateApp(nextId: string) {
 
 const ChatImplementer = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messages = useStore(chatStore.messages);
   const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams] = useSearchParams();
   // const { isLoggedIn } = useAuthStatus();
   const [input, setInput] = useState('');
-
-  const pendingMessageStatus = useStore(pendingMessageStatusStore);
 
   const showChat = useStore(chatStore.showChat);
 
