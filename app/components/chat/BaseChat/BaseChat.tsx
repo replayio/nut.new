@@ -98,10 +98,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (!hasPendingMessage && appSummary && messages && messages.length > 0) {
         const lastMessage = messages[messages.length - 1];
         const currentTimestamp = Date.now();
-        
+
         if (lastMessage.role === 'assistant' && currentTimestamp !== lastMessageTimestamp) {
           setLastMessageTimestamp(currentTimestamp);
-          
+
           setTimeout(() => {
             statusModalStore.open();
           }, 1000);
@@ -321,12 +321,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
-        {appSummary && (
-          <StatusModal 
-            appSummary={appSummary} 
-            onContinueBuilding={handleContinueBuilding} 
-          />
-        )}
+        {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}
       </div>
     );
 

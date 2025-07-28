@@ -22,4 +22,4 @@ export class StatusModalStore {
   }
 }
 
-export const statusModalStore = new StatusModalStore(); 
+export const statusModalStore = new StatusModalStore();
