@@ -85,7 +85,9 @@ async function deleteApp(appId: string): Promise<void> {
 
 async function createApp(): Promise<string> {
   const { appId } = await callNutAPI('create-app', {});
-  if (!appId) {
+
+  const userId = await getCurrentUserId();
+  if (!userId) {
     const localAppIds = getLocalAppIds();
     localAppIds.push(appId);
     setLocalAppIds(localAppIds);
