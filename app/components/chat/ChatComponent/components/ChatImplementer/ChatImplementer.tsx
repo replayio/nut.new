@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { addChatMessage, addResponseEvent, chatStore } from '~/lib/stores/chat';
+import { addChatMessage, addResponseEvent, chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
@@ -14,7 +14,6 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import type { RejectChangeData } from '~/components/chat/ApproveChange';
-import { generateRandomId } from '~/utils/nut';
 import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
@@ -23,8 +22,7 @@ import { setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { ChatResponse } from '~/lib/persistence/response';
-
-let gNumAborts = 0;
+import { generateRandomId } from '~/utils/nut';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
@@ -76,22 +74,12 @@ const ChatImplementer = memo(() => {
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
   const abort = () => {
-    stop();
-    gNumAborts++;
-    chatStore.aborted.set(true);
-    chatStore.hasPendingMessage.set(false);
-    chatStore.listenResponses.set(false);
-    clearPendingMessageStatus();
-
-    const appId = chatStore.currentAppId.get();
-    if (appId) {
-      database.abortAppChats(appId);
-    }
-
     if (gActiveChatMessageTelemetry) {
       gActiveChatMessageTelemetry.abort('StopButtonClicked');
       clearActiveChat();
     }
+
+    doAbortChat();
   };
 
   useEffect(() => {
@@ -123,7 +111,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (messageInput: string, chatMode?: ChatMode) => {
-    const numAbortsAtStart = gNumAborts;
+    const numAbortsAtStart = chatStore.numAborts.get();
 
     if (messageInput.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
@@ -145,8 +133,6 @@ const ChatImplementer = memo(() => {
     // }
 
     const chatId = generateRandomId();
-    chatStore.hasPendingMessage.set(true);
-    setPendingMessageStatus('');
 
     const userMessage: Message = {
       id: `user-${chatId}`,
@@ -186,52 +172,6 @@ const ChatImplementer = memo(() => {
     setUploadedFiles([]);
     setImageDataList([]);
 
-    chatStore.aborted.set(false);
-
-    runAnimation();
-
-    const onResponse = (response: ChatResponse) => {
-      if (gNumAborts != numAbortsAtStart) {
-        return;
-      }
-
-      switch (response.kind) {
-        case 'message': {
-          gActiveChatMessageTelemetry?.onResponseMessage();
-
-          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          addChatMessage(response.message);
-
-          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-            updateDevelopmentServer(responseRepositoryId);
-          }
-          break;
-        }
-        case 'app-event':
-          addResponseEvent(response);
-          break;
-        case 'title':
-          chatStore.appTitle.set(response.title);
-          break;
-        case 'status':
-          setPendingMessageStatus(response.status);
-          break;
-        case 'error':
-          toast.error('Error sending message');
-          console.error('Error sending message', response.error);
-          break;
-        case 'done':
-        case 'aborted':
-          break;
-        default:
-          console.error('Unknown chat response:', response);
-          break;
-      }
-    };
-
     const references: ChatReference[] = [];
 
     const mouseData = getCurrentMouseData();
@@ -260,15 +200,75 @@ const ChatImplementer = memo(() => {
       }
     }
 
-    await sendChatMessage(mode, messages, references, onResponse);
-
-    if (gNumAborts != numAbortsAtStart) {
-      return;
-    }
+    await doSendMessage(mode, messages, references);
 
     gActiveChatMessageTelemetry.finish(messages.length, true);
     clearActiveChat();
 
+    setInput('');
+    textareaRef.current?.blur();
+  };
+
+  const doListenAppResponses = async () => {
+    if (!chatStore.currentAppId.get()) {
+      return;
+    }
+
+    if (chatStore.listenResponses.get()) {
+      return;
+    }
+    chatStore.listenResponses.set(true);
+
+    const numAbortsAtStart = gNumAborts;
+
+    const onResponse = (response: ChatResponse) => {
+      if (gNumAborts != numAbortsAtStart) {
+        return;
+      }
+
+      switch (response.kind) {
+        case 'message': {
+          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+          addChatMessage(response.message);
+
+          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+            updateDevelopmentServer(responseRepositoryId);
+          }
+          break;
+        }
+        case 'app-event':
+          addResponseEvent(response);
+          break;
+        case 'title':
+          chatStore.appTitle.set(response.title);
+          break;
+        case 'status':
+          setPendingMessageStatus(response.status);
+          break;
+        case 'done':
+        case 'error':
+        case 'aborted':
+          break;
+        default:
+          console.error('Unknown chat response:', response);
+          break;
+      }
+    };
+
+    try {
+      await listenAppResponses(onResponse);
+    } catch (e) {
+      toast.error('Error resuming chat');
+      console.error('Error resuming chat', e);
+    }
+
+    if (gNumAborts != numAbortsAtStart) {
+      return;
+    }
+  
     chatStore.hasPendingMessage.set(false);
 
     setInput('');
@@ -338,6 +338,9 @@ const ChatImplementer = memo(() => {
       return;
     }
 
+
+    chatStore.listenResponses.set(false);
+  
     chatStore.listenResponses.set(false);
   };
 
@@ -412,7 +415,6 @@ const ChatImplementer = memo(() => {
       handleInputChange={(e) => {
         onTextareaChange(e);
       }}
-      handleStop={abort}
       uploadedFiles={uploadedFiles}
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}

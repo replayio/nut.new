@@ -6,7 +6,7 @@ import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
-import { chatStore } from '~/lib/stores/chat';
+import { chatStore, doAbortChat } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { getDiscoveryRating } from '~/lib/persistence/message';
@@ -15,8 +15,6 @@ export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (event: React.UIEvent, messageInput: string, mode: ChatMode | undefined) => void;
-  handleStop?: () => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
@@ -33,8 +31,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   textareaRef,
   input = '',
   handleInputChange = () => {},
-  handleSendMessage = () => {},
-  handleStop = () => {},
   uploadedFiles = [],
   setUploadedFiles = () => {},
   imageDataList = [],
@@ -167,7 +163,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             event.preventDefault();
 
             if (hasPendingMessage) {
-              handleStop();
+              doAbortChat();
               return;
             }
 
@@ -175,7 +171,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               return;
             }
 
-            handleSendMessage(event, fullInput, undefined);
+            doSendMessage(fullInput, undefined);
           }
         }}
         value={input}
@@ -193,22 +189,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <>
             <SendButton
               show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
-              onClick={(event) => {
+              onClick={() => {
                 if (hasPendingMessage) {
-                  handleStop();
+                  doAbortChat();
                   return;
                 }
 
                 if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                  handleSendMessage(event, fullInput, undefined);
+                  doSendMessage(fullInput, undefined);
                 }
               }}
             />
             {startPlanningRating > 0 && (
               <StartPlanningButton
-                onClick={(event) => {
+                onClick={() => {
                   const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                  handleSendMessage(event, message, ChatMode.BuildApp);
+                  doSendMessage(message, ChatMode.BuildApp);
                 }}
               />
             )}
