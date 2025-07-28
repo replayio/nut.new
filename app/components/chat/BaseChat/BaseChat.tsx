@@ -79,6 +79,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   ) => {
     const messages = useStore(chatStore.messages);
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
+    const listenResponses = useStore(chatStore.listenResponses);
     const appSummary = getLatestAppSummary(messages);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
@@ -90,7 +91,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [lastMessageTimestamp, setLastMessageTimestamp] = useState<number>(0);
 
     useEffect(() => {
-      if (!hasPendingMessage && appSummary && messages && messages.length > 0) {
+      if (!hasPendingMessage && !listenResponses && appSummary && messages && messages.length > 0) {
         const lastMessage = messages[messages.length - 1];
         const currentTimestamp = Date.now();
 
