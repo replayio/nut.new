@@ -43,7 +43,7 @@ export function isResponseEvent(response: ChatResponse) {
   }
 }
 
-export function addResponseEvent(response: ChatResponse) {
+function addResponseEvent(response: ChatResponse) {
   chatStore.events.set([...chatStore.events.get(), response]);
 }
 
@@ -139,6 +139,11 @@ export async function doListenAppResponses() {
 
     switch (response.kind) {
       case 'message': {
+        // Ignore messages that we already know about.
+        if (chatStore.messages.get().some(m => m.id == response.message.id)) {
+          return;
+        }
+
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
         addChatMessage(response.message);
