@@ -9,7 +9,7 @@ import { Workbench } from '~/components/workbench/Workbench.client';
 import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { getDiscoveryRating, type Message } from '~/lib/persistence/message';
+import { type Message } from '~/lib/persistence/message';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
@@ -223,15 +223,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
-                    <Messages
-                      ref={messageRef}
-                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                    />
+                    <Messages ref={messageRef} onLastMessageCheckboxChange={onLastMessageCheckboxChange} />
                   ) : null;
                 }}
               </ClientOnly>
               <ChatPromptContainer
-                chatStarted={chatStarted}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles!}
                 imageDataList={imageDataList}

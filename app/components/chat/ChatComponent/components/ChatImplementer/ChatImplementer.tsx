@@ -75,10 +75,6 @@ const ChatImplementer = memo(() => {
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
-  useEffect(() => {
-    chatStore.started.set(chatStore.messages.get().length > 0);
-  }, []);
-
   const abort = () => {
     stop();
     gNumAborts++;
@@ -343,7 +339,9 @@ const ChatImplementer = memo(() => {
   };
 
   // Always check for ongoing work when we first start the chat.
-  useEffect(() => { doListenAppResponses() }, []);
+  useEffect(() => {
+    doListenAppResponses();
+  }, []);
 
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);

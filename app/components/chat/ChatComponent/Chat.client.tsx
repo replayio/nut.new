@@ -14,7 +14,6 @@ import type { ChatResponse } from '~/lib/persistence/response';
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const { id: appId } = useLoaderData<{ id?: string }>() ?? {};
 
   const [ready, setReady] = useState<boolean>(!appId);
@@ -40,7 +39,8 @@ export function Chat() {
         chatStore.currentAppId.set(appId);
         chatStore.appTitle.set(title);
         chatStore.events.set(eventResponses);
-        setInitialMessages(messages);
+        chatStore.messages.set(messages);
+        chatStore.started.set(chatStore.messages.get().length > 0);
         setReady(true);
       } catch (error) {
         logStore.logError('Failed to load chat messages', error);
@@ -49,5 +49,5 @@ export function Chat() {
     })();
   }, []);
 
-  return <>{ready && <ChatImplementer initialMessages={initialMessages} />}</>;
+  return <>{ready && <ChatImplementer />}</>;
 }
