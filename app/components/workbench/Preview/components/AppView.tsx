@@ -2,6 +2,7 @@ import { PointSelector } from '~/components/workbench/PointSelector';
 import GripIcon from '~/components/icons/GripIcon';
 import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 import FeatureProgress from './StatusProgress';
+import useViewport from '~/lib/hooks/useViewport';
 
 export type ResizeSide = 'left' | 'right' | null;
 
@@ -32,6 +33,7 @@ const AppView = ({
   setSelectionPoint: (selectionPoint: { x: number; y: number } | null) => void;
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
+  const isSmallViewport = useViewport(1024);
   return (
     <div
       style={{
@@ -52,13 +54,15 @@ const AppView = ({
             src={iframeUrl}
             allowFullScreen
           />
-          <PointSelector
-            isSelectionMode={isSelectionMode}
-            setIsSelectionMode={setIsSelectionMode}
-            selectionPoint={selectionPoint}
-            setSelectionPoint={setSelectionPoint}
-            containerRef={iframeRef}
-          />
+          {!isSmallViewport && (
+            <PointSelector
+              isSelectionMode={isSelectionMode}
+              setIsSelectionMode={setIsSelectionMode}
+              selectionPoint={selectionPoint}
+              setSelectionPoint={setSelectionPoint}
+              containerRef={iframeRef}
+            />
+          )}
         </>
       ) : (
         <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-1">

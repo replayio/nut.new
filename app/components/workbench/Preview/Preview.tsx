@@ -177,15 +177,17 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
       {activeTab === 'preview' && (
         <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
           <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-          <IconButton
-            icon="i-ph:bug-beetle"
-            title="Point to Bug"
-            onClick={() => {
-              setSelectionPoint(null);
-              setIsSelectionMode(!isSelectionMode);
-            }}
-            className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
-          />
+          {!isSmallViewport && (
+            <IconButton
+              icon="i-ph:bug-beetle"
+              title="Point to Bug"
+              onClick={() => {
+                setSelectionPoint(null);
+                setIsSelectionMode(!isSelectionMode);
+              }}
+              className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
+            />
+          )}
           <div
             className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive
           focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive"
@@ -213,7 +215,6 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
             />
           </div>
 
-          {/* Device mode toggle button - only show in preview tab */}
           {activeTab === 'preview' && !isSmallViewport && (
             <IconButton
               icon="i-ph:devices"
@@ -221,13 +222,13 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
               title={isDeviceModeOn ? 'Switch to Responsive Mode' : 'Switch to Device Mode'}
             />
           )}
-
-          {/* Fullscreen toggle button */}
-          <IconButton
-            icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
-            onClick={toggleFullscreen}
-            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-          />
+          {!isSmallViewport && (
+            <IconButton
+              icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
+              onClick={toggleFullscreen}
+              title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+            />
+          )}
         </div>
       )}
 
