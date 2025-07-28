@@ -4,12 +4,12 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
-import { addResponseEvent, chatStore } from '~/lib/stores/chat';
+import { addChatMessage, addResponseEvent, chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { sendChatMessage, type ChatReference, resumeChatMessage, ChatMode } from '~/lib/replay/SendChatMessage';
+import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -17,7 +17,6 @@ import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { generateRandomId } from '~/utils/nut';
 import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
-import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
 import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { pendingMessageStatusStore, setPendingMessageStatus, clearPendingMessageStatus } from '~/lib/stores/status';
@@ -25,22 +24,12 @@ import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import type { ChatResponse } from '~/lib/persistence/response';
 
-interface ChatProps {
-  initialMessages: Message[];
-}
-
 let gNumAborts = 0;
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
 function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
-}
-
-let gLastChatMessages: Message[] | undefined;
-
-export function getLastChatMessages() {
-  return gLastChatMessages;
 }
 
 function navigateApp(nextId: string) {
@@ -55,22 +44,17 @@ function navigateApp(nextId: string) {
   window.history.replaceState({}, '', url);
 }
 
-const ChatImplementer = memo((props: ChatProps) => {
-  const { initialMessages } = props;
-
+const ChatImplementer = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
+  const messages = useStore(chatStore.messages);
+  const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
   const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
   const [searchParams] = useSearchParams();
   // const { isLoggedIn } = useAuthStatus();
   const [input, setInput] = useState('');
 
-  const [hasPendingMessage, setHasPendingMessage] = useState<boolean>(false);
-
   const pendingMessageStatus = useStore(pendingMessageStatusStore);
-
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const showChat = useStore(chatStore.showChat);
 
@@ -85,24 +69,24 @@ const ChatImplementer = memo((props: ChatProps) => {
   }, [searchParams]);
 
   useEffect(() => {
-    const repositoryId = getLatestAppSummary(initialMessages)?.repositoryId;
+    const repositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
     if (repositoryId) {
       updateDevelopmentServer(repositoryId);
     }
-  }, [initialMessages]);
+  }, []);
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
   useEffect(() => {
-    chatStore.started.set(initialMessages.length > 0);
+    chatStore.started.set(chatStore.messages.get().length > 0);
   }, []);
 
   const abort = () => {
     stop();
     gNumAborts++;
     chatStore.aborted.set(true);
-    setHasPendingMessage(false);
+    chatStore.hasPendingMessage.set(false);
     clearPendingMessageStatus();
 
     const appId = chatStore.currentAppId.get();
@@ -147,11 +131,11 @@ const ChatImplementer = memo((props: ChatProps) => {
   const sendMessage = async (messageInput: string, chatMode?: ChatMode) => {
     const numAbortsAtStart = gNumAborts;
 
-    if (messageInput.length === 0 || hasPendingMessage) {
+    if (messageInput.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
     }
 
-    gActiveChatMessageTelemetry = new ChatMessageTelemetry(messages.length);
+    gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
 
     // if (!isLoggedIn && !usingMockChat()) {
     //   const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
@@ -167,7 +151,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     // }
 
     const chatId = generateRandomId();
-    setHasPendingMessage(true);
+    chatStore.hasPendingMessage.set(true);
     setPendingMessageStatus('');
 
     const userMessage: Message = {
@@ -178,7 +162,7 @@ const ChatImplementer = memo((props: ChatProps) => {
       content: messageInput,
     };
 
-    let newMessages = [...messages, userMessage];
+    addChatMessage(userMessage);
 
     imageDataList.forEach((imageData, index) => {
       const imageMessage: Message = {
@@ -187,7 +171,7 @@ const ChatImplementer = memo((props: ChatProps) => {
         type: 'image',
         dataURL: imageData,
       };
-      newMessages.push(imageMessage);
+      addChatMessage(imageMessage);
     });
 
     if (!chatStore.currentAppId.get()) {
@@ -200,12 +184,11 @@ const ChatImplementer = memo((props: ChatProps) => {
       } catch (e) {
         console.error('Failed to initialize chat', e);
         toast.error('Failed to initialize chat');
-        setHasPendingMessage(false);
+        chatStore.hasPendingMessage.set(false);
         return;
       }
     }
 
-    setMessages(newMessages);
     setUploadedFiles([]);
     setImageDataList([]);
 
@@ -222,12 +205,11 @@ const ChatImplementer = memo((props: ChatProps) => {
         case 'message': {
           gActiveChatMessageTelemetry?.onResponseMessage();
 
-          const existingRepositoryId = getLatestAppRepositoryId(newMessages);
+          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
-          newMessages = mergeResponseMessage(response.message, newMessages);
-          setMessages(newMessages);
+          addChatMessage(response.message);
 
-          const responseRepositoryId = getLatestAppRepositoryId(newMessages);
+          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
           if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
             updateDevelopmentServer(responseRepositoryId);
@@ -271,102 +253,106 @@ const ChatImplementer = memo((props: ChatProps) => {
       });
     }
 
+    const messages = chatStore.messages.get();
+
     let mode = chatMode;
     if (!mode) {
       // If we don't have a plan yet, stay in the Discovery mode until
       // we either max out the discovery rating or the user forced us to start planning.
-      if (!getLatestAppSummary(newMessages) && getDiscoveryRating(newMessages) < MAX_DISCOVERY_RATING) {
+      if (!getLatestAppSummary(messages) && getDiscoveryRating(messages) < MAX_DISCOVERY_RATING) {
         mode = ChatMode.Discovery;
       } else {
         mode = ChatMode.BuildApp;
       }
     }
 
-    await sendChatMessage(mode, newMessages, references, onResponse);
+    await sendChatMessage(mode, messages, references, onResponse);
 
     if (gNumAborts != numAbortsAtStart) {
       return;
     }
 
-    gActiveChatMessageTelemetry.finish(gLastChatMessages?.length ?? 0, true);
+    gActiveChatMessageTelemetry.finish(messages.length, true);
     clearActiveChat();
 
-    setHasPendingMessage(false);
+    chatStore.hasPendingMessage.set(false);
 
     setInput('');
 
     textareaRef.current?.blur();
   };
 
-  useEffect(() => {
-    (async () => {
-      if (!chatStore.currentAppId.get()) {
-        return;
-      }
+  const doListenAppResponses = async () => {
+    if (!chatStore.currentAppId.get()) {
+      return;
+    }
 
-      const numAbortsAtStart = gNumAborts;
+    if (chatStore.listenResponses.get()) {
+      return;
+    }
+    chatStore.listenResponses.set(true);
 
-      let newMessages = messages;
+    const numAbortsAtStart = gNumAborts;
 
-      const onResponse = (response: ChatResponse) => {
-        if (gNumAborts != numAbortsAtStart) {
-          return;
-        }
-
-        switch (response.kind) {
-          case 'message': {
-            const existingRepositoryId = getLatestAppRepositoryId(newMessages);
-
-            newMessages = mergeResponseMessage(response.message, newMessages);
-            setMessages(newMessages);
-
-            const responseRepositoryId = getLatestAppRepositoryId(newMessages);
-
-            if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-              updateDevelopmentServer(responseRepositoryId);
-            }
-            break;
-          }
-          case 'app-event':
-            addResponseEvent(response);
-            break;
-          case 'title':
-            chatStore.appTitle.set(response.title);
-            break;
-          case 'status':
-            setPendingMessageStatus(response.status);
-            break;
-          case 'done':
-          case 'error':
-          case 'aborted':
-            break;
-          default:
-            console.error('Unknown chat response:', response);
-            break;
-        }
-      };
-
-      try {
-        setHasPendingMessage(true);
-        await resumeChatMessage(onResponse);
-      } catch (e) {
-        toast.error('Error resuming chat');
-        console.error('Error resuming chat', e);
-      }
-
+    const onResponse = (response: ChatResponse) => {
       if (gNumAborts != numAbortsAtStart) {
         return;
       }
 
-      setHasPendingMessage(false);
-    })();
-  }, []);
+      switch (response.kind) {
+        case 'message': {
+          const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+          addChatMessage(response.message);
+
+          const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+          if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+            updateDevelopmentServer(responseRepositoryId);
+          }
+          break;
+        }
+        case 'app-event':
+          addResponseEvent(response);
+          break;
+        case 'title':
+          chatStore.appTitle.set(response.title);
+          break;
+        case 'status':
+          setPendingMessageStatus(response.status);
+          break;
+        case 'done':
+        case 'error':
+        case 'aborted':
+          break;
+        default:
+          console.error('Unknown chat response:', response);
+          break;
+      }
+    };
+
+    try {
+      await listenAppResponses(onResponse);
+    } catch (e) {
+      toast.error('Error resuming chat');
+      console.error('Error resuming chat', e);
+    }
+
+    if (gNumAborts != numAbortsAtStart) {
+      return;
+    }
+
+    chatStore.listenResponses.set(false);
+  };
+
+  // Always check for ongoing work when we first start the chat.
+  useEffect(() => { doListenAppResponses() }, []);
 
   const onApproveChange = async (messageId: string) => {
     console.log('ApproveChange', messageId);
 
-    setMessages(
-      messages.map((message) => {
+    chatStore.messages.set(
+      chatStore.messages.get().map((message) => {
         if (message.id == messageId) {
           return {
             ...message,
@@ -380,7 +366,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     await flashScreen();
 
     pingTelemetry('ApproveChange', {
-      numMessages: messages.length,
+      numMessages: chatStore.messages.get().length,
     });
   };
 
@@ -392,7 +378,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     if (data.shareProject) {
       const feedbackData: any = {
         explanation: data.explanation,
-        chatMessages: messages,
+        chatMessages: chatStore.messages.get(),
       };
 
       shareProjectSuccess = await supabaseSubmitFeedback(feedbackData);
@@ -401,7 +387,7 @@ const ChatImplementer = memo((props: ChatProps) => {
     pingTelemetry('RejectChange', {
       shareProject: data.shareProject,
       shareProjectSuccess,
-      numMessages: messages.length,
+      numMessages: chatStore.messages.get().length,
     });
   };
 
@@ -415,8 +401,6 @@ const ChatImplementer = memo((props: ChatProps) => {
 
   const [messageRef, scrollRef] = useSnapScroll();
 
-  gLastChatMessages = messages;
-
   return (
     <BaseChat
       ref={animationScope}
@@ -424,8 +408,6 @@ const ChatImplementer = memo((props: ChatProps) => {
       input={input}
       showChat={showChat}
       chatStarted={chatStarted}
-      hasPendingMessage={hasPendingMessage}
-      pendingMessageStatus={pendingMessageStatus}
       sendMessage={sendMessage}
       messageRef={messageRef}
       scrollRef={scrollRef}
@@ -433,8 +415,6 @@ const ChatImplementer = memo((props: ChatProps) => {
         onTextareaChange(e);
       }}
       handleStop={abort}
-      messages={messages}
-      setMessages={setMessages}
       uploadedFiles={uploadedFiles}
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}

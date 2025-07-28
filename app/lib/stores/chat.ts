@@ -1,4 +1,6 @@
 import { atom } from 'nanostores';
+import mergeResponseMessage from '~/components/chat/ChatComponent/functions/mergeResponseMessages';
+import type { Message } from '~/lib/persistence/message';
 import type { ChatResponse } from '~/lib/persistence/response';
 
 export class ChatStore {
@@ -9,6 +11,13 @@ export class ChatStore {
   aborted = atom<boolean>(false);
   showChat = atom<boolean>(true);
 
+  // Whether there is an outstanding message sent to the chat.
+  hasPendingMessage = atom<boolean>(false);
+
+  // Set if work to build the app is actively going on and we are listening for responses.
+  listenResponses = atom<boolean>(false);
+
+  messages = atom<Message[]>([]);
   events = atom<ChatResponse[]>([]);
 }
 
@@ -29,4 +38,8 @@ export function isResponseEvent(response: ChatResponse) {
 
 export function addResponseEvent(response: ChatResponse) {
   chatStore.events.set([...chatStore.events.get(), response]);
+}
+
+export function addChatMessage(message: Message) {
+  chatStore.messages.set(mergeResponseMessage(message, chatStore.messages.get()));
 }

@@ -140,13 +140,7 @@ export async function sendChatMessage(
     simulationData,
   };
 
-  try {
-    await callNutAPI('chat', params, filterOnResponseCallback(onResponse));
-  } catch (error) {
-    // If the connection drops we resume any in progress chat messages.
-    console.log('sendChatMessage error, retrying', error);
-    await resumeChatMessage(onResponse);
-  }
+  await callNutAPI('chat', params, filterOnResponseCallback(onResponse));
 
   logger.debug('sendChatMessage finished');
 }
@@ -158,19 +152,18 @@ export async function getExistingAppResponses(appId: string): Promise<ChatRespon
   return responses.filter((response: ChatResponse) => addAppResponse(response));
 }
 
-// Stream any responses from chat messages that were sent previously
-// and are still in progress.
-export async function resumeChatMessage(onResponse: ChatResponseCallback) {
+// Stream any responses from ongoing work that is modifying the app.
+export async function listenAppResponses(onResponse: ChatResponseCallback) {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
   while (true) {
     try {
-      await callNutAPI('resume-chat', { appId }, filterOnResponseCallback(onResponse));
+      await callNutAPI('listen-app-responses', { appId }, filterOnResponseCallback(onResponse));
       break;
     } catch (error) {
       // Retry with a delay until the message finishes successfully.
-      console.log('resumeChatMessage error, retrying', error);
+      console.log('listenAppResponses error, retrying', error);
       await waitForTime(5000);
       continue;
     }

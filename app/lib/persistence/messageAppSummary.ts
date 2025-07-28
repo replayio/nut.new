@@ -141,8 +141,8 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
     assert(message.type === 'text', 'Message is not a text message');
     const appSummary = JSON.parse(message.content) as AppSummary;
     setInitialAppSummary(appSummary);
-    assert(appSummary.description, 'Missing app description');
-    assert(appSummary.pages, 'Missing app pages');
+    assert(typeof appSummary.description === 'string', 'Missing app description');
+    assert(Array.isArray(appSummary.pages), 'Missing app pages');
     return appSummary;
   } catch (e) {
     console.error('Failed to parse app summary message', e);

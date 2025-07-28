@@ -26,6 +26,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
+import { chatStore } from '~/lib/stores/chat';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -35,10 +36,6 @@ interface BaseChatProps {
   scrollRef?: RefCallback<HTMLDivElement>;
   showChat?: boolean;
   chatStarted?: boolean;
-  hasPendingMessage?: boolean;
-  pendingMessageStatus?: string;
-  messages?: Message[];
-  setMessages?: (messages: Message[]) => void;
   input?: string;
   handleStop?: () => void;
   sendMessage?: (messageInput: string, chatMode?: ChatMode) => void;
@@ -65,8 +62,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       scrollRef,
       showChat = true,
       chatStarted = false,
-      hasPendingMessage = false,
-      pendingMessageStatus = '',
       input = '',
       handleInputChange,
       sendMessage,
@@ -75,14 +70,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       setUploadedFiles,
       imageDataList = [],
       setImageDataList,
-      messages,
-      setMessages,
       onApproveChange,
       onRejectChange,
     },
     ref,
   ) => {
-    const appSummary = getLatestAppSummary(messages ?? []);
+    const messages = useStore(chatStore.messages);
+    const appSummary = getLatestAppSummary(messages);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [rejectFormOpen, setRejectFormOpen] = useState(false);
     const { isArboretumVisible } = useArboretumVisibility();
