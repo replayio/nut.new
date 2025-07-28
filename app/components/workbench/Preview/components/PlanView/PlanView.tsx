@@ -25,48 +25,36 @@ const PlanView = ({ appSummary, onContinueBuilding, onAbort }: PlanViewProps) =>
           <div className="flex-1">
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
               {!listenResponses && appSummary?.features?.length && (
-                <AnimatePresence>
-                  <TooltipProvider>
-                    <WithTooltip tooltip={"Continue Building"}>
-                      <motion.button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        title={"Continue Building"}
-                        transition={{ ease: customEasingFn, duration: 0.17 }}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          onContinueBuilding();
-                        }}
-                      >
-                        <div className="i-ph:rocket-launch text-xl"></div>
-                      </motion.button>
-                    </WithTooltip>
-                  </TooltipProvider>
-                </AnimatePresence>          
+                <button
+                  className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200 w-full text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onContinueBuilding();
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="i-ph:rocket-launch text-xl text-blue-600"></div>
+                    <div>
+                      <div className="font-medium text-blue-900">Continue Building</div>
+                    </div>
+                  </div>
+                </button>
               )}
               {listenResponses && appSummary?.features?.length && (
-                <AnimatePresence>
-                  <TooltipProvider>
-                    <WithTooltip tooltip={"Stop Building"}>
-                      <motion.button
-                        className="bg-red-500 hover:bg-red-600"
-                        title={"Stop Building"}
-                        transition={{ ease: customEasingFn, duration: 0.17 }}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          onAbort();
-                        }}
-                      >
-                        <div className="i-ph:stop-circle-bold text-xl"></div>
-                      </motion.button>
-                    </WithTooltip>
-                  </TooltipProvider>
-                </AnimatePresence>          
+                <button
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200 w-full text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onAbort();
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="i-ph:stop-circle-bold text-xl text-red-600"></div>
+                    <div>
+                      <div className="font-medium text-red-900">Building in Progress</div>
+                    </div>
+                  </div>
+                </button>
               )}
             <div className="mb-8">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
