@@ -74,17 +74,13 @@ const AppHistory = () => {
             <div key={index} className="border border-bolt-elements-border rounded-lg p-4 bg-bolt-elements-surfaceSecondary">
               <div className="grid grid-cols-1 gap-2 text-sm">
                 <div className="flex items-center gap-2">
+                  <span className="text-bolt-elements-textPrimary">{`${summary.version || 'N/A'}:`}</span>
                   <span className="text-bolt-elements-textPrimary font-mono">{formatUTCTime(summary.time)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-bolt-elements-textSecondary">Version:</span>
-                  <span className="text-bolt-elements-textPrimary">{summary.version || 'N/A'}</span>
-                </div>
                 <div className="flex items-start gap-2">
-                  <span className="font-semibold text-bolt-elements-textSecondary">Reason:</span>
-                  <pre className="text-bolt-elements-textPrimary font-mono text-xs bg-bolt-elements-surfacePrimary p-2 rounded overflow-x-auto">
+                  <span className="text-bolt-elements-textPrimary font-mono text-xs bg-bolt-elements-surfacePrimary p-2 rounded overflow-x-auto">
                     {renderUpdateReason(summary.reason, history)}
-                  </pre>
+                  </span>
                 </div>
               </div>
             </div>
