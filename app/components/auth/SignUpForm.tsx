@@ -75,11 +75,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
     const emailValid = email === '' || validateEmail(email);
     setIsEmailValid(emailValid);
     setDisabled(
-      password !== confirmPassword || 
-      email === '' || 
-      password === '' || 
-      confirmPassword === '' || 
-      !emailValid
+      password !== confirmPassword || email === '' || password === '' || confirmPassword === '' || !emailValid,
     );
   }, [password, confirmPassword, email]);
 
@@ -159,9 +155,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
         )}
 
         {password !== '' && password.length < 6 && (
-          <div className="mb-4 text-sm text-red-500">
-            Passwords must be at least 6 characters long
-          </div>
+          <div className="mb-4 text-sm text-red-500">Passwords must be at least 6 characters long</div>
         )}
 
         <button
@@ -202,10 +196,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
 
       <p className="mt-6 text-center text-bolt-elements-textSecondary">
         Already have an account?{' '}
-        <button
-          onClick={onToggleForm}
-          className="text-green-500 hover:text-green-600 font-medium bg-transparent"
-        >
+        <button onClick={onToggleForm} className="text-green-500 hover:text-green-600 font-medium bg-transparent">
           Sign In
         </button>
       </p>

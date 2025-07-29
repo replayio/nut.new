@@ -52,11 +52,7 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
   useEffect(() => {
     const emailValid = email === '' || validateEmail(email);
     setIsEmailValid(emailValid);
-    setDisabled(
-      email === '' || 
-      password === '' || 
-      !emailValid
-    );
+    setDisabled(email === '' || password === '' || !emailValid);
   }, [email, password]);
 
   return (
