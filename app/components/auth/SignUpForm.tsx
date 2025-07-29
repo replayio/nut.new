@@ -158,6 +158,12 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
           <div className="mb-4 text-sm text-red-500">Passwords do not match</div>
         )}
 
+        {password !== '' && password.length < 6 && (
+          <div className="mb-4 text-sm text-red-500">
+            Passwords must be at least 6 characters long
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isProcessing || disabled}
