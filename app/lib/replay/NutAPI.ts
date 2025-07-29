@@ -69,7 +69,7 @@ export async function callNutAPI(method: string, request: any, responseCallback?
     // Use native fetch for non-streaming
     const response = await fetch(url, fetchOptions);
     if (!response.ok) {
-      throw new Error(`NutAPI error: ${response.status}`);
+      throw new NutAPIError(method, response.status);
     }
     return response.json();
   }
