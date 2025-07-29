@@ -5,6 +5,7 @@ import { useStore } from '@nanostores/react';
 import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { useState } from 'react';
+import AppHistory from './AppHistory';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
@@ -45,9 +46,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
             </div>
           </button>
         </div>
-        <div className="h-full overflow-auto bg-transparent p-6">
-          HISTORY 2
-        </div>
+        <AppHistory />
       </div>
     );
   }
