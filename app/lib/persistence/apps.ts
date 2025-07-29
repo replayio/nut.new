@@ -129,6 +129,10 @@ async function getAppHistory(appId: string): Promise<AppSummary[]> {
   return history;
 }
 
+async function revertApp(appId: string, iteration: number): Promise<void> {
+  await callNutAPI('revert-app', { appId, iteration });
+}
+
 export const database = {
   getAllAppEntries,
   deleteApp,
@@ -139,4 +143,5 @@ export const database = {
   setAppDeploySettings,
   abortAppChats,
   getAppHistory,
+  revertApp,
 };

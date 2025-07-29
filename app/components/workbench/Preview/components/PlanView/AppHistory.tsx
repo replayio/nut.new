@@ -71,11 +71,9 @@ const AppHistory = () => {
     window.open(getRepositoryURL(summary.repositoryId), '_blank');
   };
 
-  const handleRevertToVersion = (summary: AppSummary) => {
-    // Stub implementation for reverting to version
-    console.log('Reverting to version:', summary.version, 'iteration:', summary.iteration);
-    // TODO: Implement actual revert logic
-    // This would typically involve calling an API to revert the app state
+  const handleRevertToVersion = async (summary: AppSummary) => {
+    await database.revertApp(appId, summary.iteration);
+    setLoading(true);
   };
 
   return (
