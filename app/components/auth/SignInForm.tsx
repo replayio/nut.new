@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
@@ -8,10 +8,17 @@ interface SignInFormProps {
   onToggleForm: () => void;
 }
 
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(email);
+};
+
 export function SignInForm({ onToggleForm }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [isEmailValid, setIsEmailValid] = useState(true);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +48,16 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
       toast.error(error.message || 'Failed to sign in with Google');
     }
   };
+
+  useEffect(() => {
+    const emailValid = email === '' || validateEmail(email);
+    setIsEmailValid(emailValid);
+    setDisabled(
+      email === '' || 
+      password === '' || 
+      !emailValid
+    );
+  }, [email, password]);
 
   return (
     <>
@@ -80,6 +97,9 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
             className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
             required
           />
+          {email !== '' && !isEmailValid && (
+            <div className="mt-2 text-sm text-red-500">Please enter a valid email address</div>
+          )}
         </div>
 
         <div className="mb-4">
@@ -98,7 +118,7 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
 
         <button
           type="submit"
-          disabled={isProcessing}
+          disabled={isProcessing || disabled}
           className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
         >
           {isProcessing ? 'Processing...' : 'Sign In'}

@@ -13,7 +13,6 @@ import { initializeAuth, userStore, isLoadingStore } from './lib/stores/auth';
 import { initializeUserStores } from './lib/stores/user';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/remix';
-import { AuthModal } from './components/auth/AuthModal';
 import GlobalFeedbackModal from './components/sidebar/Feedback/components/FeedbackModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -205,7 +204,6 @@ export default function App() {
           pauseOnFocusLoss
           transition={toastAnimation}
         />
-        <AuthModal />
         <GlobalFeedbackModal />
       </ClientOnly>
       <ScrollRestoration />

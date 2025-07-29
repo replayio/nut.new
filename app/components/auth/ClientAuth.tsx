@@ -34,7 +34,6 @@ export function ClientAuth() {
       console.log('New contact created in Intercom');
     } catch (error) {
       console.error('Error adding user to Intercom:', error);
-      // Don't throw here - we don't want to block the sign-up flow if Intercom fails
       toast.error('Failed to sync with Intercom (non-critical)');
     }
   };
@@ -101,7 +100,6 @@ export function ClientAuth() {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
   }
 
-  // Avatar URLs are disabled due to broken links from CORS issues.
   const useAvatarURL = false;
 
   return (

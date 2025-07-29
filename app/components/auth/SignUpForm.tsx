@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
@@ -9,12 +9,19 @@ interface SignUpFormProps {
   addIntercomUser: (userEmail: string) => void;
 }
 
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(email);
+};
+
 export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
+  const [disabled, setDisabled] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
+  const [isEmailValid, setIsEmailValid] = useState(true);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +71,18 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
     }
   };
 
+  useEffect(() => {
+    const emailValid = email === '' || validateEmail(email);
+    setIsEmailValid(emailValid);
+    setDisabled(
+      password !== confirmPassword || 
+      email === '' || 
+      password === '' || 
+      confirmPassword === '' || 
+      !emailValid
+    );
+  }, [password, confirmPassword, email]);
+
   return (
     <>
       <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Create Account</h2>
@@ -102,6 +121,9 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
             className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
             required
           />
+          {email !== '' && !isEmailValid && (
+            <div className="mt-2 text-sm text-red-500">Please enter a valid email address</div>
+          )}
         </div>
 
         <div className="mb-4">
@@ -118,7 +140,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
           />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4">
           <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
             Confirm Password
           </label>
@@ -132,9 +154,13 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
           />
         </div>
 
+        {password !== '' && confirmPassword !== '' && password !== confirmPassword && (
+          <div className="mb-4 text-sm text-red-500">Passwords do not match</div>
+        )}
+
         <button
           type="submit"
-          disabled={isProcessing}
+          disabled={isProcessing || disabled}
           className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
         >
           {isProcessing ? 'Processing...' : 'Create Account'}
@@ -170,7 +196,10 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
 
       <p className="mt-6 text-center text-bolt-elements-textSecondary">
         Already have an account?{' '}
-        <button onClick={onToggleForm} className="text-green-500 hover:text-green-600 font-medium bg-transparent">
+        <button
+          onClick={onToggleForm}
+          className="text-green-500 hover:text-green-600 font-medium bg-transparent"
+        >
           Sign In
         </button>
       </p>

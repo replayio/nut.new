@@ -4,7 +4,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { Suspense } from 'react';
-import { ClientAuth } from '~/components/auth/ClientAuth/ClientAuth';
+import { ClientAuth } from '~/components/auth/ClientAuth';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
