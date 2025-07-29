@@ -119,14 +119,14 @@ export interface AppTest {
 }
 
 export enum AppUpdateReasonKind {
-  DescribeLayout = "DescribeLayout",
-  DescribeFeatures = "DescribeFeatures",
-  StartImplementFeature = "StartImplementFeature",
-  StartValidateFeature = "StartValidateFeature",
-  FeatureImplemented = "FeatureImplemented",
-  FeatureValidated = "FeatureValidated",
-  MockupValidated = "MockupValidated",
-  RevertApp = "RevertApp",
+  DescribeLayout = 'DescribeLayout',
+  DescribeFeatures = 'DescribeFeatures',
+  StartImplementFeature = 'StartImplementFeature',
+  StartValidateFeature = 'StartValidateFeature',
+  FeatureImplemented = 'FeatureImplemented',
+  FeatureValidated = 'FeatureValidated',
+  MockupValidated = 'MockupValidated',
+  RevertApp = 'RevertApp',
 }
 
 // Describes why the app's summary was updated.

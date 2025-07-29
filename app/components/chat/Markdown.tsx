@@ -23,7 +23,7 @@ export const Markdown = memo((props: MarkdownProps) => {
 
   const components = useMemo(() => {
     return {
-      div: ({ className, children, node, ...props }) => {
+      div: ({ className, children, ...props }) => {
         return (
           <div className={className} {...props}>
             {children}

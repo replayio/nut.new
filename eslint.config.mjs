@@ -29,6 +29,11 @@ export default [
       'padding-line-between-statements': ['off'],
       '@blitz/lines-around-comment': ['off'],
       '@blitz/newline-before-return': ['off'],
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_', 
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
     },
   },
   {

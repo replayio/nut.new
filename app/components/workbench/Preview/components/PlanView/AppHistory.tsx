@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { database } from "~/lib/persistence/apps";
-import { AppUpdateReasonKind, type AppSummary, type AppUpdateReason } from "~/lib/persistence/messageAppSummary";
-import { chatStore } from "~/lib/stores/chat";
-import { assert } from "~/utils/nut";
-import { getRepositoryURL } from "~/lib/replay/DevelopmentServer";
+import { useState, useEffect } from 'react';
+import { database } from '~/lib/persistence/apps';
+import { AppUpdateReasonKind, type AppSummary, type AppUpdateReason } from '~/lib/persistence/messageAppSummary';
+import { chatStore } from '~/lib/stores/chat';
+import { assert } from '~/utils/nut';
+import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 
 function includeHistorySummary(summary: AppSummary): boolean {
   if (!summary.reason) {
@@ -21,7 +21,7 @@ function includeHistorySummary(summary: AppSummary): boolean {
 }
 
 const AppHistory = () => {
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<AppSummary[]>([]);
 
   const appId = chatStore.currentAppId.get();
@@ -43,7 +43,7 @@ const AppHistory = () => {
     try {
       const date = new Date(timeString);
       return date.toISOString();
-    } catch (error) {
+    } catch (_) {
       return timeString; // fallback to original string if parsing fails
     }
   };
@@ -84,7 +84,10 @@ const AppHistory = () => {
       ) : (
         <div className="space-y-4">
           {history.map((summary, index) => (
-            <div key={index} className="border border-bolt-elements-border rounded-lg p-4 bg-bolt-elements-surfaceSecondary">
+            <div
+              key={index}
+              className="border border-bolt-elements-border rounded-lg p-4 bg-bolt-elements-surfaceSecondary"
+            >
               <div className="grid grid-cols-1 gap-2 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-bolt-elements-textPrimary">{`${summary.version || 'N/A'}:`}</span>
