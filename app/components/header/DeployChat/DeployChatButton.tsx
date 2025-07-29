@@ -2,7 +2,6 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
-import { generateRandomId } from '~/utils/nut';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
@@ -19,7 +18,7 @@ export enum DeployStatus {
 
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase | null>(null);
+  const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase>({});
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
   const [databaseFound, setDatabaseFound] = useState(false);
@@ -98,23 +97,15 @@ export function DeployChatButton() {
       return;
     }
 
-    if (!deploySettings?.netlify?.authToken) {
-      setError('Netlify Auth Token is required');
-      return;
-    }
-
-    if (deploySettings?.netlify?.siteId) {
-      if (deploySettings.netlify.createInfo) {
-        setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
+    if (deploySettings?.netlify?.authToken) {
+      if (deploySettings?.netlify?.siteId) {
+        if (deploySettings.netlify.createInfo) {
+          setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
+          return;
+        }
+      } else if (!deploySettings?.netlify?.createInfo) {
+        setError('Either a Netlify Site ID or a Netlify Account Slug is required');
         return;
-      }
-    } else if (!deploySettings?.netlify?.createInfo) {
-      setError('Either a Netlify Site ID or a Netlify Account Slug is required');
-      return;
-    } else {
-      // Add a default site name if one isn't provided.
-      if (!deploySettings.netlify.createInfo?.siteName) {
-        deploySettings.netlify.createInfo.siteName = `nut-app-${generateRandomId()}`;
       }
     }
 
