@@ -3,7 +3,7 @@
 import { workbenchStore } from '~/lib/stores/workbench';
 import { debounce } from '~/utils/debounce';
 
-function getRepositoryURL(repositoryId: string | undefined) {
+export function getRepositoryURL(repositoryId: string | undefined) {
   if (!repositoryId) {
     return undefined;
   }

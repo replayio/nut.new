@@ -3,6 +3,7 @@ import { database } from "~/lib/persistence/apps";
 import { AppUpdateReasonKind, type AppSummary, type AppUpdateReason } from "~/lib/persistence/messageAppSummary";
 import { chatStore } from "~/lib/stores/chat";
 import { assert } from "~/utils/nut";
+import { getRepositoryURL } from "~/lib/replay/DevelopmentServer";
 
 function includeHistorySummary(summary: AppSummary): boolean {
   if (!summary.reason) {
@@ -27,13 +28,16 @@ const AppHistory = () => {
   assert(appId, 'App ID is required');
 
   useEffect(() => {
+    if (!loading) {
+      return;
+    }
     const fetchHistory = async () => {
       const history = await database.getAppHistory(appId);
       setHistory(history.filter(includeHistorySummary));
       setLoading(false);
     };
     fetchHistory();
-  }, []);
+  }, [loading]);
 
   const formatUTCTime = (timeString: string) => {
     try {
@@ -63,6 +67,17 @@ const AppHistory = () => {
     }
   };
 
+  const handleOpenPreview = (summary: AppSummary) => {
+    window.open(getRepositoryURL(summary.repositoryId), '_blank');
+  };
+
+  const handleRevertToVersion = (summary: AppSummary) => {
+    // Stub implementation for reverting to version
+    console.log('Reverting to version:', summary.version, 'iteration:', summary.iteration);
+    // TODO: Implement actual revert logic
+    // This would typically involve calling an API to revert the app state
+  };
+
   return (
     <div>
       <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">History</div>
@@ -81,6 +96,20 @@ const AppHistory = () => {
                   <span className="text-bolt-elements-textPrimary font-mono text-xs bg-bolt-elements-surfacePrimary p-2 rounded overflow-x-auto">
                     {renderUpdateReason(summary.reason, history)}
                   </span>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => handleOpenPreview(summary)}
+                    className="px-3 py-1 text-xs bg-bolt-elements-surfacePrimary hover:bg-bolt-elements-surfacePrimaryHover text-bolt-elements-textPrimary rounded border border-bolt-elements-border transition-colors"
+                  >
+                    Open Preview
+                  </button>
+                  <button
+                    onClick={() => handleRevertToVersion(summary)}
+                    className="px-3 py-1 text-xs bg-bolt-elements-surfacePrimary hover:bg-bolt-elements-surfacePrimaryHover text-bolt-elements-textPrimary rounded border border-bolt-elements-border transition-colors"
+                  >
+                    Revert to Version
+                  </button>
                 </div>
               </div>
             </div>
