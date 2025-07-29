@@ -10,21 +10,40 @@ import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
 import { chatStore, doListenAppResponses, isResponseEvent } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import type { ChatResponse } from '~/lib/persistence/response';
+import { NutAPIError } from '~/lib/replay/NutAPI';
+import { navigateApp } from '~/utils/nut';
+
+// Ensure that the app is accessible. Copies the app if it is owned by another user.
+async function ensureAppAccessible(appId: string) {
+  try {
+    const title = await database.getAppTitle(appId);
+    return { appId, title };
+  } catch (error) {
+    // Handle unauthorized access by copying the app.
+    if (error instanceof NutAPIError && error.status == 401) {
+      const newAppId = await database.copyApp(appId);
+      const title = await database.getAppTitle(newAppId);
+      navigateApp(newAppId);
+      return { appId: newAppId, title };
+    }
+    throw error;
+  }
+}
 
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const { id: appId } = useLoaderData<{ id?: string }>() ?? {};
+  const { id: initialAppId } = useLoaderData<{ id?: string }>() ?? {};
 
-  const [ready, setReady] = useState<boolean>(!appId);
+  const [ready, setReady] = useState<boolean>(!initialAppId);
 
   useEffect(() => {
-    if (!appId) {
+    if (!initialAppId) {
       return;
     }
     (async () => {
       try {
-        const title = await database.getAppTitle(appId);
+        const { appId, title } = await ensureAppAccessible(initialAppId);
         const responses = await getExistingAppResponses(appId);
         let messages: Message[] = [];
         const eventResponses: ChatResponse[] = [];

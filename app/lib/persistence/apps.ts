@@ -133,6 +133,11 @@ async function revertApp(appId: string, iteration: number): Promise<void> {
   await callNutAPI('revert-app', { appId, iteration });
 }
 
+async function copyApp(appId: string): Promise<string> {
+  const { appId: newAppId } = await callNutAPI('copy-app', { appId });
+  return newAppId;
+}
+
 export const database = {
   getAllAppEntries,
   deleteApp,
@@ -144,4 +149,5 @@ export const database = {
   abortAppChats,
   getAppHistory,
   revertApp,
+  copyApp,
 };

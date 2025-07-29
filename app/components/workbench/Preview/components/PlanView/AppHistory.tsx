@@ -14,6 +14,7 @@ function includeHistorySummary(summary: AppSummary): boolean {
     case AppUpdateReasonKind.FeatureImplemented:
     case AppUpdateReasonKind.FeatureValidated:
     case AppUpdateReasonKind.RevertApp:
+    case AppUpdateReasonKind.CopyApp:
       return true;
     default:
       return false;
@@ -62,6 +63,8 @@ const AppHistory = () => {
         assert(targetSummary, 'Target summary not found');
         return `Reverted to version: ${targetSummary.version}`;
       }
+      case AppUpdateReasonKind.CopyApp:
+        return `Copied app ${reason.appId}`;
       default:
         return 'Unknown reason';
     }

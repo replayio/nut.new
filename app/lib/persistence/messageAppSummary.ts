@@ -127,6 +127,7 @@ export enum AppUpdateReasonKind {
   FeatureValidated = 'FeatureValidated',
   MockupValidated = 'MockupValidated',
   RevertApp = 'RevertApp',
+  CopyApp = 'CopyApp',
 }
 
 // Describes why the app's summary was updated.
@@ -138,6 +139,9 @@ export interface AppUpdateReason {
 
   // For RevertApp, the iteration the summary was reverted to.
   iteration?: number;
+
+  // For CopyApp, the appId of the app which was copied.
+  appId?: string;
 }
 
 export interface AppSummary {

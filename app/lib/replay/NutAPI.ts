@@ -9,6 +9,17 @@ type ResponseCallback = (response: any) => void;
 //
 // Otherwise, the response is returned as a JSON object.
 
+export class NutAPIError extends Error {
+  method: string;
+  status: number;
+
+  constructor(method: string, status: number) {
+    super(`NutAPI error: ${method} ${status}`);
+    this.method = method;
+    this.status = status;
+  }
+}
+
 export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback): Promise<any> {
   const userId = await getCurrentUserId();
 

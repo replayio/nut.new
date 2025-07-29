@@ -44,3 +44,15 @@ export function stringToBase64(inputString: string) {
 
   return uint8ArrayToBase64(data);
 }
+
+export function navigateApp(appId: string) {
+  /**
+   * FIXME: Using the intended navigate function causes a rerender for <Chat /> that breaks the app.
+   *
+   * `navigate(`/app/${appId}`, { replace: true });`
+   */
+  const url = new URL(window.location.href);
+  url.pathname = `/app/${appId}`;
+  url.search = '';
+  window.history.replaceState({}, '', url);
+}

@@ -20,24 +20,12 @@ import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
-import { generateRandomId } from '~/utils/nut';
+import { generateRandomId, navigateApp } from '~/utils/nut';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
 function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
-}
-
-function navigateApp(nextId: string) {
-  /**
-   * FIXME: Using the intended navigate function causes a rerender for <Chat /> that breaks the app.
-   *
-   * `navigate(`/app/${nextId}`, { replace: true });`
-   */
-  const url = new URL(window.location.href);
-  url.pathname = `/app/${nextId}`;
-  url.search = '';
-  window.history.replaceState({}, '', url);
 }
 
 const ChatImplementer = memo(() => {
