@@ -118,6 +118,28 @@ export interface AppTest {
   recordingId?: string;
 }
 
+export enum AppUpdateReasonKind {
+  DescribeLayout = "DescribeLayout",
+  DescribeFeatures = "DescribeFeatures",
+  StartImplementFeature = "StartImplementFeature",
+  StartValidateFeature = "StartValidateFeature",
+  FeatureImplemented = "FeatureImplemented",
+  FeatureValidated = "FeatureValidated",
+  MockupValidated = "MockupValidated",
+  RevertApp = "RevertApp",
+}
+
+// Describes why the app's summary was updated.
+export interface AppUpdateReason {
+  kind: AppUpdateReasonKind;
+
+  // Any feature associated with the update.
+  featureName?: string;
+
+  // For RevertApp, the iteration the summary was reverted to.
+  iteration?: number;
+}
+
 export interface AppSummary {
   // Short and high level description of the app.
   description: string;
@@ -126,6 +148,7 @@ export interface AppSummary {
   navigation?: string;
   mockupStatus?: AppFeatureStatus;
   features?: AppFeature[];
+  otherTests?: AppTest[];
 
   // The repository being described, if available.
   repositoryId?: string;
@@ -133,6 +156,11 @@ export interface AppSummary {
   // Version string of the repository: Major.Minor.Patch
   // The version advances every time the app changes.
   version?: string;
+
+  iteration: number;
+  time: string;
+  chatId?: string;
+  reason?: AppUpdateReason;
 }
 
 export function parseAppSummaryMessage(message: Message): AppSummary | undefined {
