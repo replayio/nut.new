@@ -25,7 +25,7 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
 
     try {
       const redirectUrl = 'https://nut.new/reset-password';
-      
+
       const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
