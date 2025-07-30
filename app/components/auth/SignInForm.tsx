@@ -6,6 +6,7 @@ import { GoogleIcon } from '~/components/icons/google-icon';
 
 interface SignInFormProps {
   onToggleForm: () => void;
+  onError: (message: string) => void;
 }
 
 const validateEmail = (email: string): boolean => {
@@ -13,7 +14,7 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export function SignInForm({ onToggleForm }: SignInFormProps) {
+export function SignInForm({ onToggleForm, onError }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -31,10 +32,9 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
         throw error;
       }
 
-      toast.success('Successfully signed in!');
     } catch (error) {
       const authError = error as AuthError;
-      toast.error(authError.message || 'Failed to sign in');
+      onError(authError.message || 'Failed to sign in');
     } finally {
       setIsProcessing(false);
     }
@@ -44,8 +44,9 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
     const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'google',
     });
+
     if (error) {
-      toast.error(error.message || 'Failed to sign in with Google');
+      onError(error.message || 'Failed to sign in with Google');
     }
   };
 

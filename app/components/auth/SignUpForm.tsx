@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
@@ -7,6 +6,8 @@ import { GoogleIcon } from '~/components/icons/google-icon';
 interface SignUpFormProps {
   onToggleForm: () => void;
   addIntercomUser: (userEmail: string) => void;
+  onSuccess: (message: string) => void;
+  onError: (message: string) => void;
 }
 
 const validateEmail = (email: string): boolean => {
@@ -14,7 +15,7 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
+export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }: SignUpFormProps) {
   const [disabled, setDisabled] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +26,6 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
 
     setIsProcessing(true);
 
@@ -44,10 +40,10 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
         throw error;
       }
 
-      toast.success('Check your email for the confirmation link!');
+      onSuccess('Check your email for the confirmation link!');
     } catch (error) {
       const authError = error as AuthError;
-      toast.error(authError.message || 'Failed to sign up');
+      onError(authError.message || 'Failed to sign up');
     } finally {
       setIsProcessing(false);
     }
@@ -59,7 +55,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm }: SignUpFormProps) {
     });
 
     if (error) {
-      toast.error(error.message || 'Failed to sign in with Google');
+      onError(error.message || 'Failed to sign in with Google');
       return;
     }
 
