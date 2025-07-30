@@ -98,12 +98,11 @@ export function DeployChatButton() {
     }
 
     if (deploySettings?.netlify?.authToken) {
-      if (deploySettings?.netlify?.siteId) {
-        if (deploySettings.netlify.createInfo) {
-          setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
-          return;
-        }
-      } else if (!deploySettings?.netlify?.createInfo) {
+      const { siteId, accountSlug } = deploySettings.netlify;
+      if (siteId && accountSlug) {
+        setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
+        return;
+      } else if (!siteId && !accountSlug) {
         setError('Either a Netlify Site ID or a Netlify Account Slug is required');
         return;
       }
@@ -153,10 +152,13 @@ export function DeployChatButton() {
     let newSettings = deploySettings;
 
     // Update netlify settings so future deployments will reuse the site.
-    if (deploySettings?.netlify?.createInfo && result.netlifySiteId) {
+    if (result.netlifySiteId) {
       newSettings = {
         ...deploySettings,
-        netlify: { authToken: deploySettings.netlify.authToken, siteId: result.netlifySiteId },
+        netlify: {
+          authToken: deploySettings.netlify?.authToken,
+          siteId: result.netlifySiteId,
+        },
       };
     }
 

@@ -5,16 +5,16 @@ import { callNutAPI } from './NutAPI';
 // Deploy to a Netlify site.
 interface DeploySettingsNetlify {
   // Authentication token for Netlify account.
-  authToken: string;
+  authToken?: string;
 
   // ID of any existing site to link to.
   siteId?: string;
 
-  // Information needed when creating a new site.
-  createInfo?: {
-    accountSlug: string;
-    siteName: string;
-  };
+  // Account slug for creating a new site.
+  accountSlug?: string;
+
+  // Name of the site to create.
+  siteName?: string;
 }
 
 // Deploy to a Supabase project.

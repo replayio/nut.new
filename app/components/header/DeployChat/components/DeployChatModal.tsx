@@ -65,8 +65,8 @@ const DeployChatModal = ({
                 <div className="mb-8 p-4 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor">
                   <h3 className="text-sm font-medium text-bolt-elements-textPrimary mb-2">Before you begin:</h3>
                   <p className="text-xs text-bolt-elements-textSecondary mb-3 whitespace-pre-wrap">
-                    You'll need accounts with {databaseFound ? ' both Netlify and Supabase ' : ' Netlify '}to deploy your
-                    application. If you haven't already, please sign up using the links below:
+                    You'll need accounts with {databaseFound ? ' both Netlify and Supabase ' : ' Netlify '}to deploy
+                    your application. If you haven't already, please sign up using the links below:
                   </p>
                   <div className="flex flex-col gap-2">
                     <a
