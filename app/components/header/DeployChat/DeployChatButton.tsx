@@ -7,6 +7,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import { deployApp, downloadRepository } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
+import { generateRandomId } from '~/utils/nut';
 
 ReactModal.setAppElement('#root');
 
@@ -89,6 +90,21 @@ export function DeployChatButton() {
   };
 
   const generateSiteName = () => {
+    const appTitle = chatStore.appTitle.get();
+    if (!appTitle) {
+      return 'my-app';
+    }
+    
+    // Convert to lowercase and replace spaces/special characters with hyphens
+    const siteName = appTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+      || 'nut-app'; // Fallback if result is empty
+
+    return `${siteName}-${generateRandomId()}`;
   };
 
   const handleDeploy = async () => {
