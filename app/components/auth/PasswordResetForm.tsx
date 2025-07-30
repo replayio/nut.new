@@ -50,7 +50,7 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
   return (
     <>
       <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Reset Your Password</h2>
-      
+
       <p className="text-center text-bolt-elements-textSecondary mb-6">
         Enter your email address and we'll send you a link to reset your password.
       </p>
@@ -91,4 +91,4 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
       </p>
     </>
   );
-} 
+}

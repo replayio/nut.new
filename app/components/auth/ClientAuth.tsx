@@ -217,8 +217,8 @@ export function ClientAuth() {
                 retryButtonText="Try Again"
               />
             ) : isSignUp ? (
-              <SignUpForm 
-                addIntercomUser={addIntercomUser} 
+              <SignUpForm
+                addIntercomUser={addIntercomUser}
                 onToggleForm={() => {
                   setIsSignUp(false);
                   setAuthState('form');
@@ -251,7 +251,7 @@ export function ClientAuth() {
                 }}
               />
             ) : (
-              <SignInForm 
+              <SignInForm
                 onToggleForm={() => {
                   setIsSignUp(true);
                   setAuthState('form');

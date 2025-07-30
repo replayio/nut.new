@@ -27,47 +27,23 @@ export function AuthStateMessage({
         <div className="mb-8">
           {isSuccess ? (
             <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-              <svg 
-                className="w-10 h-10 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={3} 
-                  d="M5 13l4 4L19 7" 
-                />
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           ) : (
             <div className="mx-auto w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-              <svg 
-                className="w-10 h-10 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={3} 
-                  d="M6 18L18 6M6 6l12 12" 
-                />
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
           )}
         </div>
 
-        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">
-          {title}
-        </h2>
-        
-        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto">
-          {message}
-        </div>
-        
+        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">{title}</h2>
+
+        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto">{message}</div>
+
         <div className="space-y-3">
           {onRetry && (
             <button
@@ -77,7 +53,7 @@ export function AuthStateMessage({
               {retryButtonText}
             </button>
           )}
-          
+
           {onClose && (
             <button
               onClick={onClose}
@@ -94,4 +70,4 @@ export function AuthStateMessage({
       </div>
     </div>
   );
-} 
+}

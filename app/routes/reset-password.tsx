@@ -12,8 +12,11 @@ export default function ResetPassword() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { data: { session }, error } = await getSupabase().auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await getSupabase().auth.getSession();
+
         if (error) {
           throw error;
         }
@@ -26,13 +29,15 @@ export default function ResetPassword() {
         }
       } catch (error) {
         setAuthState('error');
-        setAuthMessage('Failed to verify reset link. Please try again.');
+        setAuthMessage(error instanceof Error ? error.message : 'Failed to verify reset link. Please try again.');
       }
     };
 
     handleAuthCallback();
-    
-    const { data: { subscription } } = getSupabase().auth.onAuthStateChange((event, session) => {
+
+    const {
+      data: { subscription },
+    } = getSupabase().auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setAuthState('form');
       }
@@ -57,11 +62,6 @@ export default function ResetPassword() {
     setAuthMessage(message);
   };
 
-  const handleRetry = () => {
-    setAuthState('form');
-    setAuthMessage('');
-  };
-
   return (
     <div className="min-h-screen bg-bolt-elements-background-depth-1 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -73,12 +73,7 @@ export default function ResetPassword() {
             </div>
           )}
 
-          {authState === 'form' && (
-            <PasswordUpdateForm
-              onSuccess={handleSuccess}
-              onError={handleError}
-            />
-          )}
+          {authState === 'form' && <PasswordUpdateForm onSuccess={handleSuccess} onError={handleError} />}
 
           {authState === 'success' && (
             <AuthStateMessage
@@ -110,4 +105,4 @@ export default function ResetPassword() {
       </div>
     </div>
   );
-} 
+}

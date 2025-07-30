@@ -30,7 +30,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
 
     try {
       const { error } = await getSupabase().auth.updateUser({
-        password: password,
+        password,
       });
 
       if (error) {
@@ -47,12 +47,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
   };
 
   useEffect(() => {
-    setDisabled(
-      password === '' ||
-      confirmPassword === '' ||
-      password.length < 6 ||
-      password !== confirmPassword
-    );
+    setDisabled(password === '' || confirmPassword === '' || password.length < 6 || password !== confirmPassword);
   }, [password, confirmPassword]);
 
   return (
@@ -60,15 +55,13 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
       <div className="text-center mb-8">
         <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg mb-4">
           <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <circle cx="12" cy="16" r="1"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <circle cx="12" cy="16" r="1" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         </div>
         <h2 className="text-2xl font-bold mb-4 text-bolt-elements-textPrimary">Set New Password</h2>
-        <p className="text-bolt-elements-textSecondary">
-          Please enter your new password below.
-        </p>
+        <p className="text-bolt-elements-textSecondary">Please enter your new password below.</p>
       </div>
 
       <form onSubmit={handlePasswordUpdate}>
@@ -88,7 +81,10 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
         </div>
 
         <div className="mb-4">
-          <label htmlFor="confirm-new-password" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+          <label
+            htmlFor="confirm-new-password"
+            className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary"
+          >
             Confirm New Password
           </label>
           <input
@@ -120,4 +116,4 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
       </form>
     </>
   );
-} 
+}

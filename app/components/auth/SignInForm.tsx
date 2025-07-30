@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
@@ -32,7 +31,6 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
       if (error) {
         throw error;
       }
-
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in');
