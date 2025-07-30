@@ -22,6 +22,7 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
 
 const PlanView = ({ appSummary }: PlanViewProps) => {
   const listenResponses = useStore(chatStore.listenResponses);
+  const appId = useStore(chatStore.currentAppId);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const completedFeatures = appSummary?.features?.filter(
@@ -33,20 +34,21 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   if (historyOpen) {
     return (
       <div className="relative h-full w-full">
-        <div className="flex justify-center items-center pt-2">
+        <div className="absolute top-4 left-4 z-10">
           <button
-            className="mb-6 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text hover:bg-bolt-elements-button-secondary-backgroundHover border border-bolt-elements-border rounded-lg transition-colors duration-200"
             onClick={(event) => {
               event.preventDefault();
               setHistoryOpen(false);
             }}
           >
-            <div className="flex items-center gap-1">
-              <div className="font-medium text-white">Back</div>
-            </div>
+            <div className="i-ph:arrow-left text-lg"></div>
+            <span className="font-medium">Back to Build Plan</span>
           </button>
         </div>
-        <AppHistory />
+        <div className="pt-16">
+          {appId && <AppHistory appId={appId} />}
+        </div>
       </div>
     );
   }
@@ -89,20 +91,22 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                 </button>
               </div>
             )}
-            <div className="flex justify-center items-center">
-              <button
-                className="mb-6 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setHistoryOpen(true);
-                }}
-              >
-                <div className="flex items-center gap-1">
-                  <div className="i-ph:list-bold text-xl text-white"></div>
-                  <div className="font-medium text-white">View History</div>
-                </div>
-              </button>
-            </div>
+            {appId && (
+              <div className="flex justify-center items-center">
+                <button
+                  className="mb-6 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setHistoryOpen(true);
+                  }}
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="i-ph:list-bold text-xl text-white"></div>
+                    <div className="font-medium text-white">View Version History</div>
+                  </div>
+                </button>
+              </div>
+            )}
             <div className="mb-8">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
