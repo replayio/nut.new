@@ -46,9 +46,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
             <span className="font-medium">Back to Build Plan</span>
           </button>
         </div>
-        <div className="pt-16">
-          {appId && <AppHistory appId={appId} />}
-        </div>
+        <div className="pt-16">{appId && <AppHistory appId={appId} />}</div>
       </div>
     );
   }

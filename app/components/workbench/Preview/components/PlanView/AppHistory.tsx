@@ -68,7 +68,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
         return date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
-          day: 'numeric'
+          day: 'numeric',
         });
       }
     } catch (_) {
@@ -84,7 +84,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     } catch (_) {
       return timeString;
@@ -158,7 +158,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
         <div className="text-center py-12">
           <div className="text-4xl mb-4 opacity-50">📝</div>
           <div className="text-bolt-elements-textSecondary mb-2">No version history available</div>
-          <div className="text-sm text-bolt-elements-textTertiary">Changes will appear here as you work on your app</div>
+          <div className="text-sm text-bolt-elements-textTertiary">
+            Changes will appear here as you work on your app
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -177,10 +179,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
                     Current Selection
                   </div>
                 )}
-                
+
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1 min-w-0 space-y-4">
-
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center px-3 py-1.5 bg-bolt-elements-surfacePrimary text-bolt-elements-textPrimary text-sm font-mono rounded-lg border border-bolt-elements-border">
                         v{summary.version || 'N/A'}
@@ -191,7 +192,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
                     </div>
 
                     <div>
-                      <span className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border ${getReasonBadgeStyles(reasonInfo.type)}`}>
+                      <span
+                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border ${getReasonBadgeStyles(reasonInfo.type)}`}
+                      >
                         <span className="text-base">{reasonInfo.icon}</span>
                         {reasonInfo.text}
                       </span>
