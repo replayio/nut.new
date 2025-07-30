@@ -57,7 +57,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-transparent p-6">
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
-          <div className="flex-1">
+          <div>
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
             {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
               <div className="flex justify-center items-center">
@@ -114,7 +114,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
             {appSummary?.pages && <Pages appSummary={appSummary} />}
           </div>
           {(appSummary?.features || appSummary?.mockupStatus) && (
-            <div className="mt-auto">
+            <div>
               <Features appSummary={appSummary} />
             </div>
           )}
