@@ -5,6 +5,7 @@ import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { SignInForm } from './SignInForm';
 import { SignUpForm } from './SignUpForm';
 import { AuthStateMessage } from './AuthStateMessage';
+import { PasswordResetForm } from './PasswordResetForm';
 
 export function ClientAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -13,8 +14,9 @@ export function ClientAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [usageData, setUsageData] = useState<{ peanuts_used: number; peanuts_refunded: number } | null>(null);
-  const [authState, setAuthState] = useState<'form' | 'success' | 'error'>('form');
+  const [authState, setAuthState] = useState<'form' | 'success' | 'error' | 'reset'>('form');
   const [authMessage, setAuthMessage] = useState<string>('');
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   const addIntercomUser = async (userEmail: string) => {
     try {
@@ -161,6 +163,7 @@ export function ClientAuth() {
             setIsSignUp(false);
             setAuthState('form');
             setAuthMessage('');
+            setShowPasswordReset(false);
           }}
           className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 font-medium transition-colors shadow-lg"
         >
@@ -175,6 +178,7 @@ export function ClientAuth() {
             setShowAuthModal(false);
             setAuthState('form');
             setAuthMessage('');
+            setShowPasswordReset(false);
           }}
         >
           <div
@@ -202,10 +206,12 @@ export function ClientAuth() {
                   setShowAuthModal(false);
                   setAuthState('form');
                   setAuthMessage('');
+                  setShowPasswordReset(false);
                 }}
                 onRetry={() => {
                   setAuthState('form');
                   setAuthMessage('');
+                  setShowPasswordReset(false);
                 }}
                 closeButtonText="Close"
                 retryButtonText="Try Again"
@@ -215,6 +221,23 @@ export function ClientAuth() {
                 addIntercomUser={addIntercomUser} 
                 onToggleForm={() => {
                   setIsSignUp(false);
+                  setAuthState('form');
+                  setAuthMessage('');
+                  setShowPasswordReset(false);
+                }}
+                onSuccess={(message) => {
+                  setAuthState('success');
+                  setAuthMessage(message);
+                }}
+                onError={(message) => {
+                  setAuthState('error');
+                  setAuthMessage(message);
+                }}
+              />
+            ) : showPasswordReset ? (
+              <PasswordResetForm
+                onBack={() => {
+                  setShowPasswordReset(false);
                   setAuthState('form');
                   setAuthMessage('');
                 }}
@@ -233,10 +256,16 @@ export function ClientAuth() {
                   setIsSignUp(true);
                   setAuthState('form');
                   setAuthMessage('');
+                  setShowPasswordReset(false);
                 }}
                 onError={(message) => {
                   setAuthState('error');
                   setAuthMessage(message);
+                }}
+                onForgotPassword={() => {
+                  setShowPasswordReset(true);
+                  setAuthState('form');
+                  setAuthMessage('');
                 }}
               />
             )}

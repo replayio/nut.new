@@ -7,6 +7,7 @@ import { GoogleIcon } from '~/components/icons/google-icon';
 interface SignInFormProps {
   onToggleForm: () => void;
   onError: (message: string) => void;
+  onForgotPassword?: () => void;
 }
 
 const validateEmail = (email: string): boolean => {
@@ -14,7 +15,7 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export function SignInForm({ onToggleForm, onError }: SignInFormProps) {
+export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -121,6 +122,17 @@ export function SignInForm({ onToggleForm, onError }: SignInFormProps) {
           {isProcessing ? 'Processing...' : 'Sign In'}
         </button>
       </form>
+
+      {onForgotPassword && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={onForgotPassword}
+            className="text-green-500 hover:text-green-600 font-medium bg-transparent text-sm"
+          >
+            Forgot password?
+          </button>
+        </div>
+      )}
 
       <p className="mt-6 text-center text-bolt-elements-textSecondary">
         Don't have an account?{' '}
