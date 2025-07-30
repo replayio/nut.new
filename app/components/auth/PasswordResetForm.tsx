@@ -24,8 +24,10 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
     setIsProcessing(true);
 
     try {
+      const redirectUrl = 'https://nut.new/reset-password';
+      
       const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) {
