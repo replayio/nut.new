@@ -5,7 +5,6 @@ import { ScreenshotStateManager } from '~/components/chat/ScreenshotStateManager
 import { ClientOnly } from 'remix-utils/client-only';
 import ApproveChange from '~/components/chat/ApproveChange';
 import { MessageInput } from '~/components/chat/MessageInput/MessageInput';
-import styles from '~/components/chat/BaseChat/BaseChat.module.scss';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 
