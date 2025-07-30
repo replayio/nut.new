@@ -88,6 +88,9 @@ export function DeployChatButton() {
     }
   };
 
+  const generateSiteName = () => {
+  };
+
   const handleDeploy = async () => {
     setError(null);
 
@@ -97,15 +100,27 @@ export function DeployChatButton() {
       return;
     }
 
-    if (deploySettings?.netlify?.authToken) {
-      const { siteId, accountSlug } = deploySettings.netlify;
-      if (siteId && accountSlug) {
-        setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
-        return;
-      } else if (!siteId && !accountSlug) {
-        setError('Either a Netlify Site ID or a Netlify Account Slug is required');
-        return;
-      }
+    if (!deploySettings.netlify) {
+      deploySettings.netlify = {};
+    }
+
+    const { authToken, siteId, accountSlug, siteName } = deploySettings.netlify;
+    if (siteId && accountSlug) {
+      setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
+      return;
+    } else if (!siteId && !accountSlug) {
+      setError('Either a Netlify Site ID or a Netlify Account Slug is required');
+      return;
+    } else if (authToken && !accountSlug) {
+      setError('An account slug is required when using an auth token');
+      return;
+    } else if (accountSlug && !authToken) {
+      setError('An auth token is required when using an account slug');
+      return;
+    }
+
+    if (!siteId && !siteName) {
+      deploySettings.netlify.siteName = generateSiteName();
     }
 
     if (
