@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
+import { useStore } from '@nanostores/react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/utils/nut';
 import { workbenchStore } from '~/lib/stores/workbench';
@@ -23,6 +24,8 @@ export function DeployChatButton() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
   const [databaseFound, setDatabaseFound] = useState(false);
+
+  const appId = useStore(chatStore.currentAppId);
 
   const handleCheckDatabase = async () => {
     const repositoryId = workbenchStore.repositoryId.get();
@@ -70,7 +73,6 @@ export function DeployChatButton() {
   };
 
   const handleOpenModal = async () => {
-    const appId = chatStore.currentAppId.get();
     if (!appId) {
       toast.error('No app ID found');
       return;
@@ -92,7 +94,6 @@ export function DeployChatButton() {
   const handleDeploy = async () => {
     setError(null);
 
-    const appId = chatStore.currentAppId.get();
     if (!appId) {
       setError('No app open');
       return;
