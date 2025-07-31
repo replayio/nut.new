@@ -94,15 +94,16 @@ export function DeployChatButton() {
     if (!appTitle) {
       return 'my-app';
     }
-    
+
     // Convert to lowercase and replace spaces/special characters with hyphens
-    const siteName = appTitle
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-      .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-      || 'nut-app'; // Fallback if result is empty
+    const siteName =
+      appTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, '') || // Remove leading/trailing hyphens
+      'nut-app'; // Fallback if result is empty
 
     return `${siteName}-${generateRandomId()}`;
   };
@@ -120,12 +121,23 @@ export function DeployChatButton() {
       deploySettings.netlify = {};
     }
 
+    // Normalize empty strings to undefined.
+    if (deploySettings.netlify.authToken?.length === 0) {
+      deploySettings.netlify.authToken = undefined;
+    }
+    if (deploySettings.netlify.siteId?.length === 0) {
+      deploySettings.netlify.siteId = undefined;
+    }
+    if (deploySettings.netlify.accountSlug?.length === 0) {
+      deploySettings.netlify.accountSlug = undefined;
+    }
+    if (deploySettings.netlify.siteName?.length === 0) {
+      deploySettings.netlify.siteName = undefined;
+    }
+
     const { authToken, siteId, accountSlug, siteName } = deploySettings.netlify;
     if (siteId && accountSlug) {
       setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
-      return;
-    } else if (!siteId && !accountSlug) {
-      setError('Either a Netlify Site ID or a Netlify Account Slug is required');
       return;
     } else if (authToken && !accountSlug) {
       setError('An account slug is required when using an auth token');

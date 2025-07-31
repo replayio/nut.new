@@ -1,12 +1,13 @@
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
+import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   status: DeployStatus;
-  deploySettings: any;
-  setDeploySettings: (settings: any) => void;
+  deploySettings: DeploySettingsDatabase;
+  setDeploySettings: (settings: DeploySettingsDatabase) => void;
   error: string | null;
   handleDeploy: () => void;
   databaseFound: boolean;
@@ -127,8 +128,9 @@ const DeployChatModal = ({
                       onChange={(e) => {
                         const netlify = {
                           authToken: e.target.value,
-                          siteId: deploySettings?.netlify?.siteId || '',
-                          createInfo: deploySettings?.netlify?.createInfo || undefined,
+                          siteId: deploySettings.netlify?.siteId,
+                          accountSlug: deploySettings.netlify?.accountSlug,
+                          siteName: deploySettings.netlify?.siteName,
                         };
                         setDeploySettings({
                           ...deploySettings,
@@ -150,13 +152,14 @@ const DeployChatModal = ({
                     <input
                       name="netlifySiteId"
                       className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      value={deploySettings?.netlify?.siteId}
+                      value={deploySettings.netlify?.siteId}
                       placeholder="123e4567-..."
                       onChange={(e) => {
                         const netlify = {
-                          authToken: deploySettings?.netlify?.authToken || '',
+                          authToken: deploySettings.netlify?.authToken,
                           siteId: e.target.value,
-                          createInfo: deploySettings?.netlify?.createInfo || undefined,
+                          accountSlug: deploySettings.netlify?.accountSlug,
+                          siteName: deploySettings.netlify?.siteName,
                         };
                         setDeploySettings({
                           ...deploySettings,
@@ -178,17 +181,14 @@ const DeployChatModal = ({
                     <input
                       name="netlifyAccountSlug"
                       className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      value={deploySettings?.netlify?.createInfo?.accountSlug}
+                      value={deploySettings.netlify?.accountSlug}
                       placeholder="abc..."
                       onChange={(e) => {
-                        const createInfo = {
-                          accountSlug: e.target.value,
-                          siteName: deploySettings?.netlify?.createInfo?.siteName || '',
-                        };
                         const netlify = {
-                          authToken: deploySettings?.netlify?.authToken || '',
-                          siteId: deploySettings?.netlify?.siteId || '',
-                          createInfo,
+                          authToken: deploySettings?.netlify?.authToken,
+                          siteId: deploySettings?.netlify?.siteId,
+                          accountSlug: e.target.value,
+                          siteName: deploySettings?.netlify?.siteName,
                         };
                         setDeploySettings({
                           ...deploySettings,
@@ -210,17 +210,14 @@ const DeployChatModal = ({
                     <input
                       name="netlifySiteName"
                       className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      value={deploySettings?.netlify?.createInfo?.siteName}
+                      value={deploySettings.netlify?.siteName}
                       placeholder="my-chat-app..."
                       onChange={(e) => {
-                        const createInfo = {
-                          accountSlug: deploySettings?.netlify?.createInfo?.accountSlug || '',
-                          siteName: e.target.value,
-                        };
                         const netlify = {
-                          authToken: deploySettings?.netlify?.authToken || '',
-                          siteId: deploySettings?.netlify?.siteId || '',
-                          createInfo,
+                          authToken: deploySettings.netlify?.authToken,
+                          siteId: deploySettings.netlify?.siteId,
+                          accountSlug: deploySettings.netlify?.accountSlug,
+                          siteName: e.target.value,
                         };
                         setDeploySettings({
                           ...deploySettings,
