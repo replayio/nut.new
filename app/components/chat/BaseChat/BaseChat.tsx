@@ -9,7 +9,6 @@ import { Workbench } from '~/components/workbench/Workbench.client';
 import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { type Message } from '~/lib/persistence/message';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
@@ -46,12 +45,6 @@ interface BaseChatProps {
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
 }
-
-type ExtendedMessage = Message & {
-  repositoryId?: string;
-  peanuts?: boolean;
-  approved?: boolean;
-};
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   (
@@ -145,23 +138,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         }
       }
     };
-
-    const approveChangeMessageId = (() => {
-      if (hasPendingMessage || !messages) {
-        return undefined;
-      }
-
-      for (let i = messages.length - 1; i >= 0; i--) {
-        const message = messages[i] as ExtendedMessage;
-        if (message.repositoryId && message.peanuts) {
-          return message.approved ? undefined : message.id;
-        }
-        if (message.role === 'user') {
-          return undefined;
-        }
-      }
-      return undefined;
-    })();
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       const newMessages = chatStore.messages.get().map((message) => {
