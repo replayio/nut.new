@@ -16,7 +16,6 @@ import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatP
 import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
 import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
-import type { RejectChangeData } from '~/components/chat/ApproveChange';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { Arboretum } from './components/Arboretum/Arboretum';
 import { useArboretumVisibility } from '~/lib/stores/settings';
@@ -46,8 +45,6 @@ interface BaseChatProps {
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
-  onApproveChange?: (messageId: string) => void;
-  onRejectChange?: (messageId: string, data: RejectChangeData) => void;
 }
 
 type ExtendedMessage = Message & {
@@ -72,8 +69,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       setUploadedFiles,
       imageDataList = [],
       setImageDataList,
-      onApproveChange,
-      onRejectChange,
     },
     ref,
   ) => {
@@ -82,7 +77,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const listenResponses = useStore(chatStore.listenResponses);
     const appSummary = getLatestAppSummary(messages);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
-    const [rejectFormOpen, setRejectFormOpen] = useState(false);
     const { isArboretumVisible } = useArboretumVisibility();
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const mobileActiveTab = useStore(mobileNavStore.activeTab);
@@ -258,11 +252,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 setUploadedFiles={setUploadedFiles!}
                 imageDataList={imageDataList}
                 setImageDataList={setImageDataList!}
-                approveChangeMessageId={approveChangeMessageId}
-                rejectFormOpen={rejectFormOpen}
-                setRejectFormOpen={setRejectFormOpen}
-                onApproveChange={onApproveChange}
-                onRejectChange={onRejectChange}
                 messageInputProps={messageInputProps}
               />
             </div>

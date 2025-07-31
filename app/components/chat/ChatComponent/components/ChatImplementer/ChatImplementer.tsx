@@ -12,11 +12,8 @@ import { useSearchParams } from '@remix-run/react';
 import { type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
-import { ChatMessageTelemetry, pingTelemetry } from '~/lib/hooks/pingTelemetry';
-import type { RejectChangeData } from '~/components/chat/ApproveChange';
+import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
-import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
-import flashScreen from '~/components/chat/ChatComponent/functions/flashScreen';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
@@ -201,49 +198,6 @@ const ChatImplementer = memo(() => {
     textareaRef.current?.blur();
   };
 
-  const onApproveChange = async (messageId: string) => {
-    console.log('ApproveChange', messageId);
-
-    chatStore.messages.set(
-      chatStore.messages.get().map((message) => {
-        if (message.id == messageId) {
-          return {
-            ...message,
-            approved: true,
-          };
-        }
-        return message;
-      }),
-    );
-
-    await flashScreen();
-
-    pingTelemetry('ApproveChange', {
-      numMessages: chatStore.messages.get().length,
-    });
-  };
-
-  const onRejectChange = async (messageId: string, data: RejectChangeData) => {
-    console.log('RejectChange', messageId, data);
-
-    let shareProjectSuccess = false;
-
-    if (data.shareProject) {
-      const feedbackData: any = {
-        explanation: data.explanation,
-        chatMessages: chatStore.messages.get(),
-      };
-
-      shareProjectSuccess = await supabaseSubmitFeedback(feedbackData);
-    }
-
-    pingTelemetry('RejectChange', {
-      shareProject: data.shareProject,
-      shareProjectSuccess,
-      numMessages: chatStore.messages.get().length,
-    });
-  };
-
   /**
    * Handles the change event for the textarea and updates the input state.
    * @param event - The change event from the textarea.
@@ -272,8 +226,6 @@ const ChatImplementer = memo(() => {
       setUploadedFiles={setUploadedFiles}
       imageDataList={imageDataList}
       setImageDataList={setImageDataList}
-      onApproveChange={onApproveChange}
-      onRejectChange={onRejectChange}
     />
   );
 });

@@ -1,13 +1,7 @@
 import type { Message, MessageImage, MessageText } from '~/lib/persistence/message';
-import type { RejectChangeData } from '~/components/chat/ApproveChange';
 
 export interface ChatProps {
   initialMessages: Message[];
-}
-
-export interface ChatImplProps extends ChatProps {
-  onApproveChange?: (messageId: string) => Promise<void>;
-  onRejectChange?: (messageId: string, data: RejectChangeData) => Promise<void>;
 }
 
 // Re-export types we need
