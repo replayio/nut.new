@@ -97,7 +97,8 @@ interface NutChatRequest {
   workerCount?: number;
 }
 
-function shouldSendMessage(message: Message) {
+// Messages that are rendered normally in the chat.
+export function shouldDisplayMessage(message: Message) {
   return (
     message.role == 'user' ||
     message.category == DISCOVERY_RESPONSE_CATEGORY ||
@@ -135,7 +136,7 @@ export async function sendChatMessage(
   const params: NutChatRequest = {
     appId: chatStore.currentAppId.get(),
     mode,
-    messages: messages.filter(shouldSendMessage),
+    messages: messages.filter(shouldDisplayMessage),
     references,
     simulationData,
   };
