@@ -1,16 +1,23 @@
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
-import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import type { DeployResult, DeploySettings, DeploySettingsNetlify } from '~/lib/replay/Deploy';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   status: DeployStatus;
-  deploySettings: DeploySettingsDatabase;
-  setDeploySettings: (settings: DeploySettingsDatabase) => void;
+  deploySettings: DeploySettings;
+  setDeploySettings: (settings: DeploySettings) => void;
   error: string | null;
   handleDeploy: () => void;
   databaseFound: boolean;
+}
+
+function lastDeployResult(deploySettings: DeploySettings): DeployResult | undefined {
+  if (!deploySettings.results?.length) {
+    return undefined;
+  }
+  return deploySettings.results[deploySettings.results.length - 1];
 }
 
 const DeployChatModal = ({
@@ -28,6 +35,8 @@ const DeployChatModal = ({
       setIsModalOpen(false);
     }
   };
+
+  const result = lastDeployResult(deploySettings);
 
   return (
     <>
@@ -91,12 +100,12 @@ const DeployChatModal = ({
                   </div>
                 </div>
 
-                {deploySettings?.siteURL && (
+                {result?.siteURL && (
                   <div className="text-center mb-6">
                     <span className="text-lg text-bolt-elements-textPrimary pr-2">Existing site:</span>
-                    <a href={deploySettings?.siteURL} target="_blank" rel="noopener noreferrer">
+                    <a href={result?.siteURL} target="_blank" rel="noopener noreferrer">
                       <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium">
-                        {deploySettings?.siteURL}
+                        {result?.siteURL}
                       </button>
                     </a>
                   </div>
@@ -126,40 +135,9 @@ const DeployChatModal = ({
                       value={deploySettings?.netlify?.authToken}
                       placeholder="nfp_..."
                       onChange={(e) => {
-                        const netlify = {
+                        const netlify: DeploySettingsNetlify = {
                           authToken: e.target.value,
-                          siteId: deploySettings.netlify?.siteId,
-                          accountSlug: deploySettings.netlify?.accountSlug,
-                          siteName: deploySettings.netlify?.siteName,
-                        };
-                        setDeploySettings({
-                          ...deploySettings,
-                          netlify,
-                        });
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
-                      Netlify Site ID (existing site)
-                    </label>
-                    <div className="w-full mb-2">
-                      <p className="text-xs text-bolt-elements-textSecondary whitespace-pre-wrap">
-                        The ID of your existing Netlify site if you want to update an existing deployment.
-                      </p>
-                    </div>
-                    <input
-                      name="netlifySiteId"
-                      className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      value={deploySettings.netlify?.siteId}
-                      placeholder="123e4567-..."
-                      onChange={(e) => {
-                        const netlify = {
-                          authToken: deploySettings.netlify?.authToken,
-                          siteId: e.target.value,
-                          accountSlug: deploySettings.netlify?.accountSlug,
-                          siteName: deploySettings.netlify?.siteName,
+                          accountSlug: deploySettings.netlify?.accountSlug ?? '',
                         };
                         setDeploySettings({
                           ...deploySettings,
@@ -184,11 +162,9 @@ const DeployChatModal = ({
                       value={deploySettings.netlify?.accountSlug}
                       placeholder="abc..."
                       onChange={(e) => {
-                        const netlify = {
-                          authToken: deploySettings?.netlify?.authToken,
-                          siteId: deploySettings?.netlify?.siteId,
+                        const netlify: DeploySettingsNetlify = {
+                          authToken: deploySettings.netlify?.authToken ?? '',
                           accountSlug: e.target.value,
-                          siteName: deploySettings?.netlify?.siteName,
                         };
                         setDeploySettings({
                           ...deploySettings,
@@ -210,18 +186,12 @@ const DeployChatModal = ({
                     <input
                       name="netlifySiteName"
                       className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      value={deploySettings.netlify?.siteName}
+                      value={deploySettings.siteName}
                       placeholder="my-chat-app..."
                       onChange={(e) => {
-                        const netlify = {
-                          authToken: deploySettings.netlify?.authToken,
-                          siteId: deploySettings.netlify?.siteId,
-                          accountSlug: deploySettings.netlify?.accountSlug,
-                          siteName: e.target.value,
-                        };
                         setDeploySettings({
                           ...deploySettings,
-                          netlify,
+                          siteName: e.target.value,
                         });
                       }}
                     />

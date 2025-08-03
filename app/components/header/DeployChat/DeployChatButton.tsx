@@ -2,13 +2,13 @@ import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
-import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import type { DeploySettings } from '~/lib/replay/Deploy';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import { deployApp, downloadRepository } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
-import { generateRandomId } from '~/utils/nut';
+import { assert, generateRandomId } from '~/utils/nut';
 
 ReactModal.setAppElement('#root');
 
@@ -20,7 +20,7 @@ export enum DeployStatus {
 
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase>({});
+  const [deploySettings, setDeploySettings] = useState<DeploySettings>({});
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
   const [databaseFound, setDatabaseFound] = useState(false);
@@ -72,6 +72,12 @@ export function DeployChatButton() {
     }
   };
 
+  const updateDeploySettings = (settings: DeploySettings) => {
+    assert(appId, 'App ID is required');
+    setDeploySettings(settings);
+    database.setAppDeploySettings(appId, settings);
+  };
+
   const handleOpenModal = async () => {
     if (!appId) {
       toast.error('No app ID found');
@@ -79,16 +85,16 @@ export function DeployChatButton() {
     }
 
     await handleCheckDatabase();
+
     const existingSettings = await database.getAppDeploySettings(appId);
-
-    setIsModalOpen(true);
-    setStatus(DeployStatus.NotStarted);
-
     if (existingSettings) {
       setDeploySettings(existingSettings);
     } else {
       setDeploySettings({});
     }
+
+    setIsModalOpen(true);
+    setStatus(DeployStatus.NotStarted);
   };
 
   const generateSiteName = () => {
@@ -118,38 +124,20 @@ export function DeployChatButton() {
       return;
     }
 
-    if (!deploySettings.netlify) {
-      deploySettings.netlify = {};
+    if (deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug) {
+      if (!deploySettings.netlify.accountSlug) {
+        setError('Netlify account slug is required');
+        return;
+      } else if (!deploySettings.netlify.authToken) {
+        setError('Netlify auth token is required');
+        return;
+      }
+    } else {
+      deploySettings.netlify = undefined;
     }
 
-    // Normalize empty strings to undefined.
-    if (deploySettings.netlify.authToken?.length === 0) {
-      deploySettings.netlify.authToken = undefined;
-    }
-    if (deploySettings.netlify.siteId?.length === 0) {
-      deploySettings.netlify.siteId = undefined;
-    }
-    if (deploySettings.netlify.accountSlug?.length === 0) {
-      deploySettings.netlify.accountSlug = undefined;
-    }
-    if (deploySettings.netlify.siteName?.length === 0) {
-      deploySettings.netlify.siteName = undefined;
-    }
-
-    const { authToken, siteId, accountSlug, siteName } = deploySettings.netlify;
-    if (siteId && accountSlug) {
-      setError('Cannot specify both a Netlify Site ID and a Netlify Account Slug');
-      return;
-    } else if (authToken && !accountSlug) {
-      setError('An account slug is required when using an auth token');
-      return;
-    } else if (accountSlug && !authToken) {
-      setError('An auth token is required when using an account slug');
-      return;
-    }
-
-    if (!siteId && !siteName) {
-      deploySettings.netlify.siteName = generateSiteName();
+    if (!deploySettings.siteName) {
+      deploySettings.siteName = generateSiteName();
     }
 
     if (
@@ -174,6 +162,8 @@ export function DeployChatButton() {
         setError('Supabase Postgres URL is required');
         return;
       }
+    } else {
+      deploySettings.supabase = undefined;
     }
 
     setStatus(DeployStatus.Started);
@@ -183,10 +173,11 @@ export function DeployChatButton() {
 
     console.log('DeploymentStarting', appId, deploySettings);
 
-    const result = await deployApp(appId, deploySettings);
+    await deployApp(appId, deploySettings);
 
     console.log('DeploymentResult', appId, deploySettings, result);
 
+    await 
     if (result.error) {
       setStatus(DeployStatus.NotStarted);
       setError(result.error);
@@ -195,28 +186,8 @@ export function DeployChatButton() {
 
     let newSettings = deploySettings;
 
-    // Update netlify settings so future deployments will reuse the site.
-    if (result.netlifySiteId) {
-      newSettings = {
-        ...deploySettings,
-        netlify: {
-          authToken: deploySettings.netlify?.authToken,
-          siteId: result.netlifySiteId,
-        },
-      };
-    }
-
-    // Update database with the deployment result.
-    newSettings = {
-      ...newSettings,
-      siteURL: result.siteURL,
-    };
-
     setDeploySettings(newSettings);
     setStatus(DeployStatus.Succeeded);
-
-    // Update the database with the new settings.
-    await database.setAppDeploySettings(appId, newSettings);
   };
 
   return (
