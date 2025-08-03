@@ -175,6 +175,10 @@ export function DeployChatButton() {
 
     console.log('DeploymentResult', appId, deploySettings, result);
 
+    if (result.error) {
+      setError(result.error);
+    }
+
     setDeploySettings({
       ...deploySettings,
       results: [...(deploySettings.results || []), result],
