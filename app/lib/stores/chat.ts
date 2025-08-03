@@ -6,7 +6,7 @@ import { clearPendingMessageStatus } from './status';
 import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
-import { getLatestAppRepositoryId } from '~/lib/persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY, getLatestAppRepositoryId, parseAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 
@@ -78,6 +78,10 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
       case 'message': {
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
+        if (response.message.category == APP_SUMMARY_CATEGORY) {
+          console.log('SendMessage AppSummary', parseAppSummaryMessage(response.message)?.iteration);
+        }
+
         addChatMessage(response.message);
 
         const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
@@ -145,6 +149,10 @@ export async function doListenAppResponses() {
         }
 
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+        if (response.message.category == APP_SUMMARY_CATEGORY) {
+          console.log('ListenApp AppSummary', parseAppSummaryMessage(response.message)?.iteration);
+        }
 
         addChatMessage(response.message);
 

@@ -6,6 +6,7 @@ import { SignInForm } from './SignInForm';
 import { SignUpForm } from './SignUpForm';
 import { AuthStateMessage } from './AuthStateMessage';
 import { PasswordResetForm } from './PasswordResetForm';
+import { addPeanuts, getPeanutsRemaining } from '~/lib/replay/Account';
 
 export function ClientAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -13,7 +14,7 @@ export function ClientAuth() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [usageData, setUsageData] = useState<{ peanuts_used: number; peanuts_refunded: number } | null>(null);
+  const [usageData, setUsageData] = useState<{ peanuts_remaining: number } | null>(null);
   const [authState, setAuthState] = useState<'form' | 'success' | 'error' | 'reset'>('form');
   const [authMessage, setAuthMessage] = useState<string>('');
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -71,25 +72,16 @@ export function ClientAuth() {
     };
   }, []);
 
-  useEffect(() => {
-    async function updateUsageData() {
-      try {
-        const { data, error } = await getSupabase()
-          .from('profiles')
-          .select('peanuts_used, peanuts_refunded')
-          .eq('id', user?.id)
-          .single();
-
-        if (error) {
-          throw error;
-        }
-
-        setUsageData(data);
-      } catch (error) {
-        console.error('Error fetching usage data:', error);
-      }
+  const updateUsageData = async () => {
+    try {
+      const peanutsRemaining = await getPeanutsRemaining();
+      setUsageData({ peanuts_remaining: peanutsRemaining });
+    } catch (error) {
+      console.error('Error fetching usage data:', error);
     }
+  }
 
+  useEffect(() => {
     if (showDropdown) {
       updateUsageData();
     }
@@ -136,14 +128,18 @@ export function ClientAuth() {
                 <div className="text-sm text-bolt-elements-textSecondary">Usage</div>
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span>Peanuts used</span>
-                    <span className="font-medium">{usageData?.peanuts_used ?? '...'}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Peanuts refunded</span>
-                    <span className="font-medium">{usageData?.peanuts_refunded ?? '...'}</span>
+                    <span>Peanuts</span>
+                    <span className="font-medium">{usageData?.peanuts_remaining ?? '...'}</span>
                   </div>
                 </div>
+              </div>
+              <div className="px-2 pt-2">
+                <button
+                  onClick={() => addPeanuts(2000).finally(() => updateUsageData())}
+                  className="w-full px-4 py-2 text-left bg-green-500 text-white hover:bg-green-600 rounded-md transition-colors flex items-center justify-center"
+                >
+                  Add 2000 peanuts
+                </button>
               </div>
               <div className="px-2 pt-2">
                 <button
