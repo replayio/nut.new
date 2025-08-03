@@ -13,7 +13,7 @@ interface DeployChatModalProps {
   databaseFound: boolean;
 }
 
-  const DeployChatModal = ({
+const DeployChatModal = ({
   isModalOpen,
   setIsModalOpen,
   status,

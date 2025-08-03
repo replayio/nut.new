@@ -8,7 +8,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import { deployApp, downloadRepository, lastDeployResult } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
-import { assert, generateRandomId } from '~/utils/nut';
+import { generateRandomId } from '~/utils/nut';
 
 ReactModal.setAppElement('#root');
 
