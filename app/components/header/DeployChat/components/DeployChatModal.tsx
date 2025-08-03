@@ -1,6 +1,6 @@
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
-import type { DeployResult, DeploySettings, DeploySettingsNetlify } from '~/lib/replay/Deploy';
+import { lastDeployResult, type DeploySettings, type DeploySettingsNetlify } from '~/lib/replay/Deploy';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;
@@ -8,19 +8,12 @@ interface DeployChatModalProps {
   status: DeployStatus;
   deploySettings: DeploySettings;
   setDeploySettings: (settings: DeploySettings) => void;
-  error: string | null;
+  error: string | undefined;
   handleDeploy: () => void;
   databaseFound: boolean;
 }
 
-function lastDeployResult(deploySettings: DeploySettings): DeployResult | undefined {
-  if (!deploySettings.results?.length) {
-    return undefined;
-  }
-  return deploySettings.results[deploySettings.results.length - 1];
-}
-
-const DeployChatModal = ({
+  const DeployChatModal = ({
   isModalOpen,
   setIsModalOpen,
   status,

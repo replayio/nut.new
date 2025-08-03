@@ -6,7 +6,7 @@ import type { DeploySettings } from '~/lib/replay/Deploy';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import { deployApp, downloadRepository } from '~/lib/replay/Deploy';
+import { deployApp, downloadRepository, lastDeployResult } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
 import { assert, generateRandomId } from '~/utils/nut';
 
@@ -21,7 +21,7 @@ export enum DeployStatus {
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deploySettings, setDeploySettings] = useState<DeploySettings>({});
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
   const [databaseFound, setDatabaseFound] = useState(false);
 
@@ -72,12 +72,6 @@ export function DeployChatButton() {
     }
   };
 
-  const updateDeploySettings = (settings: DeploySettings) => {
-    assert(appId, 'App ID is required');
-    setDeploySettings(settings);
-    database.setAppDeploySettings(appId, settings);
-  };
-
   const handleOpenModal = async () => {
     if (!appId) {
       toast.error('No app ID found');
@@ -89,6 +83,10 @@ export function DeployChatButton() {
     const existingSettings = await database.getAppDeploySettings(appId);
     if (existingSettings) {
       setDeploySettings(existingSettings);
+      const lastResult = lastDeployResult(existingSettings);
+      if (lastResult?.error) {
+        setError(lastResult.error);
+      }
     } else {
       setDeploySettings({});
     }
@@ -117,7 +115,7 @@ export function DeployChatButton() {
   };
 
   const handleDeploy = async () => {
-    setError(null);
+    setError(undefined);
 
     if (!appId) {
       setError('No app open');
@@ -173,21 +171,16 @@ export function DeployChatButton() {
 
     console.log('DeploymentStarting', appId, deploySettings);
 
-    await deployApp(appId, deploySettings);
+    const result = await deployApp(appId, deploySettings);
 
     console.log('DeploymentResult', appId, deploySettings, result);
 
-    await 
-    if (result.error) {
-      setStatus(DeployStatus.NotStarted);
-      setError(result.error);
-      return;
-    }
+    setDeploySettings({
+      ...deploySettings,
+      results: [...(deploySettings.results || []), result],
+    });
 
-    let newSettings = deploySettings;
-
-    setDeploySettings(newSettings);
-    setStatus(DeployStatus.Succeeded);
+    setStatus(result.error ? DeployStatus.NotStarted : DeployStatus.Succeeded);
   };
 
   return (

@@ -70,6 +70,13 @@ export async function deployApp(appId: string, settings: DeploySettings): Promis
   return result;
 }
 
+export function lastDeployResult(deploySettings: DeploySettings): DeployResult | undefined {
+  if (!deploySettings.results?.length) {
+    return undefined;
+  }
+  return deploySettings.results[deploySettings.results.length - 1];
+}
+
 export async function downloadRepository(repositoryId: string): Promise<string> {
   const { repositoryContents } = await callNutAPI('get-repository-contents', {
     repositoryId,
