@@ -5,6 +5,7 @@ import { logStore } from './logs';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '~/lib/supabase/client';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { refreshPeanutsStore } from './peanuts';
 
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
@@ -85,6 +86,8 @@ export async function initializeAuth() {
       }
     });
 
+    refreshPeanutsStore();
+
     return () => {
       subscription.unsubscribe();
     };
@@ -108,6 +111,8 @@ export async function signInWithEmail(email: string, password: string) {
     if (error) {
       throw error;
     }
+
+    refreshPeanutsStore();
 
     return data;
   } catch (error) {
@@ -171,6 +176,8 @@ export async function signOut() {
     if (error) {
       throw error;
     }
+
+    refreshPeanutsStore();
   } catch (error) {
     logStore.logError('Failed to sign out', error);
     throw error;

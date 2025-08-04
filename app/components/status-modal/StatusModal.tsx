@@ -209,18 +209,29 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
               >
-                {!isFullyComplete && (
+                {!isFullyComplete && peanutsError && (
                   <div className="flex justify-center items-center w-full">
-                    <WithTooltip tooltip={peanutsError || 'Build remaining features'}>
+                    <WithTooltip tooltip={peanutsError}>
                       <button
                         onClick={handleContinueBuilding}
-                        disabled={!!peanutsError}
-                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                        disabled={true}
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-gray-500 text-white flex items-center gap-2"
                       >
                         <div className="i-ph:rocket-launch text-xl"></div>
                         Continue Building
                       </button>
                     </WithTooltip>
+                  </div>
+                )}
+                {!isFullyComplete && !peanutsError && (
+                  <div className="flex justify-center items-center w-full">
+                    <button
+                      onClick={handleContinueBuilding}
+                      className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                    >
+                      <div className="i-ph:rocket-launch text-xl"></div>
+                      Continue Building
+                    </button>
                   </div>
                 )}
 

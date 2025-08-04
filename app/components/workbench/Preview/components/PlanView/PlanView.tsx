@@ -60,16 +60,12 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div>
             <div className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary">App Build Plan</div>
-            {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
+            {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && peanutsError && (
               <div className="flex justify-center items-center">
-                <WithTooltip tooltip={peanutsError || 'Build remaining features'}>
+                <WithTooltip tooltip={peanutsError}>
                   <button
-                    className="mb-6 p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      doSendMessage(ChatMode.DevelopApp, []);
-                    }}
-                    disabled={!!peanutsError}
+                    className="mb-6 p-4 bg-gray-500 text-white rounded-lg transition-colors duration-200 text-left"
+                    disabled={true}
                   >
                     <div className="flex items-center gap-1">
                       <div className="i-ph:rocket-launch text-xl text-white"></div>
@@ -77,6 +73,22 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                     </div>
                   </button>
                 </WithTooltip>
+              </div>
+            )}
+            {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && !peanutsError && (
+              <div className="flex justify-center items-center">
+                <button
+                  className="mb-6 p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-left cursor-pointer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    doSendMessage(ChatMode.DevelopApp, []);
+                  }}
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="i-ph:rocket-launch text-xl text-white"></div>
+                    <div className="font-medium text-white">Continue Building</div>
+                  </div>
+                </button>
               </div>
             )}
             {listenResponses && appSummary?.features?.length && (
