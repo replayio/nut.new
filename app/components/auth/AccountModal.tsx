@@ -1,7 +1,9 @@
 import {
   getPeanutsHistory,
+  getPeanutsRemaining,
   getPeanutsSubscription,
   setPeanutsSubscription,
+  addPeanuts,
   type PeanutHistoryEntry,
   type AccountSubscription,
 } from '~/lib/replay/Account';
@@ -12,22 +14,27 @@ import type { ReactElement } from 'react';
 
 interface AccountModalProps {
   user: User | undefined;
-  peanutsRemaining: number | undefined;
 }
 
 const DEFAULT_SUBSCRIPTION_PEANUTS = 2000;
 
-export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
+export const AccountModal = ({ user }: AccountModalProps) => {
+  const [peanutsRemaining, setPeanutsRemaining] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const reloadAccountData = async () => {
     setLoading(true);
-    const [history, subscription] = await Promise.all([getPeanutsHistory(), getPeanutsSubscription()]);
+    const [history, subscription, peanutsRemaining] = await Promise.all([
+      getPeanutsHistory(),
+      getPeanutsSubscription(),
+      getPeanutsRemaining(),
+    ]);
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
+    setPeanutsRemaining(peanutsRemaining);
     setLoading(false);
   };
 
@@ -139,6 +146,12 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
     reloadAccountData();
   };
 
+  const handleAddPeanuts = async () => {
+    setLoading(true);
+    await addPeanuts(2000);
+    reloadAccountData();
+  };
+
   return (
     <div
       className="bg-bolt-elements-background-depth-1 rounded-lg p-8 max-w-3xl w-full z-50 border border-bolt-elements-borderColor overflow-y-auto max-h-[95vh]"
@@ -158,7 +171,7 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
             <div>No active subscription</div>
           )}
         </div>
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center gap-3">
           <DialogButton
             type={subscription ? 'danger' : 'primary'}
             onClick={handleSubscriptionToggle}
@@ -170,6 +183,11 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
                 ? 'Cancel'
                 : `Subscribe (${DEFAULT_SUBSCRIPTION_PEANUTS} peanuts per month)`}
           </DialogButton>
+          {subscription && (
+            <DialogButton type="secondary" onClick={handleAddPeanuts} disabled={loading}>
+              {loading ? 'Loading...' : 'Add 2000 Peanuts'}
+            </DialogButton>
+          )}
         </div>
       </div>
 

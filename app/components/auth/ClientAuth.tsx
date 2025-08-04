@@ -275,9 +275,10 @@ export function ClientAuth() {
           className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50"
           onClick={() => {
             setShowAccountModal(false);
+            setShowDropdown(false);
           }}
         >
-          <AccountModal user={user} peanutsRemaining={peanutsRemaining} />
+          <AccountModal user={user} />
         </div>
       )}
     </>
