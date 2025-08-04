@@ -207,14 +207,6 @@ export const Menu = () => {
               <div className="i-ph:plus text-base" />
               <span>New App</span>
             </a>
-
-            <a
-              href="/about"
-              className="w-full flex items-center gap-2 bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-4 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor rounded-md px-3 py-2 transition-all duration-200 text-sm font-medium"
-            >
-              <div className="i-ph:info text-base" />
-              <span>About</span>
-            </a>
           </div>
         </div>
 
