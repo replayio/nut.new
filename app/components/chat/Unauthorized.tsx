@@ -6,35 +6,16 @@
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { classNames } from '~/utils/classNames';
-import { navigateApp } from '~/utils/nut';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { useState } from 'react';
-import { database } from '~/lib/persistence/apps';
-import { useLoaderData } from '@remix-run/react';
-import { toast } from 'react-toastify';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
-export const Unauthorized = () => {
-  const { id: appId } = useLoaderData<{ id?: string }>() ?? {};
-  const [isCopying, setIsCopying] = useState(false);
+interface UnauthorizedProps {
+  handleCopyApp: () => void;
+  isCopying: boolean;
+}
 
-  const handleCopyApp = async () => {
-    if (!appId || isCopying) return;
-
-    setIsCopying(true);
-    try {
-      const newAppId = await database.copyApp(appId);
-      toast.success('App copied successfully!');
-      navigateApp(newAppId);
-    } catch (error) {
-      console.error('Failed to copy app:', error);
-      toast.error('Failed to copy app. Please try again.');
-    } finally {
-      setIsCopying(false);
-    }
-  };
-
+export const Unauthorized = ({ handleCopyApp, isCopying }: UnauthorizedProps) => {
   return (
     <Tooltip.Provider delayDuration={200}>
       <div
