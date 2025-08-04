@@ -65,7 +65,11 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
   const getReasonDisplay = (entry: PeanutHistoryEntry) => {
     switch (entry.reason) {
       case 'SetSubscription':
-        return `Subscription set to ${entry.subscriptionPeanuts} peanuts`;
+        if (entry.subscriptionPeanuts) {
+          return `Subscription set to ${entry.subscriptionPeanuts} peanuts per month`;
+        } else {
+          return 'Subscription canceled';
+        }
       case 'SubscriptionReload':
         return 'Monthly subscription reload';
       case 'AddPeanuts':
