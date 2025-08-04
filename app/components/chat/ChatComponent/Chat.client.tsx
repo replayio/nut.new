@@ -11,21 +11,16 @@ import { chatStore, doListenAppResponses, isResponseEvent } from '~/lib/stores/c
 import { database } from '~/lib/persistence/apps';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { NutAPIError } from '~/lib/replay/NutAPI';
-import { navigateApp } from '~/utils/nut';
 import { logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import { Unauthorized } from '~/components/chat/Unauthorized';
 
-// Ensure that the app is accessible. Copies the app if it is owned by another user.
-async function ensureAppAccessible(appId: string) {
+async function isAppAccessible(appId: string) {
   try {
-    const title = await database.getAppTitle(appId);
-    return { appId, title };
+    await database.getAppTitle(appId);
+    return true;
   } catch (error) {
-    // Handle unauthorized access by copying the app.
     if (error instanceof NutAPIError && error.status == 401) {
-      const newAppId = await database.copyApp(appId);
-      const title = await database.getAppTitle(newAppId);
-      navigateApp(newAppId);
-      return { appId: newAppId, title };
+      return false;
     }
     throw error;
   }
@@ -34,17 +29,23 @@ async function ensureAppAccessible(appId: string) {
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const { id: initialAppId } = useLoaderData<{ id?: string }>() ?? {};
+  const { id: appId } = useLoaderData<{ id?: string }>() ?? {};
 
-  const [ready, setReady] = useState<boolean>(!initialAppId);
+  const [ready, setReady] = useState<boolean>(!appId);
+  const [unauthorized, setUnauthorized] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!initialAppId) {
+    if (!appId) {
       return;
     }
     (async () => {
       try {
-        const { appId, title } = await ensureAppAccessible(initialAppId);
+        if (!await isAppAccessible(appId)) {
+          setUnauthorized(true);
+          return;
+        }
+
+        const title = await database.getAppTitle(appId);
         const responses = await getExistingAppResponses(appId);
         let messages: Message[] = [];
         const eventResponses: ChatResponse[] = [];
@@ -74,5 +75,10 @@ export function Chat() {
     })();
   }, []);
 
-  return <>{ready && <ChatImplementer />}</>;
+  return (
+    <>
+      {ready && <ChatImplementer />}
+      {unauthorized && <Unauthorized />}
+    </>
+  );
 }
