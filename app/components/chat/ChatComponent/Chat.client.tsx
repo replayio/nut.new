@@ -12,6 +12,7 @@ import { database } from '~/lib/persistence/apps';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { NutAPIError } from '~/lib/replay/NutAPI';
 import { navigateApp } from '~/utils/nut';
+import { logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 
 // Ensure that the app is accessible. Copies the app if it is owned by another user.
 async function ensureAppAccessible(appId: string) {
@@ -49,6 +50,7 @@ export function Chat() {
         const eventResponses: ChatResponse[] = [];
         for (const response of responses) {
           if (response.kind == 'message') {
+            logAppSummaryMessage(response.message, 'InitialLoad');
             messages = mergeResponseMessage(response.message, messages);
           }
           if (isResponseEvent(response)) {

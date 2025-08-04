@@ -67,7 +67,7 @@ const Events = ({ featureName }: EventsProps) => {
           return (
             <div>
               A test failed:
-              <a href={`https://app.replay.io/recording/${event.recordingId}`} className="pl-1 text-blue-500">
+              <a href={`https://app.replay.io/recording/${event.recordingId}`} className="pl-1 text-blue-500" target="_blank" rel="noopener noreferrer">
                 {event.title}
               </a>
             </div>

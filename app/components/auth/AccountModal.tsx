@@ -76,7 +76,7 @@ export const AccountModal = () => {
       className="bg-bolt-elements-background-depth-1 rounded-lg p-8 max-w-3xl w-full z-50 border border-bolt-elements-borderColor overflow-y-auto max-h-[95vh]"
       onClick={(e) => e.stopPropagation()}
     >
-      <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Peanut Usage History</h2>
+      <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Usage</h2>
 
       {loading ? (
         <div className="text-center py-8 text-bolt-elements-textSecondary">Loading usage history...</div>

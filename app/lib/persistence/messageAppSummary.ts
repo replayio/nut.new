@@ -182,6 +182,13 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
   }
 }
 
+// Diagnostics for tracking down why the UI doesn't update as expected.
+export function logAppSummaryMessage(message: Message, reason: string) {
+  if (message.category === APP_SUMMARY_CATEGORY) {
+    console.log('AppSummary', reason, parseAppSummaryMessage(message)?.iteration);
+  }
+}
+
 // Get the latest app summary from messages (use passed messages, not store)
 export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
   if (!messages) {

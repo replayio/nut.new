@@ -7,9 +7,8 @@ import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
 import {
-  APP_SUMMARY_CATEGORY,
   getLatestAppRepositoryId,
-  parseAppSummaryMessage,
+  logAppSummaryMessage,
 } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
@@ -82,9 +81,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
       case 'message': {
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
-        if (response.message.category == APP_SUMMARY_CATEGORY) {
-          console.log('SendMessage AppSummary', parseAppSummaryMessage(response.message)?.iteration);
-        }
+        logAppSummaryMessage(response.message, 'SendMessage');
 
         addChatMessage(response.message);
 
@@ -154,9 +151,7 @@ export async function doListenAppResponses() {
 
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
-        if (response.message.category == APP_SUMMARY_CATEGORY) {
-          console.log('ListenApp AppSummary', parseAppSummaryMessage(response.message)?.iteration);
-        }
+        logAppSummaryMessage(response.message, 'ListenAppResponses');
 
         addChatMessage(response.message);
 
