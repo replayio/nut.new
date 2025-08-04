@@ -44,13 +44,13 @@ export function ChatDescription() {
         </form>
       ) : (
         <>
-          <div className="flex-1 min-w-0 truncate text-center">{currentTitle}</div>
+          <div className="flex-1 min-w-0 truncate text-center text-bolt-elements-textPrimary">{currentTitle}</div>
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
               <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent ml-2 flex-shrink-0">
                 <button
                   type="button"
-                  className="i-ph:pencil-fill scale-110 hover:text-bolt-elements-item-contentAccent"
+                  className="i-ph:pencil-fill scale-110 text-bolt-elements-textPrimary hover:text-bolt-elements-item-contentAccent"
                   onClick={(event) => {
                     event.preventDefault();
                     toggleEditMode();

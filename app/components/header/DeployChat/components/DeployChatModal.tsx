@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { DeployStatus, DeployType } from '~/components/header/DeployChat/DeployChatButton';
+import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
-import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import { lastDeployResult, type DeploySettings, type DeploySettingsNetlify } from '~/lib/replay/Deploy';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   status: DeployStatus;
-  deployType: DeployType;
-  deploySettings: DeploySettingsDatabase;
-  setDeploySettings: (settings: DeploySettingsDatabase) => void;
-  error: string | null;
-  handleEasyDeploy: () => void;
-  handleManualDeploy: () => void;
+  deploySettings: DeploySettings;
+  setDeploySettings: (settings: DeploySettings) => void;
+  error: string | undefined;
+  handleDeploy: () => void;
   databaseFound: boolean;
 }
 
@@ -20,12 +18,10 @@ const DeployChatModal = ({
   isModalOpen,
   setIsModalOpen,
   status,
-  deployType,
   deploySettings,
   setDeploySettings,
   error,
-  handleEasyDeploy,
-  handleManualDeploy,
+  handleDeploy,
   databaseFound,
 }: DeployChatModalProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -36,10 +32,9 @@ const DeployChatModal = ({
     }
   };
 
-  const isEasyDeploying = status === DeployStatus.Started && deployType === DeployType.Easy;
-  const isManualDeploying = status === DeployStatus.Started && deployType === DeployType.Manual;
   const isDeploying = status === DeployStatus.Started;
-  const hasExistingSite = Boolean(deploySettings?.siteURL || deploySettings?.netlify?.siteId);
+  const result = lastDeployResult(deploySettings);
+  const hasExistingSite = Boolean(result?.siteURL || deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug);
 
   return (
     <>
@@ -73,21 +68,17 @@ const DeployChatModal = ({
                   {/* Show existing site in easy deploy */}
                   {hasExistingSite && (
                     <div className="mb-4 p-3 bg-bolt-elements-background-depth-3 rounded-lg border border-bolt-elements-borderColor">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-bolt-elements-textPrimary font-medium">Current site:</span>
-                        {deploySettings?.siteURL ? (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-sm text-bolt-elements-textPrimary font-medium">Current site:</div>
+                        {result?.siteURL ? (
                           <a 
-                            href={deploySettings.siteURL} 
+                            href={result.siteURL} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-sm text-green-500 hover:text-green-600 transition-colors underline"
+                            className="text-sm text-green-500 hover:text-green-600 transition-colors underline truncate"
                           >
-                            {deploySettings.siteURL}
+                            {result.siteURL}
                           </a>
-                        ) : deploySettings?.netlify?.siteId ? (
-                          <span className="text-sm text-bolt-elements-textSecondary font-mono">
-                            ID: {deploySettings.netlify.siteId}
-                          </span>
                         ) : (
                           <span className="text-sm text-bolt-elements-textSecondary">
                             Existing deployment found
@@ -98,14 +89,14 @@ const DeployChatModal = ({
                   )}
                   
                   <div className="flex justify-center">
-                    {isEasyDeploying ? (
+                    {isDeploying ? (
                       <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-3">
                         <span className="i-svg-spinners:3-dots-fade inline-block w-[1.2em] h-[1.2em] mr-3 text-2xl"></span>
                         <span className="text-lg">{hasExistingSite ? 'Redeploying' : 'Deploying'} your app...</span>
                       </div>
                     ) : (
                       <button
-                        onClick={handleEasyDeploy}
+                        onClick={handleDeploy}
                         disabled={isDeploying}
                         className="flex items-center gap-2 px-8 py-3 bg-green-500 text-white text-lg font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
@@ -139,7 +130,7 @@ const DeployChatModal = ({
                   {showAdvanced && (
                     <div className="bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor border-t-0 rounded-b-lg">
                       <div className="p-6">
-                        <div className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor">
+                        <div className="mb-6 p-4 bg-bolt-elements-background-depth-3 rounded-lg border border-bolt-elements-borderColor">
                           <h3 className="text-sm font-medium text-bolt-elements-textPrimary mb-2">Before you begin:</h3>
                           <p className="text-xs text-bolt-elements-textSecondary mb-3">
                             You'll need accounts with {databaseFound ? 'both Netlify and Supabase' : 'Netlify'} to deploy with custom settings.
@@ -192,40 +183,9 @@ const DeployChatModal = ({
                               value={deploySettings?.netlify?.authToken || ''}
                               placeholder="nfp_..."
                               onChange={(e) => {
-                                const netlify = {
+                                const netlify: DeploySettingsNetlify = {
                                   authToken: e.target.value,
-                                  siteId: deploySettings.netlify?.siteId,
-                                  accountSlug: deploySettings.netlify?.accountSlug,
-                                  siteName: deploySettings.netlify?.siteName,
-                                };
-                                setDeploySettings({
-                                  ...deploySettings,
-                                  netlify,
-                                });
-                              }}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
-                              Netlify Site ID (existing site)
-                            </label>
-                            <div className="w-full mb-2">
-                              <p className="text-xs text-bolt-elements-textSecondary whitespace-pre-wrap">
-                                The ID of your existing Netlify site if you want to update an existing deployment.
-                              </p>
-                            </div>
-                            <input
-                              name="netlifySiteId"
-                              className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                              value={deploySettings.netlify?.siteId || ''}
-                              placeholder="123e4567-..."
-                              onChange={(e) => {
-                                const netlify = {
-                                  authToken: deploySettings.netlify?.authToken,
-                                  siteId: e.target.value,
-                                  accountSlug: deploySettings.netlify?.accountSlug,
-                                  siteName: deploySettings.netlify?.siteName,
+                                  accountSlug: deploySettings.netlify?.accountSlug ?? '',
                                 };
                                 setDeploySettings({
                                   ...deploySettings,
@@ -250,11 +210,9 @@ const DeployChatModal = ({
                               value={deploySettings.netlify?.accountSlug || ''}
                               placeholder="abc..."
                               onChange={(e) => {
-                                const netlify = {
-                                  authToken: deploySettings?.netlify?.authToken,
-                                  siteId: deploySettings?.netlify?.siteId,
+                                const netlify: DeploySettingsNetlify = {
+                                  authToken: deploySettings.netlify?.authToken ?? '',
                                   accountSlug: e.target.value,
-                                  siteName: deploySettings?.netlify?.siteName,
                                 };
                                 setDeploySettings({
                                   ...deploySettings,
@@ -264,7 +222,7 @@ const DeployChatModal = ({
                             />
                           </div>
 
-                          <div>
+                          <div className="md:col-span-2">
                             <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
                               Netlify Site Name (new site)
                             </label>
@@ -276,18 +234,12 @@ const DeployChatModal = ({
                             <input
                               name="netlifySiteName"
                               className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                              value={deploySettings.netlify?.siteName || ''}
+                              value={deploySettings.siteName || ''}
                               placeholder="my-chat-app..."
                               onChange={(e) => {
-                                const netlify = {
-                                  authToken: deploySettings.netlify?.authToken,
-                                  siteId: deploySettings.netlify?.siteId,
-                                  accountSlug: deploySettings.netlify?.accountSlug,
-                                  siteName: e.target.value,
-                                };
                                 setDeploySettings({
                                   ...deploySettings,
-                                  netlify,
+                                  siteName: e.target.value,
                                 });
                               }}
                             />
@@ -416,14 +368,14 @@ const DeployChatModal = ({
                         </div>
 
                         <div className="flex justify-center">
-                          {isManualDeploying ? (
+                          {isDeploying ? (
                             <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-3">
                               <span className="i-svg-spinners:3-dots-fade inline-block w-[1.2em] h-[1.2em] mr-3 text-2xl"></span>
                               <span className="text-lg">Deploying with custom settings...</span>
                             </div>
                           ) : (
                             <button
-                              onClick={handleManualDeploy}
+                              onClick={handleDeploy}
                               disabled={isDeploying}
                               className="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >

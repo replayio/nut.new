@@ -1,18 +1,13 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { classNames } from '~/utils/classNames';
-import WithTooltip from '~/components/ui/Tooltip';
-import {
-  type Message,
-  USER_RESPONSE_CATEGORY,
-  DISCOVERY_RESPONSE_CATEGORY,
-  DISCOVERY_RATING_CATEGORY,
-} from '~/lib/persistence/message';
+import { type Message, DISCOVERY_RESPONSE_CATEGORY, DISCOVERY_RATING_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
 interface MessagesProps {
   id?: string;
@@ -21,7 +16,6 @@ interface MessagesProps {
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLastMessageCheckboxChange }, ref) => {
-  const [showDetailMessageIds, setShowDetailMessageIds] = useState<string[]>([]);
   const [showJumpToBottom, setShowJumpToBottom] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const messages = useStore(chatStore.messages);
@@ -78,40 +72,20 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     }
   }, [messages, showJumpToBottom]);
 
-  // Get the last user response before a given message, or null if there is
-  // no user response between this and the last user message.
-  const getLastUserResponse = (index: number) => {
-    for (let i = index - 1; i >= 0; i--) {
-      if (messages[i].category === USER_RESPONSE_CATEGORY) {
-        return messages[i];
-      }
-      if (messages[i].role === 'user') {
-        return null;
-      }
-    }
-    return null;
-  };
-
   const renderMessage = (message: Message, index: number) => {
-    const { role, repositoryId } = message;
+    const { role } = message;
     const isUserMessage = role === 'user';
     const isFirst = index === 0;
     const isLast = index === messages.length - 1;
 
-    if (!isUserMessage && message.category && message.category !== USER_RESPONSE_CATEGORY) {
-      const lastUserResponse = getLastUserResponse(index);
-      const showDetails = !lastUserResponse || showDetailMessageIds.includes(lastUserResponse.id);
-
+    // Ignore messages that aren't displayed and don't affect the UI in other ways.
+    if (!shouldDisplayMessage(message)) {
       if (message.category === APP_SUMMARY_CATEGORY) {
         // App summaries are now shown in the preview area, not in chat
         return null;
       }
 
       if (message.category === DISCOVERY_RATING_CATEGORY) {
-        return null;
-      }
-
-      if (!showDetails) {
         return null;
       }
     }
@@ -145,36 +119,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
           <div className="grid grid-col-1 w-full">
             <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
           </div>
-          {!isUserMessage && message.category === 'UserResponse' && showDetailMessageIds.includes(message.id) && (
-            <div className="flex items-center justify-center bg-green-800 p-2 rounded-lg h-fit -mt-1.5">
-              <WithTooltip tooltip="Hide chat details">
-                <button
-                  onClick={() => {
-                    setShowDetailMessageIds(showDetailMessageIds.filter((id) => id !== message.id));
-                  }}
-                  className={classNames(
-                    'i-ph:list-dashes',
-                    'text-xl text-white hover:text-bolt-elements-textPrimary transition-colors',
-                  )}
-                />
-              </WithTooltip>
-            </div>
-          )}
-          {repositoryId && (
-            <div className="flex gap-2 flex-col lg:flex-row">
-              <WithTooltip tooltip="Start new chat from here">
-                <button
-                  onClick={() => {
-                    window.open(`/repository/${repositoryId}`, '_blank');
-                  }}
-                  className={classNames(
-                    'i-ph:git-fork',
-                    'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                  )}
-                />
-              </WithTooltip>
-            </div>
-          )}
         </Suspense>
       </div>
     );

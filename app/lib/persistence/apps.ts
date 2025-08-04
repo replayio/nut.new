@@ -3,7 +3,7 @@
 // any local apps are associated with the user and then local storage is cleared.
 
 import { getCurrentUserId } from '~/lib/supabase/client';
-import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import type { DeploySettings } from '~/lib/replay/Deploy';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import type { AppSummary } from './messageAppSummary';
 
@@ -109,14 +109,14 @@ async function updateAppTitle(appId: string, title: string): Promise<void> {
   await callNutAPI('set-app-title', { appId, title });
 }
 
-async function getAppDeploySettings(appId: string): Promise<DeploySettingsDatabase | undefined> {
+async function getAppDeploySettings(appId: string): Promise<DeploySettings | undefined> {
   console.log('DatabaseGetAppDeploySettingsStart', appId);
 
   const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
   return deploySettings;
 }
 
-async function setAppDeploySettings(appId: string, deploySettings: DeploySettingsDatabase): Promise<void> {
+async function setAppDeploySettings(appId: string, deploySettings: DeploySettings): Promise<void> {
   await callNutAPI('set-app-deploy-settings', { appId, deploySettings });
 }
 
