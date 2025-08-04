@@ -132,9 +132,7 @@ export function ClientAuth() {
                     <span className="text-2xl">🥜</span>
                     <span className="text-bolt-elements-textPrimary font-medium">Peanuts</span>
                   </div>
-                  <div className="text-bolt-elements-textPrimary font-bold text-lg">
-                    {peanutsRemaining ?? '...'}
-                  </div>
+                  <div className="text-bolt-elements-textPrimary font-bold text-lg">{peanutsRemaining ?? '...'}</div>
                 </div>
               </div>
 
@@ -146,7 +144,7 @@ export function ClientAuth() {
                   <div className="i-ph:gear text-lg" />
                   <span>Account Settings</span>
                 </button>
-                
+
                 <button
                   onClick={handleSignOut}
                   className="w-full px-4 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor rounded-lg transition-all duration-200 flex items-center gap-3 font-medium"

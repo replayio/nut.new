@@ -122,22 +122,14 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         className="p-4 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200"
       >
         <div className="flex items-start justify-between mb-2">
-          <div className="text-sm text-bolt-elements-textSecondary">
-            {formatTime(item.time)}
-          </div>
+          <div className="text-sm text-bolt-elements-textSecondary">{formatTime(item.time)}</div>
           <div className="flex items-center gap-2">
-            <span className="text-bolt-elements-textPrimary">
-              {formatPeanutChange(item.peanutsDelta)} peanuts
-            </span>
+            <span className="text-bolt-elements-textPrimary">{formatPeanutChange(item.peanutsDelta)} peanuts</span>
             <span className="text-bolt-elements-textSecondary">→</span>
-            <span className="text-bolt-elements-textPrimary font-semibold">
-              {item.peanutsRemaining} total
-            </span>
+            <span className="text-bolt-elements-textPrimary font-semibold">{item.peanutsRemaining} total</span>
           </div>
         </div>
-        <div className="text-sm text-bolt-elements-textSecondary">
-          {renderHistoryEntry(item)}
-        </div>
+        <div className="text-sm text-bolt-elements-textSecondary">{renderHistoryEntry(item)}</div>
       </div>
     );
   };
@@ -187,9 +179,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">
-                {peanutsRemaining ?? '---'}
-              </div>
+              <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">{peanutsRemaining ?? '---'}</div>
               <div className="text-sm text-bolt-elements-textSecondary">Peanuts Available</div>
             </div>
           </div>
@@ -203,9 +193,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             <div className="text-center">
               {subscription ? (
                 <>
-                  <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">
-                    {subscription.peanuts}
-                  </div>
+                  <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">{subscription.peanuts}</div>
                   <div className="text-sm text-bolt-elements-textSecondary mb-1">Peanuts per month</div>
                   <div className="text-xs text-bolt-elements-textSecondary">
                     Next reload: {formatSubscriptionTime(subscription.reloadTime)}
@@ -238,12 +226,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               `Subscribe - ${DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month`
             )}
           </DialogButton>
-          
-          <DialogButton 
-            type="secondary" 
-            onClick={handleAddPeanuts} 
-            disabled={loading}
-          >
+
+          <DialogButton type="secondary" onClick={handleAddPeanuts} disabled={loading}>
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
@@ -258,7 +242,10 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
       <div className="border-t border-bolt-elements-borderColor pt-8">
         <div className="flex items-center gap-3 mb-6">
-          <div onClick={reloadAccountData} className="w-8 h-8 bg-bolt-elements-background-depth-2 rounded-lg flex items-center justify-center cursor-pointer">
+          <div
+            onClick={reloadAccountData}
+            className="w-8 h-8 bg-bolt-elements-background-depth-2 rounded-lg flex items-center justify-center cursor-pointer"
+          >
             <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary" />
           </div>
           <h2 className="text-2xl font-bold text-bolt-elements-textPrimary">Usage History</h2>
@@ -275,14 +262,10 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               <div className="i-ph:list text-2xl text-bolt-elements-textSecondary" />
             </div>
             <p className="text-bolt-elements-textSecondary">No usage history available</p>
-            <p className="text-sm text-bolt-elements-textSecondary mt-1">
-              Your peanut transactions will appear here
-            </p>
+            <p className="text-sm text-bolt-elements-textSecondary mt-1">Your peanut transactions will appear here</p>
           </div>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {history.map(renderHistoryItem)}
-          </div>
+          <div className="space-y-3 max-h-96 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
     </div>
