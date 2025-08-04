@@ -2,6 +2,7 @@ import { getPeanutsHistory, getPeanutsSubscription, setPeanutsSubscription, type
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { DialogButton } from '~/components/ui/Dialog';
+import type { ReactElement } from 'react';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -62,7 +63,7 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
     );
   };
 
-  const getReasonDisplay = (entry: PeanutHistoryEntry) => {
+  const getReasonDisplay = (entry: PeanutHistoryEntry): string | ReactElement => {
     switch (entry.reason) {
       case 'SetSubscription':
         if (entry.subscriptionPeanuts) {
@@ -75,9 +76,37 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
       case 'AddPeanuts':
         return 'Manual peanut addition';
       case 'FeatureImplemented':
-        return `Feature implemented: ${entry.featureName || 'Unknown feature'}`;
+        return (
+          <span>
+            Feature implemented:{' '}
+            {entry.appId && entry.featureName ? (
+              <a
+                href={`/app/${entry.appId}`}
+                className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
+              >
+                {entry.featureName}
+              </a>
+            ) : (
+              entry.featureName || 'Unknown feature'
+            )}
+          </span>
+        );
       case 'FeatureValidated':
-        return `Feature validated: ${entry.featureName || 'Unknown feature'}`;
+        return (
+          <span>
+            Feature validated:{' '}
+            {entry.appId && entry.featureName ? (
+              <a
+                href={`/app/${entry.appId}`}
+                className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
+              >
+                {entry.featureName}
+              </a>
+            ) : (
+              entry.featureName || 'Unknown feature'
+            )}
+          </span>
+        );
       default:
         return entry.reason;
     }
