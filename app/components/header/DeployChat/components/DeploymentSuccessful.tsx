@@ -32,7 +32,7 @@ const DeploymentSuccessful = ({
       <div className="mb-8">
         <div className="mb-4">
           <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-3xl font-bold text-bolt-elements-textPrimary mb-2">Deployment Succeeded!</h2>
+          <h2 className="text-3xl font-bold text-bolt-elements-textPrimary mb-2">Woohoo!</h2>
         </div>
         <p className="text-lg text-bolt-elements-textSecondary max-w-md mx-auto leading-relaxed whitespace-pre-wrap">
           Your application has been successfully deployed and is now live on the web.
