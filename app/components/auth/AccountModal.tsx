@@ -68,11 +68,11 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
       {why}:{' '}
       {appId && featureName ? (
         <a
-          href={`/app/${appId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
-        >
+           href={`/app/${appId}`}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="text-blue-500 hover:text-blue-600 underline cursor-pointer"
+         >
           {featureName}
         </a>
       ) : (
