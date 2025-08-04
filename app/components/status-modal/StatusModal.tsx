@@ -5,6 +5,8 @@ import { statusModalStore } from '~/lib/stores/statusModal';
 import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { peanutsStore } from '~/lib/stores/peanuts';
+import WithTooltip from '~/components/ui/Tooltip';
 
 interface StatusModalProps {
   appSummary: AppSummary;
@@ -13,6 +15,7 @@ interface StatusModalProps {
 
 export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinueBuilding }) => {
   const isOpen = useStore(statusModalStore.isOpen);
+  const peanutsError = useStore(peanutsStore.peanutsError);
 
   const features = appSummary.features || [];
   const completedFeatures = features.filter(
@@ -208,13 +211,16 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               >
                 {!isFullyComplete && (
                   <div className="flex justify-center items-center w-full">
-                    <button
-                      onClick={handleContinueBuilding}
-                      className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
-                    >
-                      <div className="i-ph:rocket-launch text-xl"></div>
-                      Continue Building
-                    </button>
+                    <WithTooltip tooltip={peanutsError || 'Build remaining features'}>
+                      <button
+                        onClick={handleContinueBuilding}
+                        disabled={!!peanutsError}
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                      >
+                        <div className="i-ph:rocket-launch text-xl"></div>
+                        Continue Building
+                      </button>
+                    </WithTooltip>
                   </div>
                 )}
 
