@@ -63,7 +63,25 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
     );
   };
 
-  const getReasonDisplay = (entry: PeanutHistoryEntry): string | ReactElement => {
+  const renderFeature = (why: string, appId: string | undefined, featureName: string | undefined): ReactElement => {
+    return <span>
+      {why}:{' '}
+      {appId && featureName ? (
+        <a
+          href={`/app/${appId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
+        >
+          {featureName}
+        </a>
+      ) : (
+        featureName || 'Unknown feature'
+      )}
+    </span>
+  };
+
+  const renderHistoryEntry = (entry: PeanutHistoryEntry): string | ReactElement => {
     switch (entry.reason) {
       case 'SetSubscription':
         if (entry.subscriptionPeanuts) {
@@ -76,37 +94,9 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
       case 'AddPeanuts':
         return 'Manual peanut addition';
       case 'FeatureImplemented':
-        return (
-          <span>
-            Feature implemented:{' '}
-            {entry.appId && entry.featureName ? (
-              <a
-                href={`/app/${entry.appId}`}
-                className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
-              >
-                {entry.featureName}
-              </a>
-            ) : (
-              entry.featureName || 'Unknown feature'
-            )}
-          </span>
-        );
+        return renderFeature('Feature implemented', entry.appId, entry.featureName);
       case 'FeatureValidated':
-        return (
-          <span>
-            Feature validated:{' '}
-            {entry.appId && entry.featureName ? (
-              <a
-                href={`/app/${entry.appId}`}
-                className="text-bolt-elements-textPrimary hover:text-bolt-elements-textPrimary underline"
-              >
-                {entry.featureName}
-              </a>
-            ) : (
-              entry.featureName || 'Unknown feature'
-            )}
-          </span>
-        );
+        return renderFeature('Feature validated', entry.appId, entry.featureName);
       default:
         return entry.reason;
     }
@@ -127,7 +117,7 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
               <span className="text-bolt-elements-textPrimary font-medium">{item.peanutsRemaining} total</span>
             </div>
           </div>
-          <div className="mt-1 ml-[120px] text-sm text-bolt-elements-textSecondary">{getReasonDisplay(item)}</div>
+          <div className="mt-1 ml-[120px] text-sm text-bolt-elements-textSecondary">{renderHistoryEntry(item)}</div>
         </div>
       </div>
     );
