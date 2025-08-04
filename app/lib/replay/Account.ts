@@ -7,14 +7,19 @@ export async function getPeanutsRemaining(): Promise<number> {
   return peanutsRemaining;
 }
 
-export async function getPeanutsSubscription(): Promise<{ peanuts: number; reloadTime: string } | undefined> {
-  const { peanuts, reloadTime } = await callNutAPI('get-peanuts-subscription', {});
-  return { peanuts, reloadTime };
+interface AccountSubscription {
+  peanuts: number;
+  reloadTime: string;
+}
+
+export async function getPeanutsSubscription(): Promise<AccountSubscription | undefined> {
+  const { subscription } = await callNutAPI('get-peanuts-subscription', {});
+  return subscription;
 }
 
 // Set a subscription for peanuts. Every month if the number of peanuts is below
-// than the subscribed value, it will be set to that value.
-export async function setPeanutsSubscription(peanuts: number) {
+// than the subscribed value, it will be set to that value. Undefined clears the subscription.
+export async function setPeanutsSubscription(peanuts: number | undefined) {
   await callNutAPI('set-peanuts-subscription', { peanuts });
 }
 
@@ -25,7 +30,7 @@ export async function addPeanuts(peanuts: number) {
 
 enum PeanutChangeReason {
   SetSubscription = 'SetSubscription',
-  SubscriptionRefill = 'SubscriptionRefill',
+  SubscriptionReload = 'SubscriptionReload',
   AddPeanuts = 'AddPeanuts',
   FeatureImplemented = 'FeatureImplemented',
   FeatureValidated = 'FeatureValidated',
