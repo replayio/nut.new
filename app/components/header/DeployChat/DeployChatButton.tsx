@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
 import { workbenchStore } from '~/lib/stores/workbench';
@@ -18,11 +18,18 @@ export enum DeployStatus {
   Succeeded,
 }
 
+export enum DeployType {
+  None,
+  Easy,
+  Manual,
+}
+
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deploySettings, setDeploySettings] = useState<DeploySettingsDatabase>({});
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
+  const [deployType, setDeployType] = useState<DeployType>(DeployType.None);
   const [databaseFound, setDatabaseFound] = useState(false);
 
   const appId = useStore(chatStore.currentAppId);
@@ -82,13 +89,24 @@ export function DeployChatButton() {
     const existingSettings = await database.getAppDeploySettings(appId);
 
     setIsModalOpen(true);
-    setStatus(DeployStatus.NotStarted);
+    
+    // Only reset states if not currently deploying
+    if (status !== DeployStatus.Started) {
+      setStatus(DeployStatus.NotStarted);
+      setDeployType(DeployType.None);
+      setError(null);
+    }
 
     if (existingSettings) {
       setDeploySettings(existingSettings);
     } else {
       setDeploySettings({});
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Don't reset deployment state - let it continue in background
   };
 
   const generateSiteName = () => {
@@ -110,8 +128,64 @@ export function DeployChatButton() {
     return `${siteName}-${generateRandomId()}`;
   };
 
-  const handleDeploy = async () => {
+  const handleEasyDeploy = async () => {
     setError(null);
+    setDeployType(DeployType.Easy);
+
+    if (!appId) {
+      setError('No app open');
+      return;
+    }
+
+    // For easy deploy, reuse existing settings if available, otherwise use minimal settings
+    const easyDeploySettings: DeploySettingsDatabase = {
+      netlify: {
+        // Reuse existing credentials if available
+        authToken: deploySettings?.netlify?.authToken,
+        siteId: deploySettings?.netlify?.siteId,
+        // Only generate new site name if no existing site
+        siteName: deploySettings?.netlify?.siteName || generateSiteName(),
+      },
+    };
+
+    setStatus(DeployStatus.Started);
+
+    // Write settings to database
+    await database.setAppDeploySettings(appId, easyDeploySettings);
+
+    console.log('EasyDeployStarting', appId, easyDeploySettings);
+
+    const result = await deployApp(appId, easyDeploySettings);
+
+    console.log('EasyDeployResult', appId, easyDeploySettings, result);
+
+    if (result.error) {
+      setStatus(DeployStatus.NotStarted);
+      setDeployType(DeployType.None);
+      setError(result.error);
+      return;
+    }
+
+    // Update settings with deployment result
+    const newSettings: DeploySettingsDatabase = {
+      ...easyDeploySettings,
+      siteURL: result.siteURL,
+      netlify: {
+        ...easyDeploySettings.netlify,
+        siteId: result.netlifySiteId || easyDeploySettings.netlify?.siteId,
+      },
+    };
+
+    setDeploySettings(newSettings);
+    setStatus(DeployStatus.Succeeded);
+
+    // Update the database with the new settings
+    await database.setAppDeploySettings(appId, newSettings);
+  };
+
+  const handleManualDeploy = async () => {
+    setError(null);
+    setDeployType(DeployType.Manual);
 
     if (!appId) {
       setError('No app open');
@@ -181,14 +255,15 @@ export function DeployChatButton() {
     // Write out to the database before we start trying to deploy.
     await database.setAppDeploySettings(appId, deploySettings);
 
-    console.log('DeploymentStarting', appId, deploySettings);
+    console.log('ManualDeployStarting', appId, deploySettings);
 
     const result = await deployApp(appId, deploySettings);
 
-    console.log('DeploymentResult', appId, deploySettings, result);
+    console.log('ManualDeployResult', appId, deploySettings, result);
 
     if (result.error) {
       setStatus(DeployStatus.NotStarted);
+      setDeployType(DeployType.None);
       setError(result.error);
       return;
     }
@@ -224,17 +299,35 @@ export function DeployChatButton() {
       <button
         className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
         onClick={handleOpenModal}
+        disabled={status === DeployStatus.Started}
       >
-        Deploy App
+        {status === DeployStatus.Started ? (
+          <>
+            <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em]"></span>
+            Deploying...
+          </>
+        ) : status === DeployStatus.Succeeded ? (
+          <div className="flex items-center gap-2">
+            <div className="i-ph:check-circle text-xl"></div>
+            Deployed
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="i-ph:rocket-launch text-xl"></div>
+            Deploy App
+          </div>
+        )}
       </button>
       <DeployChatModal
         isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
+        setIsModalOpen={handleCloseModal}
         status={status}
+        deployType={deployType}
         deploySettings={deploySettings}
         setDeploySettings={setDeploySettings}
         error={error}
-        handleDeploy={handleDeploy}
+        handleEasyDeploy={handleEasyDeploy}
+        handleManualDeploy={handleManualDeploy}
         databaseFound={databaseFound}
       />
     </>

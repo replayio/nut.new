@@ -18,27 +18,21 @@ export function ChatDescription() {
   }
 
   return (
-    <div className="flex items-center justify-center max-w-400">
+    <div className="flex items-center justify-center w-full min-w-20">
       {editing ? (
-        <form onSubmit={handleSubmit} className="flex items-center justify-center">
+        <form onSubmit={handleSubmit} className="flex items-center justify-center w-full min-w-0">
           <input
             type="text"
-            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2 w-fit text-ellipsis"
+            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2 flex-1 min-w-0 truncate"
             autoFocus
             value={currentTitle}
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            style={{
-              width: `${Math.min(Math.max(currentTitle.length * 8, 100), 400)}px`,
-              maxWidth: '400px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
           />
           <TooltipProvider>
             <WithTooltip tooltip="Save title">
-              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent">
+              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent flex-shrink-0">
                 <button
                   type="submit"
                   className="i-ph:check-bold scale-110 hover:text-bolt-elements-item-contentAccent"
@@ -50,10 +44,10 @@ export function ChatDescription() {
         </form>
       ) : (
         <>
-          <div className="max-w-[400px] truncate">{currentTitle}</div>
+          <div className="flex-1 min-w-0 truncate text-center">{currentTitle}</div>
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
-              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent ml-2">
+              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent ml-2 flex-shrink-0">
                 <button
                   type="button"
                   className="i-ph:pencil-fill scale-110 hover:text-bolt-elements-item-contentAccent"

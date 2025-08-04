@@ -130,11 +130,11 @@ export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: Wor
               {!isSmallViewport && (
                 <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                   {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className="flex items-center justify-center min-w-0 flex-shrink flex-grow basis-0 max-w-300">
                     {chatStarted && (
-                      <span className="px-4 truncate text-center text-bolt-elements-textPrimary">
+                      <div className="w-full px-4">
                         <ClientOnly>{() => <ChatDescription />}</ClientOnly>
-                      </span>
+                      </div>
                     )}
                   </div>
                   <div className="flex">
