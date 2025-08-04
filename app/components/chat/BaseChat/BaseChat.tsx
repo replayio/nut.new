@@ -38,7 +38,7 @@ interface BaseChatProps {
   chatStarted?: boolean;
   input?: string;
   handleStop?: () => void;
-  sendMessage?: (messageInput: string, chatMode?: ChatMode) => void;
+  sendMessage?: (messageInput: string | undefined, chatMode?: ChatMode) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -119,8 +119,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const handleContinueBuilding = () => {
       if (sendMessage) {
-        const message = 'Continue building the app.';
-        sendMessage(message, ChatMode.DevelopApp);
+        sendMessage(undefined, ChatMode.DevelopApp);
       }
     };
 

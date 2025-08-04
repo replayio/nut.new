@@ -93,37 +93,26 @@ const ChatImplementer = memo(() => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput: string, chatMode?: ChatMode) => {
-    if (messageInput.length === 0 || chatStore.hasPendingMessage.get()) {
+  const sendMessage = async (messageInput: string | undefined, chatMode?: ChatMode) => {
+    if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
     }
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
 
-    // if (!isLoggedIn && !usingMockChat()) {
-    //   const numFreeUses = +(Cookies.get(anthropicNumFreeUsesCookieName) || 0);
-
-    //   if (numFreeUses >= maxFreeUses) {
-    //     toast.error('Please login to continue using Nut.');
-    //     gActiveChatMessageTelemetry.abort('NoFreeUses');
-    //     clearActiveChat();
-    //     return;
-    //   }
-
-    //   Cookies.set(anthropicNumFreeUsesCookieName, (numFreeUses + 1).toString());
-    // }
-
     const chatId = generateRandomId();
 
-    const userMessage: Message = {
-      id: `user-${chatId}`,
-      createTime: new Date().toISOString(),
-      role: 'user',
-      type: 'text',
-      content: messageInput,
-    };
+    if (messageInput) {
+      const userMessage: Message = {
+        id: `user-${chatId}`,
+        createTime: new Date().toISOString(),
+        role: 'user',
+        type: 'text',
+        content: messageInput,
+      };
 
-    addChatMessage(userMessage);
+      addChatMessage(userMessage);
+    }
 
     imageDataList.forEach((imageData, index) => {
       const imageMessage: Message = {
