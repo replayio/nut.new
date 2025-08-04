@@ -6,7 +6,7 @@ import { SignInForm } from './SignInForm';
 import { SignUpForm } from './SignUpForm';
 import { AuthStateMessage } from './AuthStateMessage';
 import { PasswordResetForm } from './PasswordResetForm';
-import { addPeanuts, getPeanutsRemaining } from '~/lib/replay/Account';
+import { getPeanutsRemaining } from '~/lib/replay/Account';
 import { AccountModal } from './AccountModal';
 
 export function ClientAuth() {

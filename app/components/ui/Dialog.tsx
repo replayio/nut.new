@@ -62,7 +62,7 @@ export const DialogButton = memo(({ type, children, onClick, disabled = false }:
         },
         {
           'opacity-50 cursor-not-allowed': disabled,
-        }
+        },
       )}
       onClick={onClick}
       disabled={disabled}

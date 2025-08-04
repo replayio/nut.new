@@ -6,10 +6,7 @@ import { clearPendingMessageStatus } from './status';
 import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
-import {
-  getLatestAppRepositoryId,
-  logAppSummaryMessage,
-} from '~/lib/persistence/messageAppSummary';
+import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 

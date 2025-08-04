@@ -1,4 +1,10 @@
-import { getPeanutsHistory, getPeanutsSubscription, setPeanutsSubscription, type PeanutHistoryEntry, type AccountSubscription } from '~/lib/replay/Account';
+import {
+  getPeanutsHistory,
+  getPeanutsSubscription,
+  setPeanutsSubscription,
+  type PeanutHistoryEntry,
+  type AccountSubscription,
+} from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { DialogButton } from '~/components/ui/Dialog';
@@ -18,15 +24,12 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
 
   const reloadAccountData = async () => {
     setLoading(true);
-    const [history, subscription] = await Promise.all([
-      getPeanutsHistory(),
-      getPeanutsSubscription()
-    ]);
+    const [history, subscription] = await Promise.all([getPeanutsHistory(), getPeanutsSubscription()]);
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
     setLoading(false);
-  }
+  };
 
   useEffect(() => {
     reloadAccountData();
@@ -64,21 +67,23 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
   };
 
   const renderFeature = (why: string, appId: string | undefined, featureName: string | undefined): ReactElement => {
-    return <span>
-      {why}:{' '}
-      {appId && featureName ? (
-        <a
-           href={`/app/${appId}`}
-           target="_blank"
-           rel="noopener noreferrer"
-           className="text-blue-500 hover:text-blue-600 underline cursor-pointer"
-         >
-          {featureName}
-        </a>
-      ) : (
-        featureName || 'Unknown feature'
-      )}
-    </span>
+    return (
+      <span>
+        {why}:{' '}
+        {appId && featureName ? (
+          <a
+            href={`/app/${appId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-600 underline cursor-pointer"
+          >
+            {featureName}
+          </a>
+        ) : (
+          featureName || 'Unknown feature'
+        )}
+      </span>
+    );
   };
 
   const renderHistoryEntry = (entry: PeanutHistoryEntry): string | ReactElement => {
@@ -141,8 +146,8 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
     >
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Account</h2>
-        <div className="text-bolt-elements-textPrimary font-medium">{user?.email ?? "unknown"}</div>
-        <div className="text-bolt-elements-textPrimary font-medium">Peanuts: {peanutsRemaining ?? "unknown"}</div>
+        <div className="text-bolt-elements-textPrimary font-medium">{user?.email ?? 'unknown'}</div>
+        <div className="text-bolt-elements-textPrimary font-medium">Peanuts: {peanutsRemaining ?? 'unknown'}</div>
         <div className="mt-2 text-bolt-elements-textSecondary text-sm">
           {subscription ? (
             <>
@@ -159,7 +164,11 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
             onClick={handleSubscriptionToggle}
             disabled={loading}
           >
-            {loading ? 'Loading...' : subscription ? 'Cancel' : `Subscribe (${DEFAULT_SUBSCRIPTION_PEANUTS} peanuts per month)`}
+            {loading
+              ? 'Loading...'
+              : subscription
+                ? 'Cancel'
+                : `Subscribe (${DEFAULT_SUBSCRIPTION_PEANUTS} peanuts per month)`}
           </DialogButton>
         </div>
       </div>
