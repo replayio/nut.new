@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 
 const DeploymentSuccessful = ({
-  deploySettings,
+  result,
   setIsModalOpen,
 }: {
-  deploySettings: any;
+  result: any;
   setIsModalOpen: (isOpen: boolean) => void;
 }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(deploySettings?.siteURL);
+      await navigator.clipboard.writeText(result?.siteURL);
       setCopied(true);
     } catch (err) {
       console.error('Failed to copy:', err);
@@ -47,7 +47,7 @@ const DeploymentSuccessful = ({
           <div className="space-y-3">
             <div className="p-4 bg-bolt-elements-background-depth-1 rounded-lg border border-bolt-elements-borderColor">
               <code className="text-sm text-bolt-elements-textPrimary font-mono break-words leading-relaxed block truncate">
-                {deploySettings?.siteURL}
+                {result?.siteURL}
               </code>
             </div>
             <div className="flex justify-center">
@@ -79,7 +79,7 @@ const DeploymentSuccessful = ({
 
       <div className="flex justify-center gap-4">
         <a
-          href={deploySettings?.siteURL}
+          href={result?.siteURL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"

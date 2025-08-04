@@ -12,6 +12,7 @@ interface DeployChatModalProps {
   error: string | undefined;
   handleDeploy: () => void;
   databaseFound: boolean;
+  loadingData: boolean;
 }
 
 const DeployChatModal = ({
@@ -23,6 +24,7 @@ const DeployChatModal = ({
   error,
   handleDeploy,
   databaseFound,
+  loadingData,
 }: DeployChatModalProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -38,6 +40,30 @@ const DeployChatModal = ({
     result?.siteURL || deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug,
   );
 
+  if (loadingData) {
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+        onClick={handleOverlayClick}
+      >
+        <div
+          className="bg-bolt-elements-background-depth-1 rounded-xl p-12 max-w-md w-full z-50 border border-bolt-elements-borderColor shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="w-12 h-12 rounded-full border-4 border-bolt-elements-borderColor border-t-blue-500 animate-spin mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-bolt-elements-textPrimary mb-2">Loading data...</h3>
+            <p className="text-sm text-bolt-elements-textSecondary">
+              Please wait while we prepare your deployment settings
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {isModalOpen && (
@@ -50,7 +76,7 @@ const DeployChatModal = ({
             onClick={(e) => e.stopPropagation()}
           >
             {status === DeployStatus.Succeeded ? (
-              <DeploymentSuccessful deploySettings={deploySettings} setIsModalOpen={setIsModalOpen} />
+              <DeploymentSuccessful result={result} setIsModalOpen={setIsModalOpen} />
             ) : (
               <>
                 <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">
@@ -99,7 +125,7 @@ const DeployChatModal = ({
                       <button
                         onClick={handleDeploy}
                         disabled={isDeploying}
-                        className="flex items-center gap-2 px-8 py-3 bg-green-500 text-white text-lg font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="flex items-center gap-2 px-8 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
                         <div className="i-ph:rocket-launch text-xl"></div>
                         {hasExistingSite ? 'Redeploy' : 'Deploy Now'}

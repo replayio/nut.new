@@ -9,6 +9,8 @@ import { database } from '~/lib/persistence/apps';
 import { deployApp, downloadRepository, lastDeployResult } from '~/lib/replay/Deploy';
 import DeployChatModal from './components/DeployChatModal';
 import { generateRandomId } from '~/utils/nut';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import WithTooltip from '~/components/ui/Tooltip';
 
 ReactModal.setAppElement('#root');
 
@@ -24,6 +26,7 @@ export function DeployChatButton() {
   const [error, setError] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<DeployStatus>(DeployStatus.NotStarted);
   const [databaseFound, setDatabaseFound] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const appId = useStore(chatStore.currentAppId);
 
@@ -77,6 +80,8 @@ export function DeployChatButton() {
       toast.error('No app ID found');
       return;
     }
+    setLoadingData(true);
+    setIsModalOpen(true);
 
     await handleCheckDatabase();
 
@@ -91,7 +96,7 @@ export function DeployChatButton() {
       setDeploySettings({});
     }
 
-    setIsModalOpen(true);
+    setLoadingData(false);
     setStatus(DeployStatus.NotStarted);
   };
 
@@ -194,28 +199,37 @@ export function DeployChatButton() {
 
   return (
     <>
-      <button
-        className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
-        onClick={handleOpenModal}
-        disabled={status === DeployStatus.Started}
-      >
-        {status === DeployStatus.Started ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin" />
-            Deploying...
-          </div>
-        ) : status === DeployStatus.Succeeded ? (
-          <div className="flex items-center gap-2">
-            <div className="i-ph:check-circle text-xl"></div>
-            Deployed
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <div className="i-ph:rocket-launch text-xl"></div>
-            Deploy App
-          </div>
-        )}
-      </button>
+      <TooltipProvider>
+        <WithTooltip
+          tooltip={
+            status === DeployStatus.Started
+              ? 'Deploying...'
+              : status === DeployStatus.Succeeded
+                ? 'Deployed'
+                : 'Deploy App'
+          }
+        >
+          <button
+            className="flex gap-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md p-2 transition-theme"
+            onClick={handleOpenModal}
+            disabled={status === DeployStatus.Started}
+          >
+            {status === DeployStatus.Started ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-white border-t-blue-400 animate-spin" />
+              </div>
+            ) : status === DeployStatus.Succeeded ? (
+              <div className="flex items-center gap-2">
+                <div className="i-ph:check text-xl text-green-500"></div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="i-ph:rocket-launch text-xl text-white"></div>
+              </div>
+            )}
+          </button>
+        </WithTooltip>
+      </TooltipProvider>
       <DeployChatModal
         isModalOpen={isModalOpen}
         setIsModalOpen={handleCloseModal}
@@ -225,6 +239,7 @@ export function DeployChatButton() {
         error={error}
         handleDeploy={handleDeploy}
         databaseFound={databaseFound}
+        loadingData={loadingData}
       />
     </>
   );
