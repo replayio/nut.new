@@ -34,7 +34,9 @@ const DeployChatModal = ({
 
   const isDeploying = status === DeployStatus.Started;
   const result = lastDeployResult(deploySettings);
-  const hasExistingSite = Boolean(result?.siteURL || deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug);
+  const hasExistingSite = Boolean(
+    result?.siteURL || deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug,
+  );
 
   return (
     <>
@@ -62,7 +64,8 @@ const DeployChatModal = ({
                     Quick Deploy
                   </h3>
                   <p className="text-sm text-bolt-elements-textSecondary mb-4 text-center w-full whitespace-pre-wrap">
-                    Deploy instantly with smart defaults. No configuration needed - we'll handle everything for you{databaseFound ? ', including database setup' : ''}.
+                    Deploy instantly with smart defaults. No configuration needed - we'll handle everything for you
+                    {databaseFound ? ', including database setup' : ''}.
                   </p>
 
                   {/* Show existing site in easy deploy */}
@@ -71,23 +74,21 @@ const DeployChatModal = ({
                       <div className="flex flex-col items-center justify-between">
                         <div className="text-sm text-bolt-elements-textPrimary font-medium">Current site:</div>
                         {result?.siteURL ? (
-                          <a 
-                            href={result.siteURL} 
-                            target="_blank" 
+                          <a
+                            href={result.siteURL}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-green-500 hover:text-green-600 transition-colors underline truncate"
                           >
                             {result.siteURL}
                           </a>
                         ) : (
-                          <span className="text-sm text-bolt-elements-textSecondary">
-                            Existing deployment found
-                          </span>
+                          <span className="text-sm text-bolt-elements-textSecondary">Existing deployment found</span>
                         )}
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex justify-center">
                     {isDeploying ? (
                       <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-3">
@@ -113,16 +114,18 @@ const DeployChatModal = ({
                     onClick={() => setShowAdvanced(!showAdvanced)}
                     disabled={isDeploying}
                     className={`w-full flex items-center justify-between p-4 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                      showAdvanced 
-                        ? 'rounded-t-lg border-b-0' 
-                        : 'rounded-lg'
+                      showAdvanced ? 'rounded-t-lg border-b-0' : 'rounded-lg'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-bolt-elements-textPrimary font-medium">Advanced Settings</span>
-                      <span className="text-xs text-bolt-elements-textSecondary">(Custom Netlify & Supabase credentials)</span>
+                      <span className="text-xs text-bolt-elements-textSecondary">
+                        (Custom Netlify & Supabase credentials)
+                      </span>
                     </div>
-                    <span className={`text-bolt-elements-textSecondary transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}>
+                    <span
+                      className={`text-bolt-elements-textSecondary transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}
+                    >
                       <div className="i-ph:caret-down text-bolt-elements-textPrimary text-base font-bold" />
                     </span>
                   </button>
@@ -133,7 +136,8 @@ const DeployChatModal = ({
                         <div className="mb-6 p-4 bg-bolt-elements-background-depth-3 rounded-lg border border-bolt-elements-borderColor">
                           <h3 className="text-sm font-medium text-bolt-elements-textPrimary mb-2">Before you begin:</h3>
                           <p className="text-xs text-bolt-elements-textSecondary mb-3">
-                            You'll need accounts with {databaseFound ? 'both Netlify and Supabase' : 'Netlify'} to deploy with custom settings.
+                            You'll need accounts with {databaseFound ? 'both Netlify and Supabase' : 'Netlify'} to
+                            deploy with custom settings.
                           </p>
                           <div className="flex flex-col gap-2">
                             <a

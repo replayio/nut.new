@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import type { DeploySettings } from '~/lib/replay/Deploy';
 import { workbenchStore } from '~/lib/stores/workbench';
@@ -118,7 +118,6 @@ export function DeployChatButton() {
 
     return `${siteName}-${generateRandomId()}`;
   };
-
 
   const handleDeploy = async () => {
     setError(undefined);
