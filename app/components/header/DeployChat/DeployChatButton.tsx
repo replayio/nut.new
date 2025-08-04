@@ -200,7 +200,15 @@ export function DeployChatButton() {
   return (
     <>
       <TooltipProvider>
-        <WithTooltip tooltip={status === DeployStatus.Started ? "Deploying..." : status === DeployStatus.Succeeded ? "Deployed" : "Deploy App"}>
+        <WithTooltip
+          tooltip={
+            status === DeployStatus.Started
+              ? 'Deploying...'
+              : status === DeployStatus.Succeeded
+                ? 'Deployed'
+                : 'Deploy App'
+          }
+        >
           <button
             className="flex gap-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md p-2 transition-theme"
             onClick={handleOpenModal}
@@ -220,7 +228,6 @@ export function DeployChatButton() {
               </div>
             )}
           </button>
-
         </WithTooltip>
       </TooltipProvider>
       <DeployChatModal

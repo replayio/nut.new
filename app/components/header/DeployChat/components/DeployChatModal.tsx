@@ -54,9 +54,7 @@ const DeployChatModal = ({
             <div className="mb-6">
               <div className="w-12 h-12 rounded-full border-4 border-bolt-elements-borderColor border-t-blue-500 animate-spin mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-bolt-elements-textPrimary mb-2">
-              Loading data...
-            </h3>
+            <h3 className="text-xl font-semibold text-bolt-elements-textPrimary mb-2">Loading data...</h3>
             <p className="text-sm text-bolt-elements-textSecondary">
               Please wait while we prepare your deployment settings
             </p>
