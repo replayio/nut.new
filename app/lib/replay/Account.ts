@@ -7,9 +7,9 @@ export async function getPeanutsRemaining(): Promise<number> {
   return peanutsRemaining;
 }
 
-export async function getPeanutsSubscription(): Promise<{ peanuts: number; time: string } | undefined> {
-  const { peanuts, time } = await callNutAPI('get-peanuts-subscription', {});
-  return { peanuts, time };
+export async function getPeanutsSubscription(): Promise<{ peanuts: number; reloadTime: string } | undefined> {
+  const { peanuts, reloadTime } = await callNutAPI('get-peanuts-subscription', {});
+  return { peanuts, reloadTime };
 }
 
 // Set a subscription for peanuts. Every month if the number of peanuts is below
@@ -24,6 +24,7 @@ export async function addPeanuts(peanuts: number) {
 }
 
 enum PeanutChangeReason {
+  SetSubscription = 'SetSubscription',
   SubscriptionRefill = 'SubscriptionRefill',
   AddPeanuts = 'AddPeanuts',
   FeatureImplemented = 'FeatureImplemented',
@@ -41,6 +42,7 @@ interface PeanutHistoryEntry {
 
   // Reason for the change.
   reason: PeanutChangeReason;
+  subscriptionPeanuts?: number;
   appId?: string;
   featureName?: string;
 }
