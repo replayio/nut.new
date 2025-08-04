@@ -7,13 +7,13 @@ import { SignUpForm } from './SignUpForm';
 import { AuthStateMessage } from './AuthStateMessage';
 import { PasswordResetForm } from './PasswordResetForm';
 import { addPeanuts, getPeanutsRemaining } from '~/lib/replay/Account';
-import { UsageModal } from './UsageModal';
+import { AccountModal } from './AccountModal';
 
 export function ClientAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showUsageModal, setShowUsageModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [usageData, setUsageData] = useState<{ peanuts_remaining: number } | null>(null);
@@ -127,7 +127,6 @@ export function ClientAuth() {
                 <div className="font-medium truncate">{user.email}</div>
               </div>
               <div className="px-4 py-3 text-bolt-elements-textPrimary border-b border-bolt-elements-borderColor">
-                <div className="text-sm text-bolt-elements-textSecondary">Usage</div>
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
                     <span>Peanuts</span>
@@ -137,18 +136,10 @@ export function ClientAuth() {
               </div>
               <div className="px-2 pt-2">
                 <button
-                  onClick={() => addPeanuts(2000).finally(() => updateUsageData())}
+                  onClick={() => setShowAccountModal(true)}
                   className="w-full px-4 py-2 text-left bg-green-500 text-white hover:bg-green-600 rounded-md transition-colors flex items-center justify-center"
                 >
-                  Add 2000 peanuts
-                </button>
-              </div>
-              <div className="px-2 pt-2">
-                <button
-                  onClick={() => setShowUsageModal(true)}
-                  className="w-full px-4 py-2 text-left bg-green-500 text-white hover:bg-green-600 rounded-md transition-colors flex items-center justify-center"
-                >
-                  Usage
+                  Account
                 </button>
               </div>
               <div className="px-2 pt-2">
@@ -279,14 +270,14 @@ export function ClientAuth() {
         </div>
       )}
 
-      {showUsageModal && (
+      {showAccountModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50"
           onClick={() => {
-            setShowUsageModal(false);
+            setShowAccountModal(false);
           }}
         >
-          <UsageModal />
+          <AccountModal />
         </div>
       )}
     </>

@@ -1,7 +1,7 @@
 import { getPeanutsHistory, type PeanutHistoryEntry } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 
-export const UsageModal = () => {
+export const AccountModal = () => {
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
