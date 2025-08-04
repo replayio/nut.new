@@ -81,7 +81,7 @@ export function ClientAuth() {
     } catch (error) {
       console.error('Error fetching usage data:', error);
     }
-  }
+  };
 
   useEffect(() => {
     if (showDropdown) {
