@@ -72,7 +72,7 @@ const DeployChatModal = ({
                   {hasExistingSite && (
                     <div className="mb-4 p-3 bg-bolt-elements-background-depth-3 rounded-lg border border-bolt-elements-borderColor">
                       <div className="flex flex-col items-center justify-between">
-                        <div className="text-sm text-bolt-elements-textPrimary font-medium">Current site:</div>
+                        <div className="text-sm text-bolt-elements-textPrimary font-medium">Your App's URL:</div>
                         {result?.siteURL ? (
                           <a
                             href={result.siteURL}
@@ -92,7 +92,7 @@ const DeployChatModal = ({
                   <div className="flex justify-center">
                     {isDeploying ? (
                       <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-3">
-                        <span className="i-svg-spinners:3-dots-fade inline-block w-[1.2em] h-[1.2em] mr-3 text-2xl"></span>
+                        <div className="w-5 h-5 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin mr-2" />
                         <span className="text-lg">{hasExistingSite ? 'Redeploying' : 'Deploying'} your app...</span>
                       </div>
                     ) : (

@@ -200,10 +200,10 @@ export function DeployChatButton() {
         disabled={status === DeployStatus.Started}
       >
         {status === DeployStatus.Started ? (
-          <>
-            <span className="i-svg-spinners:3-dots-fade inline-block w-[1em] h-[1em]"></span>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin" />
             Deploying...
-          </>
+          </div>
         ) : status === DeployStatus.Succeeded ? (
           <div className="flex items-center gap-2">
             <div className="i-ph:check-circle text-xl"></div>
