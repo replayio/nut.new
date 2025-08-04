@@ -1,6 +1,6 @@
-import { atom } from "nanostores";
-import { getCurrentUserId } from "~/lib/supabase/client";
-import { getPeanutsRemaining } from "~/lib/replay/Account";
+import { atom } from 'nanostores';
+import { getCurrentUserId } from '~/lib/supabase/client';
+import { getPeanutsRemaining } from '~/lib/replay/Account';
 
 // Store with state indicating whether app development is possible.
 export class PeanutsStore {
