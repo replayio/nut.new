@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
@@ -21,6 +21,8 @@ export function ClientAuth() {
   const [authState, setAuthState] = useState<'form' | 'success' | 'error' | 'reset'>('form');
   const [authMessage, setAuthMessage] = useState<string>('');
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const addIntercomUser = async (userEmail: string) => {
     try {
@@ -81,10 +83,31 @@ export function ClientAuth() {
     }
   }, [showDropdown]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleSignOut = async () => {
     await getSupabase().auth.signOut();
     setShowDropdown(false);
     toast.success('Signed out successfully');
+  };
+
+  const handleShowAccountModal = () => {
+    setShowAccountModal(true);
+    setShowDropdown(false);
   };
 
   if (loading) {
@@ -113,7 +136,10 @@ export function ClientAuth() {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 py-3 w-72 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-10">
+            <div
+              ref={dropdownRef}
+              className="absolute right-0 mt-2 py-3 w-72 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-10"
+            >
               <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-bolt-elements-background-depth-2 rounded-full flex items-center justify-center border border-bolt-elements-borderColor">
@@ -138,7 +164,7 @@ export function ClientAuth() {
 
               <div className="p-3 space-y-2">
                 <button
-                  onClick={() => setShowAccountModal(true)}
+                  onClick={handleShowAccountModal}
                   className="w-full px-4 py-3 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
                 >
                   <div className="i-ph:gear text-lg" />
