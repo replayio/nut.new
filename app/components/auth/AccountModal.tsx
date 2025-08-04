@@ -1,4 +1,4 @@
-import { getPeanutsHistory, type PeanutHistoryEntry, type AccountSubscription } from '~/lib/replay/Account';
+import { getPeanutsHistory, getPeanutsSubscription, type PeanutHistoryEntry, type AccountSubscription } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 
@@ -13,10 +13,14 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPeanutsHistory()
-      .then(history => {
+    Promise.all([
+      getPeanutsHistory(),
+      getPeanutsSubscription()
+    ])
+      .then(([history, subscription]) => {
         history.reverse();
         setHistory(history);
+        setSubscription(subscription);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -29,6 +33,15 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+    });
+  };
+
+  const formatSubscriptionTime = (timeString: string) => {
+    const date = new Date(timeString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
   };
 
@@ -90,6 +103,16 @@ export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
         <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Account</h2>
         <div className="text-bolt-elements-textPrimary font-medium">{user?.email ?? "unknown"}</div>
         <div className="text-bolt-elements-textPrimary font-medium">Peanuts: {peanutsRemaining ?? "unknown"}</div>
+        <div className="mt-2 text-bolt-elements-textSecondary text-sm">
+          {subscription ? (
+            <>
+              <div>Subscription: {subscription.peanuts} peanuts</div>
+              <div>Next reload: {formatSubscriptionTime(subscription.reloadTime)}</div>
+            </>
+          ) : (
+            <div>No active subscription</div>
+          )}
+        </div>
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Usage</h2>
