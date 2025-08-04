@@ -44,9 +44,10 @@ interface DialogButtonProps {
   type: 'primary' | 'secondary' | 'danger';
   children: ReactNode;
   onClick?: (event: React.UIEvent) => void;
+  disabled?: boolean;
 }
 
-export const DialogButton = memo(({ type, children, onClick }: DialogButtonProps) => {
+export const DialogButton = memo(({ type, children, onClick, disabled = false }: DialogButtonProps) => {
   return (
     <button
       className={classNames(
@@ -59,8 +60,12 @@ export const DialogButton = memo(({ type, children, onClick }: DialogButtonProps
           'bg-bolt-elements-button-danger-background text-bolt-elements-button-danger-text hover:bg-bolt-elements-button-danger-backgroundHover':
             type === 'danger',
         },
+        {
+          'opacity-50 cursor-not-allowed': disabled,
+        }
       )}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>
