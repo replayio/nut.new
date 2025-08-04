@@ -1,7 +1,12 @@
 import { getPeanutsHistory, type PeanutHistoryEntry } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 
-export const AccountModal = () => {
+interface AccountModalProps {
+  user: User | undefined;
+}
+
+export const AccountModal = ({ user }: AccountModalProps) => {
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -10,7 +10,7 @@ import { addPeanuts, getPeanutsRemaining } from '~/lib/replay/Account';
 import { AccountModal } from './AccountModal';
 
 export function ClientAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -50,7 +50,7 @@ export function ClientAuth() {
     async function getUser() {
       try {
         const { data } = await getSupabase().auth.getUser();
-        setUser(data.user);
+        setUser(data.user ?? undefined);
       } catch (error) {
         console.error('Error fetching user:', error);
       } finally {
@@ -63,7 +63,7 @@ export function ClientAuth() {
     const {
       data: { subscription },
     } = getSupabase().auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? null);
+      setUser(session?.user ?? undefined);
       if (session?.user) {
         setShowAuthModal(false);
       }
@@ -277,7 +277,7 @@ export function ClientAuth() {
             setShowAccountModal(false);
           }}
         >
-          <AccountModal />
+          <AccountModal user={user} />
         </div>
       )}
     </>
