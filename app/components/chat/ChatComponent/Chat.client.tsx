@@ -38,7 +38,7 @@ export function Chat() {
 
   const loadApp = async (appId: string) => {
     try {
-      if (!await isAppAccessible(appId)) {
+      if (!(await isAppAccessible(appId))) {
         setUnauthorized(true);
         return;
       }
@@ -70,10 +70,12 @@ export function Chat() {
       logStore.logError('Failed to load chat messages', error);
       toast.error((error as any).message);
     }
-  }
+  };
 
   const handleCopyApp = async () => {
-    if (!initialAppId || isCopying) return;
+    if (!initialAppId || isCopying) {
+      return;
+    }
 
     setIsCopying(true);
     try {

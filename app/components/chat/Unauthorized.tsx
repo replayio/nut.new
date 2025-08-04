@@ -1,4 +1,3 @@
-
 /*
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
@@ -18,22 +17,18 @@ interface UnauthorizedProps {
 export const Unauthorized = ({ handleCopyApp, isCopying }: UnauthorizedProps) => {
   return (
     <Tooltip.Provider delayDuration={200}>
-      <div
-        className={classNames('relative flex h-full w-full overflow-hidden')}
-      >
+      <div className={classNames('relative flex h-full w-full overflow-hidden')}>
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
             <div className="mb-6">
               <div className="i-ph:lock-key-bold text-4xl text-bolt-elements-textSecondary mb-4"></div>
-              <h2 className="text-xl font-semibold text-bolt-elements-textPrimary mb-2">
-                App Access Restricted
-              </h2>
+              <h2 className="text-xl font-semibold text-bolt-elements-textPrimary mb-2">App Access Restricted</h2>
               <p className="text-bolt-elements-textSecondary">
                 This app is owned by another user. You can create a copy to work with it.
               </p>
             </div>
-            
+
             <button
               onClick={handleCopyApp}
               disabled={isCopying}
@@ -44,7 +39,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying }: UnauthorizedProps) =>
                     !isCopying,
                   'bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text opacity-50 cursor-not-allowed':
                     isCopying,
-                }
+                },
               )}
             >
               {isCopying ? (
