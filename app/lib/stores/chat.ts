@@ -9,6 +9,7 @@ import { setPendingMessageStatus } from './status';
 import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
+import { peanutsStore, refreshPeanutsStore } from './peanuts';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -65,6 +66,14 @@ export function doAbortChat() {
 
 export async function doSendMessage(mode: ChatMode, messages: Message[], references?: ChatReference[]) {
   const numAbortsAtStart = chatStore.numAborts.get();
+
+  if (mode == ChatMode.DevelopApp) {
+    await refreshPeanutsStore();
+    if (peanutsStore.peanutsError.get()) {
+      toast.error(peanutsStore.peanutsError.get());
+      return;
+    }
+  }
 
   chatStore.hasPendingMessage.set(true);
   clearPendingMessageStatus();

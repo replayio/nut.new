@@ -2,7 +2,7 @@
 
 import { callNutAPI } from './NutAPI';
 
-export async function getPeanutsRemaining(): Promise<number> {
+export async function getPeanutsRemaining(): Promise<number | undefined> {
   const { peanutsRemaining } = await callNutAPI('get-peanuts-remaining', {});
   return peanutsRemaining;
 }

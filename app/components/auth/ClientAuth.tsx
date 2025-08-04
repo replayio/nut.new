@@ -6,8 +6,9 @@ import { SignInForm } from './SignInForm';
 import { SignUpForm } from './SignUpForm';
 import { AuthStateMessage } from './AuthStateMessage';
 import { PasswordResetForm } from './PasswordResetForm';
-import { getPeanutsRemaining } from '~/lib/replay/Account';
 import { AccountModal } from './AccountModal';
+import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
+import { useStore } from '@nanostores/react';
 
 export function ClientAuth() {
   const [user, setUser] = useState<User | undefined>(undefined);
@@ -16,7 +17,7 @@ export function ClientAuth() {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [peanutsRemaining, setPeanutsRemaining] = useState<number | undefined>(undefined);
+  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const [authState, setAuthState] = useState<'form' | 'success' | 'error' | 'reset'>('form');
   const [authMessage, setAuthMessage] = useState<string>('');
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -74,18 +75,9 @@ export function ClientAuth() {
     };
   }, []);
 
-  const updateUsageData = async () => {
-    try {
-      const peanutsRemaining = await getPeanutsRemaining();
-      setPeanutsRemaining(peanutsRemaining);
-    } catch (error) {
-      console.error('Error fetching usage data:', error);
-    }
-  };
-
   useEffect(() => {
     if (showDropdown) {
-      updateUsageData();
+      refreshPeanutsStore();
     }
   }, [showDropdown]);
 

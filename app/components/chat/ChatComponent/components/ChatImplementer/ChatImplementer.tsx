@@ -18,8 +18,6 @@ import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/pe
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { generateRandomId, navigateApp } from '~/utils/nut';
-import { getPeanutsRemaining } from '~/lib/replay/Account';
-import { getCurrentUserId } from '~/lib/supabase/client';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
@@ -98,19 +96,6 @@ const ChatImplementer = memo(() => {
   const sendMessage = async (messageInput: string | undefined, chatMode?: ChatMode) => {
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
-    }
-
-    if (chatMode == ChatMode.DevelopApp) {
-      const peanuts = await getPeanutsRemaining();
-      if (peanuts <= 0) {
-        const userId = await getCurrentUserId();
-        if (userId) {
-          toast.error('Out of peanuts, add more to continue building.');
-        } else {
-          toast.error('You must be logged in to continue building.');
-        }
-        return;
-      }
     }
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
