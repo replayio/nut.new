@@ -1,6 +1,5 @@
 import {
   getPeanutsHistory,
-  getPeanutsRemaining,
   getPeanutsSubscription,
   setPeanutsSubscription,
   addPeanuts,
@@ -11,6 +10,8 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { DialogButton } from '~/components/ui/Dialog';
 import type { ReactElement } from 'react';
+import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
+import { useStore } from '@nanostores/react';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -19,22 +20,21 @@ interface AccountModalProps {
 const DEFAULT_SUBSCRIPTION_PEANUTS = 2000;
 
 export const AccountModal = ({ user }: AccountModalProps) => {
-  const [peanutsRemaining, setPeanutsRemaining] = useState<number | undefined>(undefined);
+  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const reloadAccountData = async () => {
     setLoading(true);
-    const [history, subscription, peanutsRemaining] = await Promise.all([
+    const [history, subscription] = await Promise.all([
       getPeanutsHistory(),
       getPeanutsSubscription(),
-      getPeanutsRemaining(),
+      refreshPeanutsStore(),
     ]);
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
-    setPeanutsRemaining(peanutsRemaining);
     setLoading(false);
   };
 
