@@ -1,18 +1,23 @@
-import { getPeanutsHistory, type PeanutHistoryEntry } from '~/lib/replay/Account';
+import { getPeanutsHistory, type PeanutHistoryEntry, type AccountSubscription } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 interface AccountModalProps {
   user: User | undefined;
+  peanutsRemaining: number | undefined;
 }
 
-export const AccountModal = ({ user }: AccountModalProps) => {
+export const AccountModal = ({ user, peanutsRemaining }: AccountModalProps) => {
+  const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getPeanutsHistory()
-      .then(setHistory)
+      .then(history => {
+        history.reverse();
+        setHistory(history);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -81,6 +86,12 @@ export const AccountModal = ({ user }: AccountModalProps) => {
       className="bg-bolt-elements-background-depth-1 rounded-lg p-8 max-w-3xl w-full z-50 border border-bolt-elements-borderColor overflow-y-auto max-h-[95vh]"
       onClick={(e) => e.stopPropagation()}
     >
+      <div className="mb-6 text-center">
+        <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Account</h2>
+        <div className="text-bolt-elements-textPrimary font-medium">{user?.email ?? "unknown"}</div>
+        <div className="text-bolt-elements-textPrimary font-medium">Peanuts: {peanutsRemaining ?? "unknown"}</div>
+      </div>
+
       <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Usage</h2>
 
       {loading ? (

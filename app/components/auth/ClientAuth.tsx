@@ -16,7 +16,7 @@ export function ClientAuth() {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [usageData, setUsageData] = useState<{ peanuts_remaining: number } | null>(null);
+  const [peanutsRemaining, setPeanutsRemaining] = useState<number | undefined>(undefined);
   const [authState, setAuthState] = useState<'form' | 'success' | 'error' | 'reset'>('form');
   const [authMessage, setAuthMessage] = useState<string>('');
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -77,7 +77,7 @@ export function ClientAuth() {
   const updateUsageData = async () => {
     try {
       const peanutsRemaining = await getPeanutsRemaining();
-      setUsageData({ peanuts_remaining: peanutsRemaining });
+      setPeanutsRemaining(peanutsRemaining);
     } catch (error) {
       console.error('Error fetching usage data:', error);
     }
@@ -130,7 +130,7 @@ export function ClientAuth() {
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
                     <span>Peanuts</span>
-                    <span className="font-medium">{usageData?.peanuts_remaining ?? '...'}</span>
+                    <span className="font-medium">{peanutsRemaining ?? '...'}</span>
                   </div>
                 </div>
               </div>
@@ -277,7 +277,7 @@ export function ClientAuth() {
             setShowAccountModal(false);
           }}
         >
-          <AccountModal user={user} />
+          <AccountModal user={user} peanutsRemaining={peanutsRemaining} />
         </div>
       )}
     </>

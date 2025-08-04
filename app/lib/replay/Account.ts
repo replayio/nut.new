@@ -7,7 +7,7 @@ export async function getPeanutsRemaining(): Promise<number> {
   return peanutsRemaining;
 }
 
-interface AccountSubscription {
+export interface AccountSubscription {
   peanuts: number;
   reloadTime: string;
 }
