@@ -36,7 +36,7 @@ enum PeanutChangeReason {
   FeatureValidated = 'FeatureValidated',
 }
 
-interface PeanutHistoryEntry {
+export interface PeanutHistoryEntry {
   time: string;
 
   // Change in peanuts due to this entry.
