@@ -14,9 +14,11 @@ const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
 export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
-  const className = `absolute flex justify-center items-center bottom-[22px] right-[22px] p-1 ${
-    hasPendingMessage ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-  } color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed`;
+  const className = `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 ${
+    hasPendingMessage
+      ? 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600'
+      : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
+  } text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
 
   // Determine tooltip text based on button state
   const tooltipText = hasPendingMessage ? 'Stop Generation' : 'Send Message';
@@ -42,11 +44,9 @@ export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
             }}
           >
             {!hasPendingMessage ? (
-              <>
-                <div className="i-ph:arrow-up-bold text-xl"></div>
-              </>
+              <div className="i-ph:arrow-up-bold text-xl transition-transform duration-200 group-hover:scale-110"></div>
             ) : (
-              <div className="i-ph:stop-circle-bold text-xl"></div>
+              <div className="i-ph:stop-circle-bold text-xl transition-transform duration-200 group-hover:scale-110"></div>
             )}
           </motion.button>
         </WithTooltip>

@@ -17,6 +17,7 @@ interface MessagesProps {
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLastMessageCheckboxChange }, ref) => {
   const [showJumpToBottom, setShowJumpToBottom] = useState(false);
+  const [showTopShadow, setShowTopShadow] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const messages = useStore(chatStore.messages);
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
@@ -44,6 +45,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
     setShowJumpToBottom(distanceFromBottom > 50);
+    setShowTopShadow(scrollTop > 10);
   };
 
   const scrollToBottom = () => {
@@ -103,15 +105,19 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
           'mt-6': !isFirst,
         })}
       >
-        <div className={classNames('flex gap-4 p-6 rounded-2xl border transition-all duration-200', {
-          // User messages
-          'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/30': isUserMessage,
-          // Assistant messages
-          'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/60': !isUserMessage && (!hasPendingMessage || (hasPendingMessage && !isLast)),
-          // Last message when pending
-          'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor/50':
-            !isUserMessage && hasPendingMessage && isLast,
-        })}>
+        <div
+          className={classNames('flex gap-4 p-6 rounded-2xl border transition-all duration-200', {
+            // User messages
+            'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/30':
+              isUserMessage,
+            // Assistant messages
+            'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/60':
+              !isUserMessage && (!hasPendingMessage || (hasPendingMessage && !isLast)),
+            // Last message when pending
+            'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor/50':
+              !isUserMessage && hasPendingMessage && isLast,
+          })}
+        >
           <Suspense
             fallback={
               <div className="flex items-center justify-center w-full py-8">
@@ -122,7 +128,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
               </div>
             }
           >
-
             {isUserMessage && (
               <div className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shrink-0 self-start shadow-lg">
                 <div className="i-ph:user-fill text-lg"></div>
@@ -139,10 +144,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
 
             <div className="flex-1 min-w-0">
               <div className="mb-2">
-                <span className={classNames('text-sm font-medium', {
-                  'text-blue-600 dark:text-blue-400': isUserMessage,
-                  'text-bolt-elements-textPrimary': !isUserMessage,
-                })}>
+                <span
+                  className={classNames('text-sm font-medium', {
+                    'text-blue-600 dark:text-blue-400': isUserMessage,
+                    'text-bolt-elements-textPrimary': !isUserMessage,
+                  })}
+                >
                   {isUserMessage ? 'You' : 'Assistant'}
                 </span>
               </div>
@@ -160,24 +167,35 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
 
   return (
     <div className="relative flex-1 min-h-0">
+      {showTopShadow && (
+        <div className="absolute top-0 left-0 right-0 h-px bg-bolt-elements-borderColor/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200" />
+      )}
+
       <div
         ref={setRefs}
         className={classNames('absolute inset-0 overflow-y-auto', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
       >
         {messages.length > 0 ? messages.map(renderMessage) : null}
-                {hasPendingMessage && (
+        {hasPendingMessage && (
           <div className="w-full mt-3">
             <div className="flex gap-4 pl-6">
               <div className="flex items-center gap-3 text-bolt-elements-textSecondary py-2">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                    style={{ animationDelay: '0ms' }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                    style={{ animationDelay: '150ms' }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                    style={{ animationDelay: '300ms' }}
+                  ></div>
                 </div>
                 {pendingMessageStatus && (
-                  <span className="text-sm font-medium opacity-60">
-                    {pendingMessageStatus}...
-                  </span>
+                  <span className="text-sm font-medium opacity-60">{pendingMessageStatus}...</span>
                 )}
               </div>
             </div>
