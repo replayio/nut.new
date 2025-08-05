@@ -46,38 +46,54 @@ const GlobalFeedbackModal = () => {
       isOpen={isOpen}
       onRequestClose={feedbackModalStore.close}
       className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 outline-none max-w-2xl w-full mx-4"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[1001]"
     >
-      <div className="bg-bolt-elements-background-depth-1 rounded-lg p-8 border border-bolt-elements-borderColor">
+      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 border border-bolt-elements-borderColor/50 shadow-2xl hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative">
+        <button
+          onClick={feedbackModalStore.close}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
+          title="Close"
+        >
+          <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+        </button>
+
         {submitted ? (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Feedback Submitted</h2>
-            <div className="text-center">
-              <p className="text-bolt-elements-textSecondary mb-6">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-lg">
+                <div className="i-ph:check-circle text-3xl text-green-500" />
+              </div>
+              <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">Feedback Submitted</h2>
+              <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
                 Thank you for your feedback! We appreciate your input.
               </p>
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={feedbackModalStore.close}
-                  className="px-4 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors font-medium"
-                >
-                  Close
-                </button>
-              </div>
+            </div>
+            <div className="flex justify-center">
+              <button
+                onClick={feedbackModalStore.close}
+                className="px-6 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor group"
+              >
+                <span className="transition-transform duration-200 group-hover:scale-105">Close</span>
+              </button>
             </div>
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Share Your Feedback</h2>
-            <div className="text-center mb-6 text-bolt-elements-textSecondary">
-              Let us know how Nut is doing or report any issues you've encountered.
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
+                <div className="i-ph:chat-circle text-3xl text-blue-500" />
+              </div>
+              <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">Share Your Feedback</h2>
+              <p className="text-bolt-elements-textSecondary text-lg">
+                Let us know how Nut is doing or report any issues you've encountered.
+              </p>
             </div>
 
             <div className="mb-6">
-              <label className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">Your Feedback:</label>
+              <label className="block mb-3 text-sm font-semibold text-bolt-elements-textPrimary">Your Feedback:</label>
               <textarea
                 name="description"
-                className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-[120px]"
+                className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 min-h-[140px] transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 value={formData.description}
                 placeholder="Tell us what you think or describe any issues..."
                 onChange={(e) => {
@@ -89,12 +105,12 @@ const GlobalFeedbackModal = () => {
               />
             </div>
 
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-3 mb-8 p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
               <input
                 type="checkbox"
                 id="share-project"
                 name="share"
-                className="bg-bolt-elements-background-depth-2 text-green-500 rounded border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500"
+                className="w-4 h-4 bg-bolt-elements-background-depth-2 text-blue-500 rounded border-bolt-elements-borderColor focus:ring-2 focus:ring-blue-500/50 transition-colors"
                 checked={formData.share}
                 onChange={(e) => {
                   feedbackModalStore.setFormData({
@@ -103,37 +119,44 @@ const GlobalFeedbackModal = () => {
                   });
                 }}
               />
-              <label htmlFor="share-project" className="text-sm text-bolt-elements-textSecondary">
+              <label htmlFor="share-project" className="text-sm text-bolt-elements-textSecondary font-medium">
                 Share project with the Nut team (helps us diagnose issues)
               </label>
             </div>
 
-            <div className="flex justify-center gap-3">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
               <button
                 onClick={handleSubmitFeedback}
-                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-2"
               >
-                Submit Feedback
+                <div className="i-ph:paper-plane-right text-lg transition-transform duration-200 group-hover:scale-110" />
+                <span className="transition-transform duration-200 group-hover:scale-105">Submit Feedback</span>
               </button>
               <button
                 onClick={feedbackModalStore.close}
-                className="px-4 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                className="px-6 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor group"
               >
-                Cancel
+                <span className="transition-transform duration-200 group-hover:scale-105">Cancel</span>
               </button>
             </div>
-            <div className="flex flex-col justify-center gap-3 mt-6">
-              <h2 className="text-2xl font-bold mt-6 text-bolt-elements-textPrimary text-center">Or</h2>
-              <h4 className="text-xl font-bold mb-4 mt-6 text-bolt-elements-textPrimary text-center">
-                <a
-                  className="text-green-500 hover:text-green-600 transition-colors cursor-pointer"
-                  href="https://cal.com/filip"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Schedule a call with the Nut Team to discuss an issue or give feedback.
-                </a>
-              </h4>
+
+            <div className="text-center border-t border-bolt-elements-borderColor/50 pt-8">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-bolt-elements-borderColor/30"></div>
+                <span className="text-bolt-elements-textSecondary font-medium">Or</span>
+                <div className="flex-1 h-px bg-bolt-elements-borderColor/30"></div>
+              </div>
+              <a
+                className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-all duration-200 cursor-pointer font-semibold bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-xl border border-blue-500/20 hover:border-blue-500/30 shadow-sm hover:shadow-md hover:scale-105 group"
+                href="https://cal.com/filip"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="i-ph:calendar text-lg transition-transform duration-200 group-hover:scale-110" />
+                <span className="transition-transform duration-200 group-hover:scale-105">
+                  Schedule a call with the Nut Team
+                </span>
+              </a>
             </div>
           </>
         )}
