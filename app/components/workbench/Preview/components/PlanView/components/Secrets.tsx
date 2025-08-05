@@ -17,13 +17,48 @@ const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 const Secrets = ({ appSummary }: SecretsProps) => {
   const renderSecret = (secret: AppDetail, index: number) => {
+    const isBuiltin = BUILTIN_SECRET_NAMES.includes(secret.name);
+    
     return (
-      <span
+      <div
         key={index}
-        className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded border border-bolt-elements-borderColor"
+        className="p-3 border border-bolt-elements-borderColor rounded-lg bg-bolt-elements-background-depth-1"
       >
-        {secret.name}
-      </span>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-bolt-elements-textPrimary">
+            {secret.name}
+          </span>
+          <span
+            className={classNames(
+              "px-2 py-1 text-xs font-medium rounded",
+              isBuiltin
+                ? "bg-green-100 text-green-800 border border-green-200"
+                : "bg-yellow-100 text-yellow-800 border border-yellow-200"
+            )}
+          >
+            {isBuiltin ? "Built-in" : "Required"}
+          </span>
+        </div>
+        
+        {secret.description && (
+          <p className="text-sm text-bolt-elements-textSecondary mb-2">
+            {secret.description}
+          </p>
+        )}
+        
+        <div className={classNames(
+          "text-xs p-2 rounded",
+          isBuiltin
+            ? "bg-green-50 text-green-700 border border-green-200"
+            : "bg-yellow-50 text-yellow-700 border border-yellow-200"
+        )}>
+          {isBuiltin ? (
+            <span>✅ A value will be used automatically</span>
+          ) : (
+            <span>⚠️ This secret must be added before deployment</span>
+          )}
+        </div>
+      </div>
     );
   }
 
