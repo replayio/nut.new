@@ -18,4 +18,9 @@ export const updateDevelopmentServer = debounce((repositoryId: string | undefine
   workbenchStore.showWorkbench.set(repositoryURL !== undefined);
   workbenchStore.repositoryId.set(repositoryId);
   workbenchStore.previewURL.set(repositoryURL);
+
+  // Prefetch the development server so it will be ready earlier.
+  if (repositoryURL) {
+    fetch(repositoryURL);
+  }
 }, 500);
