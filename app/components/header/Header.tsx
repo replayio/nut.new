@@ -14,10 +14,13 @@ export function Header() {
 
   return (
     <header
-      className={classNames('flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-bolt-elements-background-depth-1/80 transition-all duration-300 z-10', {
-        'border-transparent shadow-none': !chatStarted,
-        'border-bolt-elements-borderColor/50 shadow-sm backdrop-blur-md': chatStarted,
-      })}
+      className={classNames(
+        'flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-bolt-elements-background-depth-1/80 transition-all duration-300 z-10',
+        {
+          'border-transparent shadow-none': !chatStarted,
+          'border-bolt-elements-borderColor/50 shadow-sm backdrop-blur-md': chatStarted,
+        },
+      )}
     >
       <div className="flex flex-1 items-center gap-4 text-bolt-elements-textPrimary">
         <button
@@ -43,21 +46,21 @@ export function Header() {
 
       <div className="flex-1 flex justify-end mr-4">
         <div className="flex items-center">
-          {chatStarted && (
-            <ClientOnly>
-              {() => <HeaderActionButtons />}
-            </ClientOnly>
-          )}
+          {chatStarted && <ClientOnly>{() => <HeaderActionButtons />}</ClientOnly>}
         </div>
       </div>
 
-        <ClientOnly>
-          {() => (
-            <Suspense fallback={<div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor" />}>
-              <ClientAuth />
-            </Suspense>
-          )}
-        </ClientOnly>
+      <ClientOnly>
+        {() => (
+          <Suspense
+            fallback={
+              <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor" />
+            }
+          >
+            <ClientAuth />
+          </Suspense>
+        )}
+      </ClientOnly>
     </header>
   );
 }

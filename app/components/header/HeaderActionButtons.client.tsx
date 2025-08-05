@@ -75,9 +75,11 @@ function Button({ active = false, disabled = false, children, onClick }: ButtonP
       onClick={onClick}
       disabled={disabled}
     >
-      <div className={classNames('transition-all duration-200', {
-        'transform group-hover:scale-110': !disabled,
-      })}>
+      <div
+        className={classNames('transition-all duration-200', {
+          'transform group-hover:scale-110': !disabled,
+        })}
+      >
         {children}
       </div>
       {active && !disabled && (
