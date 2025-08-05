@@ -8,6 +8,7 @@ import { ClientAuth } from '~/components/auth/ClientAuth';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
+import { IconButton } from '~/components/ui/IconButton';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
@@ -23,13 +24,13 @@ export function Header() {
       )}
     >
       <div className="flex flex-1 items-center gap-4 text-bolt-elements-textPrimary">
-        <button
+        <IconButton
           onClick={() => sidebarMenuStore.toggle()}
           data-testid="sidebar-icon"
-          className="p-2 rounded-lg hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 group"
-        >
-          <div className="i-ph:sidebar-simple-duotone text-2xl transition-transform duration-200 group-hover:scale-110" />
-        </button>
+          icon="i-ph:sidebar-simple-duotone"
+          size="xl"
+          title="Toggle Sidebar"
+        />
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a
