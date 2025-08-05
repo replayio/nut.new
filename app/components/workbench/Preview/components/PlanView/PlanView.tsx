@@ -1,5 +1,6 @@
 import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import Pages from './components/Pages';
+import Secrets from './components/Secrets';
 import Features from './components/Features/Features';
 import { useStore } from '@nanostores/react';
 import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
@@ -33,6 +34,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const totalFeatures = appSummary?.features?.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
   const peanutsError = useStore(peanutsStore.peanutsError);
+  const hasSecrets = appSummary?.features?.some(f => f.secrets?.length);
 
   if (historyOpen) {
     return (
@@ -127,6 +129,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
             </div>
+            {hasSecrets && <Secrets appSummary={appSummary!} />}
             {appSummary?.pages && <Pages appSummary={appSummary} />}
           </div>
           {(appSummary?.features || appSummary?.mockupStatus) && (

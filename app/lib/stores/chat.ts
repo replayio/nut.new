@@ -87,7 +87,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
       case 'message': {
         const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
-        logAppSummaryMessage(response.message, 'SendMessage');
+        logAppSummaryMessage(response.message, `SendMessage:${mode}`);
 
         addChatMessage(response.message);
 
@@ -108,9 +108,6 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
         setPendingMessageStatus(response.status);
         break;
       case 'error':
-        toast.error('Error sending message');
-        console.error('Error sending message', response.error);
-        break;
       case 'done':
       case 'aborted':
         break;

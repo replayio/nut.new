@@ -13,7 +13,7 @@ import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
-import { addAppResponse, clearAppResponses, filterOnResponseCallback } from './ResponseFilter';
+import { addAppResponse, clearAppResponses, filterOnResponseCallback, getLastResponseTime } from './ResponseFilter';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -106,12 +106,39 @@ export function shouldDisplayMessage(message: Message) {
   );
 }
 
+const SHORT_POLL_INTERVAL = 10000;
+
+// We use a belt-and-suspenders approach to gathering responses where we both do
+// long polling while calling the Nut API and occasional short polling to see if
+// there are other responses we haven't received yet for some reason. This covers
+// for cases where long polling does not return responses in a timely fashion.
+async function pollResponses(appId: string, onResponse: ChatResponseCallback, callback: () => Promise<void>) {
+  const getResponses = async () => {
+    const lastResponseTime = getLastResponseTime();
+    const { responses } = await callNutAPI('get-app-responses', { appId, lastResponseTime });
+    for (const response of responses) {
+      onResponse(response);
+    }
+  };
+
+  const interval = setInterval(getResponses, SHORT_POLL_INTERVAL);
+
+  try {
+    await callback();
+  } finally {
+    clearInterval(interval);
+    await getResponses();
+  }
+}
+
 export async function sendChatMessage(
   mode: ChatMode,
   messages: Message[],
   references: ChatReference[],
   onResponse: ChatResponseCallback,
 ) {
+  onResponse = filterOnResponseCallback(onResponse);
+
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
@@ -134,14 +161,14 @@ export async function sendChatMessage(
   }
 
   const params: NutChatRequest = {
-    appId: chatStore.currentAppId.get(),
+    appId,
     mode,
     messages: messages.filter(shouldDisplayMessage),
     references,
     simulationData,
   };
 
-  await callNutAPI('chat', params, filterOnResponseCallback(onResponse));
+  await pollResponses(appId, onResponse, () => callNutAPI('chat', params, onResponse));
 
   logger.debug('sendChatMessage finished');
 }
@@ -155,18 +182,22 @@ export async function getExistingAppResponses(appId: string): Promise<ChatRespon
 
 // Stream any responses from ongoing work that is modifying the app.
 export async function listenAppResponses(onResponse: ChatResponseCallback) {
+  onResponse = filterOnResponseCallback(onResponse);
+
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  while (true) {
-    try {
-      await callNutAPI('listen-app-responses', { appId }, filterOnResponseCallback(onResponse));
-      break;
-    } catch (error) {
-      // Retry with a delay until the message finishes successfully.
-      console.log('listenAppResponses error, retrying', error);
-      await waitForTime(5000);
-      continue;
+  await pollResponses(appId, onResponse, async () => {
+    while (true) {
+      try {
+        await callNutAPI('listen-app-responses', { appId }, onResponse);
+        break;
+      } catch (error) {
+        // Retry with a delay until the message finishes successfully.
+        console.log('listenAppResponses error, retrying', error);
+        await waitForTime(5000);
+        continue;
+      }
     }
-  }
+  });
 }

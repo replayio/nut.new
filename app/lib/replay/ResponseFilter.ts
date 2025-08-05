@@ -13,6 +13,7 @@ import { assert } from '~/utils/nut';
 const logger = createScopedLogger('ChatResponses');
 
 const gResponsesByTime = new Map<string, ChatResponse[]>();
+let gLastResponseTime = new Date(0).toISOString();
 
 function responseMatches(a: ChatResponse, b: ChatResponse) {
   // Special case AppSummary messages. These are generated from different places in the
@@ -39,6 +40,10 @@ export function addAppResponse(response: ChatResponse) {
 
   logger.trace('onResponse', JSON.stringify(response));
 
+  if (Date.parse(response.time) > Date.parse(gLastResponseTime)) {
+    gLastResponseTime = response.time;
+  }
+
   if (!existing) {
     existing = [];
     gResponsesByTime.set(response.time, existing);
@@ -47,7 +52,7 @@ export function addAppResponse(response: ChatResponse) {
   return true;
 }
 
-export function filterOnResponseCallback(onResponse: ChatResponseCallback) {
+export function filterOnResponseCallback(onResponse: ChatResponseCallback): ChatResponseCallback {
   return (response: ChatResponse) => {
     if (addAppResponse(response)) {
       onResponse(response);
@@ -57,4 +62,9 @@ export function filterOnResponseCallback(onResponse: ChatResponseCallback) {
 
 export function clearAppResponses() {
   gResponsesByTime.clear();
+  gLastResponseTime = new Date(0).toISOString();
+}
+
+export function getLastResponseTime() {
+  return gLastResponseTime;
 }
