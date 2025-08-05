@@ -112,115 +112,150 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
 
   return (
-    <div className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}>
-      <div className="flex flex-col text-bolt-elements-textPrimary text-sm p-4 pb-0 pt-2">
-        {checkedBoxes?.map((text) => (
-          <div className="flex items-center gap-2 pb-2" key={text}>
-            <div className="i-ph:check-circle text-xl"></div>
-            <div>{text}</div>
+    <div className={classNames('relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30')}>
+      {checkedBoxes && checkedBoxes.length > 0 && (
+        <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor rounded-t-2xl p-4">
+          <div className="flex flex-col gap-2">
+            {checkedBoxes.map((text) => (
+              <div className="flex items-center gap-3 text-bolt-elements-textPrimary text-sm" key={text}>
+                <div className="w-5 h-5 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <div className="i-ph:check text-green-500 text-sm"></div>
+                </div>
+                <div className="font-medium">{text}</div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+      )}
+
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          className={classNames(
+            'w-full px-6 py-4 pr-20 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-base',
+            'transition-all duration-200',
+            'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50',
+            checkedBoxes && checkedBoxes.length > 0 ? 'rounded-b-2xl' : 'rounded-2xl'
+          )}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.currentTarget.style.boxShadow = 'none';
+
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach((file) => {
+              if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                  const base64Image = e.target?.result as string;
+                  setUploadedFiles([...uploadedFiles, file]);
+                  setImageDataList([...imageDataList, base64Image]);
+                };
+                reader.readAsDataURL(file);
+              }
+            });
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              if (event.shiftKey) {
+                return;
+              }
+
+              event.preventDefault();
+
+              if (hasPendingMessage) {
+                handleStop();
+                return;
+              }
+
+              if (event.nativeEvent.isComposing) {
+                return;
+              }
+
+              handleSendMessage(fullInput, undefined);
+            }
+          }}
+          value={input}
+          onChange={handleInputChange}
+          onPaste={handlePaste}
+          style={{
+            minHeight,
+            maxHeight,
+            overflowY: 'auto',
+          }}
+          placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
+          translate="no"
+        />
+
+        {(() => {
+          const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted;
+          const showStartPlanningButton = startPlanningRating > 0 && !showSendButton;
+          
+          return (
+            <>
+              {
+                showSendButton && (
+                  <ClientOnly>
+                    {() => (
+                      <SendButton
+                        onClick={() => {
+                          if (hasPendingMessage) {
+                            handleStop();
+                            return;
+                          }
+
+                          if (fullInput.length > 0 || uploadedFiles.length > 0) {
+                            handleSendMessage(fullInput, undefined);
+                          }
+                        }}
+                      />
+                    )}
+                  </ClientOnly>
+                )
+              }
+
+              {
+                showStartPlanningButton && (
+                  <ClientOnly>
+                    {() => (
+                  <StartPlanningButton
+                    onClick={() => {
+                      const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
+                      handleSendMessage(message, ChatMode.BuildApp);
+                    }}
+                    startPlanningRating={startPlanningRating}
+                  />
+                )}
+              </ClientOnly>
+              )}
+            </>
+          );
+        })()}
       </div>
-      <textarea
-        ref={textareaRef}
-        className={classNames(
-          'w-full pl-4 pt-2 pr-20 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
-          'transition-all duration-200',
-          'hover:border-bolt-elements-focus',
-        )}
-        onDragEnter={(e) => {
-          e.preventDefault();
-          e.currentTarget.style.border = '2px solid #1488fc';
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.currentTarget.style.border = '2px solid #1488fc';
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.currentTarget.style.border = '1px solid var(--bolt-elements-borderColor)';
 
-          const files = Array.from(e.dataTransfer.files);
-          files.forEach((file) => {
-            if (file.type.startsWith('image/')) {
-              const reader = new FileReader();
+      <div className="flex justify-between items-center rounded-b-2xl px-4 py-3">
+        <div className="flex gap-2 items-center">
+          <button
+            title="Upload file"
+            className="w-8 h-8 rounded-lg bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+            onClick={handleFileUpload}
+          >
+            <div className="i-ph:paperclip text-lg"></div>
+          </button>
 
-              reader.onload = (e) => {
-                const base64Image = e.target?.result as string;
-                setUploadedFiles([...uploadedFiles, file]);
-                setImageDataList([...imageDataList, base64Image]);
-              };
-              reader.readAsDataURL(file);
-            }
-          });
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            if (event.shiftKey) {
-              return;
-            }
-
-            event.preventDefault();
-
-            if (hasPendingMessage) {
-              handleStop();
-              return;
-            }
-
-            if (event.nativeEvent.isComposing) {
-              return;
-            }
-
-            handleSendMessage(fullInput, undefined);
-          }
-        }}
-        value={input}
-        onChange={handleInputChange}
-        onPaste={handlePaste}
-        style={{
-          minHeight,
-          maxHeight,
-        }}
-        placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
-        translate="no"
-      />
-      <ClientOnly>
-        {() => (
-          <>
-            <SendButton
-              show={(hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted}
-              onClick={() => {
-                if (hasPendingMessage) {
-                  handleStop();
-                  return;
-                }
-
-                if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                  handleSendMessage(fullInput, undefined);
-                }
-              }}
-            />
-            {startPlanningRating > 0 && (
-              <StartPlanningButton
-                onClick={() => {
-                  const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                  handleSendMessage(message, ChatMode.BuildApp);
-                }}
-                startPlanningRating={startPlanningRating}
-              />
-            )}
-          </>
-        )}
-      </ClientOnly>
-      <div className="flex justify-between items-center text-sm p-4 pt-2">
-        <div className="flex gap-1 items-center">
-          <IconButton title="Upload file" className="transition-all" onClick={handleFileUpload}>
-            <div className="i-ph:paperclip text-xl"></div>
-          </IconButton>
+          <div className="w-px h-5 bg-bolt-elements-borderColor" />
 
           <SpeechRecognitionButton
             isListening={isListening}
@@ -229,12 +264,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             disabled={hasPendingMessage}
           />
         </div>
-        {input.length > 3 ? (
-          <div className="text-xs text-bolt-elements-textTertiary">
-            Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd> +{' '}
-            <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd> a new line
+        
+        {input.length > 3 && (
+          <div className="flex items-center gap-2 text-xs text-bolt-elements-textTertiary">
+            <span>Press</span>
+            <kbd className="px-2 py-1 rounded-md bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor font-mono text-xs">
+              Shift
+            </kbd>
+            <span>+</span>
+            <kbd className="px-2 py-1 rounded-md bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor font-mono text-xs">
+              ↵
+            </kbd>
+            <span>for new line</span>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

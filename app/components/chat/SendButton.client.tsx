@@ -5,7 +5,6 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { chatStore } from '~/lib/stores/chat';
 
 interface SendButtonProps {
-  show: boolean;
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onImagesSelected?: (images: File[]) => void;
@@ -13,9 +12,9 @@ interface SendButtonProps {
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const SendButton = ({ show, disabled, onClick }: SendButtonProps) => {
+export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
-  const className = `absolute flex justify-center items-center bottom-[95px] right-[22px] p-1 ${
+  const className = `absolute flex justify-center items-center bottom-[22px] right-[22px] p-1 ${
     hasPendingMessage ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
   } color-white rounded-md h-[34px] w-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed`;
 
@@ -24,36 +23,34 @@ export const SendButton = ({ show, disabled, onClick }: SendButtonProps) => {
 
   return (
     <AnimatePresence>
-      {show ? (
-        <TooltipProvider>
-          <WithTooltip tooltip={tooltipText}>
-            <motion.button
-              className={className}
-              title={tooltipText}
-              transition={{ ease: customEasingFn, duration: 0.17 }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              disabled={disabled}
-              onClick={(event) => {
-                event.preventDefault();
+      <TooltipProvider>
+        <WithTooltip tooltip={tooltipText}>
+          <motion.button
+            className={className}
+            title={tooltipText}
+            transition={{ ease: customEasingFn, duration: 0.17 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            disabled={disabled}
+            onClick={(event) => {
+              event.preventDefault();
 
-                if (!disabled) {
-                  onClick?.(event);
-                }
-              }}
-            >
-              {!hasPendingMessage ? (
-                <>
-                  <div className="i-ph:arrow-up-bold text-xl"></div>
-                </>
-              ) : (
-                <div className="i-ph:stop-circle-bold text-xl"></div>
-              )}
-            </motion.button>
-          </WithTooltip>
-        </TooltipProvider>
-      ) : null}
+              if (!disabled) {
+                onClick?.(event);
+              }
+            }}
+          >
+            {!hasPendingMessage ? (
+              <>
+                <div className="i-ph:arrow-up-bold text-xl"></div>
+              </>
+            ) : (
+              <div className="i-ph:stop-circle-bold text-xl"></div>
+            )}
+          </motion.button>
+        </WithTooltip>
+      </TooltipProvider>
     </AnimatePresence>
   );
 };
