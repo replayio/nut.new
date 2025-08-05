@@ -41,7 +41,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
 
   const handleGoogleSignIn = async () => {
     setIsProcessing(true);
-    
+
     try {
       const { error } = await getSupabase().auth.signInWithOAuth({
         provider: 'google',
@@ -50,7 +50,6 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
       if (error) {
         throw error;
       }
-
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in with Google');

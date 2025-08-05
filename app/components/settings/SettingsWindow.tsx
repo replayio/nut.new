@@ -4,7 +4,6 @@ import { useState, type ReactElement } from 'react';
 import { classNames } from '~/utils/classNames';
 import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/components/ui/Dialog';
 import ConnectionsTab from './connections/ConnectionsTab';
-import { useArboretumVisibility } from '~/lib/stores/settings';
 
 interface SettingsProps {
   open: boolean;
@@ -15,7 +14,6 @@ type TabType = 'data' | 'apiKeys' | 'features' | 'debug' | 'event-logs' | 'conne
 
 export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('connection');
-  // const { isArboretumVisible, toggleArboretum } = useArboretumVisibility();
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
     { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
@@ -73,19 +71,6 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
                     ))}
                   </div>
                 </div>
-
-                {/* <button
-                  className="flex items-center justify-center gap-2 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary rounded-xl py-2 md:py-3 px-3 md:px-4 transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor group whitespace-nowrap ml-4 md:ml-0 md:w-full"
-                  onClick={toggleArboretum}
-                >
-                  <div className={classNames(
-                    isArboretumVisible ? 'i-ph:eye-slash' : 'i-ph:eye',
-                    'text-base md:text-lg transition-transform duration-200 group-hover:scale-110'
-                  )} />
-                  <span className="transition-transform duration-200 group-hover:scale-105 text-xs md:text-sm hidden sm:inline">
-                    {isArboretumVisible ? 'Hide Arboretum' : 'Show Arboretum'}
-                  </span>
-                </button> */}
               </div>
 
               <div className="flex-1 flex flex-col bg-bolt-elements-background-depth-2/50 min-h-0">

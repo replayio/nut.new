@@ -1,6 +1,5 @@
 import React from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
-import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';

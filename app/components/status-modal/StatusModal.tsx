@@ -2,7 +2,6 @@ import React from 'react';
 import { useStore } from '@nanostores/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { statusModalStore } from '~/lib/stores/statusModal';
-import { IconButton } from '~/components/ui/IconButton';
 import { classNames } from '~/utils/classNames';
 import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { peanutsStore } from '~/lib/stores/peanuts';
