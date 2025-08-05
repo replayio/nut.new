@@ -179,11 +179,7 @@ export function DeployChatButton() {
     // Write out to the database before we start trying to deploy.
     await database.setAppDeploySettings(appId, deploySettings);
 
-    console.log('ManualDeployStarting', appId, deploySettings);
-
     const result = await deployApp(appId, deploySettings);
-
-    console.log('ManualDeployResult', appId, deploySettings, result);
 
     if (result.error) {
       setError(result.error);
@@ -210,22 +206,16 @@ export function DeployChatButton() {
           }
         >
           <button
-            className="flex gap-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md p-2 transition-theme"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl p-2.5 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 group"
             onClick={handleOpenModal}
             disabled={status === DeployStatus.Started}
           >
             {status === DeployStatus.Started ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-white border-t-blue-400 animate-spin" />
-              </div>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : status === DeployStatus.Succeeded ? (
-              <div className="flex items-center gap-2">
-                <div className="i-ph:check text-xl text-green-500"></div>
-              </div>
+              <div className="i-ph:check text-green-500 text-xl drop-shadow-sm transition-transform duration-200 group-hover:scale-110"></div>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="i-ph:rocket-launch text-xl text-white"></div>
-              </div>
+              <div className="i-ph:rocket-launch text-xl text-white drop-shadow-sm transition-transform duration-200 group-hover:scale-110"></div>
             )}
           </button>
         </WithTooltip>

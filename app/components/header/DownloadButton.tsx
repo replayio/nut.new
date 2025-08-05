@@ -7,8 +7,6 @@ import WithTooltip from '~/components/ui/Tooltip';
 
 ReactModal.setAppElement('#root');
 
-// Component for downloading an app's contents to disk.
-
 export function DownloadButton() {
   const handleDownload = async () => {
     const repositoryId = workbenchStore.repositoryId.get();
@@ -20,7 +18,6 @@ export function DownloadButton() {
     try {
       const repositoryContents = await downloadRepository(repositoryId);
 
-      // Convert base64 to blob
       const byteCharacters = atob(repositoryContents);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -29,7 +26,6 @@ export function DownloadButton() {
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: 'application/zip' });
 
-      // Create download link and trigger save dialog
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -51,10 +47,10 @@ export function DownloadButton() {
       <TooltipProvider>
         <WithTooltip tooltip="Download Code">
           <button
-            className="flex gap-2 bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+            className="flex items-center justify-center p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
             onClick={handleDownload}
           >
-            <div className="i-ph:download-fill text-[1.3em]" />
+            <div className="i-ph:download-fill text-xl transition-transform duration-200 group-hover:scale-110" />
           </button>
         </WithTooltip>
       </TooltipProvider>
