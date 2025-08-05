@@ -8,7 +8,7 @@ export const IntroSection: React.FC = () => {
     return (
       <div id="intro" className="mt-8 max-w-4xl mx-auto text-center px-4">
         <h1 className="text-3xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in leading-tight">
-          Build apps with 
+          Build apps with
           <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent block">
             just a prompt
           </span>
@@ -57,14 +57,15 @@ export const IntroSection: React.FC = () => {
       </div>
 
       <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textPrimary mb-6 animate-fade-in animation-delay-100 leading-tight">
-        Build apps with 
+        Build apps with
         <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent ml-4">
           just a prompt
         </span>
       </h1>
 
       <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
-        Write, test, and deploy your applications in minutes. From idea to production with the power of AI - no complex setup required.
+        Write, test, and deploy your applications in minutes. From idea to production with the power of AI - no complex
+        setup required.
       </p>
 
       <div className="flex flex-wrap justify-center gap-6 mb-8 animate-fade-in animation-delay-300">
