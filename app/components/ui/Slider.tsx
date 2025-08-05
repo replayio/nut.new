@@ -35,7 +35,7 @@ export const Slider = genericMemo(<T,>({ selected, options, setSelected }: Slide
   const isLeftSelected = selected === options.left.value;
 
   return (
-    <div className="flex items-center flex-wrap shrink-0 gap-1 bg-bolt-elements-background-depth-1 overflow-hidden rounded-full p-1">
+    <div className="flex items-center flex-wrap shrink-0 gap-1 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor overflow-hidden rounded-full p-1 shadow-sm hover:shadow-md transition-all duration-200">
       <SliderButton selected={isLeftSelected} setSelected={() => setSelected?.(options.left.value)}>
         {options.left.text}
       </SliderButton>
@@ -46,10 +46,9 @@ export const Slider = genericMemo(<T,>({ selected, options, setSelected }: Slide
   );
 });
 
-// New multi-option slider component
 export const MultiSlider = genericMemo(<T,>({ selected, options, setSelected }: MultiSliderProps<T>) => {
   return (
-    <div className="flex items-center flex-wrap shrink-0 gap-1 bg-bolt-elements-background-depth-1 overflow-hidden rounded-full p-1">
+    <div className="flex items-center flex-wrap shrink-0 gap-1 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor overflow-hidden rounded-full p-1 shadow-sm hover:shadow-md transition-all duration-200">
       {options.options.map((option) => (
         <SliderButton
           key={String(option.value)}
@@ -77,20 +76,20 @@ const SliderButton = memo(({ selected, disabled = false, children, setSelected }
       onClick={disabled ? undefined : setSelected}
       disabled={disabled}
       className={classNames(
-        'bg-transparent text-sm px-2.5 py-0.5 rounded-full relative transition-opacity',
+        'bg-transparent text-sm px-3 py-1.5 rounded-full relative transition-all duration-200 font-medium group',
         disabled
-          ? 'text-bolt-elements-item-contentDefault opacity-50 cursor-not-allowed'
+          ? 'text-bolt-elements-textSecondary opacity-50 cursor-not-allowed'
           : selected
-            ? 'text-bolt-elements-item-contentAccent'
-            : 'text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive',
+            ? 'text-white shadow-lg'
+            : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2/50 hover:scale-105',
       )}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 transition-transform duration-200 group-hover:scale-105">{children}</span>
       {selected && !disabled && (
         <motion.span
           layoutId="pill-tab"
-          transition={{ duration: 0.2, ease: cubicEasingFn }}
-          className="absolute inset-0 z-0 bg-bolt-elements-item-backgroundAccent rounded-full"
+          transition={{ duration: 0.3, ease: cubicEasingFn }}
+          className="absolute inset-0 z-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-lg border border-white/20"
         ></motion.span>
       )}
     </button>

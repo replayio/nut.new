@@ -51,9 +51,9 @@ export const IconButton = memo(
         <button
           ref={ref}
           className={classNames(
-            'flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-1 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed',
+            'flex items-center justify-center text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 enabled:hover:text-bolt-elements-textPrimary rounded-xl p-2 enabled:hover:bg-bolt-elements-background-depth-3 disabled:cursor-not-allowed transition-all duration-200 shadow-sm enabled:hover:shadow-md enabled:hover:scale-105 border border-bolt-elements-borderColor group',
             {
-              [classNames('opacity-30', disabledClassName)]: disabled,
+              [classNames('opacity-50', disabledClassName)]: disabled,
             },
             className,
           )}
@@ -69,7 +69,18 @@ export const IconButton = memo(
           }}
           style={style}
         >
-          {children ? children : <div className={classNames(icon, getIconSize(size), iconClassName)}></div>}
+          {children ? (
+            children
+          ) : (
+            <div
+              className={classNames(
+                icon,
+                getIconSize(size),
+                'transition-transform duration-200 group-hover:scale-110',
+                iconClassName,
+              )}
+            ></div>
+          )}
         </button>
       );
     },
@@ -80,7 +91,7 @@ function getIconSize(size: IconSize) {
   if (size === 'sm') {
     return 'text-sm';
   } else if (size === 'md') {
-    return 'text-md';
+    return 'text-base';
   } else if (size === 'lg') {
     return 'text-lg';
   } else if (size === 'xl') {
