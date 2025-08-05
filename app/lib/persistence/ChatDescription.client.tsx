@@ -13,53 +13,53 @@ export function ChatDescription() {
     });
 
   if (!initialTitle) {
-    // doing this to prevent showing edit button until chat description is set
     return null;
   }
 
   return (
     <div className="flex items-center justify-center w-full min-w-20">
       {editing ? (
-        <form onSubmit={handleSubmit} className="flex items-center justify-center w-full min-w-0">
+        <form onSubmit={handleSubmit} className="flex items-center justify-center w-full min-w-0 gap-3">
           <input
             type="text"
-            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded px-2 mr-2 flex-1 min-w-0 truncate"
+            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-xl px-4 py-2 flex-1 min-w-0 truncate border border-bolt-elements-borderColor focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm hover:shadow-md"
             autoFocus
             value={currentTitle}
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
+            placeholder="Enter chat title..."
           />
           <TooltipProvider>
             <WithTooltip tooltip="Save title">
-              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent flex-shrink-0">
-                <button
-                  type="submit"
-                  className="i-ph:check-bold scale-110 hover:text-bolt-elements-item-contentAccent"
-                  onMouseDown={handleSubmit}
-                />
-              </div>
+              <button
+                type="submit"
+                className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
+                onMouseDown={handleSubmit}
+              >
+                <div className="i-ph:check-bold text-lg transition-transform duration-200 bg-green-600 rounded-full group-hover:scale-110" />
+              </button>
             </WithTooltip>
           </TooltipProvider>
         </form>
       ) : (
-        <>
-          <div className="flex-1 min-w-0 truncate text-center text-bolt-elements-textPrimary">{currentTitle}</div>
+        <div className="flex items-center justify-center">
+          <div className="text-center text-bolt-elements-textPrimary font-medium px-2 truncate">{currentTitle}</div>
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
-              <div className="flex justify-between items-center p-2 rounded-md bg-bolt-elements-item-backgroundAccent ml-2 flex-shrink-0">
-                <button
-                  type="button"
-                  className="i-ph:pencil-fill scale-110 text-bolt-elements-textPrimary hover:text-bolt-elements-item-contentAccent"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    toggleEditMode();
-                  }}
-                />
-              </div>
+              <button
+                type="button"
+                className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0 ml-2"
+                onClick={(event) => {
+                  event.preventDefault();
+                  toggleEditMode();
+                }}
+              >
+                <div className="i-ph:pencil-fill text-lg transition-transform duration-200 group-hover:scale-110" />
+              </button>
             </WithTooltip>
           </TooltipProvider>
-        </>
+        </div>
       )}
     </div>
   );
