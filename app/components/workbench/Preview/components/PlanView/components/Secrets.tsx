@@ -1,12 +1,9 @@
-import { TooltipProvider } from '@radix-ui/react-tooltip';
-import WithTooltip from '~/components/ui/Tooltip';
 import {
   type AppSummary,
   type AppDetail,
-  AppFeatureStatus,
-  isFeatureStatusImplemented,
 } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
+import { useState } from 'react';
 
 interface SecretsProps {
   appSummary: AppSummary;
@@ -16,8 +13,39 @@ interface SecretsProps {
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 const Secrets = ({ appSummary }: SecretsProps) => {
+  const [secretValues, setSecretValues] = useState<Record<string, string>>({});
+  const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
+
+  const handleSecretValueChange = (secretName: string, value: string) => {
+    setSecretValues(prev => ({
+      ...prev,
+      [secretName]: value
+    }));
+  };
+
+  const handleSaveSecret = async (secretName: string) => {
+    setSavingStates(prev => ({ ...prev, [secretName]: true }));
+    
+    try {
+      // TODO: Implement actual save logic here
+      console.log(`Saving secret ${secretName}:`, secretValues[secretName]);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success feedback (you might want to add a toast notification here)
+    } catch (error) {
+      console.error('Failed to save secret:', error);
+      // Show error feedback
+    } finally {
+      setSavingStates(prev => ({ ...prev, [secretName]: false }));
+    }
+  };
+
   const renderSecret = (secret: AppDetail, index: number) => {
     const isBuiltin = BUILTIN_SECRET_NAMES.includes(secret.name);
+    const currentValue = secretValues[secret.name] || '';
+    const isSaving = savingStates[secret.name] || false;
     
     return (
       <div
@@ -41,13 +69,46 @@ const Secrets = ({ appSummary }: SecretsProps) => {
         </div>
         
         {secret.description && (
-          <p className="text-sm text-bolt-elements-textSecondary mb-2">
+          <p className="text-sm text-bolt-elements-textSecondary mb-3">
             {secret.description}
           </p>
         )}
         
+        {!isBuiltin && (
+          <div className="space-y-3">
+            <div>
+              <label htmlFor={`secret-${secret.name}`} className="block text-xs font-medium text-bolt-elements-textSecondary mb-1">
+                Secret Value
+              </label>
+              <input
+                id={`secret-${secret.name}`}
+                type="password"
+                value={currentValue}
+                onChange={(e) => handleSecretValueChange(secret.name, e.target.value)}
+                placeholder="Enter secret value..."
+                className="w-full px-3 py-2 text-sm border border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={() => handleSaveSecret(secret.name)}
+                disabled={isSaving || !currentValue.trim()}
+                className={classNames(
+                  "px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  isSaving || !currentValue.trim()
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                )}
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className={classNames(
-          "text-xs p-2 rounded",
+          "text-xs p-2 rounded mt-3",
           isBuiltin
             ? "bg-green-50 text-green-700 border border-green-200"
             : "bg-yellow-50 text-yellow-700 border border-yellow-200"
