@@ -1,6 +1,54 @@
 import React from 'react';
+import useViewport from '~/lib/hooks/useViewport';
 
 export const IntroSection: React.FC = () => {
+  const isSmallViewport = useViewport(1024);
+
+  if (isSmallViewport) {
+    return (
+      <div id="intro" className="mt-8 max-w-4xl mx-auto text-center px-4">
+        <h1 className="text-3xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in leading-tight">
+          Build apps with 
+          <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent block">
+            just a prompt
+          </span>
+        </h1>
+
+        <p className="text-base mb-6 text-bolt-elements-textSecondary animate-fade-in animation-delay-100 leading-relaxed max-w-lg mx-auto">
+          From idea to production with AI - no setup required.
+        </p>
+
+        <div className="flex justify-center gap-4 mb-6 animate-fade-in animation-delay-200">
+          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
+            <div className="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center">
+              <div className="i-ph:code text-blue-500 text-sm" />
+            </div>
+            <span className="text-xs font-medium">Code</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
+            <div className="w-6 h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
+              <div className="i-ph:flask text-green-500 text-sm" />
+            </div>
+            <span className="text-xs font-medium">Test</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
+            <div className="w-6 h-6 bg-purple-500/10 rounded-lg flex items-center justify-center">
+              <div className="i-ph:rocket-launch text-purple-500 text-sm" />
+            </div>
+            <span className="text-xs font-medium">Deploy</span>
+          </div>
+        </div>
+
+        <div className="animate-fade-in animation-delay-300 mb-1">
+          <div className="flex items-center justify-center gap-2 text-bolt-elements-textTertiary">
+            <div className="i-ph:arrow-down text-base animate-bounce" />
+            <span className="text-xs">Start typing below</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div id="intro" className="mt-[16vh] max-w-4xl mx-auto text-center px-6 lg:px-8">
       <div className="inline-flex items-center gap-2 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-full px-4 py-2 mb-8 animate-fade-in">
@@ -10,7 +58,7 @@ export const IntroSection: React.FC = () => {
 
       <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textPrimary mb-6 animate-fade-in animation-delay-100 leading-tight">
         Build apps with 
-        <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent ml-4">
           just a prompt
         </span>
       </h1>

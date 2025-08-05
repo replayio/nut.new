@@ -20,10 +20,10 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
     <TooltipProvider>
       <div className="flex">
         {!isSmallViewport && (
-          <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden">
+          <div className="flex bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl overflow-hidden transition-all duration-200 hover:border-bolt-elements-focus/30">
             <Button
               active={showChat}
-              disabled={!canHideChat || isSmallViewport} // expand button is disabled on mobile as it's not needed
+              disabled={!canHideChat || isSmallViewport}
               onClick={() => {
                 if (canHideChat) {
                   chatStore.showChat.set(!showChat);
@@ -34,7 +34,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
                 <div className="i-bolt:chat text-xl" />
               </WithTooltip>
             </Button>
-            <div className="w-[1px] bg-bolt-elements-borderColor" />
+            <div className="w-[1px] bg-bolt-elements-borderColor/50" />
             <Button
               active={showWorkbench}
               onClick={() => {
@@ -66,16 +66,23 @@ interface ButtonProps {
 function Button({ active = false, disabled = false, children, onClick }: ButtonProps) {
   return (
     <button
-      className={classNames('flex items-center p-2.5', {
-        'bg-bolt-elements-item-backgroundDefault hover:bg-bolt-elements-item-backgroundActive text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary':
-          !active,
-        'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent': active && !disabled,
-        'bg-bolt-elements-item-backgroundDefault text-alpha-gray-20 dark:text-alpha-white-20 cursor-not-allowed':
-          disabled,
+      className={classNames('flex items-center px-4 py-3 relative group transition-all duration-200', {
+        'bg-transparent hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:scale-105':
+          !active && !disabled,
+        'bg-blue-500/10 text-blue-500 shadow-inner': active && !disabled,
+        'bg-transparent text-bolt-elements-textTertiary cursor-not-allowed opacity-50': disabled,
       })}
       onClick={onClick}
+      disabled={disabled}
     >
-      {children}
+      <div className={classNames('transition-all duration-200', {
+        'transform group-hover:scale-110': !disabled,
+      })}>
+        {children}
+      </div>
+      {active && !disabled && (
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-green-500/5 rounded" />
+      )}
     </button>
   );
 }

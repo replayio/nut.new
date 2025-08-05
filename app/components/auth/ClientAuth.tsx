@@ -23,6 +23,7 @@ export function ClientAuth() {
   const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const addIntercomUser = async (userEmail: string) => {
     try {
@@ -85,7 +86,12 @@ export function ClientAuth() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -121,24 +127,27 @@ export function ClientAuth() {
       {user ? (
         <div className="relative">
           <button
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white"
+            ref={buttonRef}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-white/20 hover:border-white/30 group"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {useAvatarURL && user.user_metadata?.avatar_url ? (
               <img
                 src={user.user_metadata.avatar_url}
                 alt="User avatar"
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
               />
             ) : (
-              <span>{user.email?.substring(0, 2).toUpperCase()}</span>
+              <span className="text-sm font-semibold transition-transform duration-200 group-hover:scale-110">
+                <div className="i-ph:user text-lg" />
+              </span>
             )}
           </button>
 
           {showDropdown && (
             <div
               ref={dropdownRef}
-              className="absolute right-0 mt-2 py-3 w-72 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-10"
+              className="absolute right-[-10px] mt-2 py-3 w-72 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-10"
             >
               <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
                 <div className="flex items-center gap-3">
@@ -191,9 +200,11 @@ export function ClientAuth() {
             setAuthMessage('');
             setShowPasswordReset(false);
           }}
-          className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 font-medium transition-colors shadow-lg"
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-xl hover:from-blue-600 hover:to-green-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
         >
-          Sign In
+          <span className="transition-transform duration-200 group-hover:scale-105">
+            Sign In
+          </span>
         </button>
       )}
 

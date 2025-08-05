@@ -112,7 +112,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
 
   return (
-    <div className={classNames('relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30')}>
+    <div className={classNames('relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30')}>
       {checkedBoxes && checkedBoxes.length > 0 && (
         <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor rounded-t-2xl p-4">
           <div className="flex flex-col gap-2">
