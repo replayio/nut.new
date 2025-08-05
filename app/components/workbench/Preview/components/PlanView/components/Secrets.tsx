@@ -22,9 +22,9 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
   useEffect(() => {
     (async () => {
-      const { secrets } = await callNutAPI('get-app-secret-keys', { appId });
+      const { keys } = await callNutAPI('get-app-secret-keys', { appId });
       const record: Record<string, string> = {};
-      for (const key of secrets) {
+      for (const key of keys) {
         record[key] = '***';
       }
       setSecretValues(record);
@@ -123,20 +123,22 @@ const Secrets = ({ appSummary }: SecretsProps) => {
           </div>
         )}
 
-        <div
-          className={classNames(
-            'text-xs p-2 rounded mt-3',
-            isBuiltin
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-          )}
-        >
-          {isBuiltin ? (
-            <span>✅ A value will be used automatically</span>
-          ) : (
-            <span>⚠️ This secret must be added before deployment</span>
-          )}
-        </div>
+        {!currentValue && (
+          <div
+            className={classNames(
+              'text-xs p-2 rounded mt-3',
+              isBuiltin
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+            )}
+          >
+            {isBuiltin ? (
+              <span>✅ This secret will use a builtin value</span>
+            ) : (
+              <span>⚠️ This secret must be added before using the app</span>
+            )}
+          </div>
+        )}
       </div>
     );
   };
