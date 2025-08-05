@@ -34,7 +34,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const totalFeatures = appSummary?.features?.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
   const peanutsError = useStore(peanutsStore.peanutsError);
-  const hasSecrets = appSummary?.features?.some(f => f.secrets?.length);
+  const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
   if (historyOpen) {
     return (
