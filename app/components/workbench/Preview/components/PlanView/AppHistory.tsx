@@ -138,90 +138,97 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary mb-4"></div>
-        <div className="text-bolt-elements-textSecondary">Loading history...</div>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="p-6 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-bolt-elements-borderColor border-t-blue-500 shadow-sm"></div>
+            <div className="text-bolt-elements-textSecondary font-medium">Loading history...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-bolt-elements-textPrimary">Version History</h2>
-        <div className="text-sm text-bolt-elements-textSecondary">
+        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Version History</h2>
+        <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/50 shadow-sm">
           {history.length} {history.length === 1 ? 'version' : 'versions'}
         </div>
       </div>
 
       {history.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-4xl mb-4 opacity-50">📝</div>
-          <div className="text-bolt-elements-textSecondary mb-2">No version history available</div>
-          <div className="text-sm text-bolt-elements-textTertiary">
+        <div className="text-center py-16 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/50">
+          <div className="text-6xl mb-6 opacity-50">📝</div>
+          <div className="text-bolt-elements-textSecondary mb-3 text-lg font-medium">No version history available</div>
+          <div className="text-sm text-bolt-elements-textSecondary">
             Changes will appear here as you work on your app
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {history.reverse().map((summary, index) => {
             const reasonInfo = renderUpdateReason(summary.reason, history);
             const isLatest = index === 0;
             return (
               <div
                 key={index}
-                className={`group relative bg-bolt-elements-surfaceSecondary border border-bolt-elements-border rounded-xl p-5 transition-all duration-200 hover:shadow-lg hover:border-bolt-elements-borderColorActive ${
-                  isLatest ? 'ring-2 ring-green-500/20 border-green-500/30' : ''
+                className={`group relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-6 transition-all duration-200 hover:shadow-xl hover:border-bolt-elements-borderColor/70 hover:scale-[1.01] shadow-sm ${
+                  isLatest ? 'ring-2 ring-green-500/20 border-green-500/40 shadow-md' : ''
                 }`}
               >
                 {isLatest && (
-                  <div className="absolute -top-2 left-4 px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full shadow-sm">
+                  <div className="absolute -top-3 left-6 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold rounded-full shadow-lg border border-white/20">
                     Current Selection
                   </div>
                 )}
 
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1 min-w-0 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center px-3 py-1.5 bg-bolt-elements-surfacePrimary text-bolt-elements-textPrimary text-sm font-mono rounded-lg border border-bolt-elements-border">
+                    <div className="flex items-center gap-4">
+                      <span className="inline-flex items-center px-4 py-2 bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary text-sm font-mono font-semibold rounded-lg border border-bolt-elements-borderColor shadow-sm">
                         v{summary.version || 'N/A'}
                       </span>
-                      <span className="text-sm text-bolt-elements-textTertiary" title={getFormattedTime(summary.time)}>
+                      <span
+                        className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2/50 px-3 py-1.5 rounded-lg"
+                        title={getFormattedTime(summary.time)}
+                      >
                         {formatRelativeTime(summary.time)}
                       </span>
                     </div>
 
                     <div>
                       <span
-                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border ${getReasonBadgeStyles(reasonInfo.type)}`}
+                        className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md ${getReasonBadgeStyles(reasonInfo.type)}`}
                       >
                         <span className="text-base">{reasonInfo.icon}</span>
                         {reasonInfo.text}
                       </span>
                     </div>
 
-                    <div className="text-xs text-bolt-elements-textTertiary font-mono bg-bolt-elements-surfacePrimary px-3 py-2 rounded-md inline-block">
+                    <div className="text-xs text-bolt-elements-textSecondary font-mono bg-bolt-elements-background-depth-2/30 px-3 py-2 rounded-lg inline-block border border-bolt-elements-borderColor/30">
                       {getFormattedTime(summary.time)}
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 min-w-0">
+                  <div className="flex flex-col gap-3 min-w-0">
                     <button
                       onClick={() => handleOpenPreview(summary)}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text hover:bg-bolt-elements-button-secondary-backgroundHover border border-bolt-elements-border rounded-lg transition-colors duration-200 whitespace-nowrap"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor rounded-xl transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md hover:scale-105 group"
                       title="Open preview in new tab"
                     >
-                      <span className="text-sm">🔗</span>
-                      Preview
+                      <span className="text-sm transition-transform duration-200 group-hover:scale-110">🔗</span>
+                      <span className="font-medium">Preview</span>
                     </button>
                     {!isLatest && (
                       <button
                         onClick={() => handleRevertToVersion(summary)}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text hover:bg-bolt-elements-button-primary-backgroundHover rounded-lg transition-colors duration-200 whitespace-nowrap"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-200 whitespace-nowrap shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
                         title="Revert to this version"
                       >
-                        <span className="text-sm">↶</span>
-                        Revert
+                        <span className="text-sm transition-transform duration-200 group-hover:scale-110">↶</span>
+                        <span className="font-medium">Revert</span>
                       </button>
                     )}
                   </div>

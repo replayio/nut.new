@@ -121,14 +121,14 @@ export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: Wor
           >
             <div
               className={classNames(
-                'h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm overflow-hidden',
+                'h-full flex flex-col bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-lg overflow-hidden',
                 {
-                  'rounded-lg': !isSmallViewport,
+                  'rounded-xl': !isSmallViewport,
                 },
               )}
             >
               {!isSmallViewport && (
-                <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
+                <div className="flex items-center px-4 py-3 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/50">
                   {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
                   <div className="flex items-center justify-center min-w-0 flex-shrink flex-grow basis-0 max-w-300">
                     {chatStarted && (
@@ -152,7 +152,7 @@ export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: Wor
                   <IconButton
                     icon="i-ph:x-circle"
                     className="-mr-1"
-                    size="xl"
+                    size="xxl"
                     onClick={() => {
                       workbenchStore.showWorkbench.set(false);
                     }}

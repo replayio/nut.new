@@ -1,7 +1,7 @@
 import { PointSelector } from '~/components/workbench/PointSelector';
 import GripIcon from '~/components/icons/GripIcon';
 import type { AppSummary } from '~/lib/persistence/messageAppSummary';
-import FeatureProgress from './StatusProgress';
+import ProgressStatus from './ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 
 export type ResizeSide = 'left' | 'right' | null;
@@ -50,11 +50,16 @@ const AppView = ({
           <iframe
             ref={iframeRef}
             title="preview"
-            className="border-none w-full h-full bg-white"
+            className={`w-full h-full bg-white transition-all duration-300 ${
+              activeTab === 'preview'
+                ? 'opacity-100 rounded-lg shadow-lg border border-bolt-elements-borderColor/20'
+                : 'opacity-0 pointer-events-none absolute inset-0 rounded-none shadow-none border-none'
+            }`}
             src={iframeUrl}
             allowFullScreen
+            loading="eager"
           />
-          {!isSmallViewport && (
+          {activeTab === 'preview' && !isSmallViewport && (
             <PointSelector
               isSelectionMode={isSelectionMode}
               setIsSelectionMode={setIsSelectionMode}
@@ -63,13 +68,32 @@ const AppView = ({
               containerRef={iframeRef}
             />
           )}
+          {activeTab !== 'preview' && (
+            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
+              {appSummary ? (
+                <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+                  <ProgressStatus />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+                </div>
+              )}
+            </div>
+          )}
         </>
       ) : (
-        <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-1">
+        <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
           {appSummary ? (
-            <FeatureProgress />
+            <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+              <ProgressStatus />
+            </div>
           ) : (
-            <div className="text-bolt-elements-textSecondary">Preview loading...</div>
+            <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+            </div>
           )}
         </div>
       )}
@@ -78,49 +102,21 @@ const AppView = ({
         <>
           <div
             onMouseDown={(e) => startResizing(e, 'left')}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '15px',
-              marginLeft: '-15px',
-              height: '100%',
-              cursor: 'ew-resize',
-              background: 'rgba(255,255,255,.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.2s',
-              userSelect: 'none',
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.5)')}
-            onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.2)')}
+            className="absolute top-0 left-0 w-4 -ml-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-r border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
-            <GripIcon />
+            <div className="transition-transform duration-200 group-hover:scale-110">
+              <GripIcon />
+            </div>
           </div>
           <div
             onMouseDown={(e) => startResizing(e, 'right')}
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '15px',
-              marginRight: '-15px',
-              height: '100%',
-              cursor: 'ew-resize',
-              background: 'rgba(255,255,255,.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.2s',
-              userSelect: 'none',
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.5)')}
-            onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.2)')}
+            className="absolute top-0 right-0 w-4 -mr-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-l border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
-            <GripIcon />
+            <div className="transition-transform duration-200 group-hover:scale-110">
+              <GripIcon />
+            </div>
           </div>
         </>
       )}

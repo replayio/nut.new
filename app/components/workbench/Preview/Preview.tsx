@@ -170,12 +170,12 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
       {activeTab === 'preview' && (
-        <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
+        <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
           <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
           {!isSmallViewport && (
             <IconButton
@@ -188,10 +188,7 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
               className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
             />
           )}
-          <div
-            className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive
-          focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive"
-          >
+          <div className="flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary rounded-xl px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md">
             <input
               title="URL"
               ref={inputRef}
@@ -232,7 +229,7 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
         </div>
       )}
 
-      <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
+      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
           <PlanView appSummary={appSummary} />
         ) : (

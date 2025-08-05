@@ -109,12 +109,12 @@ const Events = ({ featureName }: EventsProps) => {
   const renderEvent = (event: ChatResponse, index: number) => {
     const time = renderTime(event.time);
     return (
-      <div key={index} className="flex items-center gap-2 pl-3">
-        <div className="w-1 h-1 bg-bolt-elements-textSecondary rounded-full" />
-        <span className="inline-flex items-center py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded">
+      <div key={index} className="flex items-center gap-3 pl-4 pb-2">
+        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-sm" />
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg border border-blue-200 shadow-sm">
           {time}
         </span>
-        <span className="inline-flex items-center py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded">
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor shadow-sm">
           {renderEventContents(event)}
         </span>
       </div>
@@ -130,8 +130,8 @@ const Events = ({ featureName }: EventsProps) => {
     }
 
     return (
-      <div key={index} className="border-t border-bolt-elements-borderColor mb-1">
-        <div className="pl-2 pt-2 text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-1">
+      <div key={index} className="border-t border-bolt-elements-borderColor/50 mb-2">
+        <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block ml-2">
           Worker {index + 1} ({peanuts} peanuts)
         </div>
         {events.map(renderEvent)}

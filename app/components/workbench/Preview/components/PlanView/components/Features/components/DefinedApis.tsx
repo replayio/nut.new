@@ -6,21 +6,21 @@ interface DefinedApisProps {
 
 const DefinedApis = ({ feature }: DefinedApisProps) => {
   return (
-    <div className="border-t border-bolt-elements-borderColor">
-      <div className="p-3">
-        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
+    <div className="border-t border-bolt-elements-borderColor/50">
+      <div className="p-4">
+        <div className="text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-4 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block">
           Defined APIs ({feature?.definedAPIs?.length})
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {feature?.definedAPIs?.map((api, apiIdx) => (
             <div
               key={apiIdx}
-              className="bg-bolt-elements-background-depth-1 rounded-lg p-3 border border-bolt-elements-borderColor"
+              className="bg-bolt-elements-background-depth-2 rounded-xl p-4 border border-bolt-elements-borderColor shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] group"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-2 h-2 bg-orange-500 rounded-full shadow-sm"></div>
                 <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">{api.name}</span>
-                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 rounded-lg border border-orange-200 shadow-sm">
                   {api.kind}
                 </span>
               </div>

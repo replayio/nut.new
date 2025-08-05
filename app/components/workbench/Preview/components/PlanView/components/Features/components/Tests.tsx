@@ -7,16 +7,16 @@ interface TestsProps {
 
 const Tests = ({ featureTests }: TestsProps) => {
   return (
-    <div className="border-t border-bolt-elements-borderColor">
-      <div className="p-3">
-        <div className="text-xs font-medium text-bolt-elements-textTertiary uppercase tracking-wider mb-3">
+    <div className="border-t border-bolt-elements-borderColor/50">
+      <div className="p-4">
+        <div className="text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-4 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block">
           Feature Tests ({featureTests.length})
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {featureTests.map((test, testIdx) => (
             <div
               key={testIdx}
-              className="flex items-center gap-3 p-2 bg-bolt-elements-background-depth-1 rounded border border-bolt-elements-borderColor"
+              className="flex items-center gap-3 p-3 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] group"
             >
               <div
                 className={classNames('w-3 h-3 rounded-full border-2 flex-shrink-0', {
@@ -29,10 +29,11 @@ const Tests = ({ featureTests }: TestsProps) => {
                 <span className="text-sm text-bolt-elements-textPrimary block truncate">{test.title}</span>
               </div>
               <div
-                className={classNames('text-xs font-medium px-2 py-1 rounded flex-shrink-0', {
-                  'text-green-700 bg-green-100': test.status === 'Pass',
-                  'text-red-700 bg-red-100': test.status === 'Fail',
-                  'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3': test.status === 'NotRun',
+                className={classNames('text-xs font-medium px-2 py-1 rounded-lg flex-shrink-0 shadow-sm border', {
+                  'text-green-700 bg-green-50 border-green-200': test.status === 'Pass',
+                  'text-red-700 bg-red-50 border-red-200': test.status === 'Fail',
+                  'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor':
+                    test.status === 'NotRun',
                 })}
               >
                 {test.status === 'Pass' && 'PASS'}
