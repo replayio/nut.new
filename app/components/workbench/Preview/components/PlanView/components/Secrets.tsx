@@ -1,6 +1,10 @@
 import { type AppSummary, type AppDetail } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { chatStore } from '~/lib/stores/chat';
+import { assert } from '~/utils/nut';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 
 interface SecretsProps {
   appSummary: AppSummary;
@@ -13,6 +17,20 @@ const Secrets = ({ appSummary }: SecretsProps) => {
   const [secretValues, setSecretValues] = useState<Record<string, string>>({});
   const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
 
+  const appId = chatStore.currentAppId.get();
+  assert(appId, 'App ID is required');
+
+  useEffect(() => {
+    (async () => {
+      const { secrets } = await callNutAPI('get-app-secret-keys', { appId });
+      const record: Record<string, string> = {};
+      for (const key of secrets) {
+        record[key] = '***';
+      }
+      setSecretValues(record);
+    })();
+  }, []);
+
   const handleSecretValueChange = (secretName: string, value: string) => {
     setSecretValues((prev) => ({
       ...prev,
@@ -24,16 +42,20 @@ const Secrets = ({ appSummary }: SecretsProps) => {
     setSavingStates((prev) => ({ ...prev, [secretName]: true }));
 
     try {
-      // TODO: Implement actual save logic here
-      console.log(`Saving secret ${secretName}:`, secretValues[secretName]);
+      await callNutAPI('set-app-secrets', {
+        appId,
+        secrets: [
+          {
+            key: secretName,
+            value: secretValues[secretName],
+          },
+        ],
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Show success feedback (you might want to add a toast notification here)
+      toast.success('Secret saved successfully');
     } catch (error) {
+      toast.error('Failed to save secret');
       console.error('Failed to save secret:', error);
-      // Show error feedback
     } finally {
       setSavingStates((prev) => ({ ...prev, [secretName]: false }));
     }
