@@ -26,44 +26,44 @@ export function AuthStateMessage({
       <div className="p-8 text-center">
         <div className="mb-8">
           {isSuccess ? (
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center shadow-lg border border-green-500/20 backdrop-blur-sm">
+              <div className="i-ph:check-circle text-3xl text-green-500 animate-pulse" />
             </div>
           ) : (
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-red-500/10 to-rose-500/10 rounded-2xl flex items-center justify-center shadow-lg border border-red-500/20 backdrop-blur-sm">
+              <div className="i-ph:x-circle text-3xl text-red-500" />
             </div>
           )}
         </div>
 
-        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">{title}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-bolt-elements-textPrimary">{title}</h2>
 
-        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto">{message}</div>
+        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto bg-bolt-elements-background-depth-2/30 px-4 py-3 rounded-xl border border-bolt-elements-borderColor/30">
+          {message}
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {onRetry && (
             <button
               onClick={onRetry}
-              className="w-full py-4 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
             >
-              {retryButtonText}
+              <span className="transition-transform duration-200 group-hover:scale-105">{retryButtonText}</span>
             </button>
           )}
 
           {onClose && (
             <button
               onClick={onClose}
-              className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 ${
+              className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] border group ${
                 onRetry
-                  ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 border-2 border-bolt-elements-borderColor hover:border-bolt-elements-borderColorActive'
-                  : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl'
+                  ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border-bolt-elements-borderColor'
+                  : isSuccess
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl'
+                    : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl'
               }`}
             >
-              {closeButtonText}
+              <span className="transition-transform duration-200 group-hover:scale-105">{closeButtonText}</span>
             </button>
           )}
         </div>

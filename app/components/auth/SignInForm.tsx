@@ -40,12 +40,21 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
   };
 
   const handleGoogleSignIn = async () => {
-    const { error } = await getSupabase().auth.signInWithOAuth({
-      provider: 'google',
-    });
+    setIsProcessing(true);
+    
+    try {
+      const { error } = await getSupabase().auth.signInWithOAuth({
+        provider: 'google',
+      });
 
-    if (error) {
-      onError(error.message || 'Failed to sign in with Google');
+      if (error) {
+        throw error;
+      }
+
+    } catch (error) {
+      const authError = error as AuthError;
+      onError(authError.message || 'Failed to sign in with Google');
+      setIsProcessing(false);
     }
   };
 
@@ -57,32 +66,40 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Welcome Back</h2>
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
+          <div className="i-ph:sign-in text-2xl text-blue-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Welcome Back</h2>
+        <p className="text-bolt-elements-textSecondary mt-2">Sign in to continue building amazing apps</p>
+      </div>
 
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isProcessing}
-        className="w-full mb-6 p-3 flex items-center justify-center gap-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 disabled:opacity-50 border border-gray-300"
+        className="w-full mb-6 p-4 flex items-center justify-center gap-3 bg-white text-gray-800 rounded-xl hover:bg-gray-50 disabled:opacity-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] group font-medium"
       >
         <GoogleIcon />
-        <span>{isProcessing ? 'Processing...' : 'Continue with Google'}</span>
+        <span className="transition-transform duration-200 group-hover:scale-105">
+          {isProcessing ? 'Processing...' : 'Continue with Google'}
+        </span>
       </button>
 
-      <div className="relative my-6">
+      <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-bolt-elements-borderColor"></div>
+          <div className="w-full border-t border-bolt-elements-borderColor/50"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary">
+          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor/30 shadow-sm">
             Or continue with email
           </span>
         </div>
       </div>
 
-      <form onSubmit={handleSignIn}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+      <form onSubmit={handleSignIn} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Email Address
           </label>
           <input
@@ -90,16 +107,19 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            placeholder="Enter your email"
             required
           />
           {email !== '' && !isEmailValid && (
-            <div className="mt-2 text-sm text-red-500">Please enter a valid email address</div>
+            <div className="mt-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+              Please enter a valid email address
+            </div>
           )}
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="password" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+        <div>
+          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Password
           </label>
           <input
@@ -107,7 +127,8 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            placeholder="Enter your password"
             required
           />
         </div>
@@ -115,29 +136,36 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
+          className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
         >
-          {isProcessing ? 'Processing...' : 'Sign In'}
+          <span className="transition-transform duration-200 group-hover:scale-105">
+            {isProcessing ? 'Signing In...' : 'Sign In'}
+          </span>
         </button>
       </form>
 
       {onForgotPassword && (
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={onForgotPassword}
-            className="text-green-500 hover:text-green-600 font-medium bg-transparent text-sm"
+            className="text-blue-500 hover:text-blue-600 font-medium bg-transparent text-sm transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-blue-500/10"
           >
             Forgot password?
           </button>
         </div>
       )}
 
-      <p className="mt-6 text-center text-bolt-elements-textSecondary">
-        Don't have an account?{' '}
-        <button onClick={onToggleForm} className="text-green-500 hover:text-green-600 font-medium bg-transparent">
-          Sign Up
-        </button>
-      </p>
+      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
+        <p className="text-bolt-elements-textSecondary">
+          Don't have an account?{' '}
+          <button
+            onClick={onToggleForm}
+            className="text-blue-500 hover:text-blue-600 font-semibold bg-transparent transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-blue-500/10"
+          >
+            Sign Up
+          </button>
+        </p>
+      </div>
     </>
   );
 }

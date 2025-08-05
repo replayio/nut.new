@@ -51,15 +51,19 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Reset Your Password</h2>
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20 shadow-lg">
+          <div className="i-ph:key text-2xl text-orange-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Reset Your Password</h2>
+        <p className="text-bolt-elements-textSecondary mt-2 leading-relaxed">
+          Enter your email address and we'll send you a secure link to reset your password.
+        </p>
+      </div>
 
-      <p className="text-center text-bolt-elements-textSecondary mb-6">
-        Enter your email address and we'll send you a link to reset your password.
-      </p>
-
-      <form onSubmit={handlePasswordReset}>
-        <div className="mb-6">
-          <label htmlFor="reset-email" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+      <form onSubmit={handlePasswordReset} className="space-y-6">
+        <div>
+          <label htmlFor="reset-email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Email Address
           </label>
           <input
@@ -67,30 +71,39 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
             placeholder="Enter your email address"
             required
           />
           {email !== '' && !isEmailValid && (
-            <div className="mt-2 text-sm text-red-500">Please enter a valid email address</div>
+            <div className="mt-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+              Please enter a valid email address
+            </div>
           )}
         </div>
 
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
+          className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
         >
-          {isProcessing ? 'Sending Reset Link...' : 'Send Reset Link'}
+          <span className="transition-transform duration-200 group-hover:scale-105">
+            {isProcessing ? 'Sending Reset Link...' : 'Send Reset Link'}
+          </span>
         </button>
       </form>
 
-      <p className="mt-6 text-center text-bolt-elements-textSecondary">
-        Remember your password?{' '}
-        <button onClick={onBack} className="text-green-500 hover:text-green-600 font-medium bg-transparent">
-          Sign In
-        </button>
-      </p>
+      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
+        <p className="text-bolt-elements-textSecondary">
+          Remember your password?{' '}
+          <button
+            onClick={onBack}
+            className="text-orange-500 hover:text-orange-600 font-semibold bg-transparent transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-orange-500/10"
+          >
+            Sign In
+          </button>
+        </p>
+      </div>
     </>
   );
 }

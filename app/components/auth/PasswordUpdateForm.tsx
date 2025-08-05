@@ -53,20 +53,18 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
   return (
     <>
       <div className="text-center mb-8">
-        <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg mb-4">
-          <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <circle cx="12" cy="16" r="1" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
+        <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center shadow-lg mb-6 border border-green-500/20">
+          <div className="i-ph:lock text-3xl text-green-500" />
         </div>
-        <h2 className="text-2xl font-bold mb-4 text-bolt-elements-textPrimary">Set New Password</h2>
-        <p className="text-bolt-elements-textSecondary">Please enter your new password below.</p>
+        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">Set New Password</h2>
+        <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
+          Please enter your new password below.
+        </p>
       </div>
 
-      <form onSubmit={handlePasswordUpdate}>
-        <div className="mb-4">
-          <label htmlFor="new-password" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+      <form onSubmit={handlePasswordUpdate} className="space-y-6">
+        <div>
+          <label htmlFor="new-password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             New Password
           </label>
           <input
@@ -74,16 +72,16 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
             placeholder="Enter your new password"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div>
           <label
             htmlFor="confirm-new-password"
-            className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary"
+            className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary"
           >
             Confirm New Password
           </label>
@@ -92,26 +90,32 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
             placeholder="Confirm your new password"
             required
           />
         </div>
 
         {password !== '' && confirmPassword !== '' && password !== confirmPassword && (
-          <div className="mb-4 text-sm text-red-500">Passwords do not match</div>
+          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            Passwords do not match
+          </div>
         )}
 
         {password !== '' && password.length < 6 && (
-          <div className="mb-4 text-sm text-red-500">Password must be at least 6 characters long</div>
+          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            Password must be at least 6 characters long
+          </div>
         )}
 
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
+          className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
         >
-          {isProcessing ? 'Updating Password...' : 'Update Password'}
+          <span className="transition-transform duration-200 group-hover:scale-105">
+            {isProcessing ? 'Updating Password...' : 'Update Password'}
+          </span>
         </button>
       </form>
     </>

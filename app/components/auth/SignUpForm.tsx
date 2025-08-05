@@ -77,32 +77,40 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-6 text-bolt-elements-textPrimary text-center">Create Account</h2>
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-green-500/20 shadow-lg">
+          <div className="i-ph:user-plus text-2xl text-green-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Create Account</h2>
+        <p className="text-bolt-elements-textSecondary mt-2">Join us and start building amazing apps</p>
+      </div>
 
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isProcessing}
-        className="w-full mb-6 p-3 flex items-center justify-center gap-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 disabled:opacity-50 border border-gray-300"
+        className="w-full mb-6 p-4 flex items-center justify-center gap-3 bg-white text-gray-800 rounded-xl hover:bg-gray-50 disabled:opacity-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] group font-medium"
       >
         <GoogleIcon />
-        <span>{isProcessing ? 'Processing...' : 'Continue with Google'}</span>
+        <span className="transition-transform duration-200 group-hover:scale-105">
+          {isProcessing ? 'Processing...' : 'Continue with Google'}
+        </span>
       </button>
 
-      <div className="relative my-6">
+      <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-bolt-elements-borderColor"></div>
+          <div className="w-full border-t border-bolt-elements-borderColor/50"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary">
+          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor/30 shadow-sm">
             Or continue with email
           </span>
         </div>
       </div>
 
-      <form onSubmit={handleSignUp}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+      <form onSubmit={handleSignUp} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Email Address
           </label>
           <input
@@ -110,16 +118,19 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            placeholder="Enter your email"
             required
           />
           {email !== '' && !isEmailValid && (
-            <div className="mt-2 text-sm text-red-500">Please enter a valid email address</div>
+            <div className="mt-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+              Please enter a valid email address
+            </div>
           )}
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="password" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+        <div>
+          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Password
           </label>
           <input
@@ -127,13 +138,14 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            placeholder="Create a password"
             required
           />
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-bolt-elements-textPrimary">
+        <div>
+          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
             Confirm Password
           </label>
           <input
@@ -141,61 +153,75 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            placeholder="Confirm your password"
             required
           />
         </div>
 
         {password !== '' && confirmPassword !== '' && password !== confirmPassword && (
-          <div className="mb-4 text-sm text-red-500">Passwords do not match</div>
+          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            Passwords do not match
+          </div>
         )}
 
         {password !== '' && password.length < 6 && (
-          <div className="mb-4 text-sm text-red-500">Passwords must be at least 6 characters long</div>
+          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            Passwords must be at least 6 characters long
+          </div>
         )}
+
+        <div className="p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
+          <div className="flex items-start gap-3">
+            <div className="relative flex items-center mt-0.5">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={isChecked}
+                onChange={() => setIsChecked(!isChecked)}
+                className="peer appearance-none h-5 w-5 rounded-lg border-2 border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 cursor-pointer checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-200"
+              />
+              <svg
+                className="absolute left-0 w-5 h-5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transition-opacity duration-200"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <label className="text-bolt-elements-textSecondary cursor-pointer text-sm leading-relaxed" htmlFor="terms">
+              I agree to receive update emails from Nut and understand the terms of service.
+            </label>
+          </div>
+        </div>
 
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 font-medium"
+          className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
         >
-          {isProcessing ? 'Processing...' : 'Create Account'}
+          <span className="transition-transform duration-200 group-hover:scale-105">
+            {isProcessing ? 'Creating Account...' : 'Create Account'}
+          </span>
         </button>
       </form>
 
-      <div className="flex justify-center items-center gap-2 my-6">
-        <div className="relative flex items-center">
-          <input
-            type="checkbox"
-            id="terms"
-            checked={isChecked}
-            onChange={() => setIsChecked(!isChecked)}
-            className="peer appearance-none h-4 w-4 rounded border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 cursor-pointer checked:bg-green-500 checked:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-          <svg
-            className="absolute left-0 w-4 h-4 pointer-events-none opacity-0 peer-checked:opacity-100 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
+        <p className="text-bolt-elements-textSecondary">
+          Already have an account?{' '}
+          <button
+            onClick={onToggleForm}
+            className="text-green-500 hover:text-green-600 font-semibold bg-transparent transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-green-500/10"
           >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-        <label className="text-bolt-elements-textSecondary cursor-pointer" htmlFor="terms">
-          I agree to receive update emails from Nut.
-        </label>
+            Sign In
+          </button>
+        </p>
       </div>
-
-      <p className="mt-6 text-center text-bolt-elements-textSecondary">
-        Already have an account?{' '}
-        <button onClick={onToggleForm} className="text-green-500 hover:text-green-600 font-medium bg-transparent">
-          Sign In
-        </button>
-      </p>
     </>
   );
 }
