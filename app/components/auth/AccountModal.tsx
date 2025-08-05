@@ -12,6 +12,7 @@ import { DialogButton } from '~/components/ui/Dialog';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
+import { classNames } from '~/utils/classNames';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -119,17 +120,27 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     return (
       <div
         key={`${item.time}-${index}`}
-        className="p-4 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200"
+        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] group backdrop-blur-sm"
       >
-        <div className="flex items-start justify-between mb-2">
-          <div className="text-sm text-bolt-elements-textSecondary">{formatTime(item.time)}</div>
-          <div className="flex items-center gap-2">
-            <span className="text-bolt-elements-textPrimary">{formatPeanutChange(item.peanutsDelta)} peanuts</span>
-            <span className="text-bolt-elements-textSecondary">→</span>
-            <span className="text-bolt-elements-textPrimary font-semibold">{item.peanutsRemaining} total</span>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+          <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/30 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30 font-medium self-start">
+            {formatTime(item.time)}
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <span className="text-bolt-elements-textPrimary font-semibold text-right sm:text-left">
+              {formatPeanutChange(item.peanutsDelta)} peanuts
+            </span>
+            <span className="text-bolt-elements-textSecondary transition-transform duration-200 group-hover:scale-110 hidden sm:inline">
+              →
+            </span>
+            <span className="text-bolt-elements-textPrimary font-bold bg-bolt-elements-background-depth-3/30 px-2 py-1 rounded-md border border-bolt-elements-borderColor/30 self-start sm:self-auto">
+              {item.peanutsRemaining} total
+            </span>
           </div>
         </div>
-        <div className="text-sm text-bolt-elements-textSecondary">{renderHistoryEntry(item)}</div>
+        <div className="text-sm text-bolt-elements-textSecondary font-medium leading-relaxed">
+          {renderHistoryEntry(item)}
+        </div>
       </div>
     );
   };
@@ -152,56 +163,65 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   return (
     <div
-      className="bg-bolt-elements-background-depth-1 rounded-xl p-8 max-w-4xl w-full z-50 border border-bolt-elements-borderColor overflow-y-auto max-h-[95vh] shadow-2xl relative"
+      className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
       onClick={(e) => e.stopPropagation()}
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
         title="Close"
       >
-        <div className="i-ph:x text-lg" />
+        <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
       </button>
+
       <div className="text-center mb-8">
-        <div className="mb-6">
-          <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-full flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor">
-            <div className="i-ph:user text-2xl text-bolt-elements-textPrimary" />
+        <div className="mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/30 shadow-lg backdrop-blur-sm">
+            <div className="i-ph:user text-3xl text-bolt-elements-textPrimary" />
           </div>
-          <h1 className="text-3xl font-bold text-bolt-elements-textPrimary mb-2">Account</h1>
-          <p className="text-bolt-elements-textSecondary">{user?.email ?? 'unknown'}</p>
+          <h1 className="text-4xl font-bold text-bolt-elements-textPrimary mb-3 bg-gradient-to-r from-bolt-elements-textPrimary to-bolt-elements-textSecondary bg-clip-text">
+            Account
+          </h1>
+          <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
+            {user?.email ?? 'unknown'}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-bolt-elements-background-depth-2 rounded-xl p-6 border border-bolt-elements-borderColor">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">🥜</span>
+          <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl p-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-2xl flex items-center justify-center shadow-lg border border-yellow-500/20">
+                <span className="text-3xl drop-shadow-sm">🥜</span>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">{peanutsRemaining ?? '---'}</div>
-              <div className="text-sm text-bolt-elements-textSecondary">Peanuts Available</div>
+              <div className="text-3xl font-bold text-bolt-elements-textPrimary mb-2 transition-transform duration-200 group-hover:scale-105">
+                {peanutsRemaining ?? '---'}
+              </div>
+              <div className="text-sm text-bolt-elements-textSecondary font-medium">Peanuts Available</div>
             </div>
           </div>
 
-          <div className="bg-bolt-elements-background-depth-2 rounded-xl p-6 border border-bolt-elements-borderColor">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <div className="i-ph:crown text-xl text-blue-600" />
+          <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl p-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl flex items-center justify-center shadow-lg border border-blue-500/20">
+                <div className="i-ph:crown text-2xl text-blue-600 transition-transform duration-200 group-hover:scale-110" />
               </div>
             </div>
             <div className="text-center">
               {subscription ? (
                 <>
-                  <div className="text-2xl font-bold text-bolt-elements-textPrimary mb-1">{subscription.peanuts}</div>
-                  <div className="text-sm text-bolt-elements-textSecondary mb-1">Peanuts per month</div>
-                  <div className="text-xs text-bolt-elements-textSecondary">
+                  <div className="text-3xl font-bold text-bolt-elements-textPrimary mb-2 transition-transform duration-200 group-hover:scale-105">
+                    {subscription.peanuts}
+                  </div>
+                  <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">Peanuts per month</div>
+                  <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30">
                     Next reload: {formatSubscriptionTime(subscription.reloadTime)}
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="text-lg font-medium text-bolt-elements-textSecondary mb-1">No Subscription</div>
+                  <div className="text-xl font-semibold text-bolt-elements-textSecondary mb-2">No Subscription</div>
                   <div className="text-sm text-bolt-elements-textSecondary">Subscribe for monthly peanuts</div>
                 </>
               )}
@@ -209,63 +229,92 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <DialogButton
-            type={subscription ? 'danger' : 'primary'}
+        <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
+          <button
             onClick={handleSubscriptionToggle}
             disabled={loading}
+            className={classNames(
+              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+              subscription
+                ? 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+              {
+                'opacity-60 cursor-not-allowed hover:scale-100': loading,
+              },
+            )}
           >
             {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                Loading...
-              </div>
+              <>
+                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
+              </>
             ) : subscription ? (
-              'Cancel Subscription'
+              <>
+                <div className="i-ph:x-circle text-xl transition-transform duration-200 group-hover:scale-110" />
+                <span className="transition-transform duration-200 group-hover:scale-105">Cancel Subscription</span>
+              </>
             ) : (
-              `Subscribe - ${DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month`
+              <>
+                <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+                <span className="transition-transform duration-200 group-hover:scale-105">
+                  Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
+                </span>
+              </>
             )}
-          </DialogButton>
+          </button>
 
-          <DialogButton type="secondary" onClick={handleAddPeanuts} disabled={loading}>
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                Loading...
-              </div>
-            ) : (
-              'Add 2000 Peanuts'
+          <button
+            onClick={handleAddPeanuts}
+            disabled={loading}
+            className={classNames(
+              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+              'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
+              {
+                'opacity-60 cursor-not-allowed hover:scale-100': loading,
+              },
             )}
-          </DialogButton>
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
+                <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="border-t border-bolt-elements-borderColor pt-8">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="border-t border-bolt-elements-borderColor/50 pt-8">
+        <div className="flex items-center gap-4 mb-6">
           <div
             onClick={reloadAccountData}
-            className="w-8 h-8 bg-bolt-elements-background-depth-2 rounded-lg flex items-center justify-center cursor-pointer"
+            className="w-10 h-10 bg-bolt-elements-background-depth-2 rounded-xl flex items-center justify-center cursor-pointer border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           >
-            <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary" />
+            <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" />
           </div>
           <h2 className="text-2xl font-bold text-bolt-elements-textPrimary">Usage History</h2>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="w-8 h-8 rounded-full border-4 border-bolt-elements-borderColor border-t-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-bolt-elements-textSecondary">Loading usage history...</p>
+          <div className="text-center py-16 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
+            <div className="w-10 h-10 rounded-full border-4 border-bolt-elements-borderColor/30 border-t-blue-500 animate-spin mx-auto mb-4 shadow-sm" />
+            <p className="text-bolt-elements-textSecondary font-medium">Loading usage history...</p>
           </div>
         ) : history.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div className="i-ph:list text-2xl text-bolt-elements-textSecondary" />
+          <div className="text-center py-16 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
+            <div className="w-20 h-20 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/50 shadow-lg">
+              <div className="i-ph:list text-3xl text-bolt-elements-textSecondary" />
             </div>
-            <p className="text-bolt-elements-textSecondary">No usage history available</p>
-            <p className="text-sm text-bolt-elements-textSecondary mt-1">Your peanut transactions will appear here</p>
+            <p className="text-bolt-elements-textSecondary text-lg font-medium mb-2">No usage history available</p>
+            <p className="text-sm text-bolt-elements-textSecondary">Your peanut transactions will appear here</p>
           </div>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">{history.map(renderHistoryItem)}</div>
+          <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
     </div>
