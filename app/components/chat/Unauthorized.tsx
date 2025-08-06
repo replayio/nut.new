@@ -31,7 +31,8 @@ export const Unauthorized = ({ handleCopyApp, isCopying }: UnauthorizedProps) =>
                 <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-4">App Access Restricted</h2>
                 <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-5 mb-6 shadow-sm">
                   <p className="text-bolt-elements-textPrimary leading-relaxed font-medium">
-                    This app is owned by another user. You can create a copy to work with it and make your own modifications.
+                    This app is owned by another user. You can create a copy to work with it and make your own
+                    modifications.
                   </p>
                 </div>
               </div>
@@ -62,7 +63,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying }: UnauthorizedProps) =>
                     </span>
                   )}
                 </button>
-                
+
                 <p className="text-xs text-bolt-elements-textSecondary">
                   Your copy will be independent and you'll have full access to modify it
                 </p>
