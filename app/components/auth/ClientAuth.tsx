@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
-import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';

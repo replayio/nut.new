@@ -199,7 +199,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             maxHeight,
             overflowY: 'auto',
           }}
-          placeholder={!chatStarted ? "✨ What do you want to build? Start typing here..." : getPlaceholderText(chatStarted, hasAppSummary)}
+          placeholder={
+            !chatStarted
+              ? '✨ What do you want to build? Start typing here...'
+              : getPlaceholderText(chatStarted, hasAppSummary)
+          }
           translate="no"
         />
 

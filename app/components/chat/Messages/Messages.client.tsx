@@ -79,7 +79,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
       const timer = setTimeout(() => {
         scrollToBottom();
       }, 50);
-      
+
       return () => clearTimeout(timer);
     }
   }, [pendingMessageStatus, hasPendingMessage, showJumpToBottom]);

@@ -15,13 +15,14 @@ export const Footer: React.FC = () => {
             Join our Discord
           </a>
         </div>
-        
+
         <div className="flex items-center justify-center">
           <span className="text-bolt-elements-textSecondary">
-            Built with <span className="text-red-500">❤️</span> by a team who got tired of going down token-eating debugging rabbit holes.
+            Built with <span className="text-red-500">❤️</span> by a team who got tired of going down token-eating
+            debugging rabbit holes.
           </span>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <a
             target="_blank"

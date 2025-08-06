@@ -44,7 +44,9 @@ export function ChatDescription() {
         </form>
       ) : (
         <div className="flex items-center justify-center w-full min-w-0">
-          <div className="text-center text-bolt-elements-textHeading font-medium px-2 truncate max-w-full">{currentTitle}</div>
+          <div className="text-center text-bolt-elements-textHeading font-medium px-2 truncate max-w-full">
+            {currentTitle}
+          </div>
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
               <button
