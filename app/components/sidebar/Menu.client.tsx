@@ -205,7 +205,7 @@ export const Menu = () => {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-bolt-elements-borderColor/50 p-1.5 bg-gradient-to-br from-blue-500/10 to-green-500/10 shadow-sm">
               <img src="/logo-styled.svg" alt="Nut.new" className="w-full h-full" />
             </div>
-            <h1 className="text-bolt-elements-textPrimary font-bold text-xl">Nut.new</h1>
+            <h1 className="text-bolt-elements-textHeading font-bold text-xl">Nut.new</h1>
           </div>
 
           <div className="space-y-2">
@@ -237,7 +237,7 @@ export const Menu = () => {
         <div className="px-6 py-4 border-b border-bolt-elements-borderColor/50 bg-bolt-elements-background-depth-1/50">
           <div className="flex items-center gap-3">
             <div className="i-ph:folder text-lg text-bolt-elements-textSecondary" />
-            <h3 className="text-bolt-elements-textPrimary font-semibold">Your Apps</h3>
+            <h3 className="text-bolt-elements-textHeading font-semibold">Your Apps</h3>
             {list && list.length > 0 && (
               <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor/30 font-medium shadow-sm">
                 {list.length}
@@ -258,7 +258,7 @@ export const Menu = () => {
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20 shadow-lg">
                     <div className="i-ph:folder-open text-2xl text-blue-500" />
                   </div>
-                  <p className="text-bolt-elements-textPrimary font-semibold mb-2 text-lg">No apps yet</p>
+                  <p className="text-bolt-elements-textHeading font-semibold mb-2 text-lg">No apps yet</p>
                   <p className="text-bolt-elements-textSecondary text-sm">Create your first app to get started</p>
                 </>
               ) : (
@@ -266,7 +266,7 @@ export const Menu = () => {
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-2xl flex items-center justify-center mb-6 border border-orange-500/20 shadow-lg">
                     <div className="i-ph:magnifying-glass text-2xl text-orange-500" />
                   </div>
-                  <p className="text-bolt-elements-textPrimary font-semibold mb-2 text-lg">No matches found</p>
+                  <p className="text-bolt-elements-textHeading font-semibold mb-2 text-lg">No matches found</p>
                   <p className="text-bolt-elements-textSecondary text-sm">Try a different search term</p>
                 </>
               )}

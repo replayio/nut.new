@@ -33,7 +33,7 @@ const DeploymentSuccessful = ({
         <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-lg">
           <div className="text-4xl">🎉</div>
         </div>
-        <h2 className="text-4xl font-bold text-bolt-elements-textPrimary mb-3 bg-gradient-to-r from-bolt-elements-textPrimary to-bolt-elements-textSecondary bg-clip-text">
+        <h2 className="text-4xl font-bold text-bolt-elements-textHeading mb-3 bg-gradient-to-r from-bolt-elements-textHeading to-bolt-elements-textSecondary bg-clip-text">
           Woohoo!
         </h2>
         <p className="text-lg text-bolt-elements-textSecondary max-w-md mx-auto leading-relaxed whitespace-pre-wrap">

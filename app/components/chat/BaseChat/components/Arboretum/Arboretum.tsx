@@ -7,7 +7,7 @@ export const Arboretum = () => {
 
   return (
     <div className="relative flex flex-col items-center">
-      <div className="text-2xl lg:text-4xl font-bold text-bolt-elements-textPrimary mt-8 mb-4 animate-fade-in text-center max-w-chat mx-auto">
+      <div className="text-2xl lg:text-4xl font-bold text-bolt-elements-textHeading mt-8 mb-4 animate-fade-in text-center max-w-chat mx-auto">
         Arboretum
       </div>
       <div className="text-bolt-elements-textSecondary text-center max-w-chat mx-auto">

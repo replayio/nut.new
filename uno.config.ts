@@ -130,6 +130,7 @@ export default defineConfig({
             },
           },
           textPrimary: 'var(--bolt-elements-textPrimary)',
+          textHeading: 'var(--bolt-elements-textHeading)',
           textSecondary: 'var(--bolt-elements-textSecondary)',
           textTertiary: 'var(--bolt-elements-textTertiary)',
           code: {

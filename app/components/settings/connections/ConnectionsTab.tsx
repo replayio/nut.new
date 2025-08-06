@@ -97,7 +97,7 @@ export default function ConnectionsTab() {
         <div className="w-16 h-16 bg-gradient-to-br from-gray-900/10 to-gray-700/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-700/20 shadow-lg">
           <div className="i-ph:github-logo text-2xl text-gray-700" />
         </div>
-        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">GitHub Connection</h3>
+        <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-2">GitHub Connection</h3>
         <p className="text-bolt-elements-textSecondary text-sm">
           Connect your GitHub account to enable repository operations and version control features.
         </p>

@@ -42,7 +42,7 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
             <div className="flex flex-col md:flex-row h-full">
               <div className="w-full md:w-56 border-b md:border-b-0 md:border-r border-bolt-elements-borderColor/50 bg-bolt-elements-background-depth-1 p-4 md:p-6 flex flex-row md:flex-col justify-between">
                 <div className="flex-1 md:flex-none">
-                  <DialogTitle className="flex-shrink-0 text-xl md:text-2xl font-bold text-bolt-elements-textPrimary mb-4 md:mb-8 bg-gradient-to-r from-bolt-elements-textPrimary to-bolt-elements-textSecondary bg-clip-text">
+                  <DialogTitle className="flex-shrink-0 text-xl md:text-2xl font-bold text-bolt-elements-textHeading mb-4 md:mb-8 bg-gradient-to-r from-bolt-elements-textHeading to-bolt-elements-textSecondary bg-clip-text">
                     Settings
                   </DialogTitle>
 

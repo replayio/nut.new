@@ -152,7 +152,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
   return (
     <div className="space-y-8 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Version History</h2>
+        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Version History</h2>
         <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/50 shadow-sm">
           {history.length} {history.length === 1 ? 'version' : 'versions'}
         </div>

@@ -48,7 +48,7 @@ const Pages = ({ appSummary }: PagesProps) => {
   return (
     <div>
       <div className="space-y-4 mb-2">
-        <div className="text-xl font-bold text-bolt-elements-textPrimary mb-2">Page Layouts</div>
+        <div className="text-xl font-bold text-bolt-elements-textHeading mb-2">Page Layouts</div>
 
         {appSummary?.pages?.length === 0 ? (
           <div className="text-center py-8 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/50">
@@ -64,7 +64,7 @@ const Pages = ({ appSummary }: PagesProps) => {
               >
                 {page.description && (
                   <div className="text-sm text-bolt-elements-textSecondary mb-3 leading-relaxed">
-                    <div className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
+                    <div className="font-mono text-sm font-semibold text-bolt-elements-textHeading">
                       {page.description}
                     </div>
                   </div>

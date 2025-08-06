@@ -56,7 +56,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
         <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center shadow-lg mb-6 border border-green-500/20">
           <div className="i-ph:lock text-3xl text-green-500" />
         </div>
-        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textPrimary">Set New Password</h2>
+        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Set New Password</h2>
         <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
           Please enter your new password below.
         </p>

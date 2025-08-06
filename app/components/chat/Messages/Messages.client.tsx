@@ -74,6 +74,16 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     }
   }, [messages, showJumpToBottom]);
 
+  useEffect(() => {
+    if (hasPendingMessage && !showJumpToBottom) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [pendingMessageStatus, hasPendingMessage, showJumpToBottom]);
+
   const renderMessage = (message: Message, index: number) => {
     const { role } = message;
     const isUserMessage = role === 'user';
@@ -147,7 +157,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
                 <span
                   className={classNames('text-sm font-medium', {
                     'text-blue-600 dark:text-blue-400': isUserMessage,
-                    'text-bolt-elements-textPrimary': !isUserMessage,
+                    'text-bolt-elements-textHeading': !isUserMessage,
                   })}
                 >
                   {isUserMessage ? 'You' : 'Assistant'}

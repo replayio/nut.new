@@ -6,10 +6,11 @@ import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';
+import { userStore } from '~/lib/stores/userAuth';
 import { useStore } from '@nanostores/react';
 
 export function ClientAuth() {
-  const [user, setUser] = useState<User | undefined>(undefined);
+  const user = useStore(userStore.user);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
@@ -21,7 +22,7 @@ export function ClientAuth() {
     async function getUser() {
       try {
         const { data } = await getSupabase().auth.getUser();
-        setUser(data.user ?? undefined);
+        userStore.setUser(data.user ?? undefined);
       } catch (error) {
         console.error('Error fetching user:', error);
       } finally {
@@ -34,7 +35,7 @@ export function ClientAuth() {
     const {
       data: { subscription },
     } = getSupabase().auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? undefined);
+      userStore.setUser(session?.user ?? undefined);
       if (session?.user) {
         authModalStore.close();
       }
@@ -95,7 +96,7 @@ export function ClientAuth() {
         <div className="relative">
           <button
             ref={buttonRef}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-white/20 hover:border-white/30 group"
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-white/20 hover:border-white/30 group"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {useAvatarURL && user.user_metadata?.avatar_url ? (
@@ -134,7 +135,7 @@ export function ClientAuth() {
                     <span className="text-2xl">🥜</span>
                     <span className="text-bolt-elements-textPrimary font-medium">Peanuts</span>
                   </div>
-                  <div className="text-bolt-elements-textPrimary font-bold text-lg">{peanutsRemaining ?? '...'}</div>
+                  <div className="text-bolt-elements-textHeading font-bold text-lg">{peanutsRemaining ?? '...'}</div>
                 </div>
               </div>
 
@@ -161,7 +162,7 @@ export function ClientAuth() {
       ) : (
         <button
           onClick={() => authModalStore.open(false)}
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-xl hover:from-blue-600 hover:to-green-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
+          className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-xl hover:from-blue-600 hover:to-green-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
         >
           <span className="transition-transform duration-200 group-hover:scale-105">Sign In</span>
         </button>

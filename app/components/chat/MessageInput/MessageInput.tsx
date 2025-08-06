@@ -139,6 +139,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             'transition-all duration-200',
             'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50',
             checkedBoxes && checkedBoxes.length > 0 ? 'rounded-b-2xl' : 'rounded-2xl',
+            { 'animate-pulse': !chatStarted },
           )}
           onDragEnter={(e) => {
             e.preventDefault();
@@ -198,7 +199,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             maxHeight,
             overflowY: 'auto',
           }}
-          placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
+          placeholder={!chatStarted ? "✨ What do you want to build? Start typing here..." : getPlaceholderText(chatStarted, hasAppSummary)}
           translate="no"
         />
 

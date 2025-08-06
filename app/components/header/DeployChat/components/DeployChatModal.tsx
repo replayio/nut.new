@@ -54,7 +54,7 @@ const DeployChatModal = ({
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
               <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
             </div>
-            <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-3">Loading data...</h3>
+            <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
             <p className="text-bolt-elements-textSecondary">Please wait while we prepare your deployment settings</p>
           </div>
         </div>
@@ -89,7 +89,7 @@ const DeployChatModal = ({
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
                     <div className="i-ph:rocket-launch text-2xl text-blue-500" />
                   </div>
-                  <h2 className="text-3xl font-bold text-bolt-elements-textPrimary mb-2">Deploy Your Application</h2>
+                  <h2 className="text-3xl font-bold text-bolt-elements-textHeading mb-2">Deploy Your Application</h2>
                   <p className="text-bolt-elements-textSecondary">Get your app live on the web in just a few clicks</p>
                 </div>
 
@@ -98,7 +98,7 @@ const DeployChatModal = ({
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <span className="text-2xl">⚡</span>
-                      <h3 className="text-xl font-bold text-bolt-elements-textPrimary">Quick Deploy</h3>
+                      <h3 className="text-xl font-bold text-bolt-elements-textHeading">Quick Deploy</h3>
                     </div>
                     <p className="text-bolt-elements-textSecondary leading-relaxed">
                       Deploy instantly with smart defaults. No configuration needed - we'll handle everything for you

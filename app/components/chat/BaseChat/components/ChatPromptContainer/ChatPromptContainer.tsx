@@ -29,6 +29,8 @@ export const ChatPromptContainer: React.FC<ChatPromptContainerProps> = ({
     <div
       className={classNames(
         'bg-bolt-elements-background-depth-2 p-3 rounded-2xl border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+        'dark:bg-gradient-to-br dark:from-bolt-elements-background-depth-2 dark:to-bolt-elements-background-depth-3/50 dark:border-bolt-elements-borderColor/60 dark:shadow-lg dark:shadow-black/10',
+        'dark:backdrop-blur-sm',
         {
           'sticky bottom-2': chatStarted,
         },

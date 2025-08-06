@@ -111,7 +111,7 @@ const Events = ({ featureName }: EventsProps) => {
     return (
       <div key={index} className="flex items-center gap-3 pl-4 pb-2">
         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-sm" />
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg border border-blue-200 shadow-sm">
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor/30">
           {time}
         </span>
         <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor shadow-sm">

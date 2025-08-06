@@ -130,7 +130,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.div>
 
               <motion.h2
-                className="text-3xl font-bold text-bolt-elements-textPrimary mb-3"
+                className="text-3xl font-bold text-bolt-elements-textHeading mb-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}

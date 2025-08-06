@@ -61,7 +61,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div>
-            <div className="text-3xl font-bold mb-8 text-bolt-elements-textPrimary">App Build Plan</div>
+            <div className="text-3xl font-bold mb-8 text-bolt-elements-textHeading">App Build Plan</div>
             {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
               <div className="flex justify-center items-center">
                 <WithTooltip tooltip={peanutsError ?? 'Continue Building Your App!'}>
@@ -120,7 +120,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
               </div>
             )}
             <div className="mb-8 p-4 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50">
-              <div className="text-lg font-semibold mb-3 text-bolt-elements-textPrimary">Project Description</div>
+              <div className="text-lg font-semibold mb-3 text-bolt-elements-textHeading">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
             </div>
             {appSummary?.pages && <Pages appSummary={appSummary} />}

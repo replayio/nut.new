@@ -132,7 +132,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             <span className="text-bolt-elements-textSecondary transition-transform duration-200 group-hover:scale-110 hidden sm:inline">
               →
             </span>
-            <span className="text-bolt-elements-textPrimary font-bold bg-bolt-elements-background-depth-3/30 px-2 py-1 rounded-md border border-bolt-elements-borderColor/30 self-start sm:self-auto">
+            <span className="text-bolt-elements-textHeading font-bold bg-bolt-elements-background-depth-3/30 px-2 py-1 rounded-md border border-bolt-elements-borderColor/30 self-start sm:self-auto">
               {item.peanutsRemaining} total
             </span>
           </div>
@@ -178,7 +178,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/30 shadow-lg backdrop-blur-sm">
             <div className="i-ph:user text-3xl text-bolt-elements-textPrimary" />
           </div>
-          <h1 className="text-4xl font-bold text-bolt-elements-textPrimary mb-3 bg-gradient-to-r from-bolt-elements-textPrimary to-bolt-elements-textSecondary bg-clip-text">
+          <h1 className="text-4xl font-bold text-bolt-elements-textHeading mb-3 bg-gradient-to-r from-bolt-elements-textHeading to-bolt-elements-textSecondary bg-clip-text">
             Account
           </h1>
           <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
@@ -194,7 +194,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-bolt-elements-textPrimary mb-2 transition-transform duration-200 group-hover:scale-105">
+              <div className="text-3xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-200 group-hover:scale-105">
                 {peanutsRemaining ?? '---'}
               </div>
               <div className="text-sm text-bolt-elements-textSecondary font-medium">Peanuts Available</div>
@@ -210,7 +210,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             <div className="text-center">
               {subscription ? (
                 <>
-                  <div className="text-3xl font-bold text-bolt-elements-textPrimary mb-2 transition-transform duration-200 group-hover:scale-105">
+                  <div className="text-3xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-200 group-hover:scale-105">
                     {subscription.peanuts}
                   </div>
                   <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">Peanuts per month</div>
@@ -296,7 +296,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           >
             <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" />
           </div>
-          <h2 className="text-2xl font-bold text-bolt-elements-textPrimary">Usage History</h2>
+          <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Usage History</h2>
         </div>
 
         {loading ? (

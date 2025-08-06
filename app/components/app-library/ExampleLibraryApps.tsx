@@ -184,7 +184,7 @@ export const ExampleLibraryApps = ({ filterText }: ExampleLibraryAppsProps) => {
             <span className={styles.detailLabel}>Database:</span>
             <span className={styles.detailValue}>{app.outcome.hasDatabase ? 'Present' : 'None'}</span>
           </div>
-          <div className="text-lg font-semibold mb-2 text-bolt-elements-textPrimary">Test Results</div>
+          <div className="text-lg font-semibold mb-2 text-bolt-elements-textHeading">Test Results</div>
           {allTests.length && (
             <div className="flex flex-col gap-2">
               {allTests.map((test) => (

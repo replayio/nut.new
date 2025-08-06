@@ -9,9 +9,11 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
+import { userStore } from '~/lib/stores/userAuth';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
+  const user = useStore(userStore.user);
 
   return (
     <header
@@ -24,13 +26,13 @@ export function Header() {
       )}
     >
       <div className="flex flex-1 items-center gap-4 text-bolt-elements-textPrimary">
-        <IconButton
+       {user && <IconButton
           onClick={() => sidebarMenuStore.toggle()}
           data-testid="sidebar-icon"
           icon="i-ph:sidebar-simple-duotone"
           size="xl"
           title="Toggle Sidebar"
-        />
+        />}
         <TooltipProvider>
           <WithTooltip tooltip="Join Discord">
             <a

@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { Header } from '~/components/header/Header';
+import { Footer } from '~/components/footer/Footer';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 import useViewport from '~/lib/hooks/useViewport';
+import { chatStore } from '~/lib/stores/chat';
+import { useStore } from '@nanostores/react';
 
 interface PageContainerProps {
   children: React.ReactNode;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
-  const isSmallViewport = useViewport(1024);
-  // Fallback for older browsers that don't support dvh
+  const isSmallViewport = useViewport(600);
+  const chatStarted = useStore(chatStore.started);
+
   useEffect(() => {
     const setAppHeight = () => {
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -37,6 +41,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
       >
         {children}
       </div>
+      {!chatStarted && !isSmallViewport && <Footer />}
     </div>
   );
 };

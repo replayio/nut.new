@@ -55,7 +55,7 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
         <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20 shadow-lg">
           <div className="i-ph:key text-2xl text-orange-500" />
         </div>
-        <h2 className="text-3xl font-bold text-bolt-elements-textPrimary">Reset Your Password</h2>
+        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Reset Your Password</h2>
         <p className="text-bolt-elements-textSecondary mt-2 leading-relaxed">
           Enter your email address and we'll send you a secure link to reset your password.
         </p>

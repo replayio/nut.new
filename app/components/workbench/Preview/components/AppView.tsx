@@ -40,10 +40,10 @@ const AppView = ({
         width: isDeviceModeOn ? `${widthPercent}%` : '100%',
         height: '100%',
         overflow: 'visible',
-        background: '#fff',
         position: 'relative',
         display: 'flex',
       }}
+      className="bg-bolt-elements-background-depth-1"
     >
       {previewURL ? (
         <>
@@ -52,7 +52,7 @@ const AppView = ({
             title="preview"
             className={`w-full h-full bg-white transition-all duration-300 ${
               activeTab === 'preview'
-                ? 'opacity-100 rounded-lg shadow-lg border border-bolt-elements-borderColor/20'
+                ? 'opacity-100 rounded-b-xl'
                 : 'opacity-0 pointer-events-none absolute inset-0 rounded-none shadow-none border-none'
             }`}
             src={iframeUrl}

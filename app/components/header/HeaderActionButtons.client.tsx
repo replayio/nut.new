@@ -66,7 +66,7 @@ interface ButtonProps {
 function Button({ active = false, disabled = false, children, onClick }: ButtonProps) {
   return (
     <button
-      className={classNames('flex items-center px-4 py-3 relative group transition-all duration-200', {
+      className={classNames('flex items-center px-4 py-2 relative group transition-all duration-200', {
         'bg-transparent hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:scale-105':
           !active && !disabled,
         'bg-blue-500/10 text-blue-500 shadow-inner': active && !disabled,

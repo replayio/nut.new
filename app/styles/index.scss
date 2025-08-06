@@ -36,3 +36,65 @@ body {
   --secondary-color: rgba(16, 87, 27, var(--gradient-opacity));
   --accent-color: rgba(25, 99, 45, var(--gradient-opacity));
 }
+
+/* Hide scrollbars on all devices */
+* {
+  /* Firefox */
+  scrollbar-width: none;
+  
+  /* WebKit browsers (Chrome, Safari, Edge) - All variants */
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+  
+  &::-webkit-scrollbar-track {
+    display: none !important;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    display: none !important;
+  }
+  
+  &::-webkit-scrollbar-corner {
+    display: none !important;
+  }
+  
+  /* Ensure scrolling still works */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+}
+
+/* Specific targeting for common scrollable elements */
+html, body, div, textarea, pre, code, section, article, main, aside, nav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+  
+  &::-webkit-scrollbar-track {
+    display: none !important;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    display: none !important;
+  }
+  
+  &::-webkit-scrollbar-corner {
+    display: none !important;
+  }
+}
+
+/* Force hide on body and html specifically for Safari */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
