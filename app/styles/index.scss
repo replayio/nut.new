@@ -13,6 +13,7 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden; /* Prevent page-level scrolling */
 }
 
 /* Modern dynamic viewport height with fallback */
@@ -35,6 +36,19 @@ body {
   --primary-color: rgba(71, 181, 87, var(--gradient-opacity));
   --secondary-color: rgba(16, 87, 27, var(--gradient-opacity));
   --accent-color: rgba(25, 99, 45, var(--gradient-opacity));
+}
+
+/* Responsive landing page layout */
+.landing-page-layout {
+  /* On tall screens (>700px height), center the content */
+  @media (min-height: 700px) {
+    justify-content: center;
+  }
+  
+  /* On shorter screens (<=700px height), start from top */
+  @media (max-height: 700px) {
+    justify-content: flex-start;
+  }
 }
 
 /* Hide scrollbars on all devices */

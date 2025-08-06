@@ -33,12 +33,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
     <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black app-height">
       <Header />
       <BackgroundRays />
-      <div
-        className="flex-1 w-full page-content"
-        style={{
-          height: isSmallViewport ? 'calc(100% - 106px)' : '100%',
-        }}
-      >
+      <div className="flex-1 w-full page-content overflow-hidden">
         {children}
       </div>
       {!chatStarted && !isSmallViewport && <Footer />}

@@ -197,12 +197,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             'overflow-y-auto': !chatStarted,
             'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
             'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
-            'p-6 pb-4': !isSmallViewport,
+            'p-6': !isSmallViewport && chatStarted,
+            'p-6 pb-16': !isSmallViewport && !chatStarted, // Add extra bottom padding on landing page to show footer
           })}
         >
           <div
             className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full', {
               'py-2': isSmallViewport,
+              'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
             })}
           >
             {!chatStarted && (
