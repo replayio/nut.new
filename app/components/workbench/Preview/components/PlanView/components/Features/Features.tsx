@@ -7,7 +7,7 @@ import DatabaseChanges from './components/DatabaseChanges';
 import Components from './components/Components';
 import Events from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTitle } from '~/components/workbench/Workbench.client';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface FeaturesProps {
   appSummary: AppSummary | null;
@@ -85,7 +85,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
   const renderFeature = (feature: AppFeature | undefined, index: number) => {
     const isCollapsed = collapsedFeatures.has(index);
 
-    const name = feature ? feature.name : 'Mockup';
+    const name = feature ? formatPascalCaseName(feature.name) : 'Mockup';
     const description = feature
       ? feature.description
       : 'Builds a mockup of the app with a complete UI but no functionality.';
@@ -110,7 +110,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
             </div>
 
             <div className="gap-2 min-w-0 flex-1">
-              <div className="text-bolt-elements-textHeading text-base font-bold">{formatTitle(name)}</div>
+              <div className="text-bolt-elements-textHeading text-base font-bold">{formatPascalCaseName(name)}</div>
               <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
                 <span>{description}</span>
               </div>

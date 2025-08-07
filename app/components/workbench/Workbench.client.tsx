@@ -16,10 +16,6 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
 import { chatStore } from '~/lib/stores/chat';
 
-export const formatTitle = (name: string) => {
-  return name.replace(/([A-Z])/g, ' $1').trim();
-};
-
 interface WorkspaceProps {
   chatStarted?: boolean;
   appSummary?: AppSummary;

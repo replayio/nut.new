@@ -7,7 +7,7 @@ import {
   isFeatureStatusImplemented,
 } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
-import { formatTitle } from '~/components/workbench/Workbench.client';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface PagesProps {
   appSummary: AppSummary | null;
@@ -25,7 +25,7 @@ const Pages = ({ appSummary }: PagesProps) => {
             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group
             "
           >
-            {formatTitle(component.name)}
+            {formatPascalCaseName(component.name)}
             {feature?.status == AppFeatureStatus.ImplementationInProgress && (
               <div className="pl-2">
                 <div
@@ -68,13 +68,14 @@ const Pages = ({ appSummary }: PagesProps) => {
                 key={index}
                 className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor p-5 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-lg hover:scale-[1.01] group"
               >
-                {page.description && (
-                  <div className="text-sm text-bolt-elements-textSecondary mb-3 leading-relaxed">
-                    <div className="font-mono text-sm font-semibold text-bolt-elements-textHeading">
-                      {page.description}
-                    </div>
+                <div className="gap-2 min-w-0 flex-1">
+                  <div className="text-bolt-elements-textHeading text-base font-bold">
+                    {formatPascalCaseName(page.name ?? '')}
                   </div>
-                )}
+                  <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
+                    <span>{page.description ?? ''}</span>
+                  </div>
+                </div>
 
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">

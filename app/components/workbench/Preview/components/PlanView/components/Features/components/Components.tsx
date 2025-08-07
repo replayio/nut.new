@@ -1,5 +1,5 @@
 import { type AppFeature, type AppSummary } from '~/lib/persistence/messageAppSummary';
-import { formatTitle } from '~/components/workbench/Workbench.client';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface ComponentsProps {
   summary: AppSummary;
@@ -33,7 +33,7 @@ const Components = ({ summary, feature }: ComponentsProps) => {
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm"></div>
                 <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
-                  {formatTitle(name)}
+                  {formatPascalCaseName(name)}
                 </span>
               </div>
 

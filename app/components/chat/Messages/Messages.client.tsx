@@ -147,7 +147,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
             {!isUserMessage && (
               <div className="flex items-center justify-center w-10 h-10 bg-bolt-elements-background-depth-2 border-2 border-bolt-elements-borderColor text-bolt-elements-textPrimary rounded-full shrink-0 self-start shadow-sm">
                 <div className="w-6 h-6">
-                  <img src="/logo-styled.svg" alt="Assistant" className="w-full h-full" />
+                  <img src="/logo-styled.svg" alt="Nut" className="w-full h-full" />
                 </div>
               </div>
             )}
@@ -160,7 +160,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
                     'text-bolt-elements-textHeading': !isUserMessage,
                   })}
                 >
-                  {isUserMessage ? 'You' : 'Assistant'}
+                  {isUserMessage ? 'You' : 'Nut'}
                 </span>
               </div>
               <div className="grid grid-col-1 w-full">
