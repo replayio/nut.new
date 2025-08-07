@@ -56,7 +56,7 @@ export default defineConfig((config) => {
       'VITE_',
       'SUPABASE_URL',
       'SUPABASE_ANON_KEY',
-      'INTERCOM_APP_ID',I
+      'INTERCOM_APP_ID',
     ],
     css: {
       preprocessorOptions: {
