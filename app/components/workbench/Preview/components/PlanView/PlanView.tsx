@@ -32,12 +32,6 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const peanutsError = useStore(peanutsStore.peanutsError);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
-  console.log('listenResponses', listenResponses);
-  console.log('isFullyComplete', isFullyComplete);
-  console.log('appSummary', appSummary);
-  console.log('appSummary?.features?.length', appSummary?.features?.length);
-  console.log('appSummaryHasPendingFeature', appSummaryHasPendingFeature(appSummary));
-
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">

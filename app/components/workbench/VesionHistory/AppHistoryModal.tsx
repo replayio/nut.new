@@ -1,6 +1,7 @@
 import { useStore } from '@nanostores/react';
 import { appHistoryModalStore, closeAppHistoryModal } from '~/lib/stores/appHistoryModal';
 import AppHistory from './AppHistory';
+import { IconButton } from '~/components/ui/IconButton';
 
 const AppHistoryModal = () => {
   const { isOpen, appId } = useStore(appHistoryModalStore);
@@ -35,13 +36,13 @@ const AppHistoryModal = () => {
             </div>
           </div>
 
-          <button
+          <IconButton
             onClick={closeAppHistoryModal}
             className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"
+            icon="i-ph:x"
             aria-label="Close modal"
-          >
-            <div className="i-ph:x text-xl"></div>
-          </button>
+            size="xxl"
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto">
