@@ -26,13 +26,13 @@ const Secrets = ({ appSummary }: SecretsProps) => {
         const response = await callNutAPI('get-app-secret-keys', { appId });
         const keys = response?.keys || [];
         const record: Record<string, string> = {};
-        
+
         if (Array.isArray(keys)) {
           for (const key of keys) {
             record[key] = '***';
           }
         }
-        
+
         setSecretValues(record);
       } catch (error) {
         console.error('Failed to fetch secret keys:', error);
