@@ -3,11 +3,12 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { chatStore } from '~/lib/stores/chat';
+import { useEffect } from 'react';
 
 export function ChatDescription() {
   const initialTitle = useStore(chatStore.appTitle);
 
-  const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
+  const { editing, handleChange, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditChatTitle({
       initialTitle,
     });
@@ -26,7 +27,6 @@ export function ChatDescription() {
             autoFocus
             value={currentTitle}
             onChange={handleChange}
-            onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder="Enter chat title..."
           />
@@ -34,8 +34,8 @@ export function ChatDescription() {
             <WithTooltip tooltip="Save title">
               <button
                 type="submit"
+                onClick={handleSubmit}
                 className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
-                onMouseDown={handleSubmit}
               >
                 <div className="i-ph:check-bold text-lg transition-transform duration-200 bg-green-600 rounded-full group-hover:scale-110" />
               </button>
@@ -51,7 +51,7 @@ export function ChatDescription() {
             <WithTooltip tooltip="Rename chat">
               <button
                 type="button"
-                className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0 ml-2"
+                className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
                 onClick={(event) => {
                   event.preventDefault();
                   toggleEditMode();

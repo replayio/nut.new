@@ -23,7 +23,7 @@ export function ExamplePrompts(sendMessage?: { (event: React.UIEvent, messageInp
               onClick={(event) => {
                 sendMessage?.(event, examplePrompt.full ?? examplePrompt.text);
               }}
-              className="group relative bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:border-bolt-elements-focus/50 rounded-full p-2.5 text-sm font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              className="group relative bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:border-bolt-elements-focus/50 rounded-full p-2.5 px-4 text-sm font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 hover:shadow-lg"
             >
               <div className="flex items-center gap-2">
                 <span>{examplePrompt.text}</span>

@@ -7,12 +7,14 @@ import {
   isFeatureStatusImplemented,
 } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
+import { formatTitle } from '~/components/workbench/Workbench.client';
 
 interface PagesProps {
   appSummary: AppSummary | null;
 }
 
 const Pages = ({ appSummary }: PagesProps) => {
+
   const renderComponent = (component: AppDetail, index: number) => {
     const feature = appSummary?.features?.find((feature) => feature.componentNames?.includes(component.name));
 
@@ -24,7 +26,7 @@ const Pages = ({ appSummary }: PagesProps) => {
             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group
             "
           >
-            {component.name}
+            {formatTitle(component.name)}
             {feature?.status == AppFeatureStatus.ImplementationInProgress && (
               <div className="pl-2">
                 <div
