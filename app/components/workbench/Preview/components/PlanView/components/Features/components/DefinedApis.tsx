@@ -1,4 +1,5 @@
 import { type AppFeature } from '~/lib/persistence/messageAppSummary';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface DefinedApisProps {
   feature: AppFeature;
