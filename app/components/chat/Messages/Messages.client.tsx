@@ -153,9 +153,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
                 </div>
               )}
 
-              <span
-                className={classNames('text-sm font-medium text-bolt-elements-textHeading')}
-              >
+              <span className={classNames('text-sm font-medium text-bolt-elements-textHeading')}>
                 {isUserMessage ? 'User' : 'Nut'}
               </span>
             </div>
