@@ -10,6 +10,7 @@ import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistenc
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -130,6 +131,11 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
 
 export async function doListenAppResponses() {
   if (!chatStore.currentAppId.get()) {
+    return;
+  }
+
+  const { active } = await callNutAPI('app-chat-active', { appId: chatStore.currentAppId.get() });
+  if (!active) {
     return;
   }
 
