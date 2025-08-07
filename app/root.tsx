@@ -16,6 +16,7 @@ import { Analytics } from '@vercel/analytics/remix';
 import GlobalFeedbackModal from './components/sidebar/Feedback/components/FeedbackModal';
 import { GlobalAccountModal } from './components/auth/GlobalAccountModal';
 import { GlobalAuthModal } from './components/auth/GlobalAuthModal';
+import AppHistoryModal from './components/workbench/VesionHistory/AppHistoryModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
@@ -209,6 +210,7 @@ export default function App() {
         <GlobalFeedbackModal />
         <GlobalAccountModal />
         <GlobalAuthModal />
+        <AppHistoryModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />
