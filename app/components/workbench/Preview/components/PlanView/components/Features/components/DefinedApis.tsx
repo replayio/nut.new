@@ -20,7 +20,9 @@ const DefinedApis = ({ feature }: DefinedApisProps) => {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-2 h-2 bg-orange-500 rounded-full shadow-sm"></div>
-                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">{formatTitle(api.name.charAt(0).toUpperCase() + api.name.slice(1))}</span>
+                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
+                  {formatTitle(api.name.charAt(0).toUpperCase() + api.name.slice(1))}
+                </span>
                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 rounded-lg border border-orange-200 shadow-sm">
                   {api.kind}
                 </span>

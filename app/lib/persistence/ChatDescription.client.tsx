@@ -3,15 +3,13 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
 import { chatStore } from '~/lib/stores/chat';
-import { useEffect } from 'react';
 
 export function ChatDescription() {
   const initialTitle = useStore(chatStore.appTitle);
 
-  const { editing, handleChange, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
-    useEditChatTitle({
-      initialTitle,
-    });
+  const { editing, handleChange, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } = useEditChatTitle({
+    initialTitle,
+  });
 
   if (!initialTitle) {
     return null;

@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { appHistoryModalStore, closeAppHistoryModal } from '~/lib/stores/appHistoryModal';
-import AppHistory from '../Preview/components/PlanView/AppHistory';
+import AppHistory from './AppHistory';
 
 const AppHistoryModal = () => {
   const { isOpen, appId } = useStore(appHistoryModalStore);
@@ -34,7 +34,7 @@ const AppHistoryModal = () => {
               <p className="text-sm text-bolt-elements-textSecondary">View and manage app versions</p>
             </div>
           </div>
-          
+
           <button
             onClick={closeAppHistoryModal}
             className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"

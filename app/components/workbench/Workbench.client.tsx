@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { motion, type Variants } from 'framer-motion';
 import { memo, useState, useEffect, useRef } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
 import { MultiSlider } from '~/components/ui/Slider';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { classNames } from '~/utils/classNames';

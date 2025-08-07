@@ -201,17 +201,13 @@ function RepositoryDiff() {
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-bolt-elements-textSecondary">Old Repository ID:</label>
                 <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
-                  {oldRepositoryId || (
-                    <span className="text-bolt-elements-textSecondary italic">Not provided</span>
-                  )}
+                  {oldRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-bolt-elements-textSecondary">New Repository ID:</label>
                 <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
-                  {newRepositoryId || (
-                    <span className="text-bolt-elements-textSecondary italic">Not provided</span>
-                  )}
+                  {newRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
                 </div>
               </div>
             </div>
@@ -246,16 +242,19 @@ function RepositoryDiff() {
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
                   <div className="i-ph:files-duotone text-white text-lg"></div>
                 </div>
-                <h2 className="text-xl font-semibold text-bolt-elements-textHeading">
-                  File Changes ({diffs.length})
-                </h2>
+                <h2 className="text-xl font-semibold text-bolt-elements-textHeading">File Changes ({diffs.length})</h2>
               </div>
               <div className="divide-y divide-bolt-elements-borderColor/20">
                 {diffs.map((diff, index) => (
-                  <div key={index} className="p-6 hover:bg-bolt-elements-background-depth-1/30 transition-colors duration-200">
+                  <div
+                    key={index}
+                    className="p-6 hover:bg-bolt-elements-background-depth-1/30 transition-colors duration-200"
+                  >
                     <div className="flex items-center mb-4 gap-3">
                       <div className={`${getDiffTypeIcon(diff.type)} text-xl`}></div>
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm ${getDiffTypeColor(diff.type)}`}>
+                      <span
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm ${getDiffTypeColor(diff.type)}`}
+                      >
                         {diff.type.toUpperCase()}
                       </span>
                       <span className="font-mono text-sm text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 px-3 py-1 rounded-lg border border-bolt-elements-borderColor/50">
@@ -287,7 +286,9 @@ function RepositoryDiff() {
                   <div className="i-ph:check-circle-duotone text-white text-2xl"></div>
                 </div>
                 <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No Changes Found</h3>
-                <p className="text-bolt-elements-textSecondary">The repositories are identical - no differences detected.</p>
+                <p className="text-bolt-elements-textSecondary">
+                  The repositories are identical - no differences detected.
+                </p>
               </div>
             </div>
           )}

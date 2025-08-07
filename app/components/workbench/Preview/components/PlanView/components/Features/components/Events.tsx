@@ -152,20 +152,20 @@ const Events = ({ featureName }: EventsProps) => {
         <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block ml-2">
           Worker {index + 1} ({peanuts} peanuts)
         </div>
-        
+
         <div className="relative">
           {visibleEvents.map(renderEvent)}
-          
+
           {shouldShowExpander && (
             <div className="flex justify-center mt-2">
               <button
                 onClick={() => toggleWorkerExpansion(index)}
                 className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor/50 rounded-lg transition-all duration-200 hover:shadow-sm"
               >
-                <span>
-                  {isExpanded ? `Hide ${events.length - 3} events` : `Show ${events.length - 3} more events`}
-                </span>
-                <div className={`i-ph:caret-${isExpanded ? 'up' : 'down'}-bold text-sm transition-transform duration-200`}></div>
+                <span>{isExpanded ? `Hide ${events.length - 3} events` : `Show ${events.length - 3} more events`}</span>
+                <div
+                  className={`i-ph:caret-${isExpanded ? 'up' : 'down'}-bold text-sm transition-transform duration-200`}
+                ></div>
               </button>
             </div>
           )}

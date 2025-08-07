@@ -14,7 +14,6 @@ interface PagesProps {
 }
 
 const Pages = ({ appSummary }: PagesProps) => {
-
   const renderComponent = (component: AppDetail, index: number) => {
     const feature = appSummary?.features?.find((feature) => feature.componentNames?.includes(component.name));
 
