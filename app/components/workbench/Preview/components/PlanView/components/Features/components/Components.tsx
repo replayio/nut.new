@@ -32,7 +32,9 @@ const Components = ({ summary, feature }: ComponentsProps) => {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm"></div>
-                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">{formatPascalCaseName(name)}</span>
+                <span className="font-mono text-sm font-semibold text-bolt-elements-textPrimary">
+                  {formatPascalCaseName(name)}
+                </span>
               </div>
 
               <div className="text-xs text-bolt-elements-textSecondary">{getComponentDescription(summary, name)}</div>

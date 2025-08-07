@@ -9,13 +9,13 @@ export function formatPascalCaseName(name: string) {
     if (index === 0) {
       return letter;
     }
-    
+
     // Don't add space if the previous character is also capital
     const previousChar = name[index - 1];
     if (previousChar && previousChar === previousChar.toUpperCase()) {
       return letter;
     }
-    
+
     // Add space before the capital letter
     return ` ${letter}`;
   });
