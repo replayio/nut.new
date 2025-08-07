@@ -72,3 +72,9 @@ export function getLastResponseTime() {
 export function getAllAppResponses() {
   return Array.from(gResponsesByTime.values()).flat();
 }
+
+if (typeof window !== 'undefined') {
+  (window as any).__NUT_DUMP_RESPONSES__ = () => {
+    console.log(JSON.stringify(getAllAppResponses()));
+  };
+}
