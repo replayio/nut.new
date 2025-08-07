@@ -7,6 +7,7 @@ import {
   isFeatureStatusImplemented,
 } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface PagesProps {
   appSummary: AppSummary | null;
@@ -24,7 +25,7 @@ const Pages = ({ appSummary }: PagesProps) => {
             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group
             "
           >
-            {component.name}
+            {formatPascalCaseName(component.name)}
             {feature?.status == AppFeatureStatus.ImplementationInProgress && (
               <div className="pl-2">
                 <div
@@ -68,7 +69,7 @@ const Pages = ({ appSummary }: PagesProps) => {
                 className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor p-5 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-lg hover:scale-[1.01] group"
               >
                 <div className="gap-2 min-w-0 flex-1">
-                  <div className="text-bolt-elements-textHeading text-base font-bold">{page.name ?? ""}</div>
+                  <div className="text-bolt-elements-textHeading text-base font-bold">{formatPascalCaseName(page.name ?? "")}</div>
                   <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
                     <span>{page.description ?? ""}</span>
                   </div>

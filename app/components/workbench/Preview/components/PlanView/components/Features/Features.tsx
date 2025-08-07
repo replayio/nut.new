@@ -7,6 +7,7 @@ import DatabaseChanges from './components/DatabaseChanges';
 import Components from './components/Components';
 import Events from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface FeaturesProps {
   appSummary: AppSummary | null;
@@ -84,7 +85,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
   const renderFeature = (feature: AppFeature | undefined, index: number) => {
     const isCollapsed = collapsedFeatures.has(index);
 
-    const name = feature ? feature.name : 'Mockup';
+    const name = feature ? formatPascalCaseName(feature.name) : 'Mockup';
     const description = feature
       ? feature.description
       : 'Builds a mockup of the app with a complete UI but no functionality.';
