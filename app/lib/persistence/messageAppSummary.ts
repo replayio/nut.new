@@ -22,6 +22,9 @@ export interface AppDetail {
 
 // Describes the contents of a page in the app.
 export interface AppPage {
+  // Short name for the page. 7/24/2025: Older apps don't have this.
+  name?: string;
+
   // Path to this page in the app. '/' for the root page, may include wildcards.
   path: string;
 
