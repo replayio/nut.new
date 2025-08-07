@@ -22,12 +22,22 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
   useEffect(() => {
     (async () => {
-      const { keys } = await callNutAPI('get-app-secret-keys', { appId });
-      const record: Record<string, string> = {};
-      for (const key of keys) {
-        record[key] = '***';
+      try {
+        const response = await callNutAPI('get-app-secret-keys', { appId });
+        const keys = response?.keys || [];
+        const record: Record<string, string> = {};
+        
+        if (Array.isArray(keys)) {
+          for (const key of keys) {
+            record[key] = '***';
+          }
+        }
+        
+        setSecretValues(record);
+      } catch (error) {
+        console.error('Failed to fetch secret keys:', error);
+        setSecretValues({});
       }
-      setSecretValues(record);
     })();
   }, []);
 
@@ -162,7 +172,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
   return (
     <div>
-      <div className="space-y-6 mb-2">
+      <div className="space-y-6 mb-4">
         <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm">
           <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
             <div className="i-ph:key-duotone text-white text-lg"></div>

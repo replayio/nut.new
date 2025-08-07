@@ -11,6 +11,7 @@ import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
 import { callNutAPI } from '~/lib/replay/NutAPI';
+import { statusModalStore } from './statusModal';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -206,4 +207,5 @@ export async function doListenAppResponses() {
   }
 
   chatStore.listenResponses.set(false);
+  statusModalStore.open();
 }

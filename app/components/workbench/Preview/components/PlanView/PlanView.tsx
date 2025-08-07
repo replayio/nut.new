@@ -32,6 +32,12 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const peanutsError = useStore(peanutsStore.peanutsError);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
+  console.log('listenResponses', listenResponses);
+  console.log('isFullyComplete', isFullyComplete);
+  console.log('appSummary', appSummary);
+  console.log('appSummary?.features?.length', appSummary?.features?.length);
+  console.log('appSummaryHasPendingFeature', appSummaryHasPendingFeature(appSummary));
+
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
@@ -58,7 +64,7 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                 </WithTooltip>
               </div>
             )}
-            {listenResponses && appSummary?.features?.length && (
+            {listenResponses && appSummary?.features?.length && !isFullyComplete && (
               <div className="flex justify-center items-center">
                 <button
                   className="mb-6 p-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-all duration-200 text-left cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
