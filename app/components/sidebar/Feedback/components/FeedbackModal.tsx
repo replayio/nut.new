@@ -4,6 +4,7 @@ import { feedbackModalState, feedbackModalStore } from '~/lib/stores/feedbackMod
 import { toast } from 'react-toastify';
 import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { getLastChatMessages } from '~/utils/chat/messageUtils';
+import { getAllAppResponses } from '~/lib/replay/ResponseFilter';
 
 const GlobalFeedbackModal = () => {
   const { isOpen, formData, submitted } = useStore(feedbackModalState);
@@ -24,6 +25,7 @@ const GlobalFeedbackModal = () => {
 
     if (feedbackData.share) {
       feedbackData.chatMessages = getLastChatMessages();
+      feedbackData.chatResponses = getAllAppResponses();
     }
 
     try {

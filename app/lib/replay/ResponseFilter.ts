@@ -68,3 +68,7 @@ export function clearAppResponses() {
 export function getLastResponseTime() {
   return gLastResponseTime;
 }
+
+export function getAllAppResponses() {
+  return Array.from(gResponsesByTime.values()).flat();
+}
