@@ -50,7 +50,7 @@ const Pages = ({ appSummary }: PagesProps) => {
     <div>
       <div className="space-y-4 mb-2">
         <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm mb-6">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm">
             <div className="i-ph:layout-duotone text-white text-lg"></div>
           </div>
           <div className="text-lg font-semibold text-bolt-elements-textHeading">Page Layouts</div>

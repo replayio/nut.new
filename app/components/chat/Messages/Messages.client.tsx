@@ -116,7 +116,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
         })}
       >
         <div
-          className={classNames('flex gap-4 p-6 rounded-2xl border transition-all duration-200', {
+          className={classNames('p-6 rounded-2xl border transition-all duration-200', {
             // User messages
             'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/30':
               isUserMessage,
@@ -138,34 +138,30 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
               </div>
             }
           >
-            {isUserMessage && (
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shrink-0 self-start shadow-lg">
-                <div className="i-ph:user-fill text-lg"></div>
-              </div>
-            )}
-
-            {!isUserMessage && (
-              <div className="flex items-center justify-center w-10 h-10 bg-bolt-elements-background-depth-2 border-2 border-bolt-elements-borderColor text-bolt-elements-textPrimary rounded-full shrink-0 self-start shadow-sm">
-                <div className="w-6 h-6">
-                  <img src="/logo-styled.svg" alt="Nut" className="w-full h-full" />
+            <div className="flex items-center gap-3 mb-4">
+              {isUserMessage && (
+                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 text-white rounded-full shadow-lg">
+                  <div className="i-ph:user text-lg"></div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="flex-1 min-w-0">
-              <div className="mb-2">
-                <span
-                  className={classNames('text-sm font-medium', {
-                    'text-blue-600 dark:text-blue-400': isUserMessage,
-                    'text-bolt-elements-textHeading': !isUserMessage,
-                  })}
-                >
-                  {isUserMessage ? 'You' : 'Nut'}
-                </span>
-              </div>
-              <div className="grid grid-col-1 w-full">
-                <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
-              </div>
+              {!isUserMessage && (
+                <div className="flex items-center justify-center w-8 h-8 bg-bolt-elements-background-depth-2 border-2 border-bolt-elements-borderColor text-bolt-elements-textPrimary rounded-full shadow-sm">
+                  <div className="w-6 h-6">
+                    <img src="/logo-styled.svg" alt="Nut" className="w-full h-full" />
+                  </div>
+                </div>
+              )}
+
+              <span
+                className={classNames('text-sm font-medium text-bolt-elements-textHeading')}
+              >
+                {isUserMessage ? 'User' : 'Nut'}
+              </span>
+            </div>
+
+            <div className="w-full">
+              <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
             </div>
           </Suspense>
         </div>
