@@ -13,7 +13,7 @@ function responseStartsFeature(response: ChatResponse, featureName: string | und
   if (featureName) {
     return response.event.name === 'start-feature' && response.event.featureName === featureName;
   }
-  return response.event.name === 'start-mockup';
+  return response.event.name === 'start-mockup' || response.event.name === 'finish-mockup';
 }
 
 // Return separate streams of events for each worker which has operated on the feature.
@@ -59,7 +59,9 @@ const Events = ({ featureName }: EventsProps) => {
       case 'start-feature':
         return event.why === 'implement' ? 'Writing the feature' : 'Writing tests';
       case 'start-mockup':
-        return 'Writing the mockup';
+        return `Writing mockup components for ${event.pageName}`;
+      case 'finish-mockup':
+        return 'Finishing the mockup';
       case 'run-tests':
         return 'Running tests';
       case 'test-failure':

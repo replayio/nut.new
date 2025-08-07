@@ -44,47 +44,8 @@ export type ChatReference = ChatReferenceElement;
 export type ChatResponseCallback = (response: ChatResponse) => void;
 
 export enum ChatMode {
-  // Default mode, builds or extends the app from the available user input.
-  //
-  // If the user is reporting a bug then will use the provided simulation data
-  // to work on a fix.
-  //
-  // Otherwise:
-  //
-  // 1. If there is no AppSummary message provided then a new one will
-  //    be created from the user input. If there is an AppSummary it may be revised.
-  //
-  // 2. When building a new app a prebuilt Arboretum app will be selected as
-  //    a starting point if possible.
-  //
-  // 3. Will then work on developing the features one by one until tests pass and it
-  //    can start on the next feature.
   BuildApp = 'BuildApp',
-
-  // Build an abstracted application for adding to the Arboretum.
-  BuildAppArboretum = 'BuildAppArboretum',
-
-  // Build a new application without using the Arboretum.
-  BuildAppFromScratch = 'BuildAppFromScratch',
-
-  // Analyze any provided recording.
-  AnalyzeRecording = 'AnalyzeRecording',
-
   Discovery = 'Discovery',
-
-  // Follow the bug fixing steps of the BuildApp workflow.
-  FixBug = 'FixBug',
-
-  // Follows step 1 of the BuildApp workflow.
-  PlanApp = 'PlanApp',
-
-  // Follows step 2 of the BuildApp workflow.
-  SearchArboretum = 'SearchArboretum',
-
-  // Performs steps 1 and 2 of the BuildApp workflow in sequence.
-  PlanAppSearchArboretum = 'PlanAppSearchArboretum',
-
-  // Follows step 3 of the BuildApp workflow.
   DevelopApp = 'DevelopApp',
 }
 
