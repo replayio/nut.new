@@ -119,7 +119,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     return (
       <div
         key={`${item.time}-${index}`}
-        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] group backdrop-blur-sm"
+        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md group backdrop-blur-sm"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
           <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/30 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30 font-medium self-start">

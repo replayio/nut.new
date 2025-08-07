@@ -74,9 +74,16 @@ export function ClientAuth() {
   }, [showDropdown]);
 
   const handleSignOut = async () => {
-    await getSupabase().auth.signOut();
-    setShowDropdown(false);
-    toast.success('Signed out successfully');
+    try {
+      await getSupabase().auth.signOut();
+      userStore.clearUser();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
+    } finally {
+      setShowDropdown(false);
+    }
   };
 
   const handleShowAccountModal = () => {
