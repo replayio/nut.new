@@ -150,7 +150,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   doListenAppResponses();
 }
 
-export async function doListenAppResponses() {
+export async function doListenAppResponses(wasStatusModalOpen = false) {
   if (!chatStore.currentAppId.get()) {
     return;
   }
@@ -158,6 +158,9 @@ export async function doListenAppResponses() {
   const { active } = await callNutAPI('app-chat-active', { appId: chatStore.currentAppId.get() });
   if (!active) {
     console.log('ListenAppResponsesNotActive');
+    if (wasStatusModalOpen) {
+      statusModalStore.open();
+    }
     return;
   }
 
