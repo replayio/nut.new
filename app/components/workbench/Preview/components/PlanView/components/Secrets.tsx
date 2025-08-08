@@ -44,7 +44,6 @@ const Secrets = ({ appSummary }: SecretsProps) => {
       const secret = prev.find((s) => s.name == secretName);
       if (secret) {
         secret.value = value;
-        secret.set = false;
       }
       return [...prev];
     });
@@ -61,9 +60,6 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
     try {
       const value = secrets.find((s) => s.name == secretName)?.value;
-      if (!value) {
-        throw new Error('Secret value is required');
-      }
 
       await callNutAPI('set-app-secrets', {
         appId,
@@ -101,7 +97,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
         key={index}
         className={classNames(
           "p-4 border rounded-xl shadow-sm hover:shadow-md transition-all duration-200",
-          isSet
+          (isSet && !currentValue.length)
             ? "border-gray-300 bg-gray-50 hover:border-gray-400"
             : "border-bolt-elements-borderColor/30 bg-bolt-elements-background-depth-2 hover:border-bolt-elements-borderColor/50"
         )}
@@ -143,7 +139,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                 placeholder={isSet ? "Click to change secret value..." : "Enter secret value..."}
                 className={classNames(
                   "w-full px-4 py-3 text-sm border rounded-xl transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400",
-                  isSet
+                  (isSet && !currentValue.length)
                     ? "border-gray-300 bg-gray-100 text-gray-700 placeholder-gray-500 hover:bg-gray-200"
                     : "border-bolt-elements-borderColor/60 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary"
                 )}
@@ -153,13 +149,11 @@ const Secrets = ({ appSummary }: SecretsProps) => {
             <div className="flex justify-end">
               <button
                 onClick={() => handleSaveSecret(secret.name)}
-                disabled={isSaving || !currentValue.trim()}
+                disabled={isSaving || (!isSet && !currentValue.trim())}
                 className={classNames(
                   'px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 shadow-sm',
-                  isSaving || !currentValue.trim()
+                  isSaving || (!isSet && !currentValue.trim())
                     ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary cursor-not-allowed border border-bolt-elements-borderColor/30'
-                    : isSet
-                    ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/20 hover:shadow-md hover:scale-105 active:scale-95'
                     : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:shadow-md hover:scale-105 active:scale-95',
                 )}
               >
@@ -169,7 +163,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                     Saving...
                   </span>
                 ) : (
-                  isSet ? 'Update Secret' : 'Save Changes'
+                  isSet ? (currentValue.length ? 'Update Secret' : 'Clear Secret') : 'Save Changes'
                 )}
               </button>
             </div>
