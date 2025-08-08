@@ -226,12 +226,15 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                       <button
                         onClick={handleContinueBuilding}
                         disabled={true}
-                        className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary flex items-center gap-3 opacity-50 cursor-not-allowed border border-bolt-elements-borderColor shadow-sm"
+                        className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-gray-500 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary flex items-center gap-3 opacity-50 cursor-not-allowed border border-bolt-elements-borderColor shadow-sm"
                       >
                         <div className="i-ph:rocket-launch text-xl"></div>
                         <span>Continue Building</span>
                       </button>
                     </WithTooltip>
+                    <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm max-w-md text-center">
+                      {peanutsErrorInfo}
+                    </div>
                   </div>
                 )}
                 {!isFullyComplete && !peanutsErrorButton && (

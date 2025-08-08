@@ -7,6 +7,7 @@ import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
+import { statusModalStore } from '~/lib/stores/statusModal';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
@@ -33,13 +34,15 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
+statusModalStore.open();
+
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
         <div className="max-w-4xl mx-auto min-h-full flex flex-col">
           <div>
             {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
-              <div className="flex justify-center items-center">
+              <div className="flex flex-col items-center">
                 <WithTooltip tooltip={peanutsErrorInfo ?? 'Continue Building Your App!'}>
                   <button
                     className={`mb-6 p-4 rounded-xl transition-all duration-200 text-left cursor-pointer border ${
@@ -65,6 +68,11 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                     </div>
                   </button>
                 </WithTooltip>
+                {peanutsErrorInfo && (
+                  <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm max-w-md text-center">
+                    {peanutsErrorInfo}
+                  </div>
+                )}
               </div>
             )}
             {listenResponses && appSummary?.features?.length && !isFullyComplete && (

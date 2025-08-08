@@ -24,9 +24,9 @@ export async function refreshPeanutsStore() {
     peanutsStore.peanutsErrorInfo.set(undefined);
   } else if (userId) {
     peanutsStore.peanutsErrorButton.set('Out of Peanuts');
-    peanutsStore.peanutsErrorInfo.set('Add more peanuts by opening your account');
+    peanutsStore.peanutsErrorInfo.set('Open your account to add more peanuts.');
   } else {
     peanutsStore.peanutsErrorButton.set('Not Logged In');
-    peanutsStore.peanutsErrorInfo.set('You must be logged in to continue building.');
+    peanutsStore.peanutsErrorInfo.set('Login to continue building.');
   }
 }
