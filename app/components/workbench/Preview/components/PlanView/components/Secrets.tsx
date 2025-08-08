@@ -5,10 +5,7 @@ import { toast } from 'react-toastify';
 import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
 import { callNutAPI } from '~/lib/replay/NutAPI';
-
-interface SecretsProps {
-  appSummary: AppSummary;
-}
+import { useStore } from '@nanostores/react';
 
 // Secrets which values do not need to be provided for.
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
@@ -33,7 +30,10 @@ function buildSecretInfo(appSummary: AppSummary): SecretInfo[] {
   }));
 }
 
-const Secrets = ({ appSummary }: SecretsProps) => {
+const Secrets = () => {
+  const appSummary = useStore(chatStore.appSummary);
+  assert(appSummary, 'App summary is required');
+
   const [secrets, setSecrets] = useState<SecretInfo[]>(buildSecretInfo(appSummary));
 
   const appId = chatStore.currentAppId.get();

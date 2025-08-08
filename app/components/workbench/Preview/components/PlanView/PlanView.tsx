@@ -95,12 +95,12 @@ const PlanView = () => {
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textHeading">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
             </div>
-            {hasSecrets && <Secrets appSummary={appSummary!} />}
-            {appSummary?.pages && <Pages appSummary={appSummary} />}
+            {hasSecrets && <Secrets />}
+            {appSummary?.pages && <Pages />}
           </div>
           {(appSummary?.features || appSummary?.mockupStatus) && (
             <div>
-              <Features appSummary={appSummary} />
+              <Features />
             </div>
           )}
         </div>

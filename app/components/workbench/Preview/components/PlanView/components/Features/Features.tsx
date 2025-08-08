@@ -8,14 +8,16 @@ import Components from './components/Components';
 import Events from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPascalCaseName } from '~/utils/names';
-
-interface FeaturesProps {
-  appSummary: AppSummary | null;
-}
+import { useStore } from '@nanostores/react';
+import { chatStore } from '~/lib/stores/chat';
+import { assert } from '~/utils/nut';
 
 const MockupFeatureIndex = -1;
 
-const Features = ({ appSummary }: FeaturesProps) => {
+const Features = () => {
+  const appSummary = useStore(chatStore.appSummary);
+  assert(appSummary, 'App summary is required');
+
   const [collapsedFeatures, setCollapsedFeatures] = useState<Set<number>>(new Set());
 
   useEffect(() => {
