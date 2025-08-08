@@ -55,8 +55,6 @@ export default async function handleRequest(
 </html>`;
 
   responseHeaders.set('Content-Type', 'text/html');
-  responseHeaders.set('Cross-Origin-Embedder-Policy', 'credentialless');
-  responseHeaders.set('Cross-Origin-Opener-Policy', 'same-origin');
 
   return new Response(html, {
     headers: responseHeaders,
