@@ -81,7 +81,6 @@ export function Chat() {
     try {
       const newAppId = await database.copyApp(initialAppId);
       
-      // Track new chat creation via copy with Segment
       if (window.analytics) {
         window.analytics.track('New Chat Created', {
           appId: newAppId,

@@ -51,7 +51,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
     setIsProcessing(true);
 
     try {
-      const { data, error } = await getSupabase().auth.signInWithOAuth({
+      const { error } = await getSupabase().auth.signInWithOAuth({
         provider: 'google',
       });
 
