@@ -59,22 +59,18 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         throw error;
       }
 
-      // For OAuth, we need to wait a bit and then get the user data
-      // since the OAuth flow redirects and comes back
-      setTimeout(async () => {
-        try {
-          const { data: { user } } = await getSupabase().auth.getUser();
-          if (window.analytics && user) {
-            window.analytics.identify(user.id, {
-              email: user.email,
-              lastSignIn: new Date().toISOString(),
-              signInMethod: 'google_oauth',
-            });
-          }
-        } catch (err) {
-          console.error('Failed to identify user after Google OAuth:', err);
+      try {
+        const { data: { user } } = await getSupabase().auth.getUser();
+        if (window.analytics && user) {
+          window.analytics.identify(user.id, {
+            email: user.email,
+            lastSignIn: new Date().toISOString(),
+            signInMethod: 'google_oauth',
+          });
         }
-      }, 1000);
+      } catch (err) {
+        console.error('Failed to identify user after Google OAuth:', err);
+      }
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in with Google');
