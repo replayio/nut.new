@@ -15,7 +15,9 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
   const user = useStore(userStore);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
     if (!user?.id || !user?.email) {
@@ -63,7 +65,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
               Select a subscription tier that fits your needs
             </p>
           </div>
-          
+
           <button
             onClick={onClose}
             className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"
@@ -76,23 +78,22 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
         {/* Subscription Tiers */}
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, typeof SUBSCRIPTION_TIERS[SubscriptionTier]][]).map(([tier, details]) => {
+            {(
+              Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, (typeof SUBSCRIPTION_TIERS)[SubscriptionTier]][]
+            ).map(([tier, details]) => {
               const isCurrentTier = tier === currentTier;
               const isLoading = loading === tier;
               const isPro = tier === 'pro';
-              
+
               return (
                 <div
                   key={tier}
-                  className={classNames(
-                    'relative p-6 rounded-xl border transition-all duration-200 hover:shadow-lg',
-                    {
-                      'border-green-500/50 bg-green-500/5': isCurrentTier,
-                      'border-purple-500/50 bg-purple-500/5 ring-2 ring-purple-500/20': isPro && !isCurrentTier,
-                      'border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/30': !isCurrentTier && !isPro,
-                      'hover:border-bolt-elements-borderColor/70': !isCurrentTier,
-                    }
-                  )}
+                  className={classNames('relative p-6 rounded-xl border transition-all duration-200 hover:shadow-lg', {
+                    'border-green-500/50 bg-green-500/5': isCurrentTier,
+                    'border-purple-500/50 bg-purple-500/5 ring-2 ring-purple-500/20': isPro && !isCurrentTier,
+                    'border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/30': !isCurrentTier && !isPro,
+                    'hover:border-bolt-elements-borderColor/70': !isCurrentTier,
+                  })}
                 >
                   {isPro && !isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -111,16 +112,12 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   )}
 
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-2">
-                      {details.name}
-                    </h3>
+                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-2">{details.name}</h3>
                     <div className="text-3xl font-bold text-bolt-elements-textHeading mb-1">
                       ${details.price}
                       <span className="text-sm font-normal text-bolt-elements-textSecondary">/month</span>
                     </div>
-                    <p className="text-sm text-bolt-elements-textSecondary">
-                      {details.description}
-                    </p>
+                    <p className="text-sm text-bolt-elements-textSecondary">{details.description}</p>
                   </div>
 
                   <div className="space-y-3 mb-6">
@@ -141,10 +138,12 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       'w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2',
                       {
                         'bg-green-500/20 text-green-500 cursor-not-allowed': isCurrentTier,
-                        'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105': isPro && !isCurrentTier && !isLoading,
-                        'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105': !isPro && !isCurrentTier && !isLoading,
+                        'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105':
+                          isPro && !isCurrentTier && !isLoading,
+                        'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105':
+                          !isPro && !isCurrentTier && !isLoading,
                         'opacity-50 cursor-not-allowed': isLoading,
-                      }
+                      },
                     )}
                   >
                     {isLoading && (

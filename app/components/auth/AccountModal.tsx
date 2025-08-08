@@ -1,8 +1,6 @@
 import {
   getPeanutsHistory,
   getPeanutsSubscription,
-  setPeanutsSubscription,
-  addPeanuts,
   type PeanutHistoryEntry,
   type AccountSubscription,
 } from '~/lib/replay/Account';
@@ -32,20 +30,20 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   const reloadAccountData = async () => {
     setLoading(true);
-    
+
     // Load basic data first
     const [history, subscription] = await Promise.all([
       getPeanutsHistory(),
       getPeanutsSubscription(),
       refreshPeanutsStore(),
     ]);
-    
+
     // Then check Stripe subscription separately
     let stripeStatus = { hasSubscription: false, subscription: null };
     if (user?.email) {
       stripeStatus = await checkSubscriptionStatus(user.email);
     }
-    
+
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
@@ -236,9 +234,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                     Next billing: {new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()}
                   </div>
                   {stripeSubscription.cancelAtPeriodEnd && (
-                    <div className="text-xs text-yellow-500 mt-1">
-                      Cancels at period end
-                    </div>
+                    <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>
                   )}
                 </>
               ) : (
