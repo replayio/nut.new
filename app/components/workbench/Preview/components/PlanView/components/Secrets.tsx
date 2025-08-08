@@ -13,51 +13,62 @@ interface SecretsProps {
 // Secrets which values do not need to be provided for.
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
+interface SecretInfo {
+  key: string;
+  value?: string; // Any value set by the client.
+  set: boolean;
+  saving: boolean;
+}
+
+function buildSecretInfo(appSummary: AppSummary): SecretInfo[] {
+  const secrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+
+  return secrets.map((s) => ({
+    key: s.name,
+    value: undefined,
+    set: appSummary.setSecrets?.includes(s.name) ?? false,
+    saving: false,
+  }));
+}
+
 const Secrets = ({ appSummary }: SecretsProps) => {
-  const [secretValues, setSecretValues] = useState<Record<string, string>>({});
-  const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
+  const [secrets, setSecrets] = useState<SecretInfo[]>(buildSecretInfo(appSummary));
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await callNutAPI('get-app-secret-keys', { appId });
-        const keys = response?.keys || [];
-        const record: Record<string, string> = {};
-
-        if (Array.isArray(keys)) {
-          for (const key of keys) {
-            record[key] = '***';
-          }
-        }
-
-        setSecretValues(record);
-      } catch (error) {
-        console.error('Failed to fetch secret keys:', error);
-        setSecretValues({});
-      }
-    })();
-  }, []);
-
   const handleSecretValueChange = (secretName: string, value: string) => {
-    setSecretValues((prev) => ({
-      ...prev,
-      [secretName]: value,
-    }));
+    setSecrets((prev) => {
+      const secret = prev.find((s) => s.key == secretName);
+      if (secret) {
+        secret.value = value;
+        secret.set = false;
+      }
+      return [...prev];
+    });
   };
 
   const handleSaveSecret = async (secretName: string) => {
-    setSavingStates((prev) => ({ ...prev, [secretName]: true }));
+    setSecrets((prev) => {
+      const secret = prev.find((s) => s.key == secretName);
+      if (secret) {
+        secret.saving = true;
+      }
+      return [...prev];
+    });
 
     try {
+      const value = secrets.find((s) => s.key == secretName)?.value;
+      if (!value) {
+        throw new Error('Secret value is required');
+      }
+
       await callNutAPI('set-app-secrets', {
         appId,
         secrets: [
           {
             key: secretName,
-            value: secretValues[secretName],
+            value,
           },
         ],
       });
@@ -67,7 +78,13 @@ const Secrets = ({ appSummary }: SecretsProps) => {
       toast.error('Failed to save secret');
       console.error('Failed to save secret:', error);
     } finally {
-      setSavingStates((prev) => ({ ...prev, [secretName]: false }));
+      setSecrets((prev) => {
+        const secret = prev.find((s) => s.key == secretName);
+        if (secret) {
+          secret.saving = false;
+        }
+        return [...prev];
+      });
     }
   };
 
@@ -167,8 +184,6 @@ const Secrets = ({ appSummary }: SecretsProps) => {
       </div>
     );
   };
-
-  const secrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
 
   return (
     <div>

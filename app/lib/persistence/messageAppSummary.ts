@@ -155,6 +155,7 @@ export interface AppSummary {
   mockupStatus?: AppFeatureStatus;
   features?: AppFeature[];
   otherTests?: AppTest[];
+  setSecrets?: string[];
 
   // The repository being described, if available.
   repositoryId?: string;
