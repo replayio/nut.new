@@ -188,3 +188,30 @@ export async function syncSubscription(userEmail: string, userId: string) {
     return { synced: false, hasSubscription: false };
   }
 }
+
+/**
+ * Cancel subscription
+ */
+export async function cancelSubscription(userEmail: string, immediate: boolean = false) {
+  try {
+    const response = await fetch('/api/stripe/cancel-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userEmail, immediate }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to cancel subscription');
+    }
+
+    const data = await response.json();
+    console.log('Subscription cancellation result:', data.message);
+    return data;
+  } catch (error) {
+    console.error('Error canceling subscription:', error);
+    throw error;
+  }
+}

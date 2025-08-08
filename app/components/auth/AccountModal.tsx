@@ -10,7 +10,7 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus, syncSubscription } from '~/lib/stripe/client';
+import { createTopoffCheckout, checkSubscriptionStatus, syncSubscription, cancelSubscription } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 
@@ -178,6 +178,34 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!user?.email) {
+      toast.error('Please sign in to cancel subscription');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      'Are you sure you want to cancel your subscription?\n\n' +
+      'Your subscription will remain active until the end of your current billing period, ' +
+      'and you\'ll keep access to your remaining peanuts.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await cancelSubscription(user.email, false); // Cancel at period end
+      toast.success('Subscription canceled. You\'ll have access until your current billing period ends.');
+      // Reload data to show updated subscription status
+      reloadAccountData();
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      toast.error('Failed to cancel subscription. Please try again.');
+    }
+  };
+
   return (
     <div
       className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
@@ -241,6 +269,15 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                   {stripeSubscription.cancelAtPeriodEnd && (
                     <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>
                   )}
+                  
+                  {!stripeSubscription.cancelAtPeriodEnd && (
+                    <button
+                      onClick={handleCancelSubscription}
+                      className="mt-3 px-4 py-2 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg transition-all duration-200 hover:scale-105"
+                    >
+                      Cancel Subscription
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -266,24 +303,10 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               },
             )}
           >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
-              </>
-            ) : subscription ? (
-              <>
-                <div className="i-ph:x-circle text-xl transition-transform duration-200 group-hover:scale-110" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Cancel Subscription</span>
-              </>
-            ) : (
-              <>
-                <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-                <span className="transition-transform duration-200 group-hover:scale-105">
-                  Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
-                </span>
-              </>
-            )}
+            <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+            <span className="transition-transform duration-200 group-hover:scale-105">
+              Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
+            </span>
           </button>
 
           <button
