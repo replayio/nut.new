@@ -4,6 +4,7 @@ import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
 import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, type SubscriptionTier } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
+import { IconButton } from '../ui/IconButton';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -66,34 +67,70 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
             </p>
           </div>
 
-          <button
+          <IconButton
             onClick={onClose}
             className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"
             aria-label="Close modal"
-          >
-            <div className="i-ph:x text-xl"></div>
-          </button>
+            icon="i-ph:x"
+            size="xxl"
+          />
+        </div>
+
+        {/* Important Notes - Moved to top */}
+        <div className="px-6 sm:px-8 pt-2 pb-6">
+          <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center mt-1 flex-shrink-0 border border-blue-500/30 shadow-sm">
+                <div className="i-ph:info text-blue-500 text-lg"></div>
+              </div>
+              <div className="text-sm text-bolt-elements-textSecondary">
+                <p className="font-semibold text-bolt-elements-textHeading mb-3 text-base">Important Notes:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 gap-x-6">
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/40 mt-2 flex-shrink-0"></div>
+                    <span>Peanuts do not roll over between billing cycles</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/40 mt-2 flex-shrink-0"></div>
+                    <span>You can upgrade or downgrade your plan at any time</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/40 mt-2 flex-shrink-0"></div>
+                    <span>Cancellation takes effect at the end of your current billing period</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/40 mt-2 flex-shrink-0"></div>
+                    <span>All plans include access to all Nut features</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Subscription Tiers */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {(
               Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, (typeof SUBSCRIPTION_TIERS)[SubscriptionTier]][]
             ).map(([tier, details]) => {
               const isCurrentTier = tier === currentTier;
               const isLoading = loading === tier;
               const isPro = tier === 'pro';
+              const isFree = tier === 'free';
 
               return (
                 <div
                   key={tier}
-                  className={classNames('relative p-6 rounded-xl border transition-all duration-200 hover:shadow-lg', {
-                    'border-green-500/50 bg-green-500/5': isCurrentTier,
-                    'border-purple-500/50 bg-purple-500/5 ring-2 ring-purple-500/20': isPro && !isCurrentTier,
-                    'border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/30': !isCurrentTier && !isPro,
-                    'hover:border-bolt-elements-borderColor/70': !isCurrentTier,
-                  })}
+                  className={classNames(
+                    'relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-105 group min-h-[400px] flex flex-col',
+                    {
+                      'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg': isCurrentTier,
+                      'border-purple-500/50 bg-gradient-to-br from-purple-500/5 to-pink-500/5 ring-2 ring-purple-500/20 shadow-lg': isPro && !isCurrentTier,
+                      'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm': !isCurrentTier && !isPro,
+                      'hover:border-bolt-elements-borderColor/70 hover:shadow-lg': !isCurrentTier,
+                    }
+                  )}
                 >
                   {isPro && !isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -111,67 +148,63 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     </div>
                   )}
 
+                  {/* Header */}
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-2">{details.name}</h3>
-                    <div className="text-3xl font-bold text-bolt-elements-textHeading mb-1">
-                      ${details.price}
-                      <span className="text-sm font-normal text-bolt-elements-textSecondary">/month</span>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+                      <div className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
+                        'i-ph:gift text-green-500': isFree,
+                        'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                        'i-ph:lightning text-orange-500': tier === 'builder', 
+                        'i-ph:crown text-purple-500': isPro,
+                      })} />
                     </div>
-                    <p className="text-sm text-bolt-elements-textSecondary">{details.description}</p>
+                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">{details.name}</h3>
+                    <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-300 group-hover:scale-105">
+                      ${details.price}
+                      <span className="text-lg font-normal text-bolt-elements-textSecondary">/month</span>
+                    </div>
+                    <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">{details.description}</p>
                   </div>
 
-                  <div className="space-y-3 mb-6">
+                  {/* Features */}
+                  <div className="space-y-3 mb-8 flex-grow">
                     {details.features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5 flex-shrink-0">
-                          <div className="i-ph:check text-green-500 text-sm"></div>
+                      <div key={index} className="flex items-start gap-3 group/feature">
+                        <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-green-500/30 transition-all duration-200 group-hover/feature:scale-110 group-hover/feature:bg-green-500/30">
+                          <div className="i-ph:check text-green-500 text-sm transition-transform duration-200 group-hover/feature:scale-110"></div>
                         </div>
-                        <span className="text-sm text-bolt-elements-textSecondary">{feature}</span>
+                        <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => handleSubscribe(tier)}
-                    disabled={isCurrentTier || isLoading}
-                    className={classNames(
-                      'w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2',
-                      {
-                        'bg-green-500/20 text-green-500 cursor-not-allowed': isCurrentTier,
-                        'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105':
-                          isPro && !isCurrentTier && !isLoading,
-                        'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105':
-                          !isPro && !isCurrentTier && !isLoading,
-                        'opacity-50 cursor-not-allowed': isLoading,
-                      },
-                    )}
-                  >
-                    {isLoading && (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    )}
-                    {isCurrentTier ? 'Current Plan' : isLoading ? 'Processing...' : 'Subscribe'}
-                  </button>
+                  {/* Subscribe Button */}
+                  <div className="mt-auto">
+                    <button
+                      onClick={() => handleSubscribe(tier)}
+                      disabled={isCurrentTier || isLoading}
+                      className={classNames(
+                        'w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl group/btn min-h-[56px]',
+                        {
+                          'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 border border-green-500/30 cursor-not-allowed': isCurrentTier,
+                          'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border border-purple-500/50 hover:border-purple-400 hover:scale-105': isPro && !isCurrentTier && !isLoading,
+                          'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border border-blue-500/50 hover:border-blue-400 hover:scale-105': !isPro && !isFree && !isCurrentTier && !isLoading,
+                          'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border border-green-500/50 hover:border-green-400 hover:scale-105': isFree && !isCurrentTier && !isLoading,
+                          'opacity-50 cursor-not-allowed hover:scale-100': isLoading,
+                        }
+                      )}
+                    >
+                      {isLoading && (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      )}
+                      <span className="transition-transform duration-300 group-hover/btn:scale-105">
+                        {isCurrentTier ? '✓ Current Plan' : isLoading ? 'Processing...' : 'Subscribe'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               );
             })}
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-8 p-4 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/30">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center mt-0.5 flex-shrink-0">
-                <div className="i-ph:info text-blue-500 text-sm"></div>
-              </div>
-              <div className="text-sm text-bolt-elements-textSecondary">
-                <p className="font-medium text-bolt-elements-textPrimary mb-1">Important Notes:</p>
-                <ul className="space-y-1">
-                  <li>• Peanuts do not roll over between billing cycles</li>
-                  <li>• You can upgrade or downgrade your plan at any time</li>
-                  <li>• Cancellation takes effect at the end of your current billing period</li>
-                  <li>• All plans include access to all Nut features</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       </div>
