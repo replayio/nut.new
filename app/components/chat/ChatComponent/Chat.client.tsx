@@ -50,23 +50,17 @@ async function updateAppState(appId: string) {
   chatStore.started.set(chatStore.messages.get().length > 0);
 }
 
-export function Chat() {
-  renderLogger.trace('Chat');
-
-  const { id: initialAppId } = useLoaderData<{ id?: string }>() ?? {};
-
-  const [ready, setReady] = useState<boolean>(!initialAppId);
-  const [unauthorized, setUnauthorized] = useState<boolean>(false);
-  const [isCopying, setIsCopying] = useState(false);
-  const appTitle = useStore(chatStore.appTitle);
-
-  // Listen for document visibility changes. If the document becomes visible
-  // we don't trust that we have the latest version of the app, so will refresh
-  // state and show the status modal if it was open earlier and there is no
-  // in progress chat.
-  useEffect(() => {
-    document.addEventListener('visibilitychange', async () => {
-      if (document.visibilityState === 'visible') {
+// Listen for document visibility changes. If the document becomes visible
+// we don't trust that we have the latest version of the app, so will refresh
+// state and show the status modal if it was open earlier and there is no
+// in progress chat.
+if (typeof document !== 'undefined') {
+  let gDocumentVisible = true;
+  document.addEventListener('visibilitychange', async () => {
+    const visible = document.visibilityState === 'visible';
+    if (visible != gDocumentVisible) {
+      gDocumentVisible = visible;
+      if (visible) {
         const appId = chatStore.currentAppId.get();
         if (appId && !chatStore.listenResponses.get()) {
           const wasStatusModalOpen = statusModalStore.isOpen.get();
@@ -76,8 +70,19 @@ export function Chat() {
           doListenAppResponses(wasStatusModalOpen);
         }
       }
-    });
-  }, []);
+    }
+  });
+}
+
+export function Chat() {
+  renderLogger.trace('Chat');
+
+  const { id: initialAppId } = useLoaderData<{ id?: string }>() ?? {};
+
+  const [ready, setReady] = useState<boolean>(!initialAppId);
+  const [unauthorized, setUnauthorized] = useState<boolean>(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const appTitle = useStore(chatStore.appTitle);
 
   // Update document title when app title changes
   useEffect(() => {
