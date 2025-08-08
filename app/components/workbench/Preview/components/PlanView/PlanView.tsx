@@ -7,7 +7,6 @@ import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
-import { statusModalStore } from '~/lib/stores/statusModal';
 
 interface PlanViewProps {
   appSummary: AppSummary | null;
@@ -34,8 +33,6 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
-statusModalStore.open();
-
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
@@ -57,12 +54,16 @@ statusModalStore.open();
                     disabled={!!peanutsErrorButton}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`i-ph:rocket-launch text-xl text-white transition-transform duration-200 ${
-                        peanutsErrorButton ? '' : 'group-hover:scale-110'
-                      }`}></div>
-                      <div className={`font-medium text-white transition-transform duration-200 ${
-                        peanutsErrorButton ? '' : 'group-hover:scale-105'
-                      }`}>
+                      <div
+                        className={`i-ph:rocket-launch text-xl text-white transition-transform duration-200 ${
+                          peanutsErrorButton ? '' : 'group-hover:scale-110'
+                        }`}
+                      ></div>
+                      <div
+                        className={`font-medium text-white transition-transform duration-200 ${
+                          peanutsErrorButton ? '' : 'group-hover:scale-105'
+                        }`}
+                      >
                         {peanutsErrorButton ?? 'Continue Building'}
                       </div>
                     </div>

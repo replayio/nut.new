@@ -70,7 +70,7 @@ function getErrorMessage(e: unknown): string {
   if (e instanceof NutAPIError) {
     return e.responseText;
   }
-  return "";
+  return '';
 }
 
 export async function doSendMessage(mode: ChatMode, messages: Message[], references?: ChatReference[]) {
@@ -78,11 +78,8 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
 
   if (mode == ChatMode.DevelopApp) {
     await refreshPeanutsStore();
-
-  console.log('WTF', peanutsStore.peanutsRemaining.get(), peanutsStore.peanutsError.get());
-
-    if (peanutsStore.peanutsError.get()) {
-      toast.error(peanutsStore.peanutsError.get());
+    if (peanutsStore.peanutsErrorInfo.get()) {
+      toast.error(peanutsStore.peanutsErrorInfo.get());
       return;
     }
   }
