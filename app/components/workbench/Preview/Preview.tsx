@@ -5,7 +5,6 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
-import { chatStore } from '~/lib/stores/chat';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 

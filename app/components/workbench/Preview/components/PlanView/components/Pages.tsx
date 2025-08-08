@@ -1,11 +1,6 @@
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import {
-  type AppSummary,
-  type AppDetail,
-  AppFeatureStatus,
-  isFeatureStatusImplemented,
-} from '~/lib/persistence/messageAppSummary';
+import { type AppDetail, AppFeatureStatus, isFeatureStatusImplemented } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
 import { formatPascalCaseName } from '~/utils/names';
 import { useStore } from '@nanostores/react';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
-import { AppFeatureStatus, type AppFeature, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppFeature } from '~/lib/persistence/messageAppSummary';
 import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
