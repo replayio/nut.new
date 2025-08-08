@@ -1,6 +1,6 @@
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
@@ -34,7 +34,11 @@ const Secrets = () => {
   const appSummary = useStore(chatStore.appSummary);
   assert(appSummary, 'App summary is required');
 
-  const [secrets, setSecrets] = useState<SecretInfo[]>(buildSecretInfo(appSummary));
+  const [secrets, setSecrets] = useState<SecretInfo[]>([]);
+
+  useEffect(() => {
+    setSecrets(buildSecretInfo(appSummary));
+  }, [appSummary]);
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
