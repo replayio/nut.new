@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
 import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
 import { statusModalStore } from './statusModal';
+import { addAppResponse } from '~/lib/replay/ResponseFilter';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -51,6 +52,13 @@ function addResponseEvent(response: ChatResponse) {
 }
 
 export function addChatMessage(message: Message) {
+  addAppResponse({
+    kind: 'message',
+    message,
+    time: message.createTime ?? new Date().toISOString(),
+    chatId: undefined,
+  });
+
   chatStore.messages.set(mergeResponseMessage(message, chatStore.messages.get()));
 }
 
@@ -149,6 +157,7 @@ export async function doListenAppResponses() {
 
   const { active } = await callNutAPI('app-chat-active', { appId: chatStore.currentAppId.get() });
   if (!active) {
+    console.log('ListenAppResponsesNotActive');
     return;
   }
 

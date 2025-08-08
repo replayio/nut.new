@@ -7,7 +7,6 @@
 import type { ChatResponse } from '~/lib/persistence/response';
 import type { ChatResponseCallback } from './SendChatMessage';
 import { createScopedLogger } from '~/utils/logger';
-import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { assert } from '~/utils/nut';
 
 const logger = createScopedLogger('ChatResponses');
@@ -16,19 +15,34 @@ const gResponsesByTime = new Map<string, ChatResponse[]>();
 let gLastResponseTime = new Date(0).toISOString();
 
 function responseMatches(a: ChatResponse, b: ChatResponse) {
-  // Special case AppSummary messages. These are generated from different places in the
-  // backend and might not be exactly identical after JSON.stringify. Compare the summaries
-  // themselves.
-  if (a.kind == 'message' && b.kind == 'message') {
-    const aMessage = a.message;
-    const bMessage = b.message;
-    if (aMessage.category == APP_SUMMARY_CATEGORY && bMessage.category == APP_SUMMARY_CATEGORY) {
-      assert(aMessage.type == 'text' && bMessage.type == 'text', 'AppSummary messages must be text');
-      return aMessage.content === bMessage.content;
-    }
+  if (a.kind != b.kind) {
+    return false;
   }
 
-  return JSON.stringify(a) == JSON.stringify(b);
+  switch (a.kind) {
+    case 'message': {
+      assert(b.kind == 'message', 'Expected message');
+      const aMessage = a.message;
+      const bMessage = b.message;
+
+      // Compare based on id and content. When a message is split into multiple responses
+      // they could share the same timestamp. (They could share the same content
+      // as well but we don't handle this case.)
+      if (aMessage.id === bMessage.id) {
+        if (aMessage.type == 'text' && bMessage.type == 'text' && aMessage.content != bMessage.content) {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }
+    case 'app-event': {
+      assert(b.kind == 'app-event', 'Expected app-event');
+      return JSON.stringify(a.event) == JSON.stringify(b.event);
+    }
+    default:
+      return JSON.stringify(a) == JSON.stringify(b);
+  }
 }
 
 export function addAppResponse(response: ChatResponse) {

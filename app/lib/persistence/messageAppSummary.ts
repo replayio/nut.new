@@ -3,7 +3,6 @@
 import { assert } from '~/utils/nut';
 import type { Message } from './message';
 import type { DatabaseSchema } from './databaseSchema';
-import { setInitialAppSummary } from '~/lib/stores/appSummary';
 
 // Message sent whenever the app summary is updated.
 export const APP_SUMMARY_CATEGORY = 'AppSummary';
@@ -175,7 +174,6 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
     assert(message.category === APP_SUMMARY_CATEGORY, 'Message is not an app summary message');
     assert(message.type === 'text', 'Message is not a text message');
     const appSummary = JSON.parse(message.content) as AppSummary;
-    setInitialAppSummary(appSummary);
     assert(typeof appSummary.description === 'string', 'Missing app description');
     assert(Array.isArray(appSummary.pages), 'Missing app pages');
     return appSummary;
