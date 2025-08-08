@@ -1,0 +1,167 @@
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe with your publishable key (lazy loading)
+let stripePromise: Promise<any> | null = null;
+
+const getStripeKey = () => {
+  if (typeof window === 'undefined') return '';
+  
+  const key = (window as any).ENV?.STRIPE_PUBLISHABLE_KEY;
+  console.log('Stripe key from ENV:', key ? `${key.substring(0, 8)}...` : 'undefined');
+  return key || '';
+};
+
+const initializeStripe = () => {
+  if (!stripePromise) {
+    const key = getStripeKey();
+    if (!key) {
+      console.error('Stripe publishable key not found in window.ENV');
+      return Promise.resolve(null);
+    }
+    stripePromise = loadStripe(key);
+  }
+  return stripePromise;
+};
+
+export interface CreateCheckoutSessionParams {
+  type: 'subscription' | 'topoff';
+  tier?: 'starter' | 'builder' | 'pro';
+  userId: string;
+  userEmail: string;
+}
+
+export interface CheckoutSessionResponse {
+  sessionId: string;
+  url: string;
+}
+
+/**
+ * Creates a Stripe checkout session and redirects the user
+ */
+export async function createCheckoutSession(params: CreateCheckoutSessionParams): Promise<void> {
+  try {
+    // Create checkout session via API
+    const response = await fetch('/api/stripe/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create checkout session');
+    }
+
+    const { url }: CheckoutSessionResponse = await response.json();
+
+    if (!url) {
+      throw new Error('No checkout URL received');
+    }
+
+    // Redirect to Stripe Checkout
+    window.location.href = url;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create subscription checkout for a specific tier
+ */
+export async function createSubscriptionCheckout(
+  tier: 'starter' | 'builder' | 'pro',
+  userId: string,
+  userEmail: string
+): Promise<void> {
+  return createCheckoutSession({
+    type: 'subscription',
+    tier,
+    userId,
+    userEmail,
+  });
+}
+
+/**
+ * Create peanut top-off checkout
+ */
+export async function createTopoffCheckout(
+  userId: string,
+  userEmail: string
+): Promise<void> {
+  return createCheckoutSession({
+    type: 'topoff',
+    userId,
+    userEmail,
+  });
+}
+
+/**
+ * Get Stripe instance for advanced usage
+ */
+export async function getStripe() {
+  return await initializeStripe();
+}
+
+// Subscription tier information
+export const SUBSCRIPTION_TIERS = {
+  starter: {
+    name: 'Starter',
+    price: 20,
+    peanuts: 2000,
+    description: 'Our basic plan to get your feet wet. No limits on any features. Go nuts!',
+    features: [
+      '2000 Peanuts per month (rolls over)',
+      'Pay-as-you-go to top off balance'
+    ]
+  },
+  builder: {
+    name: 'Builder',
+    price: 50,
+    peanuts: 5000,
+    description: 'Includes 5000 Peanuts per month, for those that are building multiple apps',
+    features: [
+      '5,000 Peanuts per month',
+      'Only pay for features that Nut builds fully'
+    ]
+  },
+  pro: {
+    name: 'Pro',
+    price: 100,
+    peanuts: 12000,
+    description: 'Our premium tier that offers 12,000 Peanuts at 20% discount, for serious vibe coding action',
+    features: [
+      '12,000 Peanuts per month (balance rolls over)',
+      'Only pay Peanuts for features Nut builds fully'
+    ]
+  }
+} as const;
+
+export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
+
+/**
+ * Check subscription status directly from Stripe
+ */
+export async function checkSubscriptionStatus(userEmail: string) {
+  try {
+    const response = await fetch('/api/stripe/check-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userEmail }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to check subscription status');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error checking subscription status:', error);
+    return { hasSubscription: false, subscription: null };
+  }
+}

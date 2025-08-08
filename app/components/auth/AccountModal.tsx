@@ -7,10 +7,13 @@ import {
   type AccountSubscription,
 } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
+import { createTopoffCheckout, checkSubscriptionStatus } from '~/lib/stripe/client';
+import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 
 interface AccountModalProps {
@@ -23,19 +26,30 @@ const DEFAULT_SUBSCRIPTION_PEANUTS = 2000;
 export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const reloadAccountData = async () => {
     setLoading(true);
+    
+    // Load basic data first
     const [history, subscription] = await Promise.all([
       getPeanutsHistory(),
       getPeanutsSubscription(),
       refreshPeanutsStore(),
     ]);
+    
+    // Then check Stripe subscription separately
+    let stripeStatus = { hasSubscription: false, subscription: null };
+    if (user?.email) {
+      stripeStatus = await checkSubscriptionStatus(user.email);
+    }
+    
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
+    setStripeSubscription(stripeStatus.hasSubscription ? stripeStatus.subscription : null);
     setLoading(false);
   };
 
@@ -51,15 +65,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
-
-  const formatSubscriptionTime = (timeString: string) => {
-    const date = new Date(timeString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
     });
   };
 
@@ -145,19 +150,29 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleSubscriptionToggle = async () => {
-    setLoading(true);
     if (subscription) {
-      await setPeanutsSubscription(undefined);
+      // TODO: Implement subscription cancellation via Stripe Customer Portal
+      toast.info('Please contact support to cancel your subscription');
     } else {
-      await setPeanutsSubscription(DEFAULT_SUBSCRIPTION_PEANUTS);
+      // Open subscription modal to choose a tier
+      openSubscriptionModal();
+      onClose();
     }
-    reloadAccountData();
   };
 
   const handleAddPeanuts = async () => {
-    setLoading(true);
-    await addPeanuts(2000);
-    reloadAccountData();
+    if (!user?.id || !user?.email) {
+      toast.error('Please sign in to add peanuts');
+      return;
+    }
+
+    try {
+      await createTopoffCheckout(user.id, user.email);
+      // User will be redirected to Stripe Checkout
+    } catch (error) {
+      console.error('Error creating peanut top-off:', error);
+      toast.error('Failed to create checkout. Please try again.');
+    }
   };
 
   return (
@@ -208,15 +223,23 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               </div>
             </div>
             <div className="text-center">
-              {subscription ? (
+              {stripeSubscription ? (
                 <>
                   <div className="text-3xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-200 group-hover:scale-105">
-                    {subscription.peanuts}
+                    {stripeSubscription.peanuts.toLocaleString()}
                   </div>
                   <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">Peanuts per month</div>
                   <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30">
-                    Next reload: {formatSubscriptionTime(subscription.reloadTime)}
+                    {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
+                  <div className="text-xs text-bolt-elements-textSecondary mt-1">
+                    Next billing: {new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()}
+                  </div>
+                  {stripeSubscription.cancelAtPeriodEnd && (
+                    <div className="text-xs text-yellow-500 mt-1">
+                      Cancels at period end
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
