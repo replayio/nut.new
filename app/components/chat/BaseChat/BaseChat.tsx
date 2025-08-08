@@ -19,7 +19,6 @@ import { type MessageInputProps } from '~/components/chat/MessageInput/MessageIn
 import { Arboretum } from './components/Arboretum/Arboretum';
 import { useArboretumVisibility } from '~/lib/stores/settings';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
-import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useStore } from '@nanostores/react';
@@ -65,9 +64,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-    const messages = useStore(chatStore.messages);
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
-    const appSummary = getLatestAppSummary(messages);
+    const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
     const { isArboretumVisible } = useArboretumVisibility();
     const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -229,15 +227,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>
-            {() => (
-              <Workbench
-                chatStarted={chatStarted}
-                appSummary={appSummary ?? undefined}
-                mobileActiveTab={mobileActiveTab}
-              />
-            )}
-          </ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} mobileActiveTab={mobileActiveTab} />}</ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}

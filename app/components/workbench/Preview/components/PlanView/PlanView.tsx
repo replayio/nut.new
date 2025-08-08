@@ -8,11 +8,7 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
 
-interface PlanViewProps {
-  appSummary: AppSummary | null;
-}
-
-function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
+function appSummaryHasPendingFeature(appSummary: AppSummary | undefined) {
   return (
     appSummary?.features?.length &&
     appSummary.features.some(
@@ -21,8 +17,9 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | null) {
   );
 }
 
-const PlanView = ({ appSummary }: PlanViewProps) => {
+const PlanView = () => {
   const listenResponses = useStore(chatStore.listenResponses);
+  const appSummary = useStore(chatStore.appSummary);
 
   const completedFeatures = appSummary?.features?.filter(
     (feature) => feature.status === AppFeatureStatus.Validated,

@@ -5,7 +5,12 @@ import type { ChatResponse } from '~/lib/persistence/response';
 import { clearPendingMessageStatus } from './status';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
-import { APP_SUMMARY_CATEGORY, getLatestAppRepositoryId, parseAppSummaryMessage, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import {
+  APP_SUMMARY_CATEGORY,
+  getLatestAppRepositoryId,
+  parseAppSummaryMessage,
+  type AppSummary,
+} from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
@@ -152,7 +157,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   clearPendingMessageStatus();
 
   try {
-    await sendChatMessage(mode, messages, references ?? [], r => onChatResponse(r, `SendMessage:${mode}`));
+    await sendChatMessage(mode, messages, references ?? [], (r) => onChatResponse(r, `SendMessage:${mode}`));
   } catch (e) {
     toast.error(getErrorMessage(e) || 'Error sending message');
     console.error('Error sending message', e);
@@ -191,7 +196,7 @@ export async function doListenAppResponses(wasStatusModalOpen = false) {
   console.log('ListenAppResponsesStart');
 
   try {
-    await listenAppResponses(r => onChatResponse(r, 'ListenAppResponses'));
+    await listenAppResponses((r) => onChatResponse(r, 'ListenAppResponses'));
   } catch (e) {
     toast.error('Error listing to app responses');
     console.error('Error listing to app response', e);
