@@ -42,7 +42,11 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
               <div className="flex justify-center items-center">
                 <WithTooltip tooltip={peanutsErrorInfo ?? 'Continue Building Your App!'}>
                   <button
-                    className="mb-6 p-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-200 text-left cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
+                    className={`mb-6 p-4 rounded-xl transition-all duration-200 text-left cursor-pointer border ${
+                      peanutsErrorButton
+                        ? 'bg-gray-500 text-white shadow-md border-gray-400/30'
+                        : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl hover:scale-105 border-white/20 hover:border-white/30 group'
+                    }`}
                     onClick={(event) => {
                       event.preventDefault();
                       doSendMessage(ChatMode.DevelopApp, []);
@@ -50,8 +54,12 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
                     disabled={!!peanutsErrorButton}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="i-ph:rocket-launch text-xl text-white transition-transform duration-200 group-hover:scale-110"></div>
-                      <div className="font-medium text-white transition-transform duration-200 group-hover:scale-105">
+                      <div className={`i-ph:rocket-launch text-xl text-white transition-transform duration-200 ${
+                        peanutsErrorButton ? '' : 'group-hover:scale-110'
+                      }`}></div>
+                      <div className={`font-medium text-white transition-transform duration-200 ${
+                        peanutsErrorButton ? '' : 'group-hover:scale-105'
+                      }`}>
                         {peanutsErrorButton ?? 'Continue Building'}
                       </div>
                     </div>
