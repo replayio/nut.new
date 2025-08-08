@@ -50,6 +50,32 @@ export async function action({ request }: { request: Request }) {
 
     const baseUrl = new URL(request.url).origin;
 
+    // Try to find existing customer by email to avoid duplicates
+    let customerId: string | undefined;
+    try {
+      const existingCustomers = await stripe.customers.list({
+        email: userEmail,
+        limit: 1,
+      });
+      
+      if (existingCustomers.data.length > 0) {
+        customerId = existingCustomers.data[0].id;
+        console.log(`Reusing existing customer: ${customerId} for email: ${userEmail}`);
+        
+        // Update customer metadata with userId
+        await stripe.customers.update(customerId, {
+          metadata: {
+            userId,
+            userEmail,
+          },
+        });
+      } else {
+        console.log(`No existing customer found for email: ${userEmail}, will create new one`);
+      }
+    } catch (error) {
+      console.error('Error checking for existing customer:', error);
+    }
+
     if (type === 'subscription') {
       if (!tier || !SUBSCRIPTION_PRICES[tier]) {
         return new Response(JSON.stringify({ error: 'Valid subscription tier is required' }), {
@@ -84,7 +110,8 @@ export async function action({ request }: { request: Request }) {
           quantity: 1,
         },
       ],
-      customer_email: userEmail,
+      // Use existing customer if found, otherwise let Stripe create a new one
+      ...(customerId ? { customer: customerId } : { customer_email: userEmail }),
       client_reference_id: userId,
       metadata: {
         userId,

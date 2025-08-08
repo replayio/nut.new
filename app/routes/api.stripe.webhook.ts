@@ -152,10 +152,44 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
       return;
     }
 
-    // Extract userId from customer metadata (you'll need to set this when creating customers)
-    const userId = customer.metadata?.userId;
+    console.log('Processing subscription change:', {
+      customerId: customer.id,
+      customerEmail: customer.email,
+      customerMetadata: customer.metadata,
+      subscriptionId: subscription.id,
+    });
+
+    // Extract userId from customer metadata
+    let userId = customer.metadata?.userId;
+    
+    // If no userId in metadata, try to find it by email in other customers
+    if (!userId && customer.email) {
+      console.log(`No userId in customer metadata, searching by email: ${customer.email}`);
+      
+      const customersWithEmail = await stripe.customers.list({
+        email: customer.email,
+        limit: 10,
+      });
+      
+      // Find a customer with userId metadata
+      const customerWithUserId = customersWithEmail.data.find(c => c.metadata?.userId);
+      if (customerWithUserId) {
+        userId = customerWithUserId.metadata.userId;
+        
+        // Update current customer with the userId for future use
+        await stripe.customers.update(customer.id, {
+          metadata: {
+            ...customer.metadata,
+            userId,
+          },
+        });
+        
+        console.log(`Found userId ${userId} from customer ${customerWithUserId.id}, updated current customer`);
+      }
+    }
+    
     if (!userId) {
-      console.error('No userId found in customer metadata');
+      console.error('No userId found in customer metadata or other customers with same email');
       return;
     }
 
