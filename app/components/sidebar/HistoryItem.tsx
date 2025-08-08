@@ -3,7 +3,7 @@ import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
 import { type AppLibraryEntry } from '~/lib/persistence/apps';
 import WithTooltip from '~/components/ui/Tooltip';
-import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
+import { useEditChatTitle } from '~/lib/hooks/useEditChatTitle';
 import { forwardRef, type ForwardedRef } from 'react';
 
 interface HistoryItemProps {

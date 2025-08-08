@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
+import { useEditChatTitle } from '~/lib/hooks/useEditChatTitle';
 import { chatStore } from '~/lib/stores/chat';
 
 export function ChatDescription() {

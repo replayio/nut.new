@@ -1,3 +1,3 @@
 export * from './useSnapScroll';
-export * from './useEditChatDescription';
+export * from './useEditChatTitle';
 export { default } from './useViewport';
