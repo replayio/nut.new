@@ -3,10 +3,9 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import type { Message } from '~/lib/persistence/message';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { clearPendingMessageStatus } from './status';
-import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
-import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY, getLatestAppRepositoryId, parseAppSummaryMessage, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
@@ -17,6 +16,7 @@ import { addAppResponse } from '~/lib/replay/ResponseFilter';
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
   appTitle = atom<string | undefined>(undefined);
+  appSummary = atom<AppSummary | undefined>(undefined);
 
   started = atom<boolean>(false);
   numAborts = atom<number>(0);
@@ -52,6 +52,8 @@ function addResponseEvent(response: ChatResponse) {
 }
 
 export function addChatMessage(message: Message) {
+  // If this is a user message, remember it so we don't add it again when it comes back
+  // from the backend.
   addAppResponse({
     kind: 'message',
     message,
@@ -93,7 +95,19 @@ export function onChatResponse(response: ChatResponse, reason: string) {
     case 'message': {
       const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
 
-      logAppSummaryMessage(response.message, reason);
+      const { message } = response;
+      if (message.category === APP_SUMMARY_CATEGORY) {
+        const appSummary = parseAppSummaryMessage(message);
+        if (appSummary) {
+          const existingSummary = chatStore.appSummary.get();
+          if (!existingSummary || appSummary.iteration > existingSummary.iteration) {
+            chatStore.appSummary.set(appSummary);
+          }
+        }
+
+        // Diagnostic for tracking down why the UI doesn't update as expected.
+        console.log('AppSummary', reason, appSummary?.iteration);
+      }
 
       addChatMessage(response.message);
 

@@ -18,7 +18,6 @@ import { chatStore } from '~/lib/stores/chat';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  appSummary?: AppSummary;
   mobileActiveTab?: 'chat' | 'planning' | 'preview';
 }
 
@@ -39,7 +38,7 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
