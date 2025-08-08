@@ -12,11 +12,13 @@ type ResponseCallback = (response: any) => void;
 export class NutAPIError extends Error {
   method: string;
   status: number;
+  responseText: string;
 
-  constructor(method: string, status: number) {
-    super(`NutAPI error: ${method} ${status}`);
+  constructor(method: string, status: number, responseText: string) {
+    super(`NutAPI error: ${method} ${status} - ${responseText}`);
     this.method = method;
     this.status = status;
+    this.responseText = responseText;
   }
 }
 
@@ -41,6 +43,10 @@ export async function callNutAPI(method: string, request: any, responseCallback?
     const response = await fetch(url, fetchOptions);
     if (!response.body) {
       throw new Error('No response body for streaming');
+    }
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new NutAPIError(method, response.status, errorText);
     }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -69,7 +75,8 @@ export async function callNutAPI(method: string, request: any, responseCallback?
     // Use native fetch for non-streaming
     const response = await fetch(url, fetchOptions);
     if (!response.ok) {
-      throw new NutAPIError(method, response.status);
+      const errorText = await response.text();
+      throw new NutAPIError(method, response.status, errorText);
     }
     return response.json();
   }

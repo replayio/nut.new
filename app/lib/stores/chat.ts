@@ -10,7 +10,7 @@ import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistenc
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
-import { callNutAPI } from '~/lib/replay/NutAPI';
+import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
 import { statusModalStore } from './statusModal';
 
 export class ChatStore {
@@ -66,11 +66,21 @@ export function doAbortChat() {
   }
 }
 
+function getErrorMessage(e: unknown): string {
+  if (e instanceof NutAPIError) {
+    return e.responseText;
+  }
+  return "";
+}
+
 export async function doSendMessage(mode: ChatMode, messages: Message[], references?: ChatReference[]) {
   const numAbortsAtStart = chatStore.numAborts.get();
 
   if (mode == ChatMode.DevelopApp) {
     await refreshPeanutsStore();
+
+  console.log('WTF', peanutsStore.peanutsRemaining.get(), peanutsStore.peanutsError.get());
+
     if (peanutsStore.peanutsError.get()) {
       toast.error(peanutsStore.peanutsError.get());
       return;
@@ -119,7 +129,12 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
     }
   };
 
-  await sendChatMessage(mode, messages, references ?? [], onResponse);
+  try {
+    await sendChatMessage(mode, messages, references ?? [], onResponse);
+  } catch (e) {
+    toast.error(getErrorMessage(e) || 'Error sending message');
+    console.error('Error sending message', e);
+  }
 
   if (chatStore.numAborts.get() != numAbortsAtStart) {
     return;
@@ -207,5 +222,8 @@ export async function doListenAppResponses() {
   }
 
   chatStore.listenResponses.set(false);
+
+  await refreshPeanutsStore();
+
   statusModalStore.open();
 }

@@ -14,7 +14,8 @@ interface StatusModalProps {
 
 export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinueBuilding }) => {
   const isOpen = useStore(statusModalStore.isOpen);
-  const peanutsError = useStore(peanutsStore.peanutsError);
+  const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
+  const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
 
   const features = appSummary.features || [];
   const completedFeatures = features.filter(
@@ -219,9 +220,9 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
               >
-                {!isFullyComplete && peanutsError && (
+                {!isFullyComplete && peanutsErrorButton && (
                   <div className="flex justify-center items-center w-full">
-                    <WithTooltip tooltip={peanutsError}>
+                    <WithTooltip tooltip={peanutsErrorInfo}>
                       <button
                         onClick={handleContinueBuilding}
                         disabled={true}
@@ -233,7 +234,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                     </WithTooltip>
                   </div>
                 )}
-                {!isFullyComplete && !peanutsError && (
+                {!isFullyComplete && !peanutsErrorButton && (
                   <div className="flex justify-center items-center w-full">
                     <button
                       onClick={handleContinueBuilding}

@@ -29,7 +29,8 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
   ).length;
   const totalFeatures = appSummary?.features?.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
-  const peanutsError = useStore(peanutsStore.peanutsError);
+  const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
+  const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
 
   return (
@@ -39,19 +40,19 @@ const PlanView = ({ appSummary }: PlanViewProps) => {
           <div>
             {!listenResponses && appSummaryHasPendingFeature(appSummary) && !isFullyComplete && (
               <div className="flex justify-center items-center">
-                <WithTooltip tooltip={peanutsError ?? 'Continue Building Your App!'}>
+                <WithTooltip tooltip={peanutsErrorInfo ?? 'Continue Building Your App!'}>
                   <button
                     className="mb-6 p-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-200 text-left cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
                     onClick={(event) => {
                       event.preventDefault();
                       doSendMessage(ChatMode.DevelopApp, []);
                     }}
-                    disabled={!!peanutsError}
+                    disabled={!!peanutsErrorButton}
                   >
                     <div className="flex items-center gap-2">
                       <div className="i-ph:rocket-launch text-xl text-white transition-transform duration-200 group-hover:scale-110"></div>
                       <div className="font-medium text-white transition-transform duration-200 group-hover:scale-105">
-                        Continue Building
+                        {peanutsErrorButton ?? 'Continue Building'}
                       </div>
                     </div>
                   </button>
