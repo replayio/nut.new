@@ -4,6 +4,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import { Chat } from '~/components/chat/ChatComponent/Chat.client';
 import { PageContainer } from '~/layout/PageContainer';
+import { useSubscriptionSync } from '~/hooks/useSubscriptionSync';
 export const meta: MetaFunction = () => {
   return [{ title: 'Nut' }];
 };
@@ -13,6 +14,9 @@ export const loader = () => json({});
 const Nothing = () => null;
 
 export default function Index() {
+  // Sync subscription status periodically
+  useSubscriptionSync();
+
   return (
     <PageContainer>
       <Suspense fallback={<Nothing />}>

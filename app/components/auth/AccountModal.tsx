@@ -10,7 +10,7 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus } from '~/lib/stripe/client';
+import { createTopoffCheckout, checkSubscriptionStatus, syncSubscription } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 
@@ -30,6 +30,11 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   const reloadAccountData = async () => {
     setLoading(true);
+
+    // First sync the subscription with Stripe to ensure peanuts are up to date
+    if (user?.email && user?.id) {
+      await syncSubscription(user.email, user.id);
+    }
 
     // Load basic data first
     const [history, subscription] = await Promise.all([

@@ -101,6 +101,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.client_reference_id;
   const metadata = session.metadata;
 
+  console.log('Processing checkout completion:', {
+    userId,
+    metadata,
+    customer: session.customer,
+    customerEmail: session.customer_details?.email,
+  });
+
   if (!userId || !metadata) {
     console.error('Missing userId or metadata in checkout session');
     return;
@@ -112,6 +119,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       await stripe.customers.update(session.customer as string, {
         metadata: {
           userId,
+          userEmail: session.customer_details?.email || '',
         },
       });
       console.log(`Updated customer ${session.customer} with userId ${userId}`);
@@ -119,17 +127,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     if (metadata.type === 'topoff') {
       // Handle one-time peanut purchase
+      console.log(`Processing peanut top-up for user ${userId}`);
       await callNutAPI('add-peanuts', {
         userId,
         peanuts: TOPOFF_PEANUTS,
       });
-      console.log(`Added ${TOPOFF_PEANUTS} peanuts for user ${userId}`);
+      console.log(`✅ Successfully added ${TOPOFF_PEANUTS} peanuts for user ${userId}`);
     } else if (metadata.type === 'subscription' && metadata.tier) {
       // Handle subscription creation - peanuts will be set via subscription webhook
       console.log(`Subscription checkout completed for user ${userId}, tier: ${metadata.tier}`);
     }
   } catch (error) {
-    console.error('Error handling checkout completion:', error);
+    console.error('❌ Error handling checkout completion:', error);
   }
 }
 

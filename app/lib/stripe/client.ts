@@ -162,3 +162,29 @@ export async function checkSubscriptionStatus(userEmail: string) {
     return { hasSubscription: false, subscription: null };
   }
 }
+
+/**
+ * Sync subscription status with backend (more reliable than webhooks)
+ */
+export async function syncSubscription(userEmail: string, userId: string) {
+  try {
+    const response = await fetch('/api/stripe/sync-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userEmail, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to sync subscription');
+    }
+
+    const data = await response.json();
+    console.log('Subscription sync result:', data.message);
+    return data;
+  } catch (error) {
+    console.error('Error syncing subscription:', error);
+    return { synced: false, hasSubscription: false };
+  }
+}
