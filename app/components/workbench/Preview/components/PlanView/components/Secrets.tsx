@@ -94,23 +94,31 @@ const Secrets = ({ appSummary }: SecretsProps) => {
     const isBuiltin = BUILTIN_SECRET_NAMES.includes(secret.name);
     const currentValue = secret.value || '';
     const isSaving = secret.saving;
+    const isSet = secret.set;
 
     return (
       <div
         key={index}
-        className="p-4 border border-bolt-elements-borderColor/30 rounded-xl bg-bolt-elements-background-depth-2 shadow-sm hover:shadow-md transition-all duration-200 hover:border-bolt-elements-borderColor/50"
+        className={classNames(
+          "p-4 border rounded-xl shadow-sm hover:shadow-md transition-all duration-200",
+          isSet
+            ? "border-gray-300 bg-gray-50 hover:border-gray-400"
+            : "border-bolt-elements-borderColor/30 bg-bolt-elements-background-depth-2 hover:border-bolt-elements-borderColor/50"
+        )}
       >
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-semibold text-bolt-elements-textHeading">{secret.name}</span>
           <span
             className={classNames(
               'px-3 py-1.5 text-xs font-medium rounded-full shadow-sm border transition-all duration-200',
-              isBuiltin
+              isSet
+                ? 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-gray-200 hover:shadow-md'
+                : isBuiltin
                 ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200 hover:shadow-md'
                 : 'bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-yellow-200 hover:shadow-md',
             )}
           >
-            {isBuiltin ? 'Built-in' : 'Required'}
+            {isSet ? 'Set' : isBuiltin ? 'Built-in' : 'Required'}
           </span>
         </div>
 
@@ -132,8 +140,13 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                 type="password"
                 value={currentValue}
                 onChange={(e) => handleSecretValueChange(secret.name, e.target.value)}
-                placeholder="Enter secret value..."
-                className="w-full px-4 py-3 text-sm border border-bolt-elements-borderColor/60 rounded-xl bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                placeholder={isSet ? "Click to change secret value..." : "Enter secret value..."}
+                className={classNames(
+                  "w-full px-4 py-3 text-sm border rounded-xl transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400",
+                  isSet
+                    ? "border-gray-300 bg-gray-100 text-gray-700 placeholder-gray-500 hover:bg-gray-200"
+                    : "border-bolt-elements-borderColor/60 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary"
+                )}
               />
             </div>
 
@@ -145,6 +158,8 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                   'px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 shadow-sm',
                   isSaving || !currentValue.trim()
                     ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary cursor-not-allowed border border-bolt-elements-borderColor/30'
+                    : isSet
+                    ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/20 hover:shadow-md hover:scale-105 active:scale-95'
                     : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:shadow-md hover:scale-105 active:scale-95',
                 )}
               >
@@ -154,14 +169,14 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                     Saving...
                   </span>
                 ) : (
-                  'Save Changes'
+                  isSet ? 'Update Secret' : 'Save Changes'
                 )}
               </button>
             </div>
           </div>
         )}
 
-        {!currentValue && (
+        {!currentValue && !isSet && (
           <div
             className={classNames(
               'text-xs p-3 rounded-xl mt-4 border shadow-sm',
@@ -181,6 +196,15 @@ const Secrets = ({ appSummary }: SecretsProps) => {
                 This secret must be added before using the app
               </span>
             )}
+          </div>
+        )}
+
+        {isSet && (
+          <div className="text-xs p-3 rounded-xl mt-4 border shadow-sm bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-gray-200/50">
+            <span className="flex items-center gap-2">
+              <div className="i-ph:check-circle-duotone text-gray-600 text-sm"></div>
+              This secret is configured and ready to use
+            </span>
           </div>
         )}
       </div>
