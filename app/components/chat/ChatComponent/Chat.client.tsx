@@ -12,6 +12,7 @@ import { Unauthorized } from '~/components/chat/Unauthorized';
 import { navigateApp } from '~/utils/nut';
 import { useStore } from '@nanostores/react';
 import { statusModalStore } from '~/lib/stores/statusModal';
+import { clearAppResponses } from '~/lib/replay/ResponseFilter';
 
 async function isAppAccessible(appId: string) {
   try {
@@ -86,6 +87,7 @@ export function Chat() {
         return;
       }
 
+      clearAppResponses();
       await updateAppState(appId);
 
       // Always check for ongoing work when we first start the chat.
@@ -123,6 +125,8 @@ export function Chat() {
       loadApp(initialAppId);
     }
   }, []);
+
+  console.log('ChatClient', ready, chatStore.started.get(), chatStore.appSummary.get(), chatStore.messages.get());
 
   return (
     <>
