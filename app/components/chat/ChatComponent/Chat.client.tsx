@@ -80,6 +80,17 @@ export function Chat() {
     setIsCopying(true);
     try {
       const newAppId = await database.copyApp(initialAppId);
+      
+      // Track new chat creation via copy with Segment
+      if (window.analytics) {
+        window.analytics.track('New Chat Created', {
+          appId: newAppId,
+          originalAppId: initialAppId,
+          timestamp: new Date().toISOString(),
+          method: 'copy_existing',
+        });
+      }
+      
       toast.success('App copied successfully!');
       navigateApp(newAppId);
       await loadApp(newAppId);
