@@ -5,7 +5,6 @@
 // multiple times.
 
 import type { ChatResponse } from '~/lib/persistence/response';
-import type { ChatResponseCallback } from './SendChatMessage';
 import { createScopedLogger } from '~/utils/logger';
 import { assert } from '~/utils/nut';
 
@@ -45,6 +44,7 @@ function responseMatches(a: ChatResponse, b: ChatResponse) {
   }
 }
 
+// Returns false on a duplicate response that should be ignored.
 export function addAppResponse(response: ChatResponse) {
   let existing = gResponsesByTime.get(response.time);
   if (existing && existing.some((r) => responseMatches(r, response))) {
@@ -64,14 +64,6 @@ export function addAppResponse(response: ChatResponse) {
   }
   existing.push(response);
   return true;
-}
-
-export function filterOnResponseCallback(onResponse: ChatResponseCallback): ChatResponseCallback {
-  return (response: ChatResponse) => {
-    if (addAppResponse(response)) {
-      onResponse(response);
-    }
-  };
 }
 
 export function clearAppResponses() {

@@ -13,7 +13,7 @@ import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
-import { addAppResponse, clearAppResponses, filterOnResponseCallback, getLastResponseTime } from './ResponseFilter';
+import { addAppResponse, clearAppResponses, getLastResponseTime } from './ResponseFilter';
 
 // Whether to send simulation data with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -98,8 +98,6 @@ export async function sendChatMessage(
   references: ChatReference[],
   onResponse: ChatResponseCallback,
 ) {
-  onResponse = filterOnResponseCallback(onResponse);
-
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
@@ -143,8 +141,6 @@ export async function getExistingAppResponses(appId: string): Promise<ChatRespon
 
 // Stream any responses from ongoing work that is modifying the app.
 export async function listenAppResponses(onResponse: ChatResponseCallback) {
-  onResponse = filterOnResponseCallback(onResponse);
-
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 

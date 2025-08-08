@@ -1,8 +1,8 @@
-import { type AppSummary, type AppDetail } from '~/lib/persistence/messageAppSummary';
+import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { chatStore } from '~/lib/stores/chat';
+import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 
@@ -61,7 +61,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
     try {
       const value = secrets.find((s) => s.name == secretName)?.value;
 
-      await callNutAPI('set-app-secrets', {
+      const { response } = await callNutAPI('set-app-secrets', {
         appId,
         secrets: [
           {
@@ -70,6 +70,10 @@ const Secrets = ({ appSummary }: SecretsProps) => {
           },
         ],
       });
+
+      if (response) {
+        onChatResponse(response, 'SetAppSecrets');
+      }
 
       toast.success('Secret saved successfully');
     } catch (error) {
