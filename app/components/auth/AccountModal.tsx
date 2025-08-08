@@ -155,6 +155,13 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleAddPeanuts = async () => {
+    // TODO: When we have actual logic here, update so it shows how many peanuts were added
+    if (window.analytics) {
+      window.analytics.track('Peanuts Added', {
+        amount: 2000,
+        timestamp: new Date().toISOString(),
+      });
+    }
     setLoading(true);
     await addPeanuts(2000);
     reloadAccountData();
