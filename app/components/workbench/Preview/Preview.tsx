@@ -6,6 +6,7 @@ import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
+import TestAccountsDropdown from '~/components/workbench/TestAccountsDropdown';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -212,6 +213,8 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
             />
           </div>
 
+          <TestAccountsDropdown iframeRef={iframeRef} setIframeUrl={setIframeUrl} />
+
           {activeTab === 'preview' && !isSmallViewport && (
             <IconButton
               icon="i-ph:devices"
@@ -246,6 +249,7 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
             setSelectionPoint={setSelectionPoint}
             startResizing={startResizing}
             widthPercent={widthPercent}
+            setIframeUrl={setIframeUrl}
           />
         )}
       </div>
