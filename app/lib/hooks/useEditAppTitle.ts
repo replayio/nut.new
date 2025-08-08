@@ -117,6 +117,10 @@ export function useEditAppTitle({
 
         await database.updateAppTitle(appId, currentTitle);
         toast.success('App title updated successfully');
+
+        if (appId == currentAppId) {
+          chatStore.appTitle.set(currentTitle);
+        }
       } catch (error) {
         toast.error('Failed to update chat title: ' + (error as Error).message);
       }
