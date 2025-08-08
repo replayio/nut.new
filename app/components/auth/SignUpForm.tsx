@@ -40,6 +40,24 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         throw error;
       }
 
+      if (window.analytics) {
+        window.analytics.track('User Signed Up', {
+          method: 'email',
+          email: data.user?.email,
+          userId: data.user?.id,
+          timestamp: new Date().toISOString(),
+        });
+
+        if (data.user?.id && data.user?.email) {
+          window.analytics.identify(data.user.id, {
+            email: data.user.email,
+            signupMethod: 'email',
+            signupDate: new Date().toISOString(),
+            createdAt: data.user.created_at,
+          });
+        }
+      }
+
       onSuccess('Check your email for the confirmation link!');
     } catch (error) {
       const authError = error as AuthError;
@@ -64,6 +82,26 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
     } = await getSupabase().auth.getUser();
     if (user?.email && isChecked) {
       addIntercomUser(user.email);
+    }
+
+    // Track signup event with Segment for Google OAuth
+    if (window.analytics && user) {
+      window.analytics.track('User Signed Up', {
+        method: 'google_oauth',
+        email: user.email,
+        userId: user.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Identify the user in Segment
+      if (user.id && user.email) {
+        window.analytics.identify(user.id, {
+          email: user.email,
+          signupMethod: 'google_oauth',
+          signupDate: new Date().toISOString(),
+          createdAt: user.created_at,
+        });
+      }
     }
   };
 

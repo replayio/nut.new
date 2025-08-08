@@ -2,6 +2,10 @@ interface Window {
   showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
   webkitSpeechRecognition: typeof SpeechRecognition;
   SpeechRecognition: typeof SpeechRecognition;
+  analytics?: {
+    track: (event: string, properties?: Record<string, any>) => void;
+    identify: (userId: string, traits?: Record<string, any>) => void;
+  };
 }
 
 interface Performance {

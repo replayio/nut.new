@@ -26,10 +26,18 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
     setIsProcessing(true);
 
     try {
-      const { error } = await getSupabase().auth.signInWithPassword({ email, password });
+      const { data, error } = await getSupabase().auth.signInWithPassword({ email, password });
 
       if (error) {
         throw error;
+      }
+
+      if (window.analytics && data.user) {
+        window.analytics.identify(data.user.id, {
+          email: data.user.email,
+          lastSignIn: new Date().toISOString(),
+          signInMethod: 'email',
+        });
       }
     } catch (error) {
       const authError = error as AuthError;
@@ -49,6 +57,19 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
 
       if (error) {
         throw error;
+      }
+
+      try {
+        const { data: { user } } = await getSupabase().auth.getUser();
+        if (window.analytics && user) {
+          window.analytics.identify(user.id, {
+            email: user.email,
+            lastSignIn: new Date().toISOString(),
+            signInMethod: 'google_oauth',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to identify user after Google OAuth:', err);
       }
     } catch (error) {
       const authError = error as AuthError;
