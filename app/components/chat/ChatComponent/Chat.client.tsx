@@ -14,6 +14,7 @@ import { NutAPIError } from '~/lib/replay/NutAPI';
 import { logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import { Unauthorized } from '~/components/chat/Unauthorized';
 import { navigateApp } from '~/utils/nut';
+import { useStore } from '@nanostores/react';
 
 async function isAppAccessible(appId: string) {
   try {
@@ -35,6 +36,18 @@ export function Chat() {
   const [ready, setReady] = useState<boolean>(!initialAppId);
   const [unauthorized, setUnauthorized] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState(false);
+
+  // Subscribe to app title changes to update document title
+  const appTitle = useStore(chatStore.appTitle);
+
+  // Update document title when app title changes
+  useEffect(() => {
+    if (appTitle) {
+      document.title = `Nut: ${appTitle}`;
+    } else {
+      document.title = 'Nut';
+    }
+  }, [appTitle]);
 
   const loadApp = async (appId: string) => {
     try {
