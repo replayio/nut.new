@@ -10,6 +10,7 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
 // Peanut amounts for each subscription tier
 const SUBSCRIPTION_PEANUTS = {
+  free: 0, // 0 peanuts per month
   starter: 2000, // 2,000 peanuts per month
   builder: 5000, // 5,000 peanuts per month
   pro: 12000, // 12,000 peanuts per month (20% discount mentioned)
@@ -153,11 +154,13 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     const priceId = subscription.items.data[0]?.price.id;
     let tier: keyof typeof SUBSCRIPTION_PEANUTS | null = null;
 
-    if (priceId === 'price_1RtE7hEfKucJn4vkXKpmDNha') {
+    if (priceId === 'price_1Rts7PEfKucJn4vkcznfKO4G') {
+      tier = 'free';
+    } else if (priceId === 'price_1RtqRQEfKucJn4vkOXRndPjt') {
       tier = 'starter';
-    } else if (priceId === 'price_1RtE9TEfKucJn4vkARIPfDb5') {
+    } else if (priceId === 'price_1Rts7dEfKucJn4vkE4REeRQH') {
       tier = 'builder';
-    } else if (priceId === 'price_1RtEBDEfKucJn4vkInF3CEvZ') {
+    } else if (priceId === 'price_1Rts7qEfKucJn4vkQypCX7cP') {
       tier = 'pro';
     }
 

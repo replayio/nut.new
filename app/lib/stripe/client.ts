@@ -27,7 +27,7 @@ const initializeStripe = () => {
 
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
-  tier?: 'starter' | 'builder' | 'pro';
+  tier?: 'free' | 'starter' | 'builder' | 'pro';
   userId: string;
   userEmail: string;
 }
@@ -74,7 +74,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
  * Create subscription checkout for a specific tier
  */
 export async function createSubscriptionCheckout(
-  tier: 'starter' | 'builder' | 'pro',
+  tier: 'free' | 'starter' | 'builder' | 'pro',
   userId: string,
   userEmail: string,
 ): Promise<void> {
@@ -106,6 +106,13 @@ export async function getStripe() {
 
 // Subscription tier information
 export const SUBSCRIPTION_TIERS = {
+  free: {
+    name: 'Free',
+    price: 0,
+    peanuts: 500,
+    description: 'Our free tier to get you started. No limits on any features. Go nuts!',
+    features: ['500 Peanuts per month', 'Pay-as-you-go to top off balance'],
+  },
   starter: {
     name: 'Starter',
     price: 20,
