@@ -14,7 +14,8 @@ interface SecretsProps {
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 interface SecretInfo {
-  key: string;
+  name: string;
+  description: string;
   value?: string; // Any value set by the client.
   set: boolean;
   saving: boolean;
@@ -24,7 +25,8 @@ function buildSecretInfo(appSummary: AppSummary): SecretInfo[] {
   const secrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
 
   return secrets.map((s) => ({
-    key: s.name,
+    name: s.name,
+    description: s.description,
     value: undefined,
     set: appSummary.setSecrets?.includes(s.name) ?? false,
     saving: false,
@@ -39,7 +41,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
   const handleSecretValueChange = (secretName: string, value: string) => {
     setSecrets((prev) => {
-      const secret = prev.find((s) => s.key == secretName);
+      const secret = prev.find((s) => s.name == secretName);
       if (secret) {
         secret.value = value;
         secret.set = false;
@@ -50,7 +52,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
 
   const handleSaveSecret = async (secretName: string) => {
     setSecrets((prev) => {
-      const secret = prev.find((s) => s.key == secretName);
+      const secret = prev.find((s) => s.name == secretName);
       if (secret) {
         secret.saving = true;
       }
@@ -58,7 +60,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
     });
 
     try {
-      const value = secrets.find((s) => s.key == secretName)?.value;
+      const value = secrets.find((s) => s.name == secretName)?.value;
       if (!value) {
         throw new Error('Secret value is required');
       }
@@ -79,7 +81,7 @@ const Secrets = ({ appSummary }: SecretsProps) => {
       console.error('Failed to save secret:', error);
     } finally {
       setSecrets((prev) => {
-        const secret = prev.find((s) => s.key == secretName);
+        const secret = prev.find((s) => s.name == secretName);
         if (secret) {
           secret.saving = false;
         }
@@ -88,10 +90,10 @@ const Secrets = ({ appSummary }: SecretsProps) => {
     }
   };
 
-  const renderSecret = (secret: AppDetail, index: number) => {
+  const renderSecret = (secret: SecretInfo, index: number) => {
     const isBuiltin = BUILTIN_SECRET_NAMES.includes(secret.name);
-    const currentValue = secretValues[secret.name] || '';
-    const isSaving = savingStates[secret.name] || false;
+    const currentValue = secret.value || '';
+    const isSaving = secret.saving;
 
     return (
       <div
