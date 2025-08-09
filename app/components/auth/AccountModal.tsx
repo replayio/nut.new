@@ -25,8 +25,6 @@ interface AccountModalProps {
   onClose: () => void;
 }
 
-const DEFAULT_SUBSCRIPTION_PEANUTS = 2000;
-
 export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
@@ -321,7 +319,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!stripeSubscription &&!loading && (
+          {!stripeSubscription && !loading && (
             <button
               onClick={handleSubscriptionToggle}
               disabled={loading}
@@ -333,9 +331,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               )}
             >
               <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">
-                Add Subscription
-              </span>
+              <span className="transition-transform duration-200 group-hover:scale-105">Add Subscription</span>
             </button>
           )}
 
