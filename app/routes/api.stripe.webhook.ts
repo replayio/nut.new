@@ -8,16 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// Peanut amounts for each subscription tier
-const SUBSCRIPTION_PEANUTS = {
-  free: 0, // 0 peanuts per month
-  starter: 2000, // 2,000 peanuts per month
-  builder: 5000, // 5,000 peanuts per month
-  pro: 12000, // 12,000 peanuts per month (20% discount mentioned)
-} as const;
-
-const TOPOFF_PEANUTS = 2000; // 2,000 peanuts for $20 top-off
-
 export async function action({ request }: { request: Request }) {
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -40,7 +30,6 @@ export async function action({ request }: { request: Request }) {
   let event: Stripe.Event;
 
   try {
-    // Verify the webhook signature
     event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
@@ -52,19 +41,6 @@ export async function action({ request }: { request: Request }) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(session);
-        break;
-      }
-
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionChange(subscription);
-        break;
-      }
-
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionCanceled(subscription);
@@ -73,8 +49,8 @@ export async function action({ request }: { request: Request }) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        // Handle recurring subscription payments
-        if ((invoice as any).subscription) {
+        // Handle recurring subscription payments (not initial payments)
+        if ((invoice as any).subscription && invoice.billing_reason === 'subscription_cycle') {
           await handleSubscriptionRenewal(invoice);
         }
         break;
@@ -97,134 +73,7 @@ export async function action({ request }: { request: Request }) {
   }
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const userId = session.client_reference_id;
-  const metadata = session.metadata;
 
-  console.log('Processing checkout completion:', {
-    userId,
-    metadata,
-    customer: session.customer,
-    customerEmail: session.customer_details?.email,
-  });
-
-  if (!userId || !metadata) {
-    console.error('Missing userId or metadata in checkout session');
-    return;
-  }
-
-  try {
-    // IMPORTANT: Update the customer with userId metadata for future webhooks
-    if (session.customer) {
-      await stripe.customers.update(session.customer as string, {
-        metadata: {
-          userId,
-          userEmail: session.customer_details?.email || '',
-        },
-      });
-      console.log(`Updated customer ${session.customer} with userId ${userId}`);
-    }
-
-    if (metadata.type === 'topoff') {
-      // Handle one-time peanut purchase
-      console.log(`Processing peanut top-up for user ${userId}`);
-      await callNutAPI('add-peanuts', {
-        userId,
-        peanuts: TOPOFF_PEANUTS,
-      });
-      console.log(`✅ Successfully added ${TOPOFF_PEANUTS} peanuts for user ${userId}`);
-    } else if (metadata.type === 'subscription' && metadata.tier) {
-      // Handle subscription creation - peanuts will be set via subscription webhook
-      console.log(`Subscription checkout completed for user ${userId}, tier: ${metadata.tier}`);
-    }
-  } catch (error) {
-    console.error('❌ Error handling checkout completion:', error);
-  }
-}
-
-async function handleSubscriptionChange(subscription: Stripe.Subscription) {
-  try {
-    // Get the customer and find the userId
-    const customer = await stripe.customers.retrieve(subscription.customer as string);
-
-    if (!customer || customer.deleted) {
-      console.error('Customer not found for subscription:', subscription.id);
-      return;
-    }
-
-    console.log('Processing subscription change:', {
-      customerId: customer.id,
-      customerEmail: customer.email,
-      customerMetadata: customer.metadata,
-      subscriptionId: subscription.id,
-    });
-
-    // Extract userId from customer metadata
-    let userId = customer.metadata?.userId;
-    
-    // If no userId in metadata, try to find it by email in other customers
-    if (!userId && customer.email) {
-      console.log(`No userId in customer metadata, searching by email: ${customer.email}`);
-      
-      const customersWithEmail = await stripe.customers.list({
-        email: customer.email,
-        limit: 10,
-      });
-      
-      // Find a customer with userId metadata
-      const customerWithUserId = customersWithEmail.data.find(c => c.metadata?.userId);
-      if (customerWithUserId) {
-        userId = customerWithUserId.metadata.userId;
-        
-        // Update current customer with the userId for future use
-        await stripe.customers.update(customer.id, {
-          metadata: {
-            ...customer.metadata,
-            userId,
-          },
-        });
-        
-        console.log(`Found userId ${userId} from customer ${customerWithUserId.id}, updated current customer`);
-      }
-    }
-    
-    if (!userId) {
-      console.error('No userId found in customer metadata or other customers with same email');
-      return;
-    }
-
-    // Determine the subscription tier from the price
-    const priceId = subscription.items.data[0]?.price.id;
-    let tier: keyof typeof SUBSCRIPTION_PEANUTS | null = null;
-
-    if (priceId === 'price_1Rts7PEfKucJn4vkcznfKO4G') {
-      tier = 'free';
-    } else if (priceId === 'price_1RtqRQEfKucJn4vkOXRndPjt') {
-      tier = 'starter';
-    } else if (priceId === 'price_1Rts7dEfKucJn4vkE4REeRQH') {
-      tier = 'builder';
-    } else if (priceId === 'price_1Rts7qEfKucJn4vkQypCX7cP') {
-      tier = 'pro';
-    }
-
-    if (!tier) {
-      console.error('Unknown subscription tier for price:', priceId);
-      return;
-    }
-
-    const peanuts = SUBSCRIPTION_PEANUTS[tier];
-
-    // Set the subscription in your system
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts,
-    });
-
-    console.log(`Set ${tier} subscription (${peanuts} peanuts) for user ${userId}`);
-  } catch (error) {
-    console.error('Error handling subscription change:', error);
-  }
-}
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
   try {

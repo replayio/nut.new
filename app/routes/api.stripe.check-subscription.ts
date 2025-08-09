@@ -74,7 +74,7 @@ export async function action({ request }: { request: Request }) {
 
     if (priceId === 'price_1Rts7PEfKucJn4vkcznfKO4G') {
       tier = 'free';
-      peanuts = 0;
+      peanuts = 500;
     } else if (priceId === 'price_1RtqRQEfKucJn4vkOXRndPjt') {
       tier = 'starter';
       peanuts = 2000;

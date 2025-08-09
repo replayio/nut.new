@@ -5,7 +5,6 @@ import {
   type AccountSubscription,
 } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
@@ -13,6 +12,8 @@ import { useStore } from '@nanostores/react';
 import { createTopoffCheckout, checkSubscriptionStatus, syncSubscription, cancelSubscription } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
+import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
+import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -27,6 +28,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const reloadAccountData = async () => {
     setLoading(true);
@@ -155,7 +157,11 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const handleSubscriptionToggle = async () => {
     if (subscription) {
       // TODO: Implement subscription cancellation via Stripe Customer Portal
-      toast.info('Please contact support to cancel your subscription');
+      stripeStatusModalActions.showInfo(
+        'Contact Support',
+        'Please contact support to cancel your subscription.',
+        'Our support team will help you manage your subscription settings.'
+      );
     } else {
       // Open subscription modal to choose a tier
       openSubscriptionModal();
@@ -165,7 +171,11 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   const handleAddPeanuts = async () => {
     if (!user?.id || !user?.email) {
-      toast.error('Please sign in to add peanuts');
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to add peanuts.',
+        'You need to be signed in to purchase peanut top-ups.'
+      );
       return;
     }
 
@@ -174,35 +184,49 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       // User will be redirected to Stripe Checkout
     } catch (error) {
       console.error('Error creating peanut top-off:', error);
-      toast.error('Failed to create checkout. Please try again.');
+      stripeStatusModalActions.showError(
+        'Checkout Failed',
+        'We couldn\'t create the checkout session.',
+        'Please try again in a few moments, or contact support if the issue persists.'
+      );
     }
   };
 
-  const handleCancelSubscription = async () => {
+  const handleCancelSubscription = () => {
     if (!user?.email) {
-      toast.error('Please sign in to cancel subscription');
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to cancel your subscription.',
+        'You need to be signed in to manage your subscription settings.'
+      );
       return;
     }
 
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      'Are you sure you want to cancel your subscription?\n\n' +
-      'Your subscription will remain active until the end of your current billing period, ' +
-      'and you\'ll keep access to your remaining peanuts.'
-    );
+    // Show confirmation modal
+    setShowCancelConfirm(true);
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  const confirmCancelSubscription = async () => {
+    setShowCancelConfirm(false);
+    
+    if (!user?.email) return;
 
     try {
       await cancelSubscription(user.email, false); // Cancel at period end
-      toast.success('Subscription canceled. You\'ll have access until your current billing period ends.');
+      stripeStatusModalActions.showSuccess(
+        '✅ Subscription Canceled',
+        'Your subscription has been successfully canceled.',
+        'You\'ll continue to have access until the end of your current billing period, and you\'ll keep access to your remaining peanuts.'
+      );
       // Reload data to show updated subscription status
       reloadAccountData();
     } catch (error) {
       console.error('Error canceling subscription:', error);
-      toast.error('Failed to cancel subscription. Please try again.');
+      stripeStatusModalActions.showError(
+        'Cancellation Failed',
+        'We couldn\'t cancel your subscription at this time.',
+        'Please try again in a few moments, or contact support if the issue persists.'
+      );
     }
   };
 
@@ -290,14 +314,11 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          <button
+          {!stripeSubscription && <button
             onClick={handleSubscriptionToggle}
             disabled={loading}
             className={classNames(
-              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-              subscription
-                ? 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600'
-                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
               {
                 'opacity-60 cursor-not-allowed hover:scale-100': loading,
               },
@@ -307,9 +328,9 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             <span className="transition-transform duration-200 group-hover:scale-105">
               Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
             </span>
-          </button>
+          </button>}
 
-          <button
+          {stripeSubscription && <button
             onClick={handleAddPeanuts}
             disabled={loading}
             className={classNames(
@@ -331,7 +352,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                 <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
               </>
             )}
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -363,6 +384,13 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmCancelModal
+        isOpen={showCancelConfirm}
+        onConfirm={confirmCancelSubscription}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 };

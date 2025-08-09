@@ -18,6 +18,7 @@ import { GlobalAccountModal } from './components/auth/GlobalAccountModal';
 import { GlobalAuthModal } from './components/auth/GlobalAuthModal';
 import AppHistoryModal from './components/workbench/VesionHistory/AppHistoryModal';
 import { GlobalSubscriptionModal } from './components/subscription/GlobalSubscriptionModal';
+import { GlobalStripeStatusModal } from './components/stripe/GlobalStripeStatusModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
@@ -216,6 +217,7 @@ export default function App() {
         <GlobalAuthModal />
         <AppHistoryModal />
         <GlobalSubscriptionModal />
+        <GlobalStripeStatusModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />

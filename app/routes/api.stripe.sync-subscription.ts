@@ -32,7 +32,7 @@ async function callNutAPIWithUserId(method: string, request: any): Promise<any> 
 
 // Peanut amounts for each subscription tier
 const SUBSCRIPTION_PEANUTS = {
-  free: 0,
+  free: 500,
   starter: 2000,
   builder: 5000,
   pro: 12000,

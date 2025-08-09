@@ -5,6 +5,7 @@ import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import { Chat } from '~/components/chat/ChatComponent/Chat.client';
 import { PageContainer } from '~/layout/PageContainer';
 import { useSubscriptionSync } from '~/hooks/useSubscriptionSync';
+import { useStripeCallback } from '~/hooks/useStripeCallback';
 export const meta: MetaFunction = () => {
   return [{ title: 'Nut' }];
 };
@@ -16,6 +17,9 @@ const Nothing = () => null;
 export default function Index() {
   // Sync subscription status periodically
   useSubscriptionSync();
+  
+  // Handle Stripe success/cancel callbacks
+  useStripeCallback();
 
   return (
     <PageContainer>
