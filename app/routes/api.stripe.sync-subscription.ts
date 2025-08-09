@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import { callNutAPI } from '~/lib/replay/NutAPI';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -22,7 +21,7 @@ async function callNutAPIWithUserId(method: string, request: any): Promise<any> 
   };
 
   const response = await fetch(url, fetchOptions);
-  
+
   if (!response.ok) {
     throw new Error(`NutAPI call failed: ${response.status} ${response.statusText}`);
   }
@@ -69,15 +68,18 @@ export async function action({ request }: { request: Request }) {
         userId,
         peanuts: undefined,
       });
-      
-      return new Response(JSON.stringify({ 
-        synced: true,
-        hasSubscription: false,
-        message: 'No Stripe customer found - cleared subscription'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+
+      return new Response(
+        JSON.stringify({
+          synced: true,
+          hasSubscription: false,
+          message: 'No Stripe customer found - cleared subscription',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const customer = customers.data[0];
@@ -95,38 +97,49 @@ export async function action({ request }: { request: Request }) {
         userId,
         peanuts: undefined,
       });
-      
-      return new Response(JSON.stringify({ 
-        synced: true,
-        hasSubscription: false,
-        message: 'No active subscription - cleared subscription'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+
+      return new Response(
+        JSON.stringify({
+          synced: true,
+          hasSubscription: false,
+          message: 'No active subscription - cleared subscription',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const subscription = subscriptions.data[0];
     const priceId = subscription.items.data[0]?.price.id;
 
-    // Map price ID to tier
+    // Map price ID to tier using environment variables
     let tier: keyof typeof SUBSCRIPTION_PEANUTS | null = null;
-    
-    if (priceId === 'price_1Rts7PEfKucJn4vkcznfKO4G') tier = 'free';
-    else if (priceId === 'price_1RtqRQEfKucJn4vkOXRndPjt') tier = 'starter';
-    else if (priceId === 'price_1Rts7dEfKucJn4vkE4REeRQH') tier = 'builder';
-    else if (priceId === 'price_1Rts7qEfKucJn4vkQypCX7cP') tier = 'pro';
+
+    if (priceId === process.env.STRIPE_PRICE_FREE) {
+      tier = 'free';
+    } else if (priceId === process.env.STRIPE_PRICE_STARTER) {
+      tier = 'starter';
+    } else if (priceId === process.env.STRIPE_PRICE_BUILDER) {
+      tier = 'builder';
+    } else if (priceId === process.env.STRIPE_PRICE_PRO) {
+      tier = 'pro';
+    }
 
     if (!tier) {
       console.error('Unknown subscription tier for price:', priceId);
-      return new Response(JSON.stringify({ 
-        synced: false,
-        error: `Unknown price ID: ${priceId}`,
-        hasSubscription: false
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          synced: false,
+          error: `Unknown price ID: ${priceId}`,
+          hasSubscription: false,
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const peanuts = SUBSCRIPTION_PEANUTS[tier];
@@ -137,26 +150,31 @@ export async function action({ request }: { request: Request }) {
       peanuts,
     });
 
-    return new Response(JSON.stringify({ 
-      synced: true,
-      hasSubscription: true,
-      tier,
-      peanuts,
-      message: `Synced ${tier} subscription (${peanuts} peanuts)`
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        synced: true,
+        hasSubscription: true,
+        tier,
+        peanuts,
+        message: `Synced ${tier} subscription (${peanuts} peanuts)`,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('Error syncing subscription:', error);
-    return new Response(JSON.stringify({ 
-      synced: false,
-      error: 'Failed to sync subscription',
-      hasSubscription: false
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        synced: false,
+        error: 'Failed to sync subscription',
+        hasSubscription: false,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   }
 }

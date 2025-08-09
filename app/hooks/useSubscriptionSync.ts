@@ -11,7 +11,9 @@ export function useSubscriptionSync() {
   const user = useStore(userStore);
 
   useEffect(() => {
-    if (!user?.email || !user?.id) return;
+    if (!user?.email || !user?.id) {
+      return;
+    }
 
     // Sync immediately on mount
     const syncNow = async () => {

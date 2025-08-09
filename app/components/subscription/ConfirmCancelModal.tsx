@@ -1,5 +1,3 @@
-import { classNames } from '~/utils/classNames';
-
 interface ConfirmCancelModalProps {
   isOpen: boolean;
   onConfirm: () => void;
@@ -7,7 +5,9 @@ interface ConfirmCancelModalProps {
 }
 
 export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCancelModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -34,14 +34,10 @@ export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCance
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">
-            Cancel Subscription?
-          </h2>
-          
+          <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">Cancel Subscription?</h2>
+
           {/* Subtitle */}
-          <p className="text-bolt-elements-textSecondary font-medium">
-            ⚠️ Please confirm this action
-          </p>
+          <p className="text-bolt-elements-textSecondary font-medium">⚠️ Please confirm this action</p>
         </div>
 
         {/* Content */}
@@ -49,7 +45,8 @@ export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCance
           {/* Message */}
           <div className="text-center mb-8">
             <p className="text-bolt-elements-textPrimary leading-relaxed">
-              Your subscription will remain active until the end of your current billing period, and you'll keep access to your remaining peanuts.
+              Your subscription will remain active until the end of your current billing period, and you'll keep access
+              to your remaining peanuts.
             </p>
           </div>
 

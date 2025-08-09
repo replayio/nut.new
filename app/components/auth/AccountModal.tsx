@@ -9,7 +9,12 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus, syncSubscription, cancelSubscription } from '~/lib/stripe/client';
+import {
+  createTopoffCheckout,
+  checkSubscriptionStatus,
+  syncSubscription,
+  cancelSubscription,
+} from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
@@ -160,7 +165,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       stripeStatusModalActions.showInfo(
         'Contact Support',
         'Please contact support to cancel your subscription.',
-        'Our support team will help you manage your subscription settings.'
+        'Our support team will help you manage your subscription settings.',
       );
     } else {
       // Open subscription modal to choose a tier
@@ -174,7 +179,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       stripeStatusModalActions.showError(
         'Sign In Required',
         'Please sign in to add peanuts.',
-        'You need to be signed in to purchase peanut top-ups.'
+        'You need to be signed in to purchase peanut top-ups.',
       );
       return;
     }
@@ -186,8 +191,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       console.error('Error creating peanut top-off:', error);
       stripeStatusModalActions.showError(
         'Checkout Failed',
-        'We couldn\'t create the checkout session.',
-        'Please try again in a few moments, or contact support if the issue persists.'
+        "We couldn't create the checkout session.",
+        'Please try again in a few moments, or contact support if the issue persists.',
       );
     }
   };
@@ -197,7 +202,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       stripeStatusModalActions.showError(
         'Sign In Required',
         'Please sign in to cancel your subscription.',
-        'You need to be signed in to manage your subscription settings.'
+        'You need to be signed in to manage your subscription settings.',
       );
       return;
     }
@@ -208,15 +213,17 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   const confirmCancelSubscription = async () => {
     setShowCancelConfirm(false);
-    
-    if (!user?.email) return;
+
+    if (!user?.email) {
+      return;
+    }
 
     try {
       await cancelSubscription(user.email, false); // Cancel at period end
       stripeStatusModalActions.showSuccess(
         '✅ Subscription Canceled',
         'Your subscription has been successfully canceled.',
-        'You\'ll continue to have access until the end of your current billing period, and you\'ll keep access to your remaining peanuts.'
+        "You'll continue to have access until the end of your current billing period, and you'll keep access to your remaining peanuts.",
       );
       // Reload data to show updated subscription status
       reloadAccountData();
@@ -224,8 +231,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       console.error('Error canceling subscription:', error);
       stripeStatusModalActions.showError(
         'Cancellation Failed',
-        'We couldn\'t cancel your subscription at this time.',
-        'Please try again in a few moments, or contact support if the issue persists.'
+        "We couldn't cancel your subscription at this time.",
+        'Please try again in a few moments, or contact support if the issue persists.',
       );
     }
   };
@@ -293,7 +300,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                   {stripeSubscription.cancelAtPeriodEnd && (
                     <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>
                   )}
-                  
+
                   {!stripeSubscription.cancelAtPeriodEnd && (
                     <button
                       onClick={handleCancelSubscription}
@@ -314,45 +321,49 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!stripeSubscription && <button
-            onClick={handleSubscriptionToggle}
-            disabled={loading}
-            className={classNames(
-              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
-              {
-                'opacity-60 cursor-not-allowed hover:scale-100': loading,
-              },
-            )}
-          >
-            <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-            <span className="transition-transform duration-200 group-hover:scale-105">
-              Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
-            </span>
-          </button>}
+          {!stripeSubscription && (
+            <button
+              onClick={handleSubscriptionToggle}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+                {
+                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
+                },
+              )}
+            >
+              <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-transform duration-200 group-hover:scale-105">
+                Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
+              </span>
+            </button>
+          )}
 
-          {stripeSubscription && <button
-            onClick={handleAddPeanuts}
-            disabled={loading}
-            className={classNames(
-              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-              'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
-              {
-                'opacity-60 cursor-not-allowed hover:scale-100': loading,
-              },
-            )}
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
-              </>
-            ) : (
-              <>
-                <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
-                <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
-              </>
-            )}
-          </button>}
+          {stripeSubscription && (
+            <button
+              onClick={handleAddPeanuts}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
+                {
+                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
+                },
+              )}
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
+                  <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -384,7 +395,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmCancelModal
         isOpen={showCancelConfirm}

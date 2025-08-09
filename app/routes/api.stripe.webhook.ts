@@ -41,6 +41,7 @@ export async function action({ request }: { request: Request }) {
 
   try {
     switch (event.type) {
+      case 'customer.subscription.paused':
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionCanceled(subscription);
@@ -72,8 +73,6 @@ export async function action({ request }: { request: Request }) {
     });
   }
 }
-
-
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
   try {

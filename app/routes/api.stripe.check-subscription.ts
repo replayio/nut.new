@@ -68,20 +68,20 @@ export async function action({ request }: { request: Request }) {
     const subscription = subscriptions.data[0];
     const priceId = subscription.items.data[0]?.price.id;
 
-    // Map price ID to tier
+    // Map price ID to tier using environment variables
     let tier = 'unknown';
     let peanuts = 0;
 
-    if (priceId === 'price_1Rts7PEfKucJn4vkcznfKO4G') {
+    if (priceId === process.env.STRIPE_PRICE_FREE) {
       tier = 'free';
       peanuts = 500;
-    } else if (priceId === 'price_1RtqRQEfKucJn4vkOXRndPjt') {
+    } else if (priceId === process.env.STRIPE_PRICE_STARTER) {
       tier = 'starter';
       peanuts = 2000;
-    } else if (priceId === 'price_1Rts7dEfKucJn4vkE4REeRQH') {
+    } else if (priceId === process.env.STRIPE_PRICE_BUILDER) {
       tier = 'builder';
       peanuts = 5000;
-    } else if (priceId === 'price_1Rts7qEfKucJn4vkQypCX7cP') {
+    } else if (priceId === process.env.STRIPE_PRICE_PRO) {
       tier = 'pro';
       peanuts = 12000;
     }

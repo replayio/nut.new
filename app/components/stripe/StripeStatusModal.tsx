@@ -10,14 +10,7 @@ interface StripeStatusModalProps {
   details?: string;
 }
 
-export function StripeStatusModal({ 
-  isOpen, 
-  onClose, 
-  type, 
-  title, 
-  message, 
-  details 
-}: StripeStatusModalProps) {
+export function StripeStatusModal({ isOpen, onClose, type, title, message, details }: StripeStatusModalProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -37,7 +30,9 @@ export function StripeStatusModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const getIcon = () => {
     switch (type) {
@@ -94,7 +89,7 @@ export function StripeStatusModal({
         {
           'opacity-100': isVisible,
           'opacity-0': !isVisible,
-        }
+        },
       )}
       onClick={handleOverlayClick}
     >
@@ -105,37 +100,38 @@ export function StripeStatusModal({
           {
             'scale-100 opacity-100': isVisible,
             'scale-95 opacity-0': !isVisible,
-          }
+          },
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Celebration Header */}
-        <div className={classNames(
-          'relative px-8 pt-12 pb-8 text-center bg-gradient-to-br',
-          colors.bg
-        )}>
+        <div className={classNames('relative px-8 pt-12 pb-8 text-center bg-gradient-to-br', colors.bg)}>
           {/* Large celebration icon at top */}
           <div className="mb-6">
-            <div className={classNames(
-              'w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br shadow-2xl flex items-center justify-center transform transition-all duration-500 hover:scale-110',
-              type === 'success' ? 'from-green-400 to-emerald-500' :
-              type === 'error' ? 'from-red-400 to-pink-500' :
-              'from-blue-400 to-indigo-500'
-            )}>
+            <div
+              className={classNames(
+                'w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br shadow-2xl flex items-center justify-center transform transition-all duration-500 hover:scale-110',
+                type === 'success'
+                  ? 'from-green-400 to-emerald-500'
+                  : type === 'error'
+                    ? 'from-red-400 to-pink-500'
+                    : 'from-blue-400 to-indigo-500',
+              )}
+            >
               <div className={classNames('text-4xl text-white', getIcon())} />
             </div>
           </div>
 
           {/* Centered title */}
-          <h2 className="text-3xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">
-            {title}
-          </h2>
-          
+          <h2 className="text-3xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">{title}</h2>
+
           {/* Subtitle */}
           <p className="text-bolt-elements-textSecondary font-medium">
-            {type === 'success' ? '✨ Transaction completed successfully' : 
-             type === 'error' ? '⚠️ Action required' : 
-             'ℹ️ Information'}
+            {type === 'success'
+              ? '✨ Transaction completed successfully'
+              : type === 'error'
+                ? '⚠️ Action required'
+                : 'ℹ️ Information'}
           </p>
         </div>
 
@@ -143,22 +139,20 @@ export function StripeStatusModal({
         <div className="px-8 pb-8">
           {/* Main message */}
           <div className="text-center mb-6">
-            <p className="text-lg text-bolt-elements-textPrimary leading-relaxed font-medium">
-              {message}
-            </p>
+            <p className="text-lg text-bolt-elements-textPrimary leading-relaxed font-medium">{message}</p>
           </div>
-          
+
           {/* Details card */}
           {details && (
             <div className="mb-8">
-              <div className={classNames(
-                'p-6 rounded-2xl border shadow-sm bg-gradient-to-br',
-                'from-bolt-elements-background-depth-2/40 to-bolt-elements-background-depth-3/20',
-                'border-bolt-elements-borderColor/30'
-              )}>
-                <p className="text-bolt-elements-textSecondary leading-relaxed text-center">
-                  {details}
-                </p>
+              <div
+                className={classNames(
+                  'p-6 rounded-2xl border shadow-sm bg-gradient-to-br',
+                  'from-bolt-elements-background-depth-2/40 to-bolt-elements-background-depth-3/20',
+                  'border-bolt-elements-borderColor/30',
+                )}
+              >
+                <p className="text-bolt-elements-textSecondary leading-relaxed text-center">{details}</p>
               </div>
             </div>
           )}
@@ -168,7 +162,7 @@ export function StripeStatusModal({
             onClick={handleClose}
             className={classNames(
               'w-full py-4 px-8 rounded-2xl font-bold text-white text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform',
-              colors.button
+              colors.button,
             )}
           >
             Continue

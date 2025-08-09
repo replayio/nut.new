@@ -17,7 +17,7 @@ const Nothing = () => null;
 export default function Index() {
   // Sync subscription status periodically
   useSubscriptionSync();
-  
+
   // Handle Stripe success/cancel callbacks
   useStripeCallback();
 

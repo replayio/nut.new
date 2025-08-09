@@ -31,12 +31,15 @@ export async function action({ request }: { request: Request }) {
     });
 
     if (customers.data.length === 0) {
-      return new Response(JSON.stringify({ 
-        error: 'No customer found with that email'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: 'No customer found with that email',
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const customer = customers.data[0];
@@ -49,12 +52,15 @@ export async function action({ request }: { request: Request }) {
     });
 
     if (subscriptions.data.length === 0) {
-      return new Response(JSON.stringify({ 
-        error: 'No active subscription found'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: 'No active subscription found',
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const subscription = subscriptions.data[0];
@@ -72,26 +78,31 @@ export async function action({ request }: { request: Request }) {
       console.log(`Set subscription ${subscription.id} to cancel at period end for customer ${customer.id}`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      canceled: true,
-      immediate,
-      message: immediate 
-        ? 'Subscription canceled immediately' 
-        : 'Subscription will cancel at the end of current billing period'
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        canceled: true,
+        immediate,
+        message: immediate
+          ? 'Subscription canceled immediately'
+          : 'Subscription will cancel at the end of current billing period',
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('Error canceling subscription:', error);
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: 'Failed to cancel subscription'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Failed to cancel subscription',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   }
 }

@@ -6,15 +6,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
 });
 
-// Product and Price mappings (Production)
+// Product and Price mappings from environment variables
 const SUBSCRIPTION_PRICES = {
-  free: 'price_1Rts7PEfKucJn4vkcznfKO4G',
-  starter: 'price_1RtqRQEfKucJn4vkOXRndPjt',
-  builder: 'price_1Rts7dEfKucJn4vkE4REeRQH',
-  pro: 'price_1Rts7qEfKucJn4vkQypCX7cP',
+  free: process.env.STRIPE_PRICE_FREE!,
+  starter: process.env.STRIPE_PRICE_STARTER!,
+  builder: process.env.STRIPE_PRICE_BUILDER!,
+  pro: process.env.STRIPE_PRICE_PRO!,
 } as const;
 
-const PEANUT_TOPOFF_PRICE = 'price_1RtqhIEfKucJn4vkCrq1qaTR';
+const PEANUT_TOPOFF_PRICE = process.env.STRIPE_PRICE_TOPOFF!;
 
 interface CreateCheckoutRequest {
   type: 'subscription' | 'topoff';
@@ -57,11 +57,11 @@ export async function action({ request }: { request: Request }) {
         email: userEmail,
         limit: 1,
       });
-      
+
       if (existingCustomers.data.length > 0) {
         customerId = existingCustomers.data[0].id;
         console.log(`Reusing existing customer: ${customerId} for email: ${userEmail}`);
-        
+
         // Update customer metadata with userId
         await stripe.customers.update(customerId, {
           metadata: {

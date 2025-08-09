@@ -4,7 +4,7 @@ import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
 import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, type SubscriptionTier } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
-import { IconButton } from '../ui/IconButton';
+import { IconButton } from '~/components/ui/IconButton';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -125,11 +125,14 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   className={classNames(
                     'relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-105 group min-h-[400px] flex flex-col',
                     {
-                      'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg': isCurrentTier,
-                      'border-purple-500/50 bg-gradient-to-br from-purple-500/5 to-pink-500/5 ring-2 ring-purple-500/20 shadow-lg': isPro && !isCurrentTier,
-                      'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm': !isCurrentTier && !isPro,
+                      'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg':
+                        isCurrentTier,
+                      'border-purple-500/50 bg-gradient-to-br from-purple-500/5 to-pink-500/5 ring-2 ring-purple-500/20 shadow-lg':
+                        isPro && !isCurrentTier,
+                      'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
+                        !isCurrentTier && !isPro,
                       'hover:border-bolt-elements-borderColor/70 hover:shadow-lg': !isCurrentTier,
-                    }
+                    },
                   )}
                 >
                   {isPro && !isCurrentTier && (
@@ -151,19 +154,25 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   {/* Header */}
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <div className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
-                        'i-ph:gift text-green-500': isFree,
-                        'i-ph:rocket-launch text-blue-500': tier === 'starter',
-                        'i-ph:lightning text-orange-500': tier === 'builder', 
-                        'i-ph:crown text-purple-500': isPro,
-                      })} />
+                      <div
+                        className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
+                          'i-ph:gift text-green-500': isFree,
+                          'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                          'i-ph:lightning text-orange-500': tier === 'builder',
+                          'i-ph:crown text-purple-500': isPro,
+                        })}
+                      />
                     </div>
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">{details.name}</h3>
+                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">
+                      {details.name}
+                    </h3>
                     <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-300 group-hover:scale-105">
                       ${details.price}
                       <span className="text-lg font-normal text-bolt-elements-textSecondary">/month</span>
                     </div>
-                    <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">{details.description}</p>
+                    <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">
+                      {details.description}
+                    </p>
                   </div>
 
                   {/* Features */}
@@ -173,7 +182,9 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                         <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-green-500/30 transition-all duration-200 group-hover/feature:scale-110 group-hover/feature:bg-green-500/30">
                           <div className="i-ph:check text-green-500 text-sm transition-transform duration-200 group-hover/feature:scale-110"></div>
                         </div>
-                        <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">{feature}</span>
+                        <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">
+                          {feature}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -186,12 +197,16 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       className={classNames(
                         'w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl group/btn min-h-[56px]',
                         {
-                          'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 border border-green-500/30 cursor-not-allowed': isCurrentTier,
-                          'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border border-purple-500/50 hover:border-purple-400 hover:scale-105': isPro && !isCurrentTier && !isLoading,
-                          'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border border-blue-500/50 hover:border-blue-400 hover:scale-105': !isPro && !isFree && !isCurrentTier && !isLoading,
-                          'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border border-green-500/50 hover:border-green-400 hover:scale-105': isFree && !isCurrentTier && !isLoading,
+                          'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 border border-green-500/30 cursor-not-allowed':
+                            isCurrentTier,
+                          'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border border-purple-500/50 hover:border-purple-400 hover:scale-105':
+                            isPro && !isCurrentTier && !isLoading,
+                          'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border border-blue-500/50 hover:border-blue-400 hover:scale-105':
+                            !isPro && !isFree && !isCurrentTier && !isLoading,
+                          'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border border-green-500/50 hover:border-green-400 hover:scale-105':
+                            isFree && !isCurrentTier && !isLoading,
                           'opacity-50 cursor-not-allowed hover:scale-100': isLoading,
-                        }
+                        },
                       )}
                     >
                       {isLoading && (
