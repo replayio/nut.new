@@ -89,25 +89,25 @@ export async function action({ request }: { request: Request }) {
 
       priceId = SUBSCRIPTION_PRICES[tier];
       mode = 'subscription';
-      
+
       // Construct URLs with proper query parameter handling
       const successUrlObj = new URL(targetUrl);
       successUrlObj.searchParams.set('stripe_success', 'subscription');
       successUrlObj.searchParams.set('tier', tier);
       successUrl = successUrlObj.toString();
-      
+
       const cancelUrlObj = new URL(targetUrl);
       cancelUrlObj.searchParams.set('stripe_canceled', 'subscription');
       cancelUrl = cancelUrlObj.toString();
     } else if (type === 'topoff') {
       priceId = PEANUT_TOPOFF_PRICE;
       mode = 'payment';
-      
+
       // Construct URLs with proper query parameter handling
       const successUrlObj = new URL(targetUrl);
       successUrlObj.searchParams.set('stripe_success', 'topoff');
       successUrl = successUrlObj.toString();
-      
+
       const cancelUrlObj = new URL(targetUrl);
       cancelUrlObj.searchParams.set('stripe_canceled', 'topoff');
       cancelUrl = cancelUrlObj.toString();
