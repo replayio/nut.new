@@ -57,6 +57,7 @@ const AppView = ({
             }`}
             src={iframeUrl}
             allowFullScreen
+            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
             loading="eager"
           />
           {activeTab === 'preview' && !isSmallViewport && (

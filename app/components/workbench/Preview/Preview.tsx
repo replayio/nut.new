@@ -6,6 +6,8 @@ import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
+import { vibeAuthSupabase } from '~/lib/supabase/vibeAuthClient';
+import { getSupabase } from '~/lib/supabase/client';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -64,6 +66,162 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
     setUrl(previewURL);
     setIframeUrl(previewURL);
   }, [previewURL]);
+
+  // Listen for general iframe messages and sign out on logout request
+  useEffect(() => {
+    const handleIframeMessage = async (e: MessageEvent) => {
+      try {
+        // preview.message: received postMessage from iframe {
+        //   "type": "oauth-request",
+        //   "provider": "google",
+        //   "origin": "https://6d92e768-c68f-43ce-ab32-2dc5afeaad1c.http.replay.io",
+        //   "callbackUrl": "https://6d92e768-c68f-43ce-ab32-2dc5afeaad1c.http.replay.io/auth/callback"
+        // }
+        if (e.data.type === 'oauth-request') {
+          // save the value of sb-zbkcavxidjyslqmnbfux-auth-token from local stoage
+          const supabaseAuth = localStorage.getItem('sb-zbkcavxidjyslqmnbfux-auth-token');
+          if (supabaseAuth) {
+            localStorage.setItem('sb-tmp-auth-token', supabaseAuth);
+          }
+
+          // TODO: This is a temporary fix to allow the iframe to open the OAuth popup.
+          console.log('preview.message: oauth-request received from iframe', JSON.stringify(e.data, null, 2));
+          
+          // Build our custom redirect URL
+          const currentOrigin = window.location.origin;
+          const customRedirectUrl = `${currentOrigin}/auth/vibe-callback?callback_url=${encodeURIComponent(e.data.callbackUrl)}`;
+          
+          // Get the OAuth URL from vibeAuth Supabase
+          const { data: authData, error } = await vibeAuthSupabase.auth.signInWithOAuth({
+            provider: e.data.provider,
+            options: {
+              redirectTo: customRedirectUrl, // Use our custom redirect URL
+              skipBrowserRedirect: true, // Important: prevent redirect in current window
+            },
+          });
+
+          if (error) {
+            console.error('preview.message: OAuth error', error);
+            return;
+          }
+
+          if (authData?.url) {
+            console.log('preview.message: OAuth URL generated:', authData.url);
+            console.log('preview.message: Using custom redirect URL:', customRedirectUrl);
+            
+            // Open OAuth URL in a popup window
+            const width = 500;
+            const height = 600;
+            const left = window.screenX + (window.innerWidth - width) / 2;
+            const top = window.screenY + (window.innerHeight - height) / 2;
+            
+            const popup = window.open(
+              authData.url,
+              'oauth-popup',
+              `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+            );
+
+            if (popup) {
+              console.log('preview.message: OAuth popup opened, starting localStorage polling');
+              
+              // Poll localStorage for the auth callback data
+              const pollInterval = setInterval(() => {
+                try {
+                  // Check for auth data
+                  const authDataStr = localStorage.getItem('vibe-auth-callback');
+                  if (authDataStr) {
+                    const authData = JSON.parse(authDataStr);
+                    console.log('preview.message: Found auth data in localStorage', authData);
+                    
+                    // Clean up
+                    localStorage.removeItem('vibe-auth-callback');
+                    clearInterval(pollInterval);
+                    
+                    // Log the Supabase auth token that was stored
+                    const supabaseKey = 'sb-auth-auth-token';
+                    const supabaseAuth = localStorage.getItem(supabaseKey);
+                    console.log('preview.message: Supabase auth token stored in localStorage:', supabaseKey, supabaseAuth);
+                    const tempKey = JSON.parse(localStorage.getItem('sb-tmp-auth-token') ?? '{}');
+                    getSupabase().auth.setSession({
+                      access_token: tempKey.access_token,
+                      refresh_token: tempKey.refresh_token,
+                    });
+                    // localStorage.removeItem('sb-tmp-auth-token');
+
+                    // Redirect the iframe with the auth session in the URL hash
+                    if (authData.session && iframeRef.current) {
+                      const { session, originalCallbackUrl } = authData;
+                      
+                      // Build the hash fragment with all session parameters
+                      const hashParams = new URLSearchParams({
+                        access_token: session.access_token,
+                        refresh_token: session.refresh_token,
+                        expires_in: session.expires_in.toString(),
+                        expires_at: session.expires_at.toString(),
+                        token_type: session.token_type,
+                      });
+                      
+                      if (session.provider_token) {
+                        hashParams.set('provider_token', session.provider_token);
+                      }
+                      
+                      // Construct the new URL with the auth hash
+                      const baseUrl = originalCallbackUrl || iframeUrl || '';
+                      const separator = baseUrl.includes('#') ? '&' : '#';
+                      const newIframeUrl = `${baseUrl}${separator}${hashParams.toString()}`;
+                      
+                      console.log('preview.message: Redirecting iframe to:', newIframeUrl);
+                      
+                      // Update the iframe URL
+                      setIframeUrl(newIframeUrl);
+                      setUrl(newIframeUrl);
+                    }
+                    
+                    return;
+                  }
+                  
+                  // Check for error
+                  const errorDataStr = localStorage.getItem('vibe-auth-callback-error');
+                  if (errorDataStr) {
+                    const errorData = JSON.parse(errorDataStr);
+                    console.error('preview.message: OAuth error from callback:', errorData);
+                    
+                    // Clean up
+                    localStorage.removeItem('vibe-auth-callback-error');
+                    clearInterval(pollInterval);
+                    return;
+                  }
+                  
+                  // Check if popup is closed
+                  if (popup.closed) {
+                    console.log('preview.message: OAuth popup was closed');
+                    clearInterval(pollInterval);
+                  }
+                } catch (err) {
+                  console.error('preview.message: Error polling localStorage:', err);
+                }
+              }, 100); // Poll every 100ms
+              
+              // Stop polling after 30 seconds
+              setTimeout(() => {
+                clearInterval(pollInterval);
+                console.log('preview.message: Stopped polling after timeout');
+              }, 30000);
+            } else {
+              console.error('preview.message: Failed to open OAuth popup');
+            }
+          }
+        }
+
+
+      } catch (err) {
+        console.error('preview.message: unexpected error handling postMessage', err);
+      }
+    };
+
+    window.addEventListener('message', handleIframeMessage);
+    return () => window.removeEventListener('message', handleIframeMessage);
+  }, []);
 
   const reloadPreview = () => {
     if (iframeRef.current) {
