@@ -21,6 +21,7 @@ interface CreateCheckoutRequest {
   tier?: 'free' | 'starter' | 'builder' | 'pro';
   userId: string;
   userEmail: string;
+  returnUrl?: string; // The current page URL to return to after checkout
 }
 
 export async function action({ request }: { request: Request }) {
@@ -33,7 +34,7 @@ export async function action({ request }: { request: Request }) {
 
   try {
     const body = (await request.json()) as CreateCheckoutRequest;
-    const { type, tier, userId, userEmail } = body;
+    const { type, tier, userId, userEmail, returnUrl } = body;
 
     // Validate required fields
     if (!userId || !userEmail) {
@@ -49,6 +50,8 @@ export async function action({ request }: { request: Request }) {
     let cancelUrl: string;
 
     const baseUrl = new URL(request.url).origin;
+    // Use the provided return URL or fallback to the base URL
+    const targetUrl = returnUrl || baseUrl;
 
     // Try to find existing customer by email to avoid duplicates
     let customerId: string | undefined;
@@ -86,13 +89,28 @@ export async function action({ request }: { request: Request }) {
 
       priceId = SUBSCRIPTION_PRICES[tier];
       mode = 'subscription';
-      successUrl = `${baseUrl}/?stripe_success=subscription&tier=${tier}`;
-      cancelUrl = `${baseUrl}/?stripe_canceled=subscription`;
+      
+      // Construct URLs with proper query parameter handling
+      const successUrlObj = new URL(targetUrl);
+      successUrlObj.searchParams.set('stripe_success', 'subscription');
+      successUrlObj.searchParams.set('tier', tier);
+      successUrl = successUrlObj.toString();
+      
+      const cancelUrlObj = new URL(targetUrl);
+      cancelUrlObj.searchParams.set('stripe_canceled', 'subscription');
+      cancelUrl = cancelUrlObj.toString();
     } else if (type === 'topoff') {
       priceId = PEANUT_TOPOFF_PRICE;
       mode = 'payment';
-      successUrl = `${baseUrl}/?stripe_success=topoff`;
-      cancelUrl = `${baseUrl}/?stripe_canceled=topoff`;
+      
+      // Construct URLs with proper query parameter handling
+      const successUrlObj = new URL(targetUrl);
+      successUrlObj.searchParams.set('stripe_success', 'topoff');
+      successUrl = successUrlObj.toString();
+      
+      const cancelUrlObj = new URL(targetUrl);
+      cancelUrlObj.searchParams.set('stripe_canceled', 'topoff');
+      cancelUrl = cancelUrlObj.toString();
     } else {
       return new Response(JSON.stringify({ error: 'Invalid checkout type' }), {
         status: 400,

@@ -30,6 +30,7 @@ export interface CreateCheckoutSessionParams {
   tier?: 'free' | 'starter' | 'builder' | 'pro';
   userId: string;
   userEmail: string;
+  returnUrl?: string; // Optional return URL to redirect to after checkout
 }
 
 export interface CheckoutSessionResponse {
@@ -83,6 +84,7 @@ export async function createSubscriptionCheckout(
     tier,
     userId,
     userEmail,
+    returnUrl: window.location.href, // Return to current page after checkout
   });
 }
 
@@ -94,6 +96,7 @@ export async function createTopoffCheckout(userId: string, userEmail: string): P
     type: 'topoff',
     userId,
     userEmail,
+    returnUrl: window.location.href, // Return to current page after checkout
   });
 }
 
