@@ -60,7 +60,9 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
       }
 
       try {
-        const { data: { user } } = await getSupabase().auth.getUser();
+        const {
+          data: { user },
+        } = await getSupabase().auth.getUser();
         if (window.analytics && user) {
           window.analytics.identify(user.id, {
             email: user.email,

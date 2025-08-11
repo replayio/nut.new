@@ -93,7 +93,7 @@ const analyticsCode = stripIndents`
   analytics.load("RA2xErHLQaGZ3YeTxzEYw3gmraAfWPIR");
   analytics.page();
   }}();
-`
+`;
 
 export const Head = createHead(() => (
   <>

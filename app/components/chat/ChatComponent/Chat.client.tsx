@@ -79,7 +79,7 @@ export function Chat() {
 
     setIsCopying(true);
     try {
-      const newAppId = await database.copyApp(initialAppId);      
+      const newAppId = await database.copyApp(initialAppId);
       toast.success('App copied successfully!');
       navigateApp(newAppId);
       await loadApp(newAppId);
