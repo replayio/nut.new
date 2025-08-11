@@ -132,8 +132,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     },
                   )}
                 >
-
-
                   {isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
@@ -145,12 +143,12 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   {/* Header */}
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                                              <div
-                          className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
-                            'i-ph:gift text-green-500': isFree,
-                            'i-ph:rocket-launch text-blue-500': tier === 'starter',
-                          })}
-                        />
+                      <div
+                        className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
+                          'i-ph:gift text-green-500': isFree,
+                          'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                        })}
+                      />
                     </div>
                     <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">
                       {details.name}
@@ -207,47 +205,67 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                 </div>
               );
             })}
-          </div>
-        </div>
 
-        {/* Advanced Plans Coming Soon Teaser */}
-        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
-            <div className="relative p-6 sm:p-8 bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 rounded-2xl border border-indigo-500/20 shadow-lg backdrop-blur-sm">
-              <div className="flex items-start gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 border border-indigo-500/30 shadow-lg">
-                  <div className="i-ph:sparkle text-2xl text-indigo-500"></div>
+            {/* Advanced Plans Coming Soon Teaser */}
+            <div className="relative overflow-hidden min-h-[400px]">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
+              <div className="relative h-full p-6 rounded-2xl bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 border border-indigo-500/20 shadow-lg backdrop-blur-sm flex flex-col">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 shadow-lg">
+                    <div className="i-ph:sparkle text-2xl text-indigo-500"></div>
+                  </div>
+                  <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">Coming Soon</h3>
+                  <div className="text-2xl font-bold text-indigo-500 mb-2">Advanced Plans</div>
+                  <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">
+                    Exciting new tiers with enhanced features
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading">More Advanced Plans Coming Soon</h3>
-                    <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      COMING SOON
+
+                {/* Features Preview */}
+                <div className="space-y-3 mb-8 flex-grow">
+                  <div className="flex items-start gap-3 group/feature">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
+                      <div className="i-ph:sparkle text-indigo-500 text-sm"></div>
+                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                      Enterprise & Team Plans
                     </span>
                   </div>
-                  <p className="text-bolt-elements-textSecondary mb-4 leading-relaxed">
-                    We're working on exciting new subscription tiers with enhanced features, priority support, 
-                    and exclusive benefits. Stay tuned for enterprise solutions, team plans, and advanced AI capabilities.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
-                      <div className="w-2 h-2 rounded-full bg-indigo-500/60"></div>
-                      <span>Enterprise & Team Plans</span>
+                  <div className="flex items-start gap-3 group/feature">
+                    <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
+                      <div className="i-ph:sparkle text-purple-500 text-sm"></div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
-                      <div className="w-2 h-2 rounded-full bg-purple-500/60"></div>
-                      <span>Priority Support & SLA</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
-                      <div className="w-2 h-2 rounded-full bg-pink-500/60"></div>
-                      <span>Advanced AI Models</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
-                      <div className="w-2 h-2 rounded-full bg-indigo-500/60"></div>
-                      <span>Custom Integrations</span>
-                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                      Priority Support & SLA
+                    </span>
                   </div>
+                  <div className="flex items-start gap-3 group/feature">
+                    <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
+                      <div className="i-ph:sparkle text-pink-500 text-sm"></div>
+                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                      Advanced AI Models
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 group/feature">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
+                      <div className="i-ph:sparkle text-indigo-500 text-sm"></div>
+                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                      Custom Integrations
+                    </span>
+                  </div>
+                </div>
+
+                {/* Coming Soon Button */}
+                <div className="mt-auto">
+                  <button
+                    disabled
+                    className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 border border-indigo-500/30 cursor-not-allowed opacity-60"
+                  >
+                    <div className="i-ph:clock text-indigo-500"></div>
+                    <span>Coming Soon</span>
+                  </button>
                 </div>
               </div>
             </div>
