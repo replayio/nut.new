@@ -39,6 +39,11 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
           signInMethod: 'email',
         });
       }
+      if (window.LogRocket && data.user) {
+        window.LogRocket.identify(data.user.id, {
+          email: data.user.email,
+        });
+      }
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in');

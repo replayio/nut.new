@@ -6,6 +6,10 @@ interface Window {
     track: (event: string, properties?: Record<string, any>) => void;
     identify: (userId: string, traits?: Record<string, any>) => void;
   };
+  LogRocket?: {
+    init: (appId: string) => void;
+    identify: (userId: string, traits?: Record<string, any>) => void;
+  };
 }
 
 interface Performance {
