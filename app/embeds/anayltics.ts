@@ -1,4 +1,4 @@
-import { stripIndents } from '../utils/stripIndent';
+import { stripIndents } from '~/utils/stripIndent';
 
 // analyticsjs from segment.io
 // to regenerate: go to the segment dashboard and click on "new source"
@@ -9,5 +9,4 @@ const analyticsCode = stripIndents`
   }}();
 `;
 
-
-export { analyticsCode }
+export { analyticsCode };

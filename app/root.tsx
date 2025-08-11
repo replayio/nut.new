@@ -97,7 +97,7 @@ const inlineThemeCode = stripIndents`
 
 const logRocketInit = stripIndents`
   window.LogRocket && window.LogRocket.init('woocwd/nut');
-`
+`;
 
 export const Head = createHead(() => (
   <>
@@ -105,7 +105,7 @@ export const Head = createHead(() => (
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
     <Meta />
     <Links />
-    <script src="https://cdn.lgrckt-in.com/LogRocket.min.js" crossOrigin="anonymous"></script> 
+    <script src="https://cdn.lgrckt-in.com/LogRocket.min.js" crossOrigin="anonymous"></script>
     <script dangerouslySetInnerHTML={{ __html: logRocketInit }} />
     <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
     <script dangerouslySetInnerHTML={{ __html: analyticsCode }} />
