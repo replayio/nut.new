@@ -25,7 +25,7 @@ function isWorkTimedOut(events: ChatResponse[]) {
   if (events.length === 0) {
     return { isTimedOut: false, minutesSinceLastActivity: 0 };
   }
-  
+
   const lastEvent = events[events.length - 1];
   return Date.now() - new Date(lastEvent.time).getTime() >= WORK_TIMEOUT_MS;
 }
@@ -160,7 +160,7 @@ const Events = ({ featureName }: EventsProps) => {
     if (featureName) {
       const finished = events.some(isWorkerFinishedResponse);
       if (finished) {
-        const landChanges = events.some(event => event.kind === 'app-event' && event.event.name === 'land-changes');
+        const landChanges = events.some((event) => event.kind === 'app-event' && event.event.name === 'land-changes');
         if (landChanges) {
           tooltip = 'Work completed';
         } else {
@@ -188,7 +188,9 @@ const Events = ({ featureName }: EventsProps) => {
       <div key={index} className="border-t border-bolt-elements-borderColor/50 mb-2">
         <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block ml-2">
           <Tooltip tooltip={tooltip}>
-            <span>Worker {index + 1} ({peanuts} peanuts)</span>
+            <span>
+              Worker {index + 1} ({peanuts} peanuts)
+            </span>
           </Tooltip>
         </div>
 
