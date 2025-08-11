@@ -13,7 +13,7 @@ import { type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
-import { getDiscoveryRating, MAX_DISCOVERY_RATING, type Message } from '~/lib/persistence/message';
+import { type Message } from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
@@ -164,9 +164,9 @@ const ChatImplementer = memo(() => {
 
     let mode = chatMode;
     if (!mode) {
-      // If we don't have a plan yet, stay in the Discovery mode until
-      // we either max out the discovery rating or the user forced us to start planning.
-      if (!getLatestAppSummary(messages) && getDiscoveryRating(messages) < MAX_DISCOVERY_RATING) {
+      // If we don't have a plan yet, stay in Discovery mode until the user
+      // forces us to start planning.
+      if (!getLatestAppSummary(messages)) {
         mode = ChatMode.Discovery;
       } else {
         mode = ChatMode.BuildApp;

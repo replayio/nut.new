@@ -133,6 +133,14 @@ export function onChatResponse(response: ChatResponse, reason: string) {
       setPendingMessageStatus(response.status);
       break;
     case 'error':
+      // Only show errors if there is an active message being sent.
+      // We will get error responses from workers as well but the backend will
+      // recover so we don't surface these.
+      if (chatStore.hasPendingMessage.get()) {
+        toast.error('Error sending message');
+        console.error('Error sending message', response.error);
+      }
+      break;
     case 'done':
     case 'aborted':
       break;
