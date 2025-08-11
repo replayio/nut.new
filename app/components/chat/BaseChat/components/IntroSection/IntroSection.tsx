@@ -8,14 +8,14 @@ export const IntroSection: React.FC = () => {
     return (
       <div id="intro" className="max-w-4xl mx-auto text-center px-4">
         <h1 className="text-3xl font-bold text-bolt-elements-textHeading mb-4 animate-fade-in leading-tight">
-          Build apps with
+          Build web apps
           <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent block">
-            just a prompt
+            that work
           </span>
         </h1>
 
         <p className="text-base mb-6 text-bolt-elements-textSecondary animate-fade-in animation-delay-100 leading-relaxed max-w-lg mx-auto">
-          From idea to production with AI - no setup required.
+        Build, test, and deploy your applications in minutes. From idea to going live with AI — no setup required.
         </p>
 
         <div className="flex justify-center gap-4 mb-6 animate-fade-in animation-delay-200">
