@@ -147,6 +147,16 @@ export function ClientAuth() {
               </div>
 
               <div className="p-3 space-y-2">
+                <a
+                  href="https://form.typeform.com/to/bFKqmqdX"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
+                >
+                  <div className="i-ph:sparkle text-lg" />
+                  <span className="text-sm">Guaranteed Reliability Waitlist</span>
+                </a>
+
                 <button
                   onClick={handleShowAccountModal}
                   className="w-full px-4 py-3 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
