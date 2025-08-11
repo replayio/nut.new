@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useEffect, useRef } from 'react';
+import React, { type RefCallback, useCallback, useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -97,7 +97,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const checkedBoxesRef = useRef<string[]>([]);
+    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
     const handleContinueBuilding = () => {
       if (sendMessage) {
@@ -109,7 +109,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (sendMessage) {
         sendMessage(messageInput, chatMode);
         abortListening();
-        checkedBoxesRef.current = [];
+        setCheckedBoxes([]);
         if (window.analytics) {
           window.analytics.track('Message Sent', {
             timestamp: new Date().toISOString(),
@@ -146,9 +146,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       });
       chatStore.messages.set(newMessages);
       if (checked) {
-        checkedBoxesRef.current = [...checkedBoxesRef.current, checkboxText];
+        setCheckedBoxes((prev) => [...prev, checkboxText]);
       } else {
-        checkedBoxesRef.current = checkedBoxesRef.current.filter((box) => box !== checkboxText);
+        setCheckedBoxes((prev) => prev.filter((box) => box !== checkboxText));
       }
     };
 
@@ -167,7 +167,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
-      checkedBoxes: checkedBoxesRef.current,
+      checkedBoxes,
     };
 
     const baseChat = (
