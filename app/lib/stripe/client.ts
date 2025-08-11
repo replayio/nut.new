@@ -27,7 +27,7 @@ const initializeStripe = () => {
 
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter' | 'builder' | 'pro';
+  tier?: 'free' | 'starter';
   userId: string;
   userEmail: string;
   returnUrl?: string; // Optional return URL to redirect to after checkout
@@ -75,7 +75,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
  * Create subscription checkout for a specific tier
  */
 export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter' | 'builder' | 'pro',
+  tier: 'free' | 'starter',
   userId: string,
   userEmail: string,
 ): Promise<void> {
@@ -122,20 +122,6 @@ export const SUBSCRIPTION_TIERS = {
     peanuts: 2000,
     description: 'Our basic plan to get your feet wet. No limits on any features. Go nuts!',
     features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
-  },
-  builder: {
-    name: 'Builder',
-    price: 50,
-    peanuts: 5000,
-    description: 'Includes 5000 Peanuts per month, for those that are building multiple apps',
-    features: ['5,000 Peanuts per month', 'Only pay for features that Nut builds fully'],
-  },
-  pro: {
-    name: 'Pro',
-    price: 100,
-    peanuts: 12000,
-    description: 'Our premium tier that offers 12,000 Peanuts at 20% discount, for serious vibe coding action',
-    features: ['12,000 Peanuts per month (balance rolls over)', 'Only pay Peanuts for features Nut builds fully'],
   },
 } as const;
 
