@@ -12,7 +12,6 @@ export function getRepositoryURL(repositoryId: string | undefined) {
 }
 
 export const updateDevelopmentServer = debounce((repositoryId: string | undefined) => {
-  repositoryId = '6d92e768-c68f-43ce-ab32-2dc5afeaad1c';
   const repositoryURL = getRepositoryURL(repositoryId);
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
 

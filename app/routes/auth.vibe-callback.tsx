@@ -33,6 +33,7 @@ export default function VibeAuthCallback() {
         expires_at: expiresAt ? parseInt(expiresAt) : Math.floor(Date.now() / 1000) + 3600,
         provider_token: providerToken,
         token_type: 'bearer',
+        force_refresh: Date.now().toString(),
       };
 
       // Store in localStorage with a unique key for the vibe auth
