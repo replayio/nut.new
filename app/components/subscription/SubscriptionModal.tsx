@@ -248,15 +248,17 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   </div>
                 </div>
 
-                {/* Coming Soon Button */}
+                {/* Join Waitlist Button */}
                 <div className="mt-auto">
-                  <button
-                    disabled
-                    className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 border border-indigo-500/30 cursor-not-allowed opacity-60"
+                  <a
+                    href="https://form.typeform.com/to/bFKqmqdX"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white border border-indigo-500/50 hover:border-indigo-400 hover:scale-105 cursor-pointer"
                   >
-                    <div className="i-ph:clock text-indigo-500"></div>
-                    <span>Coming Soon</span>
-                  </button>
+                    <div className="i-ph:arrow-up-right text-white"></div>
+                    <span>Join Waitlist</span>
+                  </a>
                 </div>
               </div>
             </div>
