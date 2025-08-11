@@ -117,6 +117,7 @@ const ChatImplementer = memo(() => {
     imageDataList.forEach((imageData, index) => {
       const imageMessage: Message = {
         id: `image-${chatId}-${index}`,
+        createTime: new Date().toISOString(),
         role: 'user',
         type: 'image',
         dataURL: imageData,

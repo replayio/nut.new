@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
@@ -15,10 +14,9 @@ export function getCurrentIFrame() {
 
 interface PreviewProps {
   activeTab: 'planning' | 'preview';
-  appSummary: AppSummary | null;
 }
 
-export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
+export const Preview = memo(({ activeTab }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -177,17 +175,6 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
       {activeTab === 'preview' && (
         <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
           <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-          {!isSmallViewport && (
-            <IconButton
-              icon="i-ph:bug-beetle"
-              title="Point to Bug"
-              onClick={() => {
-                setSelectionPoint(null);
-                setIsSelectionMode(!isSelectionMode);
-              }}
-              className={isSelectionMode ? 'bg-bolt-elements-background-depth-3' : ''}
-            />
-          )}
           <div className="flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary rounded-xl px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md">
             <input
               title="URL"
@@ -231,11 +218,10 @@ export const Preview = memo(({ activeTab, appSummary }: PreviewProps) => {
 
       <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
         {activeTab === 'planning' ? (
-          <PlanView appSummary={appSummary} />
+          <PlanView />
         ) : (
           <AppView
             activeTab={activeTab}
-            appSummary={appSummary}
             isDeviceModeOn={isDeviceModeOn}
             iframeRef={iframeRef}
             iframeUrl={iframeUrl ?? ''}

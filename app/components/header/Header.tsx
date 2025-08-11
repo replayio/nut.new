@@ -5,11 +5,10 @@ import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
-import WithTooltip from '~/components/ui/Tooltip';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
 import { userStore } from '~/lib/stores/userAuth';
+import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
@@ -35,18 +34,6 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
-        <TooltipProvider>
-          <WithTooltip tooltip="Join Discord">
-            <a
-              href="https://www.replay.io/discord"
-              className="p-2 rounded-lg bg-[#5865F2]/10 hover:bg-[#5865F2]/20 text-[#5865F2] hover:text-[#5865F2] transition-all duration-200 hover:scale-105 group flex items-center gap-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="i-ph:discord-logo-fill text-2xl transition-transform duration-200 group-hover:scale-110" />
-            </a>
-          </WithTooltip>
-        </TooltipProvider>
       </div>
 
       <div className="flex-1 flex justify-end mr-4">
@@ -59,10 +46,13 @@ export function Header() {
         {() => (
           <Suspense
             fallback={
-              <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor" />
+              <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor gap-2" />
             }
           >
-            <ClientAuth />
+            <div className="flex items-center gap-3">
+              <ThemeSwitch />
+              <ClientAuth />
+            </div>
           </Suspense>
         )}
       </ClientOnly>

@@ -3,12 +3,12 @@ import { toast } from 'react-toastify';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 
-interface EditChatDescriptionOptions {
+interface EditAppTitleOptions {
   initialTitle?: string;
   customAppId?: string;
 }
 
-type EditChatDescriptionHook = {
+type EditAppTitleHook = {
   editing: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: () => Promise<void>;
@@ -19,22 +19,17 @@ type EditChatDescriptionHook = {
 };
 
 /**
- * Hook to manage the state and behavior for editing chat descriptions.
+ * Hook to manage the state and behavior for editing app titles.
  *
  * Offers functions to:
  * - Switch between edit and view modes.
  * - Manage input changes, blur, and form submission events.
  * - Save updates to IndexedDB and optionally to the global application state.
- *
- * @param {Object} options
- * @param {string} options.initialDescription - The current chat description.
- * @param {string} options.customChatId - Optional ID for updating the description via the sidebar.
- * @returns {EditChatDescriptionHook} Methods and state for managing description edits.
  */
-export function useEditChatTitle({
+export function useEditAppTitle({
   initialTitle = chatStore.appTitle.get(),
   customAppId,
-}: EditChatDescriptionOptions): EditChatDescriptionHook {
+}: EditAppTitleOptions): EditAppTitleHook {
   const currentAppId = chatStore.currentAppId.get();
 
   const [editing, setEditing] = useState(false);
@@ -122,6 +117,10 @@ export function useEditChatTitle({
 
         await database.updateAppTitle(appId, currentTitle);
         toast.success('App title updated successfully');
+
+        if (appId == currentAppId) {
+          chatStore.appTitle.set(currentTitle);
+        }
       } catch (error) {
         toast.error('Failed to update chat title: ' + (error as Error).message);
       }

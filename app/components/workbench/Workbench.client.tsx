@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { motion, type Variants } from 'framer-motion';
 import { memo, useState, useEffect, useRef } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
 import { MultiSlider } from '~/components/ui/Slider';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { classNames } from '~/utils/classNames';
@@ -9,15 +8,15 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 import { ClientOnly } from 'remix-utils/client-only';
 import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
 import { DownloadButton } from '~/components/header/DownloadButton';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
+import { chatStore } from '~/lib/stores/chat';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  appSummary?: AppSummary;
   mobileActiveTab?: 'chat' | 'planning' | 'preview';
 }
 
@@ -38,15 +37,16 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const [activeTab, setActiveTab] = useState<'planning' | 'preview'>('planning');
-
+  const appId = useStore(chatStore.currentAppId);
   const hasSeenPreviewRef = useRef(false);
   const hasSeenProjectPlanRef = useRef(false);
   const hasSetPlanningTabRef = useRef(false);
+  const appSummary = useStore(chatStore.appSummary);
 
   const isSmallViewport = useViewport(1024);
 
@@ -128,7 +128,7 @@ export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: Wor
               )}
             >
               {!isSmallViewport && (
-                <div className="flex items-center px-4 py-3 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/50">
+                <div className="flex items-center px-4 py-4 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/50">
                   {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
                   <div className="flex items-center justify-center min-w-0 flex-shrink flex-grow basis-0 max-w-300">
                     {chatStarted && (
@@ -137,30 +137,27 @@ export const Workbench = memo(({ chatStarted, appSummary, mobileActiveTab }: Wor
                       </div>
                     )}
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-3 items-center">
                     {chatStarted && (
                       <>
-                        <span className="flex-1 min-w-fit px-2 truncate text-center text-bolt-elements-textPrimary">
+                        <div className="flex items-center justify-center">
                           <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
-                        </span>
-                        <span className="flex-1 min-w-fit px-2 truncate text-center text-bolt-elements-textPrimary">
+                        </div>
+                        {appId && (
+                          <div className="flex items-center justify-center">
+                            <ClientOnly>{() => <ViewVersionHistoryButton />}</ClientOnly>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-center">
                           <ClientOnly>{() => <DownloadButton />}</ClientOnly>
-                        </span>
+                        </div>
                       </>
                     )}
                   </div>
-                  <IconButton
-                    icon="i-ph:x-circle"
-                    className="-mr-1"
-                    size="xxl"
-                    onClick={() => {
-                      workbenchStore.showWorkbench.set(false);
-                    }}
-                  />
                 </div>
               )}
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} appSummary={appSummary ?? null} />
+                <Preview activeTab={activeTab} />
               </div>
             </div>
           </div>

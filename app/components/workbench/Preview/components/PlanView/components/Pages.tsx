@@ -1,18 +1,16 @@
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import {
-  type AppSummary,
-  type AppDetail,
-  AppFeatureStatus,
-  isFeatureStatusImplemented,
-} from '~/lib/persistence/messageAppSummary';
+import { type AppDetail, AppFeatureStatus, isFeatureStatusImplemented } from '~/lib/persistence/messageAppSummary';
 import { classNames } from '~/utils/classNames';
+import { formatPascalCaseName } from '~/utils/names';
+import { useStore } from '@nanostores/react';
+import { chatStore } from '~/lib/stores/chat';
+import { assert } from '~/utils/nut';
 
-interface PagesProps {
-  appSummary: AppSummary | null;
-}
+const Pages = () => {
+  const appSummary = useStore(chatStore.appSummary);
+  assert(appSummary, 'App summary is required');
 
-const Pages = ({ appSummary }: PagesProps) => {
   const renderComponent = (component: AppDetail, index: number) => {
     const feature = appSummary?.features?.find((feature) => feature.componentNames?.includes(component.name));
 
@@ -24,7 +22,7 @@ const Pages = ({ appSummary }: PagesProps) => {
             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group
             "
           >
-            {component.name}
+            {formatPascalCaseName(component.name)}
             {feature?.status == AppFeatureStatus.ImplementationInProgress && (
               <div className="pl-2">
                 <div
@@ -49,7 +47,7 @@ const Pages = ({ appSummary }: PagesProps) => {
     <div>
       <div className="space-y-4 mb-2">
         <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm mb-6">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm">
             <div className="i-ph:layout-duotone text-white text-lg"></div>
           </div>
           <div className="text-lg font-semibold text-bolt-elements-textHeading">Page Layouts</div>
@@ -67,13 +65,14 @@ const Pages = ({ appSummary }: PagesProps) => {
                 key={index}
                 className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor p-5 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-lg hover:scale-[1.01] group"
               >
-                {page.description && (
-                  <div className="text-sm text-bolt-elements-textSecondary mb-3 leading-relaxed">
-                    <div className="font-mono text-sm font-semibold text-bolt-elements-textHeading">
-                      {page.description}
-                    </div>
+                <div className="gap-2 min-w-0 flex-1">
+                  <div className="text-bolt-elements-textHeading text-base font-bold">
+                    {formatPascalCaseName(page.name ?? '')}
                   </div>
-                )}
+                  <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
+                    <span>{page.description ?? ''}</span>
+                  </div>
+                </div>
 
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">

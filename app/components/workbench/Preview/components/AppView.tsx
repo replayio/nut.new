@@ -1,14 +1,14 @@
 import { PointSelector } from '~/components/workbench/PointSelector';
 import GripIcon from '~/components/icons/GripIcon';
-import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 import ProgressStatus from './ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
+import { useStore } from '@nanostores/react';
+import { chatStore } from '~/lib/stores/chat';
 
 export type ResizeSide = 'left' | 'right' | null;
 
 const AppView = ({
   activeTab,
-  appSummary,
   isDeviceModeOn,
   widthPercent,
   previewURL,
@@ -21,7 +21,6 @@ const AppView = ({
   startResizing,
 }: {
   activeTab: 'planning' | 'testing' | 'preview';
-  appSummary: AppSummary | null;
   isDeviceModeOn: boolean;
   widthPercent: number;
   previewURL: string;
@@ -33,6 +32,7 @@ const AppView = ({
   setSelectionPoint: (selectionPoint: { x: number; y: number } | null) => void;
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
+  const appSummary = useStore(chatStore.appSummary);
   const isSmallViewport = useViewport(1024);
   return (
     <div

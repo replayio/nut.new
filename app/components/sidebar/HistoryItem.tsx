@@ -3,7 +3,7 @@ import { classNames } from '~/utils/classNames';
 import * as Dialog from '@radix-ui/react-dialog';
 import { type AppLibraryEntry } from '~/lib/persistence/apps';
 import WithTooltip from '~/components/ui/Tooltip';
-import { useEditChatTitle } from '~/lib/hooks/useEditChatDescription';
+import { useEditAppTitle } from '~/lib/hooks/useEditAppTitle';
 import { forwardRef, type ForwardedRef } from 'react';
 
 interface HistoryItemProps {
@@ -17,7 +17,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   const isActiveChat = urlId === item.id;
 
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
-    useEditChatTitle({
+    useEditAppTitle({
       initialTitle: item.title,
       customAppId: item.id,
     });

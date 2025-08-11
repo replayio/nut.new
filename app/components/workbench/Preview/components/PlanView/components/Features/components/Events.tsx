@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react';
+import { useState } from 'react';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { chatStore } from '~/lib/stores/chat';
 
@@ -30,6 +31,17 @@ function groupWorkerEvents(eventResponses: ChatResponse[], featureName: string |
 const Events = ({ featureName }: EventsProps) => {
   const eventResponses = useStore(chatStore.events);
   const workerEvents = groupWorkerEvents(eventResponses, featureName);
+  const [expandedWorkers, setExpandedWorkers] = useState<Set<number>>(new Set());
+
+  const toggleWorkerExpansion = (workerIndex: number) => {
+    const newExpanded = new Set(expandedWorkers);
+    if (newExpanded.has(workerIndex)) {
+      newExpanded.delete(workerIndex);
+    } else {
+      newExpanded.add(workerIndex);
+    }
+    setExpandedWorkers(newExpanded);
+  };
 
   const renderTime = (time: string) => {
     const date = new Date(time);
@@ -131,12 +143,33 @@ const Events = ({ featureName }: EventsProps) => {
       }
     }
 
+    const isExpanded = expandedWorkers.has(index);
+    const shouldShowExpander = events.length > 3;
+    const visibleEvents = shouldShowExpander && !isExpanded ? events.slice(0, 3) : events;
+
     return (
       <div key={index} className="border-t border-bolt-elements-borderColor/50 mb-2">
         <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block ml-2">
           Worker {index + 1} ({peanuts} peanuts)
         </div>
-        {events.map(renderEvent)}
+
+        <div className="relative">
+          {visibleEvents.map(renderEvent)}
+
+          {shouldShowExpander && (
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={() => toggleWorkerExpansion(index)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor/50 rounded-lg transition-all duration-200 hover:shadow-sm"
+              >
+                <span>{isExpanded ? `Hide ${events.length - 3} events` : `Show ${events.length - 3} more events`}</span>
+                <div
+                  className={`i-ph:caret-${isExpanded ? 'up' : 'down'}-bold text-sm transition-transform duration-200`}
+                ></div>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };

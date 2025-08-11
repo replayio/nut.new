@@ -1,8 +1,6 @@
 import {
   getPeanutsHistory,
   getPeanutsSubscription,
-  setPeanutsSubscription,
-  addPeanuts,
   type PeanutHistoryEntry,
   type AccountSubscription,
 } from '~/lib/replay/Account';
@@ -11,31 +9,55 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
+import {
+  createTopoffCheckout,
+  checkSubscriptionStatus,
+  syncSubscription,
+  cancelSubscription,
+} from '~/lib/stripe/client';
+import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
+import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
+import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
 
 interface AccountModalProps {
   user: User | undefined;
   onClose: () => void;
 }
 
-const DEFAULT_SUBSCRIPTION_PEANUTS = 2000;
-
 export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const reloadAccountData = async () => {
     setLoading(true);
+
+    // First sync the subscription with Stripe to ensure peanuts are up to date
+    if (user?.email && user?.id) {
+      await syncSubscription(user.email, user.id);
+    }
+
+    // Load basic data first
     const [history, subscription] = await Promise.all([
       getPeanutsHistory(),
       getPeanutsSubscription(),
       refreshPeanutsStore(),
     ]);
+
+    // Then check Stripe subscription separately
+    let stripeStatus = { hasSubscription: false, subscription: null };
+    if (user?.email) {
+      stripeStatus = await checkSubscriptionStatus(user.email);
+    }
+
     history.reverse();
     setHistory(history);
     setSubscription(subscription);
+    setStripeSubscription(stripeStatus.hasSubscription ? stripeStatus.subscription : null);
     setLoading(false);
   };
 
@@ -51,15 +73,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
-
-  const formatSubscriptionTime = (timeString: string) => {
-    const date = new Date(timeString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
     });
   };
 
@@ -119,7 +132,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     return (
       <div
         key={`${item.time}-${index}`}
-        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] group backdrop-blur-sm"
+        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md group backdrop-blur-sm"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
           <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/30 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30 font-medium self-start">
@@ -145,26 +158,86 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleSubscriptionToggle = async () => {
-    setLoading(true);
     if (subscription) {
-      await setPeanutsSubscription(undefined);
+      // TODO: Implement subscription cancellation via Stripe Customer Portal
+      stripeStatusModalActions.showInfo(
+        'Contact Support',
+        'Please contact support to cancel your subscription.',
+        'Our support team will help you manage your subscription settings.',
+      );
     } else {
-      await setPeanutsSubscription(DEFAULT_SUBSCRIPTION_PEANUTS);
+      // Open subscription modal to choose a tier
+      openSubscriptionModal();
+      onClose();
     }
-    reloadAccountData();
   };
 
   const handleAddPeanuts = async () => {
-    // TODO: When we have actual logic here, update so it shows how many peanuts were added
-    if (window.analytics) {
-      window.analytics.track('Peanuts Added', {
-        amount: 2000,
-        timestamp: new Date().toISOString(),
-      });
+    if (!user?.id || !user?.email) {
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to add peanuts.',
+        'You need to be signed in to purchase peanut top-ups.',
+      );
+      return;
     }
-    setLoading(true);
-    await addPeanuts(2000);
-    reloadAccountData();
+
+    try {
+      await createTopoffCheckout(user.id, user.email);
+      // User will be redirected to Stripe Checkout
+      if (window.analytics) {
+        window.analytics.track('Peanuts Added', {
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('Error creating peanut top-off:', error);
+      stripeStatusModalActions.showError(
+        'Checkout Failed',
+        "We couldn't create the checkout session.",
+        'Please try again in a few moments, or contact support if the issue persists.',
+      );
+    }
+  };
+
+  const handleCancelSubscription = () => {
+    if (!user?.email) {
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to cancel your subscription.',
+        'You need to be signed in to manage your subscription settings.',
+      );
+      return;
+    }
+
+    // Show confirmation modal
+    setShowCancelConfirm(true);
+  };
+
+  const confirmCancelSubscription = async () => {
+    setShowCancelConfirm(false);
+
+    if (!user?.email) {
+      return;
+    }
+
+    try {
+      await cancelSubscription(user.email, false); // Cancel at period end
+      stripeStatusModalActions.showSuccess(
+        '✅ Subscription Canceled',
+        'Your subscription has been successfully canceled.',
+        "You'll continue to have access until the end of your current billing period, and you'll keep access to your remaining peanuts.",
+      );
+      // Reload data to show updated subscription status
+      reloadAccountData();
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      stripeStatusModalActions.showError(
+        'Cancellation Failed',
+        "We couldn't cancel your subscription at this time.",
+        'Please try again in a few moments, or contact support if the issue persists.',
+      );
+    }
   };
 
   return (
@@ -215,15 +288,30 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               </div>
             </div>
             <div className="text-center">
-              {subscription ? (
+              {stripeSubscription ? (
                 <>
                   <div className="text-3xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-200 group-hover:scale-105">
-                    {subscription.peanuts}
+                    {stripeSubscription.peanuts.toLocaleString()}
                   </div>
                   <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">Peanuts per month</div>
                   <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30">
-                    Next reload: {formatSubscriptionTime(subscription.reloadTime)}
+                    {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
+                  <div className="text-xs text-bolt-elements-textSecondary mt-1">
+                    Next billing: {new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()}
+                  </div>
+                  {stripeSubscription.cancelAtPeriodEnd && (
+                    <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>
+                  )}
+
+                  {!stripeSubscription.cancelAtPeriodEnd && (
+                    <button
+                      onClick={handleCancelSubscription}
+                      className="mt-3 px-4 py-2 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg transition-all duration-200 hover:scale-105"
+                    >
+                      Cancel Subscription
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -236,62 +324,47 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          <button
-            onClick={handleSubscriptionToggle}
-            disabled={loading}
-            className={classNames(
-              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-              subscription
-                ? 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600'
-                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
-              {
-                'opacity-60 cursor-not-allowed hover:scale-100': loading,
-              },
-            )}
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
-              </>
-            ) : subscription ? (
-              <>
-                <div className="i-ph:x-circle text-xl transition-transform duration-200 group-hover:scale-110" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Cancel Subscription</span>
-              </>
-            ) : (
-              <>
-                <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-                <span className="transition-transform duration-200 group-hover:scale-105">
-                  Subscribe - {DEFAULT_SUBSCRIPTION_PEANUTS} peanuts/month
-                </span>
-              </>
-            )}
-          </button>
+          {!stripeSubscription && !loading && (
+            <button
+              onClick={handleSubscriptionToggle}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+                {
+                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
+                },
+              )}
+            >
+              <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-transform duration-200 group-hover:scale-105">Add Subscription</span>
+            </button>
+          )}
 
-          <button
-            onClick={handleAddPeanuts}
-            disabled={loading}
-            className={classNames(
-              'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-              'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
-              {
-                'opacity-60 cursor-not-allowed hover:scale-100': loading,
-              },
-            )}
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
-              </>
-            ) : (
-              <>
-                <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
-                <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
-              </>
-            )}
-          </button>
+          {stripeSubscription && !loading && (
+            <button
+              onClick={handleAddPeanuts}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
+                {
+                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
+                },
+              )}
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
+                  <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -323,6 +396,13 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmCancelModal
+        isOpen={showCancelConfirm}
+        onConfirm={confirmCancelSubscription}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 };

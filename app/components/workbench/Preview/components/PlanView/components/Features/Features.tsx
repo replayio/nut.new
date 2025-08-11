@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
-import { AppFeatureStatus, type AppFeature, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppFeature } from '~/lib/persistence/messageAppSummary';
 import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
 import Components from './components/Components';
 import Events from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface FeaturesProps {
-  appSummary: AppSummary | null;
-}
+import { formatPascalCaseName } from '~/utils/names';
+import { useStore } from '@nanostores/react';
+import { chatStore } from '~/lib/stores/chat';
+import { assert } from '~/utils/nut';
 
 const MockupFeatureIndex = -1;
 
-const Features = ({ appSummary }: FeaturesProps) => {
+const Features = () => {
+  const appSummary = useStore(chatStore.appSummary);
+  assert(appSummary, 'App summary is required');
+
   const [collapsedFeatures, setCollapsedFeatures] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -84,7 +87,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
   const renderFeature = (feature: AppFeature | undefined, index: number) => {
     const isCollapsed = collapsedFeatures.has(index);
 
-    const name = feature ? feature.name : 'Mockup';
+    const name = feature ? formatPascalCaseName(feature.name) : 'Mockup';
     const description = feature
       ? feature.description
       : 'Builds a mockup of the app with a complete UI but no functionality.';
@@ -109,7 +112,7 @@ const Features = ({ appSummary }: FeaturesProps) => {
             </div>
 
             <div className="gap-2 min-w-0 flex-1">
-              <div className="text-bolt-elements-textHeading text-base font-bold">{name}</div>
+              <div className="text-bolt-elements-textHeading text-base font-bold">{formatPascalCaseName(name)}</div>
               <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
                 <span>{description}</span>
               </div>

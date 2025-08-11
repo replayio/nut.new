@@ -120,10 +120,6 @@ async function setAppDeploySettings(appId: string, deploySettings: DeploySetting
   await callNutAPI('set-app-deploy-settings', { appId, deploySettings });
 }
 
-async function abortAppChats(appId: string): Promise<void> {
-  await callNutAPI('abort-app-chats', { appId });
-}
-
 async function getAppHistory(appId: string): Promise<AppSummary[]> {
   const { history } = await callNutAPI('get-app-history', { appId });
   return history;
@@ -146,7 +142,6 @@ export const database = {
   updateAppTitle,
   getAppDeploySettings,
   setAppDeploySettings,
-  abortAppChats,
   getAppHistory,
   revertApp,
   copyApp,
