@@ -60,3 +60,14 @@ export type ChatResponse =
   | ChatResponseError
   | ChatResponseDone
   | ChatResponseAborted;
+
+// Whether a response indicates the associated worker has finished.
+export function isWorkerFinishedResponse(response: ChatResponse): boolean {
+  switch (response.kind) {
+    case 'done':
+    case 'error':
+    case 'aborted':
+      return true;
+  }
+  return false;
+}

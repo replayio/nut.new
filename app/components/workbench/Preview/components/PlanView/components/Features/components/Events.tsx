@@ -1,7 +1,8 @@
 import { useStore } from '@nanostores/react';
 import { useState } from 'react';
-import type { ChatResponse } from '~/lib/persistence/response';
+import { isWorkerFinishedResponse, type ChatResponse } from '~/lib/persistence/response';
 import { chatStore } from '~/lib/stores/chat';
+import Tooltip from '~/components/ui/Tooltip';
 
 interface EventsProps {
   featureName: string | undefined;
@@ -143,6 +144,25 @@ const Events = ({ featureName }: EventsProps) => {
       }
     }
 
+    let tooltip;
+    if (featureName) {
+      const finished = events.some(isWorkerFinishedResponse);
+      if (finished) {
+        const landChanges = events.some(event => event.kind === 'app-event' && event.event.name === 'land-changes');
+        if (landChanges) {
+          tooltip = 'Work completed successfully';
+        } else {
+          tooltip = 'No charge for work not completed';
+          peanuts = 0;
+        }
+      } else {
+        tooltip = 'Work in progress';
+      }
+    } else {
+      tooltip = 'No charge for mockup';
+      peanuts = 0;
+    }
+
     const isExpanded = expandedWorkers.has(index);
     const shouldShowExpander = events.length > 3;
     const visibleEvents = shouldShowExpander && !isExpanded ? events.slice(0, 3) : events;
@@ -150,7 +170,9 @@ const Events = ({ featureName }: EventsProps) => {
     return (
       <div key={index} className="border-t border-bolt-elements-borderColor/50 mb-2">
         <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2/30 px-2 py-1 rounded-md inline-block ml-2">
-          Worker {index + 1} ({peanuts} peanuts)
+          <Tooltip tooltip={tooltip}>
+            <span>Worker {index + 1} ({peanuts} peanuts)</span>
+          </Tooltip>
         </div>
 
         <div className="relative">

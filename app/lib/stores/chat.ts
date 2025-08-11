@@ -140,9 +140,11 @@ export function onChatResponse(response: ChatResponse, reason: string) {
         toast.error('Error sending message');
         console.error('Error sending message', response.error);
       }
+      addResponseEvent(response);
       break;
     case 'done':
     case 'aborted':
+      addResponseEvent(response);
       break;
     default:
       console.error('Unknown chat response:', response);
