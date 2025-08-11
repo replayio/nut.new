@@ -102,7 +102,7 @@ export const Head = createHead(() => (
     <Meta />
     <Links />
     <script src="https://cdn.lgrckt-in.com/LogRocket.min.js" crossOrigin="anonymous"></script> 
-    <script>window.LogRocket && window.LogRocket.init('woocwd/nut');</script>
+    <script>window.LogRocket.init('woocwd/nut');</script>
     <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
     <script dangerouslySetInnerHTML={{ __html: analyticsCode }} />
   </>
