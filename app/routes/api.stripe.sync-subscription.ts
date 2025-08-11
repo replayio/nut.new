@@ -113,6 +113,7 @@ export async function action({ request }: { request: Request }) {
 
     const subscription = subscriptions.data[0];
     const priceId = subscription.items.data[0]?.price.id;
+    const createdAt = new Date(subscription.created).toISOString();
 
     // Map price ID to tier using environment variables
     let tier: keyof typeof SUBSCRIPTION_PEANUTS | null = null;
@@ -148,6 +149,7 @@ export async function action({ request }: { request: Request }) {
     await callNutAPIWithUserId('set-peanuts-subscription', {
       userId,
       peanuts,
+      createdAt,
     });
 
     return new Response(
@@ -156,6 +158,7 @@ export async function action({ request }: { request: Request }) {
         hasSubscription: true,
         tier,
         peanuts,
+        createdAt,
         message: `Synced ${tier} subscription (${peanuts} peanuts)`,
       }),
       {
