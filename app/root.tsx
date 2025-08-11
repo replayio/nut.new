@@ -16,6 +16,9 @@ import { Analytics } from '@vercel/analytics/remix';
 import GlobalFeedbackModal from './components/sidebar/Feedback/components/FeedbackModal';
 import { GlobalAccountModal } from './components/auth/GlobalAccountModal';
 import { GlobalAuthModal } from './components/auth/GlobalAuthModal';
+import AppHistoryModal from './components/workbench/VesionHistory/AppHistoryModal';
+import { GlobalSubscriptionModal } from './components/subscription/GlobalSubscriptionModal';
+import { GlobalStripeStatusModal } from './components/stripe/GlobalStripeStatusModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
@@ -26,6 +29,7 @@ interface LoaderData {
   ENV: {
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
+    STRIPE_PUBLISHABLE_KEY: string;
     INTERCOM_APP_ID: string;
   };
 }
@@ -59,12 +63,14 @@ export const loader: LoaderFunction = async () => {
   const supabaseUrl = process.env.SUPABASE_URL as string;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
   const publicIntercomAppId = process.env.INTERCOM_APP_ID as string;
+  const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY as string;
 
   return json<LoaderData>({
     ENV: {
       SUPABASE_URL: supabaseUrl,
       SUPABASE_ANON_KEY: supabaseAnonKey,
       INTERCOM_APP_ID: publicIntercomAppId,
+      STRIPE_PUBLISHABLE_KEY: stripePublishableKey,
     },
   });
 };
@@ -217,6 +223,9 @@ export default function App() {
         <GlobalFeedbackModal />
         <GlobalAccountModal />
         <GlobalAuthModal />
+        <AppHistoryModal />
+        <GlobalSubscriptionModal />
+        <GlobalStripeStatusModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />

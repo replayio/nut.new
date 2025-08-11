@@ -4,16 +4,15 @@ import { useLoaderData } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import { logStore } from '~/lib/stores/logs';
 import { toast } from 'react-toastify';
-import type { Message } from '~/lib/persistence/message';
-import mergeResponseMessage from './functions/mergeResponseMessages';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
-import { chatStore, doListenAppResponses, isResponseEvent } from '~/lib/stores/chat';
+import { chatStore, doListenAppResponses, onChatResponse } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import type { ChatResponse } from '~/lib/persistence/response';
 import { NutAPIError } from '~/lib/replay/NutAPI';
-import { logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
 import { Unauthorized } from '~/components/chat/Unauthorized';
 import { navigateApp } from '~/utils/nut';
+import { useStore } from '@nanostores/react';
+import { statusModalStore } from '~/lib/stores/statusModal';
+import { clearAppResponses } from '~/lib/replay/ResponseFilter';
 
 async function isAppAccessible(appId: string) {
   try {
@@ -27,6 +26,41 @@ async function isAppAccessible(appId: string) {
   }
 }
 
+async function updateAppState(appId: string) {
+  const title = await database.getAppTitle(appId);
+  const responses = await getExistingAppResponses(appId);
+  for (const response of responses) {
+    onChatResponse(response, 'InitialLoad');
+  }
+  chatStore.currentAppId.set(appId);
+  chatStore.appTitle.set(title);
+  chatStore.started.set(chatStore.messages.get().length > 0);
+}
+
+// Listen for document visibility changes. If the document becomes visible
+// we don't trust that we have the latest version of the app, so will refresh
+// state and show the status modal if it was open earlier and there is no
+// in progress chat.
+if (typeof document !== 'undefined') {
+  let gDocumentVisible = true;
+  document.addEventListener('visibilitychange', async () => {
+    const visible = document.visibilityState === 'visible';
+    if (visible != gDocumentVisible) {
+      gDocumentVisible = visible;
+      if (visible) {
+        const appId = chatStore.currentAppId.get();
+        if (appId && !chatStore.listenResponses.get()) {
+          const wasStatusModalOpen = statusModalStore.isOpen.get();
+          console.log('DocumentReloadApp', wasStatusModalOpen);
+          statusModalStore.close();
+          await updateAppState(appId);
+          doListenAppResponses(wasStatusModalOpen);
+        }
+      }
+    }
+  });
+}
+
 export function Chat() {
   renderLogger.trace('Chat');
 
@@ -35,6 +69,16 @@ export function Chat() {
   const [ready, setReady] = useState<boolean>(!initialAppId);
   const [unauthorized, setUnauthorized] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState(false);
+  const appTitle = useStore(chatStore.appTitle);
+
+  // Update document title when app title changes
+  useEffect(() => {
+    if (appTitle) {
+      document.title = `Nut: ${appTitle}`;
+    } else {
+      document.title = 'Nut';
+    }
+  }, [appTitle]);
 
   const loadApp = async (appId: string) => {
     try {
@@ -43,24 +87,8 @@ export function Chat() {
         return;
       }
 
-      const title = await database.getAppTitle(appId);
-      const responses = await getExistingAppResponses(appId);
-      let messages: Message[] = [];
-      const eventResponses: ChatResponse[] = [];
-      for (const response of responses) {
-        if (response.kind == 'message') {
-          logAppSummaryMessage(response.message, 'InitialLoad');
-          messages = mergeResponseMessage(response.message, messages);
-        }
-        if (isResponseEvent(response)) {
-          eventResponses.push(response);
-        }
-      }
-      chatStore.currentAppId.set(appId);
-      chatStore.appTitle.set(title);
-      chatStore.events.set(eventResponses);
-      chatStore.messages.set(messages);
-      chatStore.started.set(chatStore.messages.get().length > 0);
+      clearAppResponses();
+      await updateAppState(appId);
 
       // Always check for ongoing work when we first start the chat.
       doListenAppResponses();
@@ -97,6 +125,8 @@ export function Chat() {
       loadApp(initialAppId);
     }
   }, []);
+
+  console.log('ChatClient', ready, chatStore.started.get(), chatStore.appSummary.get(), chatStore.messages.get());
 
   return (
     <>

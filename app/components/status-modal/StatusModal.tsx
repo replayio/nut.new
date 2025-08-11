@@ -14,7 +14,8 @@ interface StatusModalProps {
 
 export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinueBuilding }) => {
   const isOpen = useStore(statusModalStore.isOpen);
-  const peanutsError = useStore(peanutsStore.peanutsError);
+  const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
+  const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
 
   const features = appSummary.features || [];
   const completedFeatures = features.filter(
@@ -219,21 +220,24 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
               >
-                {!isFullyComplete && peanutsError && (
-                  <div className="flex justify-center items-center w-full">
-                    <WithTooltip tooltip={peanutsError}>
+                {!isFullyComplete && peanutsErrorButton && (
+                  <div className="flex flex-col items-center w-full">
+                    <WithTooltip tooltip={peanutsErrorInfo}>
                       <button
                         onClick={handleContinueBuilding}
                         disabled={true}
-                        className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary flex items-center gap-3 opacity-50 cursor-not-allowed border border-bolt-elements-borderColor shadow-sm"
+                        className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-gray-500 text-white flex items-center gap-3 opacity-50 cursor-not-allowed border border-gray-400/30 shadow-sm"
                       >
-                        <div className="i-ph:rocket-launch text-xl"></div>
-                        <span>Continue Building</span>
+                        <div className="i-ph:rocket-launch text-xl text-white"></div>
+                        <span className="text-white">{peanutsErrorButton}</span>
                       </button>
                     </WithTooltip>
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm max-w-md text-center">
+                      {peanutsErrorInfo}
+                    </div>
                   </div>
                 )}
-                {!isFullyComplete && !peanutsError && (
+                {!isFullyComplete && !peanutsErrorButton && (
                   <div className="flex justify-center items-center w-full">
                     <button
                       onClick={handleContinueBuilding}

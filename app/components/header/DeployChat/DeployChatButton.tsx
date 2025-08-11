@@ -20,6 +20,9 @@ export enum DeployStatus {
   Succeeded,
 }
 
+// Restriction from Netlify on how long site names can be.
+const MAX_SITE_NAME_LENGTH = 63;
+
 export function DeployChatButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deploySettings, setDeploySettings] = useState<DeploySettings>({});
@@ -112,7 +115,7 @@ export function DeployChatButton() {
     }
 
     // Convert to lowercase and replace spaces/special characters with hyphens
-    const siteName =
+    let siteName =
       appTitle
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
@@ -121,7 +124,12 @@ export function DeployChatButton() {
         .replace(/^-|-$/g, '') || // Remove leading/trailing hyphens
       'nut-app'; // Fallback if result is empty
 
-    return `${siteName}-${generateRandomId()}`;
+    const suffix = `-${generateRandomId()}`;
+
+    // Shorten if necessary to ensure names are under the Netlify limit.
+    siteName = siteName.slice(0, MAX_SITE_NAME_LENGTH - suffix.length);
+
+    return `${siteName}${suffix}`;
   };
 
   const handleDeploy = async () => {
@@ -146,6 +154,11 @@ export function DeployChatButton() {
 
     if (!deploySettings.siteName) {
       deploySettings.siteName = generateSiteName();
+    }
+
+    if (deploySettings.siteName.length > MAX_SITE_NAME_LENGTH) {
+      setError(`Site name must be shorter than ${MAX_SITE_NAME_LENGTH + 1} characters`);
+      return;
     }
 
     if (

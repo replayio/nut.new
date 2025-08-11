@@ -2,7 +2,6 @@ import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
-import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
 import { SettingsButton } from '~/components/ui/SettingsButton';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
@@ -45,7 +44,7 @@ const skipConfirmDeleteCookieName = 'skipConfirmDelete';
 
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<AppLibraryEntry[] | null>(null);
+  const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
   const isOpen = useStore(sidebarMenuStore.isOpen);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -57,7 +56,7 @@ export const Menu = () => {
   });
 
   const loadEntries = useCallback(() => {
-    setList(null);
+    setList(undefined);
     database
       .getAllAppEntries()
       .then(setList)
@@ -68,12 +67,12 @@ export const Menu = () => {
     (event: React.UIEvent, item: AppLibraryEntry) => {
       event.preventDefault();
 
-      setList((list ?? []).filter((chat) => chat.id !== item.id));
+      setList(list?.filter((chat) => chat.id !== item.id));
 
       database
         .deleteApp(item.id)
         .then(() => {
-          loadEntries();
+          setList(list?.filter((chat) => chat.id !== item.id));
 
           if (chatStore.currentAppId.get() === item.id) {
             window.location.pathname = '/';
@@ -247,8 +246,8 @@ export const Menu = () => {
         </div>
         <div className="flex-1 overflow-auto px-6 pb-4">
           {filteredList.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1/30 rounded-xl mx-2 border border-bolt-elements-borderColor/30">
-              {list === null ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1/30 rounded-xl mx-2 border border-bolt-elements-borderColor/30 mt-4">
+              {list === undefined ? (
                 <>
                   <div className="w-10 h-10 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin mb-4 shadow-sm" />
                   <p className="text-bolt-elements-textSecondary text-sm font-medium">Loading apps...</p>
@@ -341,7 +340,6 @@ export const Menu = () => {
               <div className="h-6 w-px bg-bolt-elements-borderColor/50" />
               <Feedback />
             </div>
-            <ThemeSwitch />
           </div>
         </div>
       </div>

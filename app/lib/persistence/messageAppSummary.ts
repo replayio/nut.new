@@ -3,7 +3,6 @@
 import { assert } from '~/utils/nut';
 import type { Message } from './message';
 import type { DatabaseSchema } from './databaseSchema';
-import { setInitialAppSummary } from '~/lib/stores/appSummary';
 
 // Message sent whenever the app summary is updated.
 export const APP_SUMMARY_CATEGORY = 'AppSummary';
@@ -22,6 +21,9 @@ export interface AppDetail {
 
 // Describes the contents of a page in the app.
 export interface AppPage {
+  // Short name for the page. 7/24/2025: Older apps don't have this.
+  name?: string;
+
   // Path to this page in the app. '/' for the root page, may include wildcards.
   path: string;
 
@@ -153,6 +155,7 @@ export interface AppSummary {
   mockupStatus?: AppFeatureStatus;
   features?: AppFeature[];
   otherTests?: AppTest[];
+  setSecrets?: string[];
 
   // The repository being described, if available.
   repositoryId?: string;
@@ -172,20 +175,12 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
     assert(message.category === APP_SUMMARY_CATEGORY, 'Message is not an app summary message');
     assert(message.type === 'text', 'Message is not a text message');
     const appSummary = JSON.parse(message.content) as AppSummary;
-    setInitialAppSummary(appSummary);
     assert(typeof appSummary.description === 'string', 'Missing app description');
     assert(Array.isArray(appSummary.pages), 'Missing app pages');
     return appSummary;
   } catch (e) {
     console.error('Failed to parse app summary message', e);
     return undefined;
-  }
-}
-
-// Diagnostics for tracking down why the UI doesn't update as expected.
-export function logAppSummaryMessage(message: Message, reason: string) {
-  if (message.category === APP_SUMMARY_CATEGORY) {
-    console.log('AppSummary', reason, parseAppSummaryMessage(message)?.iteration);
   }
 }
 

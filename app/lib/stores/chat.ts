@@ -3,17 +3,25 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import type { Message } from '~/lib/persistence/message';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { clearPendingMessageStatus } from './status';
-import { database } from '~/lib/persistence/apps';
 import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
-import { getLatestAppRepositoryId, logAppSummaryMessage } from '~/lib/persistence/messageAppSummary';
+import {
+  APP_SUMMARY_CATEGORY,
+  getLatestAppRepositoryId,
+  parseAppSummaryMessage,
+  type AppSummary,
+} from '~/lib/persistence/messageAppSummary';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { peanutsStore, refreshPeanutsStore } from './peanuts';
+import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
+import { statusModalStore } from './statusModal';
+import { addAppResponse } from '~/lib/replay/ResponseFilter';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
   appTitle = atom<string | undefined>(undefined);
+  appSummary = atom<AppSummary | undefined>(undefined);
 
   started = atom<boolean>(false);
   numAborts = atom<number>(0);
@@ -49,10 +57,19 @@ function addResponseEvent(response: ChatResponse) {
 }
 
 export function addChatMessage(message: Message) {
+  // If this is a user message, remember it so we don't add it again when it comes back
+  // from the backend.
+  addAppResponse({
+    kind: 'message',
+    message,
+    time: message.createTime ?? new Date().toISOString(),
+    chatId: undefined,
+  });
+
   chatStore.messages.set(mergeResponseMessage(message, chatStore.messages.get()));
 }
 
-export function doAbortChat() {
+export async function doAbortChat() {
   chatStore.numAborts.set(chatStore.numAborts.get() + 1);
   chatStore.hasPendingMessage.set(false);
   chatStore.listenResponses.set(false);
@@ -60,7 +77,68 @@ export function doAbortChat() {
 
   const appId = chatStore.currentAppId.get();
   if (appId) {
-    database.abortAppChats(appId);
+    const { response } = await callNutAPI('abort-app-chats', { appId });
+    if (response) {
+      onChatResponse(response, 'AbortChat');
+    }
+  }
+}
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof NutAPIError) {
+    return e.responseText;
+  }
+  return '';
+}
+
+export function onChatResponse(response: ChatResponse, reason: string) {
+  if (!addAppResponse(response)) {
+    return;
+  }
+
+  switch (response.kind) {
+    case 'message': {
+      const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+      const { message } = response;
+      if (message.category === APP_SUMMARY_CATEGORY) {
+        const appSummary = parseAppSummaryMessage(message);
+        if (appSummary) {
+          const existingSummary = chatStore.appSummary.get();
+          if (!existingSummary || appSummary.iteration > existingSummary.iteration) {
+            chatStore.appSummary.set(appSummary);
+          }
+        }
+
+        // Diagnostic for tracking down why the UI doesn't update as expected.
+        console.log('AppSummary', reason, appSummary?.iteration);
+      }
+
+      addChatMessage(response.message);
+
+      const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
+
+      if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
+        updateDevelopmentServer(responseRepositoryId);
+      }
+      break;
+    }
+    case 'app-event':
+      addResponseEvent(response);
+      break;
+    case 'title':
+      chatStore.appTitle.set(response.title);
+      break;
+    case 'status':
+      setPendingMessageStatus(response.status);
+      break;
+    case 'error':
+    case 'done':
+    case 'aborted':
+      break;
+    default:
+      console.error('Unknown chat response:', response);
+      break;
   }
 }
 
@@ -69,8 +147,8 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
 
   if (mode == ChatMode.DevelopApp) {
     await refreshPeanutsStore();
-    if (peanutsStore.peanutsError.get()) {
-      toast.error(peanutsStore.peanutsError.get());
+    if (peanutsStore.peanutsErrorInfo.get()) {
+      toast.error(peanutsStore.peanutsErrorInfo.get());
       return;
     }
   }
@@ -78,46 +156,12 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   chatStore.hasPendingMessage.set(true);
   clearPendingMessageStatus();
 
-  const onResponse = (response: ChatResponse) => {
-    if (chatStore.numAborts.get() != numAbortsAtStart) {
-      return;
-    }
-
-    switch (response.kind) {
-      case 'message': {
-        const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-        logAppSummaryMessage(response.message, `SendMessage:${mode}`);
-
-        addChatMessage(response.message);
-
-        const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-          updateDevelopmentServer(responseRepositoryId);
-        }
-        break;
-      }
-      case 'app-event':
-        addResponseEvent(response);
-        break;
-      case 'title':
-        chatStore.appTitle.set(response.title);
-        break;
-      case 'status':
-        setPendingMessageStatus(response.status);
-        break;
-      case 'error':
-      case 'done':
-      case 'aborted':
-        break;
-      default:
-        console.error('Unknown chat response:', response);
-        break;
-    }
-  };
-
-  await sendChatMessage(mode, messages, references ?? [], onResponse);
+  try {
+    await sendChatMessage(mode, messages, references ?? [], (r) => onChatResponse(r, `SendMessage:${mode}`));
+  } catch (e) {
+    toast.error(getErrorMessage(e) || 'Error sending message');
+    console.error('Error sending message', e);
+  }
 
   if (chatStore.numAborts.get() != numAbortsAtStart) {
     return;
@@ -128,8 +172,17 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   doListenAppResponses();
 }
 
-export async function doListenAppResponses() {
+export async function doListenAppResponses(wasStatusModalOpen = false) {
   if (!chatStore.currentAppId.get()) {
+    return;
+  }
+
+  const { active } = await callNutAPI('app-chat-active', { appId: chatStore.currentAppId.get() });
+  if (!active) {
+    console.log('ListenAppResponsesNotActive');
+    if (wasStatusModalOpen) {
+      statusModalStore.open();
+    }
     return;
   }
 
@@ -140,54 +193,10 @@ export async function doListenAppResponses() {
 
   const numAbortsAtStart = chatStore.numAborts.get();
 
-  const onResponse = (response: ChatResponse) => {
-    if (chatStore.numAborts.get() != numAbortsAtStart) {
-      return;
-    }
-
-    switch (response.kind) {
-      case 'message': {
-        // Ignore messages that we already know about.
-        if (chatStore.messages.get().some((m) => m.id == response.message.id)) {
-          return;
-        }
-
-        const existingRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-        logAppSummaryMessage(response.message, 'ListenAppResponses');
-
-        addChatMessage(response.message);
-
-        const responseRepositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-        if (responseRepositoryId && existingRepositoryId != responseRepositoryId) {
-          updateDevelopmentServer(responseRepositoryId);
-        }
-        break;
-      }
-      case 'app-event':
-        addResponseEvent(response);
-        break;
-      case 'title':
-        chatStore.appTitle.set(response.title);
-        break;
-      case 'status':
-        setPendingMessageStatus(response.status);
-        break;
-      case 'done':
-      case 'error':
-      case 'aborted':
-        break;
-      default:
-        console.error('Unknown chat response:', response);
-        break;
-    }
-  };
-
   console.log('ListenAppResponsesStart');
 
   try {
-    await listenAppResponses(onResponse);
+    await listenAppResponses((r) => onChatResponse(r, 'ListenAppResponses'));
   } catch (e) {
     toast.error('Error listing to app responses');
     console.error('Error listing to app response', e);
@@ -200,4 +209,8 @@ export async function doListenAppResponses() {
   }
 
   chatStore.listenResponses.set(false);
+
+  await refreshPeanutsStore();
+
+  statusModalStore.open();
 }

@@ -83,7 +83,6 @@ function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFile
     const newContent = newFiles[path];
 
     if (!oldContent && newContent) {
-      // File was added
       diffs.push({
         path,
         type: 'added',
@@ -94,7 +93,6 @@ function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFile
           .join('\n'),
       });
     } else if (oldContent && !newContent) {
-      // File was deleted
       diffs.push({
         path,
         type: 'deleted',
@@ -105,7 +103,6 @@ function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFile
           .join('\n'),
       });
     } else if (oldContent !== newContent) {
-      // File was modified
       diffs.push({
         path,
         type: 'modified',
@@ -156,112 +153,146 @@ function RepositoryDiff() {
   const getDiffTypeColor = (type: string) => {
     switch (type) {
       case 'added':
-        return 'text-green-600 bg-green-50';
+        return 'text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200';
       case 'deleted':
-        return 'text-red-600 bg-red-50';
+        return 'text-red-700 bg-gradient-to-r from-red-50 to-rose-50 border-red-200';
       case 'modified':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-blue-700 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor';
     }
   };
 
   const getDiffTypeIcon = (type: string) => {
     switch (type) {
       case 'added':
-        return '➕';
+        return 'i-ph:plus-circle-duotone';
       case 'deleted':
-        return '❌';
+        return 'i-ph:minus-circle-duotone';
       case 'modified':
-        return '✏️';
+        return 'i-ph:pencil-circle-duotone';
       default:
-        return '📄';
+        return 'i-ph:file-duotone';
     }
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto h-full overflow-y-auto">
-      <h1 className="text-3xl font-bold mb-6">Repository Diff</h1>
-
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Repository IDs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Old Repository ID:</label>
-              <div className="p-3 bg-gray-100 rounded border font-mono text-sm break-all">
-                {oldRepositoryId || 'Not provided'}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">New Repository ID:</label>
-              <div className="p-3 bg-gray-100 rounded border font-mono text-sm break-all">
-                {newRepositoryId || 'Not provided'}
-              </div>
-            </div>
+    <div className="h-full bg-bolt-elements-background-depth-1 p-6 flex flex-col">
+      <div className="max-w-7xl mx-auto h-full overflow-y-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="i-ph:git-diff-duotone text-white text-2xl"></div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-bolt-elements-textHeading">Repository Diff</h1>
+            <p className="text-bolt-elements-textSecondary">Compare changes between repository versions</p>
           </div>
         </div>
 
-        {loading && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Loading repositories...</span>
+        <div className="space-y-6">
+          <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-6 backdrop-blur-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="i-ph:git-branch-duotone text-white text-lg"></div>
+              </div>
+              <h2 className="text-xl font-semibold text-bolt-elements-textHeading">Repository Versions</h2>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <div className="text-red-600">⚠️</div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">{error}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-bolt-elements-textSecondary">Old Repository ID:</label>
+                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
+                  {oldRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-bolt-elements-textSecondary">New Repository ID:</label>
+                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
+                  {newRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
+                </div>
               </div>
             </div>
           </div>
-        )}
 
-        {!loading && !error && diffs.length > 0 && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">File Changes ({diffs.length})</h2>
+          {loading && (
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-8 backdrop-blur-sm">
+              <div className="flex items-center justify-center">
+                <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                <span className="ml-4 text-bolt-elements-textSecondary font-medium">Loading repositories...</span>
+              </div>
             </div>
-            <div className="divide-y divide-gray-200">
-              {diffs.map((diff, index) => (
-                <div key={index} className="p-6">
-                  <div className="flex items-center mb-4">
-                    <span className="mr-2">{getDiffTypeIcon(diff.type)}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDiffTypeColor(diff.type)}`}>
-                      {diff.type.toUpperCase()}
-                    </span>
-                    <span className="ml-3 font-mono text-sm text-gray-900">{diff.path}</span>
-                  </div>
+          )}
 
-                  {diff.diff && (
-                    <div className="bg-gray-50 rounded border overflow-hidden">
-                      <div className="bg-gray-100 px-4 py-2 border-b">
-                        <span className="text-sm font-medium text-gray-700">Diff</span>
-                      </div>
-                      <pre className="p-4 text-sm overflow-x-auto whitespace-pre-wrap">
-                        <code className="font-mono">{diff.diff}</code>
-                      </pre>
-                    </div>
-                  )}
+          {error && (
+            <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/50 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-sm">
+                  <div className="i-ph:warning-circle-duotone text-white text-xl"></div>
                 </div>
-              ))}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Repositories</h3>
+                  <p className="text-red-700 leading-relaxed">{error}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!loading && !error && diffs.length === 0 && oldRepositoryId && newRepositoryId && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-center text-gray-500">
-              <p>No differences found between the repositories.</p>
+          {!loading && !error && diffs.length > 0 && (
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center gap-3 p-6 border-b border-bolt-elements-borderColor/30">
+                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="i-ph:files-duotone text-white text-lg"></div>
+                </div>
+                <h2 className="text-xl font-semibold text-bolt-elements-textHeading">File Changes ({diffs.length})</h2>
+              </div>
+              <div className="divide-y divide-bolt-elements-borderColor/20">
+                {diffs.map((diff, index) => (
+                  <div
+                    key={index}
+                    className="p-6 hover:bg-bolt-elements-background-depth-1/30 transition-colors duration-200"
+                  >
+                    <div className="flex items-center mb-4 gap-3">
+                      <div className={`${getDiffTypeIcon(diff.type)} text-xl`}></div>
+                      <span
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm ${getDiffTypeColor(diff.type)}`}
+                      >
+                        {diff.type.toUpperCase()}
+                      </span>
+                      <span className="font-mono text-sm text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 px-3 py-1 rounded-lg border border-bolt-elements-borderColor/50">
+                        {diff.path}
+                      </span>
+                    </div>
+
+                    {diff.diff && (
+                      <div className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 overflow-hidden shadow-sm">
+                        <div className="flex items-center gap-2 bg-bolt-elements-background-depth-2 px-4 py-3 border-b border-bolt-elements-borderColor/30">
+                          <div className="i-ph:code-duotone text-bolt-elements-textSecondary"></div>
+                          <span className="text-sm font-semibold text-bolt-elements-textSecondary">Diff</span>
+                        </div>
+                        <pre className="p-4 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto">
+                          <code className="font-mono text-bolt-elements-textPrimary leading-relaxed">{diff.diff}</code>
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {!loading && !error && diffs.length === 0 && oldRepositoryId && newRepositoryId && (
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-8 backdrop-blur-sm">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <div className="i-ph:check-circle-duotone text-white text-2xl"></div>
+                </div>
+                <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No Changes Found</h3>
+                <p className="text-bolt-elements-textSecondary">
+                  The repositories are identical - no differences detected.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
