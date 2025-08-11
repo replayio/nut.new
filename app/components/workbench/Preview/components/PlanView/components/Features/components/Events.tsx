@@ -4,6 +4,9 @@ import { isWorkerFinishedResponse, type ChatResponse } from '~/lib/persistence/r
 import { chatStore } from '~/lib/stores/chat';
 import Tooltip from '~/components/ui/Tooltip';
 
+// If a worker doesn't have any updates more recent than this, it is timed out.
+const WORK_TIMEOUT_MS = 20 * 60 * 1000;
+
 interface EventsProps {
   featureName: string | undefined;
 }
@@ -16,6 +19,15 @@ function responseStartsFeature(response: ChatResponse, featureName: string | und
     return response.event.name === 'start-feature' && response.event.featureName === featureName;
   }
   return response.event.name === 'start-mockup' || response.event.name === 'finish-mockup';
+}
+
+function isWorkTimedOut(events: ChatResponse[]) {
+  if (events.length === 0) {
+    return { isTimedOut: false, minutesSinceLastActivity: 0 };
+  }
+  
+  const lastEvent = events[events.length - 1];
+  return Date.now() - new Date(lastEvent.time).getTime() >= WORK_TIMEOUT_MS;
 }
 
 // Return separate streams of events for each worker which has operated on the feature.
@@ -150,13 +162,18 @@ const Events = ({ featureName }: EventsProps) => {
       if (finished) {
         const landChanges = events.some(event => event.kind === 'app-event' && event.event.name === 'land-changes');
         if (landChanges) {
-          tooltip = 'Work completed successfully';
+          tooltip = 'Work completed';
         } else {
-          tooltip = 'No charge for work not completed';
+          tooltip = 'No charge, work not completed';
           peanuts = 0;
         }
       } else {
-        tooltip = 'Work in progress';
+        if (isWorkTimedOut(events)) {
+          tooltip = `No charge, worker timed out`;
+          peanuts = 0;
+        } else {
+          tooltip = 'Work in progress';
+        }
       }
     } else {
       tooltip = 'No charge for mockup';
