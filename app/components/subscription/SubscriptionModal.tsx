@@ -110,7 +110,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
 
         {/* Subscription Tiers */}
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {(
               Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, (typeof SUBSCRIPTION_TIERS)[SubscriptionTier]][]
             ).map(([tier, details]) => {
@@ -206,7 +206,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
               );
             })}
 
-            {/* Advanced Plans Coming Soon Teaser */}
             <div className="relative overflow-hidden min-h-[400px]">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
               <div className="relative h-full p-6 rounded-2xl bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 border border-indigo-500/20 shadow-lg backdrop-blur-sm flex flex-col">
@@ -214,10 +213,10 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 shadow-lg">
                     <div className="i-ph:sparkle text-2xl text-indigo-500"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">Coming Soon</h3>
-                  <div className="text-2xl font-bold text-indigo-500 mb-2">Advanced Plans</div>
+                  <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">Pro</h3>
+                  <div className="text-2xl font-bold text-indigo-500 mb-2">Coming Soon</div>
                   <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">
-                    Exciting new tiers with enhanced features
+                    Build apps effortlessly
                   </p>
                 </div>
 
@@ -228,7 +227,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       <div className="i-ph:sparkle text-indigo-500 text-sm"></div>
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Enterprise & Team Plans
+                      Guaranteed Reliability
                     </span>
                   </div>
                   <div className="flex items-start gap-3 group/feature">
@@ -236,7 +235,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       <div className="i-ph:sparkle text-purple-500 text-sm"></div>
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Priority Support & SLA
+                      Priority Support
                     </span>
                   </div>
                   <div className="flex items-start gap-3 group/feature">
@@ -244,15 +243,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       <div className="i-ph:sparkle text-pink-500 text-sm"></div>
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Advanced AI Models
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 group/feature">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
-                      <div className="i-ph:sparkle text-indigo-500 text-sm"></div>
-                    </div>
-                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Custom Integrations
+                      Transparent Up Front Pricing
                     </span>
                   </div>
                 </div>

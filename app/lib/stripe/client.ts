@@ -113,14 +113,14 @@ export const SUBSCRIPTION_TIERS = {
     name: 'Free',
     price: 0,
     peanuts: 500,
-    description: 'Our free tier to get you started. No limits on any features. Go nuts!',
-    features: ['500 Peanuts per month', 'Pay-as-you-go to top off balance'],
+    description: 'Our free tier to get you started.',
+    features: ['500 Peanuts per month'],
   },
   starter: {
-    name: 'Starter',
+    name: 'Builder',
     price: 20,
     peanuts: 2000,
-    description: 'Our basic plan to get your feet wet. No limits on any features. Go nuts!',
+    description: 'No limits on any features. Go nuts!',
     features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
   },
 } as const;
