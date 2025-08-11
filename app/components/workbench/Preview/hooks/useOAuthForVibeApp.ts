@@ -44,14 +44,10 @@ export function useOAuthForVibeApp({
           });
 
           if (error) {
-            console.error('preview.message: OAuth error', error);
             return;
           }
 
           if (authData?.url) {
-            console.log('preview.message: OAuth URL generated:', authData.url);
-            console.log('preview.message: Using custom redirect URL:', customRedirectUrl);
-
             // Open OAuth URL in a popup window
             const width = 500;
             const height = 600;
@@ -66,7 +62,6 @@ export function useOAuthForVibeApp({
           }
         }
       } catch (err) {
-        console.error('preview.message: unexpected error handling postMessage', err);
       }
     };
     // Poll localStorage for the auth callback data
@@ -76,7 +71,6 @@ export function useOAuthForVibeApp({
         const authDataStr = localStorage.getItem('vibe-auth-callback');
         if (authDataStr) {
           const authData = JSON.parse(authDataStr);
-          console.log('preview.message: Found auth data in localStorage', authData);
 
           // Clean up
           localStorage.removeItem('vibe-auth-callback');
@@ -126,9 +120,6 @@ export function useOAuthForVibeApp({
         // Check for error
         const errorDataStr = localStorage.getItem('vibe-auth-callback-error');
         if (errorDataStr) {
-          const errorData = JSON.parse(errorDataStr);
-          console.error('preview.message: OAuth error from callback:', errorData);
-
           // Clean up
           localStorage.removeItem('vibe-auth-callback-error');
           clearInterval(pollInterval);
@@ -137,18 +128,15 @@ export function useOAuthForVibeApp({
 
         // Check if popup is closed
         if (popup && popup.closed) {
-          console.log('preview.message: OAuth popup was closed');
           clearInterval(pollInterval);
         }
       } catch (err) {
-        console.error('preview.message: Error polling localStorage:', err);
       }
     }, 100); // Poll every 100ms
 
     // Stop polling after 30 seconds
     setTimeout(() => {
       clearInterval(pollInterval);
-      console.log('preview.message: Stopped polling after timeout');
     }, 30000);
     window.addEventListener('message', handleIframeMessage);
     return () => {
