@@ -116,7 +116,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
             ).map(([tier, details]) => {
               const isCurrentTier = tier === currentTier;
               const isLoading = loading === tier;
-              const isPro = tier === 'pro';
               const isFree = tier === 'free';
 
               return (
@@ -127,21 +126,13 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     {
                       'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg':
                         isCurrentTier,
-                      'border-purple-500/50 bg-gradient-to-br from-purple-500/5 to-pink-500/5 ring-2 ring-purple-500/20 shadow-lg':
-                        isPro && !isCurrentTier,
                       'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
-                        !isCurrentTier && !isPro,
+                        !isCurrentTier,
                       'hover:border-bolt-elements-borderColor/70 hover:shadow-lg': !isCurrentTier,
                     },
                   )}
                 >
-                  {isPro && !isCurrentTier && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        MOST POPULAR
-                      </span>
-                    </div>
-                  )}
+
 
                   {isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -154,14 +145,12 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   {/* Header */}
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <div
-                        className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
-                          'i-ph:gift text-green-500': isFree,
-                          'i-ph:rocket-launch text-blue-500': tier === 'starter',
-                          'i-ph:lightning text-orange-500': tier === 'builder',
-                          'i-ph:crown text-purple-500': isPro,
-                        })}
-                      />
+                                              <div
+                          className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
+                            'i-ph:gift text-green-500': isFree,
+                            'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                          })}
+                        />
                     </div>
                     <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">
                       {details.name}
@@ -199,10 +188,8 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                         {
                           'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 border border-green-500/30 cursor-not-allowed':
                             isCurrentTier,
-                          'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border border-purple-500/50 hover:border-purple-400 hover:scale-105':
-                            isPro && !isCurrentTier && !isLoading,
                           'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border border-blue-500/50 hover:border-blue-400 hover:scale-105':
-                            !isPro && !isFree && !isCurrentTier && !isLoading,
+                            !isFree && !isCurrentTier && !isLoading,
                           'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border border-green-500/50 hover:border-green-400 hover:scale-105':
                             isFree && !isCurrentTier && !isLoading,
                           'opacity-50 cursor-not-allowed hover:scale-100': isLoading,
@@ -220,6 +207,50 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Advanced Plans Coming Soon Teaser */}
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
+            <div className="relative p-6 sm:p-8 bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 rounded-2xl border border-indigo-500/20 shadow-lg backdrop-blur-sm">
+              <div className="flex items-start gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 border border-indigo-500/30 shadow-lg">
+                  <div className="i-ph:sparkle text-2xl text-indigo-500"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-xl font-bold text-bolt-elements-textHeading">More Advanced Plans Coming Soon</h3>
+                    <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                      COMING SOON
+                    </span>
+                  </div>
+                  <p className="text-bolt-elements-textSecondary mb-4 leading-relaxed">
+                    We're working on exciting new subscription tiers with enhanced features, priority support, 
+                    and exclusive benefits. Stay tuned for enterprise solutions, team plans, and advanced AI capabilities.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
+                      <div className="w-2 h-2 rounded-full bg-indigo-500/60"></div>
+                      <span>Enterprise & Team Plans</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
+                      <div className="w-2 h-2 rounded-full bg-purple-500/60"></div>
+                      <span>Priority Support & SLA</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
+                      <div className="w-2 h-2 rounded-full bg-pink-500/60"></div>
+                      <span>Advanced AI Models</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-bolt-elements-textSecondary">
+                      <div className="w-2 h-2 rounded-full bg-indigo-500/60"></div>
+                      <span>Custom Integrations</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
