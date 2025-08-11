@@ -77,11 +77,11 @@ export function useOAuthForVibeApp({
         if (authDataStr) {
           const authData = JSON.parse(authDataStr);
           console.log('preview.message: Found auth data in localStorage', authData);
-          
+
           // Clean up
           localStorage.removeItem('vibe-auth-callback');
           clearInterval(pollInterval);
-          
+
           // Log the Supabase auth token that was stored
           const tempKey = JSON.parse(localStorage.getItem('sb-tmp-auth-token') ?? '{}');
           getSupabase().auth.setSession({
@@ -92,7 +92,7 @@ export function useOAuthForVibeApp({
           // Redirect the iframe with the auth session in the URL hash
           if (authData.session && iframeRef.current) {
             const { session, originalCallbackUrl } = authData;
-            
+
             // Build the hash fragment with all session parameters
             const hashParams = new URLSearchParams({
               access_token: session.access_token,
@@ -102,16 +102,16 @@ export function useOAuthForVibeApp({
               token_type: session.token_type,
               force_refresh: Date.now().toString(),
             });
-            
+
             if (session.provider_token) {
               hashParams.set('provider_token', session.provider_token);
             }
-            
+
             // Construct the new URL with the auth hash
             const baseUrl = originalCallbackUrl || iframeUrl || '';
             const separator = baseUrl.includes('#') ? '&' : '#';
             const newIframeUrl = `${baseUrl}${separator}${hashParams.toString()}`;
-            
+
             // Update the iframe URL
             setIframeUrl(newIframeUrl);
             setUrl(newIframeUrl);
@@ -119,22 +119,22 @@ export function useOAuthForVibeApp({
               reloadPreview();
             }, 100);
           }
-          
+
           return;
         }
-        
+
         // Check for error
         const errorDataStr = localStorage.getItem('vibe-auth-callback-error');
         if (errorDataStr) {
           const errorData = JSON.parse(errorDataStr);
           console.error('preview.message: OAuth error from callback:', errorData);
-          
+
           // Clean up
           localStorage.removeItem('vibe-auth-callback-error');
           clearInterval(pollInterval);
           return;
         }
-        
+
         // Check if popup is closed
         if (popup && popup.closed) {
           console.log('preview.message: OAuth popup was closed');
@@ -144,7 +144,7 @@ export function useOAuthForVibeApp({
         console.error('preview.message: Error polling localStorage:', err);
       }
     }, 100); // Poll every 100ms
-    
+
     // Stop polling after 30 seconds
     setTimeout(() => {
       clearInterval(pollInterval);
