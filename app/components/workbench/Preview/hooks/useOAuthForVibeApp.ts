@@ -61,7 +61,9 @@ export function useOAuthForVibeApp({
             );
           }
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error('Error handling OAuth request', err);
+      }
     };
     // Poll localStorage for the auth callback data
     const pollInterval = setInterval(() => {
@@ -129,7 +131,9 @@ export function useOAuthForVibeApp({
         if (popup && popup.closed) {
           clearInterval(pollInterval);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error('Error polling for auth callback', err);
+      }
     }, 100); // Poll every 100ms
 
     // Stop polling after 30 seconds

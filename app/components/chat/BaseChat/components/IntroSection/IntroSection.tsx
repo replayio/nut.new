@@ -15,7 +15,7 @@ export const IntroSection: React.FC = () => {
         </h1>
 
         <p className="text-base mb-6 text-bolt-elements-textSecondary animate-fade-in animation-delay-100 leading-relaxed max-w-lg mx-auto">
-        Build, test, and deploy your applications in minutes. From idea to going live with AI — no setup required.
+          Build, test, and deploy your applications in minutes. From idea to going live with AI — no setup required.
         </p>
 
         <div className="flex justify-center gap-4 mb-6 animate-fade-in animation-delay-200">
