@@ -24,27 +24,6 @@ export function waitForTime(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function uint8ArrayToBase64(data: Uint8Array) {
-  let str = '';
-
-  for (const byte of data) {
-    str += String.fromCharCode(byte);
-  }
-
-  return btoa(str);
-}
-
-export function stringToBase64(inputString: string) {
-  if (typeof inputString !== 'string') {
-    throw new TypeError('Input must be a string.');
-  }
-
-  const encoder = new TextEncoder();
-  const data = encoder.encode(inputString);
-
-  return uint8ArrayToBase64(data);
-}
-
 export function navigateApp(appId: string) {
   /**
    * FIXME: Using the intended navigate function causes a rerender for <Chat /> that breaks the app.
