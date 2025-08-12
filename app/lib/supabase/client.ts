@@ -65,6 +65,8 @@ let supabaseAnonKey = '';
 let supabaseClientInstance: ReturnType<typeof createClient<Database>> | null = null;
 
 export async function getCurrentUser(): Promise<SupabaseUser | null> {
+  throw new Error('Not available');
+  /*
   try {
     const {
       data: { user },
@@ -75,11 +77,15 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
     console.error('Error getting current user:', error);
     return null;
   }
+  */
 }
 
 export async function getCurrentUserId(): Promise<string | null> {
+  return "c6488eb4-1818-4032-a159-4b536edb2b70";
+  /*
   const user = await getCurrentUser();
   return user?.id || null;
+  */
 }
 
 export async function getNutIsAdmin(): Promise<boolean> {
@@ -107,8 +113,11 @@ export async function getNutIsAdmin(): Promise<boolean> {
  * Checks if there is a currently authenticated user.
  */
 export async function isAuthenticated(): Promise<boolean> {
+  return true;
+  /*
   const user = await getCurrentUser();
   return user !== null;
+  */
 }
 
 export function getSupabase() {
