@@ -148,29 +148,29 @@ export function ClientAuth() {
               </div>
 
               <div className="p-3 space-y-2">
-                <div className="relative">
+                                <div className="relative">
                   <a
                     href="https://form.typeform.com/to/bFKqmqdX"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex flex-col items-start gap-3 font-medium shadow-sm hover:shadow-md"
+                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
                     onMouseEnter={() => setShowProTooltip(true)}
                     onMouseLeave={() => setShowProTooltip(false)}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="i-ph:sparkle text-lg" />
-                      <span>Pro Plan: Join the Waitlist</span>
-                    </div>
-                    
-                    {showProTooltip && (
-                      <div className="text-sm text-white/80 space-y-1">
+                    <div className="i-ph:sparkle text-lg" />
+                    <span>Pro Plan: Join the Waitlist</span>
+                  </a>
+                  
+                  {showProTooltip && (
+                    <div className="absolute top-full left-0 mt-2 w-full bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg p-3 shadow-lg z-20">
+                      <div className="text-sm text-bolt-elements-textSecondary space-y-1">
                         <div>• Guaranteed Reliability</div>
                         <div>• Priority Support</div>
                         <div>• Up Front App Prices</div>
                       </div>
-                    )}
-                  </a>
-
+                    </div>
+                  )}
+                  
                   {/* Arrow */}
                   <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-bolt-elements-background-depth-1"></div>
                 </div>
