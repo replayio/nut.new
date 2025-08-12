@@ -13,6 +13,7 @@ export function ClientAuth() {
   const user = useStore(userStore.user);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showProTooltip, setShowProTooltip] = useState(false);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -147,54 +148,58 @@ export function ClientAuth() {
               </div>
 
               <div className="p-3 space-y-2">
-                <div className="relative group/pro-plan">
+                <div className="relative">
                   <a
                     href="https://form.typeform.com/to/bFKqmqdX"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
+                    onMouseEnter={() => setShowProTooltip(true)}
+                    onMouseLeave={() => setShowProTooltip(false)}
                   >
                     <div className="i-ph:sparkle text-lg" />
                     <span>Pro Plan Waitlist</span>
                   </a>
                   
                   {/* Hover Tooltip */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-72 opacity-0 invisible group-hover/pro-plan:opacity-100 group-hover/pro-plan:visible transition-all duration-300 z-20">
-                    <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl p-4">
-                      <div className="text-center mb-3">
-                        <h4 className="font-semibold text-bolt-elements-textHeading text-sm mb-1">Pro Plan Features</h4>
-                        <p className="text-xs text-bolt-elements-textSecondary">Coming Soon</p>
+                  {showProTooltip && (
+                    <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-3 w-72 z-50">
+                      <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl p-4">
+                        <div className="text-center mb-3">
+                          <h4 className="font-semibold text-bolt-elements-textHeading text-sm mb-1">Pro Plan Features</h4>
+                          <p className="text-xs text-bolt-elements-textSecondary">Coming Soon</p>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
+                              <div className="i-ph:sparkle text-indigo-500 text-sm" />
+                            </div>
+                            <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                              Guaranteed Reliability
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
+                              <div className="i-ph:sparkle text-purple-500 text-sm" />
+                            </div>
+                            <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
+                              <div className="i-ph:sparkle text-pink-500 text-sm" />
+                            </div>
+                            <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                              Transparent Up Front Pricing
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Arrow */}
+                        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-bolt-elements-background-depth-1"></div>
                       </div>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
-                            <div className="i-ph:sparkle text-indigo-500 text-sm" />
-                          </div>
-                          <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                            Guaranteed Reliability
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
-                            <div className="i-ph:sparkle text-purple-500 text-sm" />
-                          </div>
-                          <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
-                            <div className="i-ph:sparkle text-pink-500 text-sm" />
-                          </div>
-                          <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                            Transparent Up Front Pricing
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Arrow */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-bolt-elements-background-depth-1"></div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <button
