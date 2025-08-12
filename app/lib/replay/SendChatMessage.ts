@@ -2,33 +2,25 @@
  * Core logic for running and managing remote chats.
  */
 
-import type { SimulationData, SimulationPacket } from './SimulationData';
 import { assert } from '~/utils/nut';
 import { type Message, DISCOVERY_RESPONSE_CATEGORY, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { chatStore } from '~/lib/stores/chat';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
-import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulation';
+import { flushSessionData } from '~/components/chat/ChatComponent/functions/flushSessionData';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
+import type { SessionData } from './MessageHandler';
 
-// Whether to send simulation data with chat messages.
+// Whether to send session data to the backend with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
 // bugs in Nut apps.
-const ENABLE_SIMULATION = false;
+const ENABLE_SESSION_DATA = false;
 
 const logger = createScopedLogger('ChatMessage');
-
-function createRepositoryIdPacket(repositoryId: string): SimulationPacket {
-  return {
-    kind: 'repositoryId',
-    repositoryId,
-    time: new Date().toISOString(),
-  };
-}
 
 interface ChatReferenceElement {
   kind: 'element';
@@ -54,8 +46,7 @@ interface NutChatRequest {
   mode?: ChatMode;
   messages?: Message[];
   references?: ChatReference[];
-  simulationData?: SimulationData;
-  workerCount?: number;
+  sessionData?: SessionData;
 }
 
 // Messages that are rendered normally in the chat.
@@ -108,15 +99,11 @@ export async function sendChatMessage(
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  let simulationData: SimulationData | undefined;
+  let sessionData: SessionData | undefined;
 
   const repositoryId = workbenchStore.repositoryId.get();
-  if (repositoryId && ENABLE_SIMULATION) {
-    simulationData = await flushSimulationData();
-    if (simulationData) {
-      const packet = createRepositoryIdPacket(repositoryId);
-      simulationData.unshift(packet);
-    }
+  if (repositoryId && ENABLE_SESSION_DATA) {
+    sessionData = await flushSessionData();
   }
 
   const params: NutChatRequest = {
@@ -124,7 +111,7 @@ export async function sendChatMessage(
     mode,
     messages: messages.filter(shouldDisplayMessage),
     references,
-    simulationData,
+    sessionData,
   };
 
   await pollResponses(appId, onResponse, () => callNutAPI('chat', params, onResponse));
