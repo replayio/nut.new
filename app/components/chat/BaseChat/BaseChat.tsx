@@ -16,8 +16,6 @@ import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
 import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
-import { Arboretum } from './components/Arboretum/Arboretum';
-import { useArboretumVisibility } from '~/lib/stores/settings';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
@@ -67,7 +65,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-    const { isArboretumVisible } = useArboretumVisibility();
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const mobileActiveTab = useStore(mobileNavStore.activeTab);
     const isSmallViewport = useViewport(1024);
@@ -228,7 +225,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   }
                   handleSendMessage(messageInput, ChatMode.Discovery);
                 })}
-                {isArboretumVisible && <Arboretum />}
               </>
             )}
           </div>

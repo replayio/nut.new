@@ -3,21 +3,16 @@ import { motion } from 'framer-motion';
 import { useState, type ReactElement } from 'react';
 import { classNames } from '~/utils/classNames';
 import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/components/ui/Dialog';
-import ConnectionsTab from './connections/ConnectionsTab';
 
 interface SettingsProps {
   open: boolean;
   onClose: () => void;
 }
 
-type TabType = 'data' | 'apiKeys' | 'features' | 'debug' | 'event-logs' | 'connection';
-
 export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('connection');
+  const [activeTab, setActiveTab] = useState<string>('');
 
-  const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
-    { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
-  ];
+  const tabs: { id: string; label: string; icon: string; component?: ReactElement }[] = [];
 
   return (
     <RadixDialog.Root open={open}>

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
-import { SettingsButton } from '~/components/ui/SettingsButton';
+//import { SettingsButton } from '~/components/ui/SettingsButton';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { chatStore } from '~/lib/stores/chat';
 import { cubicEasingFn } from '~/utils/easings';
@@ -336,8 +336,8 @@ export const Menu = () => {
         <div className="border-t border-bolt-elements-borderColor/50 bg-bolt-elements-background-depth-1/50 backdrop-blur-sm px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <SettingsButton onClick={() => setIsSettingsOpen(true)} />
-              <div className="h-6 w-px bg-bolt-elements-borderColor/50" />
+              {/* For now settings are disabled as we don't have any <SettingsButton onClick={() => setIsSettingsOpen(true)} /> */}
+              {/* <div className="h-6 w-px bg-bolt-elements-borderColor/50" /> */}
               <Feedback />
             </div>
           </div>
