@@ -152,11 +152,7 @@ const ChatImplementer = memo(() => {
     if (mouseData) {
       references.push({
         kind: 'element',
-        selector: mouseData.selector,
-        x: mouseData.x,
-        y: mouseData.y,
-        width: mouseData.width,
-        height: mouseData.height,
+        mouseData,
       });
     }
 

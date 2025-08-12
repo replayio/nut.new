@@ -13,7 +13,7 @@ import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
-import type { SessionData } from './MessageHandler';
+import type { MouseData, SessionData } from './MessageHandler';
 
 // Whether to send session data to the backend with chat messages.
 // For now this is disabled while we design a better UX and messaging around reporting
@@ -24,11 +24,7 @@ const logger = createScopedLogger('ChatMessage');
 
 interface ChatReferenceElement {
   kind: 'element';
-  selector: string;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
+  mouseData: MouseData;
 }
 
 export type ChatReference = ChatReferenceElement;
