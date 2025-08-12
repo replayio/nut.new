@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { TestUserId } from '~/lib/stores/userAuth';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -81,7 +82,7 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
 }
 
 export async function getCurrentUserId(): Promise<string | null> {
-  return "c6488eb4-1818-4032-a159-4b536edb2b70";
+  return TestUserId;
   /*
   const user = await getCurrentUser();
   return user?.id || null;

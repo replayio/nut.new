@@ -11,13 +11,14 @@ import { useStore } from '@nanostores/react';
 
 export function ClientAuth() {
   const user = useStore(userStore.user);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  /*
   useEffect(() => {
     async function getUser() {
       try {
@@ -45,6 +46,7 @@ export function ClientAuth() {
       subscription.unsubscribe();
     };
   }, []);
+  */
 
   useEffect(() => {
     if (showDropdown) {
@@ -96,6 +98,8 @@ export function ClientAuth() {
   }
 
   const useAvatarURL = false;
+
+  console.log('user', user);
 
   return (
     <>
