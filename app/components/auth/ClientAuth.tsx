@@ -14,6 +14,7 @@ export function ClientAuth() {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProTooltip, setShowProTooltip] = useState(false);
+  const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -154,8 +155,17 @@ export function ClientAuth() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
-                    onMouseEnter={() => setShowProTooltip(true)}
-                    onMouseLeave={() => setShowProTooltip(false)}
+                    onMouseEnter={() => {
+                      const timeout = setTimeout(() => setShowProTooltip(true), 500);
+                      setProTooltipTimeout(timeout);
+                    }}
+                    onMouseLeave={() => {
+                      if (proTooltipTimeout) {
+                        clearTimeout(proTooltipTimeout);
+                        setProTooltipTimeout(null);
+                      }
+                      setShowProTooltip(false);
+                    }}
                   >
                     <div className="i-ph:sparkle text-lg" />
                     <span>Pro Plan: Join the Waitlist</span>
