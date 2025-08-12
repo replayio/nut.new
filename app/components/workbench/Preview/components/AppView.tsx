@@ -4,38 +4,10 @@ import ProgressStatus from './ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
 
 export type ResizeSide = 'left' | 'right' | null;
-
-function useVibeAuthQuery({
-  iframeForceReload,
-  setIframeForceReload,
-}: {
-  iframeForceReload: number;
-  setIframeForceReload: (forceReload: number) => void;
-}) {
-  const [vibeAuthTokenParams, setVibeAuthTokenParams] = useState<URLSearchParams | null>(null);
-
-  useEffect(() => {
-    function queryLocalstorageForVibeToken() {
-      const vibeAuthToken = localStorage.getItem('sb-vibe-auth-token') ?? '{}'; // Yes this is suppose to be auth-auth the toke comes in on the main auth and we swap it
-
-      if (vibeAuthToken !== '{}') {
-        const vibeAuthTokenJson = JSON.parse(vibeAuthToken);
-        const vibeAuthTokenParams = new URLSearchParams(vibeAuthTokenJson);
-        if (vibeAuthToken !== '{}') {
-          setVibeAuthTokenParams(vibeAuthTokenParams);
-          setIframeForceReload(iframeForceReload + 1);
-        }
-      }
-    }
-    queryLocalstorageForVibeToken();
-    const interval = setInterval(queryLocalstorageForVibeToken, 100);
-    return () => clearInterval(interval);
-  }, []);
-  return vibeAuthTokenParams;
-}
 
 const AppView = ({
   activeTab,
@@ -65,7 +37,7 @@ const AppView = ({
   const [iframeForceReload, setIframeForceReload] = useState(0);
   const appSummary = useStore(chatStore.appSummary);
   const isSmallViewport = useViewport(1024);
-  const vibeAuthTokenParams = useVibeAuthQuery({ iframeForceReload, setIframeForceReload });
+  const vibeAuthTokenParams = useVibeAppAuthQuery({ iframeForceReload, setIframeForceReload });
 
   return (
     <div

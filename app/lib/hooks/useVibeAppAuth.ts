@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { vibeAuthSupabase } from '~/lib/supabase/vibeAuthClient';
-import { getSupabase } from '~/lib/supabase/client';
 
 interface UseOAuthForVibeAppProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -56,7 +55,6 @@ export function useVibeAppAuthPopup({
       }
     };
 
-
     window.addEventListener('message', handleIframeMessage);
     return () => {
       window.removeEventListener('message', handleIframeMessage);
@@ -66,8 +64,7 @@ export function useVibeAppAuthPopup({
     };
   }, [iframeRef, iframeUrl, setIframeUrl, setUrl, reloadPreview, previewURL]);
 }
-
-function useVibeAppAuthQuery({
+export function useVibeAppAuthQuery({
   iframeForceReload,
   setIframeForceReload,
 }: {
@@ -78,7 +75,7 @@ function useVibeAppAuthQuery({
 
   useEffect(() => {
     function queryLocalstorageForVibeToken() {
-      const vibeAuthToken = localStorage.getItem('sb-vibe-auth-token') ?? '{}'; // Yes this is suppose to be auth-auth the toke comes in on the main auth and we swap it
+      const vibeAuthToken = localStorage.getItem('sb-vibe-auth-token') ?? '{}';
 
       if (vibeAuthToken !== '{}') {
         const vibeAuthTokenJson = JSON.parse(vibeAuthToken);
