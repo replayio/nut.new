@@ -1,0 +1,62 @@
+<!-- 
+ This page is used as a callback for the vibe apps. 
+ Note we do this outside of react to avoid the supabase provider from trying to handle the callback.
+ This is because the vibe app is in an iframe and the supabase provider is not aware of that.
+ Otherwise their main app will be logged into the vibe apps account instead of the vibe app.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Completing authentication…</title>
+    <style>
+      body { display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; }
+      .container { text-align: center; padding: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Completing authentication…</h2>
+      <p>This window will close automatically.</p>
+    </div>
+
+    <script>
+      (function () {
+        try {
+          var url = new URL(window.location.href);
+          var searchParams = url.searchParams;
+          var hashParams = new URLSearchParams(window.location.hash.slice(1));
+
+          var accessToken = hashParams.get('access_token');
+          var refreshToken = hashParams.get('refresh_token');
+          var expiresIn = hashParams.get('expires_in');
+          var expiresAt = hashParams.get('expires_at');
+
+          var error = searchParams.get('error');
+          var errorDescription = searchParams.get('error_description');
+
+          if (accessToken) {
+            localStorage.setItem('sb-vibe-auth-token', JSON.stringify({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                expires_in: expiresIn,
+                expires_at: expiresAt,
+                token_type: 'bearer'
+            }));
+          } else if (error) {
+            localStorage.setItem('sb-vibe-auth-error', JSON.stringify({
+                error: error,
+                errorDescription: errorDescription,
+                timestamp: Date.now()
+            }));
+          }
+        } catch (e) {
+          console.error('auth/callback.html: Exception handling callback:', e);
+        } finally {
+          setTimeout(function () { window.close(); }, 100);
+        }
+      })();
+    </script>
+  </body>
+</html>

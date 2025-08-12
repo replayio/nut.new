@@ -137,3 +137,8 @@ export function getSupabase() {
 
   return supabaseClientInstance;
 }
+
+export function getCookieKey() {
+  const cookieKey = import.meta.env.VITE_SUPABASE_COOKIE_KEY;
+  return cookieKey ? cookieKey : `sb-auth-auth-token`;
+}

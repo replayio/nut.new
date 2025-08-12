@@ -4,8 +4,38 @@ import ProgressStatus from './ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
+import { useEffect, useState } from 'react';
 
 export type ResizeSide = 'left' | 'right' | null;
+
+function useVibeAuthQuery({
+  iframeForceReload,
+  setIframeForceReload,
+}: {
+  iframeForceReload: number;
+  setIframeForceReload: (forceReload: number) => void;
+}) {
+  const [vibeAuthTokenParams, setVibeAuthTokenParams] = useState<URLSearchParams | null>(null);
+
+  useEffect(() => {
+    function queryLocalstorageForVibeToken() {
+      const vibeAuthToken = localStorage.getItem('sb-vibe-auth-token') ?? '{}'; // Yes this is suppose to be auth-auth the toke comes in on the main auth and we swap it
+
+      if (vibeAuthToken !== '{}') {
+        const vibeAuthTokenJson = JSON.parse(vibeAuthToken);
+        const vibeAuthTokenParams = new URLSearchParams(vibeAuthTokenJson);
+        if (vibeAuthToken !== '{}') {
+          setVibeAuthTokenParams(vibeAuthTokenParams);
+          setIframeForceReload(iframeForceReload + 1);
+        }
+      }
+    }
+    queryLocalstorageForVibeToken();
+    const interval = setInterval(queryLocalstorageForVibeToken, 100);
+    return () => clearInterval(interval);
+  }, []);
+  return vibeAuthTokenParams;
+}
 
 const AppView = ({
   activeTab,
@@ -32,8 +62,11 @@ const AppView = ({
   setSelectionPoint: (selectionPoint: { x: number; y: number } | null) => void;
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
+  const [iframeForceReload, setIframeForceReload] = useState(0);
   const appSummary = useStore(chatStore.appSummary);
   const isSmallViewport = useViewport(1024);
+  const vibeAuthTokenParams = useVibeAuthQuery({ iframeForceReload, setIframeForceReload });
+
   return (
     <div
       style={{
@@ -48,6 +81,7 @@ const AppView = ({
       {previewURL ? (
         <>
           <iframe
+            key={iframeUrl + iframeForceReload}
             ref={iframeRef}
             title="preview"
             className={`w-full h-full bg-white transition-all duration-300 ${
@@ -55,7 +89,7 @@ const AppView = ({
                 ? 'opacity-100 rounded-b-xl'
                 : 'opacity-0 pointer-events-none absolute inset-0 rounded-none shadow-none border-none'
             }`}
-            src={iframeUrl}
+            src={`${iframeUrl}#${vibeAuthTokenParams?.toString()}&force_refresh=${iframeForceReload}`}
             allowFullScreen
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
             loading="eager"
