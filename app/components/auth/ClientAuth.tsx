@@ -149,7 +149,7 @@ export function ClientAuth() {
               </div>
 
               <div className="p-3 space-y-2">
-                                <div className="relative">
+                <div className="relative">
                   <a
                     href="https://form.typeform.com/to/bFKqmqdX"
                     target="_blank"
@@ -170,7 +170,7 @@ export function ClientAuth() {
                     <div className="i-ph:sparkle text-lg" />
                     <span>Pro Plan: Join the Waitlist</span>
                   </a>
-                  
+
                   {showProTooltip && (
                     <div className="absolute top-full left-0 mt-3 w-80 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-4 shadow-2xl z-20 backdrop-blur-sm">
                       <div className="text-sm text-bolt-elements-textPrimary space-y-2.5">
@@ -189,7 +189,7 @@ export function ClientAuth() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Arrow */}
                   <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-bolt-elements-background-depth-1"></div>
                 </div>
