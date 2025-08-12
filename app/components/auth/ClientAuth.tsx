@@ -172,18 +172,18 @@ export function ClientAuth() {
                   </a>
 
                   {showProTooltip && (
-                    <div className="absolute top-full right-0 mt-3 w-80 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-4 shadow-2xl z-20 backdrop-blur-sm">
-                      <div className="text-sm text-bolt-elements-textPrimary space-y-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-2 h-2 rounded-full bg-black flex-shrink-0"></div>
+                    <div className="absolute top-full right-0 mt-2 w-64 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-lg p-3 shadow-lg z-20 backdrop-blur-sm">
+                      <div className="text-sm text-bolt-elements-textPrimary space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
                           <span className="font-medium">Guaranteed Reliability</span>
                         </div>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-2 h-2 rounded-full bg-black flex-shrink-0"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
                           <span className="font-medium">Up Front App Prices</span>
                         </div>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-2 h-2 rounded-full bg-black flex-shrink-0"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
                           <span className="font-medium">Priority Support</span>
                         </div>
                       </div>
