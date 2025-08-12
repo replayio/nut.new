@@ -159,11 +159,15 @@ export function ClientAuth() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="i-ph:sparkle text-lg" />
-                      <span>Pro Plan Waitlist</span>
+                      <span>Pro Plan: Join the Waitlist</span>
                     </div>
                     
                     {showProTooltip && (
-                      <div className="text-sm text-white/80">HELLO WORLD</div>
+                      <div className="text-sm text-white/80 space-y-1">
+                        <div>• Guaranteed Reliability</div>
+                        <div>• Priority Support</div>
+                        <div>• Up Front App Prices</div>
+                      </div>
                     )}
                   </a>
 

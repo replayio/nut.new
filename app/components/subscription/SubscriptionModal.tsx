@@ -241,7 +241,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                       <div className="i-ph:sparkle text-pink-500 text-sm"></div>
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Transparent Up Front Pricing
+                      Up Front App Prices
                     </span>
                   </div>
                 </div>
