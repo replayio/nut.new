@@ -8,6 +8,11 @@ export function getRepositoryURL(repositoryId: string | undefined) {
     return undefined;
   }
 
+  const override = import.meta.env.REPOSITORY_URL_OVERRIDE;
+  if (override) {
+    return override;
+  }
+
   return `https://${repositoryId}.http.replay.io`;
 }
 

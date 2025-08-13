@@ -252,10 +252,10 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
       {/* Error Display Section */}
       {detectedError && (
         <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
-          <span className="text-sm text-red-600 dark:text-red-300">
+          <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
             Network Error Detected
-          </span>
-          <div className="mt-2 mb-2 text-sm text-red-600 dark:text-red-300">
+          </div>
+          <div className="text-xs text-red-600 dark:text-red-300 mb-3">
             {detectedError.url} failed with code {detectedError.responseStatus}
           </div>
           <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
