@@ -29,8 +29,16 @@ const PlanView = () => {
   const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
-  const dividerStyles = {display: 'block', height: '1em', width: '100%', borderTop: '1px solid #ccc', marginTop: '1em'}
-
+  const dividerStyles = {
+    display: 'block',
+    height: '1em',
+    width: '100%',
+    borderTop: '1px solid',
+    borderColor: 'var(--bolt-elements-borderColor)',
+    marginTop: '1em',
+  };
+  const pullLeft = { textAlign: 'left', display: 'inline-block', width: '50%' };
+  const pullRight = { textAlign: 'right', display: 'inline-block', width: '49%' };
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
@@ -99,15 +107,16 @@ const PlanView = () => {
                 <div className="mb-4">
                   <div style={dividerStyles} />
                   <div className="mb-1 text-sm text-bolt-elements-textSecondary">
-                    <b>PROGRESS</b>: {completedFeatures} / {appSummary.features.length} features complete
+                    <b style={pullLeft}>PROGRESS:</b>{' '}
+                    <span style={pullRight}>
+                      {completedFeatures} / {appSummary.features.length} features complete
+                    </span>
                   </div>
                   <div className="w-full h-3 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
                       style={{
-                        width: `${
-                          ((completedFeatures ?? 0) / appSummary.features.length) * 100
-                        }%`,
+                        width: `${((completedFeatures ?? 0) / appSummary.features.length) * 100}%`,
                       }}
                     ></div>
                   </div>
