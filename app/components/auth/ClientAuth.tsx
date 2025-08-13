@@ -13,6 +13,8 @@ export function ClientAuth() {
   const user = useStore(userStore.user);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showProTooltip, setShowProTooltip] = useState(false);
+  const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

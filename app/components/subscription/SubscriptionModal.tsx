@@ -231,18 +231,18 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     </span>
                   </div>
                   <div className="flex items-start gap-3 group/feature">
-                    <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
-                      <div className="i-ph:sparkle text-purple-500 text-sm"></div>
-                    </div>
-                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
-                  </div>
-                  <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
                       <div className="i-ph:sparkle text-pink-500 text-sm"></div>
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                      Transparent Up Front Pricing
+                      Up Front App Prices
                     </span>
+                  </div>
+                  <div className="flex items-start gap-3 group/feature">
+                    <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
+                      <div className="i-ph:sparkle text-purple-500 text-sm"></div>
+                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
                   </div>
                 </div>
 

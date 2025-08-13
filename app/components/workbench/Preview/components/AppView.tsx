@@ -4,6 +4,8 @@ import ProgressStatus from './ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
+import { useState } from 'react';
+import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
 
 export type ResizeSide = 'left' | 'right' | null;
 
@@ -32,8 +34,11 @@ const AppView = ({
   setSelectionPoint: (selectionPoint: { x: number; y: number } | null) => void;
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
+  const [iframeForceReload, setIframeForceReload] = useState(0);
   const appSummary = useStore(chatStore.appSummary);
   const isSmallViewport = useViewport(1024);
+  const vibeAuthTokenParams = useVibeAppAuthQuery({ iframeForceReload, setIframeForceReload });
+
   return (
     <div
       style={{
@@ -48,6 +53,7 @@ const AppView = ({
       {previewURL ? (
         <>
           <iframe
+            key={iframeUrl + iframeForceReload}
             ref={iframeRef}
             title="preview"
             className={`w-full h-full bg-white transition-all duration-300 ${
@@ -55,7 +61,7 @@ const AppView = ({
                 ? 'opacity-100 rounded-b-xl'
                 : 'opacity-0 pointer-events-none absolute inset-0 rounded-none shadow-none border-none'
             }`}
-            src={iframeUrl}
+            src={`${iframeUrl}#${vibeAuthTokenParams?.toString()}&force_refresh=${iframeForceReload}`}
             allowFullScreen
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
             loading="eager"

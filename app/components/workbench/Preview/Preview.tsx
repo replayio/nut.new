@@ -5,7 +5,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
-import { useOAuthForVibeApp } from './hooks/useOAuthForVibeApp';
+import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -74,7 +74,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
   }, [previewURL]);
 
   // Handle OAuth authentication
-  useOAuthForVibeApp({
+  useVibeAppAuthPopup({
     iframeRef,
     iframeUrl,
     setIframeUrl,
