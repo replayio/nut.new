@@ -29,6 +29,7 @@ const PlanView = () => {
   const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
+  const dividerStyles = {display: 'block', height: '1em', width: '100%', borderTop: '1px solid #ccc', marginTop: '1em'}
 
   return (
     <div className="relative h-full w-full">
@@ -94,6 +95,24 @@ const PlanView = () => {
             <div className="mb-8 p-4 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50">
               <div className="text-lg font-semibold mb-3 text-bolt-elements-textHeading">Project Description</div>
               <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary?.description}</div>
+              {appSummary?.features && appSummary.features.length > 0 && (
+                <div className="mb-4">
+                  <div style={dividerStyles} />
+                  <div className="mb-1 text-sm text-bolt-elements-textSecondary">
+                    <b>PROGRESS</b>: {completedFeatures} / {appSummary.features.length} features complete
+                  </div>
+                  <div className="w-full h-3 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
+                      style={{
+                        width: `${
+                          ((completedFeatures ?? 0) / appSummary.features.length) * 100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
             {hasSecrets && <Secrets />}
             {appSummary?.pages && <Pages />}
