@@ -29,7 +29,7 @@ const PlanView = () => {
   const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
   const hasSecrets = appSummary?.features?.some((f) => f.secrets?.length);
-  const dividerStyles = {
+  const dividerStyles: React.CSSProperties = {
     display: 'block',
     height: '1em',
     width: '100%',
@@ -37,8 +37,8 @@ const PlanView = () => {
     borderColor: 'var(--bolt-elements-borderColor)',
     marginTop: '1em',
   };
-  const pullLeft = { textAlign: 'left', display: 'inline-block', width: '50%' };
-  const pullRight = { textAlign: 'right', display: 'inline-block', width: '49%' };
+  const pullLeft: React.CSSProperties = { textAlign: 'left', display: 'inline-block', width: '50%' };
+  const pullRight: React.CSSProperties = { textAlign: 'right', display: 'inline-block', width: '49%' };
   return (
     <div className="relative h-full w-full">
       <div className="h-full overflow-auto bg-bolt-elements-background-depth-1/50 p-6">
