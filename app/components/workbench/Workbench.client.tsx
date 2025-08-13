@@ -14,6 +14,7 @@ import { DownloadButton } from '~/components/header/DownloadButton';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
 import { chatStore } from '~/lib/stores/chat';
+import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -49,6 +50,13 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps)
   const appSummary = useStore(chatStore.appSummary);
 
   const isSmallViewport = useViewport(1024);
+
+  const detectedError: DetectedError = {
+    kind: 'network',
+    time: '2021-01-01T00:00:00Z',
+    url: 'https://example.com/api/data',
+    responseStatus: 404,
+  };
 
   useEffect(() => {
     if (mobileActiveTab === 'planning') {
@@ -157,7 +165,7 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps)
                 </div>
               )}
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} />
+                <Preview activeTab={activeTab} detectedError={detectedError} />
               </div>
             </div>
           </div>
