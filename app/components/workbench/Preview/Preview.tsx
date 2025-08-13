@@ -252,33 +252,12 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
       {/* Error Display Section */}
       {detectedError && (
         <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <h3 className="text-sm font-medium text-red-700 dark:text-red-400">
-              {detectedError.kind === 'network' ? 'Network Error' : 'Error Detected'}
-            </h3>
+          <div className="text-sm text-red-600 dark:text-red-300 mb-3">
+            Network Error Detected
           </div>
-          <div className="text-sm text-red-600 dark:text-red-300">
-            {detectedError.kind === 'network' 
-              ? `Network request failed with status ${detectedError.responseStatus}`
-              : 'An error occurred while processing the application.'
-            }
-          </div>
-          <details className="mt-2">
-            <summary className="text-xs text-red-500 dark:text-red-400 cursor-pointer hover:text-red-600 dark:hover:text-red-300">
-              Show Details
-            </summary>
-            <div className="mt-2 text-xs text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900/20 p-2 rounded space-y-1">
-              <div><strong>Type:</strong> {detectedError.kind}</div>
-              <div><strong>Time:</strong> {detectedError.time}</div>
-              {detectedError.kind === 'network' && (
-                <>
-                  <div><strong>URL:</strong> {detectedError.url}</div>
-                  <div><strong>Status:</strong> {detectedError.responseStatus}</div>
-                </>
-              )}
-            </div>
-          </details>
+          <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
+            Ask Nut to fix
+          </button>
         </div>
       )}
     </div>
