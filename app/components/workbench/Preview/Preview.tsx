@@ -40,7 +40,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
   // Use percentage for width
   const [widthPercent, setWidthPercent] = useState<number>(37.5); // 375px assuming 1000px window width initially
 
-  const [detectedErrors, setDetectedErrors] = useState<DetectedError[]>([]);
+  const [detectedError, setDetectedError] = useState<DetectedError | undefined>(undefined);
 
   const resizingState = useRef({
     isResizing: false,
@@ -63,6 +63,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
     }
 
     if (activeTab === 'preview') {
+      let lastDetectedError: DetectedError | undefined = undefined;
       const interval = setInterval(async () => {
         console.log('Checking for detected errors', iframeRef.current);
 
@@ -70,10 +71,12 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           return;
         }
 
-        const newDetectedErrors = await getDetectedErrors(iframeRef.current);
-        if (newDetectedErrors.length > detectedErrors.length) {
-          setDetectedErrors(newDetectedErrors);
+        const detectedErrors = await getDetectedErrors(iframeRef.current);
+        const firstError: DetectedError | undefined = detectedErrors[0];
+        if (JSON.stringify(firstError) !== JSON.stringify(lastDetectedError)) {
+          setDetectedError(firstError);
         }
+        lastDetectedError = firstError;
       }, 1000);
 
       return () => clearInterval(interval);
@@ -206,8 +209,6 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
       window.removeEventListener('resize', handleWindowResize);
     };
   }, []);
-
-  const detectedError: DetectedError | undefined = detectedErrors[0];
 
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
