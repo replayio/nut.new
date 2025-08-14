@@ -306,7 +306,12 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
               if (iframeRef.current) {
                 const sessionData = await getIFrameSessionData(iframeRef.current);
                 const message = 'Fix the error I saw while using the app: ' + detectedError.message;
-                handleSendMessage({ messageInput: message, chatMode: ChatMode.FixDetectedError, sessionData, detectedError });
+                handleSendMessage({
+                  messageInput: message,
+                  chatMode: ChatMode.FixDetectedError,
+                  sessionData,
+                  detectedError,
+                });
               }
             }}
           >

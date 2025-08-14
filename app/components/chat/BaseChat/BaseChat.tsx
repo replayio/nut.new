@@ -229,7 +229,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} mobileActiveTab={mobileActiveTab} handleSendMessage={handleSendMessage} />}</ClientOnly>
+          <ClientOnly>
+            {() => (
+              <Workbench
+                chatStarted={chatStarted}
+                mobileActiveTab={mobileActiveTab}
+                handleSendMessage={handleSendMessage}
+              />
+            )}
+          </ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}

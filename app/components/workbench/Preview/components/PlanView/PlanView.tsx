@@ -55,7 +55,7 @@ const PlanView = () => {
                     }`}
                     onClick={(event) => {
                       event.preventDefault();
-                      doSendMessage(ChatMode.DevelopApp, []);
+                      doSendMessage({ mode: ChatMode.DevelopApp });
                     }}
                     disabled={!!peanutsErrorButton}
                   >

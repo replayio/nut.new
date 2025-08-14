@@ -28,10 +28,10 @@ function clearActiveChat() {
 }
 
 export interface ChatMessageParams {
-  messageInput?: string,
-  chatMode?: ChatMode,
-  sessionData?: SessionData,
-  detectedError?: DetectedError,
+  messageInput?: string;
+  chatMode?: ChatMode;
+  sessionData?: SessionData;
+  detectedError?: DetectedError;
 }
 
 const ChatImplementer = memo(() => {

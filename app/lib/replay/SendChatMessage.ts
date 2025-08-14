@@ -6,8 +6,6 @@ import { assert } from '~/utils/nut';
 import { type Message, DISCOVERY_RESPONSE_CATEGORY, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { chatStore } from '~/lib/stores/chat';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
-import { flushSessionData } from '~/components/chat/ChatComponent/functions/flushSessionData';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
@@ -77,10 +75,7 @@ async function pollResponses(appId: string, onResponse: ChatResponseCallback, ca
   }
 }
 
-export async function sendChatMessage(
-  request: NutChatRequest,
-  onResponse: ChatResponseCallback,
-) {
+export async function sendChatMessage(request: NutChatRequest, onResponse: ChatResponseCallback) {
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;

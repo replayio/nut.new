@@ -14,7 +14,7 @@ import { DownloadButton } from '~/components/header/DownloadButton';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
 import { chatStore } from '~/lib/stores/chat';
-import type { ChatMessageParams } from '../chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
