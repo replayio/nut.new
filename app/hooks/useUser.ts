@@ -35,26 +35,24 @@ export function useUser() {
       });
     }
 
-  if (window.Intercom) {
-    console.log('Intercom is available');
-    fetch(`/api/intercom/jwt?user_id=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.jwt && window.Intercom) {
+    if (window.Intercom) {
+      console.log('Intercom is available');
+      fetch(`/api/intercom/jwt?user_id=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.jwt && window.Intercom) {
             console.log('Intercom JWT:', data.jwt);
-            window.Intercom("boot", {
-                api_base: "https://api-iam.intercom.io",
-                app_id: "k7f741xx",
-                intercom_user_jwt: data.jwt,
-                user_id: user.id,
-                email: user.email,
+            window.Intercom('boot', {
+              api_base: 'https://api-iam.intercom.io',
+              app_id: 'k7f741xx',
+              intercom_user_jwt: data.jwt,
+              user_id: user.id,
+              email: user.email,
             });
-        }
-      })
-  }
-
+          }
+        });
+    }
   }, [user?.id, user?.email]);
 
   return user;
 }
-

@@ -24,19 +24,18 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   try {
     const jwtResponse = await generateIntercomJWT(
-      { 
-        user_id: userId, 
-        email: email || undefined, 
-        name: name || undefined 
+      {
+        user_id: userId,
+        email: email || undefined,
+        name: name || undefined,
       },
       process.env.INTERCOM_APP_SECRET!, // Still required for validation
       process.env.INTERCOM_APP_ID!,
       process.env.INTERCOM_SIGNING_KEY!,
-      1 // 1 hour expiration
+      1, // 1 hour expiration
     );
 
     return json(jwtResponse);
-
   } catch (error) {
     console.error('Failed to generate Intercom JWT:', error);
     return json({ error: 'Failed to generate JWT' }, { status: 500 });
@@ -62,21 +61,20 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     const jwtResponse = await generateIntercomJWT(
-      { 
-        user_id, 
-        email: email || undefined, 
-        name: name || undefined 
+      {
+        user_id,
+        email: email || undefined,
+        name: name || undefined,
       },
       process.env.INTERCOM_APP_SECRET!,
       process.env.INTERCOM_APP_ID!,
       process.env.INTERCOM_SIGNING_KEY!,
-      1 // 1 hour expiration
+      1, // 1 hour expiration
     );
 
     return json(jwtResponse);
-
   } catch (error) {
     console.error('Failed to generate Intercom JWT:', error);
     return json({ error: 'Failed to generate JWT' }, { status: 500 });
   }
-}; 
+};

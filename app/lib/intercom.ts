@@ -39,7 +39,7 @@ export async function generateIntercomJWT(
   appSecret: string,
   appId: string,
   signingKey: string,
-  expirationHours: number = 1
+  expirationHours: number = 1,
 ): Promise<IntercomJWTResponse> {
   if (!userData.user_id) {
     throw new Error('user_id is required');
@@ -64,11 +64,11 @@ export async function generateIntercomJWT(
     email: userData.email,
     name: userData.name,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (expirationHours * 60 * 60),
+    exp: Math.floor(Date.now() / 1000) + expirationHours * 60 * 60,
   };
 
   // Remove undefined values
-  Object.keys(payload).forEach(key => {
+  Object.keys(payload).forEach((key) => {
     if (payload[key as keyof typeof payload] === undefined) {
       delete payload[key as keyof typeof payload];
     }
@@ -76,7 +76,7 @@ export async function generateIntercomJWT(
 
   // Create the JWT using the signing key
   const secret = new TextEncoder().encode(signingKey);
-  
+
   const jwt = await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -99,14 +99,11 @@ export async function generateIntercomJWT(
  * @param appSecret - Intercom app secret from environment variables
  * @returns Promise<IntercomJWTPayload>
  */
-export async function verifyIntercomJWT(
-  token: string,
-  appSecret: string
-): Promise<IntercomJWTPayload> {
+export async function verifyIntercomJWT(token: string, appSecret: string): Promise<IntercomJWTPayload> {
   try {
     const secret = new TextEncoder().encode(appSecret);
     const { payload } = await jose.jwtVerify(token, secret);
-    
+
     return payload as unknown as IntercomJWTPayload;
   } catch (error) {
     throw new Error(`Invalid JWT token: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -125,12 +122,12 @@ export function decodeIntercomJWT(token: string): IntercomJWTPayload {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
     );
 
     return JSON.parse(jsonPayload);
   } catch (error) {
     throw new Error(`Failed to decode JWT token: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-} 
+}
