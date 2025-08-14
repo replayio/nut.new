@@ -7,6 +7,7 @@ import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
+import { getDetectedErrors } from '~/lib/replay/MessageHandler';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -52,6 +53,29 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
   const SCALING_FACTOR = 2; // Adjust this value to increase/decrease sensitivity
 
   gCurrentIFrame = iframeRef.current ?? undefined;
+
+  // Interval for sending getDetectedErrors message
+  useEffect(() => {
+    if (!import.meta.env.VITE_ENABLE_DETECTED_ERRORS) {
+      console.log('Detected errors are disabled');
+      return;
+    }
+
+    if (activeTab === 'preview') {
+      const interval = setInterval(async () => {
+        console.log('Checking for detected errors', iframeRef.current);
+
+        if (!iframeRef.current) {
+          return;
+        }
+
+        const detectedErrors = await getDetectedErrors(iframeRef.current);
+        console.log('detectedErrors', detectedErrors);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, iframeRef.current]);
 
   const reloadPreview = () => {
     if (iframeRef.current) {

@@ -2,14 +2,12 @@
 
 type Compute<T> = { [K in keyof T]: T[K] } & unknown;
 
-interface DetectedErrorNetwork {
-  kind: "network";
+export interface DetectedError {
   time: string;
-  url: string;
-  responseStatus: number;
+  message: string;
+  details?: string;
+  data: unknown;
 }
-
-export type DetectedError = DetectedErrorNetwork;
 
 export type MessageHandlerRequestMap = {
   "recording-data": {
