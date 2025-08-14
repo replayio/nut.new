@@ -1,6 +1,10 @@
 // Methods for communicating with the message handler in the Preview iframe.
 
-import { type DetectedError, type MessageHandlerRequest, type MessageHandlerRequestMap } from './MessageHandlerInterface';
+import {
+  type DetectedError,
+  type MessageHandlerRequest,
+  type MessageHandlerRequestMap,
+} from './MessageHandlerInterface';
 import { assert } from '~/utils/nut';
 
 let lastRequestId = 0;

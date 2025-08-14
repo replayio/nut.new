@@ -10,15 +10,15 @@ export interface DetectedError {
 }
 
 export type MessageHandlerRequestMap = {
-  "recording-data": {
+  'recording-data': {
     payload: unknown;
     response: ArrayBufferLike;
   };
-  "mouse-data": {
+  'mouse-data': {
     payload: { x: number; y: number };
     response: unknown;
   };
-  "get-detected-errors": {
+  'get-detected-errors': {
     payload: unknown;
     response: DetectedError[];
   };
@@ -26,8 +26,8 @@ export type MessageHandlerRequestMap = {
 
 export type MessageHandlerRequest = {
   [K in keyof MessageHandlerRequestMap]: Compute<
-    { request: K } & (undefined extends MessageHandlerRequestMap[K]["payload"]
-      ? { payload?: MessageHandlerRequestMap[K]["payload"] }
-      : { payload: MessageHandlerRequestMap[K]["payload"] })
+    { request: K } & (undefined extends MessageHandlerRequestMap[K]['payload']
+      ? { payload?: MessageHandlerRequestMap[K]['payload'] }
+      : { payload: MessageHandlerRequestMap[K]['payload'] })
   >;
 }[keyof MessageHandlerRequestMap];

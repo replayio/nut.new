@@ -14,7 +14,6 @@ import { DownloadButton } from '~/components/header/DownloadButton';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
 import { chatStore } from '~/lib/stores/chat';
-import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
 
 interface WorkspaceProps {
   chatStarted?: boolean;

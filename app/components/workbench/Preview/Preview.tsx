@@ -284,9 +284,9 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
             Error: {detectedError.message}
           </div>
-          {detectedError.details && (<div className="text-xs text-red-600 dark:text-red-300 mb-3">
-            {detectedError.details}
-          </div>)}
+          {detectedError.details && (
+            <div className="text-xs text-red-600 dark:text-red-300 mb-3">{detectedError.details}</div>
+          )}
           <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
             Ask Nut to fix
           </button>
