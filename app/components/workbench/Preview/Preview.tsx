@@ -307,6 +307,7 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
                 handleSendMessage({
                   messageInput: message,
                   chatMode: ChatMode.FixDetectedError,
+                  repositoryId: workbenchStore.repositoryId.get(),
                   sessionData,
                   detectedError,
                 });

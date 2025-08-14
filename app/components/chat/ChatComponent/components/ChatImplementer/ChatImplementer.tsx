@@ -20,6 +20,7 @@ import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence
 import { generateRandomId, navigateApp } from '~/utils/nut';
 import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
 import type { SessionData } from '~/lib/replay/MessageHandler';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
@@ -30,6 +31,7 @@ function clearActiveChat() {
 export interface ChatMessageParams {
   messageInput?: string;
   chatMode?: ChatMode;
+  repositoryId?: string;
   sessionData?: SessionData;
   detectedError?: DetectedError;
 }
@@ -103,7 +105,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionData, detectedError } = params;
+    const { messageInput, chatMode, repositoryId, sessionData, detectedError } = params;
 
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
@@ -167,7 +169,7 @@ const ChatImplementer = memo(() => {
       });
     }
 
-    const messages = chatStore.messages.get();
+    const messages = chatStore.messages.get().filter(shouldDisplayMessage);
 
     let mode = chatMode;
     if (!mode) {
@@ -186,6 +188,7 @@ const ChatImplementer = memo(() => {
       mode,
       messages,
       references,
+      repositoryId,
       sessionData,
       detectedError,
     });
