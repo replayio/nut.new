@@ -41,6 +41,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
   const [widthPercent, setWidthPercent] = useState<number>(37.5); // 375px assuming 1000px window width initially
 
   const [detectedError, setDetectedError] = useState<DetectedError | undefined>(undefined);
+  const [fixingError, setFixingError] = useState(false);
 
   const resizingState = useRef({
     isResizing: false,
@@ -282,7 +283,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
       </div>
 
       {/* Error Display Section */}
-      {detectedError && (
+      {detectedError && !fixingError && (
         <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
           <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
             Error: {detectedError.message}
@@ -290,7 +291,12 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           {detectedError.details && (
             <div className="text-xs text-red-600 dark:text-red-300 mb-3">{detectedError.details}</div>
           )}
-          <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
+          <button
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
+            onClick={() => {
+              setFixingError(true);
+            }}
+          >
             Ask Nut to fix
           </button>
         </div>
