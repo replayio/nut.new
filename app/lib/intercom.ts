@@ -99,9 +99,9 @@ export async function generateIntercomJWT(
  * @param appSecret - Intercom app secret from environment variables
  * @returns Promise<IntercomJWTPayload>
  */
-export async function verifyIntercomJWT(token: string, appSecret: string): Promise<IntercomJWTPayload> {
+export async function verifyIntercomJWT(token: string, signingKey: string): Promise<IntercomJWTPayload> {
   try {
-    const secret = new TextEncoder().encode(appSecret);
+    const secret = new TextEncoder().encode(signingKey);
     const { payload } = await jose.jwtVerify(token, secret);
 
     return payload as unknown as IntercomJWTPayload;

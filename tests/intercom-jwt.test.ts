@@ -93,8 +93,8 @@ describe('Intercom JWT', () => {
         name: 'Test User'
       };
 
-      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId);
-      const verified = await verifyIntercomJWT(jwt.jwt, mockAppSecret);
+      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId, mockSigningKey);
+      const verified = await verifyIntercomJWT(jwt.jwt, mockSigningKey);
 
       expect(verified.app_id).toBe(mockAppId);
       expect(verified.user_id).toBe(userData.user_id);
@@ -115,7 +115,7 @@ describe('Intercom JWT', () => {
         user_id: 'test-user-123'
       };
 
-      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId);
+      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId, mockSigningKey);
       const wrongSecret = 'wrong-secret-key-32-chars-long';
 
       await expect(
@@ -132,7 +132,7 @@ describe('Intercom JWT', () => {
         name: 'Test User'
       };
 
-      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId);
+      const jwt = await generateIntercomJWT(userData, mockAppSecret, mockAppId, mockSigningKey);
       const decoded = decodeIntercomJWT(jwt.jwt);
 
       expect(decoded.app_id).toBe(mockAppId);
