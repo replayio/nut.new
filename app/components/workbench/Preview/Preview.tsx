@@ -17,10 +17,9 @@ export function getCurrentIFrame() {
 
 interface PreviewProps {
   activeTab: 'planning' | 'preview';
-  detectedError: DetectedError | undefined;
 }
 
-export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
+export const Preview = memo(({ activeTab }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,6 +39,8 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
 
   // Use percentage for width
   const [widthPercent, setWidthPercent] = useState<number>(37.5); // 375px assuming 1000px window width initially
+
+  const [detectedErrors, setDetectedErrors] = useState<DetectedError[]>([]);
 
   const resizingState = useRef({
     isResizing: false,
@@ -69,8 +70,10 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
           return;
         }
 
-        const detectedErrors = await getDetectedErrors(iframeRef.current);
-        console.log('detectedErrors', detectedErrors);
+        const newDetectedErrors = await getDetectedErrors(iframeRef.current);
+        if (newDetectedErrors.length > detectedErrors.length) {
+          setDetectedErrors(newDetectedErrors);
+        }
       }, 1000);
 
       return () => clearInterval(interval);
@@ -204,6 +207,8 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
     };
   }, []);
 
+  const detectedError: DetectedError | undefined = detectedErrors[0];
+
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
       {isPortDropdownOpen && (
@@ -277,11 +282,11 @@ export const Preview = memo(({ activeTab, detectedError }: PreviewProps) => {
       {detectedError && (
         <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
           <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
-            Network Error Detected
+            Error: {detectedError.message}
           </div>
-          <div className="text-xs text-red-600 dark:text-red-300 mb-3">
-            {detectedError.url} failed with code {detectedError.responseStatus}
-          </div>
+          {detectedError.details && (<div className="text-xs text-red-600 dark:text-red-300 mb-3">
+            {detectedError.details}
+          </div>)}
           <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
             Ask Nut to fix
           </button>

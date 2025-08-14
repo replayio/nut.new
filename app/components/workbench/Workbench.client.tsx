@@ -51,13 +51,6 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps)
 
   const isSmallViewport = useViewport(1024);
 
-  const detectedError: DetectedError = {
-    kind: 'network',
-    time: '2021-01-01T00:00:00Z',
-    url: 'https://example.com/api/data',
-    responseStatus: 404,
-  };
-
   useEffect(() => {
     if (mobileActiveTab === 'planning') {
       setActiveTab('planning');
@@ -165,7 +158,7 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab }: WorkspaceProps)
                 </div>
               )}
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} detectedError={detectedError} />
+                <Preview activeTab={activeTab} />
               </div>
             </div>
           </div>
