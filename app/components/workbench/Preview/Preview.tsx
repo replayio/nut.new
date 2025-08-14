@@ -91,6 +91,8 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
 
     setIsSelectionMode(false);
     setSelectionPoint(null);
+    setDetectedError(undefined);
+    setFixingError(false);
   };
 
   useEffect(() => {
@@ -104,6 +106,8 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
 
     setUrl(previewURL);
     setIframeUrl(previewURL);
+    setDetectedError(undefined);
+    setFixingError(false);
   }, [previewURL]);
 
   // Handle OAuth authentication
@@ -299,6 +303,16 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           >
             Ask Nut to fix
           </button>
+        </div>
+      )}
+
+      {/* Nut Working Display */}
+      {fixingError && (
+        <div className="border-t border-bolt-elements-borderColor/50 bg-blue-50 dark:bg-blue-950/20 p-3">
+          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            Nut is working on fixing the error...
+          </div>
         </div>
       )}
     </div>
