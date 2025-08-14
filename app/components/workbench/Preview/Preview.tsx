@@ -305,7 +305,10 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
 
               if (iframeRef.current) {
                 const sessionData = await getIFrameSessionData(iframeRef.current);
-                const message = 'Fix the error I saw while using the app: ' + detectedError.message;
+                let message = 'Fix the error I saw while using the app: ' + detectedError.message;
+                if (detectedError.details) {
+                  message += '\n\n' + detectedError.details;
+                }
                 handleSendMessage({
                   messageInput: message,
                   chatMode: ChatMode.FixDetectedError,
