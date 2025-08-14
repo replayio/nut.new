@@ -9,12 +9,13 @@ import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { getDiscoveryRating } from '~/lib/persistence/message';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
   input?: string;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSendMessage?: (messageInput: string, mode: ChatMode | undefined) => void;
+  handleSendMessage?: (params: ChatMessageParams) => void;
   handleStop?: () => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -188,7 +189,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return;
               }
 
-              handleSendMessage(fullInput, undefined);
+              handleSendMessage({ messageInput: fullInput });
             }
           }}
           value={input}
@@ -224,7 +225,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         }
 
                         if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                          handleSendMessage(fullInput, undefined);
+                          handleSendMessage({ messageInput: fullInput });
                         }
                       }}
                     />
@@ -238,7 +239,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <StartPlanningButton
                       onClick={() => {
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                        handleSendMessage(message, ChatMode.BuildApp);
+                        handleSendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
                       }}
                       startPlanningRating={startPlanningRating}
                     />

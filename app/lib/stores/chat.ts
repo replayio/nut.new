@@ -3,7 +3,7 @@ import mergeResponseMessage from '~/components/chat/ChatComponent/functions/merg
 import type { Message } from '~/lib/persistence/message';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { clearPendingMessageStatus } from './status';
-import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode } from '~/lib/replay/SendChatMessage';
+import { sendChatMessage, type ChatReference, listenAppResponses, ChatMode, type NutChatRequest } from '~/lib/replay/SendChatMessage';
 import { setPendingMessageStatus } from './status';
 import {
   APP_SUMMARY_CATEGORY,
@@ -17,6 +17,8 @@ import { peanutsStore, refreshPeanutsStore } from './peanuts';
 import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
 import { statusModalStore } from './statusModal';
 import { addAppResponse } from '~/lib/replay/ResponseFilter';
+import type { SessionData } from '../replay/MessageHandler';
+import type { DetectedError } from '../replay/MessageHandlerInterface';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -152,10 +154,10 @@ export function onChatResponse(response: ChatResponse, reason: string) {
   }
 }
 
-export async function doSendMessage(mode: ChatMode, messages: Message[], references?: ChatReference[]) {
+export async function doSendMessage(request: NutChatRequest) {
   const numAbortsAtStart = chatStore.numAborts.get();
 
-  if (mode == ChatMode.DevelopApp) {
+  if (request.mode == ChatMode.DevelopApp) {
     await refreshPeanutsStore();
     if (peanutsStore.peanutsErrorInfo.get()) {
       toast.error(peanutsStore.peanutsErrorInfo.get());
@@ -167,7 +169,7 @@ export async function doSendMessage(mode: ChatMode, messages: Message[], referen
   clearPendingMessageStatus();
 
   try {
-    await sendChatMessage(mode, messages, references ?? [], (r) => onChatResponse(r, `SendMessage:${mode}`));
+    await sendChatMessage(request, (r) => onChatResponse(r, `SendMessage:${request.mode}`));
   } catch (e) {
     toast.error(getErrorMessage(e) || 'Error sending message');
     console.error('Error sending message', e);

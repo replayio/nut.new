@@ -14,11 +14,7 @@ import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
 import type { MouseData, SessionData } from './MessageHandler';
-
-// Whether to send session data to the backend with chat messages.
-// For now this is disabled while we design a better UX and messaging around reporting
-// bugs in Nut apps.
-const ENABLE_SESSION_DATA = false;
+import type { DetectedError } from './MessageHandlerInterface';
 
 const logger = createScopedLogger('ChatMessage');
 
@@ -35,14 +31,16 @@ export enum ChatMode {
   BuildApp = 'BuildApp',
   Discovery = 'Discovery',
   DevelopApp = 'DevelopApp',
+  FixDetectedError = 'FixDetectedError',
 }
 
-interface NutChatRequest {
+export interface NutChatRequest {
   appId?: string;
   mode?: ChatMode;
   messages?: Message[];
   references?: ChatReference[];
   sessionData?: SessionData;
+  detectedError?: DetectedError;
 }
 
 // Messages that are rendered normally in the chat.
@@ -80,9 +78,7 @@ async function pollResponses(appId: string, onResponse: ChatResponseCallback, ca
 }
 
 export async function sendChatMessage(
-  mode: ChatMode,
-  messages: Message[],
-  references: ChatReference[],
+  request: NutChatRequest,
   onResponse: ChatResponseCallback,
 ) {
   if (usingMockChat()) {
@@ -90,27 +86,12 @@ export async function sendChatMessage(
     return;
   }
 
-  logger.debug('sendChatMessage', JSON.stringify({ mode, messages, references }));
+  logger.debug('sendChatMessage', JSON.stringify(request));
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  let sessionData: SessionData | undefined;
-
-  const repositoryId = workbenchStore.repositoryId.get();
-  if (repositoryId && ENABLE_SESSION_DATA) {
-    sessionData = await flushSessionData();
-  }
-
-  const params: NutChatRequest = {
-    appId,
-    mode,
-    messages: messages.filter(shouldDisplayMessage),
-    references,
-    sessionData,
-  };
-
-  await pollResponses(appId, onResponse, () => callNutAPI('chat', params, onResponse));
+  await pollResponses(appId, onResponse, () => callNutAPI('chat', request, onResponse));
 
   logger.debug('sendChatMessage finished');
 }

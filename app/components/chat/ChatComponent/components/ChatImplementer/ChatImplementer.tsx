@@ -18,11 +18,20 @@ import { type Message } from '~/lib/persistence/message';
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { generateRandomId, navigateApp } from '~/utils/nut';
+import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
+import type { SessionData } from '~/lib/replay/MessageHandler';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
 function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
+}
+
+export interface ChatMessageParams {
+  messageInput?: string,
+  chatMode?: ChatMode,
+  sessionData?: SessionData,
+  detectedError?: DetectedError,
 }
 
 const ChatImplementer = memo(() => {
@@ -93,7 +102,9 @@ const ChatImplementer = memo(() => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput: string | undefined, chatMode?: ChatMode) => {
+  const sendMessage = async (params: ChatMessageParams) => {
+    const { messageInput, chatMode, sessionData, detectedError } = params;
+
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
     }
@@ -171,7 +182,13 @@ const ChatImplementer = memo(() => {
 
     const numAbortsAtStart = chatStore.numAborts.get();
 
-    await doSendMessage(mode, messages, references);
+    await doSendMessage({
+      mode,
+      messages,
+      references,
+      sessionData,
+      detectedError,
+    });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {
       return;

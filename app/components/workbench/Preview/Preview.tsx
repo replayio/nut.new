@@ -7,7 +7,9 @@ import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
-import { getDetectedErrors } from '~/lib/replay/MessageHandler';
+import { getIFrameSessionData, getDetectedErrors } from '~/lib/replay/MessageHandler';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -17,9 +19,10 @@ export function getCurrentIFrame() {
 
 interface PreviewProps {
   activeTab: 'planning' | 'preview';
+  handleSendMessage: (params: ChatMessageParams) => void;
 }
 
-export const Preview = memo(({ activeTab }: PreviewProps) => {
+export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -297,8 +300,14 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           )}
           <button
             className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
-            onClick={() => {
+            onClick={async () => {
               setFixingError(true);
+
+              if (iframeRef.current) {
+                const sessionData = await getIFrameSessionData(iframeRef.current);
+                const message = 'Fix the error I saw while using the app: ' + detectedError.message;
+                handleSendMessage({ messageInput: message, chatMode: ChatMode.FixDetectedError, sessionData, detectedError });
+              }
             }}
           >
             Ask Nut to fix
