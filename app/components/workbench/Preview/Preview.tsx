@@ -85,7 +85,7 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
 
   const reloadPreview = () => {
     if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
+      iframeRef.current.src = iframeUrl + '?forceReload=' + Date.now();
     }
 
     setIsSelectionMode(false);
@@ -229,10 +229,12 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
                 setUrl(event.target.value);
               }}
               onKeyDown={(event) => {
-                let newUrl;
-
                 if (event.key === 'Enter') {
-                  setIframeUrl(newUrl);
+                  if (url !== iframeUrl) {
+                    setIframeUrl(url);
+                  } else {
+                    reloadPreview();
+                  }
 
                   if (inputRef.current) {
                     inputRef.current.blur();
