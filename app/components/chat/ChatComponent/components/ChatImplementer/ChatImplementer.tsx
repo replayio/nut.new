@@ -31,7 +31,7 @@ function clearActiveChat() {
 export interface ChatMessageParams {
   messageInput?: string;
   chatMode?: ChatMode;
-  repositoryId?: string;
+  sessionRepositoryId?: string;
   sessionData?: SessionData;
   detectedError?: DetectedError;
 }
@@ -105,7 +105,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, repositoryId, sessionData, detectedError } = params;
+    const { messageInput, chatMode, sessionRepositoryId, sessionData, detectedError } = params;
 
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
@@ -188,7 +188,7 @@ const ChatImplementer = memo(() => {
       mode,
       messages,
       references,
-      repositoryId,
+      sessionRepositoryId,
       sessionData,
       detectedError,
     });

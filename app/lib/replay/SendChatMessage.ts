@@ -37,7 +37,7 @@ export interface NutChatRequest {
   mode?: ChatMode;
   messages?: Message[];
   references?: ChatReference[];
-  repositoryId?: string;
+  sessionRepositoryId?: string;
   sessionData?: SessionData;
   detectedError?: DetectedError;
 }
