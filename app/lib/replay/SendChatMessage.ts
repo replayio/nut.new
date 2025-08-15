@@ -11,7 +11,7 @@ import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
-import type { MouseData, SessionData } from './MessageHandler';
+import type { MouseData, SimulationData } from './MessageHandler';
 import type { DetectedError } from './MessageHandlerInterface';
 
 const logger = createScopedLogger('ChatMessage');
@@ -32,14 +32,19 @@ export enum ChatMode {
   FixDetectedError = 'FixDetectedError',
 }
 
+// Information describing a user's visit to the app.
+export interface VisitData {
+  repositoryId: string;
+  references?: ChatReference[];
+  simulationData?: SimulationData;
+  detectedError?: DetectedError;
+}
+
 export interface NutChatRequest {
   appId?: string;
   mode?: ChatMode;
   messages?: Message[];
-  references?: ChatReference[];
-  sessionRepositoryId?: string;
-  sessionData?: SessionData;
-  detectedError?: DetectedError;
+  visit?: VisitData;
 }
 
 // Messages that are rendered normally in the chat.

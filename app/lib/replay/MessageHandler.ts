@@ -34,10 +34,10 @@ function sendIframeRequest<K extends keyof MessageHandlerRequestMap>(
   });
 }
 
-// User session data generated for analysis by the backend.
-export type SessionData = unknown;
+// User simulation data generated for analysis by the backend.
+export type SimulationData = unknown;
 
-export async function getIFrameSessionData(iframe: HTMLIFrameElement): Promise<SessionData> {
+export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
 
   if (!buffer) {
@@ -47,7 +47,7 @@ export async function getIFrameSessionData(iframe: HTMLIFrameElement): Promise<S
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(new Uint8Array(buffer));
 
-  return JSON.parse(jsonString) as SessionData;
+  return JSON.parse(jsonString) as SimulationData;
 }
 
 // Information about a mouse position in the iframe.

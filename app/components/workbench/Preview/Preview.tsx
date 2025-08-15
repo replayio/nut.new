@@ -7,9 +7,10 @@ import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
-import { getIFrameSessionData, getDetectedErrors } from '~/lib/replay/MessageHandler';
+import { getDetectedErrors } from '~/lib/replay/MessageHandler';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSessionData';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -299,7 +300,7 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
               setFixingError(true);
 
               if (iframeRef.current) {
-                const sessionData = await getIFrameSessionData(iframeRef.current);
+                const simulationData = await flushSimulationData();
                 let message = 'Fix the error I saw while using the app: ' + detectedError.message;
                 if (detectedError.details) {
                   message += '\n\n' + detectedError.details;
@@ -307,8 +308,8 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
                 handleSendMessage({
                   messageInput: message,
                   chatMode: ChatMode.FixDetectedError,
-                  repositoryId: workbenchStore.repositoryId.get(),
-                  sessionData,
+                  sessionRepositoryId: workbenchStore.repositoryId.get(),
+                  simulationData,
                   detectedError,
                 });
               }

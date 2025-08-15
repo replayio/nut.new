@@ -9,7 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
+import { type ChatReference, type VisitData, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -19,7 +19,7 @@ import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { generateRandomId, navigateApp } from '~/utils/nut';
 import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
-import type { SessionData } from '~/lib/replay/MessageHandler';
+import type { SimulationData } from '~/lib/replay/MessageHandler';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
@@ -32,7 +32,7 @@ export interface ChatMessageParams {
   messageInput?: string;
   chatMode?: ChatMode;
   sessionRepositoryId?: string;
-  sessionData?: SessionData;
+  simulationData?: SimulationData;
   detectedError?: DetectedError;
 }
 
@@ -105,7 +105,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, sessionData, detectedError } = params;
+    const { messageInput, chatMode, sessionRepositoryId, simulationData, detectedError } = params;
 
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
@@ -184,13 +184,20 @@ const ChatImplementer = memo(() => {
 
     const numAbortsAtStart = chatStore.numAborts.get();
 
+    let visit: VisitData | undefined;
+    if (sessionRepositoryId) {
+      visit = {
+        repositoryId: sessionRepositoryId,
+        references,
+        simulationData,
+        detectedError,
+      };
+    }
+
     await doSendMessage({
       mode,
       messages,
-      references,
-      sessionRepositoryId,
-      sessionData,
-      detectedError,
+      visit,
     });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {

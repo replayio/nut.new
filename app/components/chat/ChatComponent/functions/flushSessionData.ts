@@ -1,15 +1,15 @@
-import { getIFrameSessionData, type SessionData } from '~/lib/replay/MessageHandler';
+import { getIFrameSimulationData, type SimulationData } from '~/lib/replay/MessageHandler';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 import { waitForTime } from '~/utils/nut';
 import { createScopedLogger } from '~/utils/logger';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 
-// Maximum time to wait for session data for the iframe.
-const FlushSessionDataTimeoutMs = 2000;
+// Maximum time to wait for simulation data for the iframe.
+const FlushSimulationDataTimeoutMs = 2000;
 
-const logger = createScopedLogger('FlushSessionData');
+const logger = createScopedLogger('FlushSimulationData');
 
-export async function flushSessionData(): Promise<SessionData | undefined> {
+export async function flushSimulationData(): Promise<SimulationData | undefined> {
   logger.trace('Start');
 
   const iframe = getCurrentIFrame();
@@ -18,20 +18,20 @@ export async function flushSessionData(): Promise<SessionData | undefined> {
     return undefined;
   }
 
-  const sessionData = await Promise.race([
-    getIFrameSessionData(iframe),
+  const simulationData = await Promise.race([
+    getIFrameSimulationData(iframe),
     (async () => {
-      await waitForTime(FlushSessionDataTimeoutMs);
+      await waitForTime(FlushSimulationDataTimeoutMs);
       return undefined;
     })(),
   ]);
 
-  if (!sessionData) {
-    pingTelemetry('FlushSessionData.Timeout', {});
+  if (!simulationData) {
+    pingTelemetry('FlushSimulationData.Timeout', {});
     return undefined;
   }
 
-  logger.trace('Done', sessionData);
+  logger.trace('Done', simulationData);
 
-  return sessionData;
+  return simulationData;
 }
