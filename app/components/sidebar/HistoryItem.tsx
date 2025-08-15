@@ -80,7 +80,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
               />
               <Dialog.Trigger asChild>
                 <ChatActionButton
-                  toolTipContent="Delete chat"
+                  toolTipContent="Delete app"
                   icon="i-ph:trash"
                   className="[&&]:hover:text-red-500 [&&]:hover:bg-red-500/10"
                   onClick={(event) => {
