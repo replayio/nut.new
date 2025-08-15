@@ -10,7 +10,7 @@ import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
 import { getDetectedErrors } from '~/lib/replay/MessageHandler';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
-import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSessionData';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
