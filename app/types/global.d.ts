@@ -10,6 +10,9 @@ interface Window {
     init: (appId: string) => void;
     identify: (userId: string, traits?: Record<string, any>) => void;
   };
+  Intercom?: {
+    (command: string, ...args: any[]): void;
+  };
 }
 
 interface Performance {

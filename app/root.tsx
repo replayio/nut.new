@@ -96,7 +96,12 @@ const inlineThemeCode = stripIndents`
 `;
 
 const logRocketInit = stripIndents`
-  window.LogRocket && window.LogRocket.init('woocwd/nut');
+  window.LogRocket && window.LogRocket.init('woocwd/nut', { console: { isEnabled: false } });
+`;
+
+const intercomInit = stripIndents`
+  // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/k7f741xx'
+  (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/k7f741xx';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
 `;
 
 export const Head = createHead(() => (
@@ -106,6 +111,7 @@ export const Head = createHead(() => (
     <Meta />
     <Links />
     <script src="https://cdn.lgrckt-in.com/LogRocket.min.js" crossOrigin="anonymous"></script>
+    <script dangerouslySetInnerHTML={{ __html: intercomInit }} />
     <script dangerouslySetInnerHTML={{ __html: logRocketInit }} />
     <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
     <script dangerouslySetInnerHTML={{ __html: analyticsCode }} />
