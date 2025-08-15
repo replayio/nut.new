@@ -7,6 +7,7 @@ import { chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
+import { assert } from '~/utils/nut';
 
 function appSummaryHasPendingFeature(appSummary: AppSummary | undefined) {
   return (
@@ -18,6 +19,7 @@ function appSummaryHasPendingFeature(appSummary: AppSummary | undefined) {
 }
 
 const PlanView = () => {
+  const appId = useStore(chatStore.currentAppId);
   const listenResponses = useStore(chatStore.listenResponses);
   const appSummary = useStore(chatStore.appSummary);
 
@@ -55,7 +57,8 @@ const PlanView = () => {
                     }`}
                     onClick={(event) => {
                       event.preventDefault();
-                      doSendMessage({ mode: ChatMode.DevelopApp });
+                      assert(appId, 'No app id');
+                      doSendMessage({ appId, mode: ChatMode.DevelopApp });
                     }}
                     disabled={!!peanutsErrorButton}
                   >

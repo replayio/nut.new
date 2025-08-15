@@ -138,9 +138,10 @@ const ChatImplementer = memo(() => {
       addChatMessage(imageMessage);
     });
 
-    if (!chatStore.currentAppId.get()) {
+    let appId = chatStore.currentAppId.get();
+    if (!appId) {
       try {
-        const appId = await database.createApp();
+        appId = await database.createApp();
         chatStore.currentAppId.set(appId);
         chatStore.appTitle.set('New App');
 
@@ -195,6 +196,7 @@ const ChatImplementer = memo(() => {
     }
 
     await doSendMessage({
+      appId,
       mode,
       messages,
       visit,

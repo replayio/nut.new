@@ -41,7 +41,7 @@ export interface VisitData {
 }
 
 export interface NutChatRequest {
-  appId?: string;
+  appId: string;
   mode?: ChatMode;
   messages?: Message[];
   visit?: VisitData;
