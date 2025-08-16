@@ -85,6 +85,17 @@ export function useStripeCallback() {
 
             message = `Your ${tierInfo.name} subscription has been successfully activated!`;
             details = `You'll receive ${tierInfo.peanuts.toLocaleString()} peanuts every month for $${tierInfo.price}. Your subscription is now active and ready to use!`;
+
+            if (window.analytics) {
+              window.analytics.track('User Subscribed', {
+                userId: user.id,
+                email: user.email,
+                tier,
+                peanuts: tierInfo.peanuts,
+                price: tierInfo.price,
+                timestamp: new Date().toISOString(),
+              });
+            }
           } catch (error) {
             console.error('❌ Error setting subscription:', error);
             message = 'Your subscription payment was successful, but there was an issue activating it.';
