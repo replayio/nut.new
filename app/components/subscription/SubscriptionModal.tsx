@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
-import { userStore } from '~/lib/stores/auth';
+import { sessionStore } from '~/lib/stores/auth';
 import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, type SubscriptionTier } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { IconButton } from '~/components/ui/IconButton';
@@ -14,14 +14,14 @@ interface SubscriptionModalProps {
 
 export function SubscriptionModal({ isOpen, onClose, currentTier }: SubscriptionModalProps) {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
-  const user = useStore(userStore);
+  const session = useStore(sessionStore);
 
   if (!isOpen) {
     return null;
   }
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
-    if (!user?.id || !user?.email) {
+    if (!session?.access_token) {
       toast.error('Please sign in to subscribe');
       return;
     }
@@ -34,7 +34,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
     setLoading(tier);
 
     try {
-      await createSubscriptionCheckout(tier, user.id, user.email);
+      await createSubscriptionCheckout(tier, session.access_token);
       // User will be redirected to Stripe Checkout
     } catch (error) {
       console.error('Error creating subscription:', error);

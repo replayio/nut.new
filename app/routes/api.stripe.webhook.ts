@@ -1,5 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
-import { callNutAPI } from '~/lib/replay/NutAPI';
+import { getSupabase } from '~/lib/supabase/client';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -7,6 +8,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
+
+// Server-side function to call NutAPI directly
+async function callNutAPIWithJWT(method: string, request: any, jwt: string): Promise<any> {
+  const url = `https://dispatch.replay.io/nut/${method}`;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwt}`,
+  };
+
+  const fetchOptions: RequestInit = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  };
+
+  const response = await fetch(url, fetchOptions);
+
+  if (!response.ok) {
+    throw new Error(`NutAPI call failed: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
 
 export async function action({ request }: { request: Request }) {
   if (request.method !== 'POST') {
@@ -74,6 +99,38 @@ export async function action({ request }: { request: Request }) {
   }
 }
 
+// Very legal and very cool
+async function impersonateUser(user: { email: string } | { id: string }) {
+  let userEmail = '';
+  if ('email' in user) {
+    userEmail = user.email;
+  } else {
+    const { data: userData } = await getSupabase().auth.admin.getUserById(user.id);
+    userEmail = userData?.user?.email ?? '';
+  }
+
+  const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data: magicLink } = await supabaseAdmin.auth.admin.generateLink({
+    type: 'magiclink',
+    email: userEmail,
+  });
+
+  if (!magicLink?.properties?.hashed_token) {
+    throw new Error('Failed to generate auth token');
+  }
+
+  const { data: verified } = await getSupabase().auth.verifyOtp({
+    token_hash: magicLink.properties.hashed_token,
+    type: 'email',
+  });
+
+  if (verified && verified.user && verified.session) {
+    return verified;
+  }
+
+  throw new Error('Failed to verify user');
+}
+
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
   try {
     const customer = await stripe.customers.retrieve(subscription.customer as string);
@@ -89,11 +146,17 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
       return;
     }
 
+    const { session } = await impersonateUser({ id: userId });
+
     // Clear the subscription
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts: undefined,
-    });
+    await callNutAPIWithJWT(
+      'set-peanuts-subscription',
+      {
+        userId,
+        peanuts: undefined,
+      },
+      session?.access_token ?? '',
+    );
 
     console.log(`Canceled subscription for user ${userId}`);
   } catch (error) {

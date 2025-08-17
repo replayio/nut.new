@@ -19,6 +19,7 @@ import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
+import { sessionStore } from '~/lib/stores/auth';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -27,6 +28,7 @@ interface AccountModalProps {
 
 export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
+  const session = useStore(sessionStore);
   const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
   const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
@@ -173,7 +175,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleAddPeanuts = async () => {
-    if (!user?.id || !user?.email) {
+    if (!session?.access_token) {
       stripeStatusModalActions.showError(
         'Sign In Required',
         'Please sign in to add peanuts.',
@@ -183,7 +185,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
 
     try {
-      await createTopoffCheckout(user.id, user.email);
+      await createTopoffCheckout(session?.access_token);
       // User will be redirected to Stripe Checkout
       if (window.analytics) {
         window.analytics.track('Peanuts Added', {

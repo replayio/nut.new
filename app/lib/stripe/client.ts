@@ -28,8 +28,7 @@ const initializeStripe = () => {
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
   tier?: 'free' | 'starter';
-  userId: string;
-  userEmail: string;
+  jwt: string;
   returnUrl?: string; // Optional return URL to redirect to after checkout
 }
 
@@ -48,6 +47,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${params.jwt}`,
       },
       body: JSON.stringify(params),
     });
@@ -74,16 +74,11 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
 /**
  * Create subscription checkout for a specific tier
  */
-export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter',
-  userId: string,
-  userEmail: string,
-): Promise<void> {
+export async function createSubscriptionCheckout(tier: 'free' | 'starter', jwt: string): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
-    userId,
-    userEmail,
+    jwt,
     returnUrl: window.location.href, // Return to current page after checkout
   });
 }
@@ -91,11 +86,10 @@ export async function createSubscriptionCheckout(
 /**
  * Create peanut top-off checkout
  */
-export async function createTopoffCheckout(userId: string, userEmail: string): Promise<void> {
+export async function createTopoffCheckout(jwt: string): Promise<void> {
   return createCheckoutSession({
     type: 'topoff',
-    userId,
-    userEmail,
+    jwt,
     returnUrl: window.location.href, // Return to current page after checkout
   });
 }
