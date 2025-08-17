@@ -13,6 +13,11 @@ const AuthSelector = () => {
   const appSummary = useStore(chatStore.appSummary);
   assert(appSummary, 'App summary is required');
 
+  // 8/17/2025: Older apps without app template versions can't update auth settings.
+  if (!appSummary.templateVersion) {
+    return null;
+  }
+
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
 
