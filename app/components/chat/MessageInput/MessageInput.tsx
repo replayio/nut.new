@@ -210,7 +210,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         {(() => {
           const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted;
-          const showStartPlanningButton = startPlanningRating > 0 && !showSendButton;
+          const showStartPlanningButton = startPlanningRating > 0 && !showSendButton && !hasAppSummary;
 
           return (
             <>

@@ -11,18 +11,13 @@ const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
 
 const AuthSelector = () => {
   const appSummary = useStore(chatStore.appSummary);
-  assert(appSummary, 'App summary is required');
-
-  // 8/17/2025: Older apps without app template versions can't update auth settings.
-  if (!appSummary.templateVersion) {
-    return null;
-  }
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
 
-  const authRequired = appSummary.setSecrets?.includes(AuthRequiredSecret);
   const [saving, setSaving] = useState(false);
+
+  const authRequired = appSummary?.setSecrets?.includes(AuthRequiredSecret);
 
   const handleChange = async () => {
     setSaving(true);
@@ -50,6 +45,11 @@ const AuthSelector = () => {
       setSaving(false);
     }
   };
+
+  // 8/17/2025: Older apps without app template versions can't update auth settings.
+  if (!appSummary?.templateVersion) {
+    return null;
+  }
 
   return (
     <div className={classNames('flex items-center gap-3 p-3 mt-0 mb-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200')}>
