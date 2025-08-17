@@ -8,6 +8,7 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
 import { assert } from '~/utils/nut';
+import AuthSelector from './components/AuthSelector';
 
 function appSummaryHasPendingFeature(appSummary: AppSummary | undefined) {
   return (
@@ -126,6 +127,7 @@ const PlanView = () => {
                 </div>
               )}
             </div>
+            {<AuthSelector />}
             {hasSecrets && <Secrets />}
             {appSummary?.pages && <Pages />}
           </div>
