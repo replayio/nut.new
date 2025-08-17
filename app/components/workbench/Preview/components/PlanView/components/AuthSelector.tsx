@@ -1,26 +1,60 @@
-import { memo } from 'react';
+import { useState } from 'react';
 import { classNames } from '~/utils/classNames';
+import { chatStore, onChatResponse } from '~/lib/stores/chat';
+import { useStore } from '@nanostores/react';
+import { assert } from '~/utils/nut';
+import { callNutAPI } from '~/lib/replay/NutAPI';
+import { toast } from 'react-toastify';
 
-interface AuthSelectorProps {
-  className?: string;
-  checked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-}
+// Environment variable which the app checks to see if users must be logged in.
+const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
 
-const AuthSelector = memo(({ className, checked = false, onCheckedChange }: AuthSelectorProps) => {
-  const handleChange = () => {
-    onCheckedChange?.(!checked);
+const AuthSelector = () => {
+  const appSummary = useStore(chatStore.appSummary);
+  assert(appSummary, 'App summary is required');
+
+  const appId = chatStore.currentAppId.get();
+  assert(appId, 'App ID is required');
+
+  const authRequired = appSummary.setSecrets?.includes(AuthRequiredSecret);
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = async () => {
+    setSaving(true);
+
+    try {
+      const { response } = await callNutAPI('set-app-secrets', {
+        appId,
+        secrets: [
+          {
+            key: AuthRequiredSecret,
+            value: authRequired ? undefined : "true",
+          },
+        ],
+      });
+
+      if (response) {
+        onChatResponse(response, 'ToggleRequireAuth');
+      }
+
+      toast.success('Authentication settings updated successfully');
+    } catch (error) {
+      toast.error('Failed to update authentication settings');
+      console.error('Failed to update authentication settings:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className={classNames('flex items-start gap-3', className)}>
-      <div className="relative flex items-center mt-0.5">
+    <div className={classNames('flex items-center gap-3 p-3 mt-0 mb-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200')}>
+      <div className="relative flex items-center">
         <input
           type="checkbox"
           id="auth-required"
-          checked={checked}
+          checked={authRequired}
           onChange={handleChange}
-          className="peer appearance-none h-5 w-5 rounded-lg border-2 border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 cursor-pointer checked:bg-bolt-elements-item-contentAccent checked:border-bolt-elements-item-contentAccent focus:outline-none focus:ring-2 focus:ring-bolt-elements-item-contentAccent/50 transition-all duration-200"
+          className="peer appearance-none h-5 w-5 rounded border-2 border-gray-300 bg-white cursor-pointer checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
         />
         <svg
           className="absolute left-0 w-5 h-5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transition-opacity duration-200"
@@ -36,13 +70,13 @@ const AuthSelector = memo(({ className, checked = false, onCheckedChange }: Auth
         </svg>
       </div>
       <label 
-        className="text-bolt-elements-textSecondary cursor-pointer text-sm leading-relaxed" 
+        className="text-gray-700 cursor-pointer text-sm font-medium select-none" 
         htmlFor="auth-required"
       >
         Require users to login
       </label>
     </div>
   );
-});
+};
 
 export default AuthSelector;
