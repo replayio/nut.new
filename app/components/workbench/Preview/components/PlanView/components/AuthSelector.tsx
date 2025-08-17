@@ -28,7 +28,7 @@ const AuthSelector = () => {
         secrets: [
           {
             key: AuthRequiredSecret,
-            value: authRequired ? undefined : "true",
+            value: authRequired ? undefined : 'true',
           },
         ],
       });
@@ -52,7 +52,11 @@ const AuthSelector = () => {
   }
 
   return (
-    <div className={classNames('flex items-center gap-3 p-3 mt-0 mb-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200')}>
+    <div
+      className={classNames(
+        'flex items-center gap-3 p-3 mt-0 mb-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200',
+      )}
+    >
       <div className="relative flex items-center">
         <input
           type="checkbox"
@@ -81,10 +85,7 @@ const AuthSelector = () => {
           </svg>
         )}
       </div>
-      <label 
-        className="text-gray-700 cursor-pointer text-sm font-medium select-none" 
-        htmlFor="auth-required"
-      >
+      <label className="text-gray-700 cursor-pointer text-sm font-medium select-none" htmlFor="auth-required">
         Require users to login
       </label>
     </div>
