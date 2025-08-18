@@ -111,6 +111,19 @@ export async function isAuthenticated(): Promise<boolean> {
   return user !== null;
 }
 
+export async function getCurrentAccessToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await getSupabase().auth.getSession();
+
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Error getting access token:', error);
+    return null;
+  }
+}
+
 export function getSupabase() {
   // If we already have an instance, return it
   if (supabaseClientInstance) {
