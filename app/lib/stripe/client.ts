@@ -1,5 +1,4 @@
 import { loadStripe } from '@stripe/stripe-js';
-import { getCurrentAccessToken } from '~/lib/supabase/client';
 
 // Initialize Stripe with your publishable key (lazy loading)
 let stripePromise: Promise<any> | null = null;
@@ -44,13 +43,11 @@ export interface CheckoutSessionResponse {
  */
 export async function createCheckoutSession(params: CreateCheckoutSessionParams): Promise<void> {
   try {
-    const accessToken = await getCurrentAccessToken();
     // Create checkout session via API
     const response = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(params),
     });
@@ -135,12 +132,10 @@ export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
  */
 export async function checkSubscriptionStatus(userEmail: string) {
   try {
-    const accessToken = await getCurrentAccessToken();
     const response = await fetch('/api/stripe/check-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ userEmail }),
     });
@@ -162,12 +157,10 @@ export async function checkSubscriptionStatus(userEmail: string) {
  */
 export async function syncSubscription(userEmail: string, userId: string) {
   try {
-    const accessToken = await getCurrentAccessToken();
     const response = await fetch('/api/stripe/sync-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ userEmail, userId }),
     });
@@ -190,12 +183,10 @@ export async function syncSubscription(userEmail: string, userId: string) {
  */
 export async function cancelSubscription(userEmail: string, immediate: boolean = false) {
   try {
-    const accessToken = await getCurrentAccessToken();
     const response = await fetch('/api/stripe/cancel-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ userEmail, immediate }),
     });
