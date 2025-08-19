@@ -62,11 +62,6 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
 
   // Interval for sending getDetectedErrors message
   useEffect(() => {
-    // For now detected errors are disabled.
-    if (!import.meta.env.VITE_ENABLE_DETECTED_ERRORS) {
-      return;
-    }
-
     if (activeTab === 'preview') {
       let lastDetectedError: DetectedError | undefined = undefined;
       const interval = setInterval(async () => {
