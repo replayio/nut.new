@@ -31,7 +31,6 @@ export async function callNutAPI(method: string, request: any, responseCallback?
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'x-user-id': userId ?? '',
-    'x-access-token': accessToken ?? '',
     Authorization: accessToken ? `Bearer ${accessToken}` : '',
   };
 
