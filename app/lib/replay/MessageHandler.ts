@@ -1,6 +1,10 @@
 // Methods for communicating with the message handler in the Preview iframe.
 
-import { type MessageHandlerRequest, type MessageHandlerRequestMap } from './MessageHandlerInterface';
+import {
+  type DetectedError,
+  type MessageHandlerRequest,
+  type MessageHandlerRequestMap,
+} from './MessageHandlerInterface';
 import { assert } from '~/utils/nut';
 
 let lastRequestId = 0;
@@ -30,10 +34,10 @@ function sendIframeRequest<K extends keyof MessageHandlerRequestMap>(
   });
 }
 
-// User session data generated for analysis by the backend.
-export type SessionData = unknown;
+// User simulation data generated for analysis by the backend.
+export type SimulationData = unknown;
 
-export async function getIFrameSessionData(iframe: HTMLIFrameElement): Promise<SessionData> {
+export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promise<SimulationData> {
   const buffer = await sendIframeRequest(iframe, { request: 'recording-data' });
 
   if (!buffer) {
@@ -43,7 +47,7 @@ export async function getIFrameSessionData(iframe: HTMLIFrameElement): Promise<S
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(new Uint8Array(buffer));
 
-  return JSON.parse(jsonString) as SessionData;
+  return JSON.parse(jsonString) as SimulationData;
 }
 
 // Information about a mouse position in the iframe.
@@ -54,4 +58,11 @@ export async function getMouseData(iframe: HTMLIFrameElement, position: { x: num
   assert(mouseData, 'Expected to have mouse data');
 
   return mouseData;
+}
+
+export async function getDetectedErrors(iframe: HTMLIFrameElement): Promise<DetectedError[]> {
+  const detectedErrors = await sendIframeRequest(iframe, { request: 'get-detected-errors', payload: undefined });
+  assert(detectedErrors, 'Expected to have detected errors');
+
+  return detectedErrors;
 }

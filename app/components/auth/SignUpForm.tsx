@@ -47,15 +47,6 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
           userId: data.user?.id,
           timestamp: new Date().toISOString(),
         });
-
-        if (data.user?.id && data.user?.email) {
-          window.analytics.identify(data.user.id, {
-            email: data.user.email,
-            signupMethod: 'email',
-            signupDate: new Date().toISOString(),
-            createdAt: data.user.created_at,
-          });
-        }
       }
 
       onSuccess('Check your email for the confirmation link!');

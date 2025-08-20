@@ -6,6 +6,11 @@ import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
+import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
+import { getDetectedErrors } from '~/lib/replay/MessageHandler';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -15,9 +20,10 @@ export function getCurrentIFrame() {
 
 interface PreviewProps {
   activeTab: 'planning' | 'preview';
+  handleSendMessage: (params: ChatMessageParams) => void;
 }
 
-export const Preview = memo(({ activeTab }: PreviewProps) => {
+export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,6 +44,9 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
   // Use percentage for width
   const [widthPercent, setWidthPercent] = useState<number>(37.5); // 375px assuming 1000px window width initially
 
+  const [detectedError, setDetectedError] = useState<DetectedError | undefined>(undefined);
+  const [fixingError, setFixingError] = useState(false);
+
   const resizingState = useRef({
     isResizing: false,
     side: null as ResizeSide,
@@ -51,13 +60,36 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
 
   gCurrentIFrame = iframeRef.current ?? undefined;
 
+  // Interval for sending getDetectedErrors message
+  useEffect(() => {
+    if (activeTab === 'preview') {
+      let lastDetectedError: DetectedError | undefined = undefined;
+      const interval = setInterval(async () => {
+        if (!iframeRef.current) {
+          return;
+        }
+
+        const detectedErrors = await getDetectedErrors(iframeRef.current);
+        const firstError: DetectedError | undefined = detectedErrors[0];
+        if (JSON.stringify(firstError) !== JSON.stringify(lastDetectedError)) {
+          setDetectedError(firstError);
+        }
+        lastDetectedError = firstError;
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, iframeRef.current]);
+
   const reloadPreview = () => {
     if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
+      iframeRef.current.src = iframeUrl + '?forceReload=' + Date.now();
     }
 
     setIsSelectionMode(false);
     setSelectionPoint(null);
+    setDetectedError(undefined);
+    setFixingError(false);
   };
 
   useEffect(() => {
@@ -71,6 +103,8 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
 
     setUrl(previewURL);
     setIframeUrl(previewURL);
+    setDetectedError(undefined);
+    setFixingError(false);
   }, [previewURL]);
 
   // Handle OAuth authentication
@@ -197,10 +231,12 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
                 setUrl(event.target.value);
               }}
               onKeyDown={(event) => {
-                let newUrl;
-
                 if (event.key === 'Enter') {
-                  setIframeUrl(newUrl);
+                  if (url !== iframeUrl) {
+                    setIframeUrl(url);
+                  } else {
+                    reloadPreview();
+                  }
 
                   if (inputRef.current) {
                     inputRef.current.blur();
@@ -246,6 +282,51 @@ export const Preview = memo(({ activeTab }: PreviewProps) => {
           />
         )}
       </div>
+
+      {/* Error Display Section */}
+      {detectedError && !fixingError && (
+        <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
+          <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
+            Error: {detectedError.message}
+          </div>
+          {detectedError.details && (
+            <div className="text-xs text-red-600 dark:text-red-300 mb-3">{detectedError.details}</div>
+          )}
+          <button
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
+            onClick={async () => {
+              setFixingError(true);
+
+              if (iframeRef.current) {
+                const simulationData = await flushSimulationData();
+                let message = 'Fix the error I saw while using the app: ' + detectedError.message;
+                if (detectedError.details) {
+                  message += '\n\n' + detectedError.details;
+                }
+                handleSendMessage({
+                  messageInput: message,
+                  chatMode: ChatMode.FixDetectedError,
+                  sessionRepositoryId: workbenchStore.repositoryId.get(),
+                  simulationData,
+                  detectedError,
+                });
+              }
+            }}
+          >
+            Ask Nut to fix
+          </button>
+        </div>
+      )}
+
+      {/* Nut Working Display */}
+      {fixingError && (
+        <div className="border-t border-bolt-elements-borderColor/50 bg-blue-50 dark:bg-blue-950/20 p-3">
+          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            Nut is working on fixing the error...
+          </div>
+        </div>
+      )}
     </div>
   );
 });

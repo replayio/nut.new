@@ -8,6 +8,12 @@ export function getRepositoryURL(repositoryId: string | undefined) {
     return undefined;
   }
 
+  const override = import.meta.env.VITE_REPOSITORY_URL_OVERRIDE;
+  if (override) {
+    console.log('Override Repository URL', override);
+    return override;
+  }
+
   return `https://${repositoryId}.http.replay.io`;
 }
 

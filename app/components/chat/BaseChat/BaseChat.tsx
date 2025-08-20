@@ -24,6 +24,7 @@ import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
 import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -35,7 +36,7 @@ interface BaseChatProps {
   chatStarted?: boolean;
   input?: string;
   handleStop?: () => void;
-  sendMessage?: (messageInput: string | undefined, chatMode?: ChatMode) => void;
+  sendMessage?: (params: ChatMessageParams) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   uploadedFiles?: File[];
   setUploadedFiles?: (files: File[]) => void;
@@ -98,19 +99,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const handleContinueBuilding = () => {
       if (sendMessage) {
-        sendMessage(undefined, ChatMode.DevelopApp);
+        sendMessage({ chatMode: ChatMode.DevelopApp });
       }
     };
 
-    const handleSendMessage = (messageInput: string, chatMode?: ChatMode) => {
+    const handleSendMessage = (params: ChatMessageParams) => {
       if (sendMessage) {
-        sendMessage(messageInput, chatMode);
+        sendMessage(params);
         abortListening();
         setCheckedBoxes([]);
         if (window.analytics) {
           window.analytics.track('Message Sent', {
             timestamp: new Date().toISOString(),
-            chatMode,
+            chatMode: params.chatMode,
           });
         }
         if (handleInputChange) {
@@ -223,12 +224,20 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage(messageInput, ChatMode.Discovery);
+                  handleSendMessage({ messageInput, chatMode: ChatMode.Discovery });
                 })}
               </>
             )}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} mobileActiveTab={mobileActiveTab} />}</ClientOnly>
+          <ClientOnly>
+            {() => (
+              <Workbench
+                chatStarted={chatStarted}
+                mobileActiveTab={mobileActiveTab}
+                handleSendMessage={handleSendMessage}
+              />
+            )}
+          </ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}

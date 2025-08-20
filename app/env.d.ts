@@ -7,6 +7,8 @@ interface WindowEnv {
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   INTERCOM_APP_ID: string;
+  INTERCOM_APP_SECRET?: string; // Optional since it's server-side only
+  INTERCOM_SIGNING_KEY?: string; // Optional since it's server-side only
 }
 
 declare global {

@@ -9,20 +9,29 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { type ChatReference, ChatMode } from '~/lib/replay/SendChatMessage';
+import { type ChatReference, type VisitData, ChatMode } from '~/lib/replay/SendChatMessage';
 import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type Message } from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
-import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
-import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { generateRandomId, navigateApp } from '~/utils/nut';
+import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
+import type { SimulationData } from '~/lib/replay/MessageHandler';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
 function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
+}
+
+export interface ChatMessageParams {
+  messageInput?: string;
+  chatMode?: ChatMode;
+  sessionRepositoryId?: string;
+  simulationData?: SimulationData;
+  detectedError?: DetectedError;
 }
 
 const ChatImplementer = memo(() => {
@@ -35,6 +44,7 @@ const ChatImplementer = memo(() => {
   const [input, setInput] = useState('');
 
   const showChat = useStore(chatStore.showChat);
+  const hasAppSummary = !!useStore(chatStore.appSummary);
 
   const [animationScope, animate] = useAnimate();
 
@@ -45,14 +55,6 @@ const ChatImplementer = memo(() => {
       setInput(prompt);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const repositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-    if (repositoryId) {
-      updateDevelopmentServer(repositoryId);
-    }
-  }, []);
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
@@ -93,7 +95,9 @@ const ChatImplementer = memo(() => {
     setChatStarted(true);
   };
 
-  const sendMessage = async (messageInput: string | undefined, chatMode?: ChatMode) => {
+  const sendMessage = async (params: ChatMessageParams) => {
+    const { messageInput, chatMode, sessionRepositoryId, simulationData, detectedError } = params;
+
     if (messageInput?.length === 0 || chatStore.hasPendingMessage.get()) {
       return;
     }
@@ -125,9 +129,10 @@ const ChatImplementer = memo(() => {
       addChatMessage(imageMessage);
     });
 
-    if (!chatStore.currentAppId.get()) {
+    let appId = chatStore.currentAppId.get();
+    if (!appId) {
       try {
-        const appId = await database.createApp();
+        appId = await database.createApp();
         chatStore.currentAppId.set(appId);
         chatStore.appTitle.set('New App');
 
@@ -156,13 +161,13 @@ const ChatImplementer = memo(() => {
       });
     }
 
-    const messages = chatStore.messages.get();
+    const messages = chatStore.messages.get().filter(shouldDisplayMessage);
 
     let mode = chatMode;
     if (!mode) {
       // If we don't have a plan yet, stay in Discovery mode until the user
       // forces us to start planning.
-      if (!getLatestAppSummary(messages)) {
+      if (!hasAppSummary) {
         mode = ChatMode.Discovery;
       } else {
         mode = ChatMode.BuildApp;
@@ -171,7 +176,22 @@ const ChatImplementer = memo(() => {
 
     const numAbortsAtStart = chatStore.numAborts.get();
 
-    await doSendMessage(mode, messages, references);
+    let visit: VisitData | undefined;
+    if (sessionRepositoryId) {
+      visit = {
+        repositoryId: sessionRepositoryId,
+        references,
+        simulationData,
+        detectedError,
+      };
+    }
+
+    await doSendMessage({
+      appId,
+      mode,
+      messages,
+      visit,
+    });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {
       return;

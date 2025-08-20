@@ -6,19 +6,13 @@ import { assert } from '~/utils/nut';
 import { type Message, DISCOVERY_RESPONSE_CATEGORY, USER_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { chatStore } from '~/lib/stores/chat';
 import { sendChatMessageMocked, usingMockChat } from './MockChat';
-import { flushSessionData } from '~/components/chat/ChatComponent/functions/flushSessionData';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { callNutAPI } from './NutAPI';
 import { createScopedLogger } from '~/utils/logger';
 import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
-import type { MouseData, SessionData } from './MessageHandler';
-
-// Whether to send session data to the backend with chat messages.
-// For now this is disabled while we design a better UX and messaging around reporting
-// bugs in Nut apps.
-const ENABLE_SESSION_DATA = false;
+import type { MouseData, SimulationData } from './MessageHandler';
+import type { DetectedError } from './MessageHandlerInterface';
 
 const logger = createScopedLogger('ChatMessage');
 
@@ -35,14 +29,22 @@ export enum ChatMode {
   BuildApp = 'BuildApp',
   Discovery = 'Discovery',
   DevelopApp = 'DevelopApp',
+  FixDetectedError = 'FixDetectedError',
 }
 
-interface NutChatRequest {
-  appId?: string;
+// Information describing a user's visit to the app.
+export interface VisitData {
+  repositoryId: string;
+  references?: ChatReference[];
+  simulationData?: SimulationData;
+  detectedError?: DetectedError;
+}
+
+export interface NutChatRequest {
+  appId: string;
   mode?: ChatMode;
   messages?: Message[];
-  references?: ChatReference[];
-  sessionData?: SessionData;
+  visit?: VisitData;
 }
 
 // Messages that are rendered normally in the chat.
@@ -79,38 +81,18 @@ async function pollResponses(appId: string, onResponse: ChatResponseCallback, ca
   }
 }
 
-export async function sendChatMessage(
-  mode: ChatMode,
-  messages: Message[],
-  references: ChatReference[],
-  onResponse: ChatResponseCallback,
-) {
+export async function sendChatMessage(request: NutChatRequest, onResponse: ChatResponseCallback) {
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
   }
 
-  logger.debug('sendChatMessage', JSON.stringify({ mode, messages, references }));
+  logger.debug('sendChatMessage', JSON.stringify(request));
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'No app id');
 
-  let sessionData: SessionData | undefined;
-
-  const repositoryId = workbenchStore.repositoryId.get();
-  if (repositoryId && ENABLE_SESSION_DATA) {
-    sessionData = await flushSessionData();
-  }
-
-  const params: NutChatRequest = {
-    appId,
-    mode,
-    messages: messages.filter(shouldDisplayMessage),
-    references,
-    sessionData,
-  };
-
-  await pollResponses(appId, onResponse, () => callNutAPI('chat', params, onResponse));
+  await pollResponses(appId, onResponse, () => callNutAPI('chat', request, onResponse));
 
   logger.debug('sendChatMessage finished');
 }
