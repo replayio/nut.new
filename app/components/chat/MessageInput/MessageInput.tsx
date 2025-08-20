@@ -7,7 +7,6 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
 import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
-import { getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
@@ -49,7 +48,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
   const chatStarted = useStore(chatStore.started);
   const messages = useStore(chatStore.messages);
-  const hasAppSummary = !!getLatestAppSummary(messages || []);
+  const hasAppSummary = !!useStore(chatStore.appSummary);
 
   let startPlanningRating = 0;
   if (!hasPendingMessage && !hasAppSummary) {

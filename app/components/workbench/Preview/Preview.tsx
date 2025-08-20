@@ -65,8 +65,6 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
     if (activeTab === 'preview') {
       let lastDetectedError: DetectedError | undefined = undefined;
       const interval = setInterval(async () => {
-        console.log('Checking for detected errors', iframeRef.current);
-
         if (!iframeRef.current) {
           return;
         }
