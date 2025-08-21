@@ -234,8 +234,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
   };
 
-  console.log('stripeSubscription', stripeSubscription);
-
   return (
     <div
       className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
@@ -294,7 +292,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                     {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
                   <div className="text-xs text-bolt-elements-textSecondary mt-1">
-                    Next billing: {new Date(stripeSubscription.currentPeriodEnd * 1000).toLocaleDateString()}
+                    Next billing: {new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()}
                   </div>
                   {stripeSubscription.cancelAtPeriodEnd && (
                     <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>

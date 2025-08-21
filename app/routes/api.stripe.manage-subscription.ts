@@ -189,6 +189,11 @@ async function handleGetSubscriptionStatus(userEmail: string) {
       peanuts = 12000;
     }
 
+    // Get period dates from subscription items (they have the actual billing periods)
+    const subscriptionItem = subscription.items.data[0];
+    const currentPeriodStart = subscriptionItem?.current_period_start
+    const currentPeriodEnd = subscriptionItem?.current_period_end
+
     const result = {
       hasSubscription: true,
       subscription: {
@@ -196,13 +201,13 @@ async function handleGetSubscriptionStatus(userEmail: string) {
         status: subscription.status,
         tier,
         peanuts,
-        currentPeriodStart: (subscription as any).current_period_start
-          ? new Date((subscription as any).current_period_start * 1000).toISOString()
+        currentPeriodStart: currentPeriodStart
+          ? new Date(currentPeriodStart * 1000).toISOString()
           : null,
-        currentPeriodEnd: (subscription as any).current_period_end
-          ? new Date((subscription as any).current_period_end * 1000).toISOString()
+        currentPeriodEnd: currentPeriodEnd
+          ? new Date(currentPeriodEnd * 1000).toISOString()
           : null,
-        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       },
     };
 
