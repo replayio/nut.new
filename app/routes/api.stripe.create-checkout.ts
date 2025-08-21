@@ -65,15 +65,16 @@ export async function action({ request }: { request: Request }) {
         customerId = existingCustomers.data[0].id;
         console.log(`Reusing existing customer: ${customerId} for email: ${userEmail}`);
 
-        // Update customer metadata with userId
+        // Always update customer metadata with userId to ensure webhooks work
         await stripe.customers.update(customerId, {
           metadata: {
             userId,
             userEmail,
           },
         });
+        console.log(`Updated customer ${customerId} metadata with userId: ${userId}`);
       } else {
-        console.log(`No existing customer found for email: ${userEmail}, will create new one`);
+        console.log(`No existing customer found for email: ${userEmail}, will create new one in checkout`);
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);
@@ -133,6 +134,7 @@ export async function action({ request }: { request: Request }) {
       client_reference_id: userId,
       metadata: {
         userId,
+        userEmail,
         type,
         ...(tier && { tier }),
       },
@@ -142,6 +144,11 @@ export async function action({ request }: { request: Request }) {
       automatic_tax: {
         enabled: true,
       },
+      // Ensure customer metadata is set for new customers
+      ...(customerId ? {} : {
+        customer_creation: 'always',
+        custom_fields: [],
+      }),
     });
 
     return new Response(
