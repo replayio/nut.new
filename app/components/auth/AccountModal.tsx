@@ -12,7 +12,6 @@ import { useStore } from '@nanostores/react';
 import {
   createTopoffCheckout,
   checkSubscriptionStatus,
-  syncSubscription,
   cancelSubscription,
 } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
@@ -36,12 +35,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const reloadAccountData = async () => {
     setLoading(true);
 
-    // First sync the subscription with Stripe to ensure peanuts are up to date
-    if (user?.email && user?.id) {
-      await syncSubscription(user.email, user.id);
-    }
-
-    // Load basic data first
+    // Load basic data (webhooks keep everything in sync automatically)
     const [history, subscription] = await Promise.all([
       getPeanutsHistory(),
       getPeanutsSubscription(),
@@ -51,7 +45,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     // Then check Stripe subscription separately
     let stripeStatus = { hasSubscription: false, subscription: null };
     if (user?.email) {
-      stripeStatus = await checkSubscriptionStatus(user.email);
+      stripeStatus = await checkSubscriptionStatus();
     }
 
     history.reverse();
@@ -222,7 +216,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
 
     try {
-      await cancelSubscription(user.email, false); // Cancel at period end
+      await cancelSubscription(false); // Cancel at period end
       stripeStatusModalActions.showSuccess(
         '✅ Subscription Canceled',
         'Your subscription has been successfully canceled.',
@@ -239,6 +233,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       );
     }
   };
+
+  console.log('stripeSubscription', stripeSubscription);
 
   return (
     <div
@@ -298,7 +294,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                     {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
                   <div className="text-xs text-bolt-elements-textSecondary mt-1">
-                    Next billing: {new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()}
+                    Next billing: {new Date(stripeSubscription.currentPeriodEnd * 1000).toLocaleDateString()}
                   </div>
                   {stripeSubscription.cancelAtPeriodEnd && (
                     <div className="text-xs text-yellow-500 mt-1">Cancels at period end</div>

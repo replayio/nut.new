@@ -1,4 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
+import { sessionStore } from '~/lib/stores/auth';
 
 // Initialize Stripe with your publishable key (lazy loading)
 let stripePromise: Promise<any> | null = null;
@@ -8,7 +9,7 @@ const getStripeKey = () => {
     return '';
   }
 
-  const key = (window as any).ENV?.STRIPE_PUBLISHABLE_KEY;
+  const key = (window as any).ENV?.STRIPE_TEST_PUBLISHABLE_KEY;
   console.log('Stripe key from ENV:', key ? `${key.substring(0, 8)}...` : 'undefined');
   return key || '';
 };
@@ -24,6 +25,20 @@ const initializeStripe = () => {
   }
   return stripePromise;
 };
+
+// Helper function to get auth headers
+function getAuthHeaders() {
+  const session = sessionStore.get();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+  
+  return headers;
+}
 
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
@@ -46,9 +61,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     // Create checkout session via API
     const response = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(params),
     });
 
@@ -130,14 +143,12 @@ export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
 /**
  * Check subscription status directly from Stripe
  */
-export async function checkSubscriptionStatus(userEmail: string) {
+export async function checkSubscriptionStatus() {
   try {
-    const response = await fetch('/api/stripe/check-subscription', {
+    const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userEmail }),
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ action: 'get_status' }),
     });
 
     if (!response.ok) {
@@ -152,43 +163,17 @@ export async function checkSubscriptionStatus(userEmail: string) {
   }
 }
 
-/**
- * Sync subscription status with backend (more reliable than webhooks)
- */
-export async function syncSubscription(userEmail: string, userId: string) {
-  try {
-    const response = await fetch('/api/stripe/sync-subscription', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userEmail, userId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to sync subscription');
-    }
-
-    const data = await response.json();
-    console.log('Subscription sync result:', data.message);
-    return data;
-  } catch (error) {
-    console.error('Error syncing subscription:', error);
-    return { synced: false, hasSubscription: false };
-  }
-}
+// Note: syncSubscription removed - webhooks now handle all syncing automatically
 
 /**
  * Cancel subscription
  */
-export async function cancelSubscription(userEmail: string, immediate: boolean = false) {
+export async function cancelSubscription(immediate: boolean = false) {
   try {
-    const response = await fetch('/api/stripe/cancel-subscription', {
+    const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userEmail, immediate }),
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ action: 'cancel' }),
     });
 
     if (!response.ok) {

@@ -68,30 +68,18 @@ export function useStripeCallback() {
 
         if (tier && tier in SUBSCRIPTION_TIERS) {
           const tierInfo = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
-
-          try {
-            console.log(`Processing ${tier} subscription activation for user ${user.id}`);
-
-            // Set the subscription in the backend
-            await callNutAPI('set-peanuts-subscription', {
-              userId: user.id,
-              peanuts: tierInfo.peanuts,
-            });
-
-            console.log(`✅ Successfully set ${tier} subscription (${tierInfo.peanuts} peanuts) for user ${user.id}`);
-
-            // Refresh peanuts store to show updated balance
-            await refreshPeanutsStore();
-
-            message = `Your ${tierInfo.name} subscription has been successfully activated!`;
-            details = `You'll receive ${tierInfo.peanuts.toLocaleString()} peanuts every month for $${tierInfo.price}. Your subscription is now active and ready to use!`;
-          } catch (error) {
-            console.error('❌ Error setting subscription:', error);
-            message = 'Your subscription payment was successful, but there was an issue activating it.';
-            details =
-              "Please contact support and we'll resolve this quickly. Your subscription is valid and no additional payment is needed.";
-          }
+          message = `Your ${tierInfo.name} subscription has been successfully activated!`;
+          details = `You'll receive ${tierInfo.peanuts.toLocaleString()} peanuts every month for $${tierInfo.price}. The webhook is processing your subscription now!`;
         }
+
+        // Refresh peanuts store after a short delay to allow webhook processing
+        setTimeout(async () => {
+          try {
+            await refreshPeanutsStore();
+          } catch (error) {
+            console.error('Error refreshing peanuts after subscription:', error);
+          }
+        }, 2000);
 
         stripeStatusModalActions.showSuccess('🎉 Subscription Activated!', message, details);
 

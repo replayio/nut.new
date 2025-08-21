@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { syncSubscription } from '~/lib/stripe/client';
+import { refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
 
 /**
- * Hook to periodically sync subscription status with Stripe
- * This ensures peanuts are always up to date, even if webhooks fail
+ * Hook to periodically refresh peanuts store
+ * Webhooks handle all Stripe syncing automatically, we just refresh local state
  */
 export function useSubscriptionSync() {
   const user = useStore(userStore);
@@ -15,19 +15,19 @@ export function useSubscriptionSync() {
       return;
     }
 
-    // Sync immediately on mount
-    const syncNow = async () => {
+    // Refresh peanuts on mount
+    const refreshNow = async () => {
       try {
-        await syncSubscription(user.email!, user.id);
+        await refreshPeanutsStore();
       } catch (error) {
-        console.error('Failed to sync subscription on startup:', error);
+        console.error('Failed to refresh peanuts on startup:', error);
       }
     };
 
-    syncNow();
+    refreshNow();
 
-    // Set up periodic sync every 5 minutes
-    const interval = setInterval(syncNow, 5 * 60 * 1000);
+    // Set up periodic refresh every 2 minutes (webhooks handle the heavy lifting)
+    const interval = setInterval(refreshNow, 2 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [user?.email, user?.id]);
