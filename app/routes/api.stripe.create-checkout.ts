@@ -144,11 +144,6 @@ export async function action({ request }: { request: Request }) {
       automatic_tax: {
         enabled: true,
       },
-      // Ensure customer metadata is set for new customers
-      ...(customerId ? {} : {
-        customer_creation: 'always',
-        custom_fields: [],
-      }),
     });
 
     return new Response(
