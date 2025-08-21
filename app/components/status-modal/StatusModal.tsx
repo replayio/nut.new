@@ -3,7 +3,7 @@ import { useStore } from '@nanostores/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { statusModalStore } from '~/lib/stores/statusModal';
 import { classNames } from '~/utils/classNames';
-import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { isFeatureStatusImplemented, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
 
@@ -18,12 +18,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
 
   const features = appSummary.features || [];
-  const completedFeatures = features.filter(
-    (feature) =>
-      feature.status === AppFeatureStatus.Implemented ||
-      feature.status === AppFeatureStatus.Validated ||
-      feature.status === AppFeatureStatus.ValidationFailed,
-  ).length;
+  const completedFeatures = features.filter(({ status }) => isFeatureStatusImplemented(status)).length;
   const totalFeatures = features.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures > 0;
 
