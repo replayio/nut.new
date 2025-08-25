@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import ReactModal from 'react-modal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import type { DeploySettings } from '~/lib/replay/Deploy';
 import { workbenchStore } from '~/lib/stores/workbench';
@@ -32,6 +32,15 @@ export function DeployChatButton() {
   const [loadingData, setLoadingData] = useState(false);
 
   const appId = useStore(chatStore.currentAppId);
+  const appSummary = useStore(chatStore.appSummary);
+
+  // Reset deploy status when repository ID changes
+  useEffect(() => {
+    if (status !== DeployStatus.Started && appSummary?.repositoryId) {
+      setStatus(DeployStatus.NotStarted);
+      setError(undefined);
+    }
+  }, [appSummary?.repositoryId]);
 
   const handleCheckDatabase = async () => {
     const repositoryId = workbenchStore.repositoryId.get();
