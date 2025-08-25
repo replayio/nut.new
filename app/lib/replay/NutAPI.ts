@@ -22,8 +22,9 @@ export class NutAPIError extends Error {
   }
 }
 
-export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback): Promise<any> {
-  const userId = await getCurrentUserId();
+export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback, overrideUserId?: string): Promise<any> {
+  // Use provided userId (for webhooks) or get from current session (for client)
+  const userId = overrideUserId ?? await getCurrentUserId();
 
   const url = `https://dispatch.replay.io/nut/${method}`;
 
