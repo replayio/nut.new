@@ -42,9 +42,7 @@ function getAuthHeaders() {
 
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter';
-  userId: string;
-  userEmail: string;
+  tier?: 'free' | 'starter' | 'builder' | 'pro';
   returnUrl?: string; // Optional return URL to redirect to after checkout
 }
 
@@ -86,29 +84,25 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
 
 /**
  * Create subscription checkout for a specific tier
+ * User info is automatically extracted from JWT token
  */
 export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter',
-  userId: string,
-  userEmail: string,
+  tier: 'free' | 'starter' | 'builder' | 'pro',
 ): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
-    userId,
-    userEmail,
     returnUrl: window.location.href, // Return to current page after checkout
   });
 }
 
 /**
  * Create peanut top-off checkout
+ * User info is automatically extracted from JWT token
  */
-export async function createTopoffCheckout(userId: string, userEmail: string): Promise<void> {
+export async function createTopoffCheckout(): Promise<void> {
   return createCheckoutSession({
     type: 'topoff',
-    userId,
-    userEmail,
     returnUrl: window.location.href, // Return to current page after checkout
   });
 }
@@ -130,11 +124,25 @@ export const SUBSCRIPTION_TIERS = {
     features: ['500 Peanuts per month'],
   },
   starter: {
+    name: 'Starter',
+    price: 10,
+    peanuts: 2000,
+    description: 'Perfect for getting started with more peanuts.',
+    features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
+  },
+  builder: {
     name: 'Builder',
     price: 20,
-    peanuts: 2000,
-    description: 'No limits on any features. Go nuts!',
-    features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
+    peanuts: 5000,
+    description: 'For serious builders who need more power.',
+    features: ['5000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
+  },
+  pro: {
+    name: 'Pro',
+    price: 50,
+    peanuts: 12000,
+    description: 'Maximum power for professional use.',
+    features: ['12000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance', 'Priority support'],
   },
 } as const;
 

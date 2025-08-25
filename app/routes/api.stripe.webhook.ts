@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '~/lib/supabase/client';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -17,47 +18,67 @@ const SUBSCRIPTION_PEANUTS = {
   pro: 12000,
 } as const;
 
-// Utility function to get userId from customer
+// Enhanced utility function to get userId from customer - Stripe as authoritative source
 async function getUserIdFromCustomer(customerId: string): Promise<string | null> {
   try {
     const customer = await stripe.customers.retrieve(customerId);
     
     if (!customer || customer.deleted) {
-      console.error('Customer not found:', customerId);
+      console.error('❌ Customer not found or deleted:', customerId);
       return null;
     }
 
     let userId = customer.metadata?.userId;
     
-    // If no userId in metadata, try to find it by email in other customers
+    // If no userId in metadata, try comprehensive search approaches
     if (!userId && customer.email) {
-      console.log(`No userId in customer metadata, searching by email: ${customer.email}`);
+      console.log(`🔍 No userId in customer ${customerId} metadata, searching by email: ${customer.email}`);
       
+      // Search for all customers with this email
       const customersWithEmail = await stripe.customers.list({
         email: customer.email,
-        limit: 10,
+        limit: 25, // Check more customers to be thorough
       });
       
-      // Find a customer with userId metadata
-      const customerWithUserId = customersWithEmail.data.find(c => c.metadata?.userId);
+      // Find a customer with userId metadata (prefer the most recent)
+      const customerWithUserId = customersWithEmail.data
+        .filter(c => c.metadata?.userId)
+        .sort((a, b) => b.created - a.created)[0]; // Most recent first
+        
       if (customerWithUserId) {
         userId = customerWithUserId.metadata.userId;
+        const userEmail = customerWithUserId.metadata.userEmail || customer.email;
         
-        // Update current customer with the userId for future use
+        // Update current customer with complete metadata - making Stripe authoritative
         await stripe.customers.update(customerId, {
           metadata: {
             ...customer.metadata,
             userId,
+            userEmail,
+            lastUpdated: new Date().toISOString(),
+            source: 'webhook-consolidation'
           },
         });
         
-        console.log(`Found userId ${userId} from customer ${customerWithUserId.id}, updated current customer`);
+        console.log(`✅ Consolidated customer data: ${customerId} now has userId ${userId} from customer ${customerWithUserId.id}`);
+      } else {
+        // Last resort: log detailed info for manual investigation
+        console.error(`❌ Could not find userId for customer ${customerId} with email ${customer.email}`);
+        console.error(`Available customers for email:`, customersWithEmail.data.map(c => ({
+          id: c.id,
+          created: c.created,
+          metadata: c.metadata
+        })));
       }
+    }
+    
+    if (userId) {
+      console.log(`✅ Successfully retrieved userId: ${userId} for customer: ${customerId}`);
     }
     
     return userId || null;
   } catch (error) {
-    console.error('Error getting userId from customer:', error);
+    console.error('❌ Error getting userId from customer:', error);
     return null;
   }
 }
@@ -78,6 +99,89 @@ function getTierFromPriceId(priceId: string): string {
   if (priceId === process.env.STRIPE_PRICE_BUILDER) return 'builder';
   if (priceId === process.env.STRIPE_PRICE_PRO) return 'pro';
   return 'unknown';
+}
+
+// Server-side function to call NutAPI with JWT authentication
+async function callNutAPIWithJWT(method: string, request: any, jwt: string): Promise<any> {
+  if (!jwt) {
+    throw new Error('JWT token is required for NutAPI calls');
+  }
+
+  const url = `https://dispatch.replay.io/nut/${method}`;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${jwt}`,
+  };
+
+  const fetchOptions: RequestInit = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  };
+
+  console.log(`🔐 Making authenticated NutAPI call: ${method} for user in request`);
+  
+  const response = await fetch(url, fetchOptions);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ NutAPI call failed: ${method} - ${response.status} ${response.statusText}`, errorText);
+    throw new Error(`NutAPI call failed: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  return response.json();
+}
+
+// Server-side user authentication for webhook operations
+// Generates JWT tokens for users so webhooks can make authenticated NutAPI calls
+async function impersonateUser(user: { email: string } | { id: string }) {
+  try {
+    let userEmail = '';
+    let userId = '';
+    
+    if ('email' in user) {
+      userEmail = user.email;
+      console.log(`🔐 Impersonating user by email: ${userEmail}`);
+    } else {
+      userId = user.id;
+      const { data: userData, error } = await getSupabase().auth.admin.getUserById(user.id);
+      if (error || !userData?.user?.email) {
+        throw new Error(`Failed to get user data for ID ${user.id}: ${error?.message}`);
+      }
+      userEmail = userData.user.email;
+      console.log(`🔐 Impersonating user by ID: ${userId} (${userEmail})`);
+    }
+
+    if (!userEmail) {
+      throw new Error('User email is required for authentication');
+    }
+
+    const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const { data: magicLink, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userEmail,
+    });
+
+    if (linkError || !magicLink?.properties?.hashed_token) {
+      throw new Error(`Failed to generate auth token: ${linkError?.message || 'No hashed token'}`);
+    }
+
+    const { data: verified, error: verifyError } = await getSupabase().auth.verifyOtp({
+      token_hash: magicLink.properties.hashed_token,
+      type: 'email',
+    });
+
+    if (verifyError || !verified?.user || !verified?.session) {
+      throw new Error(`Failed to verify user: ${verifyError?.message || 'No session returned'}`);
+    }
+
+    console.log(`✅ Successfully authenticated user for webhook: ${userEmail}`);
+    return verified;
+  } catch (error) {
+    console.error('❌ Error impersonating user:', error);
+    throw error;
+  }
 }
 
 export async function action({ request }: { request: Request }) {
@@ -253,11 +357,16 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       return;
     }
 
-    // Set initial subscription and peanuts
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts,
-    });
+    // Set initial subscription and peanuts using JWT authentication
+    const { session } = await impersonateUser({ id: userId });
+    await callNutAPIWithJWT(
+      'set-peanuts-subscription',
+      {
+        userId,
+        peanuts,
+      },
+      session?.access_token ?? ''
+    );
 
     console.log(`✅ WEBHOOK: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
   } catch (error) {
@@ -285,11 +394,16 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       return;
     }
 
-    // Update subscription tier and peanuts
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts,
-    });
+    // Update subscription tier and peanuts using JWT authentication
+    const { session } = await impersonateUser({ id: userId });
+    await callNutAPIWithJWT(
+      'set-peanuts-subscription',
+      {
+        userId,
+        peanuts,
+      },
+      session?.access_token ?? ''
+    );
 
     console.log(`✅ Updated to ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
   } catch (error) {
@@ -303,11 +417,16 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     const userId = await getUserIdFromCustomer(subscription.customer as string);
     if (!userId) return;
 
-    // Clear the subscription
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts: undefined,
-    });
+    // Clear the subscription using JWT authentication
+    const { session } = await impersonateUser({ id: userId });
+    await callNutAPIWithJWT(
+      'set-peanuts-subscription',
+      {
+        userId,
+        peanuts: undefined,
+      },
+      session?.access_token ?? ''
+    );
 
     console.log(`✅ Canceled subscription for user ${userId}`);
   } catch (error) {
@@ -351,11 +470,16 @@ async function handleSubscriptionResumed(subscription: Stripe.Subscription) {
       return;
     }
 
-    // Resume subscription with fresh peanuts
-    await callNutAPI('set-peanuts-subscription', {
-      userId,
-      peanuts,
-    });
+    // Resume subscription with fresh peanuts using JWT authentication
+    const { session } = await impersonateUser({ id: userId });
+    await callNutAPIWithJWT(
+      'set-peanuts-subscription',
+      {
+        userId,
+        peanuts,
+      },
+      session?.access_token ?? ''
+    );
 
     console.log(`✅ Resumed ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
   } catch (error) {
@@ -387,11 +511,16 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
         return;
       }
 
-      // Renew the subscription with fresh peanuts
-      await callNutAPI('set-peanuts-subscription', {
-        userId,
-        peanuts,
-      });
+      // Renew the subscription with fresh peanuts using JWT authentication
+      const { session } = await impersonateUser({ id: userId });
+      await callNutAPIWithJWT(
+        'set-peanuts-subscription',
+        {
+          userId,
+          peanuts,
+        },
+        session?.access_token ?? ''
+      );
       
       console.log(`✅ Renewed ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
     }
@@ -446,18 +575,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // CRITICAL: Update customer metadata with userId for future webhooks
+    // CRITICAL: Update customer metadata with userId for future webhooks - Stripe as authoritative source
     if (session.customer) {
       try {
         await stripe.customers.update(session.customer as string, {
           metadata: {
             userId,
             userEmail: metadata?.userEmail || session.customer_email || '',
+            lastCheckoutSession: session.id,
+            lastUpdated: new Date().toISOString(),
+            source: 'checkout-completion'
           },
         });
-        console.log(`✅ Updated customer ${session.customer} metadata with userId: ${userId}`);
+        console.log(`✅ Enhanced customer ${session.customer} metadata with complete user info - Stripe now authoritative`);
       } catch (error) {
-        console.error('Error updating customer metadata:', error);
+        console.error('❌ Error updating customer metadata in checkout completion:', error);
       }
     }
 
@@ -465,10 +597,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (metadata?.type === 'topoff') {
       const topoffAmount = 2000; // Standard top-off amount
       
-      await callNutAPI('add-peanuts', {
-        userId,
-        peanuts: topoffAmount,
-      });
+      const { session: authSession } = await impersonateUser({ id: userId });
+      await callNutAPIWithJWT(
+        'add-peanuts',
+        {
+          userId,
+          peanuts: topoffAmount,
+        },
+        authSession?.access_token ?? ''
+      );
       
       console.log(`✅ Added ${topoffAmount} peanuts via top-off for user ${userId}`);
     }
@@ -487,10 +624,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           const tier = getTierFromPriceId(priceId);
 
           if (peanuts > 0) {
-            await callNutAPI('set-peanuts-subscription', {
-              userId,
-              peanuts,
-            });
+            const { session: authSession } = await impersonateUser({ id: userId });
+            await callNutAPIWithJWT(
+              'set-peanuts-subscription',
+              {
+                userId,
+                peanuts,
+              },
+              authSession?.access_token ?? ''
+            );
             console.log(`✅ CHECKOUT: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
           } else {
             console.error(`❌ Unknown price ID in checkout subscription: ${priceId}`);
