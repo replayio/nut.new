@@ -140,12 +140,16 @@ async function impersonateUser(user: { email: string } | { id: string }) {
     let userEmail = '';
     let userId = '';
     
+    // Create admin client for all admin operations
+    const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
     if ('email' in user) {
       userEmail = user.email;
       console.log(`🔐 Impersonating user by email: ${userEmail}`);
     } else {
       userId = user.id;
-      const { data: userData, error } = await getSupabase().auth.admin.getUserById(user.id);
+      // Use admin client to get user data by ID
+      const { data: userData, error } = await supabaseAdmin.auth.admin.getUserById(user.id);
       if (error || !userData?.user?.email) {
         throw new Error(`Failed to get user data for ID ${user.id}: ${error?.message}`);
       }
@@ -157,7 +161,7 @@ async function impersonateUser(user: { email: string } | { id: string }) {
       throw new Error('User email is required for authentication');
     }
 
-    const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    // Generate magic link using admin client
     const { data: magicLink, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: userEmail,
@@ -167,7 +171,8 @@ async function impersonateUser(user: { email: string } | { id: string }) {
       throw new Error(`Failed to generate auth token: ${linkError?.message || 'No hashed token'}`);
     }
 
-    const { data: verified, error: verifyError } = await getSupabase().auth.verifyOtp({
+    // Use admin client to verify the OTP as well
+    const { data: verified, error: verifyError } = await supabaseAdmin.auth.verifyOtp({
       token_hash: magicLink.properties.hashed_token,
       type: 'email',
     });
