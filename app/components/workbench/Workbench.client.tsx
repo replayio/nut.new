@@ -108,7 +108,7 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab, handleSendMessage
             'fixed w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
             {
               'top-[calc(var(--header-height)+0rem)] bottom-13': isSmallViewport,
-              'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
+              'top-[calc(var(--header-height))] bottom-6': !isSmallViewport,
               'w-full': isSmallViewport,
               'left-0': showWorkbench && isSmallViewport,
               'left-[var(--workbench-left)]': showWorkbench,
