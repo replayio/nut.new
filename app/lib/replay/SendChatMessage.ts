@@ -45,6 +45,7 @@ export interface NutChatRequest {
   mode?: ChatMode;
   messages?: Message[];
   visit?: VisitData;
+  useExperimentalFeatures?: boolean;
 }
 
 // Messages that are rendered normally in the chat.
@@ -86,6 +87,8 @@ export async function sendChatMessage(request: NutChatRequest, onResponse: ChatR
     await sendChatMessageMocked(onResponse);
     return;
   }
+
+  request.useExperimentalFeatures = true;
 
   logger.debug('sendChatMessage', JSON.stringify(request));
 
