@@ -152,7 +152,7 @@ export async function checkSubscriptionStatus() {
   }
 }
 
-// Note: syncSubscription removed - webhooks now handle all syncing automatically
+
 
 /**
  * Cancel subscription
