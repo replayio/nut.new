@@ -173,11 +173,11 @@ export async function action({ request }: { request: Request }) {
       //   break;
       // }
 
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription);
-        break;
-      }
+      // case 'customer.subscription.updated': {
+      //   const subscription = event.data.object as Stripe.Subscription;
+      //   await handleSubscriptionUpdated(subscription);
+      //   break;
+      // }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
@@ -291,41 +291,41 @@ export async function action({ request }: { request: Request }) {
 // }
 
 // Handler for subscription updates (tier changes)
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  try {
-    const userId = await getUserIdFromCustomer(subscription.customer as string);
-    if (!userId) return;
+// async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+//   try {
+//     const userId = await getUserIdFromCustomer(subscription.customer as string);
+//     if (!userId) return;
 
-    const priceId = subscription.items.data[0]?.price.id;
-    if (!priceId) {
-      console.error('No price ID found in subscription:', subscription.id);
-      return;
-    }
+//     const priceId = subscription.items.data[0]?.price.id;
+//     if (!priceId) {
+//       console.error('No price ID found in subscription:', subscription.id);
+//       return;
+//     }
 
-    const peanuts = getPeanutsFromPriceId(priceId);
-    const tier = getTierFromPriceId(priceId);
+//     const peanuts = getPeanutsFromPriceId(priceId);
+//     const tier = getTierFromPriceId(priceId);
 
-    if (peanuts === 0) {
-      console.error(`❌ Unknown price ID: ${priceId}`);
-      return;
-    }
+//     if (peanuts === 0) {
+//       console.error(`❌ Unknown price ID: ${priceId}`);
+//       return;
+//     }
 
-    // Update subscription tier and peanuts
-    await callNutAPI(
-      'set-peanuts-subscription',
-      {
-        userId,
-        peanuts,
-      },
-      undefined, // no streaming callback
-      userId // use this userId instead of session-based lookup
-    );
+//     // Update subscription tier and peanuts
+//     await callNutAPI(
+//       'set-peanuts-subscription',
+//       {
+//         userId,
+//         peanuts,
+//       },
+//       undefined, // no streaming callback
+//       userId // use this userId instead of session-based lookup
+//     );
 
-    console.log(`✅ Updated to ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
-  } catch (error) {
-    console.error('Error handling subscription update:', error);
-  }
-}
+//     console.log(`✅ Updated to ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
+//   } catch (error) {
+//     console.error('Error handling subscription update:', error);
+//   }
+// }
 
 // Handler for subscription cancellation
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
