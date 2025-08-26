@@ -27,7 +27,7 @@ export function useVibeAppAuthPopup({
 
         // Construct the OAuth URL directly (no Supabase)
         let appId = e.data.appId;
-        
+
         // If appId is not set, try to extract it from the current URL
         if (!appId) {
           const currentPath = window.location.pathname;
@@ -36,7 +36,7 @@ export function useVibeAppAuthPopup({
             appId = appIdMatch[1];
           }
         }
-        
+
         const provider = encodeURIComponent(e.data.provider);
         const oauthUrl = `https://auth.nut.new/functions/v1/oauth/start?app_id=${encodeURIComponent(appId)}&provider=${provider}&redirect_to=${encodeURIComponent(customRedirectUrl)}`;
 
