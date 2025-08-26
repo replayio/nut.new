@@ -9,7 +9,7 @@ const getStripeKey = () => {
     return '';
   }
 
-  const key = (window as any).ENV?.STRIPE_TEST_PUBLISHABLE_KEY;
+  const key = (window as any).ENV?.STRIPE_PUBLISHABLE_KEY;
   console.log('Stripe key from ENV:', key ? `${key.substring(0, 8)}...` : 'undefined');
   return key || '';
 };
