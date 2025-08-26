@@ -78,9 +78,9 @@ export function useVibeAppAuthPopup({
     window.addEventListener('message', handleIframeMessage);
     return () => {
       window.removeEventListener('message', handleIframeMessage);
-      // if (popup) {
-      //   popup.close();
-      // }
+      if (popup) {
+        popup.close();
+      }
     };
   }, [iframeRef, iframeUrl, setIframeUrl, setUrl, reloadPreview, previewURL]);
 }
