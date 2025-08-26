@@ -19,7 +19,7 @@ const PEANUT_TOPOFF_PRICE = process.env.STRIPE_PRICE_TOPOFF!;
 
 interface CreateCheckoutRequest {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter' | 'builder' | 'pro';
+  tier?: 'free' | 'starter';
   returnUrl?: string; // The current page URL to return to after checkout
 }
 
