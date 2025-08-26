@@ -6,6 +6,7 @@ import { getCurrentUserId } from '~/lib/supabase/client';
 import type { DeploySettings } from '~/lib/replay/Deploy';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import type { AppSummary } from './messageAppSummary';
+import { onChatResponse } from '~/lib/stores/chat';
 
 // Basic information about an app for showing in the library.
 export interface AppLibraryEntry {
@@ -126,7 +127,10 @@ async function getAppHistory(appId: string): Promise<AppSummary[]> {
 }
 
 async function revertApp(appId: string, iteration: number): Promise<void> {
-  await callNutAPI('revert-app', { appId, iteration });
+  const { response } = await callNutAPI('revert-app', { appId, iteration });
+  if (response) {
+    onChatResponse(response, 'RevertApp');
+  }
 }
 
 async function copyApp(appId: string): Promise<string> {

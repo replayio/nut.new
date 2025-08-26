@@ -34,7 +34,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
     setLoading(tier);
 
     try {
-      await createSubscriptionCheckout(tier, user.id, user.email);
+      await createSubscriptionCheckout(tier);
       // User will be redirected to Stripe Checkout
     } catch (error) {
       console.error('Error creating subscription:', error);

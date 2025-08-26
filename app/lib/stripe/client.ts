@@ -1,5 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
-import { sessionStore } from '~/lib/stores/auth';
+import { getCurrentAccessToken } from '~/lib/supabase/client';
 
 // Initialize Stripe with your publishable key (lazy loading)
 let stripePromise: Promise<any> | null = null;
@@ -26,24 +26,10 @@ const initializeStripe = () => {
   return stripePromise;
 };
 
-// Helper function to get auth headers
-function getAuthHeaders() {
-  const session = sessionStore.get();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (session?.access_token) {
-    headers['Authorization'] = `Bearer ${session.access_token}`;
-  }
-  
-  return headers;
-}
-
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter' | 'builder' | 'pro';
-  returnUrl?: string; // Optional return URL to redirect to after checkout
+  tier?: 'free' | 'starter';
+  success_url?: string; // Optional return URL to redirect to after checkout
 }
 
 export interface CheckoutSessionResponse {
@@ -56,10 +42,14 @@ export interface CheckoutSessionResponse {
  */
 export async function createCheckoutSession(params: CreateCheckoutSessionParams): Promise<void> {
   try {
+    const accessToken = await getCurrentAccessToken();
     // Create checkout session via API
     const response = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify(params),
     });
 
@@ -69,7 +59,6 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     }
 
     const { url }: CheckoutSessionResponse = await response.json();
-
     if (!url) {
       throw new Error('No checkout URL received');
     }
@@ -87,12 +76,12 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
  * User info is automatically extracted from JWT token
  */
 export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter' | 'builder' | 'pro',
+  tier: 'free' | 'starter',
 ): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
-    returnUrl: window.location.href, // Return to current page after checkout
+    success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
 
@@ -103,7 +92,7 @@ export async function createSubscriptionCheckout(
 export async function createTopoffCheckout(): Promise<void> {
   return createCheckoutSession({
     type: 'topoff',
-    returnUrl: window.location.href, // Return to current page after checkout
+    success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
 
@@ -124,25 +113,11 @@ export const SUBSCRIPTION_TIERS = {
     features: ['500 Peanuts per month'],
   },
   starter: {
-    name: 'Starter',
-    price: 10,
-    peanuts: 2000,
-    description: 'Perfect for getting started with more peanuts.',
-    features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
-  },
-  builder: {
     name: 'Builder',
     price: 20,
-    peanuts: 5000,
-    description: 'For serious builders who need more power.',
-    features: ['5000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
-  },
-  pro: {
-    name: 'Pro',
-    price: 50,
-    peanuts: 12000,
-    description: 'Maximum power for professional use.',
-    features: ['12000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance', 'Priority support'],
+    peanuts: 2000,
+    description: 'No limits on any features. Go nuts!',
+    features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
   },
 } as const;
 
@@ -153,10 +128,14 @@ export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
  */
 export async function checkSubscriptionStatus() {
   try {
+    const accessToken = await getCurrentAccessToken();
     const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ action: 'get_status' }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ }),
     });
 
     if (!response.ok) {
@@ -178,10 +157,14 @@ export async function checkSubscriptionStatus() {
  */
 export async function cancelSubscription(immediate: boolean = false) {
   try {
+    const accessToken = await getCurrentAccessToken();
     const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ action: 'cancel' }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ immediate }),
     });
 
     if (!response.ok) {

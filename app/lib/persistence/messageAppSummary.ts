@@ -187,40 +187,6 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
   }
 }
 
-// Get the latest app summary from messages (use passed messages, not store)
-export const getLatestAppSummary = (messages: Message[]): AppSummary | null => {
-  if (!messages) {
-    return null;
-  }
-
-  // Find the last message with APP_SUMMARY_CATEGORY
-  const appSummaryMessage = messages
-    .slice()
-    .reverse()
-    .find((message) => message.category === APP_SUMMARY_CATEGORY);
-
-  if (!appSummaryMessage) {
-    return null;
-  }
-  return parseAppSummaryMessage(appSummaryMessage) || null;
-};
-
 export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
   return status && status != AppFeatureStatus.NotStarted && status != AppFeatureStatus.ImplementationInProgress;
-}
-
-export function getLatestAppRepositoryId(messages: Message[]) {
-  const appSummary = getLatestAppSummary(messages);
-  if (!appSummary) {
-    return undefined;
-  }
-  // Ignore repositories if no mockup or features have been completed.
-  // This will be an incomplete skeleton app we don't want to show.
-  if (
-    !isFeatureStatusImplemented(appSummary.mockupStatus) &&
-    !appSummary.features?.some((f) => isFeatureStatusImplemented(f.status))
-  ) {
-    return undefined;
-  }
-  return appSummary.repositoryId;
 }

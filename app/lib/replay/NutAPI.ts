@@ -1,4 +1,4 @@
-import { getCurrentUserId } from '~/lib/supabase/client';
+import { getCurrentUserId, getCurrentAccessToken } from '~/lib/supabase/client';
 
 type ResponseCallback = (response: any) => void;
 
@@ -25,12 +25,14 @@ export class NutAPIError extends Error {
 export async function callNutAPI(method: string, request: any, responseCallback?: ResponseCallback, overrideUserId?: string): Promise<any> {
   // Use provided userId (for webhooks) or get from current session (for client)
   const userId = overrideUserId ?? await getCurrentUserId();
+  const accessToken = await getCurrentAccessToken();
 
   const url = `https://dispatch.replay.io/nut/${method}`;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'x-user-id': userId ?? '',
+    Authorization: accessToken ? `Bearer ${accessToken}` : '',
   };
 
   const fetchOptions: RequestInit = {

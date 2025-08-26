@@ -15,8 +15,6 @@ import { getCurrentMouseData } from '~/components/workbench/PointSelector';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type Message } from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
-import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
-import { getLatestAppRepositoryId, getLatestAppSummary } from '~/lib/persistence/messageAppSummary';
 import { generateRandomId, navigateApp } from '~/utils/nut';
 import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
 import type { SimulationData } from '~/lib/replay/MessageHandler';
@@ -46,6 +44,7 @@ const ChatImplementer = memo(() => {
   const [input, setInput] = useState('');
 
   const showChat = useStore(chatStore.showChat);
+  const hasAppSummary = !!useStore(chatStore.appSummary);
 
   const [animationScope, animate] = useAnimate();
 
@@ -56,14 +55,6 @@ const ChatImplementer = memo(() => {
       setInput(prompt);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const repositoryId = getLatestAppRepositoryId(chatStore.messages.get());
-
-    if (repositoryId) {
-      updateDevelopmentServer(repositoryId);
-    }
-  }, []);
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
@@ -176,7 +167,7 @@ const ChatImplementer = memo(() => {
     if (!mode) {
       // If we don't have a plan yet, stay in Discovery mode until the user
       // forces us to start planning.
-      if (!getLatestAppSummary(messages)) {
+      if (!hasAppSummary) {
         mode = ChatMode.Discovery;
       } else {
         mode = ChatMode.BuildApp;
