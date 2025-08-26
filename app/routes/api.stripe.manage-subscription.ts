@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -53,7 +54,7 @@ export async function action({ request }: { request: Request }) {
 
     switch (requestAction) {
       case 'cancel':
-        return await handleCancelSubscription(user.email, immediate);
+        return await handleCancelSubscription(user.email, user.id, immediate);
       
       case 'get_status':
         return await handleGetSubscriptionStatus(user.email);
@@ -74,7 +75,7 @@ export async function action({ request }: { request: Request }) {
 }
 
 // Internal function to cancel subscription (triggers webhook)
-async function handleCancelSubscription(userEmail: string, immediate: boolean = false) {
+async function handleCancelSubscription(userEmail: string, userId: string, immediate: boolean = false) {
   try {
     // Find customer by email
     const customers = await stripe.customers.list({
@@ -112,6 +113,17 @@ async function handleCancelSubscription(userEmail: string, immediate: boolean = 
     if (immediate) {
       // Cancel immediately (this will trigger webhook events)
       await stripe.subscriptions.cancel(subscription.id);
+
+      await callNutAPI(
+        'set-peanuts-subscription',
+        {
+          userId,
+          peanuts: undefined,
+        },
+        undefined, // no streaming callback
+        userId // use this userId instead of session-based lookup
+      );
+    
       message = 'Subscription canceled immediately';
       console.log(`🔄 Immediately canceled subscription ${subscription.id} - webhook will process`);
     } else {
