@@ -49,11 +49,11 @@ export async function action({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { action: requestAction } = body;
+    const { action: requestAction, immediate } = body;
 
     switch (requestAction) {
       case 'cancel':
-        return await handleCancelSubscription(user.email);
+        return await handleCancelSubscription(user.email, immediate);
       
       case 'get_status':
         return await handleGetSubscriptionStatus(user.email);
@@ -74,7 +74,7 @@ export async function action({ request }: { request: Request }) {
 }
 
 // Internal function to cancel subscription (triggers webhook)
-async function handleCancelSubscription(userEmail: string) {
+async function handleCancelSubscription(userEmail: string, immediate: boolean = false) {
   try {
     // Find customer by email
     const customers = await stripe.customers.list({
@@ -107,16 +107,25 @@ async function handleCancelSubscription(userEmail: string) {
 
     const subscription = subscriptions.data[0];
 
-    // Cancel at period end (this will trigger webhook events)
-    await stripe.subscriptions.update(subscription.id, {
-      cancel_at_period_end: true,
-    });
-
-    console.log(`🔄 Initiated cancellation for subscription ${subscription.id} - webhook will process`);
+    let message: string;
+    
+    if (immediate) {
+      // Cancel immediately (this will trigger webhook events)
+      await stripe.subscriptions.cancel(subscription.id);
+      message = 'Subscription canceled immediately';
+      console.log(`🔄 Immediately canceled subscription ${subscription.id} - webhook will process`);
+    } else {
+      // Cancel at period end (this will trigger webhook events)
+      await stripe.subscriptions.update(subscription.id, {
+        cancel_at_period_end: true,
+      });
+      message = 'Subscription will cancel at the end of current billing period';
+      console.log(`🔄 Scheduled cancellation for subscription ${subscription.id} at period end - webhook will process`);
+    }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'Subscription will cancel at the end of current billing period'
+      message
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

@@ -135,7 +135,9 @@ export async function checkSubscriptionStatus() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ }),
+      body: JSON.stringify({ 
+        action: 'get_status'
+      }),
     });
 
     if (!response.ok) {
@@ -164,7 +166,10 @@ export async function cancelSubscription(immediate: boolean = false) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ immediate }),
+      body: JSON.stringify({ 
+        action: 'cancel',
+        immediate 
+      }),
     });
 
     if (!response.ok) {

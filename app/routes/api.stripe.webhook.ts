@@ -167,11 +167,11 @@ export async function action({ request }: { request: Request }) {
   try {
     switch (event.type) {
       // Subscription lifecycle events
-      case 'customer.subscription.created': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(subscription);
-        break;
-      }
+      // case 'customer.subscription.created': {
+      //   const subscription = event.data.object as Stripe.Subscription;
+      //   await handleSubscriptionCreated(subscription);
+      //   break;
+      // }
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
@@ -211,11 +211,11 @@ export async function action({ request }: { request: Request }) {
       }
 
       // Checkout events (for one-time top-offs)
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(session);
-        break;
-      }
+      // case 'checkout.session.completed': {
+      //   const session = event.data.object as Stripe.Checkout.Session;
+      //   await handleCheckoutCompleted(session);
+      //   break;
+      // }
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
@@ -235,60 +235,60 @@ export async function action({ request }: { request: Request }) {
 }
 
 // Handler for subscription creation (initial setup)
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  try {
-    console.log('🆕 WEBHOOK: Processing subscription creation:', {
-      subscriptionId: subscription.id,
-      customerId: subscription.customer,
-      status: subscription.status,
-      priceId: subscription.items.data[0]?.price.id,
-      metadata: subscription.metadata,
-    });
+// async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+//   try {
+//     console.log('🆕 WEBHOOK: Processing subscription creation:', {
+//       subscriptionId: subscription.id,
+//       customerId: subscription.customer,
+//       status: subscription.status,
+//       priceId: subscription.items.data[0]?.price.id,
+//       metadata: subscription.metadata,
+//     });
 
-    const userId = await getUserIdFromCustomer(subscription.customer as string);
-    if (!userId) {
-      console.error('❌ No userId found for customer:', subscription.customer);
-      return;
-    }
+//     const userId = await getUserIdFromCustomer(subscription.customer as string);
+//     if (!userId) {
+//       console.error('❌ No userId found for customer:', subscription.customer);
+//       return;
+//     }
 
-    const priceId = subscription.items.data[0]?.price.id;
-    if (!priceId) {
-      console.error('❌ No price ID found in subscription:', subscription.id);
-      return;
-    }
+//     const priceId = subscription.items.data[0]?.price.id;
+//     if (!priceId) {
+//       console.error('❌ No price ID found in subscription:', subscription.id);
+//       return;
+//     }
 
-    const peanuts = getPeanutsFromPriceId(priceId);
-    const tier = getTierFromPriceId(priceId);
+//     const peanuts = getPeanutsFromPriceId(priceId);
+//     const tier = getTierFromPriceId(priceId);
 
-    console.log('🔍 Price mapping result:', { priceId, tier, peanuts });
+//     console.log('🔍 Price mapping result:', { priceId, tier, peanuts });
 
-    if (peanuts === 0) {
-      console.error(`❌ Unknown price ID: ${priceId}`);
-      console.error('Available env vars:', {
-        free: process.env.STRIPE_PRICE_FREE,
-        starter: process.env.STRIPE_PRICE_STARTER,
-        builder: process.env.STRIPE_PRICE_BUILDER,
-        pro: process.env.STRIPE_PRICE_PRO,
-      });
-      return;
-    }
+//     if (peanuts === 0) {
+//       console.error(`❌ Unknown price ID: ${priceId}`);
+//       console.error('Available env vars:', {
+//         free: process.env.STRIPE_PRICE_FREE,
+//         starter: process.env.STRIPE_PRICE_STARTER,
+//         builder: process.env.STRIPE_PRICE_BUILDER,
+//         pro: process.env.STRIPE_PRICE_PRO,
+//       });
+//       return;
+//     }
 
-    // Set initial subscription and peanuts
-    await callNutAPI(
-      'set-peanuts-subscription',
-      {
-        userId,
-        peanuts,
-      },
-      undefined, // no streaming callback
-      userId // use this userId instead of session-based lookup
-    );
+//     // Set initial subscription and peanuts
+//     await callNutAPI(
+//       'set-peanuts-subscription',
+//       {
+//         userId,
+//         peanuts,
+//       },
+//       undefined, // no streaming callback
+//       userId // use this userId instead of session-based lookup
+//     );
 
-    console.log(`✅ WEBHOOK: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
-  } catch (error) {
-    console.error('❌ Error handling subscription creation:', error);
-  }
-}
+//     console.log(`✅ WEBHOOK: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
+//   } catch (error) {
+//     console.error('❌ Error handling subscription creation:', error);
+//   }
+// }
 
 // Handler for subscription updates (tier changes)
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -464,103 +464,103 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 // Handler for completed checkouts (peanut top-offs and subscriptions)
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  try {
-    const metadata = session.metadata;
+// async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+//   try {
+//     const metadata = session.metadata;
     
-    console.log('🛒 Checkout completed:', {
-      sessionId: session.id,
-      mode: session.mode,
-      customerId: session.customer,
-      clientReferenceId: session.client_reference_id,
-      metadata: metadata,
-      subscription: session.subscription,
-      paymentStatus: session.payment_status,
-    });
+//     console.log('🛒 Checkout completed:', {
+//       sessionId: session.id,
+//       mode: session.mode,
+//       customerId: session.customer,
+//       clientReferenceId: session.client_reference_id,
+//       metadata: metadata,
+//       subscription: session.subscription,
+//       paymentStatus: session.payment_status,
+//     });
     
-    // Get userId from metadata or client_reference_id
-    let userId = metadata?.userId || session.client_reference_id;
+//     // Get userId from metadata or client_reference_id
+//     let userId = metadata?.userId || session.client_reference_id;
     
-    // If we have a customer, try to get userId from customer metadata
-    if (session.customer && !userId) {
-      userId = await getUserIdFromCustomer(session.customer as string);
-    }
+//     // If we have a customer, try to get userId from customer metadata
+//     if (session.customer && !userId) {
+//       userId = await getUserIdFromCustomer(session.customer as string);
+//     }
     
-    if (!userId) {
-      console.error('❌ No userId found in checkout session');
-      return;
-    }
+//     if (!userId) {
+//       console.error('❌ No userId found in checkout session');
+//       return;
+//     }
 
-    // CRITICAL: Update customer metadata with userId for future webhooks - Stripe as authoritative source
-    if (session.customer) {
-      try {
-        await stripe.customers.update(session.customer as string, {
-          metadata: {
-            userId,
-            userEmail: metadata?.userEmail || session.customer_email || '',
-            lastCheckoutSession: session.id,
-            lastUpdated: new Date().toISOString(),
-            source: 'checkout-completion'
-          },
-        });
-        console.log(`✅ Enhanced customer ${session.customer} metadata with complete user info - Stripe now authoritative`);
-      } catch (error) {
-        console.error('❌ Error updating customer metadata in checkout completion:', error);
-      }
-    }
+//     // CRITICAL: Update customer metadata with userId for future webhooks - Stripe as authoritative source
+//     if (session.customer) {
+//       try {
+//         await stripe.customers.update(session.customer as string, {
+//           metadata: {
+//             userId,
+//             userEmail: metadata?.userEmail || session.customer_email || '',
+//             lastCheckoutSession: session.id,
+//             lastUpdated: new Date().toISOString(),
+//             source: 'checkout-completion'
+//           },
+//         });
+//         console.log(`✅ Enhanced customer ${session.customer} metadata with complete user info - Stripe now authoritative`);
+//       } catch (error) {
+//         console.error('❌ Error updating customer metadata in checkout completion:', error);
+//       }
+//     }
 
-    // Handle peanut top-offs
-    if (metadata?.type === 'topoff') {
-      const topoffAmount = 2000; // Standard top-off amount
+//     // Handle peanut top-offs
+//     if (metadata?.type === 'topoff') {
+//       const topoffAmount = 2000; // Standard top-off amount
       
-      await callNutAPI(
-        'add-peanuts',
-        {
-          userId,
-          peanuts: topoffAmount,
-        },
-        undefined, // no streaming callback
-        userId // use this userId instead of session-based lookup
-      );
+//       await callNutAPI(
+//         'add-peanuts',
+//         {
+//           userId,
+//           peanuts: topoffAmount,
+//         },
+//         undefined, // no streaming callback
+//         userId // use this userId instead of session-based lookup
+//       );
       
-      console.log(`✅ Added ${topoffAmount} peanuts via top-off for user ${userId}`);
-    }
+//       console.log(`✅ Added ${topoffAmount} peanuts via top-off for user ${userId}`);
+//     }
     
-    // Handle subscription checkouts
-    else if (metadata?.type === 'subscription') {
-      console.log(`🔄 Processing subscription checkout for user ${userId}`);
+//     // Handle subscription checkouts
+//     else if (metadata?.type === 'subscription') {
+//       console.log(`🔄 Processing subscription checkout for user ${userId}`);
       
-      // If subscription webhooks are working, this will be redundant but harmless
-      // If they're not, this ensures the subscription is processed
-      if (session.subscription) {
-        try {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-          const priceId = subscription.items.data[0]?.price.id;
-          const peanuts = getPeanutsFromPriceId(priceId);
-          const tier = getTierFromPriceId(priceId);
+//       // If subscription webhooks are working, this will be redundant but harmless
+//       // If they're not, this ensures the subscription is processed
+//       if (session.subscription) {
+//         try {
+//           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+//           const priceId = subscription.items.data[0]?.price.id;
+//           const peanuts = getPeanutsFromPriceId(priceId);
+//           const tier = getTierFromPriceId(priceId);
 
-          if (peanuts > 0) {
-            await callNutAPI(
-              'set-peanuts-subscription',
-              {
-                userId,
-                peanuts,
-              },
-              undefined, // no streaming callback
-              userId // use this userId instead of session-based lookup
-            );
-            console.log(`✅ CHECKOUT: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
-          } else {
-            console.error(`❌ Unknown price ID in checkout subscription: ${priceId}`);
-          }
-        } catch (error) {
-          console.error('Error processing subscription via checkout:', error);
-        }
-      } else {
-        console.log('⚠️ Subscription checkout completed but no subscription ID found yet');
-      }
-    }
-  } catch (error) {
-    console.error('Error handling checkout completion:', error);
-  }
-}
+//           if (peanuts > 0) {
+//             await callNutAPI(
+//               'set-peanuts-subscription',
+//               {
+//                 userId,
+//                 peanuts,
+//               },
+//               undefined, // no streaming callback
+//               userId // use this userId instead of session-based lookup
+//             );
+//             console.log(`✅ CHECKOUT: Created ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
+//           } else {
+//             console.error(`❌ Unknown price ID in checkout subscription: ${priceId}`);
+//           }
+//         } catch (error) {
+//           console.error('Error processing subscription via checkout:', error);
+//         }
+//       } else {
+//         console.log('⚠️ Subscription checkout completed but no subscription ID found yet');
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error handling checkout completion:', error);
+//   }
+// }
