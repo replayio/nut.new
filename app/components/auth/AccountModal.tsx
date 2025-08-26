@@ -177,7 +177,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
 
     try {
-      await createTopoffCheckout(user.id, user.email);
+      await createTopoffCheckout();
       // User will be redirected to Stripe Checkout
       if (window.analytics) {
         window.analytics.track('Peanuts Added', {
