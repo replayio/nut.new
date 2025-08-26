@@ -17,17 +17,17 @@ async function getAuthenticatedUser(request: Request) {
 
   const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
   if (error || !user) {
     return null;
   }
-  
+
   return user;
 }
 
@@ -55,10 +55,10 @@ export async function action({ request }: { request: Request }) {
     switch (requestAction) {
       case 'cancel':
         return await handleCancelSubscription(user.email, user.id, immediate);
-      
+
       case 'get_status':
         return await handleGetSubscriptionStatus(user.email);
-        
+
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
           status: 400,
@@ -109,7 +109,7 @@ async function handleCancelSubscription(userEmail: string, userId: string, immed
     const subscription = subscriptions.data[0];
 
     let message: string;
-    
+
     if (immediate) {
       // Cancel immediately (this will trigger webhook events)
       await stripe.subscriptions.cancel(subscription.id);
@@ -121,9 +121,9 @@ async function handleCancelSubscription(userEmail: string, userId: string, immed
           peanuts: undefined,
         },
         undefined, // no streaming callback
-        userId // use this userId instead of session-based lookup
+        userId, // use this userId instead of session-based lookup
       );
-    
+
       message = 'Subscription canceled immediately';
       console.log(`🔄 Immediately canceled subscription ${subscription.id} - webhook will process`);
     } else {
@@ -135,13 +135,16 @@ async function handleCancelSubscription(userEmail: string, userId: string, immed
       console.log(`🔄 Scheduled cancellation for subscription ${subscription.id} at period end - webhook will process`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('Error canceling subscription:', error);
     return new Response(JSON.stringify({ error: 'Failed to cancel subscription' }), {
@@ -161,13 +164,16 @@ async function handleGetSubscriptionStatus(userEmail: string) {
     });
 
     if (customers.data.length === 0) {
-      return new Response(JSON.stringify({
-        hasSubscription: false,
-        subscription: null,
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          hasSubscription: false,
+          subscription: null,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const customer = customers.data[0];
@@ -180,13 +186,16 @@ async function handleGetSubscriptionStatus(userEmail: string) {
     });
 
     if (subscriptions.data.length === 0) {
-      return new Response(JSON.stringify({
-        hasSubscription: false,
-        subscription: null,
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          hasSubscription: false,
+          subscription: null,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const subscription = subscriptions.data[0];
@@ -212,8 +221,8 @@ async function handleGetSubscriptionStatus(userEmail: string) {
 
     // Get period dates from subscription items (they have the actual billing periods)
     const subscriptionItem = subscription.items.data[0];
-    const currentPeriodStart = subscriptionItem?.current_period_start
-    const currentPeriodEnd = subscriptionItem?.current_period_end
+    const currentPeriodStart = subscriptionItem?.current_period_start;
+    const currentPeriodEnd = subscriptionItem?.current_period_end;
 
     const result = {
       hasSubscription: true,
@@ -222,12 +231,8 @@ async function handleGetSubscriptionStatus(userEmail: string) {
         status: subscription.status,
         tier,
         peanuts,
-        currentPeriodStart: currentPeriodStart
-          ? new Date(currentPeriodStart * 1000).toISOString()
-          : null,
-        currentPeriodEnd: currentPeriodEnd
-          ? new Date(currentPeriodEnd * 1000).toISOString()
-          : null,
+        currentPeriodStart: currentPeriodStart ? new Date(currentPeriodStart * 1000).toISOString() : null,
+        currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null,
         cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       },
     };
@@ -238,13 +243,16 @@ async function handleGetSubscriptionStatus(userEmail: string) {
     });
   } catch (error) {
     console.error('Error checking subscription status:', error);
-    return new Response(JSON.stringify({
-      error: 'Failed to check subscription status',
-      hasSubscription: false,
-      subscription: null,
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to check subscription status',
+        hasSubscription: false,
+        subscription: null,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   }
 }

@@ -33,17 +33,17 @@ async function getAuthenticatedUser(request: Request) {
 
   const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
   if (error || !user) {
     return null;
   }
-  
+
   return user;
 }
 
@@ -90,7 +90,7 @@ export async function action({ request }: { request: Request }) {
       });
 
       // Look for a customer with matching userId or use the first one
-      let targetCustomer = existingCustomers.data.find(c => c.metadata?.userId === userId);
+      let targetCustomer = existingCustomers.data.find((c) => c.metadata?.userId === userId);
       if (!targetCustomer && existingCustomers.data.length > 0) {
         targetCustomer = existingCustomers.data[0];
       }
@@ -109,7 +109,9 @@ export async function action({ request }: { request: Request }) {
         });
         console.log(`✅ Updated customer ${customerId} metadata - Stripe is now authoritative source`);
       } else {
-        console.log(`No existing customer found for email: ${userEmail}, userId: ${userId} - will create new one in checkout`);
+        console.log(
+          `No existing customer found for email: ${userEmail}, userId: ${userId} - will create new one in checkout`,
+        );
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);

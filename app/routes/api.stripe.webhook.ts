@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 
 // Initialize Stripe with your secret key
@@ -21,33 +20,33 @@ const SUBSCRIPTION_PEANUTS = {
 async function getUserIdFromCustomer(customerId: string): Promise<string | null> {
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    
+
     if (!customer || customer.deleted) {
       console.error('❌ Customer not found or deleted:', customerId);
       return null;
     }
 
     let userId = customer.metadata?.userId;
-    
+
     // If no userId in metadata, try comprehensive search approaches
     if (!userId && customer.email) {
       console.log(`🔍 No userId in customer ${customerId} metadata, searching by email: ${customer.email}`);
-      
+
       // Search for all customers with this email
       const customersWithEmail = await stripe.customers.list({
         email: customer.email,
         limit: 25, // Check more customers to be thorough
       });
-      
+
       // Find a customer with userId metadata (prefer the most recent)
       const customerWithUserId = customersWithEmail.data
-        .filter(c => c.metadata?.userId)
+        .filter((c) => c.metadata?.userId)
         .sort((a, b) => b.created - a.created)[0]; // Most recent first
-        
+
       if (customerWithUserId) {
         userId = customerWithUserId.metadata.userId;
         const userEmail = customerWithUserId.metadata.userEmail || customer.email;
-        
+
         // Update current customer with complete metadata - making Stripe authoritative
         await stripe.customers.update(customerId, {
           metadata: {
@@ -55,26 +54,31 @@ async function getUserIdFromCustomer(customerId: string): Promise<string | null>
             userId,
             userEmail,
             lastUpdated: new Date().toISOString(),
-            source: 'webhook-consolidation'
+            source: 'webhook-consolidation',
           },
         });
-        
-        console.log(`✅ Consolidated customer data: ${customerId} now has userId ${userId} from customer ${customerWithUserId.id}`);
+
+        console.log(
+          `✅ Consolidated customer data: ${customerId} now has userId ${userId} from customer ${customerWithUserId.id}`,
+        );
       } else {
         // Last resort: log detailed info for manual investigation
         console.error(`❌ Could not find userId for customer ${customerId} with email ${customer.email}`);
-        console.error(`Available customers for email:`, customersWithEmail.data.map(c => ({
-          id: c.id,
-          created: c.created,
-          metadata: c.metadata
-        })));
+        console.error(
+          `Available customers for email:`,
+          customersWithEmail.data.map((c) => ({
+            id: c.id,
+            created: c.created,
+            metadata: c.metadata,
+          })),
+        );
       }
     }
-    
+
     if (userId) {
       console.log(`✅ Successfully retrieved userId: ${userId} for customer: ${customerId}`);
     }
-    
+
     return userId || null;
   } catch (error) {
     console.error('❌ Error getting userId from customer:', error);
@@ -84,25 +88,41 @@ async function getUserIdFromCustomer(customerId: string): Promise<string | null>
 
 // Utility function to get peanuts from price ID
 function getPeanutsFromPriceId(priceId: string): number {
-  if (priceId === process.env.STRIPE_PRICE_FREE) return SUBSCRIPTION_PEANUTS.free;
-  if (priceId === process.env.STRIPE_PRICE_STARTER) return SUBSCRIPTION_PEANUTS.starter;
-  if (priceId === process.env.STRIPE_PRICE_BUILDER) return SUBSCRIPTION_PEANUTS.builder;
-  if (priceId === process.env.STRIPE_PRICE_PRO) return SUBSCRIPTION_PEANUTS.pro;
+  if (priceId === process.env.STRIPE_PRICE_FREE) {
+    return SUBSCRIPTION_PEANUTS.free;
+  }
+  if (priceId === process.env.STRIPE_PRICE_STARTER) {
+    return SUBSCRIPTION_PEANUTS.starter;
+  }
+  if (priceId === process.env.STRIPE_PRICE_BUILDER) {
+    return SUBSCRIPTION_PEANUTS.builder;
+  }
+  if (priceId === process.env.STRIPE_PRICE_PRO) {
+    return SUBSCRIPTION_PEANUTS.pro;
+  }
   return 0;
 }
 
 // Utility function to get tier from price ID
 function getTierFromPriceId(priceId: string): string {
-  if (priceId === process.env.STRIPE_PRICE_FREE) return 'free';
-  if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter';
-  if (priceId === process.env.STRIPE_PRICE_BUILDER) return 'builder';
-  if (priceId === process.env.STRIPE_PRICE_PRO) return 'pro';
+  if (priceId === process.env.STRIPE_PRICE_FREE) {
+    return 'free';
+  }
+  if (priceId === process.env.STRIPE_PRICE_STARTER) {
+    return 'starter';
+  }
+  if (priceId === process.env.STRIPE_PRICE_BUILDER) {
+    return 'builder';
+  }
+  if (priceId === process.env.STRIPE_PRICE_PRO) {
+    return 'pro';
+  }
   return 'unknown';
 }
 
 export async function action({ request }: { request: Request }) {
   console.log('🎯 Webhook endpoint hit - method:', request.method);
-  
+
   if (request.method !== 'POST') {
     console.error('❌ Method not allowed:', request.method);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -331,7 +351,9 @@ export async function action({ request }: { request: Request }) {
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
   try {
     const userId = await getUserIdFromCustomer(subscription.customer as string);
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     // Clear the subscription
     await callNutAPI(
@@ -341,7 +363,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
         peanuts: undefined,
       },
       undefined, // no streaming callback
-      userId // use this userId instead of session-based lookup
+      userId, // use this userId instead of session-based lookup
     );
 
     console.log(`✅ Canceled subscription for user ${userId}`);
@@ -354,11 +376,13 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
 async function handleSubscriptionPaused(subscription: Stripe.Subscription) {
   try {
     const userId = await getUserIdFromCustomer(subscription.customer as string);
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     // Pause subscription but don't clear peanuts yet
     console.log(`⏸️ Paused subscription for user ${userId} due to payment failure`);
-    
+
     // You might want to send a notification here or set a flag
     // For now, we'll keep the subscription active but log the pause
   } catch (error) {
@@ -370,7 +394,9 @@ async function handleSubscriptionPaused(subscription: Stripe.Subscription) {
 async function handleSubscriptionResumed(subscription: Stripe.Subscription) {
   try {
     const userId = await getUserIdFromCustomer(subscription.customer as string);
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     const priceId = subscription.items.data[0]?.price.id;
     if (!priceId) {
@@ -394,7 +420,7 @@ async function handleSubscriptionResumed(subscription: Stripe.Subscription) {
         peanuts,
       },
       undefined, // no streaming callback
-      userId // use this userId instead of session-based lookup
+      userId, // use this userId instead of session-based lookup
     );
 
     console.log(`✅ Resumed ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
@@ -407,13 +433,15 @@ async function handleSubscriptionResumed(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     const userId = await getUserIdFromCustomer(invoice.customer as string);
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     // Only handle subscription renewals (not initial payments)
     if ((invoice as any).subscription && invoice.billing_reason === 'subscription_cycle') {
       const subscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string);
       const priceId = subscription.items.data[0]?.price.id;
-      
+
       if (!priceId) {
         console.error('No price ID found in subscription for invoice:', invoice.id);
         return;
@@ -435,9 +463,9 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
           peanuts,
         },
         undefined, // no streaming callback
-        userId // use this userId instead of session-based lookup
+        userId, // use this userId instead of session-based lookup
       );
-      
+
       console.log(`✅ Renewed ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
     }
   } catch (error) {
@@ -449,13 +477,15 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
     const userId = await getUserIdFromCustomer(invoice.customer as string);
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     console.log(`❌ Payment failed for user ${userId}, invoice: ${invoice.id}`);
-    
+
     // The subscription will be automatically paused by Stripe
     // We handle the actual pausing in handleSubscriptionPaused
-    
+
     // You might want to send a notification email here
     // or set a flag to show payment failure UI
   } catch (error) {
@@ -467,7 +497,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 // async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 //   try {
 //     const metadata = session.metadata;
-    
+
 //     console.log('🛒 Checkout completed:', {
 //       sessionId: session.id,
 //       mode: session.mode,
@@ -477,15 +507,15 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 //       subscription: session.subscription,
 //       paymentStatus: session.payment_status,
 //     });
-    
+
 //     // Get userId from metadata or client_reference_id
 //     let userId = metadata?.userId || session.client_reference_id;
-    
+
 //     // If we have a customer, try to get userId from customer metadata
 //     if (session.customer && !userId) {
 //       userId = await getUserIdFromCustomer(session.customer as string);
 //     }
-    
+
 //     if (!userId) {
 //       console.error('❌ No userId found in checkout session');
 //       return;
@@ -512,7 +542,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 //     // Handle peanut top-offs
 //     if (metadata?.type === 'topoff') {
 //       const topoffAmount = 2000; // Standard top-off amount
-      
+
 //       await callNutAPI(
 //         'add-peanuts',
 //         {
@@ -522,14 +552,14 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 //         undefined, // no streaming callback
 //         userId // use this userId instead of session-based lookup
 //       );
-      
+
 //       console.log(`✅ Added ${topoffAmount} peanuts via top-off for user ${userId}`);
 //     }
-    
+
 //     // Handle subscription checkouts
 //     else if (metadata?.type === 'subscription') {
 //       console.log(`🔄 Processing subscription checkout for user ${userId}`);
-      
+
 //       // If subscription webhooks are working, this will be redundant but harmless
 //       // If they're not, this ensures the subscription is processed
 //       if (session.subscription) {

@@ -75,9 +75,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
  * Create subscription checkout for a specific tier
  * User info is automatically extracted from JWT token
  */
-export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter',
-): Promise<void> {
+export async function createSubscriptionCheckout(tier: 'free' | 'starter'): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
@@ -135,8 +133,8 @@ export async function checkSubscriptionStatus() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ 
-        action: 'get_status'
+      body: JSON.stringify({
+        action: 'get_status',
       }),
     });
 
@@ -152,8 +150,6 @@ export async function checkSubscriptionStatus() {
   }
 }
 
-
-
 /**
  * Cancel subscription
  */
@@ -166,9 +162,9 @@ export async function cancelSubscription(immediate: boolean = false) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         action: 'cancel',
-        immediate 
+        immediate,
       }),
     });
 
