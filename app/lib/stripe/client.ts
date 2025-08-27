@@ -29,8 +29,6 @@ const initializeStripe = () => {
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
   tier?: 'free' | 'starter';
-  userId: string;
-  userEmail: string;
   success_url?: string; // Optional return URL to redirect to after checkout
 }
 
@@ -75,29 +73,23 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
 
 /**
  * Create subscription checkout for a specific tier
+ * User info is automatically extracted from JWT token
  */
-export async function createSubscriptionCheckout(
-  tier: 'free' | 'starter',
-  userId: string,
-  userEmail: string,
-): Promise<void> {
+export async function createSubscriptionCheckout(tier: 'free' | 'starter'): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
-    userId,
-    userEmail,
     success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
 
 /**
  * Create peanut top-off checkout
+ * User info is automatically extracted from JWT token
  */
-export async function createTopoffCheckout(userId: string, userEmail: string): Promise<void> {
+export async function createTopoffCheckout(): Promise<void> {
   return createCheckoutSession({
     type: 'topoff',
-    userId,
-    userEmail,
     success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
@@ -132,16 +124,18 @@ export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
 /**
  * Check subscription status directly from Stripe
  */
-export async function checkSubscriptionStatus(userEmail: string) {
+export async function checkSubscriptionStatus() {
   try {
     const accessToken = await getCurrentAccessToken();
-    const response = await fetch('/api/stripe/check-subscription', {
+    const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ userEmail }),
+      body: JSON.stringify({
+        action: 'get_status',
+      }),
     });
 
     if (!response.ok) {
@@ -157,46 +151,21 @@ export async function checkSubscriptionStatus(userEmail: string) {
 }
 
 /**
- * Sync subscription status with backend (more reliable than webhooks)
- */
-export async function syncSubscription(userEmail: string, userId: string) {
-  try {
-    const accessToken = await getCurrentAccessToken();
-    const response = await fetch('/api/stripe/sync-subscription', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ userEmail, userId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to sync subscription');
-    }
-
-    const data = await response.json();
-    console.log('Subscription sync result:', data.message);
-    return data;
-  } catch (error) {
-    console.error('Error syncing subscription:', error);
-    return { synced: false, hasSubscription: false };
-  }
-}
-
-/**
  * Cancel subscription
  */
-export async function cancelSubscription(userEmail: string, immediate: boolean = false) {
+export async function cancelSubscription(immediate: boolean = false) {
   try {
     const accessToken = await getCurrentAccessToken();
-    const response = await fetch('/api/stripe/cancel-subscription', {
+    const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ userEmail, immediate }),
+      body: JSON.stringify({
+        action: 'cancel',
+        immediate,
+      }),
     });
 
     if (!response.ok) {

@@ -7,6 +7,7 @@ import { sendChatMessage, listenAppResponses, ChatMode, type NutChatRequest } fr
 import { setPendingMessageStatus } from './status';
 import {
   APP_SUMMARY_CATEGORY,
+  isFeatureStatusImplemented,
   parseAppSummaryMessage,
   type AppSummary,
 } from '~/lib/persistence/messageAppSummary';
@@ -90,6 +91,23 @@ function getErrorMessage(e: unknown): string {
   return '';
 }
 
+function showPreview(appSummary: AppSummary) {
+  if (!appSummary.repositoryId) {
+    return false;
+  }
+
+  // Don't show preliminary repositories before the app finishes the mockup
+  // or at least one feature.
+  if (
+    !isFeatureStatusImplemented(appSummary.mockupStatus) &&
+    !appSummary.features?.some(({ status }) => isFeatureStatusImplemented(status))
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export function onChatResponse(response: ChatResponse, reason: string) {
   if (!addAppResponse(response)) {
     return;
@@ -109,7 +127,7 @@ export function onChatResponse(response: ChatResponse, reason: string) {
             chatStore.appSummary.set(appSummary);
           }
 
-          if (appSummary.repositoryId && existingRepositoryId != appSummary.repositoryId) {
+          if (showPreview(appSummary) && existingRepositoryId != appSummary.repositoryId) {
             updateDevelopmentServer(appSummary.repositoryId);
           }
         }
