@@ -5,7 +5,7 @@ interface UseOAuthForVibeAppProps {
   iframeUrl: string | undefined;
   setIframeUrl: (url: string) => void;
   setUrl: (url: string) => void;
-  reloadPreview: () => void;
+  reloadPreview: (route?: string) => void;
   previewURL: string | undefined;
 }
 
@@ -65,6 +65,7 @@ export function useVibeAppAuthPopup({
               if (sessionData.access_token) {
                 // Valid session detected
                 window.removeEventListener('storage', handleStorageChange);
+                reloadPreview('/auth/callback');
                 popup?.close();
               }
             }
