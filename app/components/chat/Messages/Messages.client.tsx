@@ -3,6 +3,7 @@ import { classNames } from '~/utils/classNames';
 import { type Message, DISCOVERY_RESPONSE_CATEGORY, DISCOVERY_RATING_CATEGORY } from '~/lib/persistence/message';
 import { MessageContents } from './components/MessageContents';
 import { JumpToBottom } from './components/JumpToBottom';
+import { AppCards } from './components/AppCards';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
@@ -94,6 +95,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     if (!shouldDisplayMessage(message)) {
       if (message.category === APP_SUMMARY_CATEGORY) {
         // App summaries are now shown in the preview area, not in chat
+        console.log('App summary message, not displaying', message);
         return null;
       }
 
@@ -180,6 +182,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
         className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
       >
         {messages.length > 0 ? messages.map(renderMessage) : null}
+        
+        {/* App Cards - show between messages and pending indicator */}
+        <div className="w-full mt-6">
+          <AppCards />
+        </div>
+        
         {hasPendingMessage && (
           <div className="w-full mt-3">
             <div className="flex gap-4 pl-6">

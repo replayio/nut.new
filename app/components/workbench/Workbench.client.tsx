@@ -131,7 +131,6 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab, handleSendMessage
             >
               {!isSmallViewport && (
                 <div className="flex items-center px-4 py-4 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/50">
-                  {appSummary && <MultiSlider selected={activeTab} options={tabOptions} setSelected={setActiveTab} />}
                   <div className="flex items-center justify-center min-w-0 flex-shrink flex-grow basis-0 max-w-300">
                     {chatStarted && (
                       <div className="w-full px-4">

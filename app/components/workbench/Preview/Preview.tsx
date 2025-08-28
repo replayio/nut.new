@@ -264,9 +264,6 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
       )}
 
       <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
-        {activeTab === 'planning' ? (
-          <PlanView />
-        ) : (
           <AppView
             activeTab={activeTab}
             isDeviceModeOn={isDeviceModeOn}
@@ -280,7 +277,6 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
             startResizing={startResizing}
             widthPercent={widthPercent}
           />
-        )}
       </div>
 
       {/* Error Display Section */}
