@@ -1,6 +1,6 @@
 import { PointSelector } from '~/components/workbench/PointSelector';
 import GripIcon from '~/components/icons/GripIcon';
-import ProgressStatus from './ProgressStatus';
+import ProgressStatus from './ProgressStatus/ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
@@ -76,30 +76,30 @@ const AppView = ({
             />
           )}
           {activeTab !== 'preview' && (
-            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
+            <div className="w-full h-full">
               {appSummary ? (
-                <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-                  <ProgressStatus />
-                </div>
+                <ProgressStatus />
               ) : (
-                <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+                <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
+                  <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+                  </div>
                 </div>
               )}
             </div>
           )}
         </>
       ) : (
-        <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
+        <div className="w-full h-full">
           {appSummary ? (
-            <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-              <ProgressStatus />
-            </div>
+            <ProgressStatus />
           ) : (
-            <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
+              <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
+                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
+              </div>
             </div>
           )}
         </div>
