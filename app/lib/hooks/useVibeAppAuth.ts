@@ -89,11 +89,19 @@ export function useVibeAppAuthPopup({
 export function useVibeAppAuthQuery({
   iframeForceReload,
   setIframeForceReload,
+  repositoryId,
+  iframeUrl,
+  onTokenOrRepoChange,
 }: {
   iframeForceReload: number;
   setIframeForceReload: (forceReload: number) => void;
+  repositoryId?: string;
+  iframeUrl?: string;
+  onTokenOrRepoChange?: (params: URLSearchParams) => void;
 }) {
   const [vibeAuthTokenParams, setVibeAuthTokenParams] = useState<URLSearchParams | null>(null);
+  const [previousToken, setPreviousToken] = useState<string | null>(null);
+  const [previousRepoId, setPreviousRepoId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     function queryLocalstorageForVibeToken() {
@@ -101,9 +109,31 @@ export function useVibeAppAuthQuery({
 
       if (vibeAuthToken !== '{}') {
         const vibeAuthTokenJson = JSON.parse(vibeAuthToken);
+        const currentAccessToken = vibeAuthTokenJson.access_token;
+
+        // Check if token or repository has changed
+        const tokenChanged = previousToken !== null && previousToken !== currentAccessToken;
+        const repoChanged = previousRepoId !== undefined && previousRepoId !== repositoryId;
+
+        if (tokenChanged || repoChanged) {
+          // Notify parent to redirect iframe to /auth/callback with the new token
+          const params = new URLSearchParams(vibeAuthTokenJson);
+          if (onTokenOrRepoChange && iframeUrl) {
+            onTokenOrRepoChange(params);
+          }
+          setPreviousToken(currentAccessToken);
+          setPreviousRepoId(repositoryId);
+          setIframeForceReload(iframeForceReload + 1);
+          return;
+        }
+
         const vibeAuthTokenParams = new URLSearchParams(vibeAuthTokenJson);
-        if (vibeAuthToken !== '{}') {
-          setVibeAuthTokenParams(vibeAuthTokenParams);
+        setVibeAuthTokenParams(vibeAuthTokenParams);
+        setPreviousToken(currentAccessToken);
+        setPreviousRepoId(repositoryId);
+
+        // Only force reload on initial load
+        if (previousToken === null) {
           setIframeForceReload(iframeForceReload + 1);
         }
       }
@@ -111,6 +141,15 @@ export function useVibeAppAuthQuery({
     queryLocalstorageForVibeToken();
     const interval = setInterval(queryLocalstorageForVibeToken, 100);
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    repositoryId,
+    previousToken,
+    previousRepoId,
+    iframeForceReload,
+    setIframeForceReload,
+    onTokenOrRepoChange,
+    iframeUrl,
+  ]);
+
   return vibeAuthTokenParams;
 }
