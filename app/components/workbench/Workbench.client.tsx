@@ -18,7 +18,6 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  mobileActiveTab?: 'chat' | 'planning' | 'preview';
   handleSendMessage: (params: ChatMessageParams) => void;
 }
 
@@ -39,61 +38,14 @@ const workbenchVariants = {
   },
 } satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, mobileActiveTab, handleSendMessage }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const [activeTab, setActiveTab] = useState<'planning' | 'preview'>('planning');
   const appId = useStore(chatStore.currentAppId);
-  const hasSeenPreviewRef = useRef(false);
-  const hasSeenProjectPlanRef = useRef(false);
-  const hasSetPlanningTabRef = useRef(false);
-  const appSummary = useStore(chatStore.appSummary);
 
   const isSmallViewport = useViewport(1024);
 
-  useEffect(() => {
-    if (mobileActiveTab === 'planning') {
-      setActiveTab('planning');
-    } else if (mobileActiveTab === 'preview') {
-      setActiveTab('preview');
-    }
-  }, [mobileActiveTab]);
-
-  useEffect(() => {
-    if (hasSeenProjectPlanRef.current) {
-      return;
-    }
-
-    if (!showWorkbench && appSummary) {
-      hasSeenProjectPlanRef.current = true;
-      workbenchStore.showWorkbench.set(true);
-    }
-  }, [appSummary, showWorkbench]);
-
-  useEffect(() => {
-    if (showWorkbench && !hasSeenPreviewRef.current) {
-      hasSeenPreviewRef.current = true;
-    }
-  }, [showWorkbench]);
-
-  useEffect(() => {
-    if (
-      (appSummary?.features && !hasSetPlanningTabRef.current) ||
-      (appSummary?.pages && !hasSetPlanningTabRef.current)
-    ) {
-      hasSetPlanningTabRef.current = true;
-
-      setActiveTab('planning');
-    }
-  }, [appSummary]);
-
-  const tabOptions = {
-    options: [
-      { value: 'planning' as const, text: 'Planning' },
-      { value: 'preview' as const, text: 'Preview' },
-    ],
-  };
 
   return (
     chatStarted && (
@@ -158,7 +110,7 @@ export const Workbench = memo(({ chatStarted, mobileActiveTab, handleSendMessage
                 </div>
               )}
               <div className="relative flex-1 overflow-hidden">
-                <Preview activeTab={activeTab} handleSendMessage={handleSendMessage} />
+                <Preview handleSendMessage={handleSendMessage} />
               </div>
             </div>
           </div>

@@ -17,8 +17,6 @@ import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
@@ -66,18 +64,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-    const showWorkbench = useStore(workbenchStore.showWorkbench);
-    const mobileActiveTab = useStore(mobileNavStore.activeTab);
     const isSmallViewport = useViewport(1024);
     const user = useStore(userStore.user);
 
-    useEffect(() => {
-      if (showWorkbench && mobileActiveTab === 'chat') {
-        mobileNavStore.setActiveTab('planning');
-      } else if (!showWorkbench && (mobileActiveTab === 'planning' || mobileActiveTab === 'preview')) {
-        mobileNavStore.setActiveTab('chat');
-      }
-    }, [showWorkbench, mobileActiveTab]);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -233,7 +222,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {() => (
               <Workbench
                 chatStarted={chatStarted}
-                mobileActiveTab={mobileActiveTab}
                 handleSendMessage={handleSendMessage}
               />
             )}
