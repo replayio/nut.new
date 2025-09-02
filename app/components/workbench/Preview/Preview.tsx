@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
-import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
@@ -259,18 +258,18 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
       </div>
 
       <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
-          <AppView
-            isDeviceModeOn={isDeviceModeOn}
-            iframeRef={iframeRef}
-            iframeUrl={iframeUrl ?? ''}
-            isSelectionMode={isSelectionMode}
-            previewURL={url}
-            selectionPoint={selectionPoint}
-            setIsSelectionMode={setIsSelectionMode}
-            setSelectionPoint={setSelectionPoint}
-            startResizing={startResizing}
-            widthPercent={widthPercent}
-          />
+        <AppView
+          isDeviceModeOn={isDeviceModeOn}
+          iframeRef={iframeRef}
+          iframeUrl={iframeUrl ?? ''}
+          isSelectionMode={isSelectionMode}
+          previewURL={url}
+          selectionPoint={selectionPoint}
+          setIsSelectionMode={setIsSelectionMode}
+          setSelectionPoint={setSelectionPoint}
+          startResizing={startResizing}
+          widthPercent={widthPercent}
+        />
       </div>
 
       {/* Error Display Section */}

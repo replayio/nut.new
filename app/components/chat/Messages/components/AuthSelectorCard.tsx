@@ -13,9 +13,7 @@ interface AuthSelectorCardProps {
 
 const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
 
-export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ 
-  appSummary
-}) => {
+export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }) => {
   // Only show for apps with template versions
   if (!appSummary.templateVersion) {
     return null;
@@ -55,23 +53,26 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({
   };
 
   const getDescription = () => {
-    return authRequired 
+    return authRequired
       ? 'Users must create accounts and log in to access the application'
       : 'Application is open to all users without requiring authentication';
   };
 
   const getToggleControl = () => {
     return (
-      <div className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-lg border transition-all duration-200 ${
-        saving 
-          ? 'border-bolt-elements-borderColor/30 cursor-not-allowed' 
-          : 'border-bolt-elements-borderColor/40 hover:border-bolt-elements-focus/40 hover:bg-bolt-elements-background-depth-1/70 cursor-pointer'
-      }`}
-      onClick={!saving ? handleToggle : undefined}
+      <div
+        className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-lg border transition-all duration-200 ${
+          saving
+            ? 'border-bolt-elements-borderColor/30 cursor-not-allowed'
+            : 'border-bolt-elements-borderColor/40 hover:border-bolt-elements-focus/40 hover:bg-bolt-elements-background-depth-1/70 cursor-pointer'
+        }`}
+        onClick={!saving ? handleToggle : undefined}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-focus'}`} />
+            <div
+              className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-focus'}`}
+            />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-bolt-elements-textPrimary">
                 {authRequired ? 'Authentication Required' : 'Public Access'}

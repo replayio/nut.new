@@ -46,8 +46,6 @@ const Pages = () => {
   return (
     <div>
       <div className="space-y-4">
-
-
         {appSummary?.pages?.length === 0 ? (
           <div className="text-center py-8 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/50">
             <div className="text-4xl mb-3 opacity-50">📄</div>

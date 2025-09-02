@@ -3,7 +3,6 @@ import GripIcon from '~/components/icons/GripIcon';
 import ProgressStatus from './ProgressStatus/ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
-import { chatStore } from '~/lib/stores/chat';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { useState } from 'react';
 import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
@@ -35,7 +34,6 @@ const AppView = ({
 }) => {
   const [iframeForceReload, setIframeForceReload] = useState(0);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
-  const appSummary = useStore(chatStore.appSummary);
   const repositoryId = useStore(workbenchStore.repositoryId);
   const isSmallViewport = useViewport(1024);
 

@@ -11,10 +11,12 @@ import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persis
 
 // Helper function to check if a status indicates completion
 const isStatusComplete = (status: AppFeatureStatus): boolean => {
-  return status === AppFeatureStatus.Implemented || 
-         status === AppFeatureStatus.ValidationInProgress ||
-         status === AppFeatureStatus.Validated || 
-         status === AppFeatureStatus.ValidationFailed;
+  return (
+    status === AppFeatureStatus.Implemented ||
+    status === AppFeatureStatus.ValidationInProgress ||
+    status === AppFeatureStatus.Validated ||
+    status === AppFeatureStatus.ValidationFailed
+  );
 };
 
 // Helper function to determine which cards should be shown based on progressive disclosure
@@ -27,8 +29,12 @@ const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
   }
 
   // 2. Page Layouts Card - show when mockup is complete AND pages exist
-  if (appSummary.mockupStatus && isStatusComplete(appSummary.mockupStatus) && 
-      appSummary.pages && appSummary.pages.length > 0) {
+  if (
+    appSummary.mockupStatus &&
+    isStatusComplete(appSummary.mockupStatus) &&
+    appSummary.pages &&
+    appSummary.pages.length > 0
+  ) {
     visibleCards.push('pages');
   }
 
@@ -44,15 +50,14 @@ const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
   }
 
   // 5. Features Card - show when previous cards are ready AND (features exist OR description exists)
-  const hasPreviousCards = visibleCards.includes('pages') || visibleCards.includes('mockup');
-  const hasFeatureContent = appSummary.description && (appSummary.features && appSummary.features.length > 0);
-  
+  const hasFeatureContent = appSummary.description && appSummary.features && appSummary.features.length > 0;
+
   // Show features card when mockup is complete OR when features are actually ready to be implemented
   const mockupComplete = appSummary.mockupStatus && appSummary.mockupStatus === AppFeatureStatus.Validated;
-  const featuresReadyToStart = appSummary.features?.some(f => 
-    f.status === AppFeatureStatus.ImplementationInProgress || isStatusComplete(f.status)
+  const featuresReadyToStart = appSummary.features?.some(
+    (f) => f.status === AppFeatureStatus.ImplementationInProgress || isStatusComplete(f.status),
   );
-  
+
   if (hasFeatureContent && (mockupComplete || featuresReadyToStart)) {
     visibleCards.push('features');
   }
@@ -77,60 +82,29 @@ export const AppCards: React.FC = () => {
   // Render cards in progressive order based on visibility
   if (visibleCardTypes.includes('mockup')) {
     cards.push(
-      <MockupCard
-        key="mockup"
-        mockupStatus={appSummary.mockupStatus!}
-        onViewDetails={() => openModal('mockup')}
-      />
+      <MockupCard key="mockup" mockupStatus={appSummary.mockupStatus!} onViewDetails={() => openModal('mockup')} />,
     );
   }
 
   if (visibleCardTypes.includes('pages')) {
-    cards.push(
-      <PageLayoutsCard
-        key="pages"
-        appSummary={appSummary}
-        onViewDetails={() => openModal('pages')}
-      />
-    );
+    cards.push(<PageLayoutsCard key="pages" appSummary={appSummary} onViewDetails={() => openModal('pages')} />);
   }
 
   if (visibleCardTypes.includes('auth')) {
-    cards.push(
-      <AuthSelectorCard
-        key="auth"
-        appSummary={appSummary}
-      />
-    );
+    cards.push(<AuthSelectorCard key="auth" appSummary={appSummary} />);
   }
 
   if (visibleCardTypes.includes('secrets')) {
-    cards.push(
-      <SecretsCard
-        key="secrets"
-        appSummary={appSummary}
-        onViewDetails={() => openModal('secrets')}
-      />
-    );
+    cards.push(<SecretsCard key="secrets" appSummary={appSummary} onViewDetails={() => openModal('secrets')} />);
   }
 
   if (visibleCardTypes.includes('features')) {
-    cards.push(
-      <FeaturesCard
-        key="features"
-        appSummary={appSummary}
-        onViewDetails={() => openModal('features')}
-      />
-    );
+    cards.push(<FeaturesCard key="features" appSummary={appSummary} onViewDetails={() => openModal('features')} />);
   }
 
   if (cards.length === 0) {
     return null;
   }
 
-  return (
-    <div className="space-y-5 px-3">
-      {cards}
-    </div>
-  );
+  return <div className="space-y-5 px-3">{cards}</div>;
 };

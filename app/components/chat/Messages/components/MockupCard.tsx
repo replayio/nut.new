@@ -7,10 +7,7 @@ interface MockupCardProps {
   onViewDetails: () => void;
 }
 
-export const MockupCard: React.FC<MockupCardProps> = ({ 
-  mockupStatus, 
-  onViewDetails 
-}) => {
+export const MockupCard: React.FC<MockupCardProps> = ({ mockupStatus, onViewDetails }) => {
   const getStatusInfo = () => {
     switch (mockupStatus) {
       case AppFeatureStatus.NotStarted:

@@ -147,8 +147,6 @@ const Features = () => {
 
   return (
     <div>
-
-
       <div className="space-y-6">{appSummary?.features?.map((feature, index) => renderFeature(feature, index))}</div>
     </div>
   );

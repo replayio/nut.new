@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { motion, type Variants } from 'framer-motion';
-import { memo, useState, useEffect, useRef } from 'react';
-import { MultiSlider } from '~/components/ui/Slider';
+import { memo } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
@@ -45,7 +44,6 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
   const appId = useStore(chatStore.currentAppId);
 
   const isSmallViewport = useViewport(1024);
-
 
   return (
     chatStarted && (

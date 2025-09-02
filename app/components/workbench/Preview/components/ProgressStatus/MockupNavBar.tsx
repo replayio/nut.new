@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function MockupNavBar() {
   return (
-    <motion.div 
+    <motion.div
       className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-3 w-full mx-auto overflow-hidden shadow-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

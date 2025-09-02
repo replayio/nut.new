@@ -9,7 +9,7 @@ interface FeaturesCardProps {
 
 export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDetails }) => {
   const features = appSummary.features || [];
-  
+
   const getStatusCounts = () => {
     const counts = {
       completed: 0,
@@ -90,13 +90,16 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
       return 'No features have been planned for this application yet.';
     }
 
-    const featureNames = features.slice(0, 3).map(f => f.name).join(', ');
+    const featureNames = features
+      .slice(0, 3)
+      .map((f) => f.name)
+      .join(', ');
     const remaining = totalFeatures - 3;
-    
+
     if (remaining > 0) {
       return `${featureNames} and ${remaining} more feature${remaining === 1 ? '' : 's'}`;
     }
-    
+
     return featureNames;
   };
 
@@ -118,7 +121,9 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
 
   const getContent = () => {
     // If no features, don't show progress/stats content
-    if (totalFeatures === 0) return null;
+    if (totalFeatures === 0) {
+      return null;
+    }
 
     const displayFeatures = features.slice(0, 5);
     const hasMore = totalFeatures > 5;
@@ -129,7 +134,9 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-bolt-elements-textSecondary">
             <span>Progress</span>
-            <span>{statusCounts.completed} / {totalFeatures} complete</span>
+            <span>
+              {statusCounts.completed} / {totalFeatures} complete
+            </span>
           </div>
           <div className="w-full h-1.5 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
             <div
@@ -148,9 +155,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
               <div key={index} className="flex items-center gap-2 py-1">
                 {getFeatureStatusIcon(feature.status)}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">
-                    {feature.name}
-                  </div>
+                  <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">{feature.name}</div>
                   <div className="flex items-center gap-2 text-xs text-bolt-elements-textSecondary">
                     {feature.componentNames && feature.componentNames.length > 0 && (
                       <span>{feature.componentNames.length} components</span>
@@ -158,9 +163,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
                     {feature.definedAPIs && feature.definedAPIs.length > 0 && (
                       <span>{feature.definedAPIs.length} APIs</span>
                     )}
-                    {feature.tests && feature.tests.length > 0 && (
-                      <span>{feature.tests.length} tests</span>
-                    )}
+                    {feature.tests && feature.tests.length > 0 && <span>{feature.tests.length} tests</span>}
                   </div>
                 </div>
               </div>

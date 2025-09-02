@@ -10,12 +10,6 @@ export function GlobalAppCardModal() {
   }
 
   return (
-    <AppCardModal
-      isOpen={isOpen}
-      onClose={closeAppCardModal}
-      type={type}
-      appSummary={appSummary}
-      feature={feature}
-    />
+    <AppCardModal isOpen={isOpen} onClose={closeAppCardModal} type={type} appSummary={appSummary} feature={feature} />
   );
 }

@@ -68,7 +68,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const isSmallViewport = useViewport(1024);
     const user = useStore(userStore.user);
 
-
     const onTranscriptChange = useCallback(
       (transcript: string) => {
         if (handleInputChange) {
@@ -225,14 +224,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>
-            {() => (
-              <Workbench
-                chatStarted={chatStarted}
-                handleSendMessage={handleSendMessage}
-              />
-            )}
-          </ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}

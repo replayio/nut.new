@@ -174,8 +174,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
   return (
     <div className="relative flex-1 min-h-0 flex flex-col">
       {showTopShadow && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-px bg-bolt-elements-borderColor/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200" 
-             style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)) + 10px)' }} />
+        <div
+          className="absolute top-0 left-1/2 transform -translate-x-1/2 h-px bg-bolt-elements-borderColor/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200"
+          style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)) + 10px)' }}
+        />
       )}
 
       <div
@@ -183,12 +185,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
         className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
       >
         {messages.length > 0 ? messages.map(renderMessage) : null}
-        
+
         {/* App Cards - show between messages and pending indicator */}
         <div className="w-full mt-6">
           <AppCards />
         </div>
-        
+
         {hasPendingMessage && (
           <div className="w-full mt-3">
             <div className="flex gap-4 pl-6">

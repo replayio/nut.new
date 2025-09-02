@@ -6,11 +6,11 @@ import { MockupForm } from './MockupForm';
 import { MockupDashboard } from './MockupDashboard';
 
 const messages = [
-  "Thinking about your idea...",
-  "Jacking into the matrix...", 
-  "Exploring UI elements...",
-  "Sprinkling a bit of magic...",
-  "Putting it all together..."
+  'Thinking about your idea...',
+  'Jacking into the matrix...',
+  'Exploring UI elements...',
+  'Sprinkling a bit of magic...',
+  'Putting it all together...',
 ];
 
 const mockupLayouts = [
@@ -43,7 +43,7 @@ const ProgressStatus = () => {
       <div className="absolute inset-0 p-[3px] animate-focus-border opacity-60 rounded-b-xl">
         <div className="w-full h-full bg-bolt-elements-background-depth-2 rounded-b-[9px]" />
       </div>
-      
+
       {/* Main content container with flexible centering */}
       <div className="relative w-full h-full flex flex-col items-center justify-center p-4 overflow-hidden">
         {/* Mockup Layout - responsive positioning */}
@@ -54,9 +54,9 @@ const ProgressStatus = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 1.05, y: -20 }}
-              transition={{ 
-                duration: 0.6, 
-                ease: [0.4, 0.0, 0.2, 1]
+              transition={{
+                duration: 0.6,
+                ease: [0.4, 0.0, 0.2, 1],
               }}
             >
               <CurrentMockup />
@@ -74,16 +74,12 @@ const ProgressStatus = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                transition={{ 
+                transition={{
                   duration: 0.5,
-                  ease: [0.4, 0.0, 0.2, 1]
+                  ease: [0.4, 0.0, 0.2, 1],
                 }}
               >
-                <div 
-                  className="animate-focus-text text-lg sm:text-xl font-medium px-4"
-                >
-                  {currentMessage}
-                </div>
+                <div className="animate-focus-text text-lg sm:text-xl font-medium px-4">{currentMessage}</div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -94,15 +90,15 @@ const ProgressStatus = () => {
               <motion.div
                 key={index}
                 className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/60"
-                animate={{ 
+                animate={{
                   scale: [1, 1.2, 1],
-                  opacity: [0.4, 1, 0.4]
+                  opacity: [0.4, 1, 0.4],
                 }}
-                transition={{ 
+                transition={{
                   duration: 1.5,
                   delay: index * 0.2,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: 'easeInOut',
                 }}
               />
             ))}

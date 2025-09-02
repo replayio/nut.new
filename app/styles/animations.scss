@@ -74,7 +74,7 @@
 .animate-shimmer {
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -92,7 +92,7 @@
 }
 
 /* Dark theme shimmer variant */
-html[data-theme="dark"] .animate-shimmer::before,
+html[data-theme='dark'] .animate-shimmer::before,
 .dark .animate-shimmer::before {
   background: linear-gradient(
     90deg,
@@ -105,9 +105,15 @@ html[data-theme="dark"] .animate-shimmer::before,
 
 /* Rainbow gradient animation for text */
 @keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-rainbow {
@@ -117,9 +123,15 @@ html[data-theme="dark"] .animate-shimmer::before,
 
 /* Theme-matching text gradient animation */
 @keyframes focus-text {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-focus-text {
@@ -141,22 +153,19 @@ html[data-theme="dark"] .animate-shimmer::before,
 
 /* Animated gradient border */
 @keyframes rainbow-border {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-rainbow-border {
-  background: linear-gradient(
-    90deg,
-    #ef4444,
-    #eab308, 
-    #22c55e,
-    #3b82f6,
-    #6366f1,
-    #a855f7,
-    #ef4444
-  );
+  background: linear-gradient(90deg, #ef4444, #eab308, #22c55e, #3b82f6, #6366f1, #a855f7, #ef4444);
   background-size: 200% 200%;
   animation: rainbow-border 2.4s ease-in-out infinite;
   filter: blur(1px);
@@ -164,9 +173,15 @@ html[data-theme="dark"] .animate-shimmer::before,
 
 /* Theme-matching animated gradient border */
 @keyframes focus-border {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-focus-border {
