@@ -37,17 +37,59 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({
   const getModalTitle = () => {
     switch (type) {
       case 'project-description':
-        return 'Project Overview';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:info-duotone text-white text-lg" />
+            </div>
+            Project Overview
+          </div>
+        );
       case 'features':
-        return 'Features';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:puzzle-piece-duotone text-white text-lg" />
+            </div>
+            Features
+          </div>
+        );
       case 'mockup':
-        return 'Mockup Details';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:hammer text-white text-lg" />
+            </div>
+            Mockup Details
+          </div>
+        );
       case 'pages':
-        return 'Page Layouts';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:layout-duotone text-white text-lg" />
+            </div>
+            Page Layouts
+          </div>
+        );
       case 'secrets':
-        return 'Secrets Configuration';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:key-duotone text-white text-lg" />
+            </div>
+            Secrets Configuration
+          </div>
+        );
       case 'auth':
-        return 'Authentication Settings';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="i-ph:shield-check-duotone text-white text-lg" />
+            </div>
+            Authentication Settings
+          </div>
+        );
       default:
         return 'Details';
     }
@@ -114,9 +156,6 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({
         <DialogTitle>
           {getModalTitle()}
         </DialogTitle>
-        <DialogDescription className="sr-only">
-          View detailed information about {getModalTitle().toLowerCase()}
-        </DialogDescription>
         <TooltipProvider>
           <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-6 pt-6 pb-8">
             <div className="mb-4">
