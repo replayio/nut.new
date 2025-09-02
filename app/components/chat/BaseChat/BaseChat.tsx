@@ -20,6 +20,7 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
+import { workbenchStore } from '~/lib/stores/workbench';
 import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
@@ -85,6 +86,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     });
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
+
+    useEffect(() => {
+      if (appSummary && !workbenchStore.showWorkbench.get()) {
+        workbenchStore.setShowWorkbench(true);
+      }
+    }, [appSummary]);
 
     const handleContinueBuilding = () => {
       if (sendMessage) {
