@@ -168,9 +168,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'pt-0 pb-2 px-4': isSmallViewport && !appSummary,
-            'pt-0 pb-15 px-4': isSmallViewport && !!appSummary,
-            'p-6 pt-0': !isSmallViewport && chatStarted,
+            'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
+            'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
+            'p-6': !isSmallViewport && chatStarted,
             'p-6 pb-16': !isSmallViewport && !chatStarted, // Add extra bottom padding on landing page to show footer
           })}
         >
