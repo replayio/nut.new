@@ -7,7 +7,57 @@ import { MockupCard } from './MockupCard';
 import { PageLayoutsCard } from './PageLayoutsCard';
 import { SecretsCard } from './SecretsCard';
 import { AuthSelectorCard } from './AuthSelectorCard';
-import { type AppFeature } from '~/lib/persistence/messageAppSummary';
+import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
+
+// Helper function to check if a status indicates completion
+const isStatusComplete = (status: AppFeatureStatus): boolean => {
+  return status === AppFeatureStatus.Implemented || 
+         status === AppFeatureStatus.Validated || 
+         status === AppFeatureStatus.ValidationFailed;
+};
+
+// Helper function to determine which cards should be shown based on progressive disclosure
+const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
+  const visibleCards: string[] = [];
+
+  // 1. Mockup Card - show if mockupStatus exists (any status)
+  if (appSummary.mockupStatus) {
+    visibleCards.push('mockup');
+  }
+
+  // 2. Page Layouts Card - show when mockup is complete AND pages exist
+  if (appSummary.mockupStatus && isStatusComplete(appSummary.mockupStatus) && 
+      appSummary.pages && appSummary.pages.length > 0) {
+    visibleCards.push('pages');
+  }
+
+  // 3. Authentication Card - show when pages are ready AND templateVersion exists
+  if (appSummary.templateVersion && visibleCards.includes('pages')) {
+    visibleCards.push('auth');
+  }
+
+  // 4. Secrets Card - show when auth is ready AND there are secrets
+  const hasSecrets = appSummary.features?.some((f) => f.secrets?.length);
+  if (hasSecrets && (visibleCards.includes('auth') || visibleCards.includes('pages'))) {
+    visibleCards.push('secrets');
+  }
+
+  // 5. Features Card - show when previous cards are ready AND (features exist OR description exists)
+  const hasPreviousCards = visibleCards.includes('pages') || visibleCards.includes('mockup');
+  const hasFeatureContent = appSummary.description || (appSummary.features && appSummary.features.length > 0);
+  
+  // Show features card when mockup is complete OR when features are actually ready to be implemented
+  const mockupComplete = appSummary.mockupStatus && isStatusComplete(appSummary.mockupStatus);
+  const featuresReadyToStart = appSummary.features?.some(f => 
+    f.status === AppFeatureStatus.ImplementationInProgress || isStatusComplete(f.status)
+  );
+  
+  if (hasFeatureContent && (mockupComplete || featuresReadyToStart)) {
+    visibleCards.push('features');
+  }
+
+  return visibleCards;
+};
 
 export const AppCards: React.FC = () => {
   const appSummary = useStore(chatStore.appSummary);
@@ -20,44 +70,21 @@ export const AppCards: React.FC = () => {
     openAppCardModal(type, appSummary, feature);
   };
 
+  const visibleCardTypes = getVisibleCardTypes(appSummary);
   const cards = [];
 
-    // 1. Mockup Card - show if mockupStatus exists
-    if (appSummary.mockupStatus) {
-        cards.push(
-            <MockupCard
-            key="mockup"
-            mockupStatus={appSummary.mockupStatus}
-            onViewDetails={() => openModal('mockup')}
-            />
-        );
-    }
-
-  // 2. Authentication Card - show if templateVersion exists
-  if (appSummary.templateVersion) {
+  // Render cards in progressive order based on visibility
+  if (visibleCardTypes.includes('mockup')) {
     cards.push(
-      <AuthSelectorCard
-        key="auth"
-        appSummary={appSummary}
-        onViewDetails={() => openModal('auth')}
+      <MockupCard
+        key="mockup"
+        mockupStatus={appSummary.mockupStatus!}
+        onViewDetails={() => openModal('mockup')}
       />
     );
   }
 
-  // 3. Secrets Card - show if there are any secrets
-  const hasSecrets = appSummary.features?.some((f) => f.secrets?.length);
-  if (hasSecrets) {
-    cards.push(
-      <SecretsCard
-        key="secrets"
-        appSummary={appSummary}
-        onViewDetails={() => openModal('secrets')}
-      />
-    );
-  }
-
-  // 4. Page Layouts Card - show if there are pages
-  if (appSummary.pages && appSummary.pages.length > 0) {
+  if (visibleCardTypes.includes('pages')) {
     cards.push(
       <PageLayoutsCard
         key="pages"
@@ -67,8 +94,27 @@ export const AppCards: React.FC = () => {
     );
   }
 
-  // 5. Features Card - show if there are features or a description
-  if (appSummary.description || (appSummary.features && appSummary.features.length > 0)) {
+  if (visibleCardTypes.includes('auth')) {
+    cards.push(
+      <AuthSelectorCard
+        key="auth"
+        appSummary={appSummary}
+        onViewDetails={() => openModal('auth')}
+      />
+    );
+  }
+
+  if (visibleCardTypes.includes('secrets')) {
+    cards.push(
+      <SecretsCard
+        key="secrets"
+        appSummary={appSummary}
+        onViewDetails={() => openModal('secrets')}
+      />
+    );
+  }
+
+  if (visibleCardTypes.includes('features')) {
     cards.push(
       <FeaturesCard
         key="features"

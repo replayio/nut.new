@@ -100,13 +100,28 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
     return featureNames;
   };
 
+  const getFeatureStatusIcon = (status: AppFeatureStatus) => {
+    switch (status) {
+      case AppFeatureStatus.Validated:
+        return <div className="i-ph:check-circle text-green-500 text-sm flex-shrink-0" />;
+      case AppFeatureStatus.ImplementationInProgress:
+      case AppFeatureStatus.ValidationInProgress:
+        return <div className="i-ph:circle-notch animate-spin text-blue-500 text-sm flex-shrink-0" />;
+      case AppFeatureStatus.Implemented:
+        return <div className="i-ph:check text-blue-500 text-sm flex-shrink-0" />;
+      case AppFeatureStatus.ValidationFailed:
+        return <div className="i-ph:warning-circle text-red-500 text-sm flex-shrink-0" />;
+      default:
+        return <div className="i-ph:circle text-bolt-elements-textSecondary text-sm flex-shrink-0" />;
+    }
+  };
+
   const getContent = () => {
     // If no features, don't show progress/stats content
     if (totalFeatures === 0) return null;
 
-    const totalComponents = features.reduce((total, f) => total + (f.componentNames?.length || 0), 0);
-    const totalAPIs = features.reduce((total, f) => total + (f.definedAPIs?.length || 0), 0);
-    const totalTests = features.reduce((total, f) => total + (f.tests?.length || 0), 0);
+    const displayFeatures = features.slice(0, 5);
+    const hasMore = totalFeatures > 5;
 
     return (
       <div className="space-y-3">
@@ -126,31 +141,39 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
           </div>
         </div>
 
-        {/* Feature Stats Grid */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-            <div className="text-base font-semibold text-bolt-elements-textPrimary">{totalFeatures}</div>
-            <div className="text-xs text-bolt-elements-textSecondary">Feature{totalFeatures === 1 ? '' : 's'}</div>
-          </div>
-          <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-            <div className="text-base font-semibold text-bolt-elements-textPrimary">{totalComponents}</div>
-            <div className="text-xs text-bolt-elements-textSecondary">Component{totalComponents === 1 ? '' : 's'}</div>
-          </div>
-          {(totalAPIs > 0 || totalTests > 0) && (
-            <>
-              {totalAPIs > 0 && (
-                <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-                  <div className="text-base font-semibold text-bolt-elements-textPrimary">{totalAPIs}</div>
-                  <div className="text-xs text-bolt-elements-textSecondary">API{totalAPIs === 1 ? '' : 's'}</div>
+        {/* Features List */}
+        <div className="relative">
+          <div className="space-y-1.5">
+            {displayFeatures.map((feature, index) => (
+              <div key={index} className="flex items-center gap-2 py-1">
+                {getFeatureStatusIcon(feature.status)}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">
+                    {feature.name}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-bolt-elements-textSecondary">
+                    {feature.componentNames && feature.componentNames.length > 0 && (
+                      <span>{feature.componentNames.length} components</span>
+                    )}
+                    {feature.definedAPIs && feature.definedAPIs.length > 0 && (
+                      <span>{feature.definedAPIs.length} APIs</span>
+                    )}
+                    {feature.tests && feature.tests.length > 0 && (
+                      <span>{feature.tests.length} tests</span>
+                    )}
+                  </div>
                 </div>
-              )}
-              {totalTests > 0 && (
-                <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-                  <div className="text-base font-semibold text-bolt-elements-textPrimary">{totalTests}</div>
-                  <div className="text-xs text-bolt-elements-textSecondary">Test{totalTests === 1 ? '' : 's'}</div>
-                </div>
-              )}
-            </>
+              </div>
+            ))}
+          </div>
+          {hasMore && (
+            <div className="relative mt-2">
+              <div className="absolute inset-x-0 -top-3 h-6 bg-gradient-to-t from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1/80 to-transparent pointer-events-none" />
+              <div className="flex items-center justify-center gap-2 py-2 text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-1">
+                <div className="i-ph:dots-three text-sm flex-shrink-0" />
+                <span>View all {totalFeatures} features</span>
+              </div>
+            </div>
           )}
         </div>
       </div>

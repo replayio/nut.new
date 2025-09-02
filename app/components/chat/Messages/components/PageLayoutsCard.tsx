@@ -30,19 +30,38 @@ export const PageLayoutsCard: React.FC<PageLayoutsCardProps> = ({
     return pageNames;
   };
 
-  const getSummaryStats = () => {
+  const getPagesList = () => {
     if (pages.length === 0) return null;
     
+    const displayPages = pages.slice(0, 5);
+    const hasMore = pages.length > 5;
+    
     return (
-      <div className="grid grid-cols-2 gap-2">
-        <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-          <div className="text-base font-semibold text-bolt-elements-textPrimary">{pages.length}</div>
-          <div className="text-xs text-bolt-elements-textSecondary">Page{pages.length === 1 ? '' : 's'}</div>
-        </div>
-        <div className="text-center p-2 bg-bolt-elements-background-depth-1/30 rounded-lg border border-bolt-elements-borderColor/30">
-          <div className="text-base font-semibold text-bolt-elements-textPrimary">{totalComponents}</div>
-          <div className="text-xs text-bolt-elements-textSecondary">Component{totalComponents === 1 ? '' : 's'}</div>
-        </div>
+      <div className="space-y-2">
+        {displayPages.map((page, index) => (
+          <div key={index} className="flex items-center gap-2 py-1">
+            <div className="i-ph:layout text-bolt-elements-textSecondary text-sm flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">
+                {formatPascalCaseName(page.name || `Page ${index + 1}`)}
+              </div>
+              {page.components && page.components.length > 0 && (
+                <div className="text-xs text-bolt-elements-textSecondary">
+                  {page.components.length} component{page.components.length === 1 ? '' : 's'}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        {hasMore && (
+          <div className="relative">
+            <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-bolt-elements-background-depth-1 to-transparent pointer-events-none" />
+            <div className="flex items-center gap-2 py-1 text-xs text-bolt-elements-textSecondary">
+              <div className="i-ph:dots-three text-sm flex-shrink-0" />
+              <span>and {pages.length - 5} more page{pages.length - 5 === 1 ? '' : 's'}</span>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -57,7 +76,7 @@ export const PageLayoutsCard: React.FC<PageLayoutsCardProps> = ({
       progressText={pages.length > 0 ? 'Designed' : 'Pending'}
       onClick={onViewDetails}
     >
-      {getSummaryStats()}
+      {getPagesList()}
     </AppCard>
   );
 };

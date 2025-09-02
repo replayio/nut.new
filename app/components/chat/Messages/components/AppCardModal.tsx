@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogRoot } from '~/components/ui/Dialog';
+import { Dialog, DialogRoot, DialogTitle, DialogDescription } from '~/components/ui/Dialog';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { classNames } from '~/utils/classNames';
 import { type AppSummary, type AppFeature, AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
@@ -111,13 +111,16 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({
   return (
     <DialogRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog onClose={onClose} className="max-w-4xl">
+        <DialogTitle>
+          {getModalTitle()}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          View detailed information about {getModalTitle().toLowerCase()}
+        </DialogDescription>
         <TooltipProvider>
-          <div className="bg-bolt-elements-background-depth-1 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden">
-            
-                       <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-12 py-12">
-              <div className="mb-4">
-                {renderContent()}
-              </div>
+          <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-6 pt-6 pb-8">
+            <div className="mb-4">
+              {renderContent()}
             </div>
           </div>
         </TooltipProvider>
