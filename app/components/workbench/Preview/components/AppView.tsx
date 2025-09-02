@@ -72,16 +72,7 @@ const AppView = ({
         </>
       ) : (
         <div className="w-full h-full">
-          {appSummary ? (
-            <ProgressStatus />
-          ) : (
-            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
-              <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
-              </div>
-            </div>
-          )}
+          <ProgressStatus />
         </div>
       )}
 

@@ -44,21 +44,18 @@ const ProgressStatus = () => {
         <div className="w-full h-full bg-bolt-elements-background-depth-2" />
       </div>
       
-      {/* Main content container */}
-      <div className="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
-        {/* Mockup Layout - centered and constrained */}
-        <div 
-          className="w-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" 
-          style={{ maxWidth: '400px', minWidth: '300px', marginTop: '-30px' }}
-        >
+      {/* Main content container with flexible centering */}
+      <div className="relative w-full h-full flex flex-col items-center justify-center p-4 overflow-hidden">
+        {/* Mockup Layout - responsive positioning */}
+        <div className="flex-shrink-0 w-full max-w-[280px] min-w-[240px] mb-8 sm:mb-12">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentLayoutIndex}
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 1.05, y: -30 }}
+              exit={{ opacity: 0, scale: 1.05, y: -20 }}
               transition={{ 
-                duration: 0.7, 
+                duration: 0.6, 
                 ease: [0.4, 0.0, 0.2, 1]
               }}
             >
@@ -67,23 +64,23 @@ const ProgressStatus = () => {
           </AnimatePresence>
         </div>
 
-        {/* Text and dots positioned closer to mockup */}
-        <div className="absolute left-0 right-0" style={{ top: 'calc(50% + 220px)' }}>
+        {/* Text and dots - responsive spacing */}
+        <div className="flex-shrink-0 w-full text-center">
           {/* Animated gradient text */}
-          <div className="text-center mb-4">
+          <div className="mb-4">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentMessageIndex}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -15 }}
                 transition={{ 
                   duration: 0.5,
                   ease: [0.4, 0.0, 0.2, 1]
                 }}
               >
                 <div 
-                  className="animate-focus-text text-2xl font-medium"
+                  className="animate-focus-text text-lg sm:text-xl font-medium px-4"
                 >
                   {currentMessage}
                 </div>
@@ -92,11 +89,11 @@ const ProgressStatus = () => {
           </div>
 
           {/* Animated loading dots */}
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center space-x-1.5">
             {Array.from({ length: 3 }).map((_, index) => (
               <motion.div
                 key={index}
-                className="w-2 h-2 rounded-full bg-bolt-elements-textSecondary/60"
+                className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/60"
                 animate={{ 
                   scale: [1, 1.2, 1],
                   opacity: [0.4, 1, 0.4]
