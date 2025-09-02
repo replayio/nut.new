@@ -4,6 +4,7 @@ import ProgressStatus from './ProgressStatus/ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
+import { workbenchStore } from '~/lib/stores/workbench';
 import { useState } from 'react';
 import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
 
@@ -33,10 +34,25 @@ const AppView = ({
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
   const [iframeForceReload, setIframeForceReload] = useState(0);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const appSummary = useStore(chatStore.appSummary);
+  const repositoryId = useStore(workbenchStore.repositoryId);
   const isSmallViewport = useViewport(1024);
-  const vibeAuthTokenParams = useVibeAppAuthQuery({ iframeForceReload, setIframeForceReload });
 
+  const handleTokenOrRepoChange = (params: URLSearchParams) => {
+    setRedirectUrl(`https://${repositoryId}.http.replay.io/auth/callback#${params.toString()}`);
+  };
+
+  useVibeAppAuthQuery({
+    iframeForceReload,
+    setIframeForceReload,
+    repositoryId,
+    iframeUrl,
+    onTokenOrRepoChange: handleTokenOrRepoChange,
+  });
+
+  // Determine the actual iframe URL to use
+  const actualIframeUrl = redirectUrl || iframeUrl;
   return (
     <div
       style={{
@@ -51,11 +67,11 @@ const AppView = ({
       {previewURL ? (
         <>
           <iframe
-            key={iframeUrl + iframeForceReload}
+            key={actualIframeUrl}
             ref={iframeRef}
             title="preview"
             className="w-full h-full bg-white transition-all duration-300 opacity-100 rounded-b-xl"
-            src={`${iframeUrl}#${vibeAuthTokenParams?.toString()}&force_refresh=${iframeForceReload}`}
+            src={actualIframeUrl}
             allowFullScreen
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
             loading="eager"
