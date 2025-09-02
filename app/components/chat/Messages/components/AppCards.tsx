@@ -12,6 +12,7 @@ import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persis
 // Helper function to check if a status indicates completion
 const isStatusComplete = (status: AppFeatureStatus): boolean => {
   return status === AppFeatureStatus.Implemented || 
+         status === AppFeatureStatus.ValidationInProgress ||
          status === AppFeatureStatus.Validated || 
          status === AppFeatureStatus.ValidationFailed;
 };
@@ -44,10 +45,10 @@ const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
 
   // 5. Features Card - show when previous cards are ready AND (features exist OR description exists)
   const hasPreviousCards = visibleCards.includes('pages') || visibleCards.includes('mockup');
-  const hasFeatureContent = appSummary.description || (appSummary.features && appSummary.features.length > 0);
+  const hasFeatureContent = appSummary.description && (appSummary.features && appSummary.features.length > 0);
   
   // Show features card when mockup is complete OR when features are actually ready to be implemented
-  const mockupComplete = appSummary.mockupStatus && isStatusComplete(appSummary.mockupStatus);
+  const mockupComplete = appSummary.mockupStatus && appSummary.mockupStatus === AppFeatureStatus.Validated;
   const featuresReadyToStart = appSummary.features?.some(f => 
     f.status === AppFeatureStatus.ImplementationInProgress || isStatusComplete(f.status)
   );
@@ -129,7 +130,7 @@ export const AppCards: React.FC = () => {
   }
 
   return (
-    <div className="space-y-3 px-1">
+    <div className="space-y-5 px-3">
       {cards}
     </div>
   );
