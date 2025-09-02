@@ -100,7 +100,6 @@ export const AppCards: React.FC = () => {
       <AuthSelectorCard
         key="auth"
         appSummary={appSummary}
-        onViewDetails={() => openModal('auth')}
       />
     );
   }

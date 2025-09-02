@@ -12,11 +12,15 @@ export const Switch = memo(({ className, onCheckedChange, checked }: SwitchProps
   return (
     <SwitchPrimitive.Root
       className={classNames(
-        'relative h-6 w-11 cursor-pointer rounded-full bg-bolt-elements-button-primary-background',
-        'transition-colors duration-200 ease-in-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+        'relative h-7 w-12 cursor-pointer rounded-full border-2 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus focus-visible:ring-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        'data-[state=checked]:bg-bolt-elements-item-contentAccent',
+        // Unchecked state - neutral with stronger border
+        'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor/60 hover:border-bolt-elements-borderColor',
+        // Checked state - vibrant gradient with stronger colors
+        'data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-indigo-600',
+        'data-[state=checked]:border-blue-500/80 data-[state=checked]:hover:border-blue-600',
+        'data-[state=checked]:ring-2 data-[state=checked]:ring-blue-500/20',
         className,
       )}
       checked={checked}
@@ -24,12 +28,12 @@ export const Switch = memo(({ className, onCheckedChange, checked }: SwitchProps
     >
       <SwitchPrimitive.Thumb
         className={classNames(
-          'block h-5 w-5 rounded-full bg-white',
-          'shadow-lg shadow-black/20',
-          'transition-transform duration-200 ease-in-out',
-          'translate-x-0.5',
-          'data-[state=checked]:translate-x-[1.375rem]',
-          'will-change-transform',
+          'block h-5 w-5 rounded-full bg-white border transition-all duration-300 ease-in-out',
+          'shadow-lg shadow-black/30 hover:shadow-xl',
+          'translate-x-0.5 border-bolt-elements-borderColor/30',
+          'data-[state=checked]:translate-x-[1.375rem] data-[state=checked]:border-white/60',
+          'data-[state=checked]:shadow-lg data-[state=checked]:shadow-white/30',
+          'will-change-transform scale-100 hover:scale-105',
         )}
       />
     </SwitchPrimitive.Root>
