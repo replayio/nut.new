@@ -21,6 +21,7 @@ interface MessageBase {
 export interface MessageText extends MessageBase {
   type: 'text';
   content: string;
+  hasInteracted: boolean;
 }
 
 export interface MessageImage extends MessageBase {

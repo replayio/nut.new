@@ -57,16 +57,25 @@ function addResponseEvent(response: ChatResponse) {
 }
 
 export function addChatMessage(message: Message) {
+  // Ensure hasInteracted field is set for text messages
+  const processedMessage =
+    message.type === 'text'
+      ? {
+          ...message,
+          hasInteracted: message.hasInteracted ?? false,
+        }
+      : message;
+
   // If this is a user message, remember it so we don't add it again when it comes back
   // from the backend.
   addAppResponse({
     kind: 'message',
-    message,
-    time: message.createTime ?? new Date().toISOString(),
+    message: processedMessage,
+    time: processedMessage.createTime ?? new Date().toISOString(),
     chatId: undefined,
   });
 
-  chatStore.messages.set(mergeResponseMessage(message, chatStore.messages.get()));
+  chatStore.messages.set(mergeResponseMessage(processedMessage, chatStore.messages.get()));
 }
 
 export async function doAbortChat() {

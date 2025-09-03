@@ -17,10 +17,11 @@ import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { DISCOVERY_RESPONSE_CATEGORY } from '~/lib/persistence/message';
+import { workbenchStore } from '~/lib/stores/workbench';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
@@ -100,6 +101,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const handleSendMessage = (params: ChatMessageParams) => {
       if (sendMessage) {
+        // Mark discovery messages as interacted when user sends a response
+        const messages = chatStore.messages.get();
+        const updatedMessages = messages.map((message) => {
+          if (message.type === 'text' && message.category === DISCOVERY_RESPONSE_CATEGORY && !message.hasInteracted) {
+            return { ...message, hasInteracted: true };
+          }
+          return message;
+        });
+        chatStore.messages.set(updatedMessages);
+
         sendMessage(params);
         abortListening();
         setCheckedBoxes([]);
