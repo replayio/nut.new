@@ -176,7 +176,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
       {showTopShadow && (
         <div
           className="absolute top-0 left-1/2 transform -translate-x-1/2 h-px bg-bolt-elements-borderColor/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200"
-          style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)) + 10px)' }}
+          style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}
         />
       )}
 

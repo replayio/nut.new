@@ -79,34 +79,6 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
                 },
               )}
             >
-              {!isSmallViewport && (
-                <div className="flex items-center px-4 py-4 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2/50">
-                  <div className="flex items-center justify-center min-w-0 flex-shrink flex-grow basis-0 max-w-300">
-                    {chatStarted && (
-                      <div className="w-full px-4">
-                        <ClientOnly>{() => <ChatDescription />}</ClientOnly>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-3 items-center">
-                    {chatStarted && (
-                      <>
-                        <div className="flex items-center justify-center">
-                          <ClientOnly>{() => <DeployChatButton />}</ClientOnly>
-                        </div>
-                        {appId && (
-                          <div className="flex items-center justify-center">
-                            <ClientOnly>{() => <ViewVersionHistoryButton />}</ClientOnly>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-center">
-                          <ClientOnly>{() => <DownloadButton />}</ClientOnly>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
               <div className="relative flex-1 overflow-hidden">
                 <Preview handleSendMessage={handleSendMessage} />
               </div>
