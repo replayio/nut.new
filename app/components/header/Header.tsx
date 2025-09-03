@@ -17,6 +17,7 @@ export function Header() {
   const chatStarted = useStore(chatStore.started);
   const user = useStore(userStore.user);
   const appSummary = useStore(chatStore.appSummary);
+  const appId = useStore(chatStore.currentAppId);
 
   return (
     <header
@@ -40,19 +41,16 @@ export function Header() {
         )}
       </div>
 
-      {
-        appSummary && (
-          <div className="flex-1 flex justify-center">
-            <div className="flex items-center gap-3">
-              <ChatDescription />
-              <ViewVersionHistoryButton />
-              <DownloadButton />
-              <DeployChatButton />
-            </div>
+      {appSummary && (
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-3">
+            <ChatDescription />
+            {appId && <ViewVersionHistoryButton />}
+            <DownloadButton />
+            <DeployChatButton />
           </div>
-        )
-      }
-      
+        </div>
+      )}
 
       <ClientOnly>
         {() => (

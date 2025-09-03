@@ -41,10 +41,7 @@ const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
   }
 
   // 3. Authentication Card - show when features card is visible AND templateVersion exists
-  if (
-    appSummary.templateVersion &&
-    visibleCards.includes('features')
-  ) {
+  if (appSummary.templateVersion && visibleCards.includes('features')) {
     visibleCards.push('auth');
   }
 
@@ -74,7 +71,12 @@ export const AppCards: React.FC = () => {
   // Render cards in progressive order based on visibility
   if (visibleCardTypes.includes('mockup')) {
     cards.push(
-      <MockupCard key="mockup" mockupStatus={appSummary.mockupStatus!} appSummary={appSummary} onViewDetails={() => openModal('mockup')} />,
+      <MockupCard
+        key="mockup"
+        mockupStatus={appSummary.mockupStatus!}
+        appSummary={appSummary}
+        onViewDetails={() => openModal('mockup')}
+      />,
     );
   }
 
@@ -89,7 +91,6 @@ export const AppCards: React.FC = () => {
   if (visibleCardTypes.includes('secrets')) {
     cards.push(<SecretsCard key="secrets" appSummary={appSummary} onViewDetails={() => openModal('secrets')} />);
   }
-
 
   if (cards.length === 0) {
     return null;

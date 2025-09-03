@@ -11,7 +11,7 @@ interface MockupCardProps {
 
 export const MockupCard: React.FC<MockupCardProps> = ({ mockupStatus, appSummary, onViewDetails }) => {
   const pages = appSummary.pages || [];
-  
+
   const getStatusInfo = () => {
     switch (mockupStatus) {
       case AppFeatureStatus.NotStarted:
@@ -53,8 +53,8 @@ export const MockupCard: React.FC<MockupCardProps> = ({ mockupStatus, appSummary
   };
 
   const getDescription = () => {
-    const baseDescription = "Builds a mockup of the app with a complete UI but no functionality.";
-    
+    const baseDescription = 'Builds a mockup of the app with a complete UI but no functionality.';
+
     if (pages.length === 0) {
       return baseDescription;
     }
@@ -124,9 +124,7 @@ export const MockupCard: React.FC<MockupCardProps> = ({ mockupStatus, appSummary
       progressText={statusInfo.progressText}
       onClick={onViewDetails}
     >
-      <div className="space-y-3">
-        {getPagesList()}
-      </div>
+      <div className="space-y-3">{getPagesList()}</div>
     </AppCard>
   );
 };

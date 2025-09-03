@@ -119,8 +119,6 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
           </div>
         );
 
-
-
       case 'secrets':
         return <Secrets />;
 

@@ -7,12 +7,6 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
-import { ClientOnly } from 'remix-utils/client-only';
-import { DeployChatButton } from '~/components/header/DeployChat/DeployChatButton';
-import { DownloadButton } from '~/components/header/DownloadButton';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import ViewVersionHistoryButton from './VesionHistory/ViewVersionHistoryButton';
-import { chatStore } from '~/lib/stores/chat';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 interface WorkspaceProps {
@@ -41,7 +35,6 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const appId = useStore(chatStore.currentAppId);
 
   const isSmallViewport = useViewport(1024);
 
