@@ -60,18 +60,19 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
 
   const getToggleControl = () => {
     return (
-      <div
-        className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-lg border transition-all duration-200 ${
+      <button
+        className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-xl border transition-all duration-200 w-full ${
           saving
             ? 'border-bolt-elements-borderColor/30 cursor-not-allowed'
             : 'border-bolt-elements-borderColor/40 hover:border-bolt-elements-focus/40 hover:bg-bolt-elements-background-depth-1/70 cursor-pointer'
         }`}
         onClick={!saving ? handleToggle : undefined}
+        disabled={saving}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
-              className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-focus'}`}
+              className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-textPrimary'}`}
             />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-bolt-elements-textPrimary">
@@ -93,7 +94,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
             />
           </div>
         </div>
-      </div>
+      </button>
     );
   };
 

@@ -10,7 +10,7 @@ import Pages from '~/components/workbench/Preview/components/PlanView/components
 import Secrets from '~/components/workbench/Preview/components/PlanView/components/Secrets';
 import AuthSelector from '~/components/workbench/Preview/components/PlanView/components/AuthSelector';
 
-type ModalType = 'project-description' | 'features' | 'mockup' | 'pages' | 'secrets' | 'auth';
+type ModalType = 'project-description' | 'features' | 'mockup' | 'secrets' | 'auth';
 
 interface AppCardModalProps {
   isOpen: boolean;
@@ -50,15 +50,7 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
             Mockup Details
           </div>
         );
-      case 'pages':
-        return (
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm">
-              <div className="i-ph:layout-duotone text-white text-lg" />
-            </div>
-            Page Layouts
-          </div>
-        );
+
       case 'secrets':
         return (
           <div className="flex items-center gap-3">
@@ -120,10 +112,14 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
         return <Features />;
 
       case 'mockup':
-        return <Events featureName={undefined} />;
+        return (
+          <div className="space-y-6">
+            <Pages />
+            <Events featureName={undefined} />
+          </div>
+        );
 
-      case 'pages':
-        return <Pages />;
+
 
       case 'secrets':
         return <Secrets />;
