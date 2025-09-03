@@ -85,6 +85,26 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     }
   }, [pendingMessageStatus, hasPendingMessage, showJumpToBottom]);
 
+  // Helper function to get AppSummary creation time
+  const getAppSummaryTime = (appSummary: Message): string => {
+    try {
+      if (appSummary.type === 'text' && appSummary.content) {
+        const summaryData = JSON.parse(appSummary.content);
+        return summaryData.time;
+      }
+    } catch {
+      // Fall through to createTime
+    }
+    return appSummary.createTime || new Date().toISOString();
+  };
+
+  // Helper function to filter, deduplicate, and sort messages
+  const processMessageGroup = (messageGroup: Message[]): Message[] => {
+    return messageGroup
+      .filter((message, index, array) => array.findIndex((m) => m.id === message.id) === index)
+      .sort((a, b) => new Date(a.createTime!).getTime() - new Date(b.createTime!).getTime());
+  };
+
   const renderMessage = (message: Message, index: number) => {
     const { role } = message;
     const isUserMessage = role === 'user';
@@ -95,7 +115,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     if (!shouldDisplayMessage(message)) {
       if (message.category === APP_SUMMARY_CATEGORY) {
         // App summaries are now shown in the preview area, not in chat
-        console.log('App summary message, not displaying', message);
         return null;
       }
 
@@ -184,12 +203,51 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
         ref={setRefs}
         className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
       >
-        {messages.length > 0 ? messages.map(renderMessage) : null}
+        {(() => {
+          const firstAppSummary = messages.find((message) => message.category === APP_SUMMARY_CATEGORY);
 
-        {/* App Cards - show between messages and pending indicator */}
-        <div className="w-full mt-6">
-          <AppCards />
-        </div>
+          if (!firstAppSummary) {
+            const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
+            return (
+              <>
+                {displayableMessages.map((message, index) => renderMessage(message, index))}
+                <div className="w-full mt-6">
+                  <AppCards />
+                </div>
+              </>
+            );
+          }
+
+          const appSummaryTime = getAppSummaryTime(firstAppSummary);
+
+          const beforeMessages = processMessageGroup(
+            messages.filter(
+              (message) => shouldDisplayMessage(message) && message.createTime && message.createTime < appSummaryTime,
+            ),
+          );
+
+          const afterMessages = processMessageGroup(
+            messages.filter(
+              (message) =>
+                shouldDisplayMessage(message) &&
+                message.category !== APP_SUMMARY_CATEGORY &&
+                message.createTime &&
+                message.createTime > appSummaryTime,
+            ),
+          );
+
+          return (
+            <>
+              {beforeMessages.map((message, index) => renderMessage(message, index))}
+              <div className="w-full mt-6">
+                <AppCards />
+              </div>
+              {afterMessages.length > 0 && (
+                <div className="mt-6">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
+              )}
+            </>
+          );
+        })()}
 
         {hasPendingMessage && (
           <div className="w-full mt-3">

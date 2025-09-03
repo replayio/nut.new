@@ -6,6 +6,8 @@ import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import { toast } from 'react-toastify';
 import { assert } from '~/utils/nut';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import WithTooltip from '~/components/ui/Tooltip';
 
 interface AuthSelectorCardProps {
   appSummary: AppSummary;
@@ -59,42 +61,50 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
   };
 
   const getToggleControl = () => {
+    const tooltipText = authRequired
+      ? 'Disable authentication - anyone can access your app'
+      : 'Enable authentication - requires user accounts to access your app';
+
     return (
-      <button
-        className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-xl border transition-all duration-200 w-full ${
-          saving
-            ? 'border-bolt-elements-borderColor/30 cursor-not-allowed'
-            : 'border-bolt-elements-borderColor/40 hover:border-bolt-elements-focus/40 hover:bg-bolt-elements-background-depth-1/70 cursor-pointer'
-        }`}
-        onClick={!saving ? handleToggle : undefined}
-        disabled={saving}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-textPrimary'}`}
-            />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">
-                {authRequired ? 'Authentication Required' : 'Public Access'}
-              </span>
-              <span className="text-xs text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors">
-                {saving ? 'Updating...' : null}
-              </span>
+      <TooltipProvider>
+        <WithTooltip tooltip={tooltipText}>
+          <button
+            className={`group p-4 bg-bolt-elements-background-depth-2 rounded-xl border transition-all duration-200 w-full shadow-sm ${
+              saving
+                ? 'border-bolt-elements-borderColor/30 cursor-not-allowed opacity-60'
+                : 'border-bolt-elements-borderColor hover:border-bolt-elements-focus/60 hover:bg-bolt-elements-background-depth-3 hover:shadow-md hover:scale-[1.02] cursor-pointer'
+            }`}
+            onClick={!saving ? handleToggle : undefined}
+            disabled={saving}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`transition-transform duration-200 group-hover:scale-110 ${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-textPrimary'}`}
+                />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-105">
+                    {authRequired ? 'Authentication Required' : 'Public Access'}
+                  </span>
+                  <span className="text-xs text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-all duration-200">
+                    {saving ? 'Updating...' : null}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {saving && (
+                  <div className="w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin" />
+                )}
+                <Switch
+                  checked={authRequired}
+                  onCheckedChange={!saving ? handleToggle : undefined}
+                  className={`${saving ? 'opacity-50' : 'group-hover:scale-110'} transition-all duration-200 pointer-events-none`}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {saving && (
-              <div className="w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin" />
-            )}
-            <Switch
-              checked={authRequired}
-              onCheckedChange={!saving ? handleToggle : undefined}
-              className={`${saving ? 'opacity-50' : 'group-hover:scale-105'} transition-all duration-200 pointer-events-none`}
-            />
-          </div>
-        </div>
-      </button>
+          </button>
+        </WithTooltip>
+      </TooltipProvider>
     );
   };
 
