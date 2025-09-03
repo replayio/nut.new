@@ -96,13 +96,13 @@ export const AppCard: React.FC<AppCardProps> = ({
       onClick={onClick}
     >
       {status === 'in-progress' && (
-        <div className="absolute inset-0 p-[2px] rounded-xl animate-focus-border pointer-events-none z-0">
+        <div className="absolute inset-0 p-[2px] rounded-xl animate-focus-border pointer-events-none">
           <div className="w-full h-full bg-bolt-elements-background-depth-2 rounded-[8px]" />
         </div>
       )}
       <div
         className={classNames(
-          'bg-bolt-elements-background-depth-2 rounded-xl transition-all duration-300 relative overflow-hidden z-10',
+          'bg-bolt-elements-background-depth-2 rounded-xl transition-all duration-300 relative overflow-hidden',
           {
             'border border-bolt-elements-borderColor hover:border-bolt-elements-focus/60':
               !!onClick && status !== 'in-progress',
@@ -114,16 +114,16 @@ export const AppCard: React.FC<AppCardProps> = ({
         )}
       >
         {onClick && (
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-bolt-elements-focus/8 via-bolt-elements-focus/3 to-bolt-elements-focus/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-1" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-bolt-elements-focus/8 via-bolt-elements-focus/3 to-bolt-elements-focus/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
 
         {status === 'in-progress' && (
-          <div className="absolute inset-0 rounded-xl overflow-hidden z-1">
+          <div className="absolute inset-0 rounded-xl overflow-hidden">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-flow-left-to-right" />
           </div>
         )}
 
-        <div className="p-5 relative z-20">
+        <div className="p-5 relative">
           <div className="flex items-center gap-3 mb-3">
             {icon && (
               <div

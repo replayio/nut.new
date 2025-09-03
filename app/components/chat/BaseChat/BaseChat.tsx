@@ -25,6 +25,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { mobileNavStore } from '~/lib/stores/mobileNav';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -90,6 +91,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     useEffect(() => {
       if (appSummary && !workbenchStore.showWorkbench.get()) {
         workbenchStore.setShowWorkbench(true);
+        mobileNavStore.setActiveTab('preview');
       }
     }, [appSummary]);
 

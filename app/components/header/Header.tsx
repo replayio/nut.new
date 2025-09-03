@@ -12,12 +12,14 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from './DeployChat/DeployChatButton';
 import { DownloadButton } from './DownloadButton';
 import ViewVersionHistoryButton from '~/components/workbench/VesionHistory/ViewVersionHistoryButton';
+import useViewport from '~/lib/hooks';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
   const user = useStore(userStore.user);
   const appSummary = useStore(chatStore.appSummary);
   const appId = useStore(chatStore.currentAppId);
+  const isSmallViewport = useViewport(800);
 
   return (
     <header
@@ -39,10 +41,10 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
-        {appSummary && <ChatDescription />}
+        {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
-      {appSummary && (
+      {appSummary && !isSmallViewport && (
         <div className="flex-1 flex justify-center">
           <div className="flex items-center gap-3">
             {appId && <ViewVersionHistoryButton />}
