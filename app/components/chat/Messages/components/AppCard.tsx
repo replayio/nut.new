@@ -118,8 +118,8 @@ export const AppCard: React.FC<AppCardProps> = ({
         )}
 
         {status === 'in-progress' && (
-          <div className="absolute inset-0 rounded-xl z-1">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 via-transparent to-blue-500/10 animate-pulse" />
+          <div className="absolute inset-0 rounded-xl overflow-hidden z-1">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-flow-left-to-right" />
           </div>
         )}
 

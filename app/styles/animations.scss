@@ -197,3 +197,22 @@ html[data-theme='dark'] .animate-shimmer::before,
   animation: focus-border 3s ease-in-out infinite;
   filter: blur(1px);
 }
+
+/* Blue flowing animation for in-progress cards */
+@keyframes flow-left-to-right {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0.6;
+  }
+}
+
+.animate-flow-left-to-right {
+  animation: flow-left-to-right 4s ease-in-out infinite;
+}
