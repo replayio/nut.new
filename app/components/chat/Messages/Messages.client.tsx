@@ -101,7 +101,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
   // Helper function to filter, deduplicate, and sort messages
   const processMessageGroup = (messageGroup: Message[]): Message[] => {
     return messageGroup
-      .filter((message, index, array) => array.findIndex(m => m.id === message.id) === index)
+      .filter((message, index, array) => array.findIndex((m) => m.id === message.id) === index)
       .sort((a, b) => new Date(a.createTime!).getTime() - new Date(b.createTime!).getTime());
   };
 
@@ -204,8 +204,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
         className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
       >
         {(() => {
-          const firstAppSummary = messages.find(message => message.category === APP_SUMMARY_CATEGORY);
-          
+          const firstAppSummary = messages.find((message) => message.category === APP_SUMMARY_CATEGORY);
+
           if (!firstAppSummary) {
             const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
             return (
@@ -219,22 +219,21 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
           }
 
           const appSummaryTime = getAppSummaryTime(firstAppSummary);
-          
+
           const beforeMessages = processMessageGroup(
-            messages.filter(message => 
-              shouldDisplayMessage(message) && 
-              message.createTime && 
-              message.createTime < appSummaryTime
-            )
+            messages.filter(
+              (message) => shouldDisplayMessage(message) && message.createTime && message.createTime < appSummaryTime,
+            ),
           );
-          
+
           const afterMessages = processMessageGroup(
-            messages.filter(message => 
-              shouldDisplayMessage(message) && 
-              message.category !== APP_SUMMARY_CATEGORY &&
-              message.createTime && 
-              message.createTime > appSummaryTime
-            )
+            messages.filter(
+              (message) =>
+                shouldDisplayMessage(message) &&
+                message.category !== APP_SUMMARY_CATEGORY &&
+                message.createTime &&
+                message.createTime > appSummaryTime,
+            ),
           );
 
           return (
@@ -244,9 +243,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
                 <AppCards />
               </div>
               {afterMessages.length > 0 && (
-                <div className="mt-6">
-                  {afterMessages.map((message, index) => renderMessage(message, index))}
-                </div>
+                <div className="mt-6">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
               )}
             </>
           );

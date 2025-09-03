@@ -61,7 +61,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
   };
 
   const getToggleControl = () => {
-    const tooltipText = authRequired 
+    const tooltipText = authRequired
       ? 'Disable authentication - anyone can access your app'
       : 'Enable authentication - requires user accounts to access your app';
 
