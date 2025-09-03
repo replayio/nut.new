@@ -20,12 +20,12 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
 
     features.forEach((feature) => {
       switch (feature.status) {
+        case AppFeatureStatus.Implemented:
         case AppFeatureStatus.Validated:
+        case AppFeatureStatus.ValidationInProgress:
           counts.completed++;
           break;
         case AppFeatureStatus.ImplementationInProgress:
-        case AppFeatureStatus.Implemented:
-        case AppFeatureStatus.ValidationInProgress:
           counts.inProgress++;
           break;
         case AppFeatureStatus.ValidationFailed:
@@ -140,7 +140,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
           </div>
           <div className="w-full h-1.5 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-bolt-elements-focus to-bolt-elements-focus/80 transition-all duration-1000"
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000 rounded-full"
               style={{
                 width: `${totalFeatures > 0 ? (statusCounts.completed / totalFeatures) * 100 : 0}%`,
               }}
