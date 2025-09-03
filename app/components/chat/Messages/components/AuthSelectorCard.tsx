@@ -61,10 +61,10 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
   const getToggleControl = () => {
     return (
       <button
-        className={`group p-4 bg-bolt-elements-background-depth-1/50 rounded-xl border transition-all duration-200 w-full ${
+        className={`group p-4 bg-bolt-elements-background-depth-2 rounded-xl border transition-all duration-200 w-full shadow-sm ${
           saving
-            ? 'border-bolt-elements-borderColor/30 cursor-not-allowed'
-            : 'border-bolt-elements-borderColor/40 hover:border-bolt-elements-focus/40 hover:bg-bolt-elements-background-depth-1/70 cursor-pointer'
+            ? 'border-bolt-elements-borderColor/30 cursor-not-allowed opacity-60'
+            : 'border-bolt-elements-borderColor hover:border-bolt-elements-focus/60 hover:bg-bolt-elements-background-depth-3 hover:shadow-md hover:scale-[1.02] cursor-pointer'
         }`}
         onClick={!saving ? handleToggle : undefined}
         disabled={saving}
@@ -72,13 +72,13 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
-              className={`${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-textPrimary'}`}
+              className={`transition-transform duration-200 group-hover:scale-110 ${authRequired ? 'i-ph:lock-duotone text-bolt-elements-icon-success' : 'i-ph:globe-duotone text-bolt-elements-textPrimary'}`}
             />
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">
+              <span className="text-sm font-medium text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-105">
                 {authRequired ? 'Authentication Required' : 'Public Access'}
               </span>
-              <span className="text-xs text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors">
+              <span className="text-xs text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-all duration-200">
                 {saving ? 'Updating...' : null}
               </span>
             </div>
@@ -90,7 +90,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
             <Switch
               checked={authRequired}
               onCheckedChange={!saving ? handleToggle : undefined}
-              className={`${saving ? 'opacity-50' : 'group-hover:scale-105'} transition-all duration-200 pointer-events-none`}
+              className={`${saving ? 'opacity-50' : 'group-hover:scale-110'} transition-all duration-200 pointer-events-none`}
             />
           </div>
         </div>
