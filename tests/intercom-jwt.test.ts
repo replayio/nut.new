@@ -50,7 +50,7 @@ describe('Intercom JWT', () => {
       };
 
       await expect(
-        generateIntercomJWT(userData as any, mockAppSecret, mockAppId)
+        generateIntercomJWT(userData as any, mockAppSecret, mockAppId, mockSigningKey)
       ).rejects.toThrow('user_id is required');
     });
 
@@ -60,7 +60,7 @@ describe('Intercom JWT', () => {
       };
 
       await expect(
-        generateIntercomJWT(userData, '', mockAppId)
+        generateIntercomJWT(userData, '', mockAppId, mockSigningKey)
       ).rejects.toThrow('Intercom app secret is required');
     });
 
@@ -70,7 +70,7 @@ describe('Intercom JWT', () => {
       };
 
       await expect(
-        generateIntercomJWT(userData, mockAppSecret, '')
+        generateIntercomJWT(userData, mockAppSecret, '', mockSigningKey)
       ).rejects.toThrow('Intercom app ID is required');
     });
 
