@@ -5,5 +5,4 @@ export { GlobalAppCardModal } from './GlobalAppCardModal';
 export { AuthSelectorCard } from './AuthSelectorCard';
 export { FeaturesCard } from './FeaturesCard';
 export { MockupCard } from './MockupCard';
-export { PageLayoutsCard } from './PageLayoutsCard';
 export { SecretsCard } from './SecretsCard';
