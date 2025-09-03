@@ -103,7 +103,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(({ onLas
     }
 
     let onCheckboxChange = undefined;
-    if (isActiveDiscoveryResponse(messages, message)) {
+    if (isActiveDiscoveryResponse(messages, message) && !hasInteracted(message)) {
       onCheckboxChange = onLastMessageCheckboxChange;
     }
 
@@ -221,4 +221,8 @@ function isActiveDiscoveryResponse(messages: Message[], message: Message) {
     }
   }
   return false;
+}
+
+function hasInteracted(message: Message): boolean {
+  return message.type === 'text' && message.hasInteracted === true;
 }

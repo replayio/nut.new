@@ -65,7 +65,7 @@ export const Markdown = memo((props: MarkdownProps) => {
         return <input type="checkbox" checked={checked ?? false} onChange={handleChange} {...props} />;
       },
     } satisfies Components;
-  }, []);
+  }, [onCheckboxChange]);
 
   return (
     <ReactMarkdown

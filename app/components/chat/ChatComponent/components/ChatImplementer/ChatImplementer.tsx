@@ -113,6 +113,7 @@ const ChatImplementer = memo(() => {
         role: 'user',
         type: 'text',
         content: messageInput,
+        hasInteracted: false,
       };
 
       addChatMessage(userMessage);

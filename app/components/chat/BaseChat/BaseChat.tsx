@@ -17,6 +17,7 @@ import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { DISCOVERY_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useStore } from '@nanostores/react';
@@ -105,6 +106,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const handleSendMessage = (params: ChatMessageParams) => {
       if (sendMessage) {
+        // Mark discovery messages as interacted when user sends a response
+        const messages = chatStore.messages.get();
+        const updatedMessages = messages.map((message) => {
+          if (message.type === 'text' && message.category === DISCOVERY_RESPONSE_CATEGORY && !message.hasInteracted) {
+            return { ...message, hasInteracted: true };
+          }
+          return message;
+        });
+        chatStore.messages.set(updatedMessages);
+
         sendMessage(params);
         abortListening();
         setCheckedBoxes([]);
