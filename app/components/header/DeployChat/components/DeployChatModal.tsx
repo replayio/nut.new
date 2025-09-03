@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
 import { lastDeployResult, type DeploySettings, type DeploySettingsNetlify } from '~/lib/replay/Deploy';
+import { Dialog, DialogRoot } from '~/components/ui/Dialog';
 
 interface DeployChatModalProps {
   isModalOpen: boolean;
@@ -28,11 +29,7 @@ const DeployChatModal = ({
 }: DeployChatModalProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setIsModalOpen(false);
-    }
-  };
+
 
   const isDeploying = status === DeployStatus.Started;
   const result = lastDeployResult(deploySettings);
@@ -42,44 +39,26 @@ const DeployChatModal = ({
 
   if (loadingData) {
     return (
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
-        onClick={handleOverlayClick}
-      >
-        <div
-          className="bg-bolt-elements-background-depth-1 rounded-2xl p-8 max-w-md w-full z-50 border border-bolt-elements-borderColor/50 shadow-2xl hover:shadow-3xl transition-shadow duration-300"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
-              <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+      <DialogRoot open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
+        <Dialog onClose={() => setIsModalOpen(false)} className="max-w-md">
+          <div className="p-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
+                <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+              </div>
+              <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
+              <p className="text-bolt-elements-textSecondary">Please wait while we prepare your deployment settings</p>
             </div>
-            <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
-            <p className="text-bolt-elements-textSecondary">Please wait while we prepare your deployment settings</p>
           </div>
-        </div>
-      </div>
+        </Dialog>
+      </DialogRoot>
     );
   }
 
   return (
-    <>
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
-          onClick={handleOverlayClick}
-        >
-          <div
-            className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 max-w-2xl w-full z-50 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[90vh] shadow-2xl hover:shadow-3xl transition-shadow duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setIsModalOpen(false)}
-              disabled={isDeploying}
-              className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group disabled:opacity-50"
-            >
-              <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
-            </button>
+    <DialogRoot open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
+      <Dialog onClose={() => setIsModalOpen(false)} className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
 
             {status === DeployStatus.Succeeded ? (
               <DeploymentSuccessful result={result} setIsModalOpen={setIsModalOpen} />
@@ -459,10 +438,9 @@ const DeployChatModal = ({
                 )}
               </>
             )}
-          </div>
         </div>
-      )}
-    </>
+      </Dialog>
+    </DialogRoot>
   );
 };
 
