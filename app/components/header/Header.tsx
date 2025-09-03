@@ -39,12 +39,12 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
+        {appSummary && <ChatDescription />}
       </div>
 
       {appSummary && (
         <div className="flex-1 flex justify-center">
           <div className="flex items-center gap-3">
-            <ChatDescription />
             {appId && <ViewVersionHistoryButton />}
             <DownloadButton />
             <DeployChatButton />
