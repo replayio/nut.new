@@ -12,8 +12,6 @@ import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
 
-const MockupFeatureIndex = -1;
-
 const Features = () => {
   const appSummary = useStore(chatStore.appSummary);
   assert(appSummary, 'App summary is required');
@@ -22,7 +20,7 @@ const Features = () => {
 
   useEffect(() => {
     if (appSummary?.features) {
-      setCollapsedFeatures(new Set([MockupFeatureIndex, ...appSummary.features.map((_, index) => index)]));
+      setCollapsedFeatures(new Set(appSummary.features.map((_, index) => index)));
     }
   }, [appSummary]);
 
@@ -148,18 +146,7 @@ const Features = () => {
   };
 
   return (
-    <div className="mb-8">
-      {appSummary?.mockupStatus && renderFeature(undefined, MockupFeatureIndex)}
-
-      {appSummary?.features && appSummary?.features.length > 0 && (
-        <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm mb-6">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
-            <div className="i-ph:puzzle-piece-duotone text-white text-lg"></div>
-          </div>
-          <div className="text-lg font-semibold text-bolt-elements-textHeading">Features</div>
-        </div>
-      )}
-
+    <div>
       <div className="space-y-6">{appSummary?.features?.map((feature, index) => renderFeature(feature, index))}</div>
     </div>
   );

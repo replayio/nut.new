@@ -5,8 +5,6 @@ import { ScreenshotStateManager } from '~/components/chat/ScreenshotStateManager
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { MessageInput } from '~/components/chat/MessageInput/MessageInput';
-import { useStore } from '@nanostores/react';
-import { chatStore } from '~/lib/stores/chat';
 
 interface ChatPromptContainerProps {
   uploadedFiles: File[];
@@ -23,17 +21,12 @@ export const ChatPromptContainer: React.FC<ChatPromptContainerProps> = ({
   setImageDataList,
   messageInputProps,
 }) => {
-  const chatStarted = useStore(chatStore.started);
-
   return (
     <div
       className={classNames(
-        'bg-bolt-elements-background-depth-2 p-3 rounded-2xl border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+        'bg-bolt-elements-background-depth-2 p-3 rounded-2xl border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt mt-0',
         'dark:bg-gradient-to-br dark:from-bolt-elements-background-depth-2 dark:to-bolt-elements-background-depth-3/50 dark:border-bolt-elements-borderColor/60 dark:shadow-lg dark:shadow-black/10',
         'dark:backdrop-blur-sm',
-        {
-          'sticky bottom-2': chatStarted,
-        },
       )}
     >
       <FilePreview

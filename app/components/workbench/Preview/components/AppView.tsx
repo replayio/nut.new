@@ -1,16 +1,15 @@
 import { PointSelector } from '~/components/workbench/PointSelector';
 import GripIcon from '~/components/icons/GripIcon';
-import ProgressStatus from './ProgressStatus';
+import ProgressStatus from './ProgressStatus/ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
-import { chatStore } from '~/lib/stores/chat';
+import { workbenchStore } from '~/lib/stores/workbench';
 import { useState } from 'react';
 import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
 
 export type ResizeSide = 'left' | 'right' | null;
 
 const AppView = ({
-  activeTab,
   isDeviceModeOn,
   widthPercent,
   previewURL,
@@ -22,7 +21,6 @@ const AppView = ({
   setSelectionPoint,
   startResizing,
 }: {
-  activeTab: 'planning' | 'testing' | 'preview';
   isDeviceModeOn: boolean;
   widthPercent: number;
   previewURL: string;
@@ -35,10 +33,24 @@ const AppView = ({
   startResizing: (e: React.MouseEvent, side: ResizeSide) => void;
 }) => {
   const [iframeForceReload, setIframeForceReload] = useState(0);
-  const appSummary = useStore(chatStore.appSummary);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const repositoryId = useStore(workbenchStore.repositoryId);
   const isSmallViewport = useViewport(1024);
-  const vibeAuthTokenParams = useVibeAppAuthQuery({ iframeForceReload, setIframeForceReload });
 
+  const handleTokenOrRepoChange = (params: URLSearchParams) => {
+    setRedirectUrl(`https://${repositoryId}.http.replay.io/auth/callback#${params.toString()}`);
+  };
+
+  useVibeAppAuthQuery({
+    iframeForceReload,
+    setIframeForceReload,
+    repositoryId,
+    iframeUrl,
+    onTokenOrRepoChange: handleTokenOrRepoChange,
+  });
+
+  // Determine the actual iframe URL to use
+  const actualIframeUrl = redirectUrl || iframeUrl;
   return (
     <div
       style={{
@@ -53,20 +65,16 @@ const AppView = ({
       {previewURL ? (
         <>
           <iframe
-            key={iframeUrl + iframeForceReload}
+            key={actualIframeUrl}
             ref={iframeRef}
             title="preview"
-            className={`w-full h-full bg-white transition-all duration-300 ${
-              activeTab === 'preview'
-                ? 'opacity-100 rounded-b-xl'
-                : 'opacity-0 pointer-events-none absolute inset-0 rounded-none shadow-none border-none'
-            }`}
-            src={`${iframeUrl}#${vibeAuthTokenParams?.toString()}&force_refresh=${iframeForceReload}`}
+            className="w-full h-full bg-white transition-all duration-300 opacity-100 rounded-b-xl"
+            src={actualIframeUrl}
             allowFullScreen
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
             loading="eager"
           />
-          {activeTab === 'preview' && !isSmallViewport && (
+          {!isSmallViewport && (
             <PointSelector
               isSelectionMode={isSelectionMode}
               setIsSelectionMode={setIsSelectionMode}
@@ -75,37 +83,14 @@ const AppView = ({
               containerRef={iframeRef}
             />
           )}
-          {activeTab !== 'preview' && (
-            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
-              {appSummary ? (
-                <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-                  <ProgressStatus />
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
-                </div>
-              )}
-            </div>
-          )}
         </>
       ) : (
-        <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-2/30">
-          {appSummary ? (
-            <div className="p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-              <ProgressStatus />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4 p-8 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <div className="text-bolt-elements-textSecondary font-medium">Preview loading...</div>
-            </div>
-          )}
+        <div className="w-full h-full">
+          <ProgressStatus />
         </div>
       )}
 
-      {isDeviceModeOn && activeTab === 'preview' && (
+      {isDeviceModeOn && previewURL && (
         <>
           <div
             onMouseDown={(e) => startResizing(e, 'left')}

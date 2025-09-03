@@ -1,5 +1,6 @@
 // import type { ActionFunctionArgs } from '@remix-run/node';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -18,10 +19,32 @@ const PEANUT_TOPOFF_PRICE = process.env.STRIPE_PRICE_TOPOFF!;
 
 interface CreateCheckoutRequest {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter' | 'builder' | 'pro';
-  userId: string;
-  userEmail: string;
+  tier?: 'free' | 'starter';
   returnUrl?: string; // The current page URL to return to after checkout
+}
+
+// Helper function to get authenticated user from JWT
+async function getAuthenticatedUser(request: Request) {
+  // Get the authorization header
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return null;
+  }
+
+  return user;
 }
 
 export async function action({ request }: { request: Request }) {
@@ -32,17 +55,21 @@ export async function action({ request }: { request: Request }) {
     });
   }
 
+  // 🔒 SECURITY: Authenticate the user via JWT
+  const user = await getAuthenticatedUser(request);
+  if (!user || !user.email) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const userId = user.id;
+  const userEmail = user.email;
+
   try {
     const body = (await request.json()) as CreateCheckoutRequest;
-    const { type, tier, userId, userEmail, returnUrl } = body;
-
-    // Validate required fields
-    if (!userId || !userEmail) {
-      return new Response(JSON.stringify({ error: 'User ID and email are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const { type, tier, returnUrl } = body;
 
     let priceId: string;
     let mode: 'subscription' | 'payment';
@@ -53,27 +80,38 @@ export async function action({ request }: { request: Request }) {
     // Use the provided return URL or fallback to the base URL
     const targetUrl = returnUrl || baseUrl;
 
-    // Try to find existing customer by email to avoid duplicates
+    // Try to find existing customer by email or userId to avoid duplicates
     let customerId: string | undefined;
     try {
+      // First try to find customer by email
       const existingCustomers = await stripe.customers.list({
         email: userEmail,
-        limit: 1,
+        limit: 10, // Get more results to check metadata
       });
 
-      if (existingCustomers.data.length > 0) {
-        customerId = existingCustomers.data[0].id;
-        console.log(`Reusing existing customer: ${customerId} for email: ${userEmail}`);
+      // Look for a customer with matching userId or use the first one
+      let targetCustomer = existingCustomers.data.find((c) => c.metadata?.userId === userId);
+      if (!targetCustomer && existingCustomers.data.length > 0) {
+        targetCustomer = existingCustomers.data[0];
+      }
 
-        // Update customer metadata with userId
+      if (targetCustomer) {
+        customerId = targetCustomer.id;
+        console.log(`Reusing existing customer: ${customerId} for email: ${userEmail}, userId: ${userId}`);
+
+        // Always update customer metadata with userId to ensure webhooks work
+        // This makes Stripe the authoritative source for user identification
         await stripe.customers.update(customerId, {
           metadata: {
             userId,
             userEmail,
           },
         });
+        console.log(`✅ Updated customer ${customerId} metadata - Stripe is now authoritative source`);
       } else {
-        console.log(`No existing customer found for email: ${userEmail}, will create new one`);
+        console.log(
+          `No existing customer found for email: ${userEmail}, userId: ${userId} - will create new one in checkout`,
+        );
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);
@@ -133,6 +171,7 @@ export async function action({ request }: { request: Request }) {
       client_reference_id: userId,
       metadata: {
         userId,
+        userEmail,
         type,
         ...(tier && { tier }),
       },

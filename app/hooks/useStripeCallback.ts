@@ -104,6 +104,15 @@ export function useStripeCallback() {
           }
         }
 
+        // Refresh peanuts store after a short delay to allow webhook processing
+        setTimeout(async () => {
+          try {
+            await refreshPeanutsStore();
+          } catch (error) {
+            console.error('Error refreshing peanuts after subscription:', error);
+          }
+        }, 2000);
+
         stripeStatusModalActions.showSuccess('🎉 Subscription Activated!', message, details);
 
         // Clean up URL
