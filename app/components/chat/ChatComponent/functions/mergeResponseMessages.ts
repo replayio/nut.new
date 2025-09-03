@@ -14,6 +14,7 @@ function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
     messages.push({
       ...msg,
       content: lastMessage.content + msg.content,
+      hasInteracted: lastMessage.type === 'text' ? lastMessage.hasInteracted || false : false,
     });
   } else {
     messages.push(msg);

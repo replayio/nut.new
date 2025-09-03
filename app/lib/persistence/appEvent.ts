@@ -13,11 +13,10 @@ interface AppEventStartFeature {
 
 interface AppEventStartMockup {
   name: 'start-mockup';
-  pageName: string;
 }
 
-interface AppEventFinishMockup {
-  name: 'finish-mockup';
+interface AppEventWriteMockupTest {
+  name: 'write-mockup-tests';
 }
 
 interface AppEventRunTests {
@@ -56,7 +55,7 @@ interface AppEventLandChanges {
 export type AppEvent =
   | AppEventStartFeature
   | AppEventStartMockup
-  | AppEventFinishMockup
+  | AppEventWriteMockupTest
   | AppEventRunTests
   | AppEventsTestFailure
   | AppEventAnalyzeTestFailure

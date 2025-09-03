@@ -1,7 +1,7 @@
 import { atom } from 'nanostores';
 
 export class MobileNavStore {
-  activeTab = atom<'chat' | 'planning' | 'preview'>('chat');
+  activeTab = atom<'chat' | 'preview'>('chat');
 
   constructor() {
     if (import.meta.hot) {
@@ -9,7 +9,7 @@ export class MobileNavStore {
     }
   }
 
-  setActiveTab(tab: 'chat' | 'planning' | 'preview') {
+  setActiveTab(tab: 'chat' | 'preview') {
     this.activeTab.set(tab);
   }
 

@@ -75,7 +75,9 @@ async function extractRepositoryFiles(base64Content: string): Promise<Repository
 }
 
 function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFiles): FileDiff[] {
-  const allPaths = new Set([...Object.keys(oldFiles), ...Object.keys(newFiles)]);
+  const allPathsSet = new Set([...Object.keys(oldFiles), ...Object.keys(newFiles)]);
+  const allPaths = [...allPathsSet].sort();
+
   const diffs: FileDiff[] = [];
 
   for (const path of allPaths) {

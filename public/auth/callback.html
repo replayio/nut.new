@@ -32,6 +32,7 @@
           var refreshToken = hashParams.get('refresh_token');
           var expiresIn = hashParams.get('expires_in');
           var expiresAt = hashParams.get('expires_at');
+          var user = hashParams.get('user');
 
           var error = searchParams.get('error');
           var errorDescription = searchParams.get('error_description');
@@ -42,7 +43,8 @@
                 refresh_token: refreshToken,
                 expires_in: expiresIn,
                 expires_at: expiresAt,
-                token_type: 'bearer'
+                token_type: 'bearer',
+                user: user
             }));
           } else if (error) {
             localStorage.setItem('sb-vibe-auth-error', JSON.stringify({

@@ -2,17 +2,22 @@ import { useStore } from '@nanostores/react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
-import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { Suspense } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
 import { userStore } from '~/lib/stores/userAuth';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
+import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { DeployChatButton } from './DeployChat/DeployChatButton';
+import { DownloadButton } from './DownloadButton';
+import ViewVersionHistoryButton from '~/components/workbench/VesionHistory/ViewVersionHistoryButton';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
   const user = useStore(userStore.user);
+  const appSummary = useStore(chatStore.appSummary);
+  const appId = useStore(chatStore.currentAppId);
 
   return (
     <header
@@ -24,7 +29,7 @@ export function Header() {
         },
       )}
     >
-      <div className="flex flex-1 items-center gap-4 text-bolt-elements-textPrimary">
+      <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
         {user && (
           <IconButton
             onClick={() => sidebarMenuStore.toggle()}
@@ -34,13 +39,18 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
+        {appSummary && <ChatDescription />}
       </div>
 
-      <div className="flex-1 flex justify-end mr-4">
-        <div className="flex items-center">
-          {chatStarted && <ClientOnly>{() => <HeaderActionButtons />}</ClientOnly>}
+      {appSummary && (
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-3">
+            {appId && <ViewVersionHistoryButton />}
+            <DownloadButton />
+            <DeployChatButton />
+          </div>
         </div>
-      </div>
+      )}
 
       <ClientOnly>
         {() => (

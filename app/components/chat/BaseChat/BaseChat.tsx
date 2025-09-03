@@ -17,8 +17,8 @@ import styles from './BaseChat.module.scss';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { DISCOVERY_RESPONSE_CATEGORY } from '~/lib/persistence/message';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
@@ -66,18 +66,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-    const showWorkbench = useStore(workbenchStore.showWorkbench);
-    const mobileActiveTab = useStore(mobileNavStore.activeTab);
     const isSmallViewport = useViewport(1024);
     const user = useStore(userStore.user);
-
-    useEffect(() => {
-      if (showWorkbench && mobileActiveTab === 'chat') {
-        mobileNavStore.setActiveTab('planning');
-      } else if (!showWorkbench && (mobileActiveTab === 'planning' || mobileActiveTab === 'preview')) {
-        mobileNavStore.setActiveTab('chat');
-      }
-    }, [showWorkbench, mobileActiveTab]);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -97,6 +87,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
+    useEffect(() => {
+      if (appSummary && !workbenchStore.showWorkbench.get()) {
+        workbenchStore.setShowWorkbench(true);
+      }
+    }, [appSummary]);
+
     const handleContinueBuilding = () => {
       if (sendMessage) {
         sendMessage({ chatMode: ChatMode.DevelopApp });
@@ -105,6 +101,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const handleSendMessage = (params: ChatMessageParams) => {
       if (sendMessage) {
+        // Mark discovery messages as interacted when user sends a response
+        const messages = chatStore.messages.get();
+        const updatedMessages = messages.map((message) => {
+          if (message.type === 'text' && message.category === DISCOVERY_RESPONSE_CATEGORY && !message.hasInteracted) {
+            return { ...message, hasInteracted: true };
+          }
+          return message;
+        });
+        chatStore.messages.set(updatedMessages);
+
         sendMessage(params);
         abortListening();
         setCheckedBoxes([]);
@@ -179,9 +185,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'pt-0 pb-2 px-4': isSmallViewport && !appSummary,
-            'pt-0 pb-15 px-4': isSmallViewport && !!appSummary,
-            'p-6 pt-0': !isSmallViewport && chatStarted,
+            'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
+            'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
+            'p-6': !isSmallViewport && chatStarted,
             'p-6 pb-16': !isSmallViewport && !chatStarted, // Add extra bottom padding on landing page to show footer
           })}
         >
@@ -229,15 +235,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>
-            {() => (
-              <Workbench
-                chatStarted={chatStarted}
-                mobileActiveTab={mobileActiveTab}
-                handleSendMessage={handleSendMessage}
-              />
-            )}
-          </ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
         {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}

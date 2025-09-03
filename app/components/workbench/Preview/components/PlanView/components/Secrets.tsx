@@ -222,12 +222,6 @@ const Secrets = () => {
   return (
     <div>
       <div className="space-y-6 mb-4">
-        <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
-            <div className="i-ph:key-duotone text-white text-lg"></div>
-          </div>
-          <div className="text-lg font-semibold text-bolt-elements-textHeading">Secrets</div>
-        </div>
         <div className="space-y-4">{secrets.map(renderSecret)}</div>
       </div>
     </div>

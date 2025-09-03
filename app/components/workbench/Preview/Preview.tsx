@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
-import PlanView from './components/PlanView/PlanView';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
@@ -19,11 +18,10 @@ export function getCurrentIFrame() {
 }
 
 interface PreviewProps {
-  activeTab: 'planning' | 'preview';
   handleSendMessage: (params: ChatMessageParams) => void;
 }
 
-export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => {
+export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,28 +60,26 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
 
   // Interval for sending getDetectedErrors message
   useEffect(() => {
-    if (activeTab === 'preview') {
-      let lastDetectedError: DetectedError | undefined = undefined;
-      const interval = setInterval(async () => {
-        if (!iframeRef.current) {
-          return;
-        }
+    let lastDetectedError: DetectedError | undefined = undefined;
+    const interval = setInterval(async () => {
+      if (!iframeRef.current) {
+        return;
+      }
 
-        const detectedErrors = await getDetectedErrors(iframeRef.current);
-        const firstError: DetectedError | undefined = detectedErrors[0];
-        if (JSON.stringify(firstError) !== JSON.stringify(lastDetectedError)) {
-          setDetectedError(firstError);
-        }
-        lastDetectedError = firstError;
-      }, 1000);
+      const detectedErrors = await getDetectedErrors(iframeRef.current);
+      const firstError: DetectedError | undefined = detectedErrors[0];
+      if (JSON.stringify(firstError) !== JSON.stringify(lastDetectedError)) {
+        setDetectedError(firstError);
+      }
+      lastDetectedError = firstError;
+    }, 1000);
 
-      return () => clearInterval(interval);
-    }
-  }, [activeTab, iframeRef.current]);
+    return () => clearInterval(interval);
+  }, [iframeRef.current]);
 
-  const reloadPreview = () => {
+  const reloadPreview = (route = '') => {
     if (iframeRef.current) {
-      iframeRef.current.src = iframeUrl + '?forceReload=' + Date.now();
+      iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
 
     setIsSelectionMode(false);
@@ -217,70 +213,63 @@ export const Preview = memo(({ activeTab, handleSendMessage }: PreviewProps) => 
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
-      {activeTab === 'preview' && (
-        <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
-          <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-          <div className="flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary rounded-xl px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md">
-            <input
-              title="URL"
-              ref={inputRef}
-              className="w-full bg-transparent outline-none"
-              type="text"
-              value={url}
-              onChange={(event) => {
-                setUrl(event.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  if (url !== iframeUrl) {
-                    setIframeUrl(url);
-                  } else {
-                    reloadPreview();
-                  }
-
-                  if (inputRef.current) {
-                    inputRef.current.blur();
-                  }
+      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
+        <IconButton icon="i-ph:arrow-clockwise" onClick={() => reloadPreview()} />
+        <div className="flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary rounded-xl px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md">
+          <input
+            title="URL"
+            ref={inputRef}
+            className="w-full bg-transparent outline-none"
+            type="text"
+            value={url}
+            onChange={(event) => {
+              setUrl(event.target.value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                if (url !== iframeUrl) {
+                  setIframeUrl(url);
+                } else {
+                  reloadPreview();
                 }
-              }}
-            />
-          </div>
 
-          {activeTab === 'preview' && !isSmallViewport && (
-            <IconButton
-              icon="i-ph:devices"
-              onClick={toggleDeviceMode}
-              title={isDeviceModeOn ? 'Switch to Responsive Mode' : 'Switch to Device Mode'}
-            />
-          )}
-          {!isSmallViewport && (
-            <IconButton
-              icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
-              onClick={toggleFullscreen}
-              title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-            />
-          )}
+                if (inputRef.current) {
+                  inputRef.current.blur();
+                }
+              }
+            }}
+          />
         </div>
-      )}
 
-      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
-        {activeTab === 'planning' ? (
-          <PlanView />
-        ) : (
-          <AppView
-            activeTab={activeTab}
-            isDeviceModeOn={isDeviceModeOn}
-            iframeRef={iframeRef}
-            iframeUrl={iframeUrl ?? ''}
-            isSelectionMode={isSelectionMode}
-            previewURL={url}
-            selectionPoint={selectionPoint}
-            setIsSelectionMode={setIsSelectionMode}
-            setSelectionPoint={setSelectionPoint}
-            startResizing={startResizing}
-            widthPercent={widthPercent}
+        {!isSmallViewport && (
+          <IconButton
+            icon="i-ph:devices"
+            onClick={toggleDeviceMode}
+            title={isDeviceModeOn ? 'Switch to Responsive Mode' : 'Switch to Device Mode'}
           />
         )}
+        {!isSmallViewport && (
+          <IconButton
+            icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+          />
+        )}
+      </div>
+
+      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
+        <AppView
+          isDeviceModeOn={isDeviceModeOn}
+          iframeRef={iframeRef}
+          iframeUrl={iframeUrl ?? ''}
+          isSelectionMode={isSelectionMode}
+          previewURL={url}
+          selectionPoint={selectionPoint}
+          setIsSelectionMode={setIsSelectionMode}
+          setSelectionPoint={setSelectionPoint}
+          startResizing={startResizing}
+          widthPercent={widthPercent}
+        />
       </div>
 
       {/* Error Display Section */}

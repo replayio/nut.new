@@ -54,7 +54,7 @@ const AuthSelector = () => {
   return (
     <div
       className={classNames(
-        'flex items-center gap-3 p-3 mt-0 mb-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200',
+        'flex items-center gap-3 p-3 mt-0 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors duration-200',
       )}
     >
       <div className="relative flex items-center">

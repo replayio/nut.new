@@ -60,3 +60,159 @@
 .animation-delay-600 {
   animation-delay: 0.6s;
 }
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      rgba(255, 255, 255, 0.3) 60%,
+      transparent 100%
+    );
+    background-size: 200px 100%;
+    animation: shimmer 2.5s infinite;
+  }
+}
+
+/* Dark theme shimmer variant */
+html[data-theme='dark'] .animate-shimmer::before,
+.dark .animate-shimmer::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.15) 60%,
+    transparent 100%
+  );
+}
+
+/* Rainbow gradient animation for text */
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rainbow {
+  background-size: 200% 200%;
+  animation: rainbow 3s ease-in-out infinite;
+}
+
+/* Theme-matching text gradient animation */
+@keyframes focus-text {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-focus-text {
+  background: linear-gradient(
+    90deg,
+    var(--bolt-elements-focus, #3b82f6),
+    #06b6d4,
+    #8b5cf6,
+    #3b82f6,
+    var(--bolt-elements-focus, #3b82f6)
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: focus-text 3s ease-in-out infinite;
+}
+
+/* Animated gradient border */
+@keyframes rainbow-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rainbow-border {
+  background: linear-gradient(90deg, #ef4444, #eab308, #22c55e, #3b82f6, #6366f1, #a855f7, #ef4444);
+  background-size: 200% 200%;
+  animation: rainbow-border 2.4s ease-in-out infinite;
+  filter: blur(1px);
+}
+
+/* Theme-matching animated gradient border */
+@keyframes focus-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-focus-border {
+  background: linear-gradient(
+    90deg,
+    var(--bolt-elements-focus, #3b82f6),
+    #06b6d4,
+    #8b5cf6,
+    #3b82f6,
+    var(--bolt-elements-focus, #3b82f6)
+  );
+  background-size: 200% 200%;
+  animation: focus-border 3s ease-in-out infinite;
+  filter: blur(1px);
+}
+
+/* Blue flowing animation for in-progress cards */
+@keyframes flow-left-to-right {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0.6;
+  }
+}
+
+.animate-flow-left-to-right {
+  animation: flow-left-to-right 4s ease-in-out infinite;
+}

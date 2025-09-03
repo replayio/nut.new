@@ -45,14 +45,7 @@ const Pages = () => {
 
   return (
     <div>
-      <div className="space-y-4 mb-2">
-        <div className="flex items-center gap-3 p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm mb-6">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-sm">
-            <div className="i-ph:layout-duotone text-white text-lg"></div>
-          </div>
-          <div className="text-lg font-semibold text-bolt-elements-textHeading">Page Layouts</div>
-        </div>
-
+      <div className="space-y-4">
         {appSummary?.pages?.length === 0 ? (
           <div className="text-center py-8 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/50">
             <div className="text-4xl mb-3 opacity-50">📄</div>

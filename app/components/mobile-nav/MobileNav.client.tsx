@@ -7,7 +7,7 @@ export const MobileNav = () => {
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const activeTab = useStore(mobileNavStore.activeTab);
 
-  const handleTabClick = (tab: 'chat' | 'planning' | 'preview') => {
+  const handleTabClick = (tab: 'chat' | 'preview') => {
     if (tab === 'chat') {
       workbenchStore.showWorkbench.set(false);
     } else {
@@ -18,22 +18,19 @@ export const MobileNav = () => {
     mobileNavStore.setActiveTab(tab);
   };
 
-  const getTabClasses = (tabName: 'chat' | 'planning' | 'preview', isMiddle = false) => {
+  const getTabClasses = (tabName: 'chat' | 'preview') => {
     const baseClasses =
       'flex-1 flex flex-col items-center justify-center py-2 px-2 transition-all duration-200 group relative';
-    const middleClasses = isMiddle ? 'border-x border-bolt-elements-borderColor/30' : '';
 
     if (activeTab === tabName) {
       return classNames(
         baseClasses,
-        middleClasses,
         'bg-gradient-to-t from-blue-500 to-indigo-500 text-white shadow-lg border-t-2 border-t-white/20',
       );
     }
 
     return classNames(
       baseClasses,
-      middleClasses,
       'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1/50 hover:shadow-sm',
     );
   };
@@ -56,24 +53,6 @@ export const MobileNav = () => {
             )}
           >
             Chat
-          </span>
-        </button>
-
-        <button onClick={() => handleTabClick('planning')} className={getTabClasses('planning', true)}>
-          <div
-            className={classNames(
-              'text-lg mb-0.5 transition-transform duration-200 group-hover:scale-110',
-              'i-ph:list-bullets',
-              activeTab === 'planning' ? 'drop-shadow-sm' : '',
-            )}
-          />
-          <span
-            className={classNames(
-              'text-xs font-semibold transition-transform duration-200 group-hover:scale-105',
-              activeTab === 'planning' ? 'drop-shadow-sm' : 'font-medium',
-            )}
-          >
-            Plan
           </span>
         </button>
 
