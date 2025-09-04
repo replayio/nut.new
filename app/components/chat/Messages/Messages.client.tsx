@@ -6,7 +6,7 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
-import { MessageContents, JumpToBottom, AppCards, StartPlanningCard } from './components';
+import { MessageContents, JumpToBottom, AppCards, StartBuildingCard } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
@@ -273,7 +273,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           })()}
 
           {startPlanningRating === 10 && (
-            <StartPlanningCard
+            <StartBuildingCard
               startPlanningRating={startPlanningRating}
               sendMessage={sendMessage}
               onMount={scrollToBottom}

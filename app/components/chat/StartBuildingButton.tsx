@@ -2,7 +2,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
 
-interface StartPlanningButtonProps {
+interface StartBuildingButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   startPlanningRating?: number;
   buttonText?: string;
@@ -10,7 +10,7 @@ interface StartPlanningButtonProps {
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const StartPlanningButton = ({ onClick, startPlanningRating = 0, buttonText }: StartPlanningButtonProps) => {
+export const StartBuildingButton = ({ onClick, startPlanningRating = 0, buttonText }: StartBuildingButtonProps) => {
   const hasText = !!buttonText;
   const className = hasText
     ? `relative flex justify-center items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl min-h-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`

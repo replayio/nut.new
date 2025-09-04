@@ -8,4 +8,4 @@ export { JumpToBottom } from './JumpToBottom';
 export { MessageContents } from './MessageContents';
 export { MockupCard } from './MockupCard';
 export { SecretsCard } from './SecretsCard';
-export { StartPlanningCard } from './StartPlanningCard';
+export { StartBuildingCard } from './StartBuildingCard';

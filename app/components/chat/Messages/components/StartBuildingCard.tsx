@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
-import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
+import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
-interface StartPlanningCardProps {
+interface StartBuildingCardProps {
   startPlanningRating: number;
   sendMessage?: (params: { messageInput: string; chatMode?: any }) => void;
   onMount?: () => void;
 }
 
-export const StartPlanningCard: React.FC<StartPlanningCardProps> = ({ startPlanningRating, sendMessage, onMount }) => {
+export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlanningRating, sendMessage, onMount }) => {
   useEffect(() => {
     if (onMount) {
       onMount();
@@ -32,7 +32,7 @@ export const StartPlanningCard: React.FC<StartPlanningCardProps> = ({ startPlann
           </div>
 
           <div className="relative">
-            <StartPlanningButton
+            <StartBuildingButton
               onClick={() => {
                 if (sendMessage) {
                   const message = 'Start building the app based on these requirements.';
