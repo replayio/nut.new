@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from './DeploymentSuccessful';
-import { lastDeployResult, type DeploySettings, type DeploySettingsNetlify } from '~/lib/replay/Deploy';
+import { lastDeployResult, type DeploySettings } from '~/lib/replay/Deploy';
 import { Dialog, DialogRoot } from '~/components/ui/Dialog';
 
 interface DeployChatModalProps {
@@ -27,13 +26,9 @@ const DeployChatModal = ({
   databaseFound,
   loadingData,
 }: DeployChatModalProps) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
   const isDeploying = status === DeployStatus.Started;
   const result = lastDeployResult(deploySettings);
-  const hasExistingSite = Boolean(
-    result?.siteURL || deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug,
-  );
+  const hasExistingSite = Boolean(result?.siteURL);
 
   if (loadingData) {
     return (
@@ -129,287 +124,23 @@ const DeployChatModal = ({
                 </div>
               </div>
 
-              {/* Advanced Settings Section */}
-              <div className="mb-8">
-                <button
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  disabled={isDeploying}
-                  className={`w-full flex items-center justify-between p-4 bg-bolt-elements-background-depth-2/50 border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md group ${
-                    showAdvanced ? 'rounded-t-xl border-b-0' : 'rounded-xl'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="i-ph:gear text-lg text-bolt-elements-textSecondary transition-transform duration-200 group-hover:scale-110" />
-                    <div className="text-left">
-                      <span className="text-bolt-elements-textPrimary font-semibold">Advanced Settings</span>
-                      <div className="text-xs text-bolt-elements-textSecondary">
-                        Custom Netlify & Supabase credentials
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className={`text-bolt-elements-textSecondary transition-all duration-200 ${showAdvanced ? 'rotate-180' : ''} group-hover:scale-110`}
-                  >
-                    <div className="i-ph:caret-down text-bolt-elements-textPrimary text-lg" />
-                  </div>
-                </button>
-
-                {showAdvanced && (
-                  <div className="bg-bolt-elements-background-depth-2/50 border border-bolt-elements-borderColor/50 border-t-0 rounded-b-xl shadow-lg">
-                    <div className="p-6 space-y-6">
-                      <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                        <div className="flex items-start gap-3">
-                          <div className="i-ph:info text-lg text-blue-500 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <h3 className="text-sm font-semibold text-blue-700 mb-2">Before you begin:</h3>
-                            <p className="text-xs text-blue-600 mb-3 leading-relaxed">
-                              You'll need accounts with {databaseFound ? 'both Netlify and Supabase' : 'Netlify'} to
-                              deploy with custom settings.
-                            </p>
-                            <div className="flex flex-col items-center gap-2">
-                              <a
-                                href="https://app.netlify.com/signup"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium flex items-center gap-1 hover:gap-2"
-                              >
-                                <div className="i-ph:arrow-square-out" />
-                                Sign up for Netlify
-                              </a>
-                              {databaseFound && (
-                                <a
-                                  href="https://supabase.com/dashboard/sign-up"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium flex items-center gap-1 hover:gap-2"
-                                >
-                                  <div className="i-ph:arrow-square-out" />
-                                  Sign up for Supabase
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Netlify Fields */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                            Netlify Auth Token
-                          </label>
-                          <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                            Your personal access token from{' '}
-                            <a
-                              href="https://app.netlify.com/user/applications#personal-access-tokens"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:text-blue-600 underline"
-                            >
-                              Netlify user settings
-                            </a>
-                            . Used to authorize deployments.
-                          </p>
-                          <input
-                            name="netlifyAuthToken"
-                            className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                            value={deploySettings?.netlify?.authToken || ''}
-                            placeholder="nfp_..."
-                            onChange={(e) => {
-                              const netlify: DeploySettingsNetlify = {
-                                authToken: e.target.value,
-                                accountSlug: deploySettings.netlify?.accountSlug ?? '',
-                              };
-                              setDeploySettings({
-                                ...deploySettings,
-                                netlify,
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                            Netlify Team Slug (new site)
-                          </label>
-                          <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                            Your Netlify team slug can be found in the "Team settings" section
-                          </p>
-                          <input
-                            name="netlifyAccountSlug"
-                            className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                            value={deploySettings.netlify?.accountSlug || ''}
-                            placeholder="abc..."
-                            onChange={(e) => {
-                              const netlify: DeploySettingsNetlify = {
-                                authToken: deploySettings.netlify?.authToken ?? '',
-                                accountSlug: e.target.value,
-                              };
-                              setDeploySettings({
-                                ...deploySettings,
-                                netlify,
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <div className="md:col-span-2 space-y-2">
-                          <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                            Netlify Site Name (new site)
-                          </label>
-                          <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                            The desired name for your new Netlify site. Will be part of your site's URL.
-                          </p>
-                          <input
-                            name="netlifySiteName"
-                            className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                            value={deploySettings.siteName || ''}
-                            placeholder="my-chat-app..."
-                            onChange={(e) => {
-                              setDeploySettings({
-                                ...deploySettings,
-                                siteName: e.target.value,
-                              });
-                            }}
-                          />
-                        </div>
-
-                        {/* Supabase Fields */}
-                        {databaseFound && (
-                          <>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                                Supabase Database URL
-                              </label>
-                              <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                                The URL of your Supabase project, used to connect to your database.
-                              </p>
-                              <input
-                                name="supabaseDatabaseURL"
-                                className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                                value={deploySettings?.supabase?.databaseURL || ''}
-                                placeholder="https://abc...def.supabase.co"
-                                onChange={(e) => {
-                                  const supabase = {
-                                    databaseURL: e.target.value,
-                                    anonKey: deploySettings?.supabase?.anonKey || '',
-                                    serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
-                                    postgresURL: deploySettings?.supabase?.postgresURL || '',
-                                  };
-                                  setDeploySettings({
-                                    ...deploySettings,
-                                    supabase,
-                                  });
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                                Supabase Anonymous Key
-                              </label>
-                              <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                                Public API key for client-side database access with restricted permissions.
-                              </p>
-                              <input
-                                name="supabaseAnonKey"
-                                className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                                value={deploySettings?.supabase?.anonKey || ''}
-                                placeholder="ey..."
-                                onChange={(e) => {
-                                  const supabase = {
-                                    databaseURL: deploySettings?.supabase?.databaseURL || '',
-                                    anonKey: e.target.value,
-                                    serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
-                                    postgresURL: deploySettings?.supabase?.postgresURL || '',
-                                  };
-                                  setDeploySettings({
-                                    ...deploySettings,
-                                    supabase,
-                                  });
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                                Supabase Service Role Key
-                              </label>
-                              <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                                Admin API key for server-side operations with full database access.
-                              </p>
-                              <input
-                                name="supabaseServiceRoleKey"
-                                className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                                value={deploySettings?.supabase?.serviceRoleKey || ''}
-                                placeholder="ey..."
-                                onChange={(e) => {
-                                  const supabase = {
-                                    databaseURL: deploySettings?.supabase?.databaseURL || '',
-                                    anonKey: deploySettings?.supabase?.anonKey || '',
-                                    serviceRoleKey: e.target.value,
-                                    postgresURL: deploySettings?.supabase?.postgresURL || '',
-                                  };
-                                  setDeploySettings({
-                                    ...deploySettings,
-                                    supabase,
-                                  });
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold text-bolt-elements-textPrimary">
-                                Supabase Postgres URL
-                              </label>
-                              <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
-                                Direct connection URL to your Postgres database for advanced operations.
-                              </p>
-                              <input
-                                name="supabasePostgresURL"
-                                className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
-                                value={deploySettings?.supabase?.postgresURL || ''}
-                                placeholder="postgresql://postgres:<password>@db.abc...def.supabase.co:5432/postgres"
-                                onChange={(e) => {
-                                  const supabase = {
-                                    databaseURL: deploySettings?.supabase?.databaseURL || '',
-                                    anonKey: deploySettings?.supabase?.anonKey || '',
-                                    serviceRoleKey: deploySettings?.supabase?.serviceRoleKey || '',
-                                    postgresURL: e.target.value,
-                                  };
-                                  setDeploySettings({
-                                    ...deploySettings,
-                                    supabase,
-                                  });
-                                }}
-                              />
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="flex justify-center">
-                        {isDeploying ? (
-                          <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-1/50 rounded-xl border border-bolt-elements-borderColor/30">
-                            <div className="w-6 h-6 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin mr-3" />
-                            <span className="text-lg font-medium">Deploying with custom settings...</span>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={handleDeploy}
-                            disabled={isDeploying}
-                            className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-lg font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
-                          >
-                            <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110" />
-                            <span className="transition-transform duration-200 group-hover:scale-105">
-                              Deploy with Custom Settings
-                            </span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="md:col-span-2 space-y-2">
+                <label className="block text-sm font-semibold text-bolt-elements-textPrimary">Site Name</label>
+                <p className="text-xs text-bolt-elements-textSecondary leading-relaxed mb-2 whitespace-pre-wrap">
+                  The desired name for your new site. Will be part of your site's URL.
+                </p>
+                <input
+                  name="siteName"
+                  className="w-full p-3 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+                  value={deploySettings.siteName || ''}
+                  placeholder="my-chat-app..."
+                  onChange={(e) => {
+                    setDeploySettings({
+                      ...deploySettings,
+                      siteName: e.target.value,
+                    });
+                  }}
+                />
               </div>
 
               <div className="flex justify-center">

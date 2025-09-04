@@ -2,30 +2,6 @@
 
 import { callNutAPI } from './NutAPI';
 
-// External Netlify credentials for deployment.
-export interface DeploySettingsNetlify {
-  // Authentication token for Netlify account.
-  authToken: string;
-
-  // Account slug for creating a new site.
-  accountSlug: string;
-}
-
-// External Supabase credentials for deployment.
-export interface DeploySettingsSupabase {
-  // URL of the Supabase project.
-  databaseURL: string;
-
-  // Anonymous key for the Supabase project.
-  anonKey: string;
-
-  // Service role key for the Supabase project.
-  serviceRoleKey: string;
-
-  // Internal URL of the Postgres database, including password.
-  postgresURL: string;
-}
-
 // Result of attempting to deploy an app.
 export interface DeployResult {
   // Deployment time.
@@ -53,12 +29,6 @@ export interface DeploySettings {
 
   // Name of the site to create.
   siteName?: string;
-
-  // Any external Netlify account to use.
-  netlify?: DeploySettingsNetlify;
-
-  // Any external Supabase credentials to use.
-  supabase?: DeploySettingsSupabase;
 }
 
 export async function deployApp(appId: string, settings: DeploySettings): Promise<DeployResult> {
