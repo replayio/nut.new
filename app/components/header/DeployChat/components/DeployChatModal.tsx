@@ -61,7 +61,9 @@ const DeployChatModal = ({
                   <div className="i-ph:rocket-launch text-2xl text-blue-500" />
                 </div>
                 <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Deploy Your Application</h2>
-                <p className="text-bolt-elements-textSecondary mt-2">Get your app live on the web in just a few clicks</p>
+                <p className="text-bolt-elements-textSecondary mt-2">
+                  Get your app live on the web in just a few clicks
+                </p>
               </div>
 
               {/* Easy Deploy Section */}
@@ -151,7 +153,9 @@ const DeployChatModal = ({
                   {deploySettings.siteName && (
                     <div className="mt-2 p-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
                       <p className="text-sm text-bolt-elements-textSecondary">
-                        <span className="font-medium text-bolt-elements-textPrimary">Your site will be available at:</span>
+                        <span className="font-medium text-bolt-elements-textPrimary">
+                          Your site will be available at:
+                        </span>
                         <br />
                         <span className="font-mono text-blue-600 text-sm">
                           https://{deploySettings.siteName}.netlify.app
