@@ -17,7 +17,7 @@ import { peanutsStore, refreshPeanutsStore } from './peanuts';
 import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
 import { statusModalStore } from './statusModal';
 import { addAppResponse } from '~/lib/replay/ResponseFilter';
-import { formatCheckboxesComprehensive } from '~/utils/checkboxFormatter';
+import { formatCheckboxes } from '~/utils/checkboxFormatter';
 
 export class ChatStore {
   currentAppId = atom<string | undefined>(undefined);
@@ -65,7 +65,7 @@ export function addChatMessage(message: Message) {
           ...message,
           hasInteracted: message.hasInteracted ?? false,
           // Format malformed checkbox syntax to proper GFM task list syntax
-          content: formatCheckboxesComprehensive(message.content),
+          content: formatCheckboxes(message.content),
         }
       : message;
 
