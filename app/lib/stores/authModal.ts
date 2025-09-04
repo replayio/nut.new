@@ -41,4 +41,10 @@ export const authModalStore = {
     this.state.set('form');
     this.message.set('');
   },
+
+  hideReset() {
+    this.showPasswordReset.set(false);
+    this.state.set('form');
+    this.message.set('');
+  },
 };
