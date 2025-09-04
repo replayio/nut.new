@@ -213,7 +213,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
-                    <Messages ref={messageRef} onLastMessageCheckboxChange={onLastMessageCheckboxChange} sendMessage={sendMessage} />
+                    <Messages
+                      ref={messageRef}
+                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
+                      sendMessage={sendMessage}
+                    />
                   ) : null;
                 }}
               </ClientOnly>
