@@ -40,12 +40,12 @@ Sed do eiusmod [x] tempor incididunt ut labore.`;
 [ ] First malformed checkbox
 [x] Second malformed checkbox
 [X] Third malformed checkbox`;
-      
+
       const expected = `Text before checkboxes:
 - [ ] First malformed checkbox
 - [x] Second malformed checkbox
 - [X] Third malformed checkbox`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -53,11 +53,11 @@ Sed do eiusmod [x] tempor incididunt ut labore.`;
       const input = `Tasks:
   [ ] Indented malformed checkbox
     [x] More indented malformed checkbox`;
-      
+
       const expected = `Tasks:
   - [ ] Indented malformed checkbox
     - [x] More indented malformed checkbox`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -67,13 +67,13 @@ Sed do eiusmod [x] tempor incididunt ut labore.`;
 [ ] Needs formatting
 - [x] Already formatted
 [X] Needs formatting`;
-      
+
       const expected = `Mixed checkboxes:
 - [ ] Already formatted
 - [ ] Needs formatting
 - [x] Already formatted
 - [X] Needs formatting`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -82,12 +82,12 @@ Sed do eiusmod [x] tempor incididunt ut labore.`;
 [ ] Vestibulum ante ipsum primis
 [x] Fusce dapibus tellus ac cursus
 [ ] Sed posuere consectetur est`;
-      
+
       const expected = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 - [ ] Vestibulum ante ipsum primis
 - [x] Fusce dapibus tellus ac cursus
 - [ ] Sed posuere consectetur est`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
   });
@@ -97,11 +97,11 @@ Sed do eiusmod [x] tempor incididunt ut labore.`;
       const input = `This text has [brackets] in the middle.
 And also has [x] markers that are not checkboxes.
 [ ] But this should be formatted as a checkbox`;
-      
+
       const expected = `This text has [brackets] in the middle.
 And also has [x] markers that are not checkboxes.
 - [ ] But this should be formatted as a checkbox`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -111,13 +111,13 @@ Function calls like fn([param]) should stay the same.
 [ ] But this checkbox should be formatted
 Regular text with [random] brackets continues.
 [x] And this checkbox should also be formatted`;
-      
+
       const expected = `Array access like arr[0] should not be modified.
 Function calls like fn([param]) should stay the same.
 - [ ] But this checkbox should be formatted
 Regular text with [random] brackets continues.
 - [x] And this checkbox should also be formatted`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
   });
@@ -143,12 +143,12 @@ Regular text with [random] brackets continues.
 [ ] Task one
 
 [ ] Task two after empty line`;
-      
+
       const expected = `First line
 - [ ] Task one
 
 - [ ] Task two after empty line`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -157,12 +157,12 @@ Regular text with [random] brackets continues.
 [ ]
 [x]
 [X]`;
-      
+
       const expected = `Tasks:
 - [ ] 
 - [x] 
 - [X] `;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -171,12 +171,12 @@ Regular text with [random] brackets continues.
 [ ]   Multiple spaces after
 [x]	Tab after checkbox
 [X]No space after`;
-      
+
       const expected = `Tasks:
 - [ ]   Multiple spaces after
 - [x] 	Tab after checkbox
 - [X] No space after`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -185,7 +185,7 @@ Regular text with [random] brackets continues.
 [  ] Extra space inside
 [ x] Extra space before x
 [X ] Extra space after X`;
-      
+
       // Note: These are not valid checkbox patterns, so they shouldn't be formatted
       // Only [ ], [x], [X] are valid
       expect(formatCheckboxes(input)).toBe(input);
@@ -207,7 +207,7 @@ Regular text with [random] brackets continues.
 [x] Neither should this
 \`\`\`
 [ ] This should be formatted again`;
-      
+
       const expected = `Regular text
 - [ ] This should be formatted
 \`\`\`
@@ -215,7 +215,7 @@ Regular text with [random] brackets continues.
 [x] Neither should this
 \`\`\`
 - [ ] This should be formatted again`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
 
@@ -227,7 +227,7 @@ const arr = [ ];  // Don't format this
 if (condition) [x] // Don't format this
 \`\`\`
 [ ] Format this too`;
-      
+
       const expected = `Normal text
 - [ ] Format this
 \`\`\`javascript
@@ -235,7 +235,7 @@ const arr = [ ];  // Don't format this
 if (condition) [x] // Don't format this
 \`\`\`
 - [ ] Format this too`;
-      
+
       expect(formatCheckboxes(input)).toBe(expected);
     });
   });
