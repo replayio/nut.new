@@ -6,15 +6,12 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
-import { MessageContents } from './components/MessageContents';
-import { JumpToBottom } from './components/JumpToBottom';
-import { AppCards } from './components/AppCards';
+import { MessageContents, JumpToBottom, AppCards, StartPlanningCard } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
-import { shouldDisplayMessage, ChatMode } from '~/lib/replay/SendChatMessage';
-import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
 interface MessagesProps {
   id?: string;
@@ -99,6 +96,17 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         return () => clearTimeout(timer);
       }
     }, [pendingMessageStatus, hasPendingMessage, showJumpToBottom]);
+
+    // Scroll to bottom when start planning card appears
+    useEffect(() => {
+      if (startPlanningRating === 10) {
+        const timer = setTimeout(() => {
+          scrollToBottom();
+        }, 500); // Small delay to ensure card is rendered
+
+        return () => clearTimeout(timer);
+      }
+    }, [startPlanningRating]);
 
     // Helper function to get AppSummary creation time
     const getAppSummaryTime = (appSummary: Message): string => {
@@ -264,38 +272,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             );
           })()}
 
-          {/* Start Planning Card - shows when rating is 10 */}
           {startPlanningRating === 10 && (
-            <div className="w-full mt-6">
-              <div className="bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-purple-500/5 border border-blue-500/20 rounded-2xl p-6 transition-all duration-300 hover:border-blue-500/30 hover:shadow-lg">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-full shadow-lg">
-                    <div className="i-ph:rocket-launch text-2xl"></div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Ready to Start Building!</h3>
-                    <p className="text-bolt-elements-textSecondary text-sm max-w-md">
-                      I have all the information I need to start building your app. Click the button below to begin the
-                      development process!
-                    </p>
-                  </div>
-
-                  <div className="relative">
-                    <StartPlanningButton
-                      onClick={() => {
-                        if (sendMessage) {
-                          const message = 'Start building the app based on these requirements.';
-                          sendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
-                        }
-                      }}
-                      startPlanningRating={startPlanningRating}
-                      buttonText="Start Building Now!"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <StartPlanningCard startPlanningRating={startPlanningRating} sendMessage={sendMessage} onMount={scrollToBottom} />
           )}
 
           {hasPendingMessage && (
