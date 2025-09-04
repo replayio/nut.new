@@ -5,15 +5,19 @@ import WithTooltip from '~/components/ui/Tooltip';
 interface StartPlanningButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   startPlanningRating?: number;
+  buttonText?: string;
 }
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const StartPlanningButton = ({ onClick, startPlanningRating = 0 }: StartPlanningButtonProps) => {
-  const className = `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
-  const tooltipText = 'Start Building Now!';
+export const StartPlanningButton = ({ onClick, startPlanningRating = 0, buttonText }: StartPlanningButtonProps) => {
+  const hasText = !!buttonText;
+  const className = hasText 
+    ? `relative flex justify-center items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl min-h-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`
+    : `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
+  const tooltipText = buttonText || 'Start Building Now!';
   const shouldBlink = startPlanningRating === 10;
-  const shouldShowTooltipPersistently = startPlanningRating === 10;
+  const shouldShowTooltipPersistently = startPlanningRating === 10 && !hasText;
 
   return (
     <AnimatePresence>
@@ -49,7 +53,16 @@ export const StartPlanningButton = ({ onClick, startPlanningRating = 0 }: StartP
               onClick?.(event);
             }}
           >
-            <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110"></div>
+            {hasText ? (
+              <>
+                <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap transition-transform duration-200 group-hover:scale-105">
+                  <div className="i-ph:rocket-launch text-lg transition-transform duration-200 group-hover:scale-110"></div>
+                  {buttonText}
+                </div>
+              </>
+            ) : (
+              <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110"></div>
+            )}
           </motion.button>
         </WithTooltip>
       </TooltipProvider>
