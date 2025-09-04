@@ -80,6 +80,9 @@ export interface AppFeature {
   // Current status of the feature.
   status: AppFeatureStatus;
 
+  // Time when this feature was created. 2025/8/30: Always present in newer apps.
+  time?: string;
+
   // Any existing feature in the Arboretum which will be used to implement this one.
   arboretumRepositoryId?: string;
 
