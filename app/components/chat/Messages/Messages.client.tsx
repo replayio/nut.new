@@ -273,7 +273,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           })()}
 
           {startPlanningRating === 10 && (
-            <StartPlanningCard startPlanningRating={startPlanningRating} sendMessage={sendMessage} onMount={scrollToBottom} />
+            <StartPlanningCard
+              startPlanningRating={startPlanningRating}
+              sendMessage={sendMessage}
+              onMount={scrollToBottom}
+            />
           )}
 
           {hasPendingMessage && (

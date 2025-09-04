@@ -11,7 +11,7 @@ interface StartPlanningCardProps {
 export const StartPlanningCard: React.FC<StartPlanningCardProps> = ({ startPlanningRating, sendMessage, onMount }) => {
   useEffect(() => {
     if (onMount) {
-        onMount();
+      onMount();
     }
   }, [onMount]);
 
