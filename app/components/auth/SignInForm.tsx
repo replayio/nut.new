@@ -163,7 +163,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:!bg-gradient-to-r disabled:!from-blue-400/60 disabled:!to-indigo-400/60 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:border-white/10 group"
+          className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
         >
           <span className="transition-transform duration-200 group-hover:scale-105">
             {isProcessing ? 'Signing In...' : 'Sign In'}
