@@ -6,12 +6,14 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
-import { MessageContents, JumpToBottom, AppCards, StartBuildingCard } from './components';
+import { MessageContents, JumpToBottom, AppCards, StartBuildingCard, SignInCard } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
+import { userStore } from '~/lib/stores/auth';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 
 interface MessagesProps {
   id?: string;
@@ -23,6 +25,8 @@ interface MessagesProps {
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
   ({ onLastMessageCheckboxChange, sendMessage }, ref) => {
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
+    const user = useStore(userStore);
+    const appSummary = useStore(chatStore.appSummary);
     const [showTopShadow, setShowTopShadow] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const messages = useStore(chatStore.messages);
@@ -271,6 +275,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               </>
             );
           })()}
+
+          {!user && appSummary?.mockupStatus === AppFeatureStatus.Validated && (
+            <SignInCard
+              mockupStatus={appSummary.mockupStatus}
+              onMount={scrollToBottom}
+            />
+          )}
 
           {startPlanningRating === 10 && (
             <StartBuildingCard

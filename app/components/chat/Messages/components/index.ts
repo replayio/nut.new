@@ -9,3 +9,4 @@ export { MessageContents } from './MessageContents';
 export { MockupCard } from './MockupCard';
 export { SecretsCard } from './SecretsCard';
 export { StartBuildingCard } from './StartBuildingCard';
+export { SignInCard } from './SignInCard';
