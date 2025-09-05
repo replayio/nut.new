@@ -19,7 +19,7 @@ export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ mockupStatus, pe
     if (onMount) {
       onMount();
     }
-  }, [onMount]);
+  }, []);
 
   if (mockupStatus !== AppFeatureStatus.Validated || peanutsRemaining > 0) {
     return null;

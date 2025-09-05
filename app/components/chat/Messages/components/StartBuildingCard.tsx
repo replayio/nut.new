@@ -13,7 +13,7 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
     if (onMount) {
       onMount();
     }
-  }, [onMount]);
+  }, []);
 
   return (
     <div className="w-full mt-2">

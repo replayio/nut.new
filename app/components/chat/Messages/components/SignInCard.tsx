@@ -12,7 +12,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({ mockupStatus, onMount })
     if (onMount) {
       onMount();
     }
-  }, [onMount]);
+  }, []);
 
   if (mockupStatus !== AppFeatureStatus.Validated) {
     return null;

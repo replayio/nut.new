@@ -10,7 +10,7 @@ export const StopBuildCard: React.FC<StopBuildCardProps> = ({ onMount }) => {
     if (onMount) {
       onMount();
     }
-  }, [onMount]);
+  }, []);
 
   const handleStopBuild = (event: React.MouseEvent) => {
     event.preventDefault();
