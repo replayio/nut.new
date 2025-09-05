@@ -14,14 +14,13 @@ interface AddPeanutsCardProps {
 export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ mockupStatus, peanutsRemaining, onMount }) => {
   const [loading, setLoading] = useState(false);
   const user = useStore(userStore);
-  
+
   useEffect(() => {
     if (onMount) {
       onMount();
     }
   }, [onMount]);
 
-  // Only show if mockup is validated AND user is out of peanuts
   if (mockupStatus !== AppFeatureStatus.Validated || peanutsRemaining > 0) {
     return null;
   }
@@ -39,7 +38,6 @@ export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ mockupStatus, pe
     setLoading(true);
     try {
       await createTopoffCheckout();
-      // User will be redirected to Stripe Checkout
       if (window.analytics) {
         window.analytics.track('Peanuts Added', {
           timestamp: new Date().toISOString(),

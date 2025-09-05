@@ -278,24 +278,21 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             );
           })()}
 
-          {/* Show SignInCard if mockup is validated but user is not authenticated */}
           {!user && appSummary?.mockupStatus === AppFeatureStatus.Validated && (
-            <SignInCard
-              mockupStatus={appSummary.mockupStatus}
-              onMount={scrollToBottom}
-            />
+            <SignInCard mockupStatus={appSummary.mockupStatus} onMount={scrollToBottom} />
           )}
 
-          {/* Show AddPeanutsCard if user is authenticated, mockup is complete, but out of peanuts */}
-          {user && appSummary?.mockupStatus === AppFeatureStatus.Validated && peanutsRemaining !== undefined && peanutsRemaining <= 0 && (
-            <AddPeanutsCard
-              mockupStatus={appSummary.mockupStatus}
-              peanutsRemaining={peanutsRemaining}
-              onMount={scrollToBottom}
-            />
-          )}
+          {user &&
+            appSummary?.mockupStatus === AppFeatureStatus.Validated &&
+            peanutsRemaining !== undefined &&
+            peanutsRemaining <= 0 && (
+              <AddPeanutsCard
+                mockupStatus={appSummary.mockupStatus}
+                peanutsRemaining={peanutsRemaining}
+                onMount={scrollToBottom}
+              />
+            )}
 
-          {/* Show StartBuildingCard if planning rating is 10 AND user has peanuts */}
           {startPlanningRating === 10 && (
             <StartBuildingCard
               startPlanningRating={startPlanningRating}

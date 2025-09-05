@@ -19,7 +19,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({ mockupStatus, onMount })
   }
 
   const handleSignInClick = () => {
-    authModalStore.open(false); // false = open sign in (not sign up)
+    authModalStore.open(false);
   };
 
   return (
@@ -33,7 +33,8 @@ export const SignInCard: React.FC<SignInCardProps> = ({ mockupStatus, onMount })
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Sign In to Continue Building</h3>
             <p className="text-bolt-elements-textSecondary text-sm max-w-md">
-              Your app mockup is ready! To start building and deploying your application, you'll need to sign in or create an account.
+              Your app mockup is ready! To start building and deploying your application, you'll need to sign in or
+              create an account.
             </p>
           </div>
 
@@ -42,9 +43,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({ mockupStatus, onMount })
             className="flex items-center gap-3 px-6 py-3 !bg-gradient-to-r !from-green-500 !to-emerald-500 hover:!from-green-600 hover:!to-emerald-600 text-white text-base font-semibold rounded-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
           >
             <div className="i-ph:sign-in text-lg transition-transform duration-200 group-hover:scale-110"></div>
-            <span className="transition-transform duration-200 group-hover:scale-105">
-              Sign In to Continue
-            </span>
+            <span className="transition-transform duration-200 group-hover:scale-105">Sign In to Continue</span>
           </button>
         </div>
       </div>
