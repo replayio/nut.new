@@ -6,7 +6,7 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
-import { MessageContents, JumpToBottom, AppCards, StartBuildingCard, SignInCard, AddPeanutsCard } from './components';
+import { MessageContents, JumpToBottom, AppCards, StartBuildingCard, SignInCard, AddPeanutsCard, StopBuildCard } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
@@ -29,12 +29,18 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const user = useStore(userStore);
     const appSummary = useStore(chatStore.appSummary);
     const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
+    const listenResponses = useStore(chatStore.listenResponses);
     const [showTopShadow, setShowTopShadow] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const messages = useStore(chatStore.messages);
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const pendingMessageStatus = useStore(pendingMessageStatusStore);
     const hasAppSummary = !!useStore(chatStore.appSummary);
+    const completedFeatures = appSummary?.features?.filter(
+      (feature) => feature.status === AppFeatureStatus.Validated,
+    ).length;
+    const totalFeatures = appSummary?.features?.length;
+    const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
 
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
@@ -292,6 +298,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
                 onMount={scrollToBottom}
               />
             )}
+
+          {listenResponses && appSummary?.features?.length && !isFullyComplete && (
+            <StopBuildCard
+              onMount={scrollToBottom}
+            />
+          )}
 
           {startPlanningRating === 10 && (
             <StartBuildingCard

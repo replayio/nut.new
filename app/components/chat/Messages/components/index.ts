@@ -11,3 +11,4 @@ export { SecretsCard } from './SecretsCard';
 export { StartBuildingCard } from './StartBuildingCard';
 export { SignInCard } from './SignInCard';
 export { AddPeanutsCard } from './AddPeanutsCard';
+export { StopBuildCard } from './StopBuildCard';
