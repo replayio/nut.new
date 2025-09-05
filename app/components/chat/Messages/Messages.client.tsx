@@ -6,12 +6,13 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
-import { MessageContents, JumpToBottom, AppCards, StartBuildingCard, SignInCard } from './components';
+import { MessageContents, JumpToBottom, AppCards, StartBuildingCard, SignInCard, AddPeanutsCard } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
 import { userStore } from '~/lib/stores/auth';
+import { peanutsStore } from '~/lib/stores/peanuts';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 
@@ -27,6 +28,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const user = useStore(userStore);
     const appSummary = useStore(chatStore.appSummary);
+    const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
     const [showTopShadow, setShowTopShadow] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const messages = useStore(chatStore.messages);
@@ -276,6 +278,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             );
           })()}
 
+          {/* Show SignInCard if mockup is validated but user is not authenticated */}
           {!user && appSummary?.mockupStatus === AppFeatureStatus.Validated && (
             <SignInCard
               mockupStatus={appSummary.mockupStatus}
@@ -283,6 +286,16 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             />
           )}
 
+          {/* Show AddPeanutsCard if user is authenticated, mockup is complete, but out of peanuts */}
+          {user && appSummary?.mockupStatus === AppFeatureStatus.Validated && peanutsRemaining !== undefined && peanutsRemaining <= 0 && (
+            <AddPeanutsCard
+              mockupStatus={appSummary.mockupStatus}
+              peanutsRemaining={peanutsRemaining}
+              onMount={scrollToBottom}
+            />
+          )}
+
+          {/* Show StartBuildingCard if planning rating is 10 AND user has peanuts */}
           {startPlanningRating === 10 && (
             <StartBuildingCard
               startPlanningRating={startPlanningRating}
