@@ -30,12 +30,12 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
     setIsProcessing(true);
 
     try {
-      const { data, error } = await getSupabase().auth.signUp({ 
-        email, 
+      const { data, error } = await getSupabase().auth.signUp({
+        email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}&emailConfirm=true`,
-        }
+        },
       });
 
       if (data.user?.email && isChecked) {
@@ -49,7 +49,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
       // Note: Analytics tracking will happen when user clicks email confirmation link
       // and lands on /auth/callback, so we don't track here to avoid duplicate events
 
-      onSuccess('Check your email for the confirmation link! You\'ll be redirected back here after confirming.');
+      onSuccess("Check your email for the confirmation link! You'll be redirected back here after confirming.");
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign up');

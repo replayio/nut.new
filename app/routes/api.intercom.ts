@@ -15,22 +15,23 @@ export const action: ActionFunction = async ({ request }: { request: Request }) 
   try {
     const body = await request.json();
     email = body.email;
-    
+
     if (!email || typeof email !== 'string') {
       return json({ error: 'Valid email is required' }, { status: 400 });
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(email)) {
       return json({ error: 'Invalid email format' }, { status: 400 });
     }
-    
+
     // Prevent email injection attacks by limiting length
     if (email.length > 254) {
       return json({ error: 'Email too long' }, { status: 400 });
     }
   } catch (error) {
+    console.error('Invalid request body', error);
     return json({ error: 'Invalid request body' }, { status: 400 });
   }
 
@@ -65,18 +66,15 @@ export const action: ActionFunction = async ({ request }: { request: Request }) 
         status: response.status,
         statusText: response.statusText,
       });
-      
+
       // Don't expose internal API response details to client
-      return json(
-        { error: 'Failed to create contact' },
-        { status: 500 },
-      );
+      return json({ error: 'Failed to create contact' }, { status: 500 });
     }
 
     return json({ success: true, data: responseData });
   } catch (error) {
     // Log error without sensitive details
-    console.error('Failed to contact Intercom API');
+    console.error('Failed to contact Intercom API', error);
     return json({ error: 'Internal server error' }, { status: 500 });
   }
 };

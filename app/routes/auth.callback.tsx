@@ -27,17 +27,19 @@ export default function AuthCallback() {
 
         // Validate redirect URL to prevent open redirect attacks
         const isValidRedirect = (url: string | null): boolean => {
-          if (!url || url === 'null' || url === '') return false;
-          
+          if (!url || url === 'null' || url === '') {
+            return false;
+          }
+
           try {
             const decoded = decodeURIComponent(url);
-            
+
             // Only allow relative URLs (starting with /) or same-origin URLs
             if (decoded.startsWith('/')) {
               // Ensure it doesn't try to escape to another domain with //
               return !decoded.startsWith('//');
             }
-            
+
             // If it's an absolute URL, ensure it's same origin
             const redirectUrl = new URL(decoded, window.location.origin);
             return redirectUrl.origin === window.location.origin;
@@ -46,7 +48,7 @@ export default function AuthCallback() {
             return false;
           }
         };
-        
+
         // If user is authenticated, handle analytics tracking
         if (data.session?.user) {
           const user = data.session.user;
@@ -61,8 +63,8 @@ export default function AuthCallback() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email }),
-              }).catch(err => {
-                console.error('Failed to add user to Intercom (non-blocking)');
+              }).catch((err) => {
+                console.error('Failed to add user to Intercom (non-blocking)', err);
                 // Don't log the actual error details to prevent information disclosure
               });
             }
@@ -70,17 +72,18 @@ export default function AuthCallback() {
 
           // Analytics tracking
           if (window.analytics && user) {
-            const signInMethod = isEmailConfirm ? 'email' : (isSignupFlow ? 'google_oauth' : 'google_oauth');
-            
+            const signInMethod = isEmailConfirm ? 'email' : isSignupFlow ? 'google_oauth' : 'google_oauth';
+
             window.analytics.identify(user.id, {
               email: user.email,
               lastSignIn: new Date().toISOString(),
-              signInMethod: signInMethod,
+              signInMethod,
             });
 
             // Check if this is a signup flow, email confirmation, or if it's a new user
-            const isNewUser = isSignupFlow || isEmailConfirm || new Date(user.created_at).getTime() > Date.now() - 60000; // Within last minute
-            
+            const isNewUser =
+              isSignupFlow || isEmailConfirm || new Date(user.created_at).getTime() > Date.now() - 60000; // Within last minute
+
             if (isNewUser) {
               // Track as signup
               window.analytics.track('User Signed Up', {
@@ -101,11 +104,11 @@ export default function AuthCallback() {
 
           // LogRocket identification
           if (window.LogRocket && user) {
-            const signInMethod = isEmailConfirm ? 'email' : (isSignupFlow ? 'google_oauth' : 'google_oauth');
+            const signInMethod = isEmailConfirm ? 'email' : isSignupFlow ? 'google_oauth' : 'google_oauth';
             window.LogRocket.identify(user.id, {
               email: user.email,
               lastSignIn: new Date().toISOString(),
-              signInMethod: signInMethod,
+              signInMethod,
             });
           }
         }
