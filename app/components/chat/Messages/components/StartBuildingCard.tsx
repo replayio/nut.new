@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { mobileNavStore } from '~/lib/stores/mobileNav';
 
 interface StartBuildingCardProps {
   startPlanningRating: number;
@@ -37,6 +39,10 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
                 if (sendMessage) {
                   const message = 'Start building the app based on these requirements.';
                   sendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
+                  setTimeout(() => {
+                    workbenchStore.setShowWorkbench(true);
+                    mobileNavStore.setActiveTab('preview');
+                  }, 2000);
                 }
               }}
               startPlanningRating={startPlanningRating}

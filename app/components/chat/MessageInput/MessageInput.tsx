@@ -9,6 +9,8 @@ import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { mobileNavStore } from '~/lib/stores/mobileNav';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -240,6 +242,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                       onClick={() => {
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                         handleSendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
+                        setTimeout(() => {
+                          workbenchStore.setShowWorkbench(true);
+                          mobileNavStore.setActiveTab('preview');
+                        }, 2000);
                       }}
                       startPlanningRating={startPlanningRating}
                     />
