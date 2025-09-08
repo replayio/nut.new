@@ -58,26 +58,15 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
     try {
       const { error } = await getSupabase().auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}&isSignup=false`,
+        },
       });
 
       if (error) {
         throw error;
       }
-
-      try {
-        const {
-          data: { user },
-        } = await getSupabase().auth.getUser();
-        if (window.analytics && user) {
-          window.analytics.identify(user.id, {
-            email: user.email,
-            lastSignIn: new Date().toISOString(),
-            signInMethod: 'google_oauth',
-          });
-        }
-      } catch (err) {
-        console.error('Failed to identify user after Google OAuth:', err);
-      }
+      // OAuth redirect initiated - user will be redirected to Google and then back to our callback
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in with Google');
