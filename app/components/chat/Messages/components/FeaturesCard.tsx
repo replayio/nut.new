@@ -54,7 +54,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
     if (statusCounts.failed > 0) {
       return {
         status: 'failed' as const,
-        progressText: `${statusCounts.failed} failed, ${statusCounts.completed}/${totalFeatures} complete`,
+        progressText: `${statusCounts.completed}/${totalFeatures} complete, ${statusCounts.failed} failed`,
       };
     }
 
