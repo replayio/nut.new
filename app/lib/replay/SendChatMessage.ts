@@ -27,6 +27,7 @@ export type ChatResponseCallback = (response: ChatResponse) => void;
 
 export enum ChatMode {
   BuildApp = 'BuildApp',
+  BuildAppStructured = 'BuildAppStructured',
   Discovery = 'Discovery',
   DevelopApp = 'DevelopApp',
   FixDetectedError = 'FixDetectedError',
@@ -42,10 +43,9 @@ export interface VisitData {
 
 export interface NutChatRequest {
   appId: string;
-  mode?: ChatMode;
+  mode: ChatMode;
   messages?: Message[];
   visit?: VisitData;
-  useExperimentalFeatures?: boolean;
 }
 
 // Messages that are rendered normally in the chat.
@@ -88,7 +88,9 @@ export async function sendChatMessage(request: NutChatRequest, onResponse: ChatR
     return;
   }
 
-  request.useExperimentalFeatures = true;
+  if (request.mode == ChatMode.BuildApp) {
+    request.mode = ChatMode.BuildAppStructured;
+  }
 
   logger.debug('sendChatMessage', JSON.stringify(request));
 
