@@ -10,6 +10,7 @@ import { getDetectedErrors } from '~/lib/replay/MessageHandler';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
+import { ThemeChangesBanner } from '../ThemeChangesBanner';
 
 let gCurrentIFrame: HTMLIFrameElement | undefined;
 
@@ -257,19 +258,22 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
         )}
       </div>
 
-      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
-        <AppView
-          isDeviceModeOn={isDeviceModeOn}
-          iframeRef={iframeRef}
-          iframeUrl={iframeUrl ?? ''}
-          isSelectionMode={isSelectionMode}
-          previewURL={url}
-          selectionPoint={selectionPoint}
-          setIsSelectionMode={setIsSelectionMode}
-          setSelectionPoint={setSelectionPoint}
-          startResizing={startResizing}
-          widthPercent={widthPercent}
-        />
+      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex flex-col overflow-auto">
+        <ThemeChangesBanner />
+        <div className="flex-1 flex justify-center items-center">
+          <AppView
+            isDeviceModeOn={isDeviceModeOn}
+            iframeRef={iframeRef}
+            iframeUrl={iframeUrl ?? ''}
+            isSelectionMode={isSelectionMode}
+            previewURL={url}
+            selectionPoint={selectionPoint}
+            setIsSelectionMode={setIsSelectionMode}
+            setSelectionPoint={setSelectionPoint}
+            startResizing={startResizing}
+            widthPercent={widthPercent}
+          />
+        </div>
       </div>
 
       {/* Error Display Section */}

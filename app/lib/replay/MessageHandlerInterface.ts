@@ -22,6 +22,10 @@ export type MessageHandlerRequestMap = {
     payload: unknown;
     response: DetectedError[];
   };
+  'get-custom-variables': {
+    payload: unknown;
+    response: Record<string, string>;
+  };
 };
 
 export type MessageHandlerRequest = {

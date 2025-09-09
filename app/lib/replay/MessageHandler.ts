@@ -66,3 +66,13 @@ export async function getDetectedErrors(iframe: HTMLIFrameElement): Promise<Dete
 
   return detectedErrors;
 }
+
+export async function getCustomVariables(iframe: HTMLIFrameElement): Promise<Record<string, string>> {
+  const customVariables = await sendIframeRequest(iframe, { request: 'get-custom-variables', payload: undefined });
+
+  if (!customVariables) {
+    return {};
+  }
+
+  return customVariables;
+}

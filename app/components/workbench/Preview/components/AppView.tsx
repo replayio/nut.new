@@ -4,8 +4,10 @@ import ProgressStatus from './ProgressStatus/ProgressStatus';
 import useViewport from '~/lib/hooks/useViewport';
 import { useStore } from '@nanostores/react';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
+import { themeInjector } from '~/lib/replay/ThemeInjector';
+import { themeStore } from '~/lib/stores/theme';
 
 export type ResizeSide = 'left' | 'right' | null;
 
@@ -36,6 +38,7 @@ const AppView = ({
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const repositoryId = useStore(workbenchStore.repositoryId);
   const isSmallViewport = useViewport(1024);
+  const currentTheme = useStore(themeStore);
 
   const handleTokenOrRepoChange = (params: URLSearchParams) => {
     setRedirectUrl(`https://${repositoryId}.http.replay.io/auth/callback#${params.toString()}`);
@@ -48,6 +51,20 @@ const AppView = ({
     iframeUrl,
     onTokenOrRepoChange: handleTokenOrRepoChange,
   });
+
+  // Initialize theme injector when iframe loads
+  useEffect(() => {
+    if (iframeRef.current && previewURL) {
+      themeInjector.setIframe(iframeRef.current);
+
+      // Apply current theme to iframe
+      if (currentTheme === 'dark') {
+        themeInjector.applyDarkTheme();
+      } else {
+        themeInjector.applyLightTheme();
+      }
+    }
+  }, [iframeRef, previewURL, currentTheme]);
 
   // Determine the actual iframe URL to use
   const actualIframeUrl = redirectUrl || iframeUrl;
