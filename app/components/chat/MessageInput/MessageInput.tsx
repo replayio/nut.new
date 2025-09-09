@@ -4,11 +4,13 @@ import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
-import { StartPlanningButton } from '~/components/chat/StartPlanningButton';
+import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { mobileNavStore } from '~/lib/stores/mobileNav';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -209,7 +211,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         {(() => {
           const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted;
-          const showStartPlanningButton = startPlanningRating > 0 && !showSendButton && !hasAppSummary;
+          const showStartBuildingButton =
+            startPlanningRating > 0 && startPlanningRating !== 10 && !showSendButton && !hasAppSummary;
 
           return (
             <>
@@ -232,13 +235,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </ClientOnly>
               )}
 
-              {showStartPlanningButton && (
+              {showStartBuildingButton && (
                 <ClientOnly>
                   {() => (
-                    <StartPlanningButton
+                    <StartBuildingButton
                       onClick={() => {
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                         handleSendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
+                        setTimeout(() => {
+                          workbenchStore.setShowWorkbench(true);
+                          mobileNavStore.setActiveTab('preview');
+                        }, 2000);
                       }}
                       startPlanningRating={startPlanningRating}
                     />

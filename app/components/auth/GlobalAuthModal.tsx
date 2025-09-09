@@ -85,7 +85,7 @@ export function GlobalAuthModal() {
           />
         ) : showPasswordReset ? (
           <PasswordResetForm
-            onBack={() => authModalStore.setState('form')}
+            onBack={() => authModalStore.hideReset()}
             onSuccess={(message) => authModalStore.setState('success', message)}
             onError={(message) => authModalStore.setState('error', message)}
           />
