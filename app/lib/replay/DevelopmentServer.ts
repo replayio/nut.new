@@ -2,6 +2,7 @@
 
 import { workbenchStore } from '~/lib/stores/workbench';
 import { debounce } from '~/utils/debounce';
+import { callNutAPI } from './NutAPI';
 
 export function getRepositoryURL(repositoryId: string | undefined) {
   if (!repositoryId) {
@@ -17,9 +18,23 @@ export function getRepositoryURL(repositoryId: string | undefined) {
   return `https://${repositoryId}.http.replay.io`;
 }
 
-export const updateDevelopmentServer = debounce((repositoryId: string | undefined) => {
+export const updateDevelopmentServer = debounce(async (repositoryId: string | undefined) => {
   const repositoryURL = getRepositoryURL(repositoryId);
   console.log('UpdateDevelopmentServer', new Date().toISOString(), repositoryURL);
+
+  workbenchStore.pendingRepositoryId.set(repositoryId);
+
+  if (repositoryId) {
+    try {
+      await callNutAPI('wait-for-development-server', { repositoryId });
+    } catch (error) {
+      console.error('Error waiting for development server', error);
+    }
+  }
+
+  if (workbenchStore.pendingRepositoryId.get() !== repositoryId) {
+    return;
+  }
 
   workbenchStore.showWorkbench.set(repositoryURL !== undefined);
   workbenchStore.repositoryId.set(repositoryId);

@@ -4,6 +4,9 @@ export class WorkbenchStore {
   // The current repository.
   repositoryId = atom<string | undefined>(undefined);
 
+  // Repository we are waiting to start up.
+  pendingRepositoryId = atom<string | undefined>(undefined);
+
   // Any available preview URL for the current repository.
   previewURL = atom<string | undefined>(undefined);
 
