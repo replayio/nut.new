@@ -16,22 +16,23 @@ interface WorkspaceProps {
   handleSendMessage: (params: ChatMessageParams) => void;
 }
 
-const createWorkbenchVariants = (workbenchWidth: number) => ({
-  closed: {
-    width: 0,
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
+const createWorkbenchVariants = (workbenchWidth: number) =>
+  ({
+    closed: {
+      width: 0,
+      transition: {
+        duration: 0.2,
+        ease: cubicEasingFn,
+      },
     },
-  },
-  open: {
-    width: workbenchWidth,
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
+    open: {
+      width: workbenchWidth,
+      transition: {
+        duration: 0.2,
+        ease: cubicEasingFn,
+      },
     },
-  },
-} satisfies Variants);
+  }) satisfies Variants;
 
 export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
@@ -52,20 +53,21 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
         className="z-workbench"
       >
         <div
-          className={classNames(
-            'fixed mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
-            {
-              'top-[calc(var(--header-height)+0rem)] bottom-13': isSmallViewport,
-              'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
-              'w-full': isSmallViewport,
-              'left-0': showWorkbench && isSmallViewport,
-              'left-[100%]': !showWorkbench,
-            },
-          )}
-          style={!isSmallViewport ? { 
-            width: `${workbenchWidth}px`,
-            left: showWorkbench ? `${workbenchLeft}px` : '100%'
-          } : undefined}
+          className={classNames('fixed mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier', {
+            'top-[calc(var(--header-height)+0rem)] bottom-13': isSmallViewport,
+            'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
+            'w-full': isSmallViewport,
+            'left-0': showWorkbench && isSmallViewport,
+            'left-[100%]': !showWorkbench,
+          })}
+          style={
+            !isSmallViewport
+              ? {
+                  width: `${workbenchWidth}px`,
+                  left: showWorkbench ? `${workbenchLeft}px` : '100%',
+                }
+              : undefined
+          }
         >
           <div
             className={classNames('absolute inset-0', {

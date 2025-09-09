@@ -25,10 +25,7 @@ export function useLayoutWidths(hasSidebar: boolean = false): LayoutWidths {
       const targetChatWidth = availableWidth * CHAT_TARGET_PERCENTAGE;
 
       // Apply min and max constraints
-      const chatWidth = Math.min(
-        Math.max(targetChatWidth, CHAT_MIN_WIDTH),
-        CHAT_MAX_WIDTH
-      );
+      const chatWidth = Math.min(Math.max(targetChatWidth, CHAT_MIN_WIDTH), CHAT_MAX_WIDTH);
 
       const workbenchWidth = Math.max(0, availableWidth - chatWidth);
 
@@ -44,7 +41,7 @@ export function useLayoutWidths(hasSidebar: boolean = false): LayoutWidths {
     calculateWidths();
 
     window.addEventListener('resize', calculateWidths);
-    
+
     return () => {
       window.removeEventListener('resize', calculateWidths);
     };

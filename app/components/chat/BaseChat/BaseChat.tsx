@@ -65,13 +65,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-  const hasPendingMessage = useStore(chatStore.hasPendingMessage);
-  const appSummary = useStore(chatStore.appSummary);
-  const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-  const isSmallViewport = useViewport(1024);
-  const user = useStore(userStore.user);
-  const { chatWidth } = useLayoutWidths(!!user);
-  const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const hasPendingMessage = useStore(chatStore.hasPendingMessage);
+    const appSummary = useStore(chatStore.appSummary);
+    const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
+    const isSmallViewport = useViewport(1024);
+    const user = useStore(userStore.user);
+    const { chatWidth } = useLayoutWidths(!!user);
+    const showWorkbench = useStore(workbenchStore.showWorkbench);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -203,7 +203,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               'pb-2': isSmallViewport,
               'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
             })}
-            style={(!isSmallViewport && showWorkbench) ? { width: `${chatWidth}px` } : { width: '100vw' }}
+            style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100vw' }}
           >
             {!chatStarted && (
               <>
