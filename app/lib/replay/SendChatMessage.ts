@@ -27,6 +27,7 @@ export type ChatResponseCallback = (response: ChatResponse) => void;
 
 export enum ChatMode {
   BuildApp = 'BuildApp',
+  BuildAppStructured = 'BuildAppStructured',
   Discovery = 'Discovery',
   DevelopApp = 'DevelopApp',
   FixDetectedError = 'FixDetectedError',
@@ -42,7 +43,7 @@ export interface VisitData {
 
 export interface NutChatRequest {
   appId: string;
-  mode?: ChatMode;
+  mode: ChatMode;
   messages?: Message[];
   visit?: VisitData;
 }
@@ -85,6 +86,10 @@ export async function sendChatMessage(request: NutChatRequest, onResponse: ChatR
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
+  }
+
+  if (request.mode == ChatMode.BuildApp) {
+    request.mode = ChatMode.BuildAppStructured;
   }
 
   logger.debug('sendChatMessage', JSON.stringify(request));
