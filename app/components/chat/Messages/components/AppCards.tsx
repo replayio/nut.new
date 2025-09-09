@@ -6,6 +6,7 @@ import { FeaturesCard } from './FeaturesCard';
 import { MockupCard } from './MockupCard';
 import { SecretsCard } from './SecretsCard';
 import { AuthSelectorCard } from './AuthSelectorCard';
+import { AppNameCard } from './AppNameCard';
 import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 
 // Helper function to check if a status indicates completion
@@ -86,6 +87,7 @@ export const AppCards: React.FC = () => {
 
   if (visibleCardTypes.includes('auth')) {
     cards.push(<AuthSelectorCard key="auth" appSummary={appSummary} />);
+    cards.push(<AppNameCard key="app-name" />);
   }
 
   if (visibleCardTypes.includes('secrets')) {

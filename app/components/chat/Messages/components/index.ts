@@ -3,6 +3,7 @@ export { AppCards } from './AppCards';
 export { AppCardModal } from './AppCardModal';
 export { GlobalAppCardModal } from './GlobalAppCardModal';
 export { AuthSelectorCard } from './AuthSelectorCard';
+export { AppNameCard } from './AppNameCard';
 export { FeaturesCard } from './FeaturesCard';
 export { JumpToBottom } from './JumpToBottom';
 export { MessageContents } from './MessageContents';

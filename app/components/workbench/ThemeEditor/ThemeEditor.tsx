@@ -195,6 +195,44 @@ const darkThemeVariables: CSSVariable[] = [
   },
 ];
 
+// App Settings Variables (Typography, Layout, etc.)
+const appSettingsVariables: CSSVariable[] = [
+  
+  // Typography
+  { id: 'typo1', name: '--font-sans', value: 'Inter, sans-serif', category: 'Typography', label: 'Sans Serif Font', type: 'font' },
+  { id: 'typo2', name: '--font-serif', value: 'ui-serif, Georgia, serif', category: 'Typography', label: 'Serif Font', type: 'font' },
+  { id: 'typo3', name: '--font-mono', value: 'ui-monospace, monospace', category: 'Typography', label: 'Monospace Font', type: 'font' },
+  
+  // Font Weights  
+  { id: 'typo4', name: '--font-weight-normal', value: '400', category: 'Typography', label: 'Normal Weight', type: 'other' },
+  { id: 'typo5', name: '--font-weight-medium', value: '500', category: 'Typography', label: 'Medium Weight', type: 'other' },
+  { id: 'typo6', name: '--font-weight-semibold', value: '600', category: 'Typography', label: 'Semibold Weight', type: 'other' },
+  { id: 'typo7', name: '--font-weight-bold', value: '700', category: 'Typography', label: 'Bold Weight', type: 'other' },
+  
+  // Line Heights
+  { id: 'typo8', name: '--leading-tight', value: '1.25', category: 'Typography', label: 'Tight Line Height', type: 'other' },
+  { id: 'typo9', name: '--leading-normal', value: '1.5', category: 'Typography', label: 'Normal Line Height', type: 'other' },
+  { id: 'typo10', name: '--leading-relaxed', value: '1.625', category: 'Typography', label: 'Relaxed Line Height', type: 'other' },
+  
+  // Letter Spacing
+  { id: 'typo11', name: '--tracking-tighter', value: '-0.05em', category: 'Typography', label: 'Tighter Tracking', type: 'other' },
+  { id: 'typo12', name: '--tracking-tight', value: '-0.025em', category: 'Typography', label: 'Tight Tracking', type: 'other' },
+  { id: 'typo13', name: '--tracking-normal', value: '0em', category: 'Typography', label: 'Normal Tracking', type: 'other' },
+  { id: 'typo14', name: '--tracking-wide', value: '0.025em', category: 'Typography', label: 'Wide Tracking', type: 'other' },
+  { id: 'typo15', name: '--tracking-wider', value: '0.05em', category: 'Typography', label: 'Wider Tracking', type: 'other' },
+  { id: 'typo16', name: '--tracking-widest', value: '0.1em', category: 'Typography', label: 'Widest Tracking', type: 'other' },
+  { id: 'typo17', name: '--letter-spacing', value: '0em', category: 'Typography', label: 'Letter Spacing', type: 'other' },
+  
+  // Layout
+  { id: 'layout1', name: '--radius', value: '0.5rem', category: 'Layout', label: 'Border Radius', type: 'radius' },
+  { id: 'layout2', name: '--spacing', value: '0.25rem', category: 'Layout', label: 'Base Spacing', type: 'spacing' },
+  { id: 'layout3', name: '--border-width', value: '1px', category: 'Layout', label: 'Border Width', type: 'other' },
+  
+  // Shadows
+  { id: 'shadow1', name: '--shadow-color', value: '0 0% 0%', category: 'Shadows', label: 'Shadow Color', type: 'other' },
+  { id: 'shadow2', name: '--shadow-opacity', value: '0.1', category: 'Shadows', label: 'Shadow Opacity', type: 'other' },
+];
+
 // Create the original base colors from the default theme variables
 const createOriginalBaseColors = () => {
   const baseColors: Record<string, string> = {};
@@ -217,12 +255,12 @@ const createOriginalBaseColors = () => {
 };
 
 export const ThemeEditor = () => {
-  const [lightVariables, setLightVariables] = useState<CSSVariable[]>([...lightThemeVariables]);
-  const [darkVariables, setDarkVariables] = useState<CSSVariable[]>([...darkThemeVariables]);
+  const [lightVariables, setLightVariables] = useState<CSSVariable[]>([...lightThemeVariables, ...appSettingsVariables]);
+  const [darkVariables, setDarkVariables] = useState<CSSVariable[]>([...darkThemeVariables, ...appSettingsVariables]);
   const [liveVariables, setLiveVariables] = useState<Record<string, string>>({});
   // Store the original base colors from the default theme editor values
   const [originalBaseColors] = useState<Record<string, string>>(createOriginalBaseColors());
-  const [defaultOpenCategories] = useState<string[]>(['Primary Colors', 'Base Colors', 'Live Variables']);
+  const [defaultOpenCategories] = useState<string[]>(['Primary Colors', 'Base Colors', 'Live Variables', 'App Settings', 'Typography', 'Layout']);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPresetTheme, setCurrentPresetTheme] = useState<string>('');
@@ -261,11 +299,16 @@ export const ThemeEditor = () => {
         : ('other' as const),
   }));
 
-  // Group variables by category, including live variables - only theme variables now
+  // Group variables by category, including live variables - separate color and non-color variables
   const allVariables = [...variables, ...liveVariablesAsCSS];
   const filteredVariables = allVariables;
 
-  const groupedVariables = filteredVariables.reduce(
+  // Separate variables into color and non-color categories
+  const colorVariables = filteredVariables.filter(variable => variable.type === 'color');
+  const nonColorVariables = filteredVariables.filter(variable => variable.type !== 'color');
+
+  // Group color variables by category for the theme colors section
+  const groupedColorVariables = colorVariables.reduce(
     (acc, variable) => {
       if (!acc[variable.category]) {
         acc[variable.category] = [];
@@ -276,6 +319,25 @@ export const ThemeEditor = () => {
         variable.name.toLowerCase().includes(searchTerm.toLowerCase())
       ) {
         acc[variable.category].push(variable);
+      }
+      return acc;
+    },
+    {} as Record<string, CSSVariable[]>,
+  );
+
+  // Group non-color variables - put them all in a single "Settings" category for the top table
+  const groupedNonColorVariables = nonColorVariables.reduce(
+    (acc, variable) => {
+      const category = 'Settings'; // All non-color variables go in Settings category
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      if (
+        !searchTerm ||
+        variable.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        acc[category].push(variable);
       }
       return acc;
     },
@@ -348,8 +410,8 @@ export const ThemeEditor = () => {
     };
 
     // Update both light and dark theme variables
-    const newLightVariables = updateVariablesWithTheme([...lightThemeVariables], themeData.light);
-    const newDarkVariables = updateVariablesWithTheme([...darkThemeVariables], themeData.dark);
+    const newLightVariables = updateVariablesWithTheme([...lightThemeVariables, ...appSettingsVariables], themeData.light);
+    const newDarkVariables = updateVariablesWithTheme([...darkThemeVariables, ...appSettingsVariables], themeData.dark);
 
     setLightVariables(newLightVariables);
     setDarkVariables(newDarkVariables);
@@ -456,9 +518,9 @@ export const ThemeEditor = () => {
   useEffect(() => {
     const handleThemeReset = () => {
       if (isDarkMode) {
-        setDarkVariables([...darkThemeVariables]);
+        setDarkVariables([...darkThemeVariables, ...appSettingsVariables]);
       } else {
-        setLightVariables([...lightThemeVariables]);
+        setLightVariables([...lightThemeVariables, ...appSettingsVariables]);
       }
       // Reset theme state
       setCurrentPresetTheme('');
@@ -481,7 +543,7 @@ export const ThemeEditor = () => {
     // Apply the appropriate theme to the iframe
     if (dark) {
       // Apply current dark theme variables
-      const currentDarkVars = isDarkMode ? darkVariables : [...darkThemeVariables];
+      const currentDarkVars = isDarkMode ? darkVariables : [...darkThemeVariables, ...appSettingsVariables];
       const variableObject = currentDarkVars.reduce(
         (acc, v) => {
           acc[v.name] = v.value;
@@ -492,7 +554,7 @@ export const ThemeEditor = () => {
       themeInjector.updateVariables(variableObject);
     } else {
       // Apply current light theme variables
-      const currentLightVars = !isDarkMode ? lightVariables : [...lightThemeVariables];
+      const currentLightVars = !isDarkMode ? lightVariables : [...lightThemeVariables, ...appSettingsVariables];
       const variableObject = currentLightVars.reduce(
         (acc, v) => {
           acc[v.name] = v.value;
@@ -570,8 +632,117 @@ export const ThemeEditor = () => {
 
       {/* Variables List */}
       <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={defaultOpenCategories}>
-          {Object.entries(groupedVariables).map(([category, categoryVariables]) => {
+        <Accordion type="multiple" defaultValue={[...defaultOpenCategories, 'Settings']}>
+          {/* Settings Section (Non-Color Variables) */}
+          {Object.entries(groupedNonColorVariables).map(([category, categoryVariables]) => {
+            if (categoryVariables.length === 0) {
+              return null;
+            }
+
+            return (
+              <AccordionItem key={category} value={category}>
+                <AccordionTrigger>
+                  <span className="text-sm font-semibold text-bolt-elements-textPrimary">
+                    {category}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="px-4 py-2 space-y-3">
+                    {categoryVariables.map((variable) => (
+                      <div
+                        key={variable.id}
+                        className={classNames(
+                          'flex items-center justify-between p-3 rounded-md transition-colors',
+                          variable.category === 'Live Variables' 
+                            ? 'bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor' 
+                            : 'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3',
+                        )}
+                      >
+                        <div className="flex flex-col gap-3 w-full">
+                          {/* Variable Header */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-bolt-elements-textPrimary">
+                                {variable.label}
+                              </span>
+                              {variable.category === 'Live Variables' && (
+                                <span className="px-2 py-0.5 text-xs bg-bolt-elements-button-primary-background/20 text-bolt-elements-button-primary-background rounded-full">
+                                  Live
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Variable Controls */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                value={variable.value}
+                                onChange={(e) => updateVariable(variable.id, { value: e.target.value })}
+                                className="w-full px-3 py-2 text-sm bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-md focus:outline-none focus:border-bolt-elements-borderColorActive focus:ring-1 focus:ring-bolt-elements-borderColorActive"
+                                placeholder="Enter value..."
+                              />
+                            </div>
+
+                            {/* Variable Name Display/Edit */}
+                            <div className="min-w-0 flex-shrink-0">
+                              {variable.isEditing ? (
+                                <input
+                                  type="text"
+                                  value={variable.name}
+                                  onChange={(e) => updateVariable(variable.id, { name: e.target.value })}
+                                  onBlur={() => stopEditingName(variable.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      stopEditingName(variable.id);
+                                    }
+                                  }}
+                                  className="text-xs font-mono px-2 py-1 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColorActive rounded-md focus:outline-none w-32"
+                                  autoFocus
+                                />
+                              ) : (
+                                <code
+                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-colors"
+                                  onClick={() => startEditingName(variable.id)}
+                                  title="Click to edit variable name"
+                                >
+                                  {variable.name}
+                                </code>
+                              )}
+                            </div>
+                          </div>
+                          {/* Delete button for custom variables */}
+                          {![...lightThemeVariables, ...darkThemeVariables, ...appSettingsVariables].some(
+                            (dv) => dv.name === variable.name,
+                          ) &&
+                            !variable.id.startsWith('live-') && (
+                              <button
+                                onClick={() => deleteVariable(variable.id)}
+                                className="ml-2 p-2 text-bolt-elements-icon-error hover:bg-bolt-elements-icon-error/10 rounded-md transition-colors"
+                                title="Delete variable"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+          
+          {/* Theme Colors Section (Color Variables) */}
+          {Object.entries(groupedColorVariables).map(([category, categoryVariables]) => {
             if (categoryVariables.length === 0) {
               return null;
             }
@@ -662,7 +833,7 @@ export const ThemeEditor = () => {
                             </div>
                           </div>
                           {/* Delete button for custom variables */}
-                          {![...lightThemeVariables, ...darkThemeVariables].some((dv) => dv.name === variable.name) &&
+                          {![...lightThemeVariables, ...darkThemeVariables, ...appSettingsVariables].some((dv) => dv.name === variable.name) &&
                             !variable.id.startsWith('live-') && (
                               <button
                                 onClick={() => deleteVariable(variable.id)}
@@ -703,9 +874,9 @@ export const ThemeEditor = () => {
             <button
               onClick={() => {
                 if (isDarkMode) {
-                  setDarkVariables([...darkThemeVariables]);
+                  setDarkVariables([...darkThemeVariables, ...appSettingsVariables]);
                 } else {
-                  setLightVariables([...lightThemeVariables]);
+                  setLightVariables([...lightThemeVariables, ...appSettingsVariables]);
                 }
                 // Reset theme state
                 setCurrentPresetTheme('');
