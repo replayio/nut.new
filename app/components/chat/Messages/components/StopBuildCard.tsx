@@ -24,7 +24,7 @@ export const StopBuildCard: React.FC<StopBuildCardProps> = ({ onMount }) => {
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-red-500/20 to-transparent animate-flow-left-to-right" />
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-4 relative z-10">
+        <div className="flex flex-col items-center text-center space-y-4 relative">
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Build in Progress</h3>
             <p className="text-bolt-elements-textSecondary text-sm max-w-md">
