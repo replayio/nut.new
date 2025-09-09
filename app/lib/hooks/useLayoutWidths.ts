@@ -7,7 +7,7 @@ interface LayoutWidths {
 }
 
 const CHAT_MIN_WIDTH = 500;
-const CHAT_MAX_WIDTH = 37 * 16; // 37rem = 592px (assuming 16px = 1rem)
+const CHAT_MAX_WIDTH = 600;
 const CHAT_TARGET_PERCENTAGE = 0.4;
 
 export function useLayoutWidths(hasSidebar: boolean = false): LayoutWidths {
@@ -24,7 +24,6 @@ export function useLayoutWidths(hasSidebar: boolean = false): LayoutWidths {
 
       const targetChatWidth = availableWidth * CHAT_TARGET_PERCENTAGE;
 
-      // Apply min and max constraints
       const chatWidth = Math.min(Math.max(targetChatWidth, CHAT_MIN_WIDTH), CHAT_MAX_WIDTH);
 
       const workbenchWidth = Math.max(0, availableWidth - chatWidth);
