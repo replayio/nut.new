@@ -26,6 +26,7 @@ import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
+import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -64,11 +65,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-    const hasPendingMessage = useStore(chatStore.hasPendingMessage);
-    const appSummary = useStore(chatStore.appSummary);
-    const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-    const isSmallViewport = useViewport(1024);
-    const user = useStore(userStore.user);
+  const hasPendingMessage = useStore(chatStore.hasPendingMessage);
+  const appSummary = useStore(chatStore.appSummary);
+  const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
+  const isSmallViewport = useViewport(1024);
+  const user = useStore(userStore.user);
+  const { chatWidth } = useLayoutWidths(!!user);
+  const showWorkbench = useStore(workbenchStore.showWorkbench);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -194,10 +197,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           })}
         >
           <div
-            className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full', {
+            className={classNames(styles.Chat, 'flex flex-col h-full', {
+              'flex-grow': isSmallViewport, // Full width on mobile
+              'flex-shrink-0': !isSmallViewport, // Fixed width on desktop
               'pb-2': isSmallViewport,
               'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
             })}
+            style={(!isSmallViewport && showWorkbench) ? { width: `${chatWidth}px` } : { width: '100vw' }}
           >
             {!chatStarted && (
               <>
@@ -205,7 +211,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
             <div
-              className={classNames('sm:px-6', {
+              className={classNames({
+                'pr-4': !isSmallViewport && showWorkbench,
                 'h-full flex flex-col': chatStarted,
                 'px-2': !isSmallViewport,
               })}
