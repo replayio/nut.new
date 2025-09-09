@@ -41,7 +41,7 @@ export function Header() {
     if (appId) {
       fetchHistory();
     }
-  }, [appId]);
+  }, [appSummary, appId]);
 
   return (
     <header
