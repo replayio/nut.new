@@ -4,7 +4,7 @@ import { AppUpdateReasonKind, type AppSummary, type AppUpdateReason } from '~/li
 import { assert } from '~/utils/nut';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 
-function includeHistorySummary(summary: AppSummary): boolean {
+export function includeHistorySummary(summary: AppSummary): boolean {
   if (!summary.reason) {
     return false;
   }
@@ -37,7 +37,6 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
     try {
       setLoading(true);
       const history = await database.getAppHistory(appId);
-      console.log('history', history.filter(includeHistorySummary));
       setHistory(history.filter(includeHistorySummary));
     } catch (err) {
       console.error('Failed to fetch app history:', err);

@@ -58,26 +58,15 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
     try {
       const { error } = await getSupabase().auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}&isSignup=false`,
+        },
       });
 
       if (error) {
         throw error;
       }
-
-      try {
-        const {
-          data: { user },
-        } = await getSupabase().auth.getUser();
-        if (window.analytics && user) {
-          window.analytics.identify(user.id, {
-            email: user.email,
-            lastSignIn: new Date().toISOString(),
-            signInMethod: 'google_oauth',
-          });
-        }
-      } catch (err) {
-        console.error('Failed to identify user after Google OAuth:', err);
-      }
+      // OAuth redirect initiated - user will be redirected to Google and then back to our callback
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign in with Google');
@@ -163,7 +152,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
+          className="w-full py-4 !bg-gradient-to-r !from-blue-500 !to-indigo-500 hover:!from-blue-600 hover:!to-indigo-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
         >
           <span className="transition-transform duration-200 group-hover:scale-105">
             {isProcessing ? 'Signing In...' : 'Sign In'}

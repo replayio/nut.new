@@ -30,7 +30,13 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
     setIsProcessing(true);
 
     try {
-      const { data, error } = await getSupabase().auth.signUp({ email, password });
+      const { data, error } = await getSupabase().auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}&emailConfirm=true`,
+        },
+      });
 
       if (data.user?.email && isChecked) {
         addIntercomUser(data.user.email);
@@ -40,16 +46,10 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         throw error;
       }
 
-      if (window.analytics) {
-        window.analytics.track('User Signed Up', {
-          method: 'email',
-          email: data.user?.email,
-          userId: data.user?.id,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      // Note: Analytics tracking will happen when user clicks email confirmation link
+      // and lands on /auth/callback, so we don't track here to avoid duplicate events
 
-      onSuccess('Check your email for the confirmation link!');
+      onSuccess("Check your email for the confirmation link! You'll be redirected back here after confirming.");
     } catch (error) {
       const authError = error as AuthError;
       onError(authError.message || 'Failed to sign up');
@@ -61,39 +61,16 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
   const handleGoogleSignIn = async () => {
     const { error } = await getSupabase().auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}&intercom=${isChecked}&isSignup=true`,
+      },
     });
 
     if (error) {
       onError(error.message || 'Failed to sign in with Google');
       return;
     }
-
-    const {
-      data: { user },
-    } = await getSupabase().auth.getUser();
-    if (user?.email && isChecked) {
-      addIntercomUser(user.email);
-    }
-
-    // Track signup event with Segment for Google OAuth
-    if (window.analytics && user) {
-      window.analytics.track('User Signed Up', {
-        method: 'google_oauth',
-        email: user.email,
-        userId: user.id,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Identify the user in Segment
-      if (user.id && user.email) {
-        window.analytics.identify(user.id, {
-          email: user.email,
-          signupMethod: 'google_oauth',
-          signupDate: new Date().toISOString(),
-          createdAt: user.created_at,
-        });
-      }
-    }
+    // OAuth redirect initiated - user will be redirected to Google and then back to our callback
   };
 
   useEffect(() => {
@@ -232,7 +209,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         <button
           type="submit"
           disabled={isProcessing || disabled}
-          className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
+          className="w-full py-4 !bg-gradient-to-r !from-green-500 !to-emerald-500 hover:!from-green-600 hover:!to-emerald-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
         >
           <span className="transition-transform duration-200 group-hover:scale-105">
             {isProcessing ? 'Creating Account...' : 'Create Account'}

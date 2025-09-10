@@ -127,8 +127,14 @@ export function useVibeAppAuthQuery({
           return;
         }
 
-        const vibeAuthTokenParams = new URLSearchParams(vibeAuthTokenJson);
-        setVibeAuthTokenParams(vibeAuthTokenParams);
+        const nextParams = new URLSearchParams(vibeAuthTokenJson);
+        // Avoid triggering renders with a new-but-equal object
+        setVibeAuthTokenParams((prevParams) => {
+          if (prevParams && prevParams.toString() === nextParams.toString()) {
+            return prevParams;
+          }
+          return nextParams;
+        });
         setPreviousToken(currentAccessToken);
         setPreviousRepoId(repositoryId);
 

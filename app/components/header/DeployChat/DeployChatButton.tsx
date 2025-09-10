@@ -149,18 +149,6 @@ export function DeployChatButton() {
       return;
     }
 
-    if (deploySettings?.netlify?.authToken || deploySettings?.netlify?.accountSlug) {
-      if (!deploySettings.netlify.accountSlug) {
-        setError('Netlify account slug is required');
-        return;
-      } else if (!deploySettings.netlify.authToken) {
-        setError('Netlify auth token is required');
-        return;
-      }
-    } else {
-      deploySettings.netlify = undefined;
-    }
-
     if (!deploySettings.siteName) {
       deploySettings.siteName = generateSiteName();
     }
@@ -168,32 +156,6 @@ export function DeployChatButton() {
     if (deploySettings.siteName.length > MAX_SITE_NAME_LENGTH) {
       setError(`Site name must be shorter than ${MAX_SITE_NAME_LENGTH + 1} characters`);
       return;
-    }
-
-    if (
-      deploySettings?.supabase?.databaseURL ||
-      deploySettings?.supabase?.anonKey ||
-      deploySettings?.supabase?.serviceRoleKey ||
-      deploySettings?.supabase?.postgresURL
-    ) {
-      if (!deploySettings.supabase.databaseURL) {
-        setError('Supabase Database URL is required');
-        return;
-      }
-      if (!deploySettings.supabase.anonKey) {
-        setError('Supabase Anonymous Key is required');
-        return;
-      }
-      if (!deploySettings.supabase.serviceRoleKey) {
-        setError('Supabase Service Role Key is required');
-        return;
-      }
-      if (!deploySettings.supabase.postgresURL) {
-        setError('Supabase Postgres URL is required');
-        return;
-      }
-    } else {
-      deploySettings.supabase = undefined;
     }
 
     setStatus(DeployStatus.Started);

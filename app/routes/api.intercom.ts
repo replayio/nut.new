@@ -15,19 +15,29 @@ export const action: ActionFunction = async ({ request }: { request: Request }) 
   try {
     const body = await request.json();
     email = body.email;
-    if (!email) {
-      return json({ error: 'Email is required' }, { status: 400 });
+
+    if (!email || typeof email !== 'string') {
+      return json({ error: 'Valid email is required' }, { status: 400 });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    // Prevent email injection attacks by limiting length
+    if (email.length > 254) {
+      return json({ error: 'Email too long' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Failed to parse request body:', error);
+    console.error('Invalid request body', error);
     return json({ error: 'Invalid request body' }, { status: 400 });
   }
 
   try {
-    console.log(
-      'Attempting to create Intercom contact with token:',
-      process.env.INTERCOM_ACCESS_TOKEN?.slice(0, 5) + '...',
-    );
+    // Log contact creation without sensitive details
+    console.log('Creating Intercom contact for user');
 
     const response = await fetch('https://api.intercom.io/contacts', {
       method: 'POST',
@@ -47,30 +57,24 @@ export const action: ActionFunction = async ({ request }: { request: Request }) 
 
     const responseData = await response.json();
 
-    console.log('Contact creation timestamps:', {
-      current_time: new Date().toISOString(),
-      unix_timestamp: Math.floor(Date.now() / 1000),
-      response_data: responseData,
-    });
+    // Log success without sensitive user data
+    console.log('Intercom contact created successfully');
 
     if (!response.ok) {
+      // Log error without exposing sensitive response data
       console.error('Intercom API error:', {
         status: response.status,
         statusText: response.statusText,
-        data: responseData,
       });
-      return json(
-        {
-          error: 'Failed to create contact',
-          details: responseData,
-        },
-        { status: response.status },
-      );
+
+      // Don't expose internal API response details to client
+      return json({ error: 'Failed to create contact' }, { status: 500 });
     }
 
     return json({ success: true, data: responseData });
   } catch (error) {
-    console.error('Failed to contact Intercom API:', error);
-    return json({ error: 'Failed to contact Intercom API' }, { status: 500 });
+    // Log error without sensitive details
+    console.error('Failed to contact Intercom API', error);
+    return json({ error: 'Internal server error' }, { status: 500 });
   }
 };

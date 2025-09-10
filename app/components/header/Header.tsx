@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
@@ -12,12 +12,36 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from './DeployChat/DeployChatButton';
 import { DownloadButton } from './DownloadButton';
 import ViewVersionHistoryButton from '~/components/workbench/VesionHistory/ViewVersionHistoryButton';
+import useViewport from '~/lib/hooks';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { database } from '~/lib/persistence/apps';
+import { type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { includeHistorySummary } from '~/components/workbench/VesionHistory/AppHistory';
+import { useEffect } from 'react';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
   const user = useStore(userStore.user);
   const appSummary = useStore(chatStore.appSummary);
   const appId = useStore(chatStore.currentAppId);
+  const isSmallViewport = useViewport(800);
+  const repositoryId = useStore(workbenchStore.pendingRepositoryId);
+  const [history, setHistory] = useState<AppSummary[]>([]);
+
+  const fetchHistory = async () => {
+    try {
+      const history = await database.getAppHistory(appId!);
+      setHistory(history.filter(includeHistorySummary));
+    } catch (err) {
+      console.error('Failed to fetch app history:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (appId) {
+      fetchHistory();
+    }
+  }, [appSummary, appId]);
 
   return (
     <header
@@ -39,15 +63,15 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
-        {appSummary && <ChatDescription />}
+        {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
-      {appSummary && (
+      {appSummary && !isSmallViewport && (
         <div className="flex-1 flex justify-center">
           <div className="flex items-center gap-3">
-            {appId && <ViewVersionHistoryButton />}
-            <DownloadButton />
-            <DeployChatButton />
+            {history.length > 0 && <ViewVersionHistoryButton />}
+            {repositoryId && <DownloadButton />}
+            {repositoryId && appId && <DeployChatButton />}
           </div>
         </div>
       )}

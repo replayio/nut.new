@@ -20,11 +20,11 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
 
     features.forEach((feature) => {
       switch (feature.status) {
-        case AppFeatureStatus.Implemented:
         case AppFeatureStatus.Validated:
-        case AppFeatureStatus.ValidationInProgress:
           counts.completed++;
           break;
+        case AppFeatureStatus.Implemented:
+        case AppFeatureStatus.ValidationInProgress:
         case AppFeatureStatus.ImplementationInProgress:
           counts.inProgress++;
           break;
@@ -54,7 +54,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
     if (statusCounts.failed > 0) {
       return {
         status: 'failed' as const,
-        progressText: `${statusCounts.failed} failed, ${statusCounts.completed}/${totalFeatures} complete`,
+        progressText: `${statusCounts.completed}/${totalFeatures} complete, ${statusCounts.failed} failed`,
       };
     }
 
@@ -68,7 +68,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
     if (statusCounts.inProgress > 0) {
       return {
         status: 'in-progress' as const,
-        progressText: `${statusCounts.inProgress} in progress, ${statusCounts.completed}/${totalFeatures} complete`,
+        progressText: `${statusCounts.inProgress} in progress`,
       };
     }
 
