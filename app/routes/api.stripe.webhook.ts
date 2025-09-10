@@ -179,6 +179,7 @@ export async function action({ request }: { request: Request }) {
   }
 
   console.log('📧 Stripe webhook received:', {
+    event,
     type: event.type,
     id: event.id,
     created: new Date(event.created * 1000).toISOString(),
@@ -238,7 +239,7 @@ export async function action({ request }: { request: Request }) {
       // }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}`, event);
     }
 
     return new Response(JSON.stringify({ received: true }), {
