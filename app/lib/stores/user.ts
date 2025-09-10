@@ -23,6 +23,8 @@ export function useAdminStatus() {
 
 // Initialize the user stores
 export async function initializeUserStores() {
+  return;
+  /*
   try {
     // Only run in browser environment
     if (typeof window === 'undefined') {
@@ -48,6 +50,7 @@ export async function initializeUserStores() {
     console.error('Failed to initialize user stores', error);
     return undefined;
   }
+  */
 }
 
 /*
