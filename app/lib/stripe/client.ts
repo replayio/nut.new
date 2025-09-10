@@ -29,7 +29,7 @@ const initializeStripe = () => {
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
   tier?: 'free' | 'starter';
-  success_url?: string; // Optional return URL to redirect to after checkout
+  returnUrl?: string; // Optional return URL to redirect to after checkout
 }
 
 export interface CheckoutSessionResponse {
@@ -79,7 +79,7 @@ export async function createSubscriptionCheckout(tier: 'free' | 'starter'): Prom
   return createCheckoutSession({
     type: 'subscription',
     tier,
-    success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
+    returnUrl: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
 
@@ -90,7 +90,7 @@ export async function createSubscriptionCheckout(tier: 'free' | 'starter'): Prom
 export async function createTopoffCheckout(): Promise<void> {
   return createCheckoutSession({
     type: 'topoff',
-    success_url: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
+    returnUrl: encodeURIComponent(window.location.href), // Return to current page after checkout, URL-encoded
   });
 }
 
@@ -137,12 +137,13 @@ export async function checkSubscriptionStatus() {
         action: 'get_status',
       }),
     });
+    console.log('Subscription status response:', response);
 
     if (!response.ok) {
       throw new Error('Failed to check subscription status');
     }
 
-    const data = await response.json();
+    const data= await response.json();
     return data;
   } catch (error) {
     console.error('Error checking subscription status:', error);
@@ -174,10 +175,44 @@ export async function cancelSubscription(immediate: boolean = false) {
     }
 
     const data = await response.json();
-    console.log('Subscription cancellation result:', data.message);
     return data;
   } catch (error) {
     console.error('Error canceling subscription:', error);
+    throw error;
+  }
+}
+
+export async function manageSubscription() {
+  try {
+    const accessToken = await getCurrentAccessToken();
+    const response = await fetch('/api/stripe/manage-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        action: 'manage',
+        returnUrl: encodeURIComponent(window.location.href),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to cancel subscription');
+    }
+
+    const data = await response.json();
+    
+    // If we got a portal URL, open it in a new tab
+    if (data.success && data.url) {
+      window.open(data.url, '_self', 'noopener,noreferrer');
+      return; // Successfully opened portal
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error managing subscription:', error);
     throw error;
   }
 }

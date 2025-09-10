@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
-import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, type SubscriptionTier } from '~/lib/stripe/client';
+import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, checkSubscriptionStatus, type SubscriptionTier } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { IconButton } from '~/components/ui/IconButton';
 
@@ -12,13 +12,50 @@ interface SubscriptionModalProps {
   currentTier?: SubscriptionTier;
 }
 
-export function SubscriptionModal({ isOpen, onClose, currentTier }: SubscriptionModalProps) {
+export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTier }: SubscriptionModalProps) {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
+  const [actualCurrentTier, setActualCurrentTier] = useState<SubscriptionTier | undefined>(propCurrentTier);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
+  const [fetchingSubscription, setFetchingSubscription] = useState(false);
   const user = useStore(userStore);
+
+  // Fetch actual subscription data from Stripe when modal opens
+  useEffect(() => {
+    if (isOpen && user?.email) {
+      const fetchSubscriptionData = async () => {
+        setFetchingSubscription(true);
+        try {
+          const stripeStatus = await checkSubscriptionStatus();
+          if (stripeStatus.hasSubscription && stripeStatus.subscription) {
+            setStripeSubscription(stripeStatus.subscription);
+            setActualCurrentTier(stripeStatus.subscription.tier as SubscriptionTier);
+          } else {
+            setStripeSubscription(null);
+            setActualCurrentTier(undefined);
+          }
+        } catch (error) {
+          console.error('Error fetching subscription status:', error);
+          // Fallback to prop value
+          setActualCurrentTier(propCurrentTier);
+        } finally {
+          setFetchingSubscription(false);
+        }
+      };
+
+      fetchSubscriptionData();
+    } else if (isOpen && !user?.email) {
+      // If no user, clear current tier
+      setActualCurrentTier(undefined);
+      setStripeSubscription(null);
+    }
+  }, [isOpen, user?.email, propCurrentTier]);
 
   if (!isOpen) {
     return null;
   }
+
+  // Use actual current tier from Stripe, fallback to prop
+  const currentTier = actualCurrentTier;
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
     if (!user?.id || !user?.email) {
@@ -110,6 +147,14 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
 
         {/* Subscription Tiers */}
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          {fetchingSubscription && (
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-3 bg-bolt-elements-background-depth-2/50 px-4 py-2 rounded-xl border border-bolt-elements-borderColor/30">
+                <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary/30 border-t-blue-500 rounded-full animate-spin"></div>
+                <span className="text-sm text-bolt-elements-textSecondary">Checking subscription status...</span>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {(
               Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, (typeof SUBSCRIPTION_TIERS)[SubscriptionTier]][]
@@ -124,7 +169,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   className={classNames(
                     'relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-105 group min-h-[400px] flex flex-col',
                     {
-                      'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg':
+                      'border-emerald-400/60 bg-gradient-to-br from-emerald-50/80 to-green-50/60 shadow-xl ring-2 ring-emerald-200/40 dark:from-emerald-900/10 dark:to-green-900/5 dark:ring-emerald-500/20':
                         isCurrentTier,
                       'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
                         !isCurrentTier,
@@ -134,8 +179,8 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                 >
                   {isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        CURRENT PLAN
+                      <span className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border border-emerald-400/50">
+                        ✓ Current Subscription
                       </span>
                     </div>
                   )}
@@ -150,8 +195,15 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                         })}
                       />
                     </div>
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">
+                    <h3 className={classNames(
+                      'text-xl font-bold mb-3 transition-transform duration-300 group-hover:scale-105',
+                      {
+                        'text-emerald-700 dark:text-emerald-400': isCurrentTier,
+                        'text-bolt-elements-textHeading': !isCurrentTier,
+                      }
+                    )}>
                       {details.name}
+                      {isCurrentTier && <span className="ml-2 text-emerald-500">✓</span>}
                     </h3>
                     <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-300 group-hover:scale-105">
                       ${details.price}

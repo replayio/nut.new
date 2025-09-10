@@ -50,14 +50,18 @@ export async function action({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { action: requestAction, immediate } = body;
-
+    const { action: requestAction, immediate, returnUrl } = body;
+    
     switch (requestAction) {
       case 'cancel':
         return await handleCancelSubscription(user.email, user.id, immediate);
 
       case 'get_status':
         return await handleGetSubscriptionStatus(user.email);
+
+      case 'manage':
+        const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : new URL(request.url).origin;
+        return await handleManageSubscription(user.email, targetUrl);
 
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
@@ -255,4 +259,29 @@ async function handleGetSubscriptionStatus(userEmail: string) {
       },
     );
   }
+}
+
+async function handleManageSubscription(userEmail: string, targetUrl: string) {
+  const customers = await stripe.customers.list({
+    email: userEmail,
+    limit: 1,
+  });
+
+  if (customers.data.length === 0) {
+    return new Response(JSON.stringify({ error: 'No customer found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const customer = customers.data[0];
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: customer.id,
+    return_url: targetUrl,
+  });
+
+  return new Response(JSON.stringify({ success: true, url: portalSession.url }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

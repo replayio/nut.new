@@ -77,8 +77,8 @@ export async function action({ request }: { request: Request }) {
     let cancelUrl: string;
 
     const baseUrl = new URL(request.url).origin;
-    // Use the provided return URL or fallback to the base URL
-    const targetUrl = returnUrl || baseUrl;
+    // Use the provided return URL (decode it first if provided) or fallback to the base URL
+    const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : baseUrl;
 
     // Try to find existing customer by email or userId to avoid duplicates
     let customerId: string | undefined;

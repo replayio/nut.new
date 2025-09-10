@@ -9,7 +9,7 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription } from '~/lib/stripe/client';
+import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription, manageSubscription } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
@@ -148,18 +148,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleSubscriptionToggle = async () => {
-    if (subscription) {
-      // TODO: Implement subscription cancellation via Stripe Customer Portal
-      stripeStatusModalActions.showInfo(
-        'Contact Support',
-        'Please contact support to cancel your subscription.',
-        'Our support team will help you manage your subscription settings.',
-      );
-    } else {
-      // Open subscription modal to choose a tier
       openSubscriptionModal();
       onClose();
-    }
   };
 
   const handleAddPeanuts = async () => {
@@ -225,6 +215,29 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       stripeStatusModalActions.showError(
         'Cancellation Failed',
         "We couldn't cancel your subscription at this time.",
+        'Please try again in a few moments, or contact support if the issue persists.',
+      );
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    if (!user?.email) {
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to manage your subscription.',
+        'You need to be signed in to access your billing portal.',
+      );
+      return;
+    }
+
+    try {
+      await manageSubscription();
+      // User will be redirected to Stripe billing portal
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      stripeStatusModalActions.showError(
+        'Billing Portal Unavailable',
+        "We couldn't open your billing portal right now.",
         'Please try again in a few moments, or contact support if the issue persists.',
       );
     }
@@ -314,7 +327,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!stripeSubscription && !loading && (
+          {!loading && (
             <button
               onClick={handleSubscriptionToggle}
               disabled={loading}
@@ -326,7 +339,21 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               )}
             >
               <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">Add Subscription</span>
+              <span className="transition-transform duration-200 group-hover:scale-105">View Subscriptions</span>
+            </button>
+          )}
+
+          {!loading && (
+            <button
+              onClick={handleManageSubscription}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+          )}
+            >
+              <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-transform duration-200 group-hover:scale-105">Manage Subscriptions</span>
             </button>
           )}
 
