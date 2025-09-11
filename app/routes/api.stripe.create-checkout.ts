@@ -109,9 +109,17 @@ export async function action({ request }: { request: Request }) {
         });
         console.log(`✅ Updated customer ${customerId} metadata - Stripe is now authoritative source`);
       } else {
-        console.log(
-          `No existing customer found for email: ${userEmail}, userId: ${userId} - will create new one in checkout`,
-        );
+        // Create customer explicitly with metadata to ensure webhooks work
+        console.log(`Creating new customer for email: ${userEmail}, userId: ${userId}`);
+        const newCustomer = await stripe.customers.create({
+          email: userEmail,
+          metadata: {
+            userId,
+            userEmail,
+          },
+        });
+        customerId = newCustomer.id;
+        console.log(`✅ Created new customer ${customerId} with metadata - ready for webhooks`);
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);
@@ -156,6 +164,11 @@ export async function action({ request }: { request: Request }) {
       });
     }
 
+    // Ensure we have a customer ID (should always be set now)
+    if (!customerId) {
+      throw new Error('Customer ID not found - this should not happen');
+    }
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -166,8 +179,7 @@ export async function action({ request }: { request: Request }) {
           quantity: 1,
         },
       ],
-      // Use existing customer if found, otherwise let Stripe create a new one
-      ...(customerId ? { customer: customerId } : { customer_email: userEmail }),
+      customer: customerId, // Always use existing customer with proper metadata
       client_reference_id: userId,
       metadata: {
         userId,
