@@ -111,13 +111,14 @@ export function ClientAuth() {
     } finally {
       setLoadingSubscription(false);
     }
-  }, [user?.email, loadingSubscription]);
+    console.log('subscription data fetched', stripeSubscription);
+  }, [user?.email]);
 
   useEffect(() => {
     if (showDropdown && user?.email && !stripeSubscription && !loadingSubscription) {
       fetchSubscriptionData();
     }
-  }, [showDropdown, user?.email, stripeSubscription, loadingSubscription, fetchSubscriptionData]);
+  }, [showDropdown, user?.email]);
 
   if (loading) {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
@@ -177,7 +178,7 @@ export function ClientAuth() {
                       <div className="text-bolt-elements-textHeading font-bold text-sm">
                         {stripeSubscription
                           ? `${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`
-                          : 'Free Plan'}
+                          : 'No Plan'}
                       </div>
                       {stripeSubscription && (
                         <div className="text-xs text-bolt-elements-textSecondary">
