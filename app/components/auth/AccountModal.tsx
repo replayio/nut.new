@@ -8,7 +8,7 @@ import {
   createTopoffCheckout,
   checkSubscriptionStatus,
   cancelSubscription,
-  manageSubscription,
+  manageBilling,
 } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
@@ -209,7 +209,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
   };
 
-  const handleManageSubscription = async () => {
+  const handleManageBilling = async () => {
     if (!user?.email) {
       stripeStatusModalActions.showError(
         'Sign In Required',
@@ -220,7 +220,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
 
     try {
-      await manageSubscription();
+      await manageBilling();
     } catch (error) {
       console.error('Error opening billing portal:', error);
       stripeStatusModalActions.showError(
@@ -347,7 +347,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
           {stripeSubscription && !loading && (
             <button
-              onClick={handleManageSubscription}
+              onClick={handleManageBilling}
               disabled={loading}
               className={classNames(
                 'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
@@ -355,7 +355,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               )}
             >
               <div className="i-ph:gear text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">Manage Subscription</span>
+              <span className="transition-transform duration-200 group-hover:scale-105">Manage Billing</span>
             </button>
           )}
 

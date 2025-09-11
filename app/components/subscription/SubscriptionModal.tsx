@@ -45,7 +45,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
 
       fetchSubscriptionData();
     } else if (isOpen && !user?.email) {
-      // If no user, clear current tier
       setActualCurrentTier(undefined);
     }
   }, [isOpen, user?.email, propCurrentTier]);
@@ -54,7 +53,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
     return null;
   }
 
-  // Use actual current tier from Stripe, fallback to prop
   const currentTier = actualCurrentTier;
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
@@ -72,7 +70,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
 
     try {
       await createSubscriptionCheckout(tier);
-      // User will be redirected to Stripe Checkout
     } catch (error) {
       console.error('Error creating subscription:', error);
       toast.error('Failed to create subscription. Please try again.');
@@ -113,7 +110,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
         className="bg-bolt-elements-background-depth-1 rounded-2xl border border-bolt-elements-borderColor shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor/50">
           <div>
             <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Choose Your Plan</h2>
@@ -131,7 +127,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
           />
         </div>
 
-        {/* Important Notes - Moved to top */}
         <div className="px-6 sm:px-8 pt-2 pb-6">
           <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm">
             <div className="flex items-start gap-4">
@@ -207,7 +202,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                     </div>
                   )}
 
-                  {/* Header */}
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
                       <div
@@ -238,7 +232,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                     </p>
                   </div>
 
-                  {/* Features */}
                   <div className="space-y-3 mb-8 flex-grow">
                     {details.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3 group/feature">
@@ -252,7 +245,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                     ))}
                   </div>
 
-                  {/* Subscribe Button */}
                   <div className="mt-auto">
                     <button
                       onClick={!currentTier ? () => handleSubscribe(tier) : () => handleManageSubscription()}
@@ -274,7 +266,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       )}
                       <span className="transition-transform duration-300 group-hover/btn:scale-105">
-                        {isCurrentTier ? '✓ Current Plan' : isLoading ? 'Processing...' : 'Subscribe'}
+                        {isCurrentTier ? '✓ Current Plan' : isLoading ? 'Processing...' : !!currentTier ? 'Update Subscription' : 'Subscribe'}
                       </span>
                     </button>
                   </div>
@@ -296,7 +288,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                   </p>
                 </div>
 
-                {/* Features Preview */}
                 <div className="space-y-3 mb-8 flex-grow">
                   <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
@@ -322,7 +313,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                   </div>
                 </div>
 
-                {/* Join Waitlist Button */}
                 <div className="mt-auto">
                   <a
                     href="https://form.typeform.com/to/bFKqmqdX"
