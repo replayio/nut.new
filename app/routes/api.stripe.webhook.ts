@@ -438,13 +438,17 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       return;
     }
 
-    // Only handle subscription renewals (not initial payments)
-    if ((invoice as any).subscription && invoice.billing_reason === 'subscription_cycle') {
-      const subscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string);
-      const priceId = subscription.items.data[0]?.price.id;
+    // Handle subscription payments (renewals and updates)
+    const isSubscriptionPayment = (invoice as any).subscription && 
+      (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_update');
+    
+    if (isSubscriptionPayment) {
+      // Get price ID directly from invoice line items (no API call needed!)
+      const lineItem = invoice.lines.data[0] as any;
+      const priceId = lineItem?.price?.id;
 
       if (!priceId) {
-        console.error('No price ID found in subscription for invoice:', invoice.id);
+        console.error('No price ID found in invoice lines for invoice:', invoice.id);
         return;
       }
 
@@ -452,13 +456,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       const tier = getTierFromPriceId(priceId);
 
       if (peanuts === 0) {
-        console.error(`❌ Unknown price ID for renewal: ${priceId}`);
+        console.error(`❌ Unknown price ID for ${invoice.billing_reason}: ${priceId}`);
         return;
       }
 
-      // Renew the subscription with fresh peanuts
+      // Add peanuts for subscription payment (renewal or plan change)
       await callNutAPI(
-        'set-peanuts-subscription',
+        'add-peanuts',
         {
           userId,
           peanuts,
@@ -467,7 +471,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
         userId, // use this userId instead of session-based lookup
       );
 
-      console.log(`✅ Renewed ${tier} subscription for user ${userId} with ${peanuts} peanuts`);
+      const action = invoice.billing_reason === 'subscription_cycle' ? 'Renewed' : 'Updated';
+      console.log(`✅ ${action} ${tier} subscription for user ${userId} with ${peanuts} peanuts (${invoice.billing_reason})`);
     }
   } catch (error) {
     console.error('Error handling payment success:', error);

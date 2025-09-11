@@ -138,6 +138,6 @@ export function useStripeCallback() {
     };
 
     // Only run once when component mounts and user is available
-    handleStripeCallback();
+    // handleStripeCallback();
   }, [user?.id]); // Only depend on user.id to avoid running multiple times
 }
