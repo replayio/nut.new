@@ -268,7 +268,13 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       )}
                       <span className="transition-transform duration-300 group-hover/btn:scale-105">
-                        {isCurrentTier ? '✓ Current Plan' : isLoading ? 'Processing...' : !!currentTier ? 'Update Subscription' : 'Subscribe'}
+                        {isCurrentTier
+                          ? '✓ Current Plan'
+                          : isLoading
+                            ? 'Processing...'
+                            : !!currentTier
+                              ? 'Update Subscription'
+                              : 'Subscribe'}
                       </span>
                     </button>
                   </div>

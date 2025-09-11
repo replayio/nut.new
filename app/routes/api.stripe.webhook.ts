@@ -181,7 +181,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       return;
     }
 
-    await callNutAPI('add-peanuts',
+    await callNutAPI(
+      'add-peanuts',
       {
         userId,
         peanuts,

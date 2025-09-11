@@ -4,12 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import {
-  createTopoffCheckout,
-  checkSubscriptionStatus,
-  cancelSubscription,
-  manageBilling,
-} from '~/lib/stripe/client';
+import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription, manageBilling } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';

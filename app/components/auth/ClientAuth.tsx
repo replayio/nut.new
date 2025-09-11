@@ -9,7 +9,6 @@ import { authModalStore } from '~/lib/stores/authModal';
 import { userStore } from '~/lib/stores/userAuth';
 import { useStore } from '@nanostores/react';
 import { checkSubscriptionStatus } from '~/lib/stripe/client';
-import { classNames } from '~/utils/classNames';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 
 export function ClientAuth() {
@@ -131,8 +130,6 @@ export function ClientAuth() {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
   }
 
-  
-
   const useAvatarURL = false;
 
   return (
@@ -174,44 +171,43 @@ export function ClientAuth() {
                 </div>
               </div>
 
-                {loadingSubscription ? (
-                  <div className="px-3 py-2 border-b border-bolt-elements-borderColor flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
-                  </div>
-                ) : (
-                !stripeSubscription ? (
-                  <div className="px-3 py-2 border-b border-bolt-elements-borderColor">
-                    <button
-                      onClick={handleSubscriptionToggle}
-                      disabled={loading}
-                      className="w-full px-4 py-3 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
-                    >
-                      <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-                      <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
-                    </button>
-                  </div>
-                  ) : (
-                  <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="i-ph:crown text-lg text-blue-600" />
-                        <span className="text-bolt-elements-textPrimary font-medium">Plan</span>
+              {loadingSubscription ? (
+                <div className="px-3 py-2 border-b border-bolt-elements-borderColor flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+                </div>
+              ) : !stripeSubscription ? (
+                <div className="px-3 py-2 border-b border-bolt-elements-borderColor">
+                  <button
+                    onClick={handleSubscriptionToggle}
+                    disabled={loading}
+                    className="w-full px-4 py-3 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
+                  >
+                    <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+                    <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="i-ph:crown text-lg text-blue-600" />
+                      <span className="text-bolt-elements-textPrimary font-medium">Plan</span>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-bolt-elements-textHeading font-bold text-sm">
+                        {`${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`}
                       </div>
-                      
-                      <div className="text-right">
-                        <div className="text-bolt-elements-textHeading font-bold text-sm">
-                          {`${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`}
-                        </div>
-                        <div className="text-xs text-bolt-elements-textSecondary">
-                          {stripeSubscription.peanuts.toLocaleString()}/month
-                        </div>
+                      <div className="text-xs text-bolt-elements-textSecondary">
+                        {stripeSubscription.peanuts.toLocaleString()}/month
                       </div>
                     </div>
-                    {stripeSubscription?.cancelAtPeriodEnd && (
-                      <div className="text-xs text-yellow-500 mt-1 text-center">Cancels at period end</div>
-                    )}
                   </div>
-                ))}
+                  {stripeSubscription?.cancelAtPeriodEnd && (
+                    <div className="text-xs text-yellow-500 mt-1 text-center">Cancels at period end</div>
+                  )}
+                </div>
+              )}
 
               <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
                 <div className="flex items-center justify-between">

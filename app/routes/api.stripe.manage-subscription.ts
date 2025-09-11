@@ -322,7 +322,7 @@ async function handleManageSubscription(userEmail: string, targetUrl: string) {
           return_url: targetUrl,
         },
       },
-    }
+    },
   });
 
   return new Response(JSON.stringify({ success: true, url: portalSession.url }), {
