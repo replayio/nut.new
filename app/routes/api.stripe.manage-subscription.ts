@@ -319,6 +319,12 @@ async function handleManageSubscription(userEmail: string, targetUrl: string) {
       subscription_update: {
         subscription: subscriptions?.data?.[0]?.id,
       },
+      after_completion: {
+        type: 'redirect',
+        redirect: {
+          return_url: targetUrl,
+        },
+      },
     }
   });
 
