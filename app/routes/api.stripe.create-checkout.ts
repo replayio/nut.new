@@ -109,11 +109,25 @@ export async function action({ request }: { request: Request }) {
         });
         console.log(`✅ Updated customer ${customerId} metadata - Stripe is now authoritative source`);
       } else {
-        console.log(`No existing customer found - will create during checkout and update metadata after`);
-        customerId = undefined; // Let Stripe create customer during checkout
+        console.log(`No existing customer found - creating new customer with metadata`);
+        // Create customer explicitly with metadata
+        const newCustomer = await stripe.customers.create({
+          email: userEmail,
+          metadata: {
+            userId,
+            userEmail,
+          },
+        });
+        customerId = newCustomer.id;
+        console.log(`✅ Created new customer ${customerId} with metadata`);
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);
+    }
+
+    // Ensure we have a customer ID
+    if (!customerId) {
+      throw new Error('Failed to create or find customer');
     }
 
     if (type === 'subscription') {
@@ -165,8 +179,8 @@ export async function action({ request }: { request: Request }) {
           quantity: 1,
         },
       ],
-      // Use existing customer if found, otherwise let Stripe create one during checkout
-      ...(customerId ? { customer: customerId } : { customer_email: userEmail }),
+      // Always use customer ID (we ensure one exists above)
+      customer: customerId,
       client_reference_id: userId,
       metadata: {
         userId,
@@ -177,7 +191,16 @@ export async function action({ request }: { request: Request }) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       billing_address_collection: 'auto',
+      automatic_tax: {
+        enabled: true,
+      },
+      customer_update: {
+        address: 'auto',
+        name: 'auto',
+      },
     });
+
+    // Customer is guaranteed to exist with metadata at this point
 
     return new Response(
       JSON.stringify({
