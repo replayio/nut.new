@@ -9,8 +9,7 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
 const SUBSCRIPTION_PEANUTS = {
   free: 500,
-  starter: 2000,
-  builder: 5000,
+  builder: 2000,
   pro: 12000,
 } as const;
 
@@ -73,9 +72,6 @@ function getPeanutsFromPriceId(priceId: string): number {
     return SUBSCRIPTION_PEANUTS.free;
   }
   if (priceId === process.env.STRIPE_PRICE_STARTER) {
-    return SUBSCRIPTION_PEANUTS.starter;
-  }
-  if (priceId === process.env.STRIPE_PRICE_BUILDER) {
     return SUBSCRIPTION_PEANUTS.builder;
   }
   if (priceId === process.env.STRIPE_PRICE_PRO) {

@@ -179,6 +179,8 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
               const isCurrentTier = tier === currentTier;
               const isLoading = loading === tier;
               const isFree = tier === 'free';
+              console.log('tier', tier);
+              console.log('currentTier', currentTier);
 
               return (
                 <div
@@ -207,7 +209,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                       <div
                         className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
                           'i-ph:gift text-green-500': isFree,
-                          'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                          'i-ph:rocket-launch text-blue-500': tier === 'builder',
                         })}
                       />
                     </div>

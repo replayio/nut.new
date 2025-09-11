@@ -218,9 +218,6 @@ async function handleGetSubscriptionStatus(userEmail: string) {
     } else if (priceId === process.env.STRIPE_PRICE_STARTER) {
       tier = 'builder';
       peanuts = 2000;
-    } else if (priceId === process.env.STRIPE_PRICE_BUILDER) {
-      tier = 'builder';
-      peanuts = 5000;
     } else if (priceId === process.env.STRIPE_PRICE_PRO) {
       tier = 'pro';
       peanuts = 12000;

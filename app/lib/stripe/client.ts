@@ -28,7 +28,7 @@ const initializeStripe = () => {
 
 export interface CreateCheckoutSessionParams {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter';
+  tier?: 'free' | 'builder';
   returnUrl?: string; // Optional return URL to redirect to after checkout
 }
 
@@ -75,7 +75,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
  * Create subscription checkout for a specific tier
  * User info is automatically extracted from JWT token
  */
-export async function createSubscriptionCheckout(tier: 'free' | 'starter'): Promise<void> {
+export async function createSubscriptionCheckout(tier: 'free' | 'builder'): Promise<void> {
   return createCheckoutSession({
     type: 'subscription',
     tier,
@@ -110,7 +110,7 @@ export const SUBSCRIPTION_TIERS = {
     description: 'Our free tier to get you started.',
     features: ['500 Peanuts per month'],
   },
-  starter: {
+  builder: {
     name: 'Builder',
     price: 20,
     peanuts: 2000,

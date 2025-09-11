@@ -10,8 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Product and Price mappings from environment variables
 const SUBSCRIPTION_PRICES = {
   free: process.env.STRIPE_PRICE_FREE!,
-  starter: process.env.STRIPE_PRICE_STARTER!,
-  builder: process.env.STRIPE_PRICE_BUILDER!,
+  builder: process.env.STRIPE_PRICE_STARTER!,
   pro: process.env.STRIPE_PRICE_PRO!,
 } as const;
 
@@ -19,7 +18,7 @@ const PEANUT_TOPOFF_PRICE = process.env.STRIPE_PRICE_TOPOFF!;
 
 interface CreateCheckoutRequest {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter';
+  tier?: 'free' | 'builder';
   returnUrl?: string; // The current page URL to return to after checkout
 }
 
