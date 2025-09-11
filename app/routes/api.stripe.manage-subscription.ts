@@ -216,7 +216,7 @@ async function handleGetSubscriptionStatus(userEmail: string) {
       tier = 'free';
       peanuts = 500;
     } else if (priceId === process.env.STRIPE_PRICE_STARTER) {
-      tier = 'starter';
+      tier = 'builder';
       peanuts = 2000;
     } else if (priceId === process.env.STRIPE_PRICE_BUILDER) {
       tier = 'builder';
