@@ -432,49 +432,48 @@ async function handleSubscriptionResumed(subscription: Stripe.Subscription) {
 
 // Handler for successful payments (renewals and initial)
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+  console.log('💰 Payment succeeded for invoice:', invoice);
   try {
     const userId = await getUserIdFromCustomer(invoice.customer as string);
     if (!userId) {
       console.error(`No userId found for customer ${invoice.customer} in invoice ${invoice.id}`);
       return;
     }
+    console.log('💰 User ID found for invoice:', userId);
 
-    // Handle subscription payments (renewals and updates)
-    const isSubscriptionPayment = (invoice as any).subscription && 
-      (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_update');
-    
-    if (isSubscriptionPayment) {
-      // Get price ID directly from invoice line items (no API call needed!)
-      const lineItem = invoice.lines.data[0] as any;
-      const priceId = lineItem?.price?.id;
+    // Get price ID directly from invoice line items (no API call needed!)
+    const lineItem = invoice.lines.data[0] as any;
+    const priceId = lineItem?.price?.id;
+    console.log('💰 Price ID found in invoice lines:', priceId);
 
-      if (!priceId) {
-        console.error('No price ID found in invoice lines for invoice:', invoice.id);
-        return;
-      }
-
-      const peanuts = getPeanutsFromPriceId(priceId);
-      const tier = getTierFromPriceId(priceId);
-
-      if (peanuts === 0) {
-        console.error(`❌ Unknown price ID for ${invoice.billing_reason}: ${priceId}`);
-        return;
-      }
-
-      // Add peanuts for subscription payment (renewal or plan change)
-      await callNutAPI(
-        'add-peanuts',
-        {
-          userId,
-          peanuts,
-        },
-        undefined, // no streaming callback
-        userId, // use this userId instead of session-based lookup
-      );
-
-      const action = invoice.billing_reason === 'subscription_cycle' ? 'Renewed' : 'Updated';
-      console.log(`✅ ${action} ${tier} subscription for user ${userId} with ${peanuts} peanuts (${invoice.billing_reason})`);
+    if (!priceId) {
+      console.error('No price ID found in invoice lines for invoice:', invoice.id);
+      return;
     }
+
+    const peanuts = getPeanutsFromPriceId(priceId);
+    const tier = getTierFromPriceId(priceId);
+    console.log('💰 Peanuts found in invoice lines:', peanuts);
+    console.log('💰 Tier found in invoice lines:', tier);
+
+    if (peanuts === 0) {
+      console.error(`❌ Unknown price ID for ${invoice.billing_reason}: ${priceId}`);
+      return;
+    }
+
+    // Add peanuts for subscription payment (renewal or plan change)
+    await callNutAPI(
+      'add-peanuts',
+      {
+        userId,
+        peanuts,
+      },
+      undefined, // no streaming callback
+      userId, // use this userId instead of session-based lookup
+    );
+
+    const action = invoice.billing_reason === 'subscription_cycle' ? 'Renewed' : 'Updated';
+    console.log(`✅ ${action} ${tier} subscription for user ${userId} with ${peanuts} peanuts (${invoice.billing_reason})`);
   } catch (error) {
     console.error('Error handling payment success:', error);
   }
