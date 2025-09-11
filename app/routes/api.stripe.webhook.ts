@@ -442,8 +442,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     console.log('💰 User ID found for invoice:', userId);
 
     // Get price ID directly from invoice line items (no API call needed!)
-    const lineItem = invoice.lines.data[0] as any;
-    const priceId = lineItem?.price?.id;
+    const priceId = invoice.lines.data[0]?.pricing?.price_details?.price;
     console.log('💰 Price ID found in invoice lines:', priceId);
 
     if (!priceId) {
