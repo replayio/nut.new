@@ -185,10 +185,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       return;
     }
 
-    await callNutAPI('add-peanuts', {
+    await callNutAPI('add-peanuts',
+      {
+        userId,
+        peanuts,
+      },
+      undefined,
       userId,
-      peanuts,
-    });
+    );
   } catch (error) {
     console.error('Error handling payment success:', error);
   }
