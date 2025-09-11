@@ -341,7 +341,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               )}
             >
               <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">View Subscriptions</span>
+              <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
             </button>
           )}
 
@@ -355,7 +355,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               )}
             >
               <div className="i-ph:gear text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">Manage Subscriptions</span>
+              <span className="transition-transform duration-200 group-hover:scale-105">Manage Subscription</span>
             </button>
           )}
 
