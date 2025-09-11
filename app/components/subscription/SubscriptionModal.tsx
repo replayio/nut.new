@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
-import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, checkSubscriptionStatus, type SubscriptionTier, manageSubscription } from '~/lib/stripe/client';
+import {
+  SUBSCRIPTION_TIERS,
+  createSubscriptionCheckout,
+  checkSubscriptionStatus,
+  type SubscriptionTier,
+  manageSubscription,
+} from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { IconButton } from '~/components/ui/IconButton';
 
@@ -211,13 +217,15 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                         })}
                       />
                     </div>
-                    <h3 className={classNames(
-                      'text-xl font-bold mb-3 transition-transform duration-300 group-hover:scale-105',
-                      {
-                        'text-emerald-700 dark:text-emerald-400': isCurrentTier,
-                        'text-bolt-elements-textHeading': !isCurrentTier,
-                      }
-                    )}>
+                    <h3
+                      className={classNames(
+                        'text-xl font-bold mb-3 transition-transform duration-300 group-hover:scale-105',
+                        {
+                          'text-emerald-700 dark:text-emerald-400': isCurrentTier,
+                          'text-bolt-elements-textHeading': !isCurrentTier,
+                        },
+                      )}
+                    >
                       {details.name}
                       {isCurrentTier && <span className="ml-2 text-emerald-500">✓</span>}
                     </h3>

@@ -161,7 +161,7 @@ export async function action({ request }: { request: Request }) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-};
+}
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
@@ -185,17 +185,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       return;
     }
 
-    await callNutAPI(
-      'add-peanuts',
-      {
-        userId,
-        peanuts,
-      }
-    );
+    await callNutAPI('add-peanuts', {
+      userId,
+      peanuts,
+    });
   } catch (error) {
     console.error('Error handling payment success:', error);
   }
-};
+}
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
@@ -208,4 +205,4 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   } catch (error) {
     console.error('Error handling payment failure:', error);
   }
-};
+}

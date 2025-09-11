@@ -1,14 +1,15 @@
-import {
-  getPeanutsHistory,
-  getPeanutsSubscription,
-  type PeanutHistoryEntry,
-} from '~/lib/replay/Account';
+import { getPeanutsHistory, getPeanutsSubscription, type PeanutHistoryEntry } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription, manageSubscription } from '~/lib/stripe/client';
+import {
+  createTopoffCheckout,
+  checkSubscriptionStatus,
+  cancelSubscription,
+  manageSubscription,
+} from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
@@ -29,11 +30,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const reloadAccountData = async () => {
     setLoading(true);
 
-    const [history, subscription] = await Promise.all([
-      getPeanutsHistory(),
-      getPeanutsSubscription(),
-      refreshPeanutsStore(),
-    ]);
+    const [history] = await Promise.all([getPeanutsHistory(), getPeanutsSubscription(), refreshPeanutsStore()]);
 
     let stripeStatus = { hasSubscription: false, subscription: null };
     if (user?.email) {
@@ -143,8 +140,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleSubscriptionToggle = async () => {
-      openSubscriptionModal();
-      onClose();
+    openSubscriptionModal();
+    onClose();
   };
 
   const handleAddPeanuts = async () => {
@@ -249,7 +246,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   }
 
   return (
-
     <div
       className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
       onClick={(e) => e.stopPropagation()}
@@ -408,7 +404,9 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
               <div className="i-ph:list text-3xl text-bolt-elements-textSecondary" />
             </div>
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No usage history available</h3>
-            <p className="text-sm text-bolt-elements-textSecondary">Your peanut transactions will appear here once you start using the platform</p>
+            <p className="text-sm text-bolt-elements-textSecondary">
+              Your peanut transactions will appear here once you start using the platform
+            </p>
           </div>
         ) : (
           <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>

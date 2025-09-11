@@ -97,8 +97,10 @@ export function ClientAuth() {
   };
 
   const fetchSubscriptionData = useCallback(async () => {
-    if (!user?.email || loadingSubscription) return;
-    
+    if (!user?.email || loadingSubscription) {
+      return;
+    }
+
     setLoadingSubscription(true);
     try {
       const stripeStatus = await checkSubscriptionStatus();
@@ -173,10 +175,9 @@ export function ClientAuth() {
                   ) : (
                     <div className="text-right">
                       <div className="text-bolt-elements-textHeading font-bold text-sm">
-                        {stripeSubscription 
+                        {stripeSubscription
                           ? `${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`
-                          : 'Free Plan'
-                        }
+                          : 'Free Plan'}
                       </div>
                       {stripeSubscription && (
                         <div className="text-xs text-bolt-elements-textSecondary">

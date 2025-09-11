@@ -51,7 +51,8 @@ export async function action({ request }: { request: Request }) {
   try {
     const body = await request.json();
     const { action: requestAction, immediate, returnUrl } = body;
-    
+    const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : new URL(request.url).origin;
+
     switch (requestAction) {
       case 'cancel':
         return await handleCancelSubscription(user.email, user.id, immediate);
@@ -60,7 +61,6 @@ export async function action({ request }: { request: Request }) {
         return await handleGetSubscriptionStatus(user.email);
 
       case 'manage':
-        const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : new URL(request.url).origin;
         return await handleManageSubscription(user.email, targetUrl);
 
       default:

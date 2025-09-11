@@ -143,7 +143,7 @@ export async function checkSubscriptionStatus() {
       throw new Error('Failed to check subscription status');
     }
 
-    const data= await response.json();
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error checking subscription status:', error);
@@ -203,13 +203,13 @@ export async function manageSubscription() {
     }
 
     const data = await response.json();
-    
+
     // If we got a portal URL, open it in a new tab
     if (data.success && data.url) {
       window.open(data.url, '_self', 'noopener,noreferrer');
       return; // Successfully opened portal
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error managing subscription:', error);

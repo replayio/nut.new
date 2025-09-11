@@ -25,7 +25,6 @@ export function useStripeCallback() {
     const handleStripeCallback = async () => {
       if (stripeSuccess === 'topoff') {
         try {
-
           // Add peanuts directly via API
           await callNutAPI('add-peanuts', {
             userId: user.id,
