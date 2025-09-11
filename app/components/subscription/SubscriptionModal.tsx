@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
-import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, checkSubscriptionStatus, type SubscriptionTier } from '~/lib/stripe/client';
+import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, checkSubscriptionStatus, type SubscriptionTier, manageSubscription } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { IconButton } from '~/components/ui/IconButton';
 
@@ -15,11 +15,9 @@ interface SubscriptionModalProps {
 export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTier }: SubscriptionModalProps) {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
   const [actualCurrentTier, setActualCurrentTier] = useState<SubscriptionTier | undefined>(propCurrentTier);
-  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [fetchingSubscription, setFetchingSubscription] = useState(false);
   const user = useStore(userStore);
 
-  // Fetch actual subscription data from Stripe when modal opens
   useEffect(() => {
     if (isOpen && user?.email) {
       const fetchSubscriptionData = async () => {
@@ -27,15 +25,12 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
         try {
           const stripeStatus = await checkSubscriptionStatus();
           if (stripeStatus.hasSubscription && stripeStatus.subscription) {
-            setStripeSubscription(stripeStatus.subscription);
             setActualCurrentTier(stripeStatus.subscription.tier as SubscriptionTier);
           } else {
-            setStripeSubscription(null);
             setActualCurrentTier(undefined);
           }
         } catch (error) {
           console.error('Error fetching subscription status:', error);
-          // Fallback to prop value
           setActualCurrentTier(propCurrentTier);
         } finally {
           setFetchingSubscription(false);
@@ -46,7 +41,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
     } else if (isOpen && !user?.email) {
       // If no user, clear current tier
       setActualCurrentTier(undefined);
-      setStripeSubscription(null);
     }
   }, [isOpen, user?.email, propCurrentTier]);
 
@@ -80,11 +74,29 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
     }
   };
 
+  const handleManageSubscription = async () => {
+    await manageSubscription();
+  };
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
+  if (fetchingSubscription) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm px-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
+            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+          <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">Loading Subscription Data</h3>
+          <p className="text-bolt-elements-textSecondary">Fetching your subscription details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -145,13 +157,17 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
           </div>
         </div>
 
-        {/* Subscription Tiers */}
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
           {fetchingSubscription && (
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-3 bg-bolt-elements-background-depth-2/50 px-4 py-2 rounded-xl border border-bolt-elements-borderColor/30">
-                <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary/30 border-t-blue-500 rounded-full animate-spin"></div>
-                <span className="text-sm text-bolt-elements-textSecondary">Checking subscription status...</span>
+              <div className="inline-flex items-center gap-4 bg-gradient-to-r from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 px-6 py-4 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 shadow-sm">
+                  <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary/30 border-t-blue-500 rounded-full animate-spin"></div>
+                </div>
+                <div className="text-left">
+                  <h4 className="text-sm font-semibold text-bolt-elements-textHeading">Checking subscription</h4>
+                  <p className="text-xs text-bolt-elements-textSecondary">Verifying your current plan status...</p>
+                </div>
               </div>
             </div>
           )}
@@ -231,7 +247,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTie
                   {/* Subscribe Button */}
                   <div className="mt-auto">
                     <button
-                      onClick={() => handleSubscribe(tier)}
+                      onClick={!currentTier ? () => handleSubscribe(tier) : () => handleManageSubscription()}
                       disabled={isCurrentTier || isLoading}
                       className={classNames(
                         'w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl group/btn min-h-[56px]',

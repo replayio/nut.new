@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
@@ -8,6 +8,7 @@ import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';
 import { userStore } from '~/lib/stores/userAuth';
 import { useStore } from '@nanostores/react';
+import { checkSubscriptionStatus } from '~/lib/stripe/client';
 
 export function ClientAuth() {
   const user = useStore(userStore.user);
@@ -15,6 +16,8 @@ export function ClientAuth() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProTooltip, setShowProTooltip] = useState(false);
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -93,6 +96,27 @@ export function ClientAuth() {
     setShowDropdown(false);
   };
 
+  const fetchSubscriptionData = useCallback(async () => {
+    if (!user?.email || loadingSubscription) return;
+    
+    setLoadingSubscription(true);
+    try {
+      const stripeStatus = await checkSubscriptionStatus();
+      setStripeSubscription(stripeStatus.hasSubscription ? stripeStatus.subscription : null);
+    } catch (error) {
+      console.error('Error fetching subscription status:', error);
+      setStripeSubscription(null);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  }, [user?.email, loadingSubscription]);
+
+  useEffect(() => {
+    if (showDropdown && user?.email && !stripeSubscription && !loadingSubscription) {
+      fetchSubscriptionData();
+    }
+  }, [showDropdown, user?.email, stripeSubscription, loadingSubscription, fetchSubscriptionData]);
+
   if (loading) {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
   }
@@ -136,6 +160,35 @@ export function ClientAuth() {
                     <div className="font-medium text-bolt-elements-textPrimary truncate text-sm">{user.email}</div>
                   </div>
                 </div>
+              </div>
+
+              <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="i-ph:crown text-lg text-blue-600" />
+                    <span className="text-bolt-elements-textPrimary font-medium">Plan</span>
+                  </div>
+                  {loadingSubscription ? (
+                    <div className="w-4 h-4 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+                  ) : (
+                    <div className="text-right">
+                      <div className="text-bolt-elements-textHeading font-bold text-sm">
+                        {stripeSubscription 
+                          ? `${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`
+                          : 'Free Plan'
+                        }
+                      </div>
+                      {stripeSubscription && (
+                        <div className="text-xs text-bolt-elements-textSecondary">
+                          {stripeSubscription.peanuts.toLocaleString()}/month
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {stripeSubscription?.cancelAtPeriodEnd && (
+                  <div className="text-xs text-yellow-500 mt-1 text-center">Cancels at period end</div>
+                )}
               </div>
 
               <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
