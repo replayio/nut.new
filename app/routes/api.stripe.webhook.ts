@@ -435,6 +435,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     const userId = await getUserIdFromCustomer(invoice.customer as string);
     if (!userId) {
+      console.error(`No userId found for customer ${invoice.customer} in invoice ${invoice.id}`);
       return;
     }
 
