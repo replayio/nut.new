@@ -46,7 +46,7 @@ export const FAQSection = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-16">
-      <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+      <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
         Frequently Asked Questions
       </h2>
       
