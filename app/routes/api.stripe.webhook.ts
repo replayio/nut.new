@@ -180,10 +180,15 @@ async function handleCheckoutCompleted(checkoutSession: Stripe.Checkout.Session)
     }
 
     if (type === 'topoff') {
-      await callNutAPI('add-peanuts', {
+      await callNutAPI(
+        'add-peanuts',
+        {
+          userId,
+          peanuts: TOPOFF_PEANUTS,
+        },
+        undefined,
         userId,
-        peanuts: TOPOFF_PEANUTS,
-      }, undefined, userId);
+      );
     }
   } catch (error) {
     console.error('Error handling checkout completed:', error);
