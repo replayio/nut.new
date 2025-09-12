@@ -203,7 +203,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               'pb-2': isSmallViewport,
               'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
             })}
-            style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100vw' }}
+            style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
           >
             {!chatStarted && (
               <>
@@ -250,7 +250,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
-        {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {isSmallViewport && (appSummary || showWorkbench) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}
       </div>
     );

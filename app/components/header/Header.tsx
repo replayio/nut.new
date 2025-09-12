@@ -25,7 +25,7 @@ export function Header() {
   const appSummary = useStore(chatStore.appSummary);
   const appId = useStore(chatStore.currentAppId);
   const isSmallViewport = useViewport(800);
-  const repositoryId = workbenchStore.repositoryId.get();
+  const repositoryId = useStore(workbenchStore.pendingRepositoryId);
   const [history, setHistory] = useState<AppSummary[]>([]);
 
   const fetchHistory = async () => {
