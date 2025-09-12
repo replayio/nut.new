@@ -4,7 +4,6 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 import { Chat } from '~/components/chat/ChatComponent/Chat.client';
 import { PageContainer } from '~/layout/PageContainer';
-import { useStripeCallback } from '~/hooks/useStripeCallback';
 import { useUser } from '~/hooks/useUser';
 
 export const meta: MetaFunction = () => {
@@ -16,10 +15,6 @@ export const loader = () => json({});
 const Nothing = () => null;
 
 export default function Index() {
-  // Handle Stripe success/cancel callbacks
-  useStripeCallback();
-
-  // Listen for changes to user and identify in analytics/LogRocket
   useUser();
 
   return (

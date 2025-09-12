@@ -6,6 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
+const TOPOFF_PEANUTS = 2000;
 
 const SUBSCRIPTION_PEANUTS = {
   free: 500,
@@ -142,6 +143,12 @@ export async function action({ request }: { request: Request }) {
         break;
       }
 
+      case 'checkout.session.completed': {
+        const checkoutSession = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(checkoutSession);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`, event);
     }
@@ -156,6 +163,30 @@ export async function action({ request }: { request: Request }) {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+}
+
+async function handleCheckoutCompleted(checkoutSession: Stripe.Checkout.Session) {
+  try {
+    const userId = checkoutSession.metadata?.userId;
+    const type = checkoutSession.metadata?.type;
+    if (!userId) {
+      console.error('No userId found in checkout session metadata');
+      return;
+    }
+    if (!type) {
+      console.error('No type found in checkout session metadata');
+      return;
+    }
+
+    if (type === 'topoff') {
+      await callNutAPI('add-peanuts', {
+        userId,
+        peanuts: TOPOFF_PEANUTS,
+      }, undefined, userId);
+    }
+  } catch (error) {
+    console.error('Error handling checkout completed:', error);
   }
 }
 
