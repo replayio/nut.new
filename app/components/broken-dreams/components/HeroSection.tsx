@@ -6,15 +6,13 @@ export const HeroSection = () => {
           Rebuild your vibe-broken apps
         </span>
         <br />
-        <span className="bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
-          with Nut.new
-        </span>
+        <span className="bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">with Nut.new</span>
       </h1>
-      
+
       <p className="text-xl text-bolt-elements-textSecondary mb-8 max-w-3xl mx-auto leading-relaxed">
         Tell us what you've been struggling to build, and get $50 in credits along with tech support to get it working.
       </p>
-      
+
       <a
         href="https://form.typeform.com/to/QWeBbEox"
         target="_blank"
@@ -23,10 +21,10 @@ export const HeroSection = () => {
       >
         <span className="text-base sm:text-xl">Submit Your App</span>
       </a>
-      
+
       <p className="text-sm text-bolt-elements-textSecondary mt-6 max-w-2xl mx-auto">
-        Nut.new is focused on building web apps. So if you are looking to build native iOS/Android apps, 
-        desktop apps or Chrome extensions, we're not ready for you...yet.
+        Nut.new is focused on building web apps. So if you are looking to build native iOS/Android apps, desktop apps or
+        Chrome extensions, we're not ready for you...yet.
       </p>
     </div>
   );
