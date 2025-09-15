@@ -63,6 +63,7 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
+        {!user && <ThemeSwitch />}
         {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
@@ -84,7 +85,7 @@ export function Header() {
             }
           >
             <div className="flex items-center gap-3">
-              <ThemeSwitch />
+              {user && <ThemeSwitch />}
               <ClientAuth />
             </div>
           </Suspense>

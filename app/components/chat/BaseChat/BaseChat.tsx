@@ -27,6 +27,7 @@ import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
+import BrokenDreamsBanner from '../BrokenDreamsBanner';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -205,6 +206,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             })}
             style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
           >
+            {!chatStarted && <BrokenDreamsBanner />}
             {!chatStarted && (
               <>
                 <IntroSection />
