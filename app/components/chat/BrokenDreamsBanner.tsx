@@ -5,7 +5,7 @@ const BrokenDreamsBanner = () => {
         <a href="/rebuild-broken-dreams" className="group">
           <button className="relative flex justify-center items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl min-h-[48px] transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group cursor-pointer">
             <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap transition-transform duration-200 group-hover:scale-105">
-              Rebuild Your Broken Apps
+              Rebuild Your Broken Dreams
             </div>
           </button>
         </a>
