@@ -29,6 +29,9 @@ export interface DeploySettings {
 
   // Name of the site to create.
   siteName?: string;
+
+  // Authentication allow-list: domains that are allowed to sign in.
+  authAllowList?: string[];
 }
 
 export async function deployApp(appId: string, settings: DeploySettings): Promise<DeployResult> {

@@ -260,11 +260,12 @@ export const ThemeEditor = () => {
   const [liveVariables, setLiveVariables] = useState<Record<string, string>>({});
   // Store the original base colors from the default theme editor values
   const [originalBaseColors] = useState<Record<string, string>>(createOriginalBaseColors());
-  const [defaultOpenCategories] = useState<string[]>(['Primary Colors', 'Base Colors', 'Live Variables', 'App Settings', 'Typography', 'Layout']);
+  const [defaultOpenCategories] = useState<string[]>(['Primary Colors', 'Base Colors', 'Secondary Colors', 'Accent Colors']);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPresetTheme, setCurrentPresetTheme] = useState<string>('');
   const [isCustomTheme, setIsCustomTheme] = useState(false);
+  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'other'>('colors');
 
   // Get current theme variables
   const variables = isDarkMode ? darkVariables : lightVariables;
@@ -303,9 +304,14 @@ export const ThemeEditor = () => {
   const allVariables = [...variables, ...liveVariablesAsCSS];
   const filteredVariables = allVariables;
 
-  // Separate variables into color and non-color categories
+  // Separate variables by type for tabs
   const colorVariables = filteredVariables.filter(variable => variable.type === 'color');
-  const nonColorVariables = filteredVariables.filter(variable => variable.type !== 'color');
+  const typographyVariables = filteredVariables.filter(variable => 
+    variable.category === 'Typography' || variable.type === 'font'
+  );
+  const otherVariables = filteredVariables.filter(variable => 
+    variable.type !== 'color' && variable.category !== 'Typography' && variable.type !== 'font'
+  );
 
   // Group color variables by category for the theme colors section
   const groupedColorVariables = colorVariables.reduce(
@@ -325,10 +331,29 @@ export const ThemeEditor = () => {
     {} as Record<string, CSSVariable[]>,
   );
 
-  // Group non-color variables - put them all in a single "Settings" category for the top table
-  const groupedNonColorVariables = nonColorVariables.reduce(
+  // Group typography variables by subcategory
+  const groupedTypographyVariables = typographyVariables.reduce(
     (acc, variable) => {
-      const category = 'Settings'; // All non-color variables go in Settings category
+      const category = variable.category || 'Typography';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      if (
+        !searchTerm ||
+        variable.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        acc[category].push(variable);
+      }
+      return acc;
+    },
+    {} as Record<string, CSSVariable[]>,
+  );
+
+  // Group other variables by category
+  const groupedOtherVariables = otherVariables.reduce(
+    (acc, variable) => {
+      const category = variable.category || 'Other';
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -569,72 +594,144 @@ export const ThemeEditor = () => {
   return (
     <div className="flex flex-col h-full bg-bolt-elements-background">
       {/* Header */}
-      <div className="border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 p-4 space-y-3">
-
-        {/* Theme Switcher */}
-        <div className="space-y-2">
+      <div className="border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-1">
+        {/* Theme Selector */}
+        <div className="p-4 border-b border-bolt-elements-borderColor">
           <ThemeSwitcher
             currentTheme={isCustomTheme ? 'custom' : currentPresetTheme}
             onThemeSwitch={applyPresetTheme}
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Tab Navigation */}
+        <div className="flex items-center px-4 py-3 bg-bolt-elements-background-depth-1">
+          <div className="flex items-center gap-1 p-1 bg-bolt-elements-background-depth-2 rounded-lg relative overflow-hidden">
+            {/* Animated background bubble */}
+            <div
+              className="absolute h-[calc(100%-8px)] bg-bolt-elements-background-depth-3 rounded-md transition-all duration-300 bolt-ease-cubic-bezier"
+              style={{
+                width: activeTab === 'colors' ? '67px' : activeTab === 'typography' ? '96px' : '60px',
+                transform: `translateX(${
+                  activeTab === 'colors' ? '0px' : 
+                  activeTab === 'typography' ? '71px' : 
+                  '171px'
+                })`,
+              }}
+            />
+            
             <button
-              onClick={fetchLiveVariables}
-              className="px-3 py-1.5 text-xs bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded hover:bg-bolt-elements-background-depth-3 transition-colors"
-              title="Refresh live variables"
+              onClick={() => setActiveTab('colors')}
+              className={classNames(
+                'relative z-10 px-3 py-1.5 text-sm font-medium rounded-md transition-theme',
+                activeTab === 'colors'
+                  ? 'text-bolt-elements-textPrimary'
+                  : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary'
+              )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
+              Colors
+            </button>
+            <button
+              onClick={() => setActiveTab('typography')}
+              className={classNames(
+                'relative z-10 px-3 py-1.5 text-sm font-medium rounded-md transition-theme',
+                activeTab === 'typography'
+                  ? 'text-bolt-elements-textPrimary'
+                  : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary'
+              )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              Typography
+            </button>
+            <button
+              onClick={() => setActiveTab('other')}
+              className={classNames(
+                'relative z-10 px-3 py-1.5 text-sm font-medium rounded-md transition-theme',
+                activeTab === 'other'
+                  ? 'text-bolt-elements-textPrimary'
+                  : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary'
+              )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              Other
+            </button>
+          </div>
+          
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => {/* Generate theme logic */}}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg transition-theme"
+              title="Generate theme"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-            </button>
-            <button
-              onClick={() => handleThemeSwitch(false)}
-              className={classNames(
-                'px-3 py-1.5 text-xs rounded transition-colors',
-                !isDarkMode
-                  ? 'bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text'
-                  : 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3',
-              )}
-            >
-              Light
-            </button>
-            <button
-              onClick={() => handleThemeSwitch(true)}
-              className={classNames(
-                'px-3 py-1.5 text-xs rounded transition-colors',
-                isDarkMode
-                  ? 'bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text'
-                  : 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3',
-              )}
-            >
-              Dark
+              Generate
             </button>
           </div>
         </div>
 
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search variables..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 text-sm bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-md focus:outline-none focus:border-bolt-elements-borderColorActive"
-        />
+        {/* Theme Mode & Search */}
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={fetchLiveVariables}
+                className="px-3 py-1.5 text-xs bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-lg hover:bg-bolt-elements-background-depth-3 transition-theme"
+                title="Refresh live variables"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
+              <div className="flex bg-bolt-elements-background-depth-2 rounded-lg p-1">
+                <button
+                  onClick={() => handleThemeSwitch(false)}
+                  className={classNames(
+                    'px-3 py-1 text-xs rounded transition-theme',
+                    !isDarkMode
+                      ? 'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary'
+                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                  )}
+                >
+                  Light
+                </button>
+                <button
+                  onClick={() => handleThemeSwitch(true)}
+                  className={classNames(
+                    'px-3 py-1 text-xs rounded transition-theme',
+                    isDarkMode
+                      ? 'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary'
+                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                  )}
+                >
+                  Dark
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search variables..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 text-sm bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg focus:outline-none focus:border-bolt-elements-borderColorActive"
+          />
+        </div>
       </div>
 
       {/* Variables List */}
-      <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={[...defaultOpenCategories, 'Settings']}>
-          {/* Settings Section (Non-Color Variables) */}
-          {Object.entries(groupedNonColorVariables).map(([category, categoryVariables]) => {
+      <div className="flex-1 px-4 overflow-y-auto">
+        <Accordion type="multiple" defaultValue={defaultOpenCategories}>
+          {/* Render content based on active tab */}
+          {activeTab === 'colors' && Object.entries(groupedColorVariables).map(([category, categoryVariables]) => {
             if (categoryVariables.length === 0) {
               return null;
             }
@@ -652,7 +749,7 @@ export const ThemeEditor = () => {
                       <div
                         key={variable.id}
                         className={classNames(
-                          'flex items-center justify-between p-3 rounded-md transition-colors',
+                          'flex items-center justify-between p-3 rounded-md transition-theme',
                           variable.category === 'Live Variables' 
                             ? 'bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor' 
                             : 'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3',
@@ -703,7 +800,7 @@ export const ThemeEditor = () => {
                                 />
                               ) : (
                                 <code
-                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-colors"
+                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-theme"
                                   onClick={() => startEditingName(variable.id)}
                                   title="Click to edit variable name"
                                 >
@@ -719,7 +816,7 @@ export const ThemeEditor = () => {
                             !variable.id.startsWith('live-') && (
                               <button
                                 onClick={() => deleteVariable(variable.id)}
-                                className="ml-2 p-2 text-bolt-elements-icon-error hover:bg-bolt-elements-icon-error/10 rounded-md transition-colors"
+                                className="ml-2 p-2 text-bolt-elements-icon-error hover:bg-red-500/10 rounded-md transition-theme"
                                 title="Delete variable"
                               >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -741,8 +838,8 @@ export const ThemeEditor = () => {
             );
           })}
           
-          {/* Theme Colors Section (Color Variables) */}
-          {Object.entries(groupedColorVariables).map(([category, categoryVariables]) => {
+          {/* Typography Tab Content */}
+          {activeTab === 'typography' && Object.entries(groupedTypographyVariables).map(([category, categoryVariables]) => {
             if (categoryVariables.length === 0) {
               return null;
             }
@@ -765,7 +862,7 @@ export const ThemeEditor = () => {
                       <div
                         key={variable.id}
                         className={classNames(
-                          'flex items-center justify-between p-3 rounded-md transition-colors',
+                          'flex items-center justify-between p-3 rounded-md transition-theme',
                           variable.category === 'Live Variables' 
                             ? 'bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor' 
                             : 'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3',
@@ -823,7 +920,7 @@ export const ThemeEditor = () => {
                                 />
                               ) : (
                                 <code
-                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-colors"
+                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-theme"
                                   onClick={() => startEditingName(variable.id)}
                                   title="Click to edit variable name"
                                 >
@@ -837,7 +934,7 @@ export const ThemeEditor = () => {
                             !variable.id.startsWith('live-') && (
                               <button
                                 onClick={() => deleteVariable(variable.id)}
-                                className="ml-2 p-2 text-bolt-elements-icon-error hover:bg-bolt-elements-icon-error/10 rounded-md transition-colors"
+                                className="ml-2 p-2 text-bolt-elements-icon-error hover:bg-red-500/10 rounded-md transition-theme"
                                 title="Delete variable"
                               >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -858,6 +955,87 @@ export const ThemeEditor = () => {
               </AccordionItem>
             );
           })}
+          
+          {/* Other Tab Content */}
+          {activeTab === 'other' && Object.entries(groupedOtherVariables).map(([category, categoryVariables]) => {
+            if (categoryVariables.length === 0) {
+              return null;
+            }
+
+            return (
+              <AccordionItem key={category} value={category}>
+                <AccordionTrigger>
+                  <span className="text-sm font-semibold text-bolt-elements-textPrimary">
+                    {category}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="px-4 py-2 space-y-3">
+                    {categoryVariables.map((variable) => (
+                      <div
+                        key={variable.id}
+                        className={classNames(
+                          'flex items-center justify-between p-3 rounded-md transition-theme',
+                          'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3',
+                        )}
+                      >
+                        <div className="flex flex-col gap-3 w-full">
+                          {/* Variable Header */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-bolt-elements-textPrimary">
+                                {variable.label}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Variable Controls */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                value={variable.value}
+                                onChange={(e) => updateVariable(variable.id, { value: e.target.value })}
+                                className="w-full px-3 py-2 text-sm bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-md focus:outline-none focus:border-bolt-elements-borderColorActive focus:ring-1 focus:ring-bolt-elements-borderColorActive"
+                                placeholder="Enter value..."
+                              />
+                            </div>
+
+                            {/* Variable Name Display/Edit */}
+                            <div className="min-w-0 flex-shrink-0">
+                              {variable.isEditing ? (
+                                <input
+                                  type="text"
+                                  value={variable.name}
+                                  onChange={(e) => updateVariable(variable.id, { name: e.target.value })}
+                                  onBlur={() => stopEditingName(variable.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      stopEditingName(variable.id);
+                                    }
+                                  }}
+                                  className="text-xs font-mono px-2 py-1 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColorActive rounded-md focus:outline-none w-32"
+                                  autoFocus
+                                />
+                              ) : (
+                                <code
+                                  className="text-xs text-bolt-elements-textSecondary font-mono cursor-pointer hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 px-2 py-1 rounded-md transition-theme"
+                                  onClick={() => startEditingName(variable.id)}
+                                  title="Click to edit variable name"
+                                >
+                                  {variable.name}
+                                </code>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </div>
 
@@ -867,7 +1045,7 @@ export const ThemeEditor = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={addVariable}
-              className="px-4 py-2 text-sm bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text rounded-md hover:bg-bolt-elements-button-primary-backgroundHover transition-colors font-medium"
+              className="px-4 py-2 text-sm bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text rounded-md hover:bg-bolt-elements-button-primary-backgroundHover transition-theme font-medium"
             >
               + Add Variable
             </button>
@@ -885,7 +1063,7 @@ export const ThemeEditor = () => {
                 // Apply the reset theme to iframe
                 handleThemeSwitch(isDarkMode);
               }}
-              className="px-4 py-2 text-sm bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text rounded-md hover:bg-bolt-elements-button-secondary-backgroundHover transition-colors font-medium"
+              className="px-4 py-2 text-sm bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text rounded-md hover:bg-bolt-elements-button-secondary-backgroundHover transition-theme font-medium"
             >
               Reset to Default
             </button>
@@ -904,14 +1082,14 @@ export const ThemeEditor = () => {
                 const json = JSON.stringify(variableObject, null, 2);
                 navigator.clipboard.writeText(json);
               }}
-              className="px-4 py-2 text-sm bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-md hover:bg-bolt-elements-background-depth-3 transition-colors font-medium"
+              className="px-4 py-2 text-sm bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-md hover:bg-bolt-elements-background-depth-3 transition-theme font-medium"
             >
               Copy JSON
             </button>
 
             <button
               onClick={applyVariables}
-              className="px-4 py-2 text-sm bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text rounded-md hover:bg-bolt-elements-button-primary-backgroundHover transition-colors font-medium"
+              className="px-4 py-2 text-sm bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text rounded-md hover:bg-bolt-elements-button-primary-backgroundHover transition-theme font-medium"
             >
               Apply Changes
             </button>

@@ -12,7 +12,7 @@ const AccordionItem = forwardRef<
 >(({ className, ...props }, ref) => (
   <RadixAccordion.Item
     ref={ref}
-    className={classNames('border-b border-bolt-elements-borderColor', className)}
+    className={classNames('mb-2', className)}
     {...props}
   />
 ));
@@ -27,7 +27,12 @@ const AccordionTrigger = forwardRef<
     <RadixAccordion.Trigger
       ref={ref}
       className={classNames(
-        'flex flex-1 items-center justify-between py-4 px-4 font-medium text-sm transition-all bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary [&[data-state=open]>svg]:rotate-180',
+        'flex flex-1 items-center justify-between py-3 px-4 font-medium text-sm transition-all rounded-lg',
+        'bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-2',
+        'text-bolt-elements-textPrimary',
+        '[&[data-state=open]>svg]:rotate-180',
+        '[&[data-state=open]]:bg-bolt-elements-background-depth-2',
+        '[&[data-state=open]]:rounded-b-none',
         className,
       )}
       {...props}
@@ -53,10 +58,13 @@ const AccordionContent = forwardRef<
 >(({ className, children, ...props }, ref) => (
   <RadixAccordion.Content
     ref={ref}
-    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down bg-bolt-elements-background-depth-2"
+    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={classNames('pb-4 pt-0 bg-bolt-elements-background-depth-2', className)}>
+    <div className={classNames(
+      'pb-4 pt-2 bg-bolt-elements-background-depth-2 rounded-b-lg',
+      className
+    )}>
       {children}
     </div>
   </RadixAccordion.Content>

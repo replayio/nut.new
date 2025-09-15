@@ -48,7 +48,12 @@ export default async function handleRequest(
   // Build full HTML response
   const html = `<!DOCTYPE html>
 <html lang="en" data-theme="${themeStore.value}">
-<head>${head}</head>
+<head>
+   <script
+      crossOrigin="anonymous"
+      src="//unpkg.com/react-scan/dist/auto.global.js"
+    ></script>
+${head}</head>
 <body>
   <div id="root" class="w-full h-full">${markup}</div>
 </body>

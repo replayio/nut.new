@@ -126,11 +126,13 @@ export const ThemeChangesBanner = () => {
           </svg>
           <span className="text-sm text-amber-800 dark:text-amber-200">
             Theme changes made locally ({totalChangedCount} variable{totalChangedCount !== 1 ? 's' : ''} modified
-            {lightChangedCount > 0 && darkChangedCount > 0
-              ? ` - ${lightChangedCount} light, ${darkChangedCount} dark`
-              : lightChangedCount > 0
-                ? ' - light theme'
-                : ' - dark theme'}
+            {(() => {
+              const parts = [];
+              if (appSettingsCount > 0) parts.push(`${appSettingsCount} app setting${appSettingsCount !== 1 ? 's' : ''}`);
+              if (lightChangedCount > 0) parts.push(`${lightChangedCount} light`);
+              if (darkChangedCount > 0) parts.push(`${darkChangedCount} dark`);
+              return parts.length > 0 ? ` - ${parts.join(', ')}` : '';
+            })()}
             )
           </span>
         </div>
