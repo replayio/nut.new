@@ -243,7 +243,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage({ messageInput, chatMode: ChatMode.Discovery });
+                  handleSendMessage({ messageInput, chatMode: ChatMode.UserMessage });
                 })}
               </>
             )}
