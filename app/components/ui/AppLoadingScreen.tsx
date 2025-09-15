@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { LoadingDots } from './LoadingDots';
 
 interface AppLoadingScreenProps {
   appId?: string;
@@ -18,7 +17,7 @@ export const AppLoadingScreen = ({ appId }: AppLoadingScreenProps) => {
           transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
         >
           <div className="i-ph:nut text-2xl text-white" />
@@ -56,7 +55,7 @@ export const AppLoadingScreen = ({ appId }: AppLoadingScreenProps) => {
                 duration: 1.5,
                 repeat: Infinity,
                 delay: index * 0.2,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             />
           ))}
