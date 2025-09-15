@@ -1,16 +1,13 @@
 import { useStore } from '@nanostores/react';
 import { deployModalStore } from '~/lib/stores/deployModal';
 import { chatStore } from '~/lib/stores/chat';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { database } from '~/lib/persistence/apps';
-import { downloadRepository, lastDeployResult, deployApp } from '~/lib/replay/Deploy';
+import { lastDeployResult, deployApp } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/utils/nut';
-import { toast } from 'react-toastify';
-import { DeployStatus } from '../DeployChatButton';
+import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import DeploymentSuccessful from './DeploymentSuccessful';
 
-// Restriction from Netlify on how long site names can be.
 const MAX_SITE_NAME_LENGTH = 63;
 
 export function GlobalDeployChatModal() {
@@ -22,7 +19,6 @@ export function GlobalDeployChatModal() {
   const loadingData = useStore(deployModalStore.loadingData);
 
   const appId = useStore(chatStore.currentAppId);
-  const appSummary = useStore(chatStore.appSummary);
 
   const handleCloseModal = () => {
     deployModalStore.close();
@@ -37,7 +33,7 @@ export function GlobalDeployChatModal() {
     }
 
     const currentSettings = deployModalStore.deploySettings.get();
-    let settingsToUse = { ...currentSettings };
+    const settingsToUse = { ...currentSettings };
 
     if (!settingsToUse.siteName) {
       const appTitle = chatStore.appTitle.get();
@@ -152,7 +148,9 @@ export function GlobalDeployChatModal() {
                   <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
                 </div>
                 <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
-                <p className="text-bolt-elements-textSecondary">Please wait while we prepare your deployment settings</p>
+                <p className="text-bolt-elements-textSecondary">
+                  Please wait while we prepare your deployment settings
+                </p>
               </div>
             ) : status === DeployStatus.Succeeded ? (
               <DeploymentSuccessful result={lastDeployResult(deploySettings)} setIsModalOpen={handleCloseModal} />
@@ -225,7 +223,10 @@ export function GlobalDeployChatModal() {
 
                 <div className="p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30 space-y-4">
                   <div>
-                    <label htmlFor="siteName" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+                    <label
+                      htmlFor="siteName"
+                      className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary"
+                    >
                       Site Name (optional)
                     </label>
                     <p className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-3">

@@ -201,11 +201,14 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                           {feature.status === AppFeatureStatus.ValidationFailed && (
                             <div className="i-ph:warning-circle-fill text-sm text-yellow-600 transition-transform duration-200 hover:scale-110" />
                           )}
-                          {(feature.status === AppFeatureStatus.NotStarted || feature.status === AppFeatureStatus.ImplementationInProgress) && (
+                          {(feature.status === AppFeatureStatus.NotStarted ||
+                            feature.status === AppFeatureStatus.ImplementationInProgress) && (
                             <div className="i-ph:circle text-sm text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110" />
                           )}
                           <span className="capitalize">
-                            {feature.status === AppFeatureStatus.ImplementationInProgress ? 'In Progress' : feature.status}
+                            {feature.status === AppFeatureStatus.ImplementationInProgress
+                              ? 'In Progress'
+                              : feature.status}
                           </span>
                         </div>
                       </div>
