@@ -90,13 +90,7 @@ const AppView = ({
           )}
         </>
       ) : (
-        <div className="w-full h-full">
-          {isMockupImplemented ? (
-            <PreviewLoad />
-          ) : (
-            <ProgressStatus />
-          )}
-        </div>
+        <div className="w-full h-full">{isMockupImplemented ? <PreviewLoad /> : <ProgressStatus />}</div>
       )}
 
       {isDeviceModeOn && previewURL && (

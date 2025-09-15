@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ServerIcon, PuzzleIcon, ToolsIcon, ClockIcon } from './components';
 
 const messages = [
-  "Spinning up the server",
-  "Connecting the puzzle pieces", 
-  "Tightening a few nuts (and bolts)",
-  "Getting closer"
+  'Spinning up the server',
+  'Connecting the puzzle pieces',
+  'Tightening a few nuts (and bolts)',
+  'Getting closer',
 ];
 
 const loadingStates = [
@@ -45,7 +45,7 @@ const PreviewLoad = () => {
       <div className="absolute inset-0 p-[3px] animate-focus-border opacity-60 rounded-b-xl">
         <div className="w-full h-full bg-bolt-elements-background-depth-2 rounded-b-[9px]" />
       </div>
-      
+
       {/* Content container */}
       <div className="relative w-full h-full flex flex-col items-center justify-center p-6 overflow-hidden">
         {/* Icon Component - constrained to 30% of viewport width */}
@@ -56,9 +56,9 @@ const PreviewLoad = () => {
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 1.05, y: -30 }}
-              transition={{ 
-                duration: 0.7, 
-                ease: [0.4, 0.0, 0.2, 1]
+              transition={{
+                duration: 0.7,
+                ease: [0.4, 0.0, 0.2, 1],
               }}
             >
               <CurrentComponent />
@@ -76,13 +76,13 @@ const PreviewLoad = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ 
+                transition={{
                   duration: 0.5,
-                  ease: [0.4, 0.0, 0.2, 1]
+                  ease: [0.4, 0.0, 0.2, 1],
                 }}
                 className="relative"
               >
-                <div 
+                <div
                   className="bg-gradient-to-r from-yellow-400 via-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
                   style={{ fontSize: '1.75rem', fontWeight: 500, lineHeight: 1.5 }}
                 >
@@ -96,9 +96,15 @@ const PreviewLoad = () => {
 
       <style jsx>{`
         @keyframes rainbow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
         }
       `}</style>
     </div>
