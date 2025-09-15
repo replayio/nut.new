@@ -244,6 +244,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         handleSendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
                         setTimeout(() => {
                           workbenchStore.setShowWorkbench(true);
+                          mobileNavStore.setShowMobileNav(true);
                           mobileNavStore.setActiveTab('preview');
                         }, 2000);
                       }}

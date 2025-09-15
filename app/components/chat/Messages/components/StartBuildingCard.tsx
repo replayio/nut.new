@@ -41,6 +41,7 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
                   sendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
                   setTimeout(() => {
                     workbenchStore.setShowWorkbench(true);
+                    mobileNavStore.setShowMobileNav(true);
                     mobileNavStore.setActiveTab('preview');
                   }, 2000);
                 }

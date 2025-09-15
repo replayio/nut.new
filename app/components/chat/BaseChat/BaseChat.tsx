@@ -72,6 +72,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const showMobileNav = useStore(mobileNavStore.showMobileNav);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -250,7 +251,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
-        {isSmallViewport && (appSummary || showWorkbench) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {isSmallViewport && (appSummary || showMobileNav) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
         {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}
       </div>
     );
