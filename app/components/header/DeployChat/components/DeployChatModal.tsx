@@ -31,9 +31,9 @@ const DeployChatModal = ({
   const hasExistingSite = Boolean(result?.siteURL);
 
   if (loadingData) {
-    return (
-      <DialogRoot open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
-        <Dialog onClose={() => setIsModalOpen(false)} className="max-w-md">
+  return (
+    <DialogRoot open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
+      <Dialog onClose={() => setIsModalOpen(false)} className="max-w-md z-[1001]">
           <div className="p-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
@@ -50,7 +50,7 @@ const DeployChatModal = ({
 
   return (
     <DialogRoot open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
-      <Dialog onClose={() => setIsModalOpen(false)} className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <Dialog onClose={() => setIsModalOpen(false)} className="max-w-2xl max-h-[90vh] overflow-y-auto z-[1001]">
         <div className="p-6">
           {status === DeployStatus.Succeeded ? (
             <DeploymentSuccessful result={result} setIsModalOpen={setIsModalOpen} />

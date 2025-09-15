@@ -121,6 +121,7 @@ export function Chat() {
     }
   };
 
+
   useEffect(() => {
     if (initialAppId) {
       loadApp(initialAppId);
