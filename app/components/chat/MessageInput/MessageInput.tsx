@@ -10,7 +10,7 @@ import { useStore } from '@nanostores/react';
 import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { mobileNavStore } from '~/lib/stores/mobileNav';
+import useViewport from '~/lib/hooks/useViewport';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -51,6 +51,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const chatStarted = useStore(chatStore.started);
   const messages = useStore(chatStore.messages);
   const hasAppSummary = !!useStore(chatStore.appSummary);
+  const isSmallViewport = useViewport(600);
 
   let startPlanningRating = 0;
   if (!hasPendingMessage && !hasAppSummary) {
@@ -243,9 +244,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                         handleSendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
                         setTimeout(() => {
-                          workbenchStore.setShowWorkbench(true);
-                          mobileNavStore.setShowMobileNav(true);
-                          mobileNavStore.setActiveTab('preview');
+                          !isSmallViewport && workbenchStore.setShowWorkbench(true);
                         }, 2000);
                       }}
                       startPlanningRating={startPlanningRating}

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { mobileNavStore } from '~/lib/stores/mobileNav';
+import useViewport from '~/lib/hooks/useViewport';
 
 interface StartBuildingCardProps {
   startPlanningRating: number;
@@ -11,6 +11,7 @@ interface StartBuildingCardProps {
 }
 
 export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlanningRating, sendMessage, onMount }) => {
+  const isSmallViewport = useViewport(600);
   useEffect(() => {
     if (onMount) {
       onMount();
@@ -40,9 +41,7 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
                   const message = 'Start building the app based on these requirements.';
                   sendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
                   setTimeout(() => {
-                    workbenchStore.setShowWorkbench(true);
-                    mobileNavStore.setShowMobileNav(true);
-                    mobileNavStore.setActiveTab('preview');
+                    isSmallViewport && workbenchStore.setShowWorkbench(true);
                   }, 2000);
                 }
               }}

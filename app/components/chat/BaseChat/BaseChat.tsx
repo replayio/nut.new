@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useEffect, useState } from 'react';
+import React, { type RefCallback, useCallback, useEffect, useState, useRef } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -90,11 +90,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     });
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
+    const hasShownWorkbench = useRef(false);
 
     useEffect(() => {
-      if (appSummary && !workbenchStore.showWorkbench.get()) {
+      if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
         mobileNavStore.setActiveTab('preview');
+        hasShownWorkbench.current = true;
       }
     }, [appSummary]);
 
@@ -205,15 +207,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
             'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
             'p-6': !isSmallViewport && chatStarted,
-            'p-6 pb-16': !isSmallViewport && !chatStarted, // Add extra bottom padding on landing page to show footer
+            'p-6 pb-16': !isSmallViewport && !chatStarted,
           })}
         >
           <div
             className={classNames(styles.Chat, 'flex flex-col h-full', {
-              'flex-grow': isSmallViewport, // Full width on mobile
-              'flex-shrink-0': !isSmallViewport, // Fixed width on desktop
+              'flex-grow': isSmallViewport,
+              'flex-shrink-0': !isSmallViewport,
               'pb-2': isSmallViewport,
-              'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
+              'landing-page-layout': !chatStarted,
             })}
             style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
           >
@@ -262,7 +264,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
-        {isSmallViewport && (appSummary || showMobileNav) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
       </div>
     );
 
