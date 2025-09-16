@@ -71,7 +71,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
-    const showMobileNav = useStore(mobileNavStore.showMobileNav);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {

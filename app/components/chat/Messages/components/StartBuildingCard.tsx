@@ -41,7 +41,9 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
                   const message = 'Start building the app based on these requirements.';
                   sendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
                   setTimeout(() => {
-                    isSmallViewport && workbenchStore.setShowWorkbench(true);
+                    if (!isSmallViewport) {
+                      workbenchStore.setShowWorkbench(true);
+                    }
                   }, 2000);
                 }
               }}

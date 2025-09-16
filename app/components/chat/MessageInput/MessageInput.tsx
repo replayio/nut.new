@@ -244,7 +244,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
                         handleSendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
                         setTimeout(() => {
-                          !isSmallViewport && workbenchStore.setShowWorkbench(true);
+                          if (!isSmallViewport) {
+                            workbenchStore.setShowWorkbench(true);
+                          }
                         }, 2000);
                       }}
                       startPlanningRating={startPlanningRating}
