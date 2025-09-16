@@ -86,9 +86,7 @@ const Features = () => {
     const isCollapsed = collapsedFeatures.has(index);
 
     const name = feature ? formatPascalCaseName(feature.name) : 'N/A';
-    const description = feature
-      ? feature.description
-      : 'N/A';
+    const description = feature ? feature.description : 'N/A';
     const status = feature ? feature.status : AppFeatureStatus.NotStarted;
 
     return (
@@ -147,7 +145,9 @@ const Features = () => {
 
   return (
     <div>
-      <div className="space-y-6">{appSummary?.features?.slice(1)?.map((feature, index) => renderFeature(feature, index))}</div>
+      <div className="space-y-6">
+        {appSummary?.features?.slice(1)?.map((feature, index) => renderFeature(feature, index))}
+      </div>
     </div>
   );
 };
