@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useEffect, useState, useRef } from 'react';
+import React, { type RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -71,6 +71,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const showMobileNav = useStore(mobileNavStore.showMobileNav);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -89,8 +90,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     });
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
-    const hasShownWorkbench = useRef(false);
 
+    const hasShownWorkbench = useRef(false);
     useEffect(() => {
       if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
@@ -203,8 +204,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
-            'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
+            'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
+            'pt-2 pb-15 px-4': isSmallViewport && (!!appSummary || showMobileNav),
             'p-6': !isSmallViewport && chatStarted,
             'p-6 pb-16': !isSmallViewport && !chatStarted,
           })}
@@ -263,7 +264,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
-        {isSmallViewport && appSummary && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
+        {isSmallViewport && (appSummary || showMobileNav) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
       </div>
     );
 
