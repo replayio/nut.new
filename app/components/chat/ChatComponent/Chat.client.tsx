@@ -13,6 +13,7 @@ import { navigateApp } from '~/utils/nut';
 import { useStore } from '@nanostores/react';
 import { statusModalStore } from '~/lib/stores/statusModal';
 import { clearAppResponses } from '~/lib/replay/ResponseFilter';
+import { AppLoadingScreen } from '~/components/ui/AppLoadingScreen';
 
 async function isAppAccessible(appId: string) {
   try {
@@ -130,6 +131,7 @@ export function Chat() {
 
   return (
     <>
+      {!ready && initialAppId && <AppLoadingScreen appId={initialAppId} />}
       {ready && <ChatImplementer />}
       {unauthorized && <Unauthorized handleCopyApp={handleCopyApp} isCopying={isCopying} />}
     </>

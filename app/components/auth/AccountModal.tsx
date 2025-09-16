@@ -1,15 +1,10 @@
-import {
-  getPeanutsHistory,
-  getPeanutsSubscription,
-  type PeanutHistoryEntry,
-  type AccountSubscription,
-} from '~/lib/replay/Account';
+import { getPeanutsHistory, getPeanutsSubscription, type PeanutHistoryEntry } from '~/lib/replay/Account';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription } from '~/lib/stripe/client';
+import { createTopoffCheckout, checkSubscriptionStatus, cancelSubscription, manageBilling } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
@@ -22,7 +17,6 @@ interface AccountModalProps {
 
 export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
-  const [subscription, setSubscription] = useState<AccountSubscription | undefined>(undefined);
   const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,14 +25,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const reloadAccountData = async () => {
     setLoading(true);
 
-    // Load basic data (webhooks keep everything in sync automatically)
-    const [history, subscription] = await Promise.all([
-      getPeanutsHistory(),
-      getPeanutsSubscription(),
-      refreshPeanutsStore(),
-    ]);
+    const [history] = await Promise.all([getPeanutsHistory(), getPeanutsSubscription(), refreshPeanutsStore()]);
 
-    // Then check Stripe subscription separately
     let stripeStatus = { hasSubscription: false, subscription: null };
     if (user?.email) {
       stripeStatus = await checkSubscriptionStatus();
@@ -46,7 +34,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
     history.reverse();
     setHistory(history);
-    setSubscription(subscription);
     setStripeSubscription(stripeStatus.hasSubscription ? stripeStatus.subscription : null);
     setLoading(false);
   };
@@ -148,18 +135,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   };
 
   const handleSubscriptionToggle = async () => {
-    if (subscription) {
-      // TODO: Implement subscription cancellation via Stripe Customer Portal
-      stripeStatusModalActions.showInfo(
-        'Contact Support',
-        'Please contact support to cancel your subscription.',
-        'Our support team will help you manage your subscription settings.',
-      );
-    } else {
-      // Open subscription modal to choose a tier
-      openSubscriptionModal();
-      onClose();
-    }
+    openSubscriptionModal();
+    onClose();
   };
 
   const handleAddPeanuts = async () => {
@@ -174,7 +151,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
     try {
       await createTopoffCheckout();
-      // User will be redirected to Stripe Checkout
       if (window.analytics) {
         window.analytics.track('Peanuts Added', {
           timestamp: new Date().toISOString(),
@@ -200,7 +176,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       return;
     }
 
-    // Show confirmation modal
     setShowCancelConfirm(true);
   };
 
@@ -212,13 +187,12 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     }
 
     try {
-      await cancelSubscription(false); // Cancel at period end
+      await cancelSubscription(false);
       stripeStatusModalActions.showSuccess(
         '✅ Subscription Canceled',
         'Your subscription has been successfully canceled.',
         "You'll continue to have access until the end of your current billing period, and you'll keep access to your remaining peanuts.",
       );
-      // Reload data to show updated subscription status
       reloadAccountData();
     } catch (error) {
       console.error('Error canceling subscription:', error);
@@ -229,6 +203,42 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       );
     }
   };
+
+  const handleManageBilling = async () => {
+    if (!user?.email) {
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to manage your subscription.',
+        'You need to be signed in to access your billing portal.',
+      );
+      return;
+    }
+
+    try {
+      await manageBilling();
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      stripeStatusModalActions.showError(
+        'Billing Portal Unavailable',
+        "We couldn't open your billing portal right now.",
+        'Please try again in a few moments, or contact support if the issue persists.',
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm">
+        <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
+            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+          <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">Loading Account Data</h3>
+          <p className="text-bolt-elements-textSecondary">Fetching your usage history and subscription details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -314,19 +324,33 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!stripeSubscription && !loading && (
+          {!loading && (
             <button
               onClick={handleSubscriptionToggle}
               disabled={loading}
               className={classNames(
-                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
                 {
                   'opacity-60 cursor-not-allowed hover:scale-100': loading,
                 },
               )}
             >
               <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">Add Subscription</span>
+              <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
+            </button>
+          )}
+
+          {stripeSubscription && !loading && (
+            <button
+              onClick={handleManageBilling}
+              disabled={loading}
+              className={classNames(
+                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+              )}
+            >
+              <div className="i-ph:gear text-xl transition-transform duration-200 group-hover:scale-110" />
+              <span className="transition-transform duration-200 group-hover:scale-105">Manage Billing</span>
             </button>
           )}
 
@@ -369,25 +393,21 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Usage History</h2>
         </div>
 
-        {loading ? (
-          <div className="text-center py-16 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-            <div className="w-10 h-10 rounded-full border-4 border-bolt-elements-borderColor/30 border-t-blue-500 animate-spin mx-auto mb-4 shadow-sm" />
-            <p className="text-bolt-elements-textSecondary font-medium">Loading usage history...</p>
-          </div>
-        ) : history.length === 0 ? (
-          <div className="text-center py-16 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-            <div className="w-20 h-20 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/50 shadow-lg">
+        {history.length === 0 ? (
+          <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+            <div className="w-20 h-20 bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-3 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/50 shadow-lg">
               <div className="i-ph:list text-3xl text-bolt-elements-textSecondary" />
             </div>
-            <p className="text-bolt-elements-textSecondary text-lg font-medium mb-2">No usage history available</p>
-            <p className="text-sm text-bolt-elements-textSecondary">Your peanut transactions will appear here</p>
+            <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No usage history available</h3>
+            <p className="text-sm text-bolt-elements-textSecondary">
+              Your peanut transactions will appear here once you start using the platform
+            </p>
           </div>
         ) : (
           <div className="space-y-4 max-h-80 overflow-y-auto">{history.map(renderHistoryItem)}</div>
         )}
       </div>
 
-      {/* Confirmation Modal */}
       <ConfirmCancelModal
         isOpen={showCancelConfirm}
         onConfirm={confirmCancelSubscription}

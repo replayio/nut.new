@@ -50,7 +50,8 @@ export async function action({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { action: requestAction, immediate } = body;
+    const { action: requestAction, immediate, returnUrl } = body;
+    const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : new URL(request.url).origin;
 
     switch (requestAction) {
       case 'cancel':
@@ -58,6 +59,12 @@ export async function action({ request }: { request: Request }) {
 
       case 'get_status':
         return await handleGetSubscriptionStatus(user.email);
+
+      case 'manage-billing':
+        return await handleManageBilling(user.email, targetUrl);
+
+      case 'manage-subscription':
+        return await handleManageSubscription(user.email, targetUrl);
 
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
@@ -209,11 +216,8 @@ async function handleGetSubscriptionStatus(userEmail: string) {
       tier = 'free';
       peanuts = 500;
     } else if (priceId === process.env.STRIPE_PRICE_STARTER) {
-      tier = 'starter';
-      peanuts = 2000;
-    } else if (priceId === process.env.STRIPE_PRICE_BUILDER) {
       tier = 'builder';
-      peanuts = 5000;
+      peanuts = 2000;
     } else if (priceId === process.env.STRIPE_PRICE_PRO) {
       tier = 'pro';
       peanuts = 12000;
@@ -255,4 +259,74 @@ async function handleGetSubscriptionStatus(userEmail: string) {
       },
     );
   }
+}
+
+async function handleManageBilling(userEmail: string, targetUrl: string) {
+  const customers = await stripe.customers.list({
+    email: userEmail,
+    limit: 1,
+  });
+
+  if (customers.data.length === 0) {
+    return new Response(JSON.stringify({ error: 'No customer found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const customer = customers.data[0];
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: customer.id,
+    return_url: targetUrl,
+  });
+
+  return new Response(JSON.stringify({ success: true, url: portalSession.url }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+async function handleManageSubscription(userEmail: string, targetUrl: string) {
+  const customers = await stripe.customers.list({
+    email: userEmail,
+    limit: 1,
+  });
+
+  if (customers.data.length === 0) {
+    return new Response(JSON.stringify({ error: 'No customer found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const customer = customers.data[0];
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: customer.id,
+    status: 'active',
+    limit: 1,
+  });
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: customer.id,
+    return_url: targetUrl,
+    flow_data: {
+      type: 'subscription_update',
+      subscription_update: {
+        subscription: subscriptions?.data?.[0]?.id,
+      },
+      after_completion: {
+        type: 'redirect',
+        redirect: {
+          return_url: targetUrl,
+        },
+      },
+    },
+  });
+
+  return new Response(JSON.stringify({ success: true, url: portalSession.url }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

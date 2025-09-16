@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
-import { SUBSCRIPTION_TIERS, createSubscriptionCheckout, type SubscriptionTier } from '~/lib/stripe/client';
+import {
+  SUBSCRIPTION_TIERS,
+  createSubscriptionCheckout,
+  checkSubscriptionStatus,
+  type SubscriptionTier,
+  manageSubscription,
+} from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { IconButton } from '~/components/ui/IconButton';
 
@@ -12,13 +18,42 @@ interface SubscriptionModalProps {
   currentTier?: SubscriptionTier;
 }
 
-export function SubscriptionModal({ isOpen, onClose, currentTier }: SubscriptionModalProps) {
+export function SubscriptionModal({ isOpen, onClose, currentTier: propCurrentTier }: SubscriptionModalProps) {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
+  const [actualCurrentTier, setActualCurrentTier] = useState<SubscriptionTier | undefined>(propCurrentTier);
+  const [fetchingSubscription, setFetchingSubscription] = useState(false);
   const user = useStore(userStore);
+
+  useEffect(() => {
+    if (isOpen && user?.email) {
+      const fetchSubscriptionData = async () => {
+        setFetchingSubscription(true);
+        try {
+          const stripeStatus = await checkSubscriptionStatus();
+          if (stripeStatus.hasSubscription && stripeStatus.subscription) {
+            setActualCurrentTier(stripeStatus.subscription.tier as SubscriptionTier);
+          } else {
+            setActualCurrentTier(undefined);
+          }
+        } catch (error) {
+          console.error('Error fetching subscription status:', error);
+          setActualCurrentTier(propCurrentTier);
+        } finally {
+          setFetchingSubscription(false);
+        }
+      };
+
+      fetchSubscriptionData();
+    } else if (isOpen && !user?.email) {
+      setActualCurrentTier(undefined);
+    }
+  }, [isOpen, user?.email, propCurrentTier]);
 
   if (!isOpen) {
     return null;
   }
+
+  const currentTier = actualCurrentTier;
 
   const handleSubscribe = async (tier: SubscriptionTier) => {
     if (!user?.id || !user?.email) {
@@ -35,7 +70,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
 
     try {
       await createSubscriptionCheckout(tier);
-      // User will be redirected to Stripe Checkout
     } catch (error) {
       console.error('Error creating subscription:', error);
       toast.error('Failed to create subscription. Please try again.');
@@ -43,11 +77,29 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
     }
   };
 
+  const handleManageSubscription = async () => {
+    await manageSubscription();
+  };
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
+  if (fetchingSubscription) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm px-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
+            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+          <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">Loading Subscription Data</h3>
+          <p className="text-bolt-elements-textSecondary">Fetching your subscription details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -58,7 +110,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
         className="bg-bolt-elements-background-depth-1 rounded-2xl border border-bolt-elements-borderColor shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor/50">
           <div>
             <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Choose Your Plan</h2>
@@ -76,7 +127,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
           />
         </div>
 
-        {/* Important Notes - Moved to top */}
         <div className="px-6 sm:px-8 pt-2 pb-6">
           <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm">
             <div className="flex items-start gap-4">
@@ -108,8 +158,20 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
           </div>
         </div>
 
-        {/* Subscription Tiers */}
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          {fetchingSubscription && (
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-4 bg-gradient-to-r from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 px-6 py-4 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 shadow-sm">
+                  <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary/30 border-t-blue-500 rounded-full animate-spin"></div>
+                </div>
+                <div className="text-left">
+                  <h4 className="text-sm font-semibold text-bolt-elements-textHeading">Checking subscription</h4>
+                  <p className="text-xs text-bolt-elements-textSecondary">Verifying your current plan status...</p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {(
               Object.entries(SUBSCRIPTION_TIERS) as [SubscriptionTier, (typeof SUBSCRIPTION_TIERS)[SubscriptionTier]][]
@@ -117,6 +179,8 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
               const isCurrentTier = tier === currentTier;
               const isLoading = loading === tier;
               const isFree = tier === 'free';
+              console.log('tier', tier);
+              console.log('currentTier', currentTier);
 
               return (
                 <div
@@ -124,7 +188,7 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   className={classNames(
                     'relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-105 group min-h-[400px] flex flex-col',
                     {
-                      'border-green-500/50 bg-gradient-to-br from-green-500/5 to-emerald-500/5 shadow-lg':
+                      'border-emerald-400/60 bg-gradient-to-br from-emerald-50/80 to-green-50/60 shadow-xl ring-2 ring-emerald-200/40 dark:from-emerald-900/10 dark:to-green-900/5 dark:ring-emerald-500/20':
                         isCurrentTier,
                       'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
                         !isCurrentTier,
@@ -134,24 +198,32 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                 >
                   {isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        CURRENT PLAN
+                      <span className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border border-emerald-400/50">
+                        ✓ Current Subscription
                       </span>
                     </div>
                   )}
 
-                  {/* Header */}
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
                       <div
                         className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
                           'i-ph:gift text-green-500': isFree,
-                          'i-ph:rocket-launch text-blue-500': tier === 'starter',
+                          'i-ph:rocket-launch text-blue-500': tier === 'builder',
                         })}
                       />
                     </div>
-                    <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3 transition-transform duration-300 group-hover:scale-105">
+                    <h3
+                      className={classNames(
+                        'text-xl font-bold mb-3 transition-transform duration-300 group-hover:scale-105',
+                        {
+                          'text-emerald-700 dark:text-emerald-400': isCurrentTier,
+                          'text-bolt-elements-textHeading': !isCurrentTier,
+                        },
+                      )}
+                    >
                       {details.name}
+                      {isCurrentTier && <span className="ml-2 text-emerald-500">✓</span>}
                     </h3>
                     <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-300 group-hover:scale-105">
                       ${details.price}
@@ -162,7 +234,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     </p>
                   </div>
 
-                  {/* Features */}
                   <div className="space-y-3 mb-8 flex-grow">
                     {details.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3 group/feature">
@@ -176,10 +247,9 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                     ))}
                   </div>
 
-                  {/* Subscribe Button */}
                   <div className="mt-auto">
                     <button
-                      onClick={() => handleSubscribe(tier)}
+                      onClick={!currentTier ? () => handleSubscribe(tier) : () => handleManageSubscription()}
                       disabled={isCurrentTier || isLoading}
                       className={classNames(
                         'w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl group/btn min-h-[56px]',
@@ -198,7 +268,13 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       )}
                       <span className="transition-transform duration-300 group-hover/btn:scale-105">
-                        {isCurrentTier ? '✓ Current Plan' : isLoading ? 'Processing...' : 'Subscribe'}
+                        {isCurrentTier
+                          ? '✓ Current Plan'
+                          : isLoading
+                            ? 'Processing...'
+                            : !!currentTier
+                              ? 'Update Subscription'
+                              : 'Subscribe'}
                       </span>
                     </button>
                   </div>
@@ -220,7 +296,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   </p>
                 </div>
 
-                {/* Features Preview */}
                 <div className="space-y-3 mb-8 flex-grow">
                   <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
@@ -246,7 +321,6 @@ export function SubscriptionModal({ isOpen, onClose, currentTier }: Subscription
                   </div>
                 </div>
 
-                {/* Join Waitlist Button */}
                 <div className="mt-auto">
                   <a
                     href="https://form.typeform.com/to/bFKqmqdX"

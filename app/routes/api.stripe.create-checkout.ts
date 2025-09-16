@@ -10,8 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Product and Price mappings from environment variables
 const SUBSCRIPTION_PRICES = {
   free: process.env.STRIPE_PRICE_FREE!,
-  starter: process.env.STRIPE_PRICE_STARTER!,
-  builder: process.env.STRIPE_PRICE_BUILDER!,
+  builder: process.env.STRIPE_PRICE_STARTER!,
   pro: process.env.STRIPE_PRICE_PRO!,
 } as const;
 
@@ -19,7 +18,7 @@ const PEANUT_TOPOFF_PRICE = process.env.STRIPE_PRICE_TOPOFF!;
 
 interface CreateCheckoutRequest {
   type: 'subscription' | 'topoff';
-  tier?: 'free' | 'starter';
+  tier?: 'free' | 'builder';
   returnUrl?: string; // The current page URL to return to after checkout
 }
 
@@ -77,8 +76,8 @@ export async function action({ request }: { request: Request }) {
     let cancelUrl: string;
 
     const baseUrl = new URL(request.url).origin;
-    // Use the provided return URL or fallback to the base URL
-    const targetUrl = returnUrl || baseUrl;
+    // Use the provided return URL (decode it first if provided) or fallback to the base URL
+    const targetUrl = returnUrl ? decodeURIComponent(returnUrl) : baseUrl;
 
     // Try to find existing customer by email or userId to avoid duplicates
     let customerId: string | undefined;
@@ -109,12 +108,25 @@ export async function action({ request }: { request: Request }) {
         });
         console.log(`✅ Updated customer ${customerId} metadata - Stripe is now authoritative source`);
       } else {
-        console.log(
-          `No existing customer found for email: ${userEmail}, userId: ${userId} - will create new one in checkout`,
-        );
+        console.log(`No existing customer found - creating new customer with metadata`);
+        // Create customer explicitly with metadata
+        const newCustomer = await stripe.customers.create({
+          email: userEmail,
+          metadata: {
+            userId,
+            userEmail,
+          },
+        });
+        customerId = newCustomer.id;
+        console.log(`✅ Created new customer ${customerId} with metadata`);
       }
     } catch (error) {
       console.error('Error checking for existing customer:', error);
+    }
+
+    // Ensure we have a customer ID
+    if (!customerId) {
+      throw new Error('Failed to create or find customer');
     }
 
     if (type === 'subscription') {
@@ -166,8 +178,8 @@ export async function action({ request }: { request: Request }) {
           quantity: 1,
         },
       ],
-      // Use existing customer if found, otherwise let Stripe create a new one
-      ...(customerId ? { customer: customerId } : { customer_email: userEmail }),
+      // Always use customer ID (we ensure one exists above)
+      customer: customerId,
       client_reference_id: userId,
       metadata: {
         userId,
@@ -181,7 +193,13 @@ export async function action({ request }: { request: Request }) {
       automatic_tax: {
         enabled: true,
       },
+      customer_update: {
+        address: 'auto',
+        name: 'auto',
+      },
     });
+
+    // Customer is guaranteed to exist with metadata at this point
 
     return new Response(
       JSON.stringify({

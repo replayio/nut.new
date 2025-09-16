@@ -5,6 +5,9 @@ import BackgroundRays from '~/components/ui/BackgroundRays';
 import useViewport from '~/lib/hooks/useViewport';
 import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
+import BrokenDreamsBanner from '~/components/broken-dreams/BrokenDreamsBanner';
+import { useLocation } from '@remix-run/react';
+import { isLoadingStore, authStatusStore } from '~/lib/stores/auth';
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -13,6 +16,9 @@ interface PageContainerProps {
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
   const isSmallViewport = useViewport(600);
   const chatStarted = useStore(chatStore.started);
+  const isLoggedIn = useStore(authStatusStore.isLoggedIn);
+  const location = useLocation();
+  const isLoading = useStore(isLoadingStore);
 
   useEffect(() => {
     const setAppHeight = () => {
@@ -31,6 +37,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
 
   return (
     <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black app-height">
+      {!chatStarted && !isLoggedIn && !isLoading && location.pathname === '/' && <BrokenDreamsBanner />}
       <Header />
       <BackgroundRays />
       <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
