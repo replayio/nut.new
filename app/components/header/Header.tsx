@@ -18,6 +18,7 @@ import { database } from '~/lib/persistence/apps';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { includeHistorySummary } from '~/components/workbench/VesionHistory/AppHistory';
 import { useEffect } from 'react';
+import { useLocation } from '@remix-run/react';
 
 export function Header() {
   const chatStarted = useStore(chatStore.started);
@@ -27,6 +28,7 @@ export function Header() {
   const isSmallViewport = useViewport(800);
   const repositoryId = useStore(workbenchStore.pendingRepositoryId);
   const [history, setHistory] = useState<AppSummary[]>([]);
+  const location = useLocation();
 
   const fetchHistory = async () => {
     try {
@@ -63,6 +65,7 @@ export function Header() {
             title="Toggle Sidebar"
           />
         )}
+        {!user && location.pathname !== '/rebuild-broken-dreams' && <ThemeSwitch />}
         {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
@@ -84,7 +87,7 @@ export function Header() {
             }
           >
             <div className="flex items-center gap-3">
-              <ThemeSwitch />
+              {(user || location.pathname === '/rebuild-broken-dreams') && <ThemeSwitch />}
               <ClientAuth />
             </div>
           </Suspense>

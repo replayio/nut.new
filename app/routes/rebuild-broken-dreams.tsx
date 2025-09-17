@@ -1,10 +1,9 @@
 import { json, type MetaFunction } from '~/lib/remix-types';
 import { Suspense } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
-import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
-import { Chat } from '~/components/chat/ChatComponent/Chat.client';
 import { PageContainer } from '~/layout/PageContainer';
 import { useUser } from '~/hooks/useUser';
+import LandingPage from '~/components/broken-dreams/LandingPage';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Nut' }];
@@ -20,7 +19,7 @@ export default function Index() {
   return (
     <PageContainer>
       <Suspense fallback={<Nothing />}>
-        <ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
+        <ClientOnly>{() => <LandingPage />}</ClientOnly>
       </Suspense>
     </PageContainer>
   );
