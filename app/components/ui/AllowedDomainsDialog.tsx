@@ -42,29 +42,14 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
     (async () => {
       try {
         setLoading(true);
-        // Prefer explicit auth allow-list API if available, fallback to deploy settings
-        let list: string[] | undefined;
-        try {
-          const { allowList } = await callNutAPI('get-auth-allow-list', { appId });
-          if (Array.isArray(allowList)) {
-            list = allowList as string[];
-          } else if (typeof allowList === 'string') {
-            list = allowList
-              .split(',')
-              .map((d) => d.trim())
-              .filter((d) => d.length > 0);
-          }
-        } catch {
-          // Fallback to deploy settings if special API is not implemented
-          const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
-          if (deploySettings?.authAllowList && Array.isArray(deploySettings.authAllowList)) {
-            list = deploySettings.authAllowList as string[];
-          }
-        }
-
-        if (list && list.length > 0) {
-          setDomains(list);
-          setTouched(new Array(list.length).fill(false));
+        const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
+        if (
+          deploySettings?.authAllowList &&
+          Array.isArray(deploySettings.authAllowList) &&
+          deploySettings.authAllowList.length > 0
+        ) {
+          setDomains(deploySettings.authAllowList);
+          setTouched(new Array(deploySettings.authAllowList.length).fill(false));
         } else {
           setDomains(['']);
           setTouched([false]);
