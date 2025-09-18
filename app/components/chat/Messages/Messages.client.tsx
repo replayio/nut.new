@@ -299,7 +299,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             );
           })()}
 
-          {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
+          {/* {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />} */}
 
           {user &&
             appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented &&
@@ -314,7 +314,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             <ContinueBuildCard onMount={scrollToBottom} sendMessage={sendMessage} />
           )}
 
-          {user && startPlanningRating === 10 && (
+          {startPlanningRating === 10 && (
             <StartBuildingCard
               startPlanningRating={startPlanningRating}
               sendMessage={sendMessage}
