@@ -61,13 +61,6 @@ const AppView = ({
   useEffect(() => {
     if (iframeRef.current && previewURL) {
       themeInjector.setIframe(iframeRef.current);
-
-      // Apply current theme to iframe
-      if (currentTheme === 'dark') {
-        themeInjector.applyDarkTheme();
-      } else {
-        themeInjector.applyLightTheme();
-      }
     }
   }, [iframeRef, previewURL, currentTheme]);
 
