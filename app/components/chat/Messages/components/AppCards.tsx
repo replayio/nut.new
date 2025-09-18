@@ -5,6 +5,7 @@ import { openAppCardModal, type AppCardModalType } from '~/lib/stores/appCardMod
 import { FeaturesCard } from './FeaturesCard';
 import { MockupCard } from './MockupCard';
 import { SecretsCard } from './SecretsCard';
+import { AppNameCard } from './AppNameCard';
 import { AuthSelectorCard } from './AuthSelectorCard';
 import { type AppFeature, AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 
@@ -82,6 +83,7 @@ export const AppCards: React.FC = () => {
   }
 
   if (visibleCardTypes.includes('features')) {
+    cards.push(<AppNameCard key="app-name" />);
     cards.push(<FeaturesCard key="features" appSummary={appSummary} onViewDetails={() => openModal('features')} />);
   }
 
