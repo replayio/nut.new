@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { authModalStore } from '~/lib/stores/authModal';
-import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 
 interface SignInCardProps {
   onMount?: () => void;

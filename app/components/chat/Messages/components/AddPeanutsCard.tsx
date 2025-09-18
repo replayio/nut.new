@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 import { createTopoffCheckout } from '~/lib/stripe/client';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { userStore } from '~/lib/stores/auth';

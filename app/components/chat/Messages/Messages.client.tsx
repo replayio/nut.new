@@ -292,18 +292,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             );
           })()}
 
-          {!user && startPlanningRating === 10 && (
-            <SignInCard onMount={scrollToBottom} />
-          )}
+          {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
 
           {user &&
             appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 && (
-              <AddPeanutsCard
-                onMount={scrollToBottom}
-              />
-            )}
+            peanutsRemaining <= 0 && <AddPeanutsCard onMount={scrollToBottom} />}
 
           {listenResponses && appSummary?.features?.length && !isFullyComplete && (
             <StopBuildCard onMount={scrollToBottom} />
