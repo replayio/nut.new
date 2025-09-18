@@ -3,20 +3,15 @@ import { authModalStore } from '~/lib/stores/authModal';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 
 interface SignInCardProps {
-  mockupStatus: AppFeatureStatus;
   onMount?: () => void;
 }
 
-export const SignInCard: React.FC<SignInCardProps> = ({ mockupStatus, onMount }) => {
+export const SignInCard: React.FC<SignInCardProps> = ({ onMount }) => {
   useEffect(() => {
     if (onMount) {
       onMount();
     }
   }, []);
-
-  if (mockupStatus !== AppFeatureStatus.Validated) {
-    return null;
-  }
 
   const handleSignInClick = () => {
     authModalStore.open(false);

@@ -6,12 +6,10 @@ import { userStore } from '~/lib/stores/auth';
 import { useStore } from '@nanostores/react';
 
 interface AddPeanutsCardProps {
-  mockupStatus: AppFeatureStatus;
-  peanutsRemaining: number;
   onMount?: () => void;
 }
 
-export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ mockupStatus, peanutsRemaining, onMount }) => {
+export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ onMount }) => {
   const [loading, setLoading] = useState(false);
   const user = useStore(userStore);
 
@@ -20,10 +18,6 @@ export const AddPeanutsCard: React.FC<AddPeanutsCardProps> = ({ mockupStatus, pe
       onMount();
     }
   }, []);
-
-  if (mockupStatus !== AppFeatureStatus.Validated || peanutsRemaining > 0) {
-    return null;
-  }
 
   const handleAddPeanuts = async () => {
     if (!user?.id || !user?.email) {
