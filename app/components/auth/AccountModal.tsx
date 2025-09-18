@@ -26,7 +26,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
   const [loadingList, setLoadingList] = useState(true);
-  const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
+  const { filteredItems: filteredList } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
   });
@@ -89,8 +89,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   const renderFeature = (why: string, appId: string | undefined, featureName: string | undefined): ReactElement => {
     // Find the app title from filteredList using the appId
-    const appTitle = appId ? filteredList.find(app => app.id === appId)?.title : undefined;
-    
+    const appTitle = appId ? filteredList.find((app) => app.id === appId)?.title : undefined;
+
     return (
       <div className="space-y-2">
         {appTitle && (
@@ -110,9 +110,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           <span className="text-bolt-elements-textSecondary text-sm">
             {why === 'Feature implemented' ? 'Feature implemented' : 'Feature validated'}:{' '}
           </span>
-          <span className="text-bolt-elements-textHeading font-medium">
-            {featureName || 'Unknown feature'}
-          </span>
+          <span className="text-bolt-elements-textHeading font-medium">{featureName || 'Unknown feature'}</span>
         </div>
       </div>
     );
