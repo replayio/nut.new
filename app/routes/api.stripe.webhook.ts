@@ -10,7 +10,7 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 const TOPOFF_PEANUTS = 2000;
 
 const analytics = new Analytics({
-  writeKey: 'RA2xErHLQaGZ3YeTxzEYw3gmraAfWPIR',
+  writeKey: process.env.SEGMENT_WRITE_KEY!,
 });
 
 const PLAN_MAPPING = {
