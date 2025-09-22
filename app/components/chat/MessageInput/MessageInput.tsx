@@ -281,12 +281,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
           {!isMobile && !isTablet && <div className="w-px h-5 bg-bolt-elements-borderColor" />}
 
-          {!isMobile && !isTablet && <SpeechRecognitionButton
-            isListening={isListening}
-            onStart={onStartListening}
-            onStop={onStopListening}
-            disabled={hasPendingMessage}
-          />}
+          {!isMobile && !isTablet && (
+            <SpeechRecognitionButton
+              isListening={isListening}
+              onStart={onStartListening}
+              onStop={onStopListening}
+              disabled={hasPendingMessage}
+            />
+          )}
         </div>
 
         {input.length > 3 && (
