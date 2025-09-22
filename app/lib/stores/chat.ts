@@ -108,7 +108,7 @@ function showPreview(appSummary: AppSummary) {
   // Don't show preliminary repositories before the app finishes the mockup
   // or at least one feature.
   if (
-    !isFeatureStatusImplemented(appSummary.mockupStatus) &&
+    !isFeatureStatusImplemented(appSummary?.features?.[0]?.status) &&
     !appSummary.features?.some(({ status }) => isFeatureStatusImplemented(status))
   ) {
     return false;
@@ -248,4 +248,11 @@ export async function doListenAppResponses(wasStatusModalOpen = false) {
   await refreshPeanutsStore();
 
   statusModalStore.open();
+}
+
+export function continueBuilding() {
+  // This will trigger the continue building action
+  // We'll need to emit an event or call a function that the BaseChat can listen to
+  const event = new CustomEvent('continueBuilding');
+  window.dispatchEvent(event);
 }

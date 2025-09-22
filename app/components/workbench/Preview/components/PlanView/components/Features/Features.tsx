@@ -51,24 +51,12 @@ const Features = () => {
           </div>
         );
       case AppFeatureStatus.Implemented:
-        return (
-          <div className="text-gray-500 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-lg border border-gray-200 shadow-sm">
-            <div className="i-ph:check-bold" />
-            Implemented
-          </div>
-        );
-      case AppFeatureStatus.ValidationInProgress:
-        return (
-          <div className="text-blue-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200 shadow-sm">
-            <div className="i-ph:spinner-gap-fill animate-spin" />
-            Testing...
-          </div>
-        );
       case AppFeatureStatus.Validated:
+      case AppFeatureStatus.ValidationInProgress:
         return (
           <div className="text-green-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-green-50 px-2 py-1 rounded-lg border border-green-200 shadow-sm">
             <div className="i-ph:check-bold" />
-            Tests Passed
+            Complete
           </div>
         );
       case AppFeatureStatus.ValidationFailed:
@@ -85,11 +73,9 @@ const Features = () => {
   const renderFeature = (feature: AppFeature | undefined, index: number) => {
     const isCollapsed = collapsedFeatures.has(index);
 
-    const name = feature ? formatPascalCaseName(feature.name) : 'Mockup';
-    const description = feature
-      ? feature.description
-      : 'Builds a mockup of the app with a complete UI but no functionality.';
-    const status = feature ? feature.status : (appSummary?.mockupStatus ?? AppFeatureStatus.NotStarted);
+    const name = feature ? formatPascalCaseName(feature.name) : 'N/A';
+    const description = feature ? feature.description : 'N/A';
+    const status = feature ? feature.status : AppFeatureStatus.NotStarted;
 
     return (
       <div
@@ -147,7 +133,9 @@ const Features = () => {
 
   return (
     <div>
-      <div className="space-y-6">{appSummary?.features?.map((feature, index) => renderFeature(feature, index))}</div>
+      <div className="space-y-6">
+        {appSummary?.features?.slice(1)?.map((feature, index) => renderFeature(feature, index))}
+      </div>
     </div>
   );
 };

@@ -2,14 +2,13 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import React, { type RefCallback, useCallback, useEffect, useState } from 'react';
+import React, { type RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import * as Tooltip from '@radix-ui/react-tooltip';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
 import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
@@ -22,11 +21,11 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { StatusModal } from '~/components/status-modal/StatusModal';
 import { userStore } from '~/lib/stores/userAuth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -72,6 +71,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const showMobileNav = useStore(mobileNavStore.showMobileNav);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -91,10 +91,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
+    const hasShownWorkbench = useRef(false);
     useEffect(() => {
-      if (appSummary && !workbenchStore.showWorkbench.get()) {
+      if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
         mobileNavStore.setActiveTab('preview');
+        hasShownWorkbench.current = true;
       }
     }, [appSummary]);
 
@@ -103,6 +105,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         sendMessage({ chatMode: ChatMode.DevelopApp });
       }
     };
+
+    // Listen for continue building events from the global status modal
+    useEffect(() => {
+      const handleContinueBuildingEvent = () => {
+        handleContinueBuilding();
+      };
+
+      window.addEventListener('continueBuilding', handleContinueBuildingEvent);
+      return () => {
+        window.removeEventListener('continueBuilding', handleContinueBuildingEvent);
+      };
+    }, [sendMessage]);
 
     const handleSendMessage = (params: ChatMessageParams) => {
       if (sendMessage) {
@@ -190,18 +204,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           ref={scrollRef}
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
-            'pt-2 pb-2 px-4': isSmallViewport && !appSummary,
-            'pt-2 pb-15 px-4': isSmallViewport && !!appSummary,
+            'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
+            'pt-2 pb-15 px-4': isSmallViewport && (!!appSummary || showMobileNav),
             'p-6': !isSmallViewport && chatStarted,
-            'p-6 pb-16': !isSmallViewport && !chatStarted, // Add extra bottom padding on landing page to show footer
+            'p-6 pb-16': !isSmallViewport && !chatStarted,
           })}
         >
           <div
             className={classNames(styles.Chat, 'flex flex-col h-full', {
-              'flex-grow': isSmallViewport, // Full width on mobile
-              'flex-shrink-0': !isSmallViewport, // Fixed width on desktop
+              'flex-grow': isSmallViewport,
+              'flex-shrink-0': !isSmallViewport,
               'pb-2': isSmallViewport,
-              'landing-page-layout': !chatStarted, // Custom CSS class for responsive centering
+              'landing-page-layout': !chatStarted,
             })}
             style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
           >
@@ -243,19 +257,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-                  handleSendMessage({ messageInput, chatMode: ChatMode.Discovery });
+                  handleSendMessage({ messageInput, chatMode: ChatMode.UserMessage });
                 })}
               </>
             )}
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
         </div>
-        {isSmallViewport && (appSummary || showWorkbench) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
-        {appSummary && <StatusModal appSummary={appSummary} onContinueBuilding={handleContinueBuilding} />}
+        {isSmallViewport && (appSummary || showMobileNav) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
       </div>
     );
 
-    return <Tooltip.Provider delayDuration={200}>{baseChat}</Tooltip.Provider>;
+    return <TooltipProvider delayDuration={200}>{baseChat}</TooltipProvider>;
   },
 );
 

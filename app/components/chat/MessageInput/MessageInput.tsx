@@ -11,6 +11,8 @@ import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
+import { userStore } from '~/lib/stores/userAuth';
+import { peanutsStore } from '~/lib/stores/peanuts';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -51,6 +53,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const chatStarted = useStore(chatStore.started);
   const messages = useStore(chatStore.messages);
   const hasAppSummary = !!useStore(chatStore.appSummary);
+  const user = useStore(userStore.user);
+  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   let startPlanningRating = 0;
   if (!hasPendingMessage && !hasAppSummary) {
@@ -190,7 +194,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return;
               }
 
-              handleSendMessage({ messageInput: fullInput });
+              handleSendMessage({ messageInput: fullInput, chatMode: ChatMode.UserMessage });
             }
           }}
           value={input}
@@ -212,7 +216,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {(() => {
           const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted;
           const showStartBuildingButton =
-            startPlanningRating > 0 && startPlanningRating !== 10 && !showSendButton && !hasAppSummary;
+            user &&
+            startPlanningRating > 0 &&
+            !showSendButton &&
+            !hasAppSummary &&
+            peanutsRemaining !== undefined &&
+            peanutsRemaining > 0;
 
           return (
             <>
@@ -227,7 +236,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         }
 
                         if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                          handleSendMessage({ messageInput: fullInput });
+                          handleSendMessage({ messageInput: fullInput, chatMode: ChatMode.UserMessage });
                         }
                       }}
                     />
@@ -241,9 +250,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <StartBuildingButton
                       onClick={() => {
                         const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                        handleSendMessage({ messageInput: message, chatMode: ChatMode.BuildApp });
+                        handleSendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
                         setTimeout(() => {
                           workbenchStore.setShowWorkbench(true);
+                          mobileNavStore.setShowMobileNav(true);
                           mobileNavStore.setActiveTab('preview');
                         }, 2000);
                       }}

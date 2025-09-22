@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { statusModalStore } from '~/lib/stores/statusModal';
 import { classNames } from '~/utils/classNames';
-import { isFeatureStatusImplemented, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { peanutsStore } from '~/lib/stores/peanuts';
 import WithTooltip from '~/components/ui/Tooltip';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { userStore } from '~/lib/stores/userAuth';
+import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
+import { createTopoffCheckout } from '~/lib/stripe/client';
 
 interface StatusModalProps {
   appSummary: AppSummary;
@@ -14,11 +18,19 @@ interface StatusModalProps {
 
 export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinueBuilding }) => {
   const isOpen = useStore(statusModalStore.isOpen);
-  const peanutsErrorButton = useStore(peanutsStore.peanutsErrorButton);
   const peanutsErrorInfo = useStore(peanutsStore.peanutsErrorInfo);
+  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
+  const user = useStore(userStore.user);
+  const [loading, setLoading] = useState(false);
 
-  const features = appSummary.features || [];
-  const completedFeatures = features.filter(({ status }) => isFeatureStatusImplemented(status)).length;
+  const features = appSummary.features?.slice(1) || [];
+  const completedFeatures = features.filter(
+    ({ status }) =>
+      status === AppFeatureStatus.Validated ||
+      status === AppFeatureStatus.Implemented ||
+      status === AppFeatureStatus.ValidationInProgress ||
+      status === AppFeatureStatus.ValidationFailed,
+  ).length;
   const totalFeatures = features.length;
   const isFullyComplete = completedFeatures === totalFeatures && totalFeatures > 0;
 
@@ -29,6 +41,36 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
   const handleContinueBuilding = () => {
     statusModalStore.close();
     onContinueBuilding();
+  };
+
+  const handleAddPeanuts = async () => {
+    if (!user?.id || !user?.email) {
+      stripeStatusModalActions.showError(
+        'Sign In Required',
+        'Please sign in to add peanuts.',
+        'You need to be signed in to purchase peanut top-ups.',
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createTopoffCheckout();
+      if (window.analytics) {
+        window.analytics.track('Peanuts Added', {
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('Error creating peanut top-off:', error);
+      stripeStatusModalActions.showError(
+        'Checkout Failed',
+        "We couldn't create the checkout session.",
+        'Please try again in a few moments, or contact support if the issue persists.',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const overlayVariants = {
@@ -91,7 +133,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[1001] flex items-center justify-center p-2 sm:p-4"
+          className="fixed inset-0 z-[1002] flex items-center justify-center p-2 sm:p-4"
           variants={overlayVariants}
           initial="hidden"
           animate="visible"
@@ -183,24 +225,30 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                         <div
                           className={classNames(
                             'flex items-center gap-2 px-2 py-1 rounded-lg text-xs font-medium border shadow-sm',
-                            feature.status === 'Implemented' || feature.status === 'Validated'
+                            feature.status === AppFeatureStatus.Validated ||
+                              feature.status === AppFeatureStatus.Implemented ||
+                              feature.status === AppFeatureStatus.ValidationInProgress
                               ? 'text-green-700 bg-green-50 border-green-200'
-                              : feature.status === 'ValidationFailed'
+                              : feature.status === AppFeatureStatus.ValidationFailed
                                 ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
                                 : 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor',
                           )}
                         >
-                          {(feature.status === 'Implemented' || feature.status === 'Validated') && (
-                            <div className="i-ph:check-circle-fill text-sm transition-transform duration-200 hover:scale-110" />
+                          {(feature.status === AppFeatureStatus.Validated ||
+                            feature.status === AppFeatureStatus.Implemented ||
+                            feature.status === AppFeatureStatus.ValidationInProgress) && (
+                            <div className="i-ph:check-circle-fill text-sm text-green-600 transition-transform duration-200 hover:scale-110" />
                           )}
-                          {feature.status === 'ValidationFailed' && (
-                            <div className="i-ph:warning-circle-fill text-sm transition-transform duration-200 hover:scale-110" />
+                          {feature.status === AppFeatureStatus.ValidationFailed && (
+                            <div className="i-ph:warning-circle-fill text-sm text-yellow-600 transition-transform duration-200 hover:scale-110" />
                           )}
-                          {(feature.status === 'NotStarted' || feature.status === 'ImplementationInProgress') && (
-                            <div className="i-ph:circle text-sm transition-transform duration-200 hover:scale-110" />
+                          {feature.status === AppFeatureStatus.NotStarted && (
+                            <div className="i-ph:circle text-sm text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110" />
                           )}
                           <span className="capitalize">
-                            {feature.status === 'ImplementationInProgress' ? 'In Progress' : feature.status}
+                            {feature.status === AppFeatureStatus.ImplementationInProgress
+                              ? 'In Progress'
+                              : feature.status}
                           </span>
                         </div>
                       </div>
@@ -215,24 +263,41 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
               >
-                {!isFullyComplete && peanutsErrorButton && (
+                {!isFullyComplete && peanutsRemaining !== undefined && peanutsRemaining <= 0 && (
                   <div className="flex flex-col items-center w-full">
-                    <WithTooltip tooltip={peanutsErrorInfo}>
-                      <button
-                        onClick={handleContinueBuilding}
-                        disabled={true}
-                        className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-gray-500 text-white flex items-center gap-3 opacity-50 cursor-not-allowed border border-gray-400/30 shadow-sm"
-                      >
-                        <div className="i-ph:rocket-launch text-xl text-white"></div>
-                        <span className="text-white">{peanutsErrorButton}</span>
-                      </button>
-                    </WithTooltip>
+                    <TooltipProvider>
+                      <WithTooltip tooltip={peanutsErrorInfo}>
+                        <button
+                          onClick={handleAddPeanuts}
+                          disabled={loading}
+                          className="px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] !bg-gradient-to-r !from-green-500 !to-emerald-500 hover:!from-green-600 hover:!to-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        >
+                          {loading ? (
+                            <>
+                              <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                              <span className="transition-transform duration-200 group-hover:scale-105">
+                                Loading...
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-2xl transition-transform duration-200 group-hover:scale-110">
+                                🥜
+                              </span>
+                              <span className="transition-transform duration-200 group-hover:scale-105">
+                                Add 2000 Peanuts
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </WithTooltip>
+                    </TooltipProvider>
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm max-w-md text-center">
                       {peanutsErrorInfo}
                     </div>
                   </div>
                 )}
-                {!isFullyComplete && !peanutsErrorButton && (
+                {!isFullyComplete && peanutsRemaining !== undefined && peanutsRemaining > 0 && (
                   <div className="flex justify-center items-center w-full">
                     <button
                       onClick={handleContinueBuilding}

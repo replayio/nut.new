@@ -14,6 +14,7 @@ import {
   SignInCard,
   AddPeanutsCard,
   StopBuildCard,
+  ContinueBuildCard,
 } from './components';
 import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
@@ -21,14 +22,14 @@ import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
 import { userStore } from '~/lib/stores/auth';
 import { peanutsStore } from '~/lib/stores/peanuts';
-import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import { ChatMode, shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 
 interface MessagesProps {
   id?: string;
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
-  sendMessage?: (params: { messageInput: string; chatMode?: any }) => void;
+  sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
@@ -44,10 +45,16 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const pendingMessageStatus = useStore(pendingMessageStatusStore);
     const hasAppSummary = !!useStore(chatStore.appSummary);
-    const completedFeatures = appSummary?.features?.filter(
-      (feature) => feature.status === AppFeatureStatus.Validated,
-    ).length;
-    const totalFeatures = appSummary?.features?.length;
+    const completedFeatures = appSummary?.features
+      ?.slice(1)
+      .filter(
+        (feature) =>
+          feature.status === AppFeatureStatus.Validated ||
+          feature.status === AppFeatureStatus.Implemented ||
+          feature.status === AppFeatureStatus.ValidationInProgress ||
+          feature.status === AppFeatureStatus.ValidationFailed,
+      ).length;
+    const totalFeatures = appSummary?.features?.slice(1).length;
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
 
     // Calculate startPlanningRating for the card display
@@ -176,7 +183,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           data-testid="message"
           key={index}
           className={classNames('group relative w-full transition-all duration-200', {
-            'mt-6': !isFirst,
+            'mt-5': !isFirst,
           })}
         >
           <div
@@ -254,9 +261,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               return (
                 <>
                   {displayableMessages.map((message, index) => renderMessage(message, index))}
-                  <div className="w-full mt-6">
-                    <AppCards />
-                  </div>
+                  <AppCards />
                 </>
               );
             }
@@ -282,36 +287,39 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             return (
               <>
                 {beforeMessages.map((message, index) => renderMessage(message, index))}
-                <div className="w-full mt-6">
+                <div className="w-full mt-5">
                   <AppCards />
                 </div>
                 {afterMessages.length > 0 && (
-                  <div className="mt-6">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
+                  <div className="mt-5">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
                 )}
               </>
             );
           })()}
 
-          {!user && appSummary?.mockupStatus === AppFeatureStatus.Validated && (
-            <SignInCard mockupStatus={appSummary.mockupStatus} onMount={scrollToBottom} />
-          )}
+          {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
 
           {user &&
-            appSummary?.mockupStatus === AppFeatureStatus.Validated &&
+            (appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented ||
+              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationFailed ||
+              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationInProgress ||
+              appSummary?.features?.[0]?.status === AppFeatureStatus.Validated ||
+              startPlanningRating === 10) &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 && (
-              <AddPeanutsCard
-                mockupStatus={appSummary.mockupStatus}
-                peanutsRemaining={peanutsRemaining}
-                onMount={scrollToBottom}
-              />
-            )}
+            peanutsRemaining <= 0 && <AddPeanutsCard onMount={scrollToBottom} />}
 
           {listenResponses && appSummary?.features?.length && !isFullyComplete && (
             <StopBuildCard onMount={scrollToBottom} />
           )}
 
-          {startPlanningRating === 10 && (
+          {!hasPendingMessage &&
+            !listenResponses &&
+            appSummary?.features?.length &&
+            !isFullyComplete &&
+            peanutsRemaining !== undefined &&
+            peanutsRemaining > 0 && <ContinueBuildCard onMount={scrollToBottom} sendMessage={sendMessage} />}
+
+          {user && startPlanningRating === 10 && peanutsRemaining !== undefined && peanutsRemaining > 0 && (
             <StartBuildingCard
               startPlanningRating={startPlanningRating}
               sendMessage={sendMessage}
