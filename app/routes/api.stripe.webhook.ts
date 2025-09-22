@@ -9,9 +9,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 const TOPOFF_PEANUTS = 2000;
 
+// Initialize Segment Analytics
 const analytics = new Analytics({
   writeKey: process.env.SEGMENT_WRITE_KEY!,
+  flushAt: 1, // Flush immediately for webhooks
+  flushInterval: 1000, // Flush every second
 });
+
+// Debug: Log if Segment write key is configured
+console.log('🔍 Segment write key configured:', !!process.env.SEGMENT_WRITE_KEY);
 
 const PLAN_MAPPING = {
   [process.env.STRIPE_PRICE_FREE!]: { name: 'Free', price: 0, peanuts: 500 },
@@ -157,6 +163,14 @@ export async function action({ request }: { request: Request }) {
         console.log(`Unhandled event type: ${event.type}`, event);
     }
 
+    // Ensure all analytics events are flushed before responding
+    try {
+      await analytics.closeAndFlush();
+      console.log('✅ Analytics events flushed successfully');
+    } catch (flushError) {
+      console.error('❌ Failed to flush analytics events:', flushError);
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -194,6 +208,7 @@ async function handleCheckoutCompleted(checkoutSession: Stripe.Checkout.Session)
         userId,
       );
 
+      // Track analytics event
       analytics.track({
         userId,
         event: 'Peanut Purchase Completed',
@@ -203,6 +218,7 @@ async function handleCheckoutCompleted(checkoutSession: Stripe.Checkout.Session)
           timestamp: new Date().toISOString(),
         },
       });
+      console.log('✅ Segment event queued: Peanut Purchase Completed for user', userId);
     }
   } catch (error) {
     console.error('Error handling checkout completed:', error);
@@ -244,6 +260,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     const planName = getPlanNameFromPriceId(priceId);
     const planPrice = getPlanPriceFromPriceId(priceId);
 
+    // Track analytics event
     analytics.track({
       userId,
       event: 'Subscription Completed',
@@ -254,6 +271,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
         timestamp: new Date().toISOString(),
       },
     });
+    console.log('✅ Segment event queued: Subscription Completed for user', userId);
   } catch (error) {
     console.error('Error handling payment success:', error);
   }
