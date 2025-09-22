@@ -9,8 +9,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 const TOPOFF_PEANUTS = 2000;
 
+// Initialize Segment Analytics
 const analytics = new Analytics({
   writeKey: process.env.SEGMENT_WRITE_KEY!,
+  flushAt: 1, // Flush immediately for webhooks
+  flushInterval: 1000, // Flush every second
 });
 
 const PLAN_MAPPING = {
@@ -155,6 +158,14 @@ export async function action({ request }: { request: Request }) {
 
       default:
         console.log(`Unhandled event type: ${event.type}`, event);
+    }
+
+    // Ensure all analytics events are flushed before responding
+    try {
+      await analytics.closeAndFlush();
+      console.log('✅ Analytics events flushed successfully');
+    } catch (flushError) {
+      console.error('❌ Failed to flush analytics events:', flushError);
     }
 
     return new Response(JSON.stringify({ received: true }), {
