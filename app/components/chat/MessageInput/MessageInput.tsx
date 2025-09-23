@@ -106,12 +106,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
 
     try {
-      // Process the image
+      // Process the image with higher quality settings
       const processed = await processImage(file, {
-        maxSizeKB: 500,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        quality: 0.8,
+        maxSizeKB: 500, // Target 450-500KB range
+        maxWidth: 2048, // Higher resolution to preserve detail
+        maxHeight: 1536, // Higher resolution to preserve detail  
+        quality: 0.9, // Start with higher quality
         targetFormat: 'jpeg',
       });
 
@@ -130,7 +130,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       setImageDataList([...imageDataList, processed.dataURL]);
     } catch (error) {
       console.error('Image processing failed:', error);
-      toast.error(error instanceof Error ? `Failed to process image: ${error.message}` : 'Failed to process image');
+      
+      // Offer fallback: upload original image if it's not too large
+      if (originalSizeKB <= 500) {
+        toast.error(
+          `Processing failed, but uploading original image (${formatFileSize(originalSizeKB)}). Some features may not work optimally.`
+        );
+        
+        // Upload original file as fallback
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64Image = e.target?.result as string;
+          setUploadedFiles([...uploadedFiles, file]);
+          setImageDataList([...imageDataList, base64Image]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        toast.error(
+          error instanceof Error 
+            ? `Failed to process image: ${error.message}. File too large (${formatFileSize(originalSizeKB)})`
+            : `Failed to process image. File too large (${formatFileSize(originalSizeKB)})`
+        );
+      }
     }
   };
 
