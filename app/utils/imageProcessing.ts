@@ -70,16 +70,16 @@ function createCanvasFromImage(file: File): Promise<HTMLCanvasElement> {
       // Use natural dimensions for accurate canvas size
       const width = img.naturalWidth;
       const height = img.naturalHeight;
-      
+
       canvas.width = width;
       canvas.height = height;
-      
+
       // Clear canvas and draw image at exact size
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
-      
+
       console.log(`Canvas created: ${width}x${height}`);
-      
+
       // Clean up object URL
       URL.revokeObjectURL(img.src);
       resolve(canvas);
@@ -89,7 +89,7 @@ function createCanvasFromImage(file: File): Promise<HTMLCanvasElement> {
       URL.revokeObjectURL(img.src);
       reject(new Error('Failed to load image'));
     };
-    
+
     // Create object URL
     img.src = URL.createObjectURL(file);
   });
@@ -217,17 +217,23 @@ export async function processImage(file: File, options: ImageProcessingOptions =
     // Create canvas from image
     const canvas = await createCanvasFromImage(file);
     const originalAspectRatio = canvas.width / canvas.height;
-    console.log(`Original image dimensions: ${canvas.width}x${canvas.height} (aspect ratio: ${originalAspectRatio.toFixed(3)})`);
+    console.log(
+      `Original image dimensions: ${canvas.width}x${canvas.height} (aspect ratio: ${originalAspectRatio.toFixed(3)})`,
+    );
 
     // Resize if needed
     const resizedCanvas = resizeCanvas(canvas, opts.maxWidth, opts.maxHeight);
     const newAspectRatio = resizedCanvas.width / resizedCanvas.height;
-    console.log(`Final image dimensions: ${resizedCanvas.width}x${resizedCanvas.height} (aspect ratio: ${newAspectRatio.toFixed(3)})`);
-    
+    console.log(
+      `Final image dimensions: ${resizedCanvas.width}x${resizedCanvas.height} (aspect ratio: ${newAspectRatio.toFixed(3)})`,
+    );
+
     // Verify aspect ratio is preserved (allow tiny rounding differences)
     const aspectRatioDiff = Math.abs(originalAspectRatio - newAspectRatio);
     if (aspectRatioDiff > 0.001) {
-      console.warn(`⚠️ Aspect ratio changed! Original: ${originalAspectRatio.toFixed(3)}, New: ${newAspectRatio.toFixed(3)}`);
+      console.warn(
+        `⚠️ Aspect ratio changed! Original: ${originalAspectRatio.toFixed(3)}, New: ${newAspectRatio.toFixed(3)}`,
+      );
     } else {
       console.log(`✅ Aspect ratio preserved: ${originalAspectRatio.toFixed(3)}`);
     }
@@ -238,7 +244,7 @@ export async function processImage(file: File, options: ImageProcessingOptions =
     // Smart compression targeting 450-500KB range
     const targetMinKB = Math.max(450, opts.maxSizeKB - 50); // Target at least 450KB
     const targetMaxKB = opts.maxSizeKB; // Max 500KB
-    
+
     let quality = opts.quality;
     let processedBlob: Blob;
     let attempts = 0;
@@ -256,20 +262,22 @@ export async function processImage(file: File, options: ImageProcessingOptions =
       console.log(`✅ Perfect size on first attempt: ${currentSizeKB}KB`);
     } else if (currentSizeKB <= targetMaxKB) {
       // Too small - try to increase quality/size
-      console.log(`Image too small (${currentSizeKB}KB), trying to get closer to ${targetMinKB}-${targetMaxKB}KB range`);
+      console.log(
+        `Image too small (${currentSizeKB}KB), trying to get closer to ${targetMinKB}-${targetMaxKB}KB range`,
+      );
       lastGoodBlob = processedBlob;
       lastGoodQuality = quality;
-      
+
       // Binary search upwards to find better quality
       let minQuality = quality;
       let maxQuality = 1.0;
-      
+
       for (attempts = 2; attempts <= maxAttempts && maxQuality - minQuality > 0.02; attempts++) {
         quality = (minQuality + maxQuality) / 2;
         processedBlob = await canvasToBlob(resizedCanvas, outputFormat, quality);
         currentSizeKB = Math.round(processedBlob.size / 1024);
         console.log(`Attempt ${attempts}: Quality ${quality.toFixed(2)}, Size: ${currentSizeKB}KB`);
-        
+
         if (currentSizeKB > targetMaxKB) {
           maxQuality = quality;
         } else {
@@ -280,27 +288,29 @@ export async function processImage(file: File, options: ImageProcessingOptions =
           }
         }
       }
-      
+
       // Use the best result we found
       if (lastGoodBlob && Math.round(lastGoodBlob.size / 1024) >= targetMinKB) {
         processedBlob = lastGoodBlob;
         quality = lastGoodQuality;
-        console.log(`✅ Using optimal result: Quality ${quality.toFixed(2)}, Size: ${Math.round(processedBlob.size / 1024)}KB`);
+        console.log(
+          `✅ Using optimal result: Quality ${quality.toFixed(2)}, Size: ${Math.round(processedBlob.size / 1024)}KB`,
+        );
       }
     } else {
       // Too large - reduce quality
       console.log(`Image too large (${currentSizeKB}KB), reducing quality`);
-      
+
       // Binary search downwards
       let minQuality = 0.1;
       let maxQuality = quality;
-      
+
       for (attempts = 2; attempts <= maxAttempts && maxQuality - minQuality > 0.02; attempts++) {
         quality = (minQuality + maxQuality) / 2;
         processedBlob = await canvasToBlob(resizedCanvas, outputFormat, quality);
         currentSizeKB = Math.round(processedBlob.size / 1024);
         console.log(`Attempt ${attempts}: Quality ${quality.toFixed(2)}, Size: ${currentSizeKB}KB`);
-        
+
         if (currentSizeKB > targetMaxKB) {
           maxQuality = quality;
         } else {
