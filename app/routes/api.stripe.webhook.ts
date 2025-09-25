@@ -180,7 +180,6 @@ async function handleCheckoutCompleted(checkoutSession: Stripe.Checkout.Session)
         undefined,
         userId,
       );
-
     }
   } catch (error) {
     console.error('Error handling checkout completed:', error);
@@ -218,7 +217,6 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       undefined,
       userId,
     );
-
   } catch (error) {
     console.error('Error handling payment success:', error);
   }
