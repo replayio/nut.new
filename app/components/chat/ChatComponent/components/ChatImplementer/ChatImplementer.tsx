@@ -16,6 +16,7 @@ import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type ChatMessageAttachment, type Message } from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { assert, generateRandomId, navigateApp } from '~/utils/nut';
+import { createAttachment as createAttachmentAPI } from '~/lib/replay/NutAPI';
 import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
 import type { SimulationData } from '~/lib/replay/MessageHandler';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
@@ -38,17 +39,29 @@ async function createAttachment(dataURL: string): Promise<ChatMessageAttachment>
   const match = dataURL.match(/^data:([^;]+);base64,(.+)$/);
   assert(match, "Expected data URL");
   const mimeType = match[1];
-  const data = match[2];
+  const base64Data = match[2];
 
+  // Convert base64 to ArrayBuffer
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const attachmentData = bytes.buffer;
 
-  const imageMessage: Message = {
-    id: `image-${chatId}-${index}`,
-    createTime: new Date().toISOString(),
-    role: 'user',
-    type: 'image',
-    dataURL: imageData,
+  // Generate a filename based on the mime type
+  const extension = mimeType.split('/')[1] || 'bin';
+  const fileName = `attachment.${extension}`;
+
+  // Call the API to create the attachment
+  const attachmentId = await createAttachmentAPI(mimeType, attachmentData);
+
+  return {
+    attachmentId,
+    fileName,
+    byteLength: attachmentData.byteLength,
+    mimeType,
   };
-  addChatMessage(imageMessage);
 }
 
 const ChatImplementer = memo(() => {
