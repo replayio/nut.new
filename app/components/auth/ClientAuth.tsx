@@ -92,6 +92,13 @@ export function ClientAuth() {
 
   const handleShowAccountModal = () => {
     accountModalStore.open();
+    if (window.analytics) {
+      window.analytics.track('Clicked Account Settings button', {
+        timestamp: new Date().toISOString(),
+        userId: user?.id,
+        email: user?.email,
+      });
+    }
     setShowDropdown(false);
   };
 
