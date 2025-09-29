@@ -102,9 +102,10 @@ export async function createAttachment(
 
   const headers: HeadersInit = {
     'x-user-id': userId ?? '',
+    Authorization: accessToken ? `Bearer ${accessToken}` : '',
     'x-replay-attachment-type': mimeType,
     'Content-Type': 'application/octet-stream',
-    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    'Content-Length': attachmentData.byteLength.toString(),
   };
 
   // Create a ReadableStream for streaming the attachment data
@@ -145,4 +146,62 @@ export async function createAttachment(
   }
   const { attachmentId } = await response.json() as { attachmentId: string };
   return attachmentId;
+}
+
+export async function downloadAttachment(attachmentId: string): Promise<ArrayBuffer> {
+  const apiHost = import.meta.env.VITE_REPLAY_API_HOST || 'https://dispatch.replay.io';
+  const url = `${apiHost}/nut/download-attachment`;
+
+  const userId = await getCurrentUserId();
+  const accessToken = await getCurrentAccessToken();
+
+  const headers: HeadersInit = {
+    'x-user-id': userId ?? '',
+    Authorization: accessToken ? `Bearer ${accessToken}` : '',
+    'Content-Type': 'application/json',
+  };
+
+  const fetchOptions: RequestInit = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ attachmentId }),
+  };
+
+  const response = await fetch(url, fetchOptions);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new NutAPIError('downloadAttachment', response.status, errorText);
+  }
+
+  if (!response.body) {
+    throw new Error('No response body for streaming');
+  }
+
+  // Stream the response data
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  // Calculate total length and combine chunks
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return result.buffer;
 }
