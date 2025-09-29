@@ -92,7 +92,7 @@ export async function callNutAPI(
 
 export async function createAttachment(mimeType: string, attachmentData: ArrayBuffer): Promise<string> {
   const apiHost = import.meta.env.VITE_REPLAY_API_HOST || 'https://dispatch.replay.io';
-  const url = `${apiHost}/nut/createAttachment`;
+  const url = `${apiHost}/nut/create-attachment`;
 
   const userId = await getCurrentUserId();
   const accessToken = await getCurrentAccessToken();
@@ -134,6 +134,7 @@ export async function createAttachment(mimeType: string, attachmentData: ArrayBu
     method: 'POST',
     headers,
     body: stream,
+    duplex: 'half',
   };
 
   const response = await fetch(url, fetchOptions);
