@@ -42,9 +42,7 @@ export function DownloadButton() {
       toast.success('Repository downloaded successfully');
       if (window.analytics) {
         window.analytics.track('Repository Downloaded', {
-          repositoryId,
           timestamp: new Date().toISOString(),
-          method: 'download_button',
           userId: user?.id,
           email: user?.email,
         });

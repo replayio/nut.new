@@ -99,9 +99,7 @@ export default function AuthCallback() {
                 createdAt: user.created_at,
               });
 
-              window.analytics.track('User Signed Up', {
-                name: user.user_metadata.full_name,
-                method: isEmailConfirm ? 'email' : 'google_oauth',
+              window.analytics.track('Created Account', {
                 email: user.email,
                 userId: user.id,
                 timestamp: new Date().toISOString(),

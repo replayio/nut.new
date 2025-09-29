@@ -176,8 +176,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  
   const fullInput =
-    `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
+  `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
+  
+  const handleStartBuilding = () => {
+    const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
+
+    handleSendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
+
+    if (window.analytics) {
+      window.analytics.track('Clicked Start Building button', {
+        timestamp: new Date().toISOString(),
+        userId: user?.id,
+        email: user?.email,
+      });
+    }
+
+    setTimeout(() => {
+      workbenchStore.setShowWorkbench(true);
+      mobileNavStore.setShowMobileNav(true);
+      mobileNavStore.setActiveTab('preview');
+    }, 2000);
+  };
 
   return (
     <div
@@ -311,15 +332,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <ClientOnly>
                   {() => (
                     <StartBuildingButton
-                      onClick={() => {
-                        const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
-                        handleSendMessage({ messageInput: message, chatMode: ChatMode.DevelopApp });
-                        setTimeout(() => {
-                          workbenchStore.setShowWorkbench(true);
-                          mobileNavStore.setShowMobileNav(true);
-                          mobileNavStore.setActiveTab('preview');
-                        }, 2000);
-                      }}
+                      onClick={handleStartBuilding}
                       startPlanningRating={startPlanningRating}
                     />
                   )}
