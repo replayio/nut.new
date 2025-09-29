@@ -181,6 +181,8 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
       if (window.analytics) {
         window.analytics.track('Peanuts Added', {
           timestamp: new Date().toISOString(),
+          email: user.email,
+          userId: user.id,
         });
       }
     } catch (error) {

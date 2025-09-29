@@ -137,6 +137,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           window.analytics.track('Message Sent', {
             timestamp: new Date().toISOString(),
             chatMode: params.chatMode,
+            userId: user?.id,
+            email: user?.email,
           });
         }
         if (handleInputChange) {
