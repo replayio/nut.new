@@ -1,5 +1,4 @@
 import type { Message } from '~/lib/persistence/message';
-import { assert } from '~/utils/nut';
 
 function mergeResponseMessage(msg: Message, messages: Message[]): Message[] {
   if (!messages.length) {

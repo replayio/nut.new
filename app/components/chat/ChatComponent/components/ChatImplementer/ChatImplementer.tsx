@@ -37,7 +37,7 @@ export interface ChatMessageParams {
 
 async function createAttachment(dataURL: string): Promise<ChatMessageAttachment> {
   const match = dataURL.match(/^data:([^;]+);base64,(.+)$/);
-  assert(match, "Expected data URL");
+  assert(match, 'Expected data URL');
   const mimeType = match[1];
   const base64Data = match[2];
 

@@ -90,10 +90,7 @@ export async function callNutAPI(
   }
 }
 
-export async function createAttachment(
-  mimeType: string,
-  attachmentData: ArrayBuffer
-): Promise<string> {
+export async function createAttachment(mimeType: string, attachmentData: ArrayBuffer): Promise<string> {
   const apiHost = import.meta.env.VITE_REPLAY_API_HOST || 'https://dispatch.replay.io';
   const url = `${apiHost}/nut/createAttachment`;
 
@@ -144,7 +141,7 @@ export async function createAttachment(
     const errorText = await response.text();
     throw new NutAPIError('createAttachment', response.status, errorText);
   }
-  const { attachmentId } = await response.json() as { attachmentId: string };
+  const { attachmentId } = (await response.json()) as { attachmentId: string };
   return attachmentId;
 }
 
@@ -180,7 +177,7 @@ export async function downloadAttachment(attachmentId: string): Promise<ArrayBuf
   // Stream the response data
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
-  
+
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -197,7 +194,7 @@ export async function downloadAttachment(attachmentId: string): Promise<ArrayBuf
   const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
   const result = new Uint8Array(totalLength);
   let offset = 0;
-  
+
   for (const chunk of chunks) {
     result.set(chunk, offset);
     offset += chunk.length;

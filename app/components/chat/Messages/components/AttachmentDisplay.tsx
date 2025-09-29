@@ -16,9 +16,9 @@ export function AttachmentDisplay({ attachment }: AttachmentDisplayProps) {
       try {
         setLoading(true);
         setError(null);
-        
+
         const arrayBuffer = await downloadAttachment(attachment.attachmentId);
-        
+
         // Convert ArrayBuffer to base64 data URL
         const bytes = new Uint8Array(arrayBuffer);
         let binary = '';
@@ -27,7 +27,7 @@ export function AttachmentDisplay({ attachment }: AttachmentDisplayProps) {
         }
         const base64 = btoa(binary);
         const dataURL = `data:${attachment.mimeType};base64,${base64}`;
-        
+
         setDataURL(dataURL);
       } catch (err) {
         console.error('Failed to load attachment:', err);
