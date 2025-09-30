@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
@@ -8,8 +8,8 @@ import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';
 import { userStore } from '~/lib/stores/userAuth';
 import { useStore } from '@nanostores/react';
-import { checkSubscriptionStatus } from '~/lib/stripe/client';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
+import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 
 export function ClientAuth() {
   const user = useStore(userStore.user);
@@ -17,8 +17,7 @@ export function ClientAuth() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProTooltip, setShowProTooltip] = useState(false);
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
-  const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const stripeSubscription = useStore(subscriptionStore.subscription);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -94,37 +93,27 @@ export function ClientAuth() {
 
   const handleShowAccountModal = () => {
     accountModalStore.open();
+    if (window.analytics) {
+      window.analytics.track('Clicked Account Settings button', {
+        timestamp: new Date().toISOString(),
+        userId: user?.id,
+        email: user?.email,
+      });
+    }
     setShowDropdown(false);
   };
 
   const handleSubscriptionToggle = async () => {
     openSubscriptionModal();
+    if (window.analytics) {
+      window.analytics.track('Clicked View Plans button', {
+        timestamp: new Date().toISOString(),
+        userId: user?.id,
+        email: user?.email,
+      });
+    }
     setShowDropdown(false);
   };
-
-  const fetchSubscriptionData = useCallback(async () => {
-    if (!user?.email) {
-      return;
-    }
-
-    setLoadingSubscription(true);
-    try {
-      const stripeStatus = await checkSubscriptionStatus();
-      setStripeSubscription(stripeStatus.hasSubscription ? stripeStatus.subscription : null);
-    } catch (error) {
-      console.error('Error fetching subscription status:', error);
-      setStripeSubscription(null);
-    } finally {
-      setLoadingSubscription(false);
-    }
-    console.log('subscription data fetched', stripeSubscription);
-  }, [user?.email]);
-
-  useEffect(() => {
-    if (showDropdown && user?.email && !stripeSubscription) {
-      fetchSubscriptionData();
-    }
-  }, [showDropdown, user?.email]);
 
   if (loading) {
     return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
@@ -171,11 +160,7 @@ export function ClientAuth() {
                 </div>
               </div>
 
-              {loadingSubscription ? (
-                <div className="px-3 py-2 border-b border-bolt-elements-borderColor flex items-center justify-center">
-                  <div className="w-4 h-4 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
-                </div>
-              ) : !stripeSubscription ? (
+              {!stripeSubscription ? (
                 <div className="px-3 py-2 border-b border-bolt-elements-borderColor">
                   <button
                     onClick={handleSubscriptionToggle}
@@ -226,6 +211,15 @@ export function ClientAuth() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
+                    onClick={() => {
+                      if (window.analytics) {
+                        window.analytics.track('Clicked Pro Plan Waitlist button', {
+                          timestamp: new Date().toISOString(),
+                          userId: user?.id,
+                          email: user?.email,
+                        });
+                      }
+                    }}
                     onMouseEnter={() => {
                       const timeout = setTimeout(() => setShowProTooltip(true), 500);
                       setProTooltipTimeout(timeout);

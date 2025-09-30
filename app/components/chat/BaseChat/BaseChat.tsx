@@ -123,7 +123,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         // Mark discovery messages as interacted when user sends a response
         const messages = chatStore.messages.get();
         const updatedMessages = messages.map((message) => {
-          if (message.type === 'text' && message.category === DISCOVERY_RESPONSE_CATEGORY && !message.hasInteracted) {
+          if (message.category === DISCOVERY_RESPONSE_CATEGORY && !message.hasInteracted) {
             return { ...message, hasInteracted: true };
           }
           return message;
@@ -133,12 +133,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         sendMessage(params);
         abortListening();
         setCheckedBoxes([]);
-        if (window.analytics) {
-          window.analytics.track('Message Sent', {
+
+        if (window.analytics && messages.length === 0) {
+          window.analytics.track('Created a new chat', {
             timestamp: new Date().toISOString(),
-            chatMode: params.chatMode,
+            userId: user?.id,
+            email: user?.email,
           });
         }
+
         if (handleInputChange) {
           const syntheticEvent = {
             target: { value: '' },
@@ -150,20 +153,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       const newMessages = chatStore.messages.get().map((message) => {
-        if (message.type == 'text') {
-          const oldBox = checked ? `[ ]` : `[x]`;
-          const newBox = checked ? `[x]` : `[ ]`;
-          const lines = message.content.split('\n');
-          const matchingLineIndex = lines.findIndex(
-            (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
-          );
-          if (matchingLineIndex >= 0) {
-            lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
-            return {
-              ...message,
-              content: lines.join('\n').trim(),
-            };
-          }
+        const oldBox = checked ? `[ ]` : `[x]`;
+        const newBox = checked ? `[x]` : `[ ]`;
+        const lines = message.content.split('\n');
+        const matchingLineIndex = lines.findIndex(
+          (line) => line.includes(oldBox) && lineIncludesNoMarkdown(line, checkboxText),
+        );
+        if (matchingLineIndex >= 0) {
+          lines[matchingLineIndex] = lines[matchingLineIndex].replace(oldBox, newBox);
+          return {
+            ...message,
+            content: lines.join('\n').trim(),
+          };
         }
         return message;
       });
