@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { appSettingsModalStore } from '~/lib/stores/appSettingsModal';
-import { database } from '~/lib/persistence/apps';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { toast } from 'react-toastify';
@@ -48,7 +47,7 @@ export function AppSettingsButton() {
     <TooltipProvider>
       <WithTooltip tooltip="App Settings">
         <button
-          className="flex items-center justify-center gap-2 bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600 text-white rounded-xl p-2.5 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 group"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white rounded-xl p-2.5 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 group"
           onClick={handleOpenModal}
           disabled={loadingData}
         >

@@ -3,14 +3,14 @@ import { atom } from 'nanostores';
 export interface AppSettings {
   // App name
   name?: string;
-  
+
   // App icon (URL or data URL)
   icon?: string;
-  
+
   // Authentication settings
   authenticationRequired?: boolean;
   domainWhitelist?: string[];
-  
+
   // API integrations
   apiIntegrations?: {
     name: string;

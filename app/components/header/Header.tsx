@@ -8,7 +8,6 @@ import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
 import { userStore } from '~/lib/stores/userAuth';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from './DeployChat/DeployChatButton';
 import { AppSettingsButton } from './AppSettings/AppSettingsButton';
 import { DownloadButton } from './DownloadButton';
@@ -67,7 +66,6 @@ export function Header() {
           />
         )}
         {!user && location.pathname !== '/rebuild-broken-dreams' && <ThemeSwitch />}
-        {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
       {appSummary && !isSmallViewport && (

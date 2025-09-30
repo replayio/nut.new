@@ -16,12 +16,12 @@ export function ChatDescription() {
   }
 
   return (
-    <div className="flex items-center flex-1 min-w-0 max-w-md mx-auto">
+    <div className="flex justify-start flex-1">
       {editing ? (
-        <form onSubmit={handleSubmit} className="flex items-center w-full min-w-0 gap-3">
+        <form onSubmit={handleSubmit} className="flex items-center justify-start w-full min-w-0 gap-3">
           <input
             type="text"
-            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-xl px-4 py-2 flex-1 min-w-0 truncate border border-bolt-elements-borderColor focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-xl p-4 py-2 flex-1 min-w-0 truncate border border-bolt-elements-borderColor focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm hover:shadow-md"
             autoFocus
             value={currentTitle}
             onChange={handleChange}
@@ -41,8 +41,8 @@ export function ChatDescription() {
           </TooltipProvider>
         </form>
       ) : (
-        <div className="flex items-center justify-center w-full min-w-0">
-          <div className="text-center text-bolt-elements-textHeading font-medium px-2 truncate max-w-full">
+        <div className="flex items-center justify-start w-full min-w-0">
+          <div className="text-center text-bolt-elements-textHeading font-medium pr-2 truncate max-w-full">
             {currentTitle}
           </div>
           <TooltipProvider>
