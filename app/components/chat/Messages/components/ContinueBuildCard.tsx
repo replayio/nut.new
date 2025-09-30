@@ -4,10 +4,11 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface ContinueBuildCardProps {
   sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
+  setShowContinueBuildCard?: (show: boolean) => void;
   onMount?: () => void;
 }
 
-export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({ sendMessage, onMount }) => {
+export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({ sendMessage, onMount, setShowContinueBuildCard }) => {
   useEffect(() => {
     if (onMount) {
       onMount();
@@ -20,6 +21,10 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({ sendMessag
         messageInput: 'Continue building the app based on these requirements.',
         chatMode: ChatMode.DevelopApp,
       });
+
+      if (setShowContinueBuildCard) {
+        setShowContinueBuildCard(false);
+      }
     }
   };
 
