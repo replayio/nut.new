@@ -8,7 +8,11 @@ interface ContinueBuildCardProps {
   onMount?: () => void;
 }
 
-export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({ sendMessage, onMount, setShowContinueBuildCard }) => {
+export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
+  sendMessage,
+  onMount,
+  setShowContinueBuildCard,
+}) => {
   useEffect(() => {
     if (onMount) {
       onMount();

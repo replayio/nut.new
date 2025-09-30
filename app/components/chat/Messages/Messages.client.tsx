@@ -68,7 +68,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     }
 
     useEffect(() => {
-      const shouldShow = !hasPendingMessage &&
+      const shouldShow =
+        !hasPendingMessage &&
         !listenResponses &&
         appSummary?.features?.length &&
         !isFullyComplete &&
@@ -346,7 +347,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             <StopBuildCard onMount={scrollToBottom} />
           )}
 
-          {showContinueBuildCard && <ContinueBuildCard onMount={scrollToBottom} sendMessage={sendMessage} setShowContinueBuildCard={setShowContinueBuildCard} />}
+          {showContinueBuildCard && (
+            <ContinueBuildCard
+              onMount={scrollToBottom}
+              sendMessage={sendMessage}
+              setShowContinueBuildCard={setShowContinueBuildCard}
+            />
+          )}
 
           {user && startPlanningRating === 10 && peanutsRemaining !== undefined && peanutsRemaining > 0 && (
             <StartBuildingCard
