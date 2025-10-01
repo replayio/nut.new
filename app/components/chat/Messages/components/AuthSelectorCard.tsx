@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AppCard } from './AppCard';
+import React, { useState } from 'react';
 import { Switch } from '~/components/ui/Switch';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { chatStore, onChatResponse } from '~/lib/stores/chat';
@@ -8,27 +7,13 @@ import { toast } from 'react-toastify';
 import { assert } from '~/utils/nut';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import { Skeleton } from '~/components/ui/Skeleton';
+import AllowedDomainsDialog from '~/components/ui/AllowedDomainsDialog';
 
 interface AuthSelectorCardProps {
   appSummary: AppSummary;
 }
 
 const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
-
-function isValidDomain(domain: string): boolean {
-  const value = domain.trim();
-  if (value.length === 0) {
-    return false;
-  }
-  // Disallow protocol, path, or spaces
-  if (value.includes('://') || value.includes('/') || value.includes(' ')) {
-    return false;
-  }
-  // Basic domain regex: label(.label)+ with TLD >= 2
-  const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-  return domainRegex.test(value);
-}
 
 export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }) => {
   // Only show for apps with template versions
@@ -40,6 +25,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
   assert(appId, 'App ID is required');
 
   const [saving, setSaving] = useState(false);
+  const [showDomains, setShowDomains] = useState(false);
   const authRequired = appSummary?.setSecrets?.includes(AuthRequiredSecret);
 
   const handleToggle = async () => {
@@ -123,206 +109,48 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
     );
   };
 
-  const [domains, setDomains] = useState<string[]>(['']);
-  const [touched, setTouched] = useState<boolean[]>([false]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    (async () => {
-      try {
-        setLoading(true);
-        const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
-        if (
-          deploySettings?.authAllowList &&
-          Array.isArray(deploySettings.authAllowList) &&
-          deploySettings.authAllowList.length > 0
-        ) {
-          setDomains(deploySettings.authAllowList);
-          setTouched(new Array(deploySettings.authAllowList.length).fill(false));
-        } else {
-          setDomains(['']);
-          setTouched([false]);
-        }
-      } catch (error) {
-        // If API fails, start with a single empty row
-        setDomains(['']);
-        setTouched([false]);
-        console.error('Failed to fetch allowed domains', error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [open, appId]);
-
-  const haveAny = useMemo(() => domains.some((d) => d.trim().length > 0), [domains]);
-  const allValid = useMemo(() => domains.filter((d) => d.trim().length > 0).every((d) => isValidDomain(d)), [domains]);
-
-  const setDomainAt = useCallback((index: number, value: string) => {
-    setDomains((prev) => {
-      const copy = [...prev];
-      copy[index] = value;
-      return copy;
-    });
-  }, []);
-
-  const setTouchedAt = useCallback((index: number, value: boolean) => {
-    setTouched((prev) => {
-      const copy = [...prev];
-      copy[index] = value;
-      return copy;
-    });
-  }, []);
-
-  const addRow = useCallback(() => {
-    setDomains((prev) => [...prev, '']);
-    setTouched((prev) => [...prev, false]);
-  }, []);
-
-  const removeRow = useCallback((index: number) => {
-    setDomains((prev) => prev.filter((_, i) => i !== index));
-    setTouched((prev) => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (!haveAny || !allValid) {
-      return;
-    }
-    setSaving(true);
-    try {
-      const cleaned = domains.map((d) => d.trim()).filter((d) => d.length > 0);
-
-      // Merge with existing deploy settings to avoid clobbering other fields
-      const { deploySettings } = await callNutAPI('get-app-deploy-settings', { appId });
-      const newDeploySettings = { ...(deploySettings || {}), authAllowList: cleaned };
-      await callNutAPI('set-app-deploy-settings', { appId, deploySettings: newDeploySettings });
-
-      toast.success('Allowed domains updated');
-    } catch (error) {
-      console.error('Failed to save allowed domains', error);
-      toast.error('Failed to save allowed domains');
-      setSaving(false);
-    }
-  }, [haveAny, allValid, domains, appId]);
-
   return (
-    <AppCard
-      title="Authentication Settings"
-      description={getDescription()}
-      icon={<div className="i-ph:shield-check-duotone text-white text-lg" />}
-      iconColor="indigo"
-      status="completed"
-      progressText="Configured"
-    >
-      <div className="space-y-3">
-        {getToggleControl()}
-        {authRequired && (
-          <div className="p-5 space-y-4">
-            <div>
-              <div className="text-sm font-medium text-bolt-elements-textPrimary">Set Allowed Domains</div>
-              <div className="text-xs text-bolt-elements-textSecondary">
-                Users can sign in only with emails belonging to these domains.
-              </div>
+    <div className="relative rounded-xl transition-all duration-300 shadow-sm">
+      <div className="bg-bolt-elements-background-depth-2 rounded-xl transition-all duration-300 relative overflow-hidden p-5 border border-bolt-elements-borderColor">
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-sm bg-gradient-to-br from-indigo-500 to-indigo-600">
+              <div className="i-ph:shield-check-duotone text-white text-lg" />
             </div>
-
-            <div className="space-y-3">
-              {loading ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 rounded-md border border-bolt-elements-borderColor px-3 py-2 bg-bolt-elements-background-depth-2">
-                      <span className="text-bolt-elements-textSecondary select-none">@</span>
-                      <Skeleton className="h-6 w-full" />
-                    </div>
-                    <Skeleton className="h-6 w-8" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 rounded-md border border-bolt-elements-borderColor px-3 py-2 bg-bolt-elements-background-depth-2">
-                      <span className="text-bolt-elements-textSecondary select-none">@</span>
-                      <Skeleton className="h-6 w-full" />
-                    </div>
-                    <Skeleton className="h-6 w-8" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-9 6w-40 mt-2" />
-                  </div>
-                </>
-              ) : (
-                domains.map((domain, index) => {
-                  const showInvalid = touched[index] && domain.trim().length > 0 && !isValidDomain(domain);
-                  return (
-                    <div key={index} className="flex items-center gap-2">
-                      <div
-                        className={
-                          'flex-1 flex items-center gap-2 rounded-md border px-3 py-2 bg-bolt-elements-background-depth-2 ' +
-                          (showInvalid
-                            ? 'border-red-500 focus-within:border-red-500'
-                            : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus')
-                        }
-                      >
-                        <span className="text-bolt-elements-textSecondary select-none">@</span>
-                        <input
-                          type="text"
-                          value={domain}
-                          onChange={(e) => setDomainAt(index, e.target.value)}
-                          onBlur={() => setTouchedAt(index, true)}
-                          placeholder="example.com"
-                          className={
-                            'w-full bg-transparent outline-none text-sm ' +
-                            (showInvalid
-                              ? 'text-red-600 placeholder-red-400'
-                              : 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary')
-                          }
-                        />
-                      </div>
-                      {domains.length > 1 && (
-                        <button
-                          className="h-8 w-8 border-0 text-red-500 bg-transparent items-center justify-center"
-                          onClick={() => removeRow(index)}
-                          aria-label="Remove domain"
-                          type="button"
-                          disabled={loading}
-                        >
-                          <div className="i-ph:trash-duotone" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-              {!loading && (
-                <div>
-                  <button
-                    className="mt-1 inline-flex items-center gap-2 px-3 h-9 rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3"
-                    onClick={addRow}
-                    type="button"
-                    disabled={loading}
-                  >
-                    <div className="i-ph:plus" />
-                    <span>Add new domain</span>
-                  </button>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold text-bolt-elements-textHeading truncate">
+                Authentication Settings
+              </h3>
+              <div className="mt-1.5 flex items-center">
+                <div className="flex items-center gap-2 text-bolt-elements-icon-success">
+                  <div className="i-ph:check-bold text-sm" />
+                  <span className="text-sm font-medium text-green-600">Configured</span>
                 </div>
-              )}
-              <div className="text-xs text-bolt-elements-textSecondary">
-                Enter domains like <span className="font-mono">example.com</span> or{' '}
-                <span className="font-mono">team.example.com</span>
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                className="px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:shadow-md hover:scale-105 active:scale-95"
-                onClick={handleSave}
-                disabled={loading || saving || !haveAny || !allValid}
-              >
-                {saving ? 'Saving…' : loading ? 'Loading…' : 'Save'}
-              </button>
             </div>
           </div>
-        )}
+
+          <div className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-3">{getDescription()}</div>
+
+          <div className="mt-3">
+            <div className="space-y-3">
+              {getToggleControl()}
+              {authRequired && (
+                <div>
+                  <button
+                    type="button"
+                    className="w-full px-4 py-3 text-sm rounded-xl border text-bolt-elements-textHeading border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-md font-medium"
+                    onClick={() => setShowDomains(true)}
+                  >
+                    Set Allowed Domains
+                  </button>
+                  <AllowedDomainsDialog open={showDomains} onOpenChange={setShowDomains} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </AppCard>
+    </div>
   );
 };

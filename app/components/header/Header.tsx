@@ -8,6 +8,7 @@ import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { IconButton } from '~/components/ui/IconButton';
 import { userStore } from '~/lib/stores/userAuth';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
+import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from './DeployChat/DeployChatButton';
 import { AppSettingsButton } from './AppSettings/AppSettingsButton';
 import { DownloadButton } from './DownloadButton';
@@ -55,7 +56,7 @@ export function Header() {
         },
       )}
     >
-      <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
+      <div className="flex items-center gap-4 text-bolt-elements-textPrimary flex-1">
         {user && (
           <IconButton
             onClick={() => sidebarMenuStore.toggle()}
@@ -66,6 +67,7 @@ export function Header() {
           />
         )}
         {!user && location.pathname !== '/rebuild-broken-dreams' && <ThemeSwitch />}
+        {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
       {appSummary && !isSmallViewport && (

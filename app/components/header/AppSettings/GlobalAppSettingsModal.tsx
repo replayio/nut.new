@@ -2,9 +2,9 @@ import { useStore } from '@nanostores/react';
 import { appSettingsModalStore } from '~/lib/stores/appSettingsModal';
 import { chatStore } from '~/lib/stores/chat';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AuthSelectorCard } from '~/components/chat/Messages/components/AuthSelectorCard';
-import { SecretsCard } from '~/components/chat/Messages/components/SecretsCard';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { AuthSelectorComponent } from './components/AuthSelectorComponent';
+import { SecretsComponent } from './components/SecretsComponent';
 
 export function GlobalAppSettingsModal() {
   const isOpen = useStore(appSettingsModalStore.isOpen);
@@ -111,10 +111,10 @@ export function GlobalAppSettingsModal() {
                   </div>
 
                   {/* Authentication Settings */}
-                  {appSummary && <AuthSelectorCard appSummary={appSummary} />}
+                  {appSummary && <AuthSelectorComponent appSummary={appSummary} />}
 
                   {/* API Integrations */}
-                  {appSummary && allSecrets.length > 0 && <SecretsCard appSummary={appSummary} />}
+                  {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
                 </div>
 
                 {/* Action Buttons */}
