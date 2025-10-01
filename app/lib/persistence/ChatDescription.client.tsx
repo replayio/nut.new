@@ -21,7 +21,7 @@ export function ChatDescription() {
         <div className="flex items-center justify-start w-full min-w-0 gap-3">
           <input
             type="text"
-            className="w-full bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-xl p-4 py-2 flex-1 min-w-0 truncate border border-bolt-elements-borderColor focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-100 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-xl p-4 py-2 flex-1 min-w-0 truncate border border-bolt-elements-borderColor focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm hover:shadow-md"
             autoFocus
             value={currentTitle}
             onChange={handleChange}
@@ -42,7 +42,7 @@ export function ChatDescription() {
         </div>
       ) : (
         <div className="flex items-center justify-start w-full min-w-0">
-          <div className="text-center text-bolt-elements-textHeading font-medium pr-2 truncate max-w-full">
+          <div className="text-center text-bolt-elements-textHeading font-medium pr-2 truncate max-w-100">
             {currentTitle}
           </div>
           <TooltipProvider>

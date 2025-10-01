@@ -56,7 +56,7 @@ export function Header() {
         },
       )}
     >
-      <div className="flex items-center gap-4 text-bolt-elements-textPrimary flex-1">
+      <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
         {user && (
           <IconButton
             onClick={() => sidebarMenuStore.toggle()}
