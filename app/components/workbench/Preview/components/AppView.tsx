@@ -80,7 +80,7 @@ const AppView = ({
           </div>
           {!initialBuildComplete && (
             <TooltipProvider>
-              <WithTooltip tooltip="Your app's functionality is still in progress. Not all features will work as expected.">
+              <WithTooltip tooltip="Your app’s functionality hasn’t been built yet. This is a quick mockup showing the general structure.">
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 py-1 px-4 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm rounded-t-lg flex items-center gap-2 cursor-help">
                   Preview (App build in progress)
                   <div className="i-ph:info text-sm" />
