@@ -10,12 +10,14 @@ import {
 } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { useIsMobile } from '~/lib/hooks/useIsMobile';
 
 interface SubscriptionModalProps {
   currentTier?: SubscriptionTier;
 }
 
 export function SubscriptionModal({ currentTier: propCurrentTier }: SubscriptionModalProps) {
+  const { isMobile } = useIsMobile();
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const user = useStore(userStore);
@@ -51,7 +53,13 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
   return (
     <div className="bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
       <div
-        className="bg-bolt-elements-background-depth-1 rounded-r-2xl border border-bolt-elements-borderColor shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+        className={classNames(
+          'bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-2xl max-w-6xl w-full h-full overflow-y-auto',
+          {
+            'rounded-b-2xl': isMobile,
+            'rounded-r-2xl': !isMobile,
+          },
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor/50">

@@ -122,7 +122,7 @@ export function GlobalAccountModal() {
                   className="flex items-center gap-2  bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary hover:text-bolt-elements-textSecondary transition-colors"
                 >
                   <div className="i-ph:arrow-left text-lg" />
-                  <span className="font-medium">Back to Settings</span>
+                  <span className="font-medium">Settings</span>
                 </button>
                 <IconButton
                   onClick={() => accountModalStore.close()}
