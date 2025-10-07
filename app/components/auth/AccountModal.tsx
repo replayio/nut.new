@@ -5,7 +5,6 @@ import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
 import { createTopoffCheckout, cancelSubscription, manageBilling } from '~/lib/stripe/client';
-import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
@@ -16,10 +15,9 @@ import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 
 interface AccountModalProps {
   user: User | undefined;
-  onClose: () => void;
 }
 
-export const AccountModal = ({ user, onClose }: AccountModalProps) => {
+export const AccountModal = ({ user }: AccountModalProps) => {
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
@@ -161,18 +159,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     );
   };
 
-  const handleSubscriptionToggle = async () => {
-    openSubscriptionModal();
-    if (window.analytics) {
-      window.analytics.track('Clicked View Plans button', {
-        timestamp: new Date().toISOString(),
-        userId: user?.id,
-        email: user?.email,
-      });
-    }
-    onClose();
-  };
-
   const handleAddPeanuts = async () => {
     if (!user?.id || !user?.email) {
       stripeStatusModalActions.showError(
@@ -264,7 +250,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   if (loading || loadingList) {
     return (
-      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm">
+      <div className="bg-bolt-elements-background-depth-1 rounded-r-2xl p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm">
         <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
             <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
@@ -278,17 +264,9 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   return (
     <div
-      className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
+      className="bg-bolt-elements-background-depth-1 rounded-r-2xl p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
       onClick={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
-        title="Close"
-      >
-        <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
-      </button>
-
       <div className="text-center mb-8">
         <div className="mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/30 shadow-lg backdrop-blur-sm">
@@ -363,22 +341,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!loading && (
-            <button
-              onClick={handleSubscriptionToggle}
-              disabled={loading}
-              className={classNames(
-                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
-                {
-                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
-                },
-              )}
-            >
-              <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
-            </button>
-          )}
-
           {stripeSubscription && !loading && (
             <button
               onClick={handleManageBilling}
