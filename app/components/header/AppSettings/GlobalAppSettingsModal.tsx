@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { AuthSelectorComponent } from './components/AuthSelectorComponent';
 import { SecretsComponent } from './components/SecretsComponent';
+import { PermissionsSelectionComponent } from './components/PermissionsSelectionComponent';
 
 export function GlobalAppSettingsModal() {
   const isOpen = useStore(appSettingsModalStore.isOpen);
@@ -112,6 +113,9 @@ export function GlobalAppSettingsModal() {
 
                   {/* Authentication Settings */}
                   {appSummary && <AuthSelectorComponent appSummary={appSummary} />}
+
+                  {/* Permissions */}
+                  <PermissionsSelectionComponent />
 
                   {/* API Integrations */}
                   {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
