@@ -17,10 +17,12 @@ export enum AppAccessKind {
   SetTitle = 'RenameApp',
 
   /** Delete the app. */
-  Delete = 'DeleteApp',
+//   Delete = 'DeleteApp',
 
   /** Set new permissions for the app. */
   SetPermissions = 'SetPermissions',
+
+  AllPermissions = 'AllPermissions',
 }
 
 /**
@@ -74,6 +76,20 @@ export interface GetAppPermissionsResponse {
 }
 
 /**
+ * Request payload for getting whether the current user is the owner of an app.
+ */
+export interface IsAppOwnerRequest {
+  appId: string;
+}
+
+/**
+ * Response payload for getting whether the current user is the owner of an app.
+ */
+export interface IsAppOwnerResponse {
+  isOwner: boolean;
+}
+
+/**
  * Request payload for setting app permissions.
  */
 export interface SetAppPermissionsRequest {
@@ -107,13 +123,22 @@ export async function getAppPermissions(appId: string): Promise<AppPermissions> 
 }
 
 /**
+ * Get whether the current user is the owner of an app.
+ */ 
+export async function isAppOwner(appId: string, userId: string): Promise<boolean> {
+  const request: IsAppOwnerRequest = { appId };
+  const response: IsAppOwnerResponse = await callNutAPI('is-app-owner', request, undefined, userId);
+  return response.isOwner;
+}
+
+/**
  * Set the permissions for an app.
  *
  * @param appId - The ID of the app to set permissions for
  * @param permissions - The new permissions to set
  * @throws NutAPIError if the request fails (e.g., unauthorized, invalid permissions)
  */
-export async function setAppPermissions(appId: string, permissions: AppPermissions): Promise<void> {
+export async function setAppPermissions(appId: string, permissions: AppPermissions): Promise<SetAppPermissionsResponse> {
   if (!appId || typeof appId !== 'string') {
     throw new Error('Invalid appId: must be a non-empty string');
   }
@@ -121,6 +146,7 @@ export async function setAppPermissions(appId: string, permissions: AppPermissio
   if (!Array.isArray(permissions)) {
     throw new Error('Invalid permissions: must be an array');
   }
+  console.log('permissions', permissions);
 
   // Validate each permission
   for (const permission of permissions) {
@@ -167,17 +193,13 @@ export async function setAppPermissions(appId: string, permissions: AppPermissio
   }
 
   const request: SetAppPermissionsRequest = { appId, permissions };
-  await callNutAPI('set-app-permissions', request);
+  const response = await callNutAPI('set-app-permissions', request);
+
+  return response;
 }
 
 /**
  * Helper function to validate if a user has access based on permissions.
- *
- * @param permissions - The app's permissions
- * @param accessKind - The kind of access to check
- * @param userEmail - The user's email
- * @param userIsOwner - Whether the user is the app owner
- * @returns Whether the user has access
  */
 export function isAppAccessAllowed(
   permissions: AppPermissions | undefined,
@@ -185,59 +207,63 @@ export function isAppAccessAllowed(
   userEmail: string,
   userIsOwner: boolean = false,
 ): boolean {
-  // Owner always has access
+  // RULE 1: Owner always has full access to everything
   if (userIsOwner) {
     return true;
   }
 
-  // If no permissions are set, default to allowing if user is owner
+  // RULE 2: If no permissions defined, deny access to non-owners
   if (!permissions || permissions.length === 0) {
-    return userIsOwner;
+    return false;
   }
 
-  // Only read permissions that can be granted to everyone.
-  const canBeGrantedToEveryone = [AppAccessKind.Copy, AppAccessKind.View].includes(accessKind);
+  // Extract user's domain from email
+  const userDomain = userEmail.includes('@') ? userEmail.split('@')[1] : null;
 
-  // Look for a permission for the specific user
-  const userPermission = permissions.find(
-    (p) => p.access === accessKind && p.accessor === AppAccessorKind.User && p.accessorName === userEmail,
+  // Find all permissions that match this access kind
+  const matchingPermissions = permissions.filter((p) => p.access === accessKind);
+
+  // If no permissions defined for this access kind, deny access
+  if (matchingPermissions.length === 0) {
+    return false;
+  }
+
+  // Check permissions in order of specificity (most specific to least specific):
+  // 1. Specific User permission (highest priority)
+  // 2. Domain permission (medium priority)
+  // 3. Everyone permission (lowest priority)
+
+  // 1. Check for specific user permission (most specific)
+  const userPermission = matchingPermissions.find(
+    (p) => p.accessor === AppAccessorKind.User && p.accessorName === userEmail,
   );
 
   if (userPermission) {
+    // Explicit user permission found - return its allowed value
     return userPermission.allowed;
   }
 
-  // Look for a permission for the user's email domain
-  const domain = userEmail.split('@')[1];
-  if (domain) {
-    const domainPermission = permissions.find(
-      (p) => p.access === accessKind && p.accessor === AppAccessorKind.Domain && p.accessorName === domain,
+  // 2. Check for domain permission
+  if (userDomain) {
+    const domainPermission = matchingPermissions.find(
+      (p) => p.accessor === AppAccessorKind.Domain && p.accessorName === userDomain,
     );
 
     if (domainPermission) {
+      // Domain permission found - return its allowed value
       return domainPermission.allowed;
     }
   }
 
-  // Look for a permission applying to everyone
-  const everyonePermission = permissions.find(
-    (p) => p.access === accessKind && p.accessor === AppAccessorKind.Everyone,
-  );
+  // 3. Check for everyone permission (least specific)
+  const everyonePermission = matchingPermissions.find((p) => p.accessor === AppAccessorKind.Everyone);
 
   if (everyonePermission) {
-    // Writable permission ${access} cannot be granted to everyone.
-    if (!canBeGrantedToEveryone) {
-      return false;
-    }
+    // Everyone permission found - return its allowed value
     return everyonePermission.allowed;
   }
 
-  // Apply default rules in the absence of specific permissions
-  switch (accessKind) {
-    case AppAccessKind.Copy:
-      return true; // Default: allow copying
-    default:
-      return userIsOwner; // Default: only owner for other operations
-  }
+  // No matching permission found for this user - deny access
+  return false;
 }
 

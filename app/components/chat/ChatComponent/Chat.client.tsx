@@ -7,27 +7,50 @@ import { toast } from 'react-toastify';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
 import { chatStore, doListenAppResponses, onChatResponse } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import { NutAPIError } from '~/lib/replay/NutAPI';
 import { Unauthorized } from '~/components/chat/Unauthorized';
 import { navigateApp } from '~/utils/nut';
 import { useStore } from '@nanostores/react';
 import { statusModalStore } from '~/lib/stores/statusModal';
 import { clearAppResponses } from '~/lib/replay/ResponseFilter';
 import { AppLoadingScreen } from '~/components/ui/AppLoadingScreen';
+import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
+import type { AppPermissions } from '~/lib/api/permissions';
+import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
+import { userStore } from '~/lib/stores/userAuth';
 
-async function isAppAccessible(appId: string) {
-  try {
-    await database.getAppTitle(appId);
+async function isAppViewable(isAppOwner: boolean, permissions: AppPermissions, userEmail: string) {
+  if (isAppOwner) {
     return true;
-  } catch (error) {
-    if (error instanceof NutAPIError && error.status == 401) {
-      return false;
-    }
-    throw error;
   }
+
+  if (!permissions || permissions.length === 0) {
+    return false;
+  }
+
+  if (isAppAccessAllowed(permissions, AppAccessKind.View, userEmail, isAppOwner)) {
+    return true;
+  }
+
+  return false;
 }
 
-async function updateAppState(appId: string) {
+async function isAppCopyable(isAppOwner: boolean, permissions: AppPermissions, userEmail: string) {
+  if (isAppOwner) {
+    return true;
+  }
+
+  if (!permissions || permissions.length === 0) {
+    return false;
+  }
+
+  if (isAppAccessAllowed(permissions, AppAccessKind.Copy, userEmail, isAppOwner)) {
+    return true;
+  }
+
+  return false;
+}
+
+export async function updateAppState(appId: string) {
   const title = await database.getAppTitle(appId);
   const responses = await getExistingAppResponses(appId);
   for (const response of responses) {
@@ -44,11 +67,15 @@ export function Chat() {
   const { id: initialAppId } = useLoaderData<{ id?: string }>() ?? {};
 
   const [ready, setReady] = useState<boolean>(!initialAppId);
-  const [unauthorized, setUnauthorized] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState(false);
   const appTitle = useStore(chatStore.appTitle);
   const isOpen = useStore(statusModalStore.isOpen);
   const appSummary = useStore(chatStore.appSummary);
+  const isAppOwner = useStore(isAppOwnerStore);
+  const [unauthorized, setUnauthorized] = useState<boolean>(false);
+  const [authorizedCopy, setAuthorizedCopy] = useState<boolean>(true);
+  const permissions = useStore(permissionsStore);
+  const user = useStore(userStore.user);
 
   useEffect(() => {
     if (appTitle) {
@@ -90,8 +117,13 @@ export function Chat() {
 
   const loadApp = async (appId: string) => {
     try {
-      if (!(await isAppAccessible(appId))) {
-        setUnauthorized(true);
+      if ((await isAppViewable(isAppOwner, permissions, user?.email ?? ''))) {
+        setUnauthorized(false);
+        return;
+      }
+
+      if ((await isAppCopyable(isAppOwner, permissions, user?.email ?? ''))) {
+        setAuthorizedCopy(true);
         return;
       }
 
@@ -129,16 +161,16 @@ export function Chat() {
   };
 
   useEffect(() => {
-    if (initialAppId) {
+    if (initialAppId && user) {
       loadApp(initialAppId);
     }
-  }, []);
+  }, [initialAppId, user, permissions]);
 
   return (
     <>
       {!ready && initialAppId && !unauthorized && <AppLoadingScreen appId={initialAppId} />}
-      {ready && <ChatImplementer />}
-      {unauthorized && <Unauthorized handleCopyApp={handleCopyApp} isCopying={isCopying} />}
+      {ready && !unauthorized && <ChatImplementer />}
+      {ready && unauthorized && <Unauthorized authorizedCopy={authorizedCopy} handleCopyApp={handleCopyApp} isCopying={isCopying} />}
     </>
   );
 }
