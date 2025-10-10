@@ -248,14 +248,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   ) : null;
                 }}
               </ClientOnly>
-              {(!appId || (appId && isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) &&
+              {(!appId ||
+                (appId &&
+                  isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) && (
                 <ChatPromptContainer
                   uploadedFiles={uploadedFiles}
                   setUploadedFiles={setUploadedFiles!}
                   imageDataList={imageDataList}
                   setImageDataList={setImageDataList!}
                   messageInputProps={messageInputProps}
-                />}
+                />
+              )}
             </div>
             {!chatStarted && (
               <>

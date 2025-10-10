@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { AppPermissions } from '../api/permissions';
+import type { AppPermissions } from '~/lib/api/permissions';
 
 // Store for tracking the current permissions
 export const permissionsStore = atom<AppPermissions>([]);

@@ -3,10 +3,10 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditAppTitle } from '~/lib/hooks/useEditAppTitle';
 import { chatStore } from '~/lib/stores/chat';
-import { AppAccessKind, isAppAccessAllowed } from '../api/permissions';
-import { isAppOwnerStore } from '../stores/permissions';
-import { userStore } from '../stores/userAuth';
-import { permissionsStore } from '../stores/permissions';
+import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
+import { isAppOwnerStore } from '~/lib/stores/permissions';
+import { userStore } from '~/lib/stores/userAuth';
+import { permissionsStore } from '~/lib/stores/permissions';
 
 export function ChatDescription() {
   const initialTitle = useStore(chatStore.appTitle);
@@ -54,20 +54,20 @@ export function ChatDescription() {
             {currentTitle}
           </div>
           <TooltipProvider>
-            {appId && isAppAccessAllowed(permissions, AppAccessKind.SetTitle, user?.email ?? '', isAppOwner) &&
+            {appId && isAppAccessAllowed(permissions, AppAccessKind.SetTitle, user?.email ?? '', isAppOwner) && (
               <WithTooltip tooltip="Rename chat">
-                  <button
-                    type="button"
-                    className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      toggleEditMode();
-                    }}
-                  >
-                    <div className="i-ph:pencil-fill text-lg transition-transform duration-200 group-hover:scale-110" />
-                  </button>
+                <button
+                  type="button"
+                  className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    toggleEditMode();
+                  }}
+                >
+                  <div className="i-ph:pencil-fill text-lg transition-transform duration-200 group-hover:scale-110" />
+                </button>
               </WithTooltip>
-            }
+            )}
           </TooltipProvider>
         </div>
       )}

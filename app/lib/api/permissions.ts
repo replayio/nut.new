@@ -17,7 +17,7 @@ export enum AppAccessKind {
   SetTitle = 'RenameApp',
 
   /** Delete the app. */
-//   Delete = 'DeleteApp',
+  //   Delete = 'DeleteApp',
 
   /** Set new permissions for the app. */
   SetPermissions = 'SetPermissions',
@@ -124,7 +124,7 @@ export async function getAppPermissions(appId: string): Promise<AppPermissions> 
 
 /**
  * Get whether the current user is the owner of an app.
- */ 
+ */
 export async function isAppOwner(appId: string, userId: string): Promise<boolean> {
   const request: IsAppOwnerRequest = { appId };
   const response: IsAppOwnerResponse = await callNutAPI('is-app-owner', request, undefined, userId);
@@ -138,7 +138,10 @@ export async function isAppOwner(appId: string, userId: string): Promise<boolean
  * @param permissions - The new permissions to set
  * @throws NutAPIError if the request fails (e.g., unauthorized, invalid permissions)
  */
-export async function setAppPermissions(appId: string, permissions: AppPermissions): Promise<SetAppPermissionsResponse> {
+export async function setAppPermissions(
+  appId: string,
+  permissions: AppPermissions,
+): Promise<SetAppPermissionsResponse> {
   if (!appId || typeof appId !== 'string') {
     throw new Error('Invalid appId: must be a non-empty string');
   }
@@ -266,4 +269,3 @@ export function isAppAccessAllowed(
   // No matching permission found for this user - deny access
   return false;
 }
-

@@ -117,12 +117,12 @@ export function Chat() {
 
   const loadApp = async (appId: string) => {
     try {
-      if ((await isAppViewable(isAppOwner, permissions, user?.email ?? ''))) {
+      if (await isAppViewable(isAppOwner, permissions, user?.email ?? '')) {
         setUnauthorized(false);
         return;
       }
 
-      if ((await isAppCopyable(isAppOwner, permissions, user?.email ?? ''))) {
+      if (await isAppCopyable(isAppOwner, permissions, user?.email ?? '')) {
         setAuthorizedCopy(true);
         return;
       }
@@ -170,7 +170,9 @@ export function Chat() {
     <>
       {!ready && initialAppId && !unauthorized && <AppLoadingScreen appId={initialAppId} />}
       {ready && !unauthorized && <ChatImplementer />}
-      {ready && unauthorized && <Unauthorized authorizedCopy={authorizedCopy} handleCopyApp={handleCopyApp} isCopying={isCopying} />}
+      {ready && unauthorized && (
+        <Unauthorized authorizedCopy={authorizedCopy} handleCopyApp={handleCopyApp} isCopying={isCopying} />
+      )}
     </>
   );
 }

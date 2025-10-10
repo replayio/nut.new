@@ -17,7 +17,9 @@ export default function AppRoute() {
   const user = useStore(userStore.user);
 
   useEffect(() => {
-    if (!appId) return;
+    if (!appId) {
+      return;
+    }
 
     const loadPermissions = async () => {
       try {
@@ -33,7 +35,9 @@ export default function AppRoute() {
   }, [appId]);
 
   useEffect(() => {
-    if (!appId || !user) return;
+    if (!appId || !user) {
+      return;
+    }
 
     const loadIsOwner = async () => {
       try {

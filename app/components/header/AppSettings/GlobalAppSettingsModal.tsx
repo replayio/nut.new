@@ -120,13 +120,18 @@ export function GlobalAppSettingsModal() {
                   </div>
 
                   {/* Copy App */}
-                  {appId && isAppAccessAllowed(permissions, AppAccessKind.Copy, user?.email ?? '', isAppOwner) && <CopyApp />}
+                  {appId && isAppAccessAllowed(permissions, AppAccessKind.Copy, user?.email ?? '', isAppOwner) && (
+                    <CopyApp />
+                  )}
 
                   {/* Authentication Settings */}
                   {appSummary && <AuthSelectorComponent appSummary={appSummary} />}
 
                   {/* Permissions */}
-                  {appId && isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isAppOwner) && <PermissionsSelectionComponent />}
+                  {appId &&
+                    isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isAppOwner) && (
+                      <PermissionsSelectionComponent />
+                    )}
 
                   {/* API Integrations */}
                   {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
