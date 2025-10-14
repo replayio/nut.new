@@ -1,31 +1,13 @@
-import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { database } from '~/lib/persistence/apps';
-import { navigateApp } from '~/utils/nut';
-import { clearAppResponses } from '~/lib/replay/ResponseFilter';
-import { chatStore, doListenAppResponses } from '~/lib/stores/chat';
-import { logStore } from '~/lib/stores/logs';
+import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
-import { updateAppState } from '~/components/chat/ChatComponent/Chat.client';
 import { classNames } from '~/utils/classNames';
+import { isCopyingStore, setIsCopying } from '~/lib/stores/loadAppStore';
 
 const CopyApp = () => {
-  const appSummary = useStore(chatStore.appSummary);
-  const [isCopying, setIsCopying] = useState(false);
+  const isCopying = useStore(isCopyingStore);
   const initialAppId = useStore(chatStore.currentAppId);
-
-  const loadApp = async (appId: string) => {
-    try {
-      clearAppResponses();
-      await updateAppState(appId);
-
-      // Always check for ongoing work when we first start the chat.
-      doListenAppResponses(false, (appSummary?.features?.length ?? 0) > 0);
-    } catch (error) {
-      logStore.logError('Failed to load chat messages', error);
-      toast.error((error as any).message);
-    }
-  };
 
   const handleCopyApp = async () => {
     if (!initialAppId || isCopying) {
@@ -36,8 +18,7 @@ const CopyApp = () => {
     try {
       const newAppId = await database.copyApp(initialAppId);
       toast.success('App copied successfully!');
-      navigateApp(newAppId);
-      await loadApp(newAppId);
+      window.location.href = `/app/${newAppId}`;
     } catch (error) {
       console.error('Failed to copy app:', error);
       toast.error('Failed to copy app. Please try again.');
@@ -45,6 +26,7 @@ const CopyApp = () => {
       setIsCopying(false);
     }
   };
+
   return (
     <div className="p-5 bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor">
       <div className="flex flex-col items-center gap-3">

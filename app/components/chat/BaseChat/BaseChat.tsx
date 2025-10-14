@@ -26,8 +26,6 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
-import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -74,9 +72,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
-    const appId = useStore(chatStore.currentAppId);
-    const permissions = useStore(permissionsStore);
-    const isAppOwner = useStore(isAppOwnerStore);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -248,17 +243,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   ) : null;
                 }}
               </ClientOnly>
-              {(!appId ||
-                (appId &&
-                  isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) && (
-                <ChatPromptContainer
-                  uploadedFiles={uploadedFiles}
-                  setUploadedFiles={setUploadedFiles!}
-                  imageDataList={imageDataList}
-                  setImageDataList={setImageDataList!}
-                  messageInputProps={messageInputProps}
-                />
-              )}
+              <ChatPromptContainer
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles!}
+                imageDataList={imageDataList}
+                setImageDataList={setImageDataList!}
+                messageInputProps={messageInputProps}
+              />
             </div>
             {!chatStarted && (
               <>
