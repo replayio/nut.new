@@ -83,6 +83,28 @@ export const PermissionsSelectionComponent: React.FC = () => {
       }
 
       permissionsToAdd.push(newPermission);
+
+      const requiresView = [AppAccessKind.SendMessage, AppAccessKind.SetTitle, AppAccessKind.SetPermissions].includes(
+        newPermission.access,
+      );
+
+      if (requiresView) {
+        const viewPermissionExists = [...permissions, ...permissionsToAdd].some(
+          (p) =>
+            p.access === AppAccessKind.View &&
+            p.accessor === newPermission.accessor &&
+            p.accessorName === newPermission.accessorName,
+        );
+
+        if (!viewPermissionExists) {
+          permissionsToAdd.push({
+            access: AppAccessKind.View,
+            accessor: newPermission.accessor,
+            accessorName: newPermission.accessorName,
+            allowed: newPermission.allowed,
+          });
+        }
+      }
     }
 
     // Add the new permission(s) and save to backend
