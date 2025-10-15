@@ -13,7 +13,7 @@ import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
 import type { SimulationData } from './MessageHandler';
 import type { DetectedError } from './MessageHandlerInterface';
-import { experimentalFeaturesStore } from '../stores/experimentalFeatures';
+import { experimentalFeaturesStore } from '~/lib/stores/experimentalFeatures';
 
 const logger = createScopedLogger('ChatMessage');
 
