@@ -366,16 +366,16 @@ export const PermissionsSelectionComponent: React.FC = () => {
                     {/* Group Header */}
                     <button
                       onClick={() => toggleGroup(groupKey)}
-                      className="w-full p-3 flex items-center gap-3 hover:bg-bolt-elements-background-depth-2 transition-all"
+                      className="w-full p-3 flex items-center gap-3 bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 transition-all"
                     >
                       {/* Icon */}
                       <div className="flex-shrink-0 w-8 h-8 rounded-md bg-bolt-elements-background-depth-3 flex items-center justify-center">
-                        <div className={`${getGroupIcon(group)} text-sm text-bolt-elements-textPrimary`} />
+                        <div className={`${getGroupIcon(group)} text-sm text-bolt-elements-textHeading`} />
                       </div>
 
                       {/* Label */}
                       <div className="flex-1 text-left min-w-0">
-                        <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">
+                        <div className="text-sm font-medium text-bolt-elements-textHeading truncate">
                           {getGroupLabel(group)}
                         </div>
                         <div className="text-xs text-bolt-elements-textSecondary">
