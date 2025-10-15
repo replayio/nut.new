@@ -138,7 +138,7 @@ export function GlobalAppSettingsModal() {
                   {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
 
                   {/* Experimental Features */}
-                  {appSummary && <ExperimentalFeaturesComponent appSummary={appSummary} />}
+                  {appSummary && <ExperimentalFeaturesComponent />}
                 </div>
 
                 {/* Action Buttons */}
