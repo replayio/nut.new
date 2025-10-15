@@ -10,12 +10,6 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { Skeleton } from '~/components/ui/Skeleton';
 
-interface ExperimentalFeaturesComponentProps {
-  appSummary: AppSummary;
-}
-
-const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
-
 function isValidDomain(domain: string): boolean {
   const value = domain.trim();
   if (value.length === 0) {
@@ -30,12 +24,7 @@ function isValidDomain(domain: string): boolean {
   return domainRegex.test(value);
 }
 
-export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesComponentProps> = ({ appSummary }) => {
-  // Only show for apps with template versions
-  if (!appSummary.templateVersion) {
-    return null;
-  }
-
+export const ExperimentalFeaturesComponent = () => {
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
 
