@@ -88,7 +88,7 @@ export enum AppFeatureKind {
 }
 
 export interface AppFeature {
-  // Short name for the feature.
+  // Short name for the feature. Unique within the app.
   name: string;
 
   // Kind of feature.
@@ -100,26 +100,11 @@ export interface AppFeature {
   // Time when this feature was created. 2025/8/30: Always present in newer apps.
   time?: string;
 
-  // Any existing feature in the Arboretum which will be used to implement this one.
-  arboretumRepositoryId?: string;
-
   // One sentence description of the feature.
   description: string;
 
   // One paragraph summary of the feature's requirements.
   summary: string;
-
-  // Names of any components which the feature implements.
-  componentNames?: string[];
-
-  // Any APIs defined by other features and used by this feature.
-  usedAPIs?: AppAPI[];
-
-  // Any APIs defined by this feature.
-  definedAPIs?: AppAPI[];
-
-  // Any database changes needed by the feature.
-  databaseChange?: DatabaseSchema;
 
   // Any secrets required by backend APIs in the feature.
   // Names are environment variables.
@@ -127,6 +112,39 @@ export interface AppFeature {
 
   // Tests for functionality added by the feature.
   tests?: AppTest[];
+}
+
+export enum BugReportStatus {
+  // The bug is unresolved. It is either being worked on by a feature or has been
+  // escalated to developer support.
+  Open = "Open",
+
+  // Work finished on the bug, waiting for confirmation from the user
+  // for whether the bug is resolved.
+  WaitingForFeedback = "WaitingForFeedback",
+
+  // The user marked the bug as fixed.
+  Resolved = "Resolved",
+
+  // The bug was not fixed successfully. The cost of the app was refunded.
+  Failed = "Failed",
+}
+
+export interface BugReport {
+  // Unique name within the app for the bug report.
+  name: string;
+
+  // One sentence description of the problem with the app.
+  description: string;
+
+  // Current status of the bug report.
+  status: BugReportStatus;
+
+  // Any features that have attempted (or are still attempting) to fix this bug.
+  featureNames: string[];
+
+  // Any time at which the bug report was escalated to developer support.
+  escalateTime?: string;
 }
 
 // Describes a planned or implemented playwright test.
@@ -157,6 +175,8 @@ export enum AppUpdateReasonKind {
   CopyApp = 'CopyApp',
   UpdateTemplate = 'UpdateTemplate',
   ManualUpdate = 'ManualUpdate',
+  ResolveBugReport = "ResolveBugReport",
+  EscalateBugReport = "EscalateBugReport",
 }
 
 // Describes why the app's summary was updated.
@@ -180,7 +200,9 @@ export interface AppSummary {
   pages?: AppPage[];
   navigation?: string;
   features?: AppFeature[];
-  otherTests?: AppTest[];
+  bugReports?: BugReport[];
+  schema?: DatabaseSchema;
+  secrets?: AppDetail[];
   setSecrets?: string[];
 
   // The repository being described, if available.

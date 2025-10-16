@@ -5,6 +5,7 @@ import { SendButton } from '~/components/chat/SendButton.client';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
+import { BugReportComponent } from '~/components/chat/BugReportComponent';
 import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { getDiscoveryRating } from '~/lib/persistence/message';
@@ -75,7 +76,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
   const chatStarted = useStore(chatStore.started);
   const messages = useStore(chatStore.messages);
-  const hasAppSummary = !!useStore(chatStore.appSummary);
+  const appSummary = useStore(chatStore.appSummary);
+  const hasAppSummary = !!appSummary;
   const user = useStore(userStore.user);
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const selectedElement = useStore(workbenchStore.selectedElement) as SelectedElementData | null;
@@ -238,6 +240,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         'relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30',
       )}
     >
+      {!!appSummary?.bugReports?.length && (
+        appSummary.bugReports.map(report => <BugReportComponent key={report.name} report={report} />)
+      )}
+
       {checkedBoxes && checkedBoxes.length > 0 && (
         <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor rounded-t-2xl p-4">
           <div className="flex flex-col gap-2">
