@@ -83,10 +83,9 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
               <WithTooltip tooltip="Mark this bug as resolved">
                 <button
                   onClick={handleResolve}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 border border-green-500/20 hover:border-green-500/30"
+                  className="w-7 h-7 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg transition-all duration-200 hover:scale-110 border border-green-500/20 hover:border-green-500/30"
                 >
                   <div className="i-ph:check-circle text-base"></div>
-                  Resolve
                 </button>
               </WithTooltip>
             </TooltipProvider>
@@ -95,10 +94,9 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
               <WithTooltip tooltip="Retry fixing this bug">
                 <button
                   onClick={handleRetry}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 border border-blue-500/20 hover:border-blue-500/30"
+                  className="w-7 h-7 flex items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg transition-all duration-200 hover:scale-110 border border-blue-500/20 hover:border-blue-500/30"
                 >
                   <div className="i-ph:arrow-clockwise text-base"></div>
-                  Retry
                 </button>
               </WithTooltip>
             </TooltipProvider>
