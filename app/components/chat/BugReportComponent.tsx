@@ -1,71 +1,110 @@
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
+import type { BugReport } from '~/lib/persistence/messageAppSummary';
+import { chatStore } from '~/lib/stores/chat';
+import { doSendMessage } from '~/lib/stores/chat';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { toast } from 'react-toastify';
 
-interface StartBuildingButtonProps {
-  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  startPlanningRating?: number;
-  buttonText?: string;
+interface BugReportComponentProps {
+  report: BugReport;
 }
 
-const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
+export const BugReportComponent = ({ report }: BugReportComponentProps) => {
+  const handleResolve = async () => {
+    const appId = chatStore.currentAppId.get();
+    if (!appId) {
+      toast.error('No app selected');
+      return;
+    }
 
-export const StartBuildingButton = ({ onClick, startPlanningRating = 0, buttonText }: StartBuildingButtonProps) => {
-  const hasText = !!buttonText;
-  const className = hasText
-    ? `relative flex justify-center items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl min-h-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`
-    : `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
-  const tooltipText = buttonText || 'Start Building Now!';
-  const shouldBlink = startPlanningRating === 10;
-  const shouldShowTooltipPersistently = startPlanningRating === 10 && !hasText;
+    // Send a message to mark the bug as resolved
+    await doSendMessage({
+      appId,
+      mode: ChatMode.UserMessage,
+      messages: [
+        {
+          id: crypto.randomUUID(),
+          role: 'user',
+          content: `Mark bug report "${report.name}" as resolved.`,
+          createTime: new Date().toISOString(),
+          hasInteracted: false,
+        },
+      ],
+    });
+  };
+
+  const handleRetry = async () => {
+    const appId = chatStore.currentAppId.get();
+    if (!appId) {
+      toast.error('No app selected');
+      return;
+    }
+
+    // Send a message to retry fixing the bug
+    await doSendMessage({
+      appId,
+      mode: ChatMode.UserMessage,
+      messages: [
+        {
+          id: crypto.randomUUID(),
+          role: 'user',
+          content: `Retry fixing bug report "${report.name}".`,
+          createTime: new Date().toISOString(),
+          hasInteracted: false,
+        },
+      ],
+    });
+  };
 
   return (
-    <AnimatePresence>
-      <TooltipProvider>
-        <WithTooltip tooltip={tooltipText} forceOpen={shouldShowTooltipPersistently}>
-          <motion.button
-            className={className}
-            title={tooltipText}
-            initial={{ opacity: 0, y: 10 }}
-            animate={
-              shouldBlink
-                ? {
-                    opacity: [1, 0.4, 1],
-                    y: 0,
-                  }
-                : { opacity: 1, y: 0 }
-            }
-            exit={{ opacity: 0, y: 10 }}
-            transition={
-              shouldBlink
-                ? {
-                    opacity: {
-                      repeat: Infinity,
-                      duration: 1.5,
-                      ease: 'easeInOut',
-                    },
-                    y: { ease: customEasingFn, duration: 0.17 },
-                  }
-                : { ease: customEasingFn, duration: 0.17 }
-            }
-            onClick={(event) => {
-              event.preventDefault();
-              onClick?.(event);
-            }}
-          >
-            {hasText ? (
-              <>
-                <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap transition-transform duration-200 group-hover:scale-105">
-                  <div className="i-ph:rocket-launch text-lg transition-transform duration-200 group-hover:scale-110"></div>
-                  {buttonText}
-                </div>
-              </>
-            ) : (
-              <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110"></div>
-            )}
-          </motion.button>
-        </WithTooltip>
-      </TooltipProvider>
-    </AnimatePresence>
+    <motion.div
+      className="bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-xl p-4 mb-3 mx-4 mt-3"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="i-ph:bug text-red-500 text-lg"></div>
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-bolt-elements-textPrimary mb-1">
+            {report.name}
+          </h3>
+          <p className="text-sm text-bolt-elements-textSecondary mb-3">
+            {report.description}
+          </p>
+          
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <WithTooltip tooltip="Mark this bug as resolved">
+                <button
+                  onClick={handleResolve}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 border border-green-500/20 hover:border-green-500/30"
+                >
+                  <div className="i-ph:check-circle text-base"></div>
+                  Resolve
+                </button>
+              </WithTooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <WithTooltip tooltip="Retry fixing this bug">
+                <button
+                  onClick={handleRetry}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 border border-blue-500/20 hover:border-blue-500/30"
+                >
+                  <div className="i-ph:arrow-clockwise text-base"></div>
+                  Retry
+                </button>
+              </WithTooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
