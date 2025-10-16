@@ -32,6 +32,8 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
     throw new Error('NYI');
   };
 
+  const { status, escalateTime } = report;
+
   return (
     <motion.div
       className="bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-xl p-4 mb-3 mx-4 mt-3"
@@ -54,7 +56,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
         </div>
 
         <div className="flex flex-col gap-2 flex-shrink-0">
-          {report.status === BugReportStatus.WaitingForFeedback && (
+          {status === BugReportStatus.WaitingForFeedback && (
             <>
               <TooltipProvider>
                 <WithTooltip tooltip="Mark this bug as fixed">
@@ -80,17 +82,21 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
             </>
           )}
 
-          {report.status === BugReportStatus.Open && (
+          {status === BugReportStatus.Open && (
             <TooltipProvider>
-              <WithTooltip tooltip="Fixing in progress">
+              <WithTooltip tooltip={escalateTime ? "Escalated to developer support" : "Fixing in progress"}>
                 <div className="w-7 h-7 flex items-center justify-center">
-                  <div className="i-ph:spinner text-bolt-elements-textSecondary text-base animate-spin"></div>
+                  {escalateTime ? (
+                    <div className="i-ph:hourglass text-bolt-elements-textSecondary text-base"></div>
+                  ) : (
+                    <div className="i-ph:spinner text-bolt-elements-textSecondary text-base animate-spin"></div>
+                  )}
                 </div>
               </WithTooltip>
             </TooltipProvider>
           )}
 
-          {report.status === BugReportStatus.Resolved && (
+          {status === BugReportStatus.Resolved && (
             <TooltipProvider>
               <WithTooltip tooltip="Bug resolved">
                 <div className="w-7 h-7 flex items-center justify-center bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg border border-green-500/20">
@@ -100,7 +106,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
             </TooltipProvider>
           )}
 
-          {report.status === BugReportStatus.Failed && (
+          {status === BugReportStatus.Failed && (
             <TooltipProvider>
               <WithTooltip tooltip="Fix failed">
                 <div className="w-7 h-7 flex items-center justify-center bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
