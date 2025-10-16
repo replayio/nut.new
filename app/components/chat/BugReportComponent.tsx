@@ -81,21 +81,33 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
           )}
 
           {report.status === BugReportStatus.Open && (
-            <div className="w-7 h-7 flex items-center justify-center">
-              <div className="i-ph:spinner text-bolt-elements-textSecondary text-base animate-spin"></div>
-            </div>
+            <TooltipProvider>
+              <WithTooltip tooltip="Fixing in progress">
+                <div className="w-7 h-7 flex items-center justify-center">
+                  <div className="i-ph:spinner text-bolt-elements-textSecondary text-base animate-spin"></div>
+                </div>
+              </WithTooltip>
+            </TooltipProvider>
           )}
 
           {report.status === BugReportStatus.Resolved && (
-            <div className="w-7 h-7 flex items-center justify-center bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg border border-green-500/20">
-              <div className="i-ph:check text-base"></div>
-            </div>
+            <TooltipProvider>
+              <WithTooltip tooltip="Bug resolved">
+                <div className="w-7 h-7 flex items-center justify-center bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg border border-green-500/20">
+                  <div className="i-ph:check text-base"></div>
+                </div>
+              </WithTooltip>
+            </TooltipProvider>
           )}
 
           {report.status === BugReportStatus.Failed && (
-            <div className="w-7 h-7 flex items-center justify-center bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
-              <div className="i-ph:x text-base"></div>
-            </div>
+            <TooltipProvider>
+              <WithTooltip tooltip="Fix failed">
+                <div className="w-7 h-7 flex items-center justify-center bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
+                  <div className="i-ph:x text-base"></div>
+                </div>
+              </WithTooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>
