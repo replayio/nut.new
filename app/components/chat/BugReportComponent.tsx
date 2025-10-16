@@ -3,9 +3,8 @@ import { motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
 import { chatStore } from '~/lib/stores/chat';
-import { doSendMessage } from '~/lib/stores/chat';
-import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { toast } from 'react-toastify';
+import { formatPascalCaseName } from '~/utils/names';
 
 interface BugReportComponentProps {
   report: BugReport;
@@ -19,20 +18,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
       return;
     }
 
-    // Send a message to mark the bug as resolved
-    await doSendMessage({
-      appId,
-      mode: ChatMode.UserMessage,
-      messages: [
-        {
-          id: crypto.randomUUID(),
-          role: 'user',
-          content: `Mark bug report "${report.name}" as resolved.`,
-          createTime: new Date().toISOString(),
-          hasInteracted: false,
-        },
-      ],
-    });
+    throw new Error('NYI');
   };
 
   const handleRetry = async () => {
@@ -42,20 +28,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
       return;
     }
 
-    // Send a message to retry fixing the bug
-    await doSendMessage({
-      appId,
-      mode: ChatMode.UserMessage,
-      messages: [
-        {
-          id: crypto.randomUUID(),
-          role: 'user',
-          content: `Retry fixing bug report "${report.name}".`,
-          createTime: new Date().toISOString(),
-          hasInteracted: false,
-        },
-      ],
-    });
+    throw new Error('NYI');
   };
 
   return (
@@ -72,7 +45,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
         
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-bolt-elements-textPrimary mb-1">
-            {report.name}
+            {formatPascalCaseName(report.name)}
           </h3>
           <p className="text-sm text-bolt-elements-textSecondary">
             {report.description}
@@ -81,7 +54,7 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
 
         <div className="flex flex-col gap-2 flex-shrink-0">
           <TooltipProvider>
-            <WithTooltip tooltip="Mark this bug as resolved">
+            <WithTooltip tooltip="Mark this bug as fixed">
               <button
                 onClick={handleResolve}
                 className="w-7 h-7 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg transition-all duration-200 hover:scale-110 border border-green-500/20 hover:border-green-500/30"

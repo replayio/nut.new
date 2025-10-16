@@ -34,23 +34,6 @@ export interface AppPage {
   components: AppDetail[];
 }
 
-// Kinds of APIs a feature can define or use.
-export enum AppAPIKind {
-  // A serverless function which is defined in the backend and called by the frontend.
-  ServerlessFunction = 'ServerlessFunction',
-
-  // A function defined in library code and called by frontend components.
-  Frontend = 'Frontend',
-
-  // A function defined in library code and called by backend functions.
-  Backend = 'Backend',
-}
-
-// An API defined or used by a feature.
-export interface AppAPI extends AppDetail {
-  kind: AppAPIKind;
-}
-
 // The status of a feature describes its implementation and whether associated components
 // should be functional.
 export enum AppFeatureStatus {
