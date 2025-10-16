@@ -2,6 +2,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
+import { BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { chatStore } from '~/lib/stores/chat';
 import { toast } from 'react-toastify';
 import { formatPascalCaseName } from '~/utils/names';
@@ -53,27 +54,49 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
         </div>
 
         <div className="flex flex-col gap-2 flex-shrink-0">
-          <TooltipProvider>
-            <WithTooltip tooltip="Mark this bug as fixed">
-              <button
-                onClick={handleResolve}
-                className="w-7 h-7 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg transition-all duration-200 hover:scale-110 border border-green-500/20 hover:border-green-500/30"
-              >
-                <div className="i-ph:check-circle text-base"></div>
-              </button>
-            </WithTooltip>
-          </TooltipProvider>
+          {report.status === BugReportStatus.WaitingForFeedback && (
+            <>
+              <TooltipProvider>
+                <WithTooltip tooltip="Mark this bug as fixed">
+                  <button
+                    onClick={handleResolve}
+                    className="w-7 h-7 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg transition-all duration-200 hover:scale-110 border border-green-500/20 hover:border-green-500/30"
+                  >
+                    <div className="i-ph:check-circle text-base"></div>
+                  </button>
+                </WithTooltip>
+              </TooltipProvider>
 
-          <TooltipProvider>
-            <WithTooltip tooltip="Retry fixing this bug">
-              <button
-                onClick={handleRetry}
-                className="w-7 h-7 flex items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg transition-all duration-200 hover:scale-110 border border-blue-500/20 hover:border-blue-500/30"
-              >
-                <div className="i-ph:arrow-clockwise text-base"></div>
-              </button>
-            </WithTooltip>
-          </TooltipProvider>
+              <TooltipProvider>
+                <WithTooltip tooltip="Retry fixing this bug">
+                  <button
+                    onClick={handleRetry}
+                    className="w-7 h-7 flex items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg transition-all duration-200 hover:scale-110 border border-blue-500/20 hover:border-blue-500/30"
+                  >
+                    <div className="i-ph:arrow-clockwise text-base"></div>
+                  </button>
+                </WithTooltip>
+              </TooltipProvider>
+            </>
+          )}
+
+          {report.status === BugReportStatus.Open && (
+            <div className="w-7 h-7 flex items-center justify-center">
+              <div className="i-ph:spinner text-bolt-elements-textSecondary text-base animate-spin"></div>
+            </div>
+          )}
+
+          {report.status === BugReportStatus.Resolved && (
+            <div className="w-7 h-7 flex items-center justify-center bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg border border-green-500/20">
+              <div className="i-ph:check text-base"></div>
+            </div>
+          )}
+
+          {report.status === BugReportStatus.Failed && (
+            <div className="w-7 h-7 flex items-center justify-center bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-500/20">
+              <div className="i-ph:x text-base"></div>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
