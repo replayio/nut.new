@@ -3,15 +3,19 @@ import { motion } from 'framer-motion';
 import WithTooltip from '~/components/ui/Tooltip';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
 import { BugReportStatus } from '~/lib/persistence/messageAppSummary';
-import { chatStore } from '~/lib/stores/chat';
+import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { toast } from 'react-toastify';
 import { formatPascalCaseName } from '~/utils/names';
+import { callNutAPI } from '~/lib/replay/NutAPI';
+import type { ChatMessageParams } from './ChatComponent/components/ChatImplementer/ChatImplementer';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface BugReportComponentProps {
   report: BugReport;
+  handleSendMessage?: (params: ChatMessageParams) => void;
 }
 
-export const BugReportComponent = ({ report }: BugReportComponentProps) => {
+export const BugReportComponent = ({ report, handleSendMessage }: BugReportComponentProps) => {
   const handleResolve = async () => {
     const appId = chatStore.currentAppId.get();
     if (!appId) {
@@ -19,7 +23,10 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
       return;
     }
 
-    throw new Error('NYI');
+    const { response } = await callNutAPI('resolve-bug-report', { appId, bugReportName: report.name });
+    if (response) {
+      onChatResponse(response, 'ResolveBugReport');
+    }
   };
 
   const handleRetry = async () => {
@@ -29,7 +36,11 @@ export const BugReportComponent = ({ report }: BugReportComponentProps) => {
       return;
     }
 
-    throw new Error('NYI');
+    handleSendMessage?.({
+      messageInput: `Retry fixing bug report "${formatPascalCaseName(report.name)}".`,
+      chatMode: ChatMode.UserMessage,
+      retryBugReportName: report.name,
+    });
   };
 
   const { status, escalateTime } = report;
