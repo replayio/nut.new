@@ -130,7 +130,15 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, simulationData, detectedError, componentReference, retryBugReportName } = params;
+    const {
+      messageInput,
+      chatMode,
+      sessionRepositoryId,
+      simulationData,
+      detectedError,
+      componentReference,
+      retryBugReportName,
+    } = params;
 
     if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
       return;

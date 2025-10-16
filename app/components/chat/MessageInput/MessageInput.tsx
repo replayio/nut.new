@@ -90,7 +90,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   }
 
   const bugReports = appSummary?.bugReports?.filter(
-    report => report.status === BugReportStatus.Open || report.status == BugReportStatus.WaitingForFeedback
+    (report) => report.status === BugReportStatus.Open || report.status == BugReportStatus.WaitingForFeedback,
   );
 
   const handleFileUpload = () => {
@@ -245,7 +245,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         'relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30',
       )}
     >
-      {bugReports?.map(report => <BugReportComponent key={report.name} report={report} handleSendMessage={handleSendMessage} />)}
+      {bugReports?.map((report) => (
+        <BugReportComponent key={report.name} report={report} handleSendMessage={handleSendMessage} />
+      ))}
 
       {checkedBoxes && checkedBoxes.length > 0 && (
         <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor rounded-t-2xl p-4">

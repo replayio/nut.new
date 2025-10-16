@@ -34,6 +34,23 @@ export interface AppPage {
   components: AppDetail[];
 }
 
+// Kinds of APIs a feature can define or use.
+export enum AppAPIKind {
+  // A serverless function which is defined in the backend and called by the frontend.
+  ServerlessFunction = 'ServerlessFunction',
+
+  // A function defined in library code and called by frontend components.
+  Frontend = 'Frontend',
+
+  // A function defined in library code and called by backend functions.
+  Backend = 'Backend',
+}
+
+// An API defined or used by a feature.
+export interface AppAPI extends AppDetail {
+  kind: AppAPIKind;
+}
+
 // The status of a feature describes its implementation and whether associated components
 // should be functional.
 export enum AppFeatureStatus {
@@ -89,6 +106,18 @@ export interface AppFeature {
   // One paragraph summary of the feature's requirements.
   summary: string;
 
+  // Names of any components which the feature implements.
+  componentNames?: string[];
+
+  // Any APIs defined by other features and used by this feature.
+  usedAPIs?: AppAPI[];
+
+  // Any APIs defined by this feature.
+  definedAPIs?: AppAPI[];
+
+  // Any database changes needed by the feature.
+  databaseChange?: DatabaseSchema;
+
   // Any secrets required by backend APIs in the feature.
   // Names are environment variables.
   secrets?: AppDetail[];
@@ -100,17 +129,17 @@ export interface AppFeature {
 export enum BugReportStatus {
   // The bug is unresolved. It is either being worked on by a feature or has been
   // escalated to developer support.
-  Open = "Open",
+  Open = 'Open',
 
   // Work finished on the bug, waiting for confirmation from the user
   // for whether the bug is resolved.
-  WaitingForFeedback = "WaitingForFeedback",
+  WaitingForFeedback = 'WaitingForFeedback',
 
   // The user marked the bug as fixed.
-  Resolved = "Resolved",
+  Resolved = 'Resolved',
 
   // The bug was not fixed successfully. The cost of the app was refunded.
-  Failed = "Failed",
+  Failed = 'Failed',
 }
 
 export interface BugReport {
@@ -158,8 +187,8 @@ export enum AppUpdateReasonKind {
   CopyApp = 'CopyApp',
   UpdateTemplate = 'UpdateTemplate',
   ManualUpdate = 'ManualUpdate',
-  ResolveBugReport = "ResolveBugReport",
-  EscalateBugReport = "EscalateBugReport",
+  ResolveBugReport = 'ResolveBugReport',
+  EscalateBugReport = 'EscalateBugReport',
 }
 
 // Describes why the app's summary was updated.

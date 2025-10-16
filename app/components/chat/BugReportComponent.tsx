@@ -56,14 +56,12 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
         <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
           <div className="i-ph:bug text-red-500 text-lg"></div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-bolt-elements-textPrimary mb-1">
             {formatPascalCaseName(report.name)}
           </h3>
-          <p className="text-sm text-bolt-elements-textSecondary">
-            {report.description}
-          </p>
+          <p className="text-sm text-bolt-elements-textSecondary">{report.description}</p>
         </div>
 
         <div className="flex flex-col gap-2 flex-shrink-0">
@@ -95,7 +93,7 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
 
           {status === BugReportStatus.Open && (
             <TooltipProvider>
-              <WithTooltip tooltip={escalateTime ? "Escalated to developer support" : "Fixing in progress"}>
+              <WithTooltip tooltip={escalateTime ? 'Escalated to developer support' : 'Fixing in progress'}>
                 <div className="w-7 h-7 flex items-center justify-center">
                   {escalateTime ? (
                     <div className="i-ph:hourglass text-bolt-elements-textSecondary text-base"></div>
