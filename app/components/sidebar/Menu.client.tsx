@@ -16,6 +16,7 @@ import Feedback from './Feedback/FeedbackButton';
 import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import useViewport from '~/lib/hooks';
+import { X, Plus, Search, Folder, FolderOpen } from '~/components/ui/Icon';
 
 const menuVariants = {
   closed: {
@@ -193,7 +194,7 @@ export const Menu = () => {
           onClick={() => sidebarMenuStore.close()}
           className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-1 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
         >
-          <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+          <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
         </button>
       </div>
 
@@ -212,7 +213,7 @@ export const Menu = () => {
               href="/"
               className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 rounded-xl px-4 py-3 transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
             >
-              <div className="i-ph:plus text-lg transition-transform duration-200 group-hover:scale-110" />
+              <Plus className="transition-transform duration-200 group-hover:scale-110" size={18} />
               <span className="transition-transform duration-200 group-hover:scale-105">New App</span>
             </a>
           </div>
@@ -221,7 +222,7 @@ export const Menu = () => {
         <div className="px-6 py-4 border-b border-bolt-elements-borderColor/50">
           <div className="relative group">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bolt-elements-textTertiary group-focus-within:text-blue-500 transition-colors duration-200">
-              <div className="i-ph:magnifying-glass text-lg" />
+              <Search size={18} />
             </div>
             <input
               className="w-full bg-bolt-elements-background-depth-3 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-bolt-elements-textTertiary text-bolt-elements-textPrimary border border-bolt-elements-borderColor/50 transition-all duration-200 shadow-sm focus:shadow-md hover:shadow-sm"
@@ -235,7 +236,7 @@ export const Menu = () => {
 
         <div className="px-6 py-4 border-b border-bolt-elements-borderColor/50 bg-bolt-elements-background-depth-1/50">
           <div className="flex items-center gap-3">
-            <div className="i-ph:folder text-lg text-bolt-elements-textSecondary" />
+            <Folder className="text-bolt-elements-textSecondary" size={18} />
             <h3 className="text-bolt-elements-textHeading font-semibold">Your Apps</h3>
             {list && list.length > 0 && (
               <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor/30 font-medium shadow-sm">
@@ -255,7 +256,7 @@ export const Menu = () => {
               ) : list.length === 0 ? (
                 <>
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20 shadow-lg">
-                    <div className="i-ph:folder-open text-2xl text-blue-500" />
+                    <FolderOpen className="text-blue-500" size={24} />
                   </div>
                   <p className="text-bolt-elements-textHeading font-semibold mb-2 text-lg">No apps yet</p>
                   <p className="text-bolt-elements-textSecondary text-sm">Create your first app to get started</p>
@@ -263,7 +264,7 @@ export const Menu = () => {
               ) : (
                 <>
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-2xl flex items-center justify-center mb-6 border border-orange-500/20 shadow-lg">
-                    <div className="i-ph:magnifying-glass text-2xl text-orange-500" />
+                    <Search className="text-orange-500" size={24} />
                   </div>
                   <p className="text-bolt-elements-textHeading font-semibold mb-2 text-lg">No matches found</p>
                   <p className="text-bolt-elements-textSecondary text-sm">Try a different search term</p>

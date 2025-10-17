@@ -4,6 +4,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { classNames } from '~/utils/classNames';
 import { isCopyingStore, setIsCopying } from '~/lib/stores/loadAppStore';
+import { Copy } from '~/components/ui/Icon';
 
 const CopyApp = () => {
   const isCopying = useStore(isCopyingStore);
@@ -53,7 +54,7 @@ const CopyApp = () => {
             </span>
           ) : (
             <span className="flex items-center gap-3">
-              <div className="i-ph:copy-duotone text-lg"></div>
+              <Copy size={18} />
               Create a Copy
             </span>
           )}

@@ -12,6 +12,7 @@ import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { createTopoffCheckout } from '~/lib/stripe/client';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
+import { X, CheckCircle, AlertTriangle, Circle, Crown, Rocket } from '~/components/ui/Icon';
 
 interface StatusModalProps {
   appSummary: AppSummary;
@@ -163,7 +164,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                 onClick={handleClose}
                 className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
               >
-                <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+                <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
               </button>
             </div>
 
@@ -247,13 +248,13 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                           {(feature.status === AppFeatureStatus.Validated ||
                             feature.status === AppFeatureStatus.Implemented ||
                             feature.status === AppFeatureStatus.ValidationInProgress) && (
-                            <div className="i-ph:check-circle-fill text-sm text-green-600 transition-transform duration-200 hover:scale-110" />
+                            <CheckCircle className="text-green-600 transition-transform duration-200 hover:scale-110" size={14} strokeWidth={2.5} />
                           )}
                           {feature.status === AppFeatureStatus.ValidationFailed && (
-                            <div className="i-ph:warning-circle-fill text-sm text-yellow-600 transition-transform duration-200 hover:scale-110" />
+                            <AlertTriangle className="text-yellow-600 transition-transform duration-200 hover:scale-110" size={14} strokeWidth={2.5} />
                           )}
                           {feature.status === AppFeatureStatus.NotStarted && (
-                            <div className="i-ph:circle text-sm text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110" />
+                            <Circle className="text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110" size={14} />
                           )}
                           <span className="capitalize">
                             {feature.status === AppFeatureStatus.ImplementationInProgress
@@ -323,7 +324,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                         },
                       )}
                     >
-                      <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
+                      <Crown className="transition-transform duration-200 group-hover:scale-110" size={20} />
                       <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
                     </button>
                   </div>
@@ -334,7 +335,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                       onClick={handleContinueBuilding}
                       className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
                     >
-                      <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110"></div>
+                      <Rocket className="transition-transform duration-200 group-hover:scale-110" size={20} />
                       <span className="transition-transform duration-200 group-hover:scale-105">Continue Building</span>
                     </button>
                   </div>

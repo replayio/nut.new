@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { classNames } from '~/utils/classNames';
+import { ChevronDown } from '~/components/ui/Icon';
 
 interface FAQItem {
   question: string;
@@ -72,7 +73,7 @@ export const FaqSection = () => {
                   'rotate-180': expandedItem === index,
                 })}
               >
-                <div className="i-ph:caret-down text-bolt-elements-textSecondary" />
+                <ChevronDown className="text-bolt-elements-textSecondary" size={16} />
               </div>
             </button>
 

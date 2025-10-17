@@ -11,6 +11,7 @@ import {
 import { classNames } from '~/utils/classNames';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { Info, Gift, Rocket, Check, Sparkles, ArrowUpRight } from '~/components/ui/Icon';
 
 interface SubscriptionModalProps {
   currentTier?: SubscriptionTier;
@@ -75,7 +76,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
           <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center mt-1 flex-shrink-0 border border-blue-500/30 shadow-sm">
-                <div className="i-ph:info text-blue-500 text-lg"></div>
+                <Info className="text-blue-500" size={18} />
               </div>
               <div className="text-sm text-bolt-elements-textSecondary">
                 <p className="font-semibold text-bolt-elements-textHeading mb-3 text-base">Important Notes:</p>
@@ -135,12 +136,11 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
 
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <div
-                        className={classNames('text-2xl transition-transform duration-300 group-hover:scale-110', {
-                          'i-ph:gift text-green-500': isFree,
-                          'i-ph:rocket-launch text-blue-500': tier === 'builder',
-                        })}
-                      />
+                      {isFree ? (
+                        <Gift className="text-green-500 transition-transform duration-300 group-hover:scale-110" size={24} />
+                      ) : (
+                        <Rocket className="text-blue-500 transition-transform duration-300 group-hover:scale-110" size={24} />
+                      )}
                     </div>
                     <h3
                       className={classNames(
@@ -167,7 +167,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                     {details.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3 group/feature">
                         <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-green-500/30 transition-all duration-200 group-hover/feature:scale-110 group-hover/feature:bg-green-500/30">
-                          <div className="i-ph:check text-green-500 text-sm transition-transform duration-200 group-hover/feature:scale-110"></div>
+                          <Check className="text-green-500 transition-transform duration-200 group-hover/feature:scale-110" size={14} />
                         </div>
                         <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">
                           {feature}
@@ -216,7 +216,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
               <div className="relative h-full p-6 rounded-2xl bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 border border-indigo-500/20 shadow-lg backdrop-blur-sm flex flex-col">
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 shadow-lg">
-                    <div className="i-ph:sparkle text-2xl text-indigo-500"></div>
+                    <Sparkles className="text-indigo-500" size={24} />
                   </div>
                   <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">Pro</h3>
                   <div className="text-2xl font-bold text-indigo-500 mb-2">Coming Soon</div>
@@ -228,7 +228,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                 <div className="space-y-3 mb-8 flex-grow">
                   <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
-                      <div className="i-ph:sparkle text-indigo-500 text-sm"></div>
+                      <Sparkles className="text-indigo-500" size={14} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                       Guaranteed Reliability
@@ -236,7 +236,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                   </div>
                   <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
-                      <div className="i-ph:sparkle text-pink-500 text-sm"></div>
+                      <Sparkles className="text-pink-500" size={14} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                       Up Front App Prices
@@ -244,7 +244,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                   </div>
                   <div className="flex items-start gap-3 group/feature">
                     <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
-                      <div className="i-ph:sparkle text-purple-500 text-sm"></div>
+                      <Sparkles className="text-purple-500" size={14} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
                   </div>
@@ -257,7 +257,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                     rel="noopener noreferrer"
                     className="w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white border border-indigo-500/50 hover:border-indigo-400 hover:scale-105 cursor-pointer"
                   >
-                    <div className="i-ph:arrow-up-right text-white"></div>
+                    <ArrowUpRight className="text-white" size={18} />
                     <span>Join Waitlist</span>
                   </a>
                 </div>

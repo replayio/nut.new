@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, type ReactElement } from 'react';
 import { classNames } from '~/utils/classNames';
 import { DialogTitle, dialogVariants, dialogBackdropVariants } from '~/components/ui/Dialog';
+import { X } from '~/components/ui/Icon';
 
 interface SettingsProps {
   open: boolean;
@@ -77,7 +78,7 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
 
             <RadixDialog.Close asChild onClick={onClose}>
               <button className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group">
-                <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+                <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
               </button>
             </RadixDialog.Close>
           </motion.div>

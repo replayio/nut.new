@@ -6,6 +6,7 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
+import { User } from '~/components/ui/Icon';
 import {
   MessageContents,
   JumpToBottom,
@@ -236,7 +237,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               <div className="flex items-center gap-3 mb-4">
                 {isUserMessage && (
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 text-white rounded-full shadow-lg">
-                    <div className="i-ph:user text-lg"></div>
+                    <User size={18} />
                   </div>
                 )}
 

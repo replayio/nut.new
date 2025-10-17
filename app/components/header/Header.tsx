@@ -18,6 +18,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { database } from '~/lib/persistence/apps';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { includeHistorySummary } from '~/components/workbench/VesionHistory/AppHistory';
+import { PanelLeft } from '~/components/ui/Icon';
 import { useEffect } from 'react';
 import { useLocation } from '@remix-run/react';
 
@@ -61,7 +62,7 @@ export function Header() {
           <IconButton
             onClick={() => sidebarMenuStore.toggle()}
             data-testid="sidebar-icon"
-            icon="i-ph:sidebar-simple-duotone"
+            icon={<PanelLeft />}
             size="xl"
             title="Toggle Sidebar"
           />

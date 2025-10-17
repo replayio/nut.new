@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, Check, Copy, ExternalLink } from '~/components/ui/Icon';
 
 const DeploymentSuccessful = ({
   result,
@@ -45,7 +46,7 @@ const DeploymentSuccessful = ({
         <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl py-6 px-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="mb-6">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="i-ph:link text-lg text-bolt-elements-textPrimary" />
+              <Link className="text-bolt-elements-textPrimary" size={18} />
               <span className="text-sm font-semibold text-bolt-elements-textPrimary">Your App's URL:</span>
             </div>
           </div>
@@ -67,12 +68,12 @@ const DeploymentSuccessful = ({
               >
                 {copied ? (
                   <>
-                    <div className="i-ph:check text-lg text-green-500 transition-transform duration-200 group-hover:scale-110" />
+                    <Check className="text-green-500 transition-transform duration-200 group-hover:scale-110" size={18} />
                     <span className="transition-transform duration-200 group-hover:scale-105">Copied!</span>
                   </>
                 ) : (
                   <>
-                    <div className="i-ph:copy text-lg transition-transform duration-200 group-hover:scale-110" />
+                    <Copy className="transition-transform duration-200 group-hover:scale-110" size={18} />
                     <span className="transition-transform duration-200 group-hover:scale-105">Copy URL</span>
                   </>
                 )}
@@ -89,7 +90,7 @@ const DeploymentSuccessful = ({
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
         >
-          <div className="i-ph:arrow-square-out text-lg transition-transform duration-200 group-hover:scale-110" />
+          <ExternalLink className="transition-transform duration-200 group-hover:scale-110" size={18} />
           <span className="transition-transform duration-200 group-hover:scale-105">Open App</span>
         </a>
         <button

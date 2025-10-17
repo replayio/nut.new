@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { User as UserIcon, Crown, Settings, RotateCw, List } from '~/components/ui/Icon';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -286,7 +287,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
       <div className="text-center mb-8">
         <div className="mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/30 shadow-lg backdrop-blur-sm">
-            <div className="i-ph:user text-3xl text-bolt-elements-textPrimary" />
+            <UserIcon className="text-bolt-elements-textPrimary" size={30} />
           </div>
           <h1 className="text-4xl font-bold text-bolt-elements-textHeading mb-3 bg-gradient-to-r from-bolt-elements-textHeading to-bolt-elements-textSecondary bg-clip-text">
             Account
@@ -314,7 +315,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
           <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl p-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl flex items-center justify-center shadow-lg border border-blue-500/20">
-                <div className="i-ph:crown text-2xl text-blue-600 transition-transform duration-200 group-hover:scale-110" />
+                <Crown className="text-blue-600 transition-transform duration-200 group-hover:scale-110" size={24} />
               </div>
             </div>
             <div className="text-center">
@@ -367,7 +368,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
                   'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
                 )}
               >
-                <div className="i-ph:gear text-xl transition-transform duration-200 group-hover:scale-110" />
+                <Settings className="transition-transform duration-200 group-hover:scale-110" size={20} />
                 <span className="transition-transform duration-200 group-hover:scale-105">Manage Billing</span>
               </button>
             )}
@@ -407,7 +408,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
             onClick={reloadAccountData}
             className="w-10 h-10 bg-bolt-elements-background-depth-2 rounded-xl flex items-center justify-center cursor-pointer border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           >
-            <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" />
+            <RotateCw className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" size={18} />
           </div>
           <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Usage History</h2>
         </div>
@@ -415,7 +416,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
         {history.length === 0 ? (
           <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
             <div className="w-20 h-20 bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-3 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/50 shadow-lg">
-              <div className="i-ph:list text-3xl text-bolt-elements-textSecondary" />
+              <List className="text-bolt-elements-textSecondary" size={30} />
             </div>
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No usage history available</h3>
             <p className="text-sm text-bolt-elements-textSecondary">

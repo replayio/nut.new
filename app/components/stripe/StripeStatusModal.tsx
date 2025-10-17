@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
+import { CheckCircle, XCircle, Info } from '~/components/ui/Icon';
 
 interface StripeStatusModalProps {
   isOpen: boolean;
@@ -37,13 +38,13 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return 'i-ph:check-circle';
+        return <CheckCircle className="text-green-500" size={24} />;
       case 'error':
-        return 'i-ph:x-circle';
+        return <XCircle className="text-red-500" size={24} />;
       case 'info':
-        return 'i-ph:info';
+        return <Info className="text-blue-500" size={24} />;
       default:
-        return 'i-ph:info';
+        return <Info className="text-blue-500" size={24} />;
     }
   };
 

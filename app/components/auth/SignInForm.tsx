@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
+import { LogIn } from '~/components/ui/Icon';
 
 interface SignInFormProps {
   onToggleForm: () => void;
@@ -90,7 +91,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
     <>
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
-          <div className="i-ph:sign-in text-2xl text-blue-500" />
+          <LogIn className="text-blue-500" size={24} />
         </div>
         <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Welcome Back</h2>
         <p className="text-bolt-elements-textSecondary mt-2">Sign in to continue building amazing apps</p>

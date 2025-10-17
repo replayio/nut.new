@@ -8,6 +8,7 @@ import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import DeploymentSuccessful from './DeploymentSuccessful';
 import { userStore } from '~/lib/stores/userAuth';
+import { X, Rocket, CheckCircle, AlertTriangle } from '~/components/ui/Icon';
 
 const MAX_SITE_NAME_LENGTH = 63;
 
@@ -147,7 +148,7 @@ export function GlobalDeployChatModal() {
               onClick={handleCloseModal}
               className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
             >
-              <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+              <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
             </button>
           </div>
 
@@ -168,7 +169,7 @@ export function GlobalDeployChatModal() {
               <>
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
-                    <div className="i-ph:rocket-launch text-2xl text-blue-500" />
+                    <Rocket className="text-blue-500" size={24} />
                   </div>
                   <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Deploy Your Application</h2>
                   <p className="text-bolt-elements-textSecondary mt-2">
@@ -194,7 +195,7 @@ export function GlobalDeployChatModal() {
                     <div className="mb-6 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 shadow-sm">
                       <div className="flex flex-col items-center justify-between gap-2">
                         <div className="text-sm text-green-700 font-semibold flex items-center gap-2">
-                          <div className="i-ph:check-circle text-lg text-green-500" />
+                          <CheckCircle className="text-green-500" size={18} />
                           Your App's URL:
                         </div>
                         <a
@@ -222,7 +223,7 @@ export function GlobalDeployChatModal() {
                         onClick={handleDeploy}
                         className="flex items-center gap-3 px-8 py-4 !bg-gradient-to-r !from-blue-500 !to-indigo-500 hover:!from-blue-600 hover:!to-indigo-600 text-white text-lg font-semibold rounded-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
                       >
-                        <div className="i-ph:rocket-launch text-xl transition-transform duration-200 group-hover:scale-110"></div>
+                        <Rocket className="transition-transform duration-200 group-hover:scale-110" size={20} />
                         <span className="transition-transform duration-200 group-hover:scale-105">
                           {lastDeployResult(deploySettings)?.siteURL ? 'Redeploy' : 'Deploy Now'}
                         </span>
@@ -287,7 +288,7 @@ export function GlobalDeployChatModal() {
                 {error && (
                   <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl shadow-sm">
                     <div className="flex items-start gap-3">
-                      <div className="i-ph:warning-circle text-lg text-red-500 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
                       <div>
                         <p className="font-semibold mb-1">Deployment Error</p>
                         <p className="text-sm leading-relaxed">{error}</p>
