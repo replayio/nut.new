@@ -1,29 +1,107 @@
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 interface IconProps {
   icon: LucideIcon;
   className?: string;
   size?: number | string;
+  strokeWidth?: number;
 }
 
-export function Icon({ icon: IconComponent, className, size = 20 }: IconProps) {
+export function Icon({ icon: IconComponent, className, size = 20, strokeWidth }: IconProps) {
   return (
     <IconComponent 
       className={cn('inline-block', className)} 
       size={size}
+      strokeWidth={strokeWidth}
     />
   );
 }
 
-// Common icons used in your app
+// All icons used in the app (migrated from Phosphor/UnoCSS)
 export { 
-  Check, 
-  X, 
-  Rocket, 
-  WarningCircle, 
-  CheckBold,
-  WarningCircleBold,
-  RocketLaunch,
-  // Add more icons as needed
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowUp,
+  ArrowUpRight,
+  Bug,
+  Calendar,
+  Check,
+  CheckCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Circle,
+  Clipboard,
+  Code,
+  Copy,
+  CreditCard,
+  Crosshair,
+  Crown,
+  Download,
+  ExternalLink,
+  Eye,
+  File,
+  Files,
+  FlaskConical,
+  Folder,
+  FolderOpen,
+  Gift,
+  GitBranch,
+  GitCompareArrows,
+  Globe,
+  Hammer,
+  Home,
+  Hourglass,
+  Info,
+  Key,
+  KeyRound,
+  KeySquare,
+  Layout,
+  Link,
+  List,
+  Loader2,
+  Lock,
+  LockOpen,
+  LogIn,
+  LogOut,
+  Maximize2,
+  MessageCircle,
+  MessageSquare,
+  Mic,
+  MicOff,
+  Minimize2,
+  Minus,
+  MinusCircle,
+  Monitor,
+  MonitorSmartphone,
+  MoreHorizontal,
+  MousePointer,
+  Paperclip,
+  PanelLeft,
+  Pencil,
+  PenLine,
+  PenSquare,
+  Plus,
+  PlusCircle,
+  Puzzle,
+  Rocket,
+  RotateCw,
+  Search,
+  Send,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  StopCircle,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  Type,
+  User,
+  UserPlus,
+  Users,
+  X,
+  XCircle,
 } from 'lucide-react';

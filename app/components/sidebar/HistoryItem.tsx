@@ -6,6 +6,7 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { useEditAppTitle } from '~/lib/hooks/useEditAppTitle';
 import { forwardRef, type ForwardedRef } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { Check, Copy, PenLine, Trash2 } from '~/components/ui/Icon';
 
 interface HistoryItemProps {
   item: AppLibraryEntry;
@@ -36,9 +37,11 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       />
       <button
         type="submit"
-        className="i-ph:check text-lg text-bolt-elements-textSecondary hover:text-green-500 transition-all duration-200 hover:scale-110 p-1 rounded-lg hover:bg-green-500/10"
+        className="text-bolt-elements-textSecondary hover:text-green-500 transition-all duration-200 hover:scale-110 p-1 rounded-lg hover:bg-green-500/10"
         onMouseDown={handleSubmit}
-      />
+      >
+        <Check size={18} />
+      </button>
     </form>
   );
 
@@ -67,13 +70,13 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
               {onDuplicate && (
                 <ChatActionButton
                   toolTipContent="Duplicate chat"
-                  icon="i-ph:copy"
+                  icon={Copy}
                   onClick={() => onDuplicate?.(item.id)}
                 />
               )}
               <ChatActionButton
                 toolTipContent="Rename chat"
-                icon="i-ph:pencil-fill"
+                icon={PenLine}
                 onClick={(event) => {
                   event.preventDefault();
                   toggleEditMode();
@@ -82,7 +85,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
               <Dialog.Trigger asChild>
                 <ChatActionButton
                   toolTipContent="Delete app"
-                  icon="i-ph:trash"
+                  icon={Trash2}
                   className="[&&]:hover:text-red-500 [&&]:hover:bg-red-500/10"
                   onClick={(event) => {
                     event.preventDefault();
@@ -102,12 +105,12 @@ const ChatActionButton = forwardRef(
   (
     {
       toolTipContent,
-      icon,
+      icon: IconComponent,
       className,
       onClick,
     }: {
       toolTipContent: string;
-      icon: string;
+      icon: React.ComponentType<any>;
       className?: string;
       onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
       btnTitle?: string;
@@ -120,9 +123,11 @@ const ChatActionButton = forwardRef(
           <button
             ref={ref}
             type="button"
-            className={`p-1.5 rounded-lg text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-all duration-200 hover:scale-110 ${icon} ${className ? className : ''}`}
+            className={`p-1.5 rounded-lg text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-all duration-200 hover:scale-110 ${className ? className : ''}`}
             onClick={onClick}
-          />
+          >
+            <IconComponent size={16} />
+          </button>
         </WithTooltip>
       </TooltipProvider>
     );

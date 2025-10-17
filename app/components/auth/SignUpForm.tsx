@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
+import { UserPlus } from '~/components/ui/Icon';
 
 interface SignUpFormProps {
   onToggleForm: () => void;
@@ -89,7 +90,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
     <>
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-green-500/20 shadow-lg">
-          <div className="i-ph:user-plus text-2xl text-green-500" />
+          <UserPlus className="text-green-500" size={24} />
         </div>
         <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Create Account</h2>
         <p className="text-bolt-elements-textSecondary mt-2">Join us and start building amazing apps</p>
