@@ -250,8 +250,6 @@ export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
   return (
     status &&
     (status === AppFeatureStatus.Implemented ||
-      status === AppFeatureStatus.Validated ||
-      status === AppFeatureStatus.ValidationInProgress ||
-      status === AppFeatureStatus.ValidationFailed)
+     status === AppFeatureStatus.Failed)
   );
 }

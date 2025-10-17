@@ -53,7 +53,7 @@ export interface NutChatRequest {
   visit?: VisitData;
   retryBugReportName?: string;
   upFrontPricing?: boolean;
-  payFeatureName?: string;
+  payFeatures?: boolean;
 }
 
 // Messages that are rendered normally in the chat.

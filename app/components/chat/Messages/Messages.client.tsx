@@ -17,7 +17,7 @@ import {
   ContinueBuildCard,
   SubscriptionCard,
 } from './components';
-import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
+import { APP_SUMMARY_CATEGORY, type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
@@ -32,6 +32,16 @@ interface MessagesProps {
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
   sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
+}
+
+function getUnpaidFeatureCost(appSummary: AppSummary | undefined) {
+  let total = 0;
+  for (const { status, cost } of appSummary?.features || []) {
+    if (status === AppFeatureStatus.PaymentNeeded) {
+      total += cost ?? 0;
+    }
+  }
+  return total;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
@@ -52,14 +62,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       ?.slice(1)
       .filter(
         (feature) =>
-          feature.status === AppFeatureStatus.Validated ||
           feature.status === AppFeatureStatus.Implemented ||
-          feature.status === AppFeatureStatus.ValidationInProgress ||
-          feature.status === AppFeatureStatus.ValidationFailed,
+          feature.status === AppFeatureStatus.Failed,
       ).length;
     const totalFeatures = appSummary?.features?.slice(1).length;
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const hasSubscription = useStore(subscriptionStore.hasSubscription);
+    const unpaidFeatureCost = getUnpaidFeatureCost(appSummary);
 
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
@@ -69,12 +78,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     useEffect(() => {
       const shouldShow =
-        !hasPendingMessage &&
-        !listenResponses &&
+        (unpaidFeatureCost || (!hasPendingMessage && !listenResponses)) &&
         appSummary?.features?.length &&
         !isFullyComplete &&
         peanutsRemaining !== undefined &&
-        peanutsRemaining > 0;
+        peanutsRemaining > 0 &&
+        peanutsRemaining >= unpaidFeatureCost;
 
       if (shouldShow) {
         const timer = setTimeout(() => {
@@ -85,7 +94,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       } else {
         setShowContinueBuildCard(false);
       }
-    }, [hasPendingMessage, listenResponses, appSummary?.features?.length, isFullyComplete, peanutsRemaining]);
+    }, [hasPendingMessage, listenResponses, appSummary?.features?.length, isFullyComplete, peanutsRemaining, unpaidFeatureCost]);
 
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {
@@ -325,22 +334,18 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
           {user &&
             (appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationFailed ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationInProgress ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.Validated ||
+              appSummary?.features?.[0]?.status === AppFeatureStatus.Failed ||
               startPlanningRating === 10) &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 &&
+            (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             hasSubscription && <AddPeanutsCard onMount={scrollToBottom} />}
 
           {user &&
             (appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationFailed ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationInProgress ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.Validated ||
+              appSummary?.features?.[0]?.status === AppFeatureStatus.Failed ||
               startPlanningRating === 10) &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 &&
+            (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             !hasSubscription && <SubscriptionCard onMount={scrollToBottom} />}
 
           {listenResponses && appSummary?.features?.length && !isFullyComplete && (
@@ -352,6 +357,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               onMount={scrollToBottom}
               sendMessage={sendMessage}
               setShowContinueBuildCard={setShowContinueBuildCard}
+              unpaidFeatureCost={unpaidFeatureCost}
             />
           )}
 

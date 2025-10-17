@@ -37,7 +37,7 @@ import { processImage, validateImageFile, formatFileSize } from '~/utils/imagePr
 import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import { AppFeatureStatus, BugReportStatus, type AppSummary } from '~/lib/persistence/messageAppSummary';
+import { BugReportStatus } from '~/lib/persistence/messageAppSummary';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -204,8 +204,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const fullInput =
     `${input ? input + '\n\n' : ''}` + (checkedBoxes ? `${checkedBoxes.map((box) => `${box}`).join('\n')}` : '');
-
-  const paymentCost = getUnpaidFeatureCost(appSummary);
 
   const handleStartBuilding = () => {
     const message = (fullInput + '\n\nStart building the app based on these requirements.').trim();
@@ -387,7 +385,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         />
 
         {(() => {
-          const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0 || paymentCost > 0) && chatStarted;
+          const showSendButton = (hasPendingMessage || fullInput.length > 0 || uploadedFiles.length > 0) && chatStarted;
           const showStartBuildingButton =
             user &&
             startPlanningRating > 0 &&
@@ -402,7 +400,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <ClientOnly>
                   {() => (
                     <SendButton
-                      paymentCost={paymentCost}
                       onClick={() => {
                         if (hasPendingMessage) {
                           handleStop();
@@ -519,18 +516,4 @@ function getPlaceholderText(chatStarted: boolean, hasAppSummary: boolean) {
 
   // We have an app that is being iterated on.
   return 'How can we help you?';
-}
-
-function getUnpaidFeatureCost(appSummary: AppSummary | undefined) {
-  if (!appSummary) {
-    return 0;
-  }
-
-  for (const { status, cost } of appSummary.features || []) {
-    if (status === AppFeatureStatus.PaymentNeeded) {
-      return cost ?? 0;
-    }
-  }
-
-  return 0;
 }
