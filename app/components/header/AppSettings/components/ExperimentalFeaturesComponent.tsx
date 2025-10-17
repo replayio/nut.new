@@ -52,7 +52,10 @@ export const ExperimentalFeaturesComponent = () => {
                 Enable experimental up front pricing functionality
               </span>
             </div>
-            <Switch checked={experimentalFeatures.upFrontPricing ?? false} onCheckedChange={handleUpFrontPricingToggle} />
+            <Switch
+              checked={experimentalFeatures.upFrontPricing ?? false}
+              onCheckedChange={handleUpFrontPricingToggle}
+            />
           </div>
         </div>
       )}

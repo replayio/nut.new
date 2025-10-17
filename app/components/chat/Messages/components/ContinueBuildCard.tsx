@@ -46,13 +46,17 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Continue Building</h3>
             <p className="text-bolt-elements-textSecondary text-sm max-w-md">
               {unpaidFeatureCost
-               ? `Pay ${unpaidFeatureCost} peanuts to continue on your app`
-               : `Ready to continue working on your app? Click the button below to keep building where you left off.`}
+                ? `Pay ${unpaidFeatureCost} peanuts to continue on your app`
+                : `Ready to continue working on your app? Click the button below to keep building where you left off.`}
             </p>
           </div>
 
           <div className="relative">
-            <StartBuildingButton unpaidFeatureCost={unpaidFeatureCost} onClick={handleContinueBuilding} buttonText="Continue Building" />
+            <StartBuildingButton
+              unpaidFeatureCost={unpaidFeatureCost}
+              onClick={handleContinueBuilding}
+              buttonText="Continue Building"
+            />
           </div>
         </div>
       </div>

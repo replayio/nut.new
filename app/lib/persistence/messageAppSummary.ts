@@ -55,19 +55,19 @@ export interface AppAPI extends AppDetail {
 // should be functional.
 export enum AppFeatureStatus {
   // Not started and has an associated cost which must be paid before work can start.
-  PaymentNeeded = "PaymentNeeded",
+  PaymentNeeded = 'PaymentNeeded',
 
   // Not started but work can start immediately.
-  NotStarted = "NotStarted",
+  NotStarted = 'NotStarted',
 
   // Implementation has started on implementing the feature's functionality.
-  ImplementationInProgress = "ImplementationInProgress",
+  ImplementationInProgress = 'ImplementationInProgress',
 
   // Functionality has finished implementation.
-  Implemented = "Implemented",
+  Implemented = 'Implemented',
 
   // Implementation work for the feature failed after several attempts.
-  Failed = "Failed",
+  Failed = 'Failed',
 }
 
 export enum AppFeatureKind {
@@ -247,9 +247,5 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
 }
 
 export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
-  return (
-    status &&
-    (status === AppFeatureStatus.Implemented ||
-     status === AppFeatureStatus.Failed)
-  );
+  return status && (status === AppFeatureStatus.Implemented || status === AppFeatureStatus.Failed);
 }

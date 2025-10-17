@@ -11,7 +11,12 @@ interface StartBuildingButtonProps {
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const StartBuildingButton = ({ onClick, startPlanningRating = 0, buttonText, unpaidFeatureCost = 0 }: StartBuildingButtonProps) => {
+export const StartBuildingButton = ({
+  onClick,
+  startPlanningRating = 0,
+  buttonText,
+  unpaidFeatureCost = 0,
+}: StartBuildingButtonProps) => {
   const hasText = !!buttonText;
   const isGold = unpaidFeatureCost > 0;
   const gradientColors = isGold
