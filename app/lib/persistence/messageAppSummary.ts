@@ -54,23 +54,20 @@ export interface AppAPI extends AppDetail {
 // The status of a feature describes its implementation and whether associated components
 // should be functional.
 export enum AppFeatureStatus {
-  // Not started, all components will be non-functional.
-  NotStarted = 'NotStarted',
+  // Not started and has an associated cost which must be paid before work can start.
+  PaymentNeeded = "PaymentNeeded",
+
+  // Not started but work can start immediately.
+  NotStarted = "NotStarted",
 
   // Implementation has started on implementing the feature's functionality.
-  ImplementationInProgress = 'ImplementationInProgress',
+  ImplementationInProgress = "ImplementationInProgress",
 
-  // Functionality has been implemented but the app has not been validated.
-  Implemented = 'Implemented',
+  // Functionality has finished implementation.
+  Implemented = "Implemented",
 
-  // Validation has started to test the feature's functionality.
-  ValidationInProgress = 'ValidationInProgress',
-
-  // Validation has completed and all tests pass. The feature should be functional.
-  Validated = 'Validated',
-
-  // The feature is implemented but we've given up on validating it.
-  ValidationFailed = 'ValidationFailed',
+  // Implementation work for the feature failed after several attempts.
+  Failed = "Failed",
 }
 
 export enum AppFeatureKind {
@@ -105,6 +102,9 @@ export interface AppFeature {
 
   // One paragraph summary of the feature's requirements.
   summary: string;
+
+  // Cost of this feature in peanuts. If not set, the feature is free.
+  cost?: number;
 
   // Names of any components which the feature implements.
   componentNames?: string[];

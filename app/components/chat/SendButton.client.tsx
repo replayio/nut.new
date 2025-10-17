@@ -6,13 +6,14 @@ import { chatStore } from '~/lib/stores/chat';
 
 interface SendButtonProps {
   disabled?: boolean;
+  paymentCost?: number;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onImagesSelected?: (images: File[]) => void;
 }
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
 
-export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
+export const SendButton = ({ disabled, paymentCost, onClick }: SendButtonProps) => {
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
   const className = `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 ${
     hasPendingMessage
@@ -21,7 +22,14 @@ export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
   } text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
 
   // Determine tooltip text based on button state
-  const tooltipText = hasPendingMessage ? 'Stop Generation' : 'Send Message';
+  let tooltipText;
+  if (hasPendingMessage) {
+    tooltipText = 'Stop Generation';
+  } else if (paymentCost) {
+    tooltipText = `Pay ${paymentCost} peanuts`;
+  } else {
+    tooltipText = 'Send Message';
+  }
 
   return (
     <AnimatePresence>
