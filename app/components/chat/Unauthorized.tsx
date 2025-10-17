@@ -6,6 +6,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { classNames } from '~/utils/classNames';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { KeySquare, Copy } from '~/components/ui/Icon';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -26,7 +27,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
               <div className="mb-8">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <div className="i-ph:lock-key-duotone text-white text-2xl"></div>
+                    <KeySquare className="text-white" size={24} />
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-4">App Access Restricted</h2>
@@ -66,7 +67,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
                       </span>
                     ) : (
                       <span className="flex items-center gap-3">
-                        <div className="i-ph:copy-duotone text-lg"></div>
+                        <Copy size={18} />
                         Create a Copy
                       </span>
                     )}
