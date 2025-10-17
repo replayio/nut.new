@@ -72,7 +72,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     useEffect(() => {
       const shouldShow =
-        (unpaidFeatureCost || (!hasPendingMessage && !listenResponses)) &&
+        !hasPendingMessage &&
+        !listenResponses &&
         appSummary?.features?.length &&
         !isFullyComplete &&
         peanutsRemaining !== undefined &&
