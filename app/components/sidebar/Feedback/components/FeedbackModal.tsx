@@ -6,6 +6,7 @@ import { supabaseSubmitFeedback } from '~/lib/supabase/feedback';
 import { getLastChatMessages } from '~/utils/chat/messageUtils';
 import { getAllAppResponses } from '~/lib/replay/ResponseFilter';
 import { userStore } from '~/lib/stores/userAuth';
+import { X, CheckCircle, MessageCircle, Send, Calendar } from '~/components/ui/Icon';
 
 const GlobalFeedbackModal = () => {
   const { isOpen, formData, submitted } = useStore(feedbackModalState);
@@ -66,14 +67,14 @@ const GlobalFeedbackModal = () => {
           className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
           title="Close"
         >
-          <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+          <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
         </button>
 
         {submitted ? (
           <>
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-lg">
-                <div className="i-ph:check-circle text-3xl text-green-500" />
+                <CheckCircle className="text-green-500" size={32} />
               </div>
               <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Feedback Submitted</h2>
               <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
@@ -93,7 +94,7 @@ const GlobalFeedbackModal = () => {
           <>
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
-                <div className="i-ph:chat-circle text-3xl text-blue-500" />
+                <MessageCircle className="text-blue-500" size={32} />
               </div>
               <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Share Your Feedback</h2>
               <p className="text-bolt-elements-textSecondary text-lg">
@@ -141,7 +142,7 @@ const GlobalFeedbackModal = () => {
                 onClick={handleSubmitFeedback}
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-2"
               >
-                <div className="i-ph:paper-plane-right text-lg transition-transform duration-200 group-hover:scale-110" />
+                <Send className="transition-transform duration-200 group-hover:scale-110" size={18} />
                 <span className="transition-transform duration-200 group-hover:scale-105">Submit Feedback</span>
               </button>
               <button
@@ -164,7 +165,7 @@ const GlobalFeedbackModal = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <div className="i-ph:calendar text-lg transition-transform duration-200 group-hover:scale-110" />
+                <Calendar className="transition-transform duration-200 group-hover:scale-110" size={18} />
                 <span className="transition-transform duration-200 group-hover:scale-105">
                   Schedule a call with the Nut Team
                 </span>

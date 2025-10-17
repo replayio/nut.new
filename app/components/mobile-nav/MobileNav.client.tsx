@@ -2,6 +2,7 @@ import { useStore } from '@nanostores/react';
 import { classNames } from '~/utils/classNames';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
+import { MessageCircle, Monitor } from '~/components/ui/Icon';
 
 export const MobileNav = () => {
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -39,12 +40,12 @@ export const MobileNav = () => {
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-bolt-elements-background-depth-2/95 backdrop-blur-md border-t border-bolt-elements-borderColor/50 shadow-2xl">
       <div className="flex w-full">
         <button onClick={() => handleTabClick('chat')} className={getTabClasses('chat')}>
-          <div
+          <MessageCircle
             className={classNames(
               'text-lg mb-0.5 transition-transform duration-200 group-hover:scale-110',
-              'i-ph:chat-circle',
               activeTab === 'chat' ? 'drop-shadow-sm' : '',
             )}
+            size={18}
           />
           <span
             className={classNames(
@@ -57,12 +58,12 @@ export const MobileNav = () => {
         </button>
 
         <button onClick={() => handleTabClick('preview')} className={getTabClasses('preview')}>
-          <div
+          <Monitor
             className={classNames(
               'text-lg mb-0.5 transition-transform duration-200 group-hover:scale-110',
-              'i-ph:monitor',
               activeTab === 'preview' ? 'drop-shadow-sm' : '',
             )}
+            size={18}
           />
           <span
             className={classNames(

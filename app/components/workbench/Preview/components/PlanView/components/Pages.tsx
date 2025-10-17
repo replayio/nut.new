@@ -6,6 +6,7 @@ import { formatPascalCaseName } from '~/utils/names';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
+import { Check } from '~/components/ui/Icon';
 
 const Pages = () => {
   const appSummary = useStore(chatStore.appSummary);
@@ -34,7 +35,7 @@ const Pages = () => {
             )}
             {isFeatureStatusImplemented(feature?.status ?? AppFeatureStatus.NotStarted) && (
               <div className="text-green-500 text-sm font-medium whitespace-nowrap pl-2">
-                <div className="i-ph:check-bold transition-transform duration-200 group-hover:scale-110" />
+                <Check className="transition-transform duration-200 group-hover:scale-110" size={14} strokeWidth={2.5} />
               </div>
             )}
           </span>

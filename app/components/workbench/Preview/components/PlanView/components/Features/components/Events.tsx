@@ -4,6 +4,7 @@ import { isWorkerFinishedResponse, type ChatResponse } from '~/lib/persistence/r
 import { chatStore } from '~/lib/stores/chat';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { ChevronUp, ChevronDown } from '~/components/ui/Icon';
 
 // If a worker doesn't have any updates more recent than this, it is timed out.
 const WORK_TIMEOUT_MS = 20 * 60 * 1000;
@@ -207,9 +208,11 @@ const Events = ({ featureName }: EventsProps) => {
                 className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor/50 rounded-lg transition-all duration-200 hover:shadow-sm"
               >
                 <span>{isExpanded ? `Hide ${events.length - 3} events` : `Show ${events.length - 3} more events`}</span>
-                <div
-                  className={`i-ph:caret-${isExpanded ? 'up' : 'down'}-bold text-sm transition-transform duration-200`}
-                ></div>
+                {isExpanded ? (
+                  <ChevronUp className="text-sm transition-transform duration-200" size={14} strokeWidth={2.5} />
+                ) : (
+                  <ChevronDown className="text-sm transition-transform duration-200" size={14} strokeWidth={2.5} />
+                )}
               </button>
             </div>
           )}

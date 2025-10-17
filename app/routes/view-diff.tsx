@@ -3,6 +3,7 @@ import { downloadRepository } from '~/lib/replay/Deploy';
 import { useEffect, useState } from 'react';
 import JSZip from 'jszip';
 import { diffLines } from 'diff';
+import { PlusCircle, MinusCircle, PenCircle, File, GitDiff, GitBranch, AlertTriangle, Files, Code, CheckCircle } from '~/components/ui/Icon';
 
 interface FileDiff {
   path: string;
@@ -165,16 +166,16 @@ function RepositoryDiff() {
     }
   };
 
-  const getDiffTypeIcon = (type: string) => {
+  const getDiffTypeIcon = (type: string): JSX.Element => {
     switch (type) {
       case 'added':
-        return 'i-ph:plus-circle-duotone';
+        return <PlusCircle className="text-green-500" size={20} />;
       case 'deleted':
-        return 'i-ph:minus-circle-duotone';
+        return <MinusCircle className="text-red-500" size={20} />;
       case 'modified':
-        return 'i-ph:pencil-circle-duotone';
+        return <PenCircle className="text-blue-500" size={20} />;
       default:
-        return 'i-ph:file-duotone';
+        return <File className="text-gray-500" size={20} />;
     }
   };
 
@@ -183,7 +184,7 @@ function RepositoryDiff() {
       <div className="max-w-7xl mx-auto h-full overflow-y-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <div className="i-ph:git-diff-duotone text-white text-2xl"></div>
+            <GitDiff className="text-white" size={24} />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-bolt-elements-textHeading">Repository Diff</h1>
@@ -195,7 +196,7 @@ function RepositoryDiff() {
           <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-6 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                <div className="i-ph:git-branch-duotone text-white text-lg"></div>
+                <GitBranch className="text-white" size={18} />
               </div>
               <h2 className="text-xl font-semibold text-bolt-elements-textHeading">Repository Versions</h2>
             </div>
@@ -228,7 +229,7 @@ function RepositoryDiff() {
             <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/50 rounded-2xl p-6 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-sm">
-                  <div className="i-ph:warning-circle-duotone text-white text-xl"></div>
+                  <AlertTriangle className="text-white" size={20} />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Repositories</h3>
@@ -242,7 +243,7 @@ function RepositoryDiff() {
             <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
               <div className="flex items-center gap-3 p-6 border-b border-bolt-elements-borderColor/30">
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
-                  <div className="i-ph:files-duotone text-white text-lg"></div>
+                  <Files className="text-white" size={18} />
                 </div>
                 <h2 className="text-xl font-semibold text-bolt-elements-textHeading">File Changes ({diffs.length})</h2>
               </div>
@@ -267,7 +268,7 @@ function RepositoryDiff() {
                     {diff.diff && (
                       <div className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 overflow-hidden shadow-sm">
                         <div className="flex items-center gap-2 bg-bolt-elements-background-depth-2 px-4 py-3 border-b border-bolt-elements-borderColor/30">
-                          <div className="i-ph:code-duotone text-bolt-elements-textSecondary"></div>
+                          <Code className="text-bolt-elements-textSecondary" size={16} />
                           <span className="text-sm font-semibold text-bolt-elements-textSecondary">Diff</span>
                         </div>
                         <pre className="p-4 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto">
@@ -285,7 +286,7 @@ function RepositoryDiff() {
             <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-8 backdrop-blur-sm">
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <div className="i-ph:check-circle-duotone text-white text-2xl"></div>
+                  <CheckCircle className="text-white" size={24} />
                 </div>
                 <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No Changes Found</h3>
                 <p className="text-bolt-elements-textSecondary">
