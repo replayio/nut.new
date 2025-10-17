@@ -3,7 +3,7 @@ import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface ContinueBuildCardProps {
-  sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
+  sendMessage?: (params: { messageInput: string; chatMode: ChatMode; payFeatures?: boolean }) => void;
   setShowContinueBuildCard?: (show: boolean) => void;
   onMount?: () => void;
   unpaidFeatureCost?: number;
@@ -26,6 +26,7 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
       sendMessage({
         messageInput: 'Continue building the app based on these requirements.',
         chatMode: ChatMode.DevelopApp,
+        payFeatures: true,
       });
 
       if (setShowContinueBuildCard) {
