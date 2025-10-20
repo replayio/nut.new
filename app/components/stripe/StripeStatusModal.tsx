@@ -119,7 +119,7 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
                     : 'from-blue-400 to-indigo-500',
               )}
             >
-              <div className={classNames('text-4xl text-white', getIcon())} />
+              <div className="text-4xl text-white">{getIcon()}</div>
             </div>
           </div>
 
