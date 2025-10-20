@@ -4,15 +4,17 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { Rocket } from '~/components/ui/Icon';
 
 interface ContinueBuildCardProps {
-  sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
+  sendMessage?: (params: { messageInput: string; chatMode: ChatMode; payFeatures?: boolean }) => void;
   setShowContinueBuildCard?: (show: boolean) => void;
   onMount?: () => void;
+  unpaidFeatureCost?: number;
 }
 
 export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
   sendMessage,
   onMount,
   setShowContinueBuildCard,
+  unpaidFeatureCost,
 }) => {
   useEffect(() => {
     if (onMount) {
@@ -25,6 +27,7 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
       sendMessage({
         messageInput: 'Continue building the app based on these requirements.',
         chatMode: ChatMode.DevelopApp,
+        payFeatures: true,
       });
 
       if (setShowContinueBuildCard) {
@@ -44,12 +47,18 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Continue Building</h3>
             <p className="text-bolt-elements-textSecondary text-sm max-w-md">
-              Ready to continue working on your app? Click the button below to keep building where you left off.
+              {unpaidFeatureCost
+                ? `Pay ${unpaidFeatureCost} peanuts to continue on your app`
+                : `Ready to continue working on your app? Click the button below to keep building where you left off.`}
             </p>
           </div>
 
           <div className="relative">
-            <StartBuildingButton onClick={handleContinueBuilding} buttonText="Continue Building" />
+            <StartBuildingButton
+              unpaidFeatureCost={unpaidFeatureCost}
+              onClick={handleContinueBuilding}
+              buttonText="Continue Building"
+            />
           </div>
         </div>
       </div>

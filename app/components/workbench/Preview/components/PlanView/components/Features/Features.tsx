@@ -52,15 +52,13 @@ const Features = () => {
           </div>
         );
       case AppFeatureStatus.Implemented:
-      case AppFeatureStatus.Validated:
-      case AppFeatureStatus.ValidationInProgress:
         return (
           <div className="text-green-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-green-50 px-2 py-1 rounded-lg border border-green-200 shadow-sm">
             <Check size={14} strokeWidth={2.5} />
             Complete
           </div>
         );
-      case AppFeatureStatus.ValidationFailed:
+      case AppFeatureStatus.Failed:
         return (
           <div className="text-red-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-red-50 px-2 py-1 rounded-lg border border-red-200 shadow-sm">
             <X size={14} strokeWidth={2.5} />
