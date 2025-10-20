@@ -39,7 +39,7 @@ export function AuthStateMessage({
 
         <h2 className="text-3xl font-bold mb-6 text-bolt-elements-textHeading">{title}</h2>
 
-        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto bg-bolt-elements-background-depth-2/30 px-4 py-3 rounded-xl border border-bolt-elements-borderColor/30">
+        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-3 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
           {message}
         </div>
 

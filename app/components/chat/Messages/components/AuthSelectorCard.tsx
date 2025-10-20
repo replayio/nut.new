@@ -73,7 +73,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
           <button
             className={`group p-4 bg-bolt-elements-background-depth-2 rounded-xl border transition-all duration-200 w-full shadow-sm ${
               saving
-                ? 'border-bolt-elements-borderColor/30 cursor-not-allowed opacity-60'
+                ? 'border-bolt-elements-borderColor border-opacity-30 cursor-not-allowed opacity-60'
                 : 'border-bolt-elements-borderColor hover:border-bolt-elements-focus/60 hover:bg-bolt-elements-background-depth-3 hover:shadow-md hover:scale-[1.02] cursor-pointer'
             }`}
             onClick={!saving ? handleToggle : undefined}

@@ -25,7 +25,7 @@ export const ExperimentalFeaturesComponent = () => {
           <FlaskConical className="text-bolt-elements-textPrimary" size={18} />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Experimental Features</span>
         </div>
-        <ChevronDown className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} size={16} />
+        <ChevronDown className={`transition-transform duration-200 text-bolt-elements-textPrimary ${isExpanded ? 'rotate-180' : ''}`} size={16} />
       </button>
 
       {isExpanded && (

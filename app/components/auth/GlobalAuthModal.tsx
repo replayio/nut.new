@@ -50,7 +50,7 @@ export function GlobalAuthModal() {
       onClick={() => authModalStore.close()}
     >
       <div
-        className="bg-bolt-elements-background-depth-1 p-6 sm:p-8 rounded-2xl w-full max-w-md mx-auto border border-bolt-elements-borderColor/50 shadow-2xl hover:shadow-3xl transition-shadow duration-300 backdrop-blur-sm relative max-h-[calc(100vh-4rem)] overflow-y-auto"
+        className="bg-bolt-elements-background-depth-1 p-6 sm:p-8 rounded-2xl w-full max-w-md mx-auto border border-bolt-elements-borderColor border-opacity-50 shadow-2xl hover:shadow-3xl transition-shadow duration-300 backdrop-blur-sm relative max-h-[calc(100vh-4rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button

@@ -48,9 +48,9 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   return (
     <div
       className={classNames(
-        'group rounded-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 overflow-hidden flex justify-between items-center px-3 py-2.5 transition-all duration-200 hover:shadow-sm border border-transparent hover:border-bolt-elements-borderColor/30',
+        'group rounded-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3 overflow-hidden flex justify-between items-center px-3 py-2.5 transition-all duration-200 hover:shadow-sm border border-transparent hover:border-bolt-elements-borderColor border-opacity-30',
         {
-          '[&&]:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor/50 shadow-sm':
+          '[&&]:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor border-opacity-50 shadow-sm':
             isActiveChat,
         },
       )}

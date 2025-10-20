@@ -137,7 +137,7 @@ export function GlobalDeployChatModal() {
         <motion.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
 
         <motion.div
-          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor/50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
+          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor border-opacity-50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -156,7 +156,7 @@ export function GlobalDeployChatModal() {
             {loadingData ? (
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
-                  <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin" />
                 </div>
                 <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
                 <p className="text-bolt-elements-textSecondary">
@@ -178,7 +178,7 @@ export function GlobalDeployChatModal() {
                 </div>
 
                 {/* Easy Deploy Section */}
-                <div className="mb-8 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="mb-8 p-6 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <span className="text-2xl">⚡</span>
@@ -212,8 +212,8 @@ export function GlobalDeployChatModal() {
 
                   <div className="flex justify-center">
                     {status === DeployStatus.Started ? (
-                      <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-1/50 rounded-xl border border-bolt-elements-borderColor/30">
-                        <div className="w-6 h-6 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin mr-3" />
+                      <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-1 bg-opacity-50 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
+                        <div className="w-6 h-6 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin mr-3" />
                         <span className="text-lg font-medium">
                           {lastDeployResult(deploySettings)?.siteURL ? 'Redeploying' : 'Deploying'} your app...
                         </span>
@@ -232,7 +232,7 @@ export function GlobalDeployChatModal() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30 space-y-4">
+                <div className="p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30 space-y-4">
                   <div>
                     <label
                       htmlFor="siteName"
@@ -248,7 +248,7 @@ export function GlobalDeployChatModal() {
                         id="siteName"
                         name="siteName"
                         type="text"
-                        className="w-full p-4 pr-32 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+                        className="w-full p-4 pr-32 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
                         value={deploySettings.siteName || ''}
                         placeholder="my-chat-app..."
                         onChange={(e) => {

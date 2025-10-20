@@ -61,7 +61,7 @@ const GlobalFeedbackModal = () => {
       className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 outline-none max-w-2xl w-full mx-4"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[1001]"
     >
-      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 border border-bolt-elements-borderColor/50 shadow-2xl hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative">
+      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 border border-bolt-elements-borderColor border-opacity-50 shadow-2xl hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative">
         <button
           onClick={feedbackModalStore.close}
           className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
@@ -77,7 +77,7 @@ const GlobalFeedbackModal = () => {
                 <CheckCircle className="text-green-500" size={32} />
               </div>
               <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Feedback Submitted</h2>
-              <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
+              <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30">
                 Thank you for your feedback! We appreciate your input.
               </p>
             </div>
@@ -106,7 +106,7 @@ const GlobalFeedbackModal = () => {
               <label className="block mb-3 text-sm font-semibold text-bolt-elements-textPrimary">Your Feedback:</label>
               <textarea
                 name="description"
-                className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 min-h-[140px] transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 min-h-[140px] transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 value={formData.description}
                 placeholder="Tell us what you think or describe any issues..."
                 onChange={(e) => {
@@ -118,7 +118,7 @@ const GlobalFeedbackModal = () => {
               />
             </div>
 
-            <div className="flex items-center gap-3 mb-8 p-4 bg-bolt-elements-background-depth-2/30 rounded-xl border border-bolt-elements-borderColor/30">
+            <div className="flex items-center gap-3 mb-8 p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
               <input
                 type="checkbox"
                 id="share-project"
@@ -153,7 +153,7 @@ const GlobalFeedbackModal = () => {
               </button>
             </div>
 
-            <div className="text-center border-t border-bolt-elements-borderColor/50 pt-8">
+            <div className="text-center border-t border-bolt-elements-borderColor border-opacity-50 pt-8">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="flex-1 h-px bg-bolt-elements-borderColor/30"></div>
                 <span className="text-bolt-elements-textSecondary font-medium">Or</span>

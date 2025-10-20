@@ -23,7 +23,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-lg w-full">
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-lg p-8 text-center backdrop-blur-sm">
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-lg p-8 text-center backdrop-blur-sm">
               <div className="mb-8">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
@@ -55,7 +55,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
                       {
                         'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-md hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/20':
                           !isCopying,
-                        'bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary border border-bolt-elements-borderColor/30 cursor-not-allowed':
+                        'bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary border border-bolt-elements-borderColor border-opacity-30 cursor-not-allowed':
                           isCopying,
                       },
                     )}

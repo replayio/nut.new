@@ -98,7 +98,7 @@ const AppView = ({
         <>
           <div
             onMouseDown={(e) => startResizing(e, 'left')}
-            className="absolute top-0 left-0 w-4 -ml-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-r border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
+            className="absolute top-0 left-0 w-4 -ml-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2 bg-opacity-50 hover:bg-bolt-elements-background-depth-3 bg-opacity-70 flex items-center justify-center transition-all duration-200 select-none border-r border-bolt-elements-borderColor border-opacity-30 hover:border-bolt-elements-borderColor border-opacity-50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
             <div className="transition-transform duration-200 group-hover:scale-110">
@@ -107,7 +107,7 @@ const AppView = ({
           </div>
           <div
             onMouseDown={(e) => startResizing(e, 'right')}
-            className="absolute top-0 right-0 w-4 -mr-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-l border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
+            className="absolute top-0 right-0 w-4 -mr-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2 bg-opacity-50 hover:bg-bolt-elements-background-depth-3 bg-opacity-70 flex items-center justify-center transition-all duration-200 select-none border-l border-bolt-elements-borderColor border-opacity-30 hover:border-bolt-elements-borderColor border-opacity-50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
             <div className="transition-transform duration-200 group-hover:scale-110">

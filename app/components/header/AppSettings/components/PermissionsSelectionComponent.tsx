@@ -540,7 +540,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                 <div className="flex justify-center mb-4">
                   <button
                     onClick={() => setShowAllGroups(!showAllGroups)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor/50 rounded-lg transition-all duration-200 hover:shadow-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor border-opacity-50 rounded-lg transition-all duration-200 hover:shadow-sm"
                   >
                     <span>
                       {showAllGroups

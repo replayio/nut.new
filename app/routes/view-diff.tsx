@@ -193,7 +193,7 @@ function RepositoryDiff() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-6 backdrop-blur-sm">
+          <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-6 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
                 <GitBranch className="text-white" size={18} />
@@ -203,13 +203,13 @@ function RepositoryDiff() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-bolt-elements-textSecondary">Old Repository ID:</label>
-                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
+                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
                   {oldRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-bolt-elements-textSecondary">New Repository ID:</label>
-                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
+                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-sm">
                   {newRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
                 </div>
               </div>
@@ -217,7 +217,7 @@ function RepositoryDiff() {
           </div>
 
           {loading && (
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-8 backdrop-blur-sm">
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
               <div className="flex items-center justify-center">
                 <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
                 <span className="ml-4 text-bolt-elements-textSecondary font-medium">Loading repositories...</span>
@@ -240,8 +240,8 @@ function RepositoryDiff() {
           )}
 
           {!loading && !error && diffs.length > 0 && (
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
-              <div className="flex items-center gap-3 p-6 border-b border-bolt-elements-borderColor/30">
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center gap-3 p-6 border-b border-bolt-elements-borderColor border-opacity-30">
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
                   <Files className="text-white" size={18} />
                 </div>
@@ -251,7 +251,7 @@ function RepositoryDiff() {
                 {diffs.map((diff, index) => (
                   <div
                     key={index}
-                    className="p-6 hover:bg-bolt-elements-background-depth-1/30 transition-colors duration-200"
+                    className="p-6 hover:bg-bolt-elements-background-depth-1 bg-opacity-30 transition-colors duration-200"
                   >
                     <div className="flex items-center mb-4 gap-3">
                       <div className={`${getDiffTypeIcon(diff.type)} text-xl`}></div>
@@ -260,14 +260,14 @@ function RepositoryDiff() {
                       >
                         {diff.type.toUpperCase()}
                       </span>
-                      <span className="font-mono text-sm text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 px-3 py-1 rounded-lg border border-bolt-elements-borderColor/50">
+                      <span className="font-mono text-sm text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 px-3 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-50">
                         {diff.path}
                       </span>
                     </div>
 
                     {diff.diff && (
-                      <div className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 overflow-hidden shadow-sm">
-                        <div className="flex items-center gap-2 bg-bolt-elements-background-depth-2 px-4 py-3 border-b border-bolt-elements-borderColor/30">
+                      <div className="bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 overflow-hidden shadow-sm">
+                        <div className="flex items-center gap-2 bg-bolt-elements-background-depth-2 px-4 py-3 border-b border-bolt-elements-borderColor border-opacity-30">
                           <Code className="text-bolt-elements-textSecondary" size={16} />
                           <span className="text-sm font-semibold text-bolt-elements-textSecondary">Diff</span>
                         </div>
@@ -283,7 +283,7 @@ function RepositoryDiff() {
           )}
 
           {!loading && !error && diffs.length === 0 && oldRepositoryId && newRepositoryId && (
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm p-8 backdrop-blur-sm">
+            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <CheckCircle className="text-white" size={24} />

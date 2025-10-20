@@ -102,7 +102,7 @@ export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDeta
 
         {/* Built-in secrets info */}
         {allSecrets.filter((s) => BUILTIN_SECRET_NAMES.includes(s.name)).length > 0 && (
-          <div className="flex items-center gap-2 py-1 mt-2 pt-2 border-t border-bolt-elements-borderColor/30">
+          <div className="flex items-center gap-2 py-1 mt-2 pt-2 border-t border-bolt-elements-borderColor border-opacity-30">
             <CheckCircle className="text-green-500 flex-shrink-0" size={14} />
             <span className="text-xs text-bolt-elements-textSecondary">Built-in API keys configured automatically</span>
           </div>

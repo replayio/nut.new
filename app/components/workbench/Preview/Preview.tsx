@@ -263,7 +263,7 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
-      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
+      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 p-3 flex items-center gap-2 shadow-sm">
         <IconButton icon={<RotateCw size={20} />} onClick={() => reloadPreview()} />
         {ENABLE_ELEMENT_PICKER && (
           <IconButton
@@ -321,7 +321,7 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
         )}
       </div>
 
-      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
+      <div className="flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 flex justify-center items-center overflow-auto">
         <AppView
           isDeviceModeOn={isDeviceModeOn}
           iframeRef={iframeRef}
@@ -334,7 +334,7 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
 
       {/* Error Display Section */}
       {detectedErrors.length > 0 && !fixingError && (
-        <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
+        <div className="border-t border-bolt-elements-borderColor border-opacity-50 bg-red-50 dark:bg-red-950/20 p-4">
           <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">Errors detected</div>
           <button
             className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
@@ -367,7 +367,7 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
 
       {/* Nut Working Display */}
       {fixingError && (
-        <div className="border-t border-bolt-elements-borderColor/50 bg-blue-50 dark:bg-blue-950/20 p-3">
+        <div className="border-t border-bolt-elements-borderColor border-opacity-50 bg-blue-50 dark:bg-blue-950/20 p-3">
           <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             Nut is working on fixing the error...

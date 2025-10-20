@@ -89,7 +89,7 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
         return (
           <>
             <div className="space-y-6 mb-6">
-              <div className="p-6 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50">
+              <div className="p-6 bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-xl border border-bolt-elements-borderColor border-opacity-50">
                 <div className="text-lg font-semibold mb-3 text-bolt-elements-textHeading">Project Description</div>
                 <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary.description}</div>
 

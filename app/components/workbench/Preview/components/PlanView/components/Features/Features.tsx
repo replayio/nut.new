@@ -85,7 +85,7 @@ const Features = () => {
       >
         <div
           onClick={() => toggleFeatureCollapse(index)}
-          className="flex justify-between items-center p-4 border-b border-bolt-elements-borderColor/50 cursor-pointer hover:bg-bolt-elements-background-depth-2/30 transition-all duration-200"
+          className="flex justify-between items-center p-4 border-b border-bolt-elements-borderColor border-opacity-50 cursor-pointer hover:bg-bolt-elements-background-depth-2 bg-opacity-30 transition-all duration-200"
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:scale-105">

@@ -43,7 +43,7 @@ const DeploymentSuccessful = ({
       </div>
 
       <div className="mb-8">
-        <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl py-6 px-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-2xl py-6 px-6 border border-bolt-elements-borderColor border-opacity-50 shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="mb-6">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Link className="text-bolt-elements-textPrimary" size={18} />
@@ -51,7 +51,7 @@ const DeploymentSuccessful = ({
             </div>
           </div>
           <div className="space-y-4">
-            <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/50 shadow-sm">
+            <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 shadow-sm">
               <code className="text-sm text-bolt-elements-textPrimary font-mono break-words leading-relaxed block truncate">
                 {result?.siteURL}
               </code>

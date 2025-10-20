@@ -63,7 +63,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor/50">
+        <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor border-opacity-50">
           <div>
             <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Choose Your Plan</h2>
             <p className="text-sm text-bolt-elements-textSecondary mt-1">
@@ -73,7 +73,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
         </div>
 
         <div className="px-6 sm:px-8 pt-2 pb-6">
-          <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm">
+          <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center mt-1 flex-shrink-0 border border-blue-500/30 shadow-sm">
                 <Info className="text-blue-500" size={18} />
@@ -120,9 +120,9 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                     {
                       'border-emerald-400/60 bg-gradient-to-br from-emerald-50/80 to-green-50/60 shadow-xl ring-2 ring-emerald-200/40 dark:from-emerald-900/10 dark:to-green-900/5 dark:ring-emerald-500/20':
                         isCurrentTier,
-                      'border-bolt-elements-borderColor/50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
+                      'border-bolt-elements-borderColor border-opacity-50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
                         !isCurrentTier,
-                      'hover:border-bolt-elements-borderColor/70 hover:shadow-lg': !isCurrentTier,
+                      'hover:border-bolt-elements-borderColor border-opacity-70 hover:shadow-lg': !isCurrentTier,
                     },
                   )}
                 >
@@ -135,7 +135,7 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                   )}
 
                   <div className="text-center mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor/30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor border-opacity-30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
                       {isFree ? (
                         <Gift className="text-green-500 transition-transform duration-300 group-hover:scale-110" size={24} />
                       ) : (

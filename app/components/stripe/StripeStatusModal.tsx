@@ -150,7 +150,7 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
                 className={classNames(
                   'p-6 rounded-2xl border shadow-sm bg-gradient-to-br',
                   'from-bolt-elements-background-depth-2/40 to-bolt-elements-background-depth-3/20',
-                  'border-bolt-elements-borderColor/30',
+                  'border-bolt-elements-borderColor border-opacity-30',
                 )}
               >
                 <p className="text-bolt-elements-textSecondary leading-relaxed text-center">{details}</p>

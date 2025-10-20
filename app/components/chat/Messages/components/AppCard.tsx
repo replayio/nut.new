@@ -145,7 +145,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           {children && <div className="mt-3">{children}</div>}
 
           {onClick && (
-            <div className="mt-3 pt-3 border-t border-bolt-elements-borderColor/30">
+            <div className="mt-3 pt-3 border-t border-bolt-elements-borderColor border-opacity-30">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-bolt-elements-textSecondary">View details</span>
                 <ChevronRight className="text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors duration-200" size={12} />

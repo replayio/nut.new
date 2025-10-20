@@ -153,7 +153,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
           <motion.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
 
           <motion.div
-            className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor/50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-md w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
+            className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor border-opacity-50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-md w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -188,7 +188,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.h2>
 
               <motion.p
-                className="text-bolt-elements-textSecondary mb-8 text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30"
+                className="text-bolt-elements-textSecondary mb-8 text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.5 }}
@@ -199,19 +199,19 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.p>
 
               <motion.div
-                className="mb-8 p-4 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30"
+                className="mb-8 p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.5 }}
               >
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm font-semibold text-bolt-elements-textPrimary">Features Complete</span>
-                  <span className="text-sm font-bold text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 px-3 py-1 rounded-lg border border-bolt-elements-borderColor/50 shadow-sm">
+                  <span className="text-sm font-bold text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 px-3 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-50 shadow-sm">
                     {completedFeatures}/{totalFeatures}
                   </span>
                 </div>
 
-                <div className="w-full bg-bolt-elements-background-depth-3 rounded-xl h-4 overflow-hidden shadow-inner border border-bolt-elements-borderColor/30">
+                <div className="w-full bg-bolt-elements-background-depth-3 rounded-xl h-4 overflow-hidden shadow-inner border border-bolt-elements-borderColor border-opacity-30">
                   <motion.div
                     className={classNames(
                       'h-full rounded-xl shadow-sm',
@@ -230,7 +230,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between text-sm p-3 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor/30 shadow-sm hover:shadow-md transition-all duration-200"
+                        className="flex items-center justify-between text-sm p-3 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm hover:shadow-md transition-all duration-200"
                       >
                         <span className="text-bolt-elements-textPrimary truncate font-medium">{feature.name}</span>
                         <div

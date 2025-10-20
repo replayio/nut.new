@@ -108,7 +108,7 @@ const Secrets = () => {
           'p-4 border rounded-xl shadow-sm hover:shadow-md transition-all duration-200',
           isSet && !currentValue.length
             ? 'border-gray-300 bg-gray-50 hover:border-gray-400'
-            : 'border-bolt-elements-borderColor/30 bg-bolt-elements-background-depth-2 hover:border-bolt-elements-borderColor/50',
+            : 'border-bolt-elements-borderColor border-opacity-30 bg-bolt-elements-background-depth-2 hover:border-bolt-elements-borderColor border-opacity-50',
         )}
       >
         <div className="flex items-center justify-between mb-3">
@@ -150,7 +150,7 @@ const Secrets = () => {
                   'w-full px-4 py-3 text-sm border rounded-xl transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400',
                   isSet && !currentValue.length
                     ? 'border-gray-300 bg-gray-100 text-gray-700 placeholder-gray-500 hover:bg-gray-200'
-                    : 'border-bolt-elements-borderColor/60 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary',
+                    : 'border-bolt-elements-borderColor border-opacity-60 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary',
                 )}
               />
             </div>

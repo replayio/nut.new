@@ -217,10 +217,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/30':
                 isUserMessage,
               // Assistant messages
-              'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/60':
+              'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor border-opacity-60':
                 !isUserMessage && (!hasPendingMessage || (hasPendingMessage && !isLast)),
               // Last message when pending
-              'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor/50':
+              'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor border-opacity-50':
                 !isUserMessage && hasPendingMessage && isLast,
             })}
           >
