@@ -35,7 +35,11 @@ const Pages = () => {
             )}
             {isFeatureStatusImplemented(feature?.status ?? AppFeatureStatus.NotStarted) && (
               <div className="text-green-500 text-sm font-medium whitespace-nowrap pl-2">
-                <Check className="transition-transform duration-200 group-hover:scale-110" size={14} strokeWidth={2.5} />
+                <Check
+                  className="transition-transform duration-200 group-hover:scale-110"
+                  size={14}
+                  strokeWidth={2.5}
+                />
               </div>
             )}
           </span>

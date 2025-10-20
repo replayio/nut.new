@@ -248,13 +248,24 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                           {(feature.status === AppFeatureStatus.Validated ||
                             feature.status === AppFeatureStatus.Implemented ||
                             feature.status === AppFeatureStatus.ValidationInProgress) && (
-                            <CheckCircle className="text-green-600 transition-transform duration-200 hover:scale-110" size={14} strokeWidth={2.5} />
+                            <CheckCircle
+                              className="text-green-600 transition-transform duration-200 hover:scale-110"
+                              size={14}
+                              strokeWidth={2.5}
+                            />
                           )}
                           {feature.status === AppFeatureStatus.ValidationFailed && (
-                            <AlertTriangle className="text-yellow-600 transition-transform duration-200 hover:scale-110" size={14} strokeWidth={2.5} />
+                            <AlertTriangle
+                              className="text-yellow-600 transition-transform duration-200 hover:scale-110"
+                              size={14}
+                              strokeWidth={2.5}
+                            />
                           )}
                           {feature.status === AppFeatureStatus.NotStarted && (
-                            <Circle className="text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110" size={14} />
+                            <Circle
+                              className="text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110"
+                              size={14}
+                            />
                           )}
                           <span className="capitalize">
                             {feature.status === AppFeatureStatus.ImplementationInProgress

@@ -7,7 +7,26 @@ import { setAppPermissions, AppAccessKind, AppAccessorKind, type AppPermission }
 import { IconButton } from '~/components/ui/IconButton';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
-import { User, Users, Globe, Info, Copy, Eye, Send, Pencil, KeyRound, ChevronDown, ToggleRight, ToggleLeft, Trash2, ChevronUp, LockOpen, X, AlertCircle, PlusCircle } from '~/components/ui/Icon';
+import {
+  User,
+  Users,
+  Globe,
+  Info,
+  Copy,
+  Eye,
+  Send,
+  Pencil,
+  KeyRound,
+  ChevronDown,
+  ToggleRight,
+  ToggleLeft,
+  Trash2,
+  ChevronUp,
+  LockOpen,
+  X,
+  AlertCircle,
+  PlusCircle,
+} from '~/components/ui/Icon';
 
 interface PermissionGroup {
   accessor: AppAccessorKind;
@@ -347,15 +366,27 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
   const getAccessIcon = (access: AppAccessKind, allowed: boolean): JSX.Element => {
     const icons: Record<AppAccessKind, JSX.Element> = {
-      [AppAccessKind.AllPermissions]: <KeyRound className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
+      [AppAccessKind.AllPermissions]: (
+        <KeyRound className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />
+      ),
       [AppAccessKind.Copy]: <Copy className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
       [AppAccessKind.View]: <Eye className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
-      [AppAccessKind.SendMessage]: <Send className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
-      [AppAccessKind.SetTitle]: <Pencil className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
+      [AppAccessKind.SendMessage]: (
+        <Send className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />
+      ),
+      [AppAccessKind.SetTitle]: (
+        <Pencil className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />
+      ),
       // [AppAccessKind.Delete]: <Trash className="text-blue-500" size={16} />,
-      [AppAccessKind.SetPermissions]: <KeyRound className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />,
+      [AppAccessKind.SetPermissions]: (
+        <KeyRound className={`text-xs ${allowed ? 'text-blue-500' : 'text-red-500'}`} size={16} />
+      ),
     };
-    return icons[access] || <Info className={`text-xs ${allowed ? 'text-bolt-elements-textPrimary' : 'text-red-500'}`} size={16} />;
+    return (
+      icons[access] || (
+        <Info className={`text-xs ${allowed ? 'text-bolt-elements-textPrimary' : 'text-red-500'}`} size={16} />
+      )
+    );
   };
 
   return (
@@ -477,7 +508,9 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
                                 {/* Permission Label */}
                                 <div className="flex-1 min-w-0">
-                                  <span className={`text-sm font-medium text-xs ${permission.allowed ? 'text-bolt-elements-textPrimary' : 'text-red-500'}`}>
+                                  <span
+                                    className={`text-sm font-medium text-xs ${permission.allowed ? 'text-bolt-elements-textPrimary' : 'text-red-500'}`}
+                                  >
                                     {getAccessLabel(permission.access)}
                                   </span>
                                 </div>

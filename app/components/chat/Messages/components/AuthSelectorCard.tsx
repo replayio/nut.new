@@ -82,9 +82,15 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {authRequired ? (
-                  <Lock className="transition-transform duration-200 group-hover:scale-110 text-bolt-elements-icon-success" size={18} />
+                  <Lock
+                    className="transition-transform duration-200 group-hover:scale-110 text-bolt-elements-icon-success"
+                    size={18}
+                  />
                 ) : (
-                  <Globe className="transition-transform duration-200 group-hover:scale-110 text-bolt-elements-textPrimary" size={18} />
+                  <Globe
+                    className="transition-transform duration-200 group-hover:scale-110 text-bolt-elements-textPrimary"
+                    size={18}
+                  />
                 )}
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-105">

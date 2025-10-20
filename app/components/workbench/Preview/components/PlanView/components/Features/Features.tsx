@@ -90,9 +90,17 @@ const Features = () => {
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:scale-105">
               {isCollapsed ? (
-                <ChevronDown className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" size={16} strokeWidth={2.5} />
+                <ChevronDown
+                  className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+                  size={16}
+                  strokeWidth={2.5}
+                />
               ) : (
-                <ChevronUp className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" size={16} strokeWidth={2.5} />
+                <ChevronUp
+                  className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+                  size={16}
+                  strokeWidth={2.5}
+                />
               )}
             </div>
 

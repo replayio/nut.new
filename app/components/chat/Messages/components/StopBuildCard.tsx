@@ -37,7 +37,11 @@ export const StopBuildCard: React.FC<StopBuildCardProps> = ({ onMount }) => {
             onClick={handleStopBuild}
             className="px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-2 min-h-[48px] !bg-gradient-to-r !from-red-600 !to-rose-600 hover:!from-red-700 hover:!to-rose-700"
           >
-            <StopCircle className="transition-transform duration-200 group-hover:scale-110" size={18} strokeWidth={2.5} />
+            <StopCircle
+              className="transition-transform duration-200 group-hover:scale-110"
+              size={18}
+              strokeWidth={2.5}
+            />
             <span className="transition-transform duration-200 group-hover:scale-105">Stop Build</span>
           </button>
         </div>

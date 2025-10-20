@@ -68,11 +68,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
           >
             <div className="flex items-center gap-1 text-bolt-elements-textSecondary opacity-0 group-hover:opacity-100 transition-all duration-200">
               {onDuplicate && (
-                <ChatActionButton
-                  toolTipContent="Duplicate chat"
-                  icon={Copy}
-                  onClick={() => onDuplicate?.(item.id)}
-                />
+                <ChatActionButton toolTipContent="Duplicate chat" icon={Copy} onClick={() => onDuplicate?.(item.id)} />
               )}
               <ChatActionButton
                 toolTipContent="Rename chat"
@@ -86,7 +82,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
                 <ChatActionButton
                   toolTipContent="Delete app"
                   icon={Trash2}
-                  className="[&&]:hover:text-red-500 [&&]:hover:bg-red-500/10"
+                  className="[&&]:hover:text-red-500"
                   onClick={(event) => {
                     event.preventDefault();
                     onDelete?.(event);
@@ -105,6 +101,7 @@ const ChatActionButton = forwardRef(
   (
     {
       toolTipContent,
+      //eslint-disable-next-line @typescript-eslint/naming-convention
       icon: IconComponent,
       className,
       onClick,
@@ -123,7 +120,7 @@ const ChatActionButton = forwardRef(
           <button
             ref={ref}
             type="button"
-            className={`p-1.5 rounded-lg text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-all duration-200 hover:scale-110 ${className ? className : ''}`}
+            className={`p-1.5 rounded-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-110 ${className ? className : ''}`}
             onClick={onClick}
           >
             <IconComponent size={16} />

@@ -408,7 +408,10 @@ export const AccountModal = ({ user }: AccountModalProps) => {
             onClick={reloadAccountData}
             className="w-10 h-10 bg-bolt-elements-background-depth-2 rounded-xl flex items-center justify-center cursor-pointer border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           >
-            <RotateCw className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" size={18} />
+            <RotateCw
+              className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+              size={18}
+            />
           </div>
           <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Usage History</h2>
         </div>

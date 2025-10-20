@@ -3,7 +3,18 @@ import { downloadRepository } from '~/lib/replay/Deploy';
 import { useEffect, useState } from 'react';
 import JSZip from 'jszip';
 import { diffLines } from 'diff';
-import { PlusCircle, MinusCircle, PenCircle, File, GitDiff, GitBranch, AlertTriangle, Files, Code, CheckCircle } from '~/components/ui/Icon';
+import {
+  PlusCircle,
+  MinusCircle,
+  PenSquare,
+  File,
+  GitCompareArrows,
+  GitBranch,
+  AlertTriangle,
+  Files,
+  Code,
+  CheckCircle,
+} from '~/components/ui/Icon';
 
 interface FileDiff {
   path: string;
@@ -173,7 +184,7 @@ function RepositoryDiff() {
       case 'deleted':
         return <MinusCircle className="text-red-500" size={20} />;
       case 'modified':
-        return <PenCircle className="text-blue-500" size={20} />;
+        return <PenSquare className="text-blue-500" size={20} />;
       default:
         return <File className="text-gray-500" size={20} />;
     }
@@ -184,7 +195,7 @@ function RepositoryDiff() {
       <div className="max-w-7xl mx-auto h-full overflow-y-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <GitDiff className="text-white" size={24} />
+            <GitCompareArrows className="text-white" size={24} />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-bolt-elements-textHeading">Repository Diff</h1>

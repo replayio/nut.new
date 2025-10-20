@@ -54,19 +54,19 @@
   .bolt-ease-cubic-bezier {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .transition-theme {
     transition-property: background-color, border-color, color;
     transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .kdb {
     background-color: var(--bolt-elements-code-background);
     color: var(--bolt-elements-code-text);
     @apply py-1 px-1.5 rounded-md;
   }
-  
+
   .max-w-chat {
     max-width: var(--chat-max-width);
   }

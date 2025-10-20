@@ -68,7 +68,10 @@ const DeploymentSuccessful = ({
               >
                 {copied ? (
                   <>
-                    <Check className="text-green-500 transition-transform duration-200 group-hover:scale-110" size={18} />
+                    <Check
+                      className="text-green-500 transition-transform duration-200 group-hover:scale-110"
+                      size={18}
+                    />
                     <span className="transition-transform duration-200 group-hover:scale-105">Copied!</span>
                   </>
                 ) : (

@@ -18,7 +18,10 @@ const LandingPage = () => {
               href="/"
               className="block p-2 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 cursor-pointer"
             >
-              <Home className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 cursor-pointer" size={20} />
+              <Home
+                className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 cursor-pointer"
+                size={20}
+              />
             </a>
           </div>
         )}

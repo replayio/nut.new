@@ -45,7 +45,11 @@ export const SendButton = ({ disabled, onClick }: SendButtonProps) => {
             }}
           >
             {!hasPendingMessage ? (
-              <ArrowUp className="transition-transform duration-200 group-hover:scale-110" size={20} strokeWidth={2.5} />
+              <ArrowUp
+                className="transition-transform duration-200 group-hover:scale-110"
+                size={20}
+                strokeWidth={2.5}
+              />
             ) : (
               <StopCircle className="transition-transform duration-200 group-hover:scale-110" size={20} />
             )}

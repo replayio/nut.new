@@ -7,19 +7,13 @@ interface IconProps {
   size?: number | string;
   strokeWidth?: number;
 }
-
+//eslint-disable-next-line @typescript-eslint/naming-convention
 export function Icon({ icon: IconComponent, className, size = 20, strokeWidth }: IconProps) {
-  return (
-    <IconComponent 
-      className={cn('inline-block', className)} 
-      size={size}
-      strokeWidth={strokeWidth}
-    />
-  );
+  return <IconComponent className={cn('inline-block', className)} size={size} strokeWidth={strokeWidth} />;
 }
 
 // All icons used in the app (migrated from Phosphor/UnoCSS)
-export { 
+export {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,

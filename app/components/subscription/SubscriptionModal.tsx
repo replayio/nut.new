@@ -137,9 +137,15 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor border-opacity-30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
                       {isFree ? (
-                        <Gift className="text-green-500 transition-transform duration-300 group-hover:scale-110" size={24} />
+                        <Gift
+                          className="text-green-500 transition-transform duration-300 group-hover:scale-110"
+                          size={24}
+                        />
                       ) : (
-                        <Rocket className="text-blue-500 transition-transform duration-300 group-hover:scale-110" size={24} />
+                        <Rocket
+                          className="text-blue-500 transition-transform duration-300 group-hover:scale-110"
+                          size={24}
+                        />
                       )}
                     </div>
                     <h3
@@ -167,7 +173,10 @@ export function SubscriptionModal({ currentTier: propCurrentTier }: Subscription
                     {details.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3 group/feature">
                         <div className="w-6 h-6 rounded-lg bg-green-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-green-500/30 transition-all duration-200 group-hover/feature:scale-110 group-hover/feature:bg-green-500/30">
-                          <Check className="text-green-500 transition-transform duration-200 group-hover/feature:scale-110" size={14} />
+                          <Check
+                            className="text-green-500 transition-transform duration-200 group-hover/feature:scale-110"
+                            size={14}
+                          />
                         </div>
                         <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">
                           {feature}

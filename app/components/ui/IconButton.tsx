@@ -84,10 +84,7 @@ export const IconButton = memo(
           ) : typeof icon === 'function' ? (
             // Lucide icon as a component
             createElement(icon, {
-              className: classNames(
-                'transition-transform duration-200 group-hover:scale-110',
-                iconClassName,
-              ),
+              className: classNames('transition-transform duration-200 group-hover:scale-110', iconClassName),
               size: getIconSizeNumber(size),
             })
           ) : (
