@@ -4,12 +4,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
-import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
-import { getDetectedErrors } from '~/lib/replay/MessageHandler';
-import { ChatMode } from '~/lib/replay/SendChatMessage';
-import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
-import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 
