@@ -1,25 +1,8 @@
 import { useState } from 'react';
-import { useStore } from '@nanostores/react';
-import { experimentalFeaturesStore, setExperimentalFeatures } from '~/lib/stores/experimentalFeatures';
 import { FlaskConical, ChevronDown } from '~/components/ui/Icon';
 
 export const ExperimentalFeaturesComponent = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const experimentalFeatures = useStore(experimentalFeaturesStore);
-
-  const handleBugReportsToggle = (checked: boolean) => {
-    setExperimentalFeatures({
-      ...experimentalFeatures,
-      bugReports: checked,
-    });
-  };
-
-  const handleUpFrontPricingToggle = (checked: boolean) => {
-    setExperimentalFeatures({
-      ...experimentalFeatures,
-      upFrontPricing: checked,
-    });
-  };
 
   return (
     <div className="space-y-2">
@@ -38,8 +21,7 @@ export const ExperimentalFeaturesComponent = () => {
       </button>
 
       {isExpanded && (
-        <div className="p-4 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor space-y-3">
-        </div>
+        <div className="p-4 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor space-y-3"></div>
       )}
     </div>
   );

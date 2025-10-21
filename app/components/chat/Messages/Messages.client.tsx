@@ -351,9 +351,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             !hasSubscription && <SubscriptionCard onMount={scrollToBottom} />}
 
-          {!showContinueBuildCard && listenResponses && !hasPendingMessage && appSummary?.features?.length && !isFullyComplete && (
-            <StopBuildCard onMount={scrollToBottom} />
-          )}
+          {!showContinueBuildCard &&
+            listenResponses &&
+            !hasPendingMessage &&
+            appSummary?.features?.length &&
+            !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
 
           {showContinueBuildCard && (
             <ContinueBuildCard

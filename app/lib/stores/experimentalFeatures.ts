@@ -2,8 +2,7 @@ import { atom } from 'nanostores';
 
 export const kExperimentalFeatures = 'nut_experimental_features';
 
-interface ExperimentalFeatures {
-}
+interface ExperimentalFeatures {}
 
 // Whether to enable UI for setting experimental features.
 export function hasExperimentalFeatures() {
