@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
-import { Switch } from '~/components/ui/Switch';
 import { experimentalFeaturesStore, setExperimentalFeatures } from '~/lib/stores/experimentalFeatures';
 import { FlaskConical, ChevronDown } from '~/components/ui/Icon';
 
@@ -40,27 +39,6 @@ export const ExperimentalFeaturesComponent = () => {
 
       {isExpanded && (
         <div className="p-4 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">Bug Reports</span>
-              <span className="text-xs text-bolt-elements-textSecondary">
-                Enable experimental bug reporting functionality
-              </span>
-            </div>
-            <Switch checked={experimentalFeatures.bugReports ?? false} onCheckedChange={handleBugReportsToggle} />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">Up Front Pricing</span>
-              <span className="text-xs text-bolt-elements-textSecondary">
-                Enable experimental up front pricing functionality
-              </span>
-            </div>
-            <Switch
-              checked={experimentalFeatures.upFrontPricing ?? false}
-              onCheckedChange={handleUpFrontPricingToggle}
-            />
-          </div>
         </div>
       )}
     </div>
