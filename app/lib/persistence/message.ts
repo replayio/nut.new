@@ -9,6 +9,10 @@ export interface ChatMessageAttachment {
   mimeType: string;
 }
 
+export interface ChatReferenceComponent {
+  componentNames: string[];
+}
+
 export interface Message {
   id: string;
   role: MessageRole;
@@ -24,6 +28,9 @@ export interface Message {
   approved?: boolean;
 
   hasInteracted: boolean;
+
+  // Component/element reference attached to this message (for visual changes)
+  componentReference?: ChatReferenceComponent;
 }
 
 // Category for the initial response made to every user message.

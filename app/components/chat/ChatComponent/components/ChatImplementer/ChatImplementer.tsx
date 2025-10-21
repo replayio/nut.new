@@ -12,7 +12,11 @@ import { useSearchParams } from '@remix-run/react';
 import { type VisitData, ChatMode } from '~/lib/replay/SendChatMessage';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
-import { type ChatMessageAttachment, type Message } from '~/lib/persistence/message';
+import {
+  type ChatMessageAttachment,
+  type ChatReferenceComponent,
+  type Message,
+} from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { assert, generateRandomId, navigateApp } from '~/utils/nut';
 import { createAttachment as createAttachmentAPI } from '~/lib/replay/NutAPI';
@@ -24,10 +28,6 @@ let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
 function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
-}
-
-interface ChatReferenceComponent {
-  componentNames: string[];
 }
 
 export interface ChatMessageParams {
@@ -157,6 +157,7 @@ const ChatImplementer = memo(() => {
         attachments,
         content: messageInput ?? '',
         hasInteracted: false,
+        componentReference,
       };
 
       addChatMessage(userMessage);

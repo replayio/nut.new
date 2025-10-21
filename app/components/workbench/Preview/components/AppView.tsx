@@ -47,7 +47,8 @@ const AppView = ({
     onTokenOrRepoChange: handleTokenOrRepoChange,
   });
 
-  const actualIframeUrl = redirectUrl || iframeUrl;
+  const actualIframeUrl = "https://44972da2-6ac0-42eb-b975-6f9daca40789.http.replay.io/"
+  
 
   return (
     <div
