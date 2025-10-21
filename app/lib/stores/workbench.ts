@@ -6,6 +6,7 @@ interface ReactComponent {
   props?: Record<string, unknown>;
   state?: unknown;
   type: 'class' | 'function' | 'host';
+  selector?: string; // CSS selector for this specific element
   source?: {
     fileName?: string;
     lineNumber?: number;
