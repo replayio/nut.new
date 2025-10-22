@@ -362,8 +362,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     const originalTree = selectedElement.tree;
                     const breadcrumbData = buildBreadcrumbData(originalTree, {
                       getDisplayName: (comp) => comp.displayName || comp.name,
-                      getKind: (comp) =>
-                        comp.type === 'function' || comp.type === 'class' ? 'react' : 'html',
+                      getKind: (comp) => (comp.type === 'function' || comp.type === 'class' ? 'react' : 'html'),
                     });
 
                     if (!breadcrumbData) {
@@ -388,23 +387,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                           {lastReactComponent &&
                             firstReactComponent &&
                             lastReactDisplayName !== firstReactDisplayName && (
-                            <>
-                              <BreadcrumbSeparator />
-                              <BreadcrumbItem>
-                                <BreadcrumbPage
-                                  className="text-blue-600 dark:text-blue-400 cursor-pointer"
-                                  onMouseEnter={() => highlightElement(lastReactComponent)}
-                                  onMouseLeave={clearHighlight}
-                                  onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
-                                >
-                                  {lastReactDisplayName?.split('$')[0] ||
-                                    lastReactDisplayName ||
-                                    lastReactComponent.name ||
-                                    'Component'}
-                                </BreadcrumbPage>
-                              </BreadcrumbItem>
-                            </>
-                          )}
+                              <>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                  <BreadcrumbPage
+                                    className="text-blue-600 dark:text-blue-400 cursor-pointer"
+                                    onMouseEnter={() => highlightElement(lastReactComponent)}
+                                    onMouseLeave={clearHighlight}
+                                    onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
+                                  >
+                                    {lastReactDisplayName?.split('$')[0] ||
+                                      lastReactDisplayName ||
+                                      lastReactComponent.name ||
+                                      'Component'}
+                                  </BreadcrumbPage>
+                                </BreadcrumbItem>
+                              </>
+                            )}
 
                           {/* Second ellipsis for HTML elements (if there are any) */}
                           {htmlElements.length > 1 && (
