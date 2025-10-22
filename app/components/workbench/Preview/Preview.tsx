@@ -8,10 +8,10 @@ import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 
-let gCurrentIFrame: HTMLIFrameElement | undefined;
+let gCurrentIFrame: React.RefObject<HTMLIFrameElement> | undefined;
 
 export function getCurrentIFrame() {
-  return gCurrentIFrame;
+  return gCurrentIFrameRef?.current ?? undefined;
 }
 
 export const Preview = memo(() => {
@@ -47,7 +47,7 @@ export const Preview = memo(() => {
   // Define the scaling factor
   const SCALING_FACTOR = 2; // Adjust this value to increase/decrease sensitivity
 
-  gCurrentIFrame = iframeRef.current ?? undefined;
+  gCurrentIFrameRef = iframeRef;
 
   const reloadPreview = (route = '') => {
     if (iframeRef.current) {
