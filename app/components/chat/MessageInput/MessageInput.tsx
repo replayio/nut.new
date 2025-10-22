@@ -55,6 +55,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
+import { Crosshair, Paperclip } from 'lucide-react';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -343,7 +344,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <div className="i-ph:cursor text-blue-500 text-sm"></div>
+                <Crosshair size={18} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium">
@@ -464,7 +465,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               onClick={() => workbenchStore.setSelectedElement(null)}
               className="w-6 h-6 rounded-lg bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary flex-shrink-0"
             >
-              <div className="i-ph:x text-sm"></div>
+              <X size={18} />
             </button>
           </div>
         </div>
@@ -640,7 +641,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 className="w-8 h-8 rounded-lg bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
                 onClick={handleFileUpload}
               >
-                <div className="i-ph:paperclip text-lg"></div>
+                <Paperclip size={18} />
               </button>
             </WithTooltip>
           </TooltipProvider>
