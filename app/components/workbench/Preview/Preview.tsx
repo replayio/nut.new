@@ -8,7 +8,7 @@ import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 
-let gCurrentIFrame: React.RefObject<HTMLIFrameElement> | undefined;
+let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
 export function getCurrentIFrame() {
   return gCurrentIFrameRef?.current ?? undefined;
