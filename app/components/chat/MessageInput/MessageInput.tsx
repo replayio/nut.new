@@ -55,7 +55,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
-import { Crosshair, Paperclip } from 'lucide-react';
+import { Crosshair, Paperclip, X } from 'lucide-react';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
