@@ -56,9 +56,7 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
                 </BreadcrumbItem>
 
                 {/* Show currently selected React component (last React component) */}
-                {lastReact &&
-                  firstReact &&
-                  lastReact.displayName !== firstReact.displayName && (
+                {lastReact && firstReact && lastReact.displayName !== firstReact.displayName && (
                   <>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
