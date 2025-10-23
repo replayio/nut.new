@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { Rocket } from '~/components/ui/Icon';
 
 interface ContinueBuildCardProps {
-  sendMessage?: (params: { messageInput: string; chatMode: ChatMode; payFeatures?: boolean }) => void;
+  sendMessage?: (params: ChatMessageParams) => void;
   setShowContinueBuildCard?: (show: boolean) => void;
   onMount?: () => void;
   unpaidFeatureCost?: number;
@@ -47,9 +48,15 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Continue Building</h3>
             <p className="text-bolt-elements-textSecondary text-sm max-w-md">
-              {unpaidFeatureCost
-                ? `Pay ${unpaidFeatureCost} peanuts to continue on your app`
-                : `Ready to continue working on your app? Click the button below to keep building where you left off.`}
+              {unpaidFeatureCost ? (
+                <>
+                  <b>Build Cost: {unpaidFeatureCost} peanuts</b>
+                  <br />
+                  To continue, we'll deduct the peanuts from your account.
+                </>
+              ) : (
+                `Ready to continue working on your app? Click the button below to keep building where you left off.`
+              )}
             </p>
           </div>
 

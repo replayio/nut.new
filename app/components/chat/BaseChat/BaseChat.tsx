@@ -74,6 +74,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const selectedElement = useStore(workbenchStore.selectedElement);
+    const repositoryId = useStore(workbenchStore.repositoryId);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
 
@@ -143,26 +145,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     }, [appSummary]);
 
-    const handleContinueBuilding = () => {
-      if (sendMessage) {
-        sendMessage({ chatMode: ChatMode.DevelopApp });
+    const getComponentReference = useCallback(() => {
+      if (!selectedElement?.tree?.length) {
+        return undefined;
       }
-    };
 
-    // Listen for continue building events from the global status modal
-    useEffect(() => {
-      const handleContinueBuildingEvent = () => {
-        handleContinueBuilding();
+      return {
+        componentNames: selectedElement.tree.map((component) => component.displayName || 'Anonymous'),
       };
+    }, [selectedElement]);
 
-      window.addEventListener('continueBuilding', handleContinueBuildingEvent);
-      return () => {
-        window.removeEventListener('continueBuilding', handleContinueBuildingEvent);
-      };
-    }, [sendMessage]);
+    const handleSendMessage = useCallback(
+      (params: ChatMessageParams) => {
+        if (!sendMessage) {
+          return;
+        }
 
-    const handleSendMessage = (params: ChatMessageParams) => {
-      if (sendMessage) {
+        const componentReference = params.componentReference ?? getComponentReference();
+        const sessionRepositoryId = params.sessionRepositoryId ?? repositoryId;
+
         // Mark discovery messages as interacted when user sends a response
         const messages = chatStore.messages.get();
         const updatedMessages = messages.map((message) => {
@@ -173,7 +174,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         });
         chatStore.messages.set(updatedMessages);
 
-        sendMessage(params);
+        const payload: ChatMessageParams = {
+          ...params,
+          componentReference,
+        };
+
+        if (sessionRepositoryId) {
+          payload.sessionRepositoryId = sessionRepositoryId;
+        }
+
+        sendMessage(payload);
         abortListening();
         setCheckedBoxes([]);
 
@@ -191,8 +201,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           } as React.ChangeEvent<HTMLTextAreaElement>;
           handleInputChange(syntheticEvent);
         }
-      }
-    };
+      },
+      [sendMessage, getComponentReference, repositoryId, abortListening, user, handleInputChange],
+    );
+
+    // Listen for continue building events from the global status modal
+    useEffect(() => {
+      const handleContinueBuildingEvent = () => {
+        handleSendMessage({ chatMode: ChatMode.DevelopApp });
+      };
+
+      window.addEventListener('continueBuilding', handleContinueBuildingEvent);
+      return () => {
+        window.removeEventListener('continueBuilding', handleContinueBuildingEvent);
+      };
+    }, [handleSendMessage]);
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       const newMessages = chatStore.messages.get().map((message) => {

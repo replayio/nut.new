@@ -24,7 +24,8 @@ import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
 import { userStore } from '~/lib/stores/auth';
 import { peanutsStore } from '~/lib/stores/peanuts';
-import { ChatMode, shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 
@@ -32,10 +33,13 @@ interface MessagesProps {
   id?: string;
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
-  sendMessage?: (params: { messageInput: string; chatMode: ChatMode; payFeatures?: boolean }) => void;
+  sendMessage?: (params: ChatMessageParams) => void;
 }
 
-function getUnpaidFeatureCost(appSummary: AppSummary | undefined) {
+function getUnpaidFeatureCost(appSummary: AppSummary | undefined, lastContinueBuildIteration: number) {
+  if ((appSummary?.iteration ?? 0) <= lastContinueBuildIteration) {
+    return 0;
+  }
   let total = 0;
   for (const { status, cost } of appSummary?.features || []) {
     if (status === AppFeatureStatus.PaymentNeeded) {
@@ -63,7 +67,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const totalFeatures = appSummary?.features?.slice(1).length;
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const hasSubscription = useStore(subscriptionStore.hasSubscription);
-    const unpaidFeatureCost = getUnpaidFeatureCost(appSummary);
+    const lastMessageIteration = useStore(chatStore.lastMessageIteration);
+
+    const unpaidFeatureCost = getUnpaidFeatureCost(appSummary, lastMessageIteration);
 
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
@@ -73,8 +79,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     useEffect(() => {
       const shouldShow =
-        !hasPendingMessage &&
-        !listenResponses &&
+        (unpaidFeatureCost || (!hasPendingMessage && !listenResponses)) &&
         appSummary?.features?.length &&
         !isFullyComplete &&
         peanutsRemaining !== undefined &&
@@ -308,9 +313,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             !hasSubscription && <SubscriptionCard onMount={scrollToBottom} />}
 
-          {listenResponses && appSummary?.features?.length && !isFullyComplete && (
-            <StopBuildCard onMount={scrollToBottom} />
-          )}
+          {!showContinueBuildCard &&
+            listenResponses &&
+            !hasPendingMessage &&
+            appSummary?.features?.length &&
+            !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
 
           {showContinueBuildCard && (
             <ContinueBuildCard
