@@ -19,6 +19,8 @@ interface MarkdownProps {
 export const Markdown = memo((props: MarkdownProps) => {
   const { children, html = false, limitedMarkdown = false, onCheckboxChange } = props;
 
+  console.log('children', children);
+  console.log('html', html);
   logger.trace('Render');
 
   const components = useMemo(() => {

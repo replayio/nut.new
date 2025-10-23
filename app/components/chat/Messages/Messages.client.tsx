@@ -290,47 +290,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
         >
           {(() => {
-            const firstAppSummary = messages.find((message) => message.category === APP_SUMMARY_CATEGORY);
-
-            if (!firstAppSummary) {
-              const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
-              return (
-                <>
-                  {displayableMessages.map((message, index) => renderMessage(message, index))}
-                  <AppCards />
-                </>
-              );
-            }
-
-            const appSummaryTime = getAppSummaryTime(firstAppSummary);
-
-            const beforeMessages = processMessageGroup(
-              messages.filter(
-                (message) => shouldDisplayMessage(message) && message.createTime && message.createTime < appSummaryTime,
-              ),
-            );
-
-            const afterMessages = processMessageGroup(
-              messages.filter(
-                (message) =>
-                  shouldDisplayMessage(message) &&
-                  message.category !== APP_SUMMARY_CATEGORY &&
-                  message.createTime &&
-                  message.createTime > appSummaryTime,
-              ),
-            );
-
-            return (
-              <>
-                {beforeMessages.map((message, index) => renderMessage(message, index))}
-                <div className="w-full mt-5">
-                  <AppCards />
-                </div>
-                {afterMessages.length > 0 && (
-                  <div className="mt-5">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
-                )}
-              </>
-            );
+            const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
+            return <>{displayableMessages.map((message, index) => renderMessage(message, index))}</>;
           })()}
 
           {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}

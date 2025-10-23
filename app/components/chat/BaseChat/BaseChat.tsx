@@ -26,6 +26,9 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
+import { AppFeatureKind, AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
+import { openFeatureModal } from '~/lib/stores/featureModal';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -72,6 +75,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
+    const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -97,6 +101,45 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         workbenchStore.setShowWorkbench(true);
         mobileNavStore.setActiveTab('preview');
         hasShownWorkbench.current = true;
+      }
+    }, [appSummary]);
+
+    useEffect(() => {
+      if (appSummary?.features) {
+        // Create filtered features array for modal
+        const filteredFeatures = appSummary.features.filter(
+          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+        );
+
+        setInfoCards(
+          appSummary.features.map((feature, index) => {
+            const iconType =
+              feature.status === AppFeatureStatus.ImplementationInProgress
+                ? 'loading'
+                : feature.status === AppFeatureStatus.Failed
+                  ? 'error'
+                  : 'success';
+
+            const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
+
+            // Find the index of this feature in the filtered array
+            const modalIndex = filteredFeatures.findIndex((f) => f === feature);
+
+            return {
+              id: feature.name,
+              title: feature.name,
+              description: feature.description,
+              iconType,
+              variant,
+              onCardClick:
+                modalIndex !== -1
+                  ? () => {
+                      openFeatureModal(modalIndex, filteredFeatures.length);
+                    }
+                  : undefined,
+            };
+          }),
+        );
       }
     }, [appSummary]);
 
@@ -194,6 +237,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       checkedBoxes,
     };
 
+    console.log('appSummary', appSummary);
+    console.log('infoCards', infoCards);
+
     const baseChat = (
       <div
         ref={ref}
@@ -235,11 +281,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
-                    <Messages
-                      ref={messageRef}
-                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                      sendMessage={sendMessage}
-                    />
+                    <>
+                      <Messages
+                        ref={messageRef}
+                        onLastMessageCheckboxChange={onLastMessageCheckboxChange}
+                        sendMessage={sendMessage}
+                      />
+                      {infoCards && infoCards.length > 0 && (
+                        <StackedInfoCard cards={infoCards} className="w-full mb-2 mt-8" />
+                      )}
+                    </>
                   ) : null;
                 }}
               </ClientOnly>
