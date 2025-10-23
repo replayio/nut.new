@@ -12,7 +12,7 @@ import DefinedApis from '~/components/workbench/Preview/components/PlanView/comp
 import DatabaseChanges from '~/components/workbench/Preview/components/PlanView/components/Features/components/DatabaseChanges';
 import Components from '~/components/workbench/Preview/components/PlanView/components/Features/components/Components';
 import Events from '~/components/workbench/Preview/components/PlanView/components/Features/components/Events';
-import Pages from '../workbench/Preview/components/PlanView/components/Pages';
+import Pages from '~/components/workbench/Preview/components/PlanView/components/Pages';
 
 const FeatureModal: React.FC = () => {
   const modalState = useStore(featureModalStore);

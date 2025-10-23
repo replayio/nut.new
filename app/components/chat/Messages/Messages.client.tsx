@@ -10,7 +10,6 @@ import { User } from '~/components/ui/Icon';
 import {
   MessageContents,
   JumpToBottom,
-  AppCards,
   StartBuildingCard,
   SignInCard,
   AddPeanutsCard,
@@ -175,19 +174,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         return () => clearTimeout(timer);
       }
     }, [startPlanningRating]);
-
-    // Helper function to get AppSummary creation time
-    const getAppSummaryTime = (appSummary: Message): string => {
-      try {
-        if (appSummary.content) {
-          const summaryData = JSON.parse(appSummary.content);
-          return summaryData.time;
-        }
-      } catch {
-        // Fall through to createTime
-      }
-      return appSummary.createTime || new Date().toISOString();
-    };
 
     // Helper function to filter, deduplicate, and sort messages
     const processMessageGroup = (messageGroup: Message[]): Message[] => {

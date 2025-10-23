@@ -59,7 +59,8 @@ $code-font-size: 13px;
   }
 
   // Bold/strong text styling
-  strong, b {
+  strong,
+  b {
     font-weight: 600;
     color: var(--bolt-elements-textHeading);
   }
