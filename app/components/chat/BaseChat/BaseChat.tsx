@@ -98,6 +98,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
     const hasShownWorkbench = useRef(false);
+
     useEffect(() => {
       if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
@@ -114,33 +115,35 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         );
 
         setInfoCards(
-          appSummary.features.map((feature) => {
-            const iconType =
-              feature.status === AppFeatureStatus.ImplementationInProgress
-                ? 'loading'
-                : feature.status === AppFeatureStatus.Failed
-                  ? 'error'
-                  : 'success';
+          appSummary.features
+            .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress)
+            .map((feature) => {
+              const iconType =
+                feature.status === AppFeatureStatus.ImplementationInProgress
+                  ? 'loading'
+                  : feature.status === AppFeatureStatus.Failed
+                    ? 'error'
+                    : 'success';
 
-            const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
+              const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
 
-            // Find the index of this feature in the filtered array
-            const modalIndex = filteredFeatures.findIndex((f) => f === feature);
+              // Find the index of this feature in the filtered array
+              const modalIndex = filteredFeatures.findIndex((f) => f === feature);
 
-            return {
-              id: feature.name,
-              title: feature.name,
-              description: feature.description,
-              iconType,
-              variant,
-              onCardClick:
-                modalIndex !== -1
-                  ? () => {
-                      openFeatureModal(modalIndex, filteredFeatures.length);
-                    }
-                  : undefined,
-            };
-          }),
+              return {
+                id: feature.name,
+                title: feature.name,
+                description: feature.description,
+                iconType,
+                variant,
+                onCardClick:
+                  modalIndex !== -1
+                    ? () => {
+                        openFeatureModal(modalIndex, filteredFeatures.length);
+                      }
+                    : undefined,
+              };
+            }),
         );
       }
     }, [appSummary]);
@@ -260,9 +263,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       checkedBoxes,
     };
 
-    console.log('appSummary', appSummary);
-    console.log('infoCards', infoCards);
-
     const baseChat = (
       <div
         ref={ref}
@@ -311,7 +311,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         sendMessage={sendMessage}
                       />
                       {infoCards && infoCards.length > 0 && (
-                        <StackedInfoCard cards={infoCards} className="w-full mb-2 mt-8" />
+                        <StackedInfoCard cards={infoCards} className="w-full mb-2" />
                       )}
                     </>
                   ) : null;

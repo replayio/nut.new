@@ -2,8 +2,11 @@ import React from 'react';
 import { useStore } from '@nanostores/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { classNames } from '~/utils/classNames';
-import { Check, X, ChevronRight, ChevronLeft } from '~/components/ui/Icon';
+import { X, ChevronRight, ChevronLeft, Icon, CreditCard, Hourglass } from '~/components/ui/Icon';
+import { Loader2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { AppFeatureKind, AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
+import { XCircle } from 'lucide-react';
 import { formatPascalCaseName } from '~/utils/names';
 import { chatStore } from '~/lib/stores/chat';
 import { featureModalStore, goToNextFeature, goToPreviousFeature, closeFeatureModal } from '~/lib/stores/featureModal';
@@ -31,35 +34,71 @@ const FeatureModal: React.FC = () => {
   const hasPrevious = modalState.currentFeatureIndex > 0;
 
   const renderFeatureStatus = (status: AppFeatureStatus) => {
-    switch (status) {
-      case AppFeatureStatus.NotStarted:
-        break;
-      case AppFeatureStatus.ImplementationInProgress:
-        return (
-          <div className="flex items-center pl-2">
-            <div
-              className={classNames(
-                'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin shadow-sm',
-              )}
-            />
-          </div>
-        );
-      case AppFeatureStatus.Implemented:
-        return (
-          <div className="text-green-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-green-50 px-2 py-1 rounded-lg border border-green-200 shadow-sm">
-            <Check size={14} strokeWidth={2.5} />
-            Complete
-          </div>
-        );
-      case AppFeatureStatus.Failed:
-        return (
-          <div className="text-red-600 text-sm font-medium whitespace-nowrap pl-2 flex items-center gap-2 bg-red-50 px-2 py-1 rounded-lg border border-red-200 shadow-sm">
-            <X size={14} strokeWidth={2.5} />
-            Failed
-          </div>
-        );
+    const getStatusConfig = (status: AppFeatureStatus) => {
+      switch (status) {
+        case AppFeatureStatus.PaymentNeeded:
+          return {
+            icon: CreditCard,
+            label: 'Payment Required',
+            className: 'text-bolt-elements-textPrimary bg-amber-50 border-amber-200',
+            iconClassName: 'text-bolt-elements-textPrimary',
+          };
+        case AppFeatureStatus.NotStarted:
+          return {
+            icon: Hourglass,
+            label: 'Pending',
+            className: 'text-bolt-elements-textPrimary bg-gray-50 border-gray-200',
+            iconClassName: 'text-bolt-elements-textPrimary',
+          };
+        case AppFeatureStatus.ImplementationInProgress:
+          return {
+            icon: Loader2,
+            label: 'In Progress',
+            className: 'text-blue-600 bg-blue-50 border-blue-200',
+            iconClassName: 'text-blue-500',
+            showSpinner: true,
+          };
+        case AppFeatureStatus.Implemented:
+          return {
+            icon: CheckCircle,
+            label: 'Complete',
+            className: 'text-green-600 bg-green-50 border-green-200',
+            iconClassName: 'text-green-500',
+          };
+        case AppFeatureStatus.Failed:
+          return {
+            icon: XCircle,
+            label: 'Failed',
+            className: 'text-red-600 bg-red-50 border-red-200',
+            iconClassName: 'text-red-500',
+          };
+        default:
+          return null;
+      }
+    };
+
+    const config = getStatusConfig(status);
+    if (!config) {
+      return null;
     }
-    return null;
+
+    return (
+      <div
+        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all duration-200 ${config.className}`}
+      >
+        {config.showSpinner ? (
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            <span>{config.label}</span>
+          </div>
+        ) : (
+          <>
+            <Icon icon={config.icon} size={16} className={config.iconClassName} />
+            <span>{config.label}</span>
+          </>
+        )}
+      </div>
+    );
   };
 
   const handleNext = () => {
@@ -111,12 +150,12 @@ const FeatureModal: React.FC = () => {
               <div className="flex items-center gap-4">
                 {/* Feature Info */}
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold text-bolt-elements-textHeading">{name}</h2>
+                  <h2 className="flex items-center gap-2 text-xl font-bold text-bolt-elements-textHeading">
+                    {name}
+                    <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
+                  </h2>
                   <p className="text-bolt-elements-textSecondary mt-1">{description}</p>
                 </div>
-
-                {/* Status */}
-                <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
               </div>
 
               {/* Close Button */}
