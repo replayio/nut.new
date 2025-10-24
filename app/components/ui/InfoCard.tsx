@@ -6,50 +6,6 @@ import { CheckCircle, Info, AlertTriangle, XCircle, Loader2 } from 'lucide-react
 import { useState } from 'react';
 import { formatPascalCaseName } from '~/utils/names';
 
-// Add CSS keyframes for animations
-const animationStyles = `
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-  }
-`;
-
-// Inject styles if not already present
-if (typeof document !== 'undefined' && !document.getElementById('stacked-info-card-animations')) {
-  const styleSheet = document.createElement('style');
-  styleSheet.id = 'stacked-info-card-animations';
-  styleSheet.textContent = animationStyles;
-  document.head.appendChild(styleSheet);
-}
-
 const infoCardVariants = cva('flex items-start gap-3 rounded-2xl border p-4 transition-colors', {
   variants: {
     variant: {
@@ -188,158 +144,118 @@ export { InfoCard, infoCardVariants };
 export interface StackedInfoCardProps {
   cards: Array<InfoCardData>;
   className?: string;
+  scrollToBottom?: () => void;
 }
 
-const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(({ cards, className }, ref) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
-  const [wrapperHeight, setWrapperHeight] = React.useState(80); // Default height
-  const [expandedHeight, setExpandedHeight] = React.useState(0);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const cardRef = React.useRef<HTMLDivElement>(null);
-  const hasMoreCards = cards.length > 1;
+const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
+  ({ cards, className, scrollToBottom }, ref) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+    const [wrapperHeight, setWrapperHeight] = React.useState(80); // Default height
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+    const cardRef = React.useRef<HTMLDivElement>(null);
+    const hasMoreCards = cards.length > 1;
 
-  const toggleExpanded = () => {
-    if (hasMoreCards) {
-      setIsAnimating(true);
-
-      if (!isExpanded) {
-        // Calculate expanded height
-        const estimatedHeight = Math.min(cards.length * 100 + 40, 400); // Estimate 100px per card + padding
-        setExpandedHeight(estimatedHeight);
+    const toggleExpanded = () => {
+      if (hasMoreCards) {
+        setIsExpanded(!isExpanded);
+        setTimeout(() => {
+          scrollToBottom?.();
+        }, 100);
       }
+    };
 
-      setIsExpanded(!isExpanded);
+    // Measure card height and update wrapper height
+    React.useEffect(() => {
+      if (cardRef.current && !isExpanded) {
+        const cardElement = cardRef.current;
+        const cardHeight = cardElement.offsetHeight;
+        // Use the larger of the measured height or minimum 80px
+        setWrapperHeight(Math.max(cardHeight, 80));
+      }
+    }, [cards, isExpanded]);
 
-      // Handle animation completion
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 300); // Match the transition duration
-    }
-  };
+    // Scroll to bottom when expanded
+    React.useEffect(() => {
+      if (isExpanded && scrollContainerRef.current) {
+        const scrollContainer = scrollContainerRef.current;
+        // Use setTimeout to ensure the DOM has updated
+        setTimeout(() => {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }, 0);
+      }
+    }, [isExpanded]);
 
-  // Measure card height and update wrapper height
-  React.useEffect(() => {
-    if (cardRef.current && !isExpanded) {
-      const cardElement = cardRef.current;
-      const cardHeight = cardElement.offsetHeight;
-      // Use the larger of the measured height or minimum 80px
-      setWrapperHeight(Math.max(cardHeight, 80));
-    }
-  }, [cards, isExpanded]);
-
-  // Scroll to bottom when expanded
-  React.useEffect(() => {
-    if (isExpanded && scrollContainerRef.current) {
-      const scrollContainer = scrollContainerRef.current;
-      // Use setTimeout to ensure the DOM has updated
-      setTimeout(() => {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }, 0);
-    }
-  }, [isExpanded]);
-
-  return (
-    <div
-      ref={ref}
-      className={cn('relative mt-4 transition-all duration-300 ease-in-out', className, {
-        'mt-10': hasMoreCards,
-      })}
-      style={{
-        height: isExpanded ? `${expandedHeight}px` : `${wrapperHeight}px`,
-        transition: 'height 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-    >
+    return (
       <div
-        className={cn(
-          'relative transition-all duration-200',
-          hasMoreCards && !isExpanded && 'cursor-pointer hover:scale-[1.02]',
-          isExpanded && 'absolute bottom-0 w-full left-0 z-20 backdrop-blur-sm',
-        )}
-        onMouseEnter={hasMoreCards && !isExpanded ? toggleExpanded : undefined}
-        onMouseLeave={isExpanded ? toggleExpanded : undefined}
+        ref={ref}
+        className={cn('relative mt-4', className, {
+          'mt-10': hasMoreCards,
+        })}
+        style={{ height: `${wrapperHeight}px` }}
       >
-        {!isExpanded ? (
-          <>
-            <div
-              ref={cardRef}
-              className="relative z-30 transition-all duration-300 ease-out"
-              onMouseEnter={() => setHoveredIndex(0)}
-              onMouseLeave={() => setHoveredIndex(null)}
+        <div
+          className={cn(
+            'relative transition-all duration-200',
+            hasMoreCards && !isExpanded && 'cursor-pointer hover:scale-[1.02]',
+            isExpanded && 'absolute bottom-0 w-full left-0 z-20 backdrop-blur-sm',
+          )}
+          onMouseEnter={hasMoreCards && !isExpanded ? toggleExpanded : undefined}
+          onMouseLeave={isExpanded ? toggleExpanded : undefined}
+        >
+          {!isExpanded ? (
+            <>
+              <div
+                ref={cardRef}
+                className="relative z-30 transition-all duration-200"
+                onMouseEnter={() => setHoveredIndex(0)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <InfoCard
+                  title={cards[cards.length - 1].title}
+                  description={cards[cards.length - 1].description}
+                  iconType={cards[cards.length - 1].iconType}
+                  variant={cards[cards.length - 1].variant}
+                  onActionClick={cards[cards.length - 1].onActionClick}
+                  className={cn('shadow-md', hoveredIndex === 0 && 'shadow-lg')}
+                  onCardClick={cards[cards.length - 1].onCardClick}
+                />
+              </div>
+
+              {/* Empty placeholder cards for stack effect */}
+              {cards.length > 1 && (
+                <div
+                  className="absolute w-full bottom-[60px] left-0 z-20 transition-all duration-200"
+                  style={{
+                    transform: 'scale(0.95)',
+                  }}
+                >
+                  <div className="bg-bolt-elements-background-depth-2 border-2 border-bolt-elements-borderColor rounded-2xl p-4 h-full" />
+                </div>
+              )}
+
+              {cards.length > 2 && (
+                <div
+                  className="absolute w-full bottom-[75px] left-0 z-10 transition-all duration-200"
+                  style={{
+                    transform: 'scale(0.9)',
+                  }}
+                >
+                  <div className="bg-bolt-elements-background-depth-2 border-2 border-bolt-elements-borderColor rounded-2xl p-4 h-full" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div 
+              ref={scrollContainerRef} 
+              className="space-y-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto animate-in slide-in-from-bottom duration-400"
               style={{
-                animation:
-                  isAnimating && !isExpanded ? 'slideDown 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards' : 'none',
+                animation: 'slideUp 400ms ease-out'
               }}
             >
-              <InfoCard
-                title={cards[cards.length - 1].title}
-                description={cards[cards.length - 1].description}
-                iconType={cards[cards.length - 1].iconType}
-                variant={cards[cards.length - 1].variant}
-                onActionClick={cards[cards.length - 1].onActionClick}
-                className={cn('shadow-md transition-all duration-300', hoveredIndex === 0 && 'shadow-lg')}
-                onCardClick={cards[cards.length - 1].onCardClick}
-              />
-            </div>
-
-            {/* Background cards for stack effect */}
-            {cards.length > 1 && (
-              <div
-                className="absolute w-full bottom-[40px] left-0 z-10 transition-all duration-300 ease-out"
-                style={{
-                  animation:
-                    isAnimating && !isExpanded ? 'slideDown 300ms cubic-bezier(0.4, 0, 0.2, 1) 50ms forwards' : 'none',
-                }}
-              >
+              {cards.map((card) => (
                 <InfoCard
-                  title={cards[cards.length - 2].title}
-                  description={cards[cards.length - 2].description}
-                  iconType={cards[cards.length - 2].iconType}
-                  variant={cards[cards.length - 2].variant}
-                  className="shadow-md scale-90"
-                />
-              </div>
-            )}
-
-            {cards.length > 2 && (
-              <div
-                className="absolute w-full bottom-[20px] left-0 z-10 transition-all duration-300 ease-out"
-                style={{
-                  animation:
-                    isAnimating && !isExpanded ? 'slideDown 300ms cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards' : 'none',
-                }}
-              >
-                <InfoCard
-                  title={cards[cards.length - 3].title}
-                  description={cards[cards.length - 3].description}
-                  iconType={cards[cards.length - 3].iconType}
-                  variant={cards[cards.length - 3].variant}
-                  className="shadow-md scale-95"
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <div
-            ref={scrollContainerRef}
-            className="space-y-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto"
-            style={{
-              animation: isAnimating ? 'slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards' : 'none',
-            }}
-          >
-            {cards.map((card, index) => (
-              <div
-                key={card.id}
-                style={{
-                  animation: isAnimating
-                    ? `fadeInUp 300ms cubic-bezier(0.4, 0, 0.2, 1) ${index * 50}ms forwards`
-                    : 'none',
-                  opacity: isAnimating ? 0 : 1,
-                  transform: isAnimating ? 'translateY(20px)' : 'translateY(0)',
-                }}
-              >
-                <InfoCard
+                  key={card.id}
                   title={card.title}
                   description={card.description}
                   iconType={card.iconType}
@@ -348,14 +264,14 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>((
                   onCardClick={card.onCardClick}
                   className="shadow-sm"
                 />
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 StackedInfoCard.displayName = 'StackedInfoCard';
 

@@ -1,15 +1,14 @@
 import React from 'react';
 import { useStore } from '@nanostores/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { classNames } from '~/utils/classNames';
-import { X, ChevronRight, ChevronLeft, Icon, CreditCard, Hourglass } from '~/components/ui/Icon';
+import { X, Icon, CreditCard, Hourglass } from '~/components/ui/Icon';
 import { Loader2 } from 'lucide-react';
 import { CheckCircle } from 'lucide-react';
 import { AppFeatureKind, AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 import { XCircle } from 'lucide-react';
 import { formatPascalCaseName } from '~/utils/names';
 import { chatStore } from '~/lib/stores/chat';
-import { featureModalStore, goToNextFeature, goToPreviousFeature, closeFeatureModal } from '~/lib/stores/featureModal';
+import { featureModalStore, closeFeatureModal } from '~/lib/stores/featureModal';
 import Tests from '~/components/workbench/Preview/components/PlanView/components/Features/components/Tests';
 import DefinedApis from '~/components/workbench/Preview/components/PlanView/components/Features/components/DefinedApis';
 import DatabaseChanges from '~/components/workbench/Preview/components/PlanView/components/Features/components/DatabaseChanges';
@@ -30,8 +29,6 @@ const FeatureModal: React.FC = () => {
     (feature) => feature.kind !== AppFeatureKind.BuildInitialApp && feature.kind !== AppFeatureKind.DesignAPIs,
   );
   const currentFeature = filteredFeatures[modalState.currentFeatureIndex];
-  const hasNext = modalState.currentFeatureIndex < modalState.totalFeatures - 1;
-  const hasPrevious = modalState.currentFeatureIndex > 0;
 
   const renderFeatureStatus = (status: AppFeatureStatus) => {
     const getStatusConfig = (status: AppFeatureStatus) => {
@@ -101,18 +98,6 @@ const FeatureModal: React.FC = () => {
     );
   };
 
-  const handleNext = () => {
-    if (hasNext) {
-      goToNextFeature();
-    }
-  };
-
-  const handlePrevious = () => {
-    if (hasPrevious) {
-      goToPreviousFeature();
-    }
-  };
-
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       closeFeatureModal();
@@ -169,16 +154,6 @@ const FeatureModal: React.FC = () => {
 
             {/* Content with Navigation */}
             <div className="flex items-center">
-              {/* Left Navigation Button */}
-              {hasPrevious && (
-                <button
-                  onClick={handlePrevious}
-                  className="flex-shrink-0 w-10 h-10 rounded-full bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border border-bolt-elements-borderColor shadow-lg transition-all duration-200 flex items-center justify-center opacity-50 hover:opacity-100 hover:shadow-xl cursor-pointer ml-2.5"
-                >
-                  <ChevronLeft size={20} strokeWidth={2.5} />
-                </button>
-              )}
-
               {/* Content */}
               <div className="flex-1 p-6 overflow-y-auto max-h-[calc(90vh-120px)] ">
                 <div className="space-y-6">
@@ -208,39 +183,8 @@ const FeatureModal: React.FC = () => {
                   )}
                 </div>
               </div>
-
-              {/* Right Navigation Button */}
-              {hasNext && (
-                <button
-                  onClick={handleNext}
-                  className="flex-shrink-0 w-10 h-10 rounded-full bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border border-bolt-elements-borderColor shadow-lg transition-all duration-200 flex items-center justify-center opacity-50 hover:opacity-100 hover:shadow-xl cursor-pointer mr-2.5"
-                >
-                  <ChevronRight size={20} strokeWidth={2.5} />
-                </button>
-              )}
             </div>
 
-            {/* Footer with feature counter */}
-            <div className="px-6 py-4 border-t border-bolt-elements-borderColor bg-bolt-elements-background-depth-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-bolt-elements-textSecondary">
-                  Feature {modalState.currentFeatureIndex + 1} of {modalState.totalFeatures}
-                </div>
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: modalState.totalFeatures }, (_, index) => (
-                    <div
-                      key={index}
-                      className={classNames(
-                        'w-2 h-2 rounded-full transition-all duration-200',
-                        index === modalState.currentFeatureIndex
-                          ? 'bg-bolt-elements-textPrimary'
-                          : 'bg-bolt-elements-borderColor',
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
           </motion.div>
         </motion.div>
       )}
