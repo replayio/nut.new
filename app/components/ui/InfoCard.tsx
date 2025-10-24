@@ -151,7 +151,9 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
   ({ cards, className, scrollToBottom }, ref) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+    const [wrapperHeight, setWrapperHeight] = React.useState(80); // Default height
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+    const cardRef = React.useRef<HTMLDivElement>(null);
     const hasMoreCards = cards.length > 1;
 
     const toggleExpanded = () => {
@@ -162,6 +164,16 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
         }, 100);
       }
     };
+
+    // Measure card height and update wrapper height
+    React.useEffect(() => {
+      if (cardRef.current && !isExpanded) {
+        const cardElement = cardRef.current;
+        const cardHeight = cardElement.offsetHeight;
+        // Use the larger of the measured height or minimum 80px
+        setWrapperHeight(Math.max(cardHeight, 80));
+      }
+    }, [cards, isExpanded]);
 
     // Scroll to bottom when expanded
     React.useEffect(() => {
@@ -177,9 +189,10 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     return (
       <div
         ref={ref}
-        className={cn('relative h-[80px] mt-4', className, {
+        className={cn('relative mt-4', className, {
           'mt-8': hasMoreCards,
         })}
+        style={{ height: `${wrapperHeight}px` }}
       >
         <div
           className={cn(
@@ -193,6 +206,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
           {!isExpanded ? (
             <>
               <div
+                ref={cardRef}
                 className="relative z-30 transition-all duration-200"
                 onMouseEnter={() => setHoveredIndex(0)}
                 onMouseLeave={() => setHoveredIndex(null)}
