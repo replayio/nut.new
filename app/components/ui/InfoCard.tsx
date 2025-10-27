@@ -1,9 +1,8 @@
-import * as React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '~/lib/utils';
 import { Icon } from './Icon';
 import { CheckCircle, Info, AlertTriangle, XCircle, Loader2 } from 'lucide-react';
-import { useState } from 'react';
 import { formatPascalCaseName } from '~/utils/names';
 
 const infoCardVariants = cva('flex items-start gap-3 rounded-2xl border p-4 transition-colors', {
@@ -150,11 +149,15 @@ export interface StackedInfoCardProps {
 const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
   ({ cards, className, scrollToBottom }, ref) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
-    const [wrapperHeight, setWrapperHeight] = React.useState(80); // Default height
-    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-    const cardRef = React.useRef<HTMLDivElement>(null);
-    const hasMoreCards = cards.length > 1;
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const [wrapperHeight, setWrapperHeight] = useState(80); // Default height
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const cardRef = useRef<HTMLDivElement>(null);
+    const [hasMoreCards, setHasMoreCards] = useState<boolean>(cards.length > 1);
+
+    useEffect(() => {
+      setHasMoreCards(cards.length > 1);
+    }, [cards]);
 
     const toggleExpanded = () => {
       if (hasMoreCards) {
@@ -166,7 +169,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     };
 
     // Measure card height and update wrapper height
-    React.useEffect(() => {
+    useEffect(() => {
       if (cardRef.current && !isExpanded) {
         const cardElement = cardRef.current;
         const cardHeight = cardElement.offsetHeight;
@@ -176,7 +179,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     }, [cards, isExpanded]);
 
     // Scroll to bottom when expanded
-    React.useEffect(() => {
+    useEffect(() => {
       if (isExpanded && scrollContainerRef.current) {
         const scrollContainer = scrollContainerRef.current;
         // Use setTimeout to ensure the DOM has updated
@@ -190,7 +193,8 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
       <div
         ref={ref}
         className={cn('relative mt-4', className, {
-          'mt-10': hasMoreCards,
+          'mt-8': hasMoreCards && cards.length > 1,
+          'mt-10': hasMoreCards && cards.length > 2,
         })}
         style={{ height: `${wrapperHeight}px` }}
       >
@@ -246,13 +250,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
               )}
             </>
           ) : (
-            <div 
-              ref={scrollContainerRef} 
-              className="space-y-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto animate-in slide-in-from-bottom duration-400"
-              style={{
-                animation: 'slideUp 400ms ease-out'
-              }}
-            >
+            <div ref={scrollContainerRef} className="space-y-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
               {cards.map((card) => (
                 <InfoCard
                   key={card.id}
