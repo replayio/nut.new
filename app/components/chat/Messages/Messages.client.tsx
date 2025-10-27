@@ -408,7 +408,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               onMount={scrollToBottom}
               sendMessage={sendMessage}
               setShowContinueBuildCard={setShowContinueBuildCard}
-              unpaidFeatureCost={0}
+              unpaidFeatureCost={unpaidFeatureCost}
             />
           )}
 
