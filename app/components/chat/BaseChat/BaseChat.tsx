@@ -117,7 +117,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setInfoCards((prevState) => [
           ...prevState,
           ...(appSummary.features ?? [])
-            .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress)
+            // .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress)
             .map((feature) => {
               const iconType: 'loading' | 'error' | 'success' =
                 feature.status === AppFeatureStatus.ImplementationInProgress

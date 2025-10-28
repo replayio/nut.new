@@ -149,7 +149,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
                   <Icon icon={MoreHorizontal} size={16} className="text-bolt-elements-textSecondary" />
                 </button>
                 {isOpen && (
-                  <div className="absolute right-full top-0 mt-2 w-48 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg shadow-lg z-50">
+                  <div className="absolute right-full top-0 mt-2 w-48 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg shadow-lg z-14">
                     {actionButtons.map((button) => (
                       <button
                         key={button.label}
@@ -240,7 +240,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
           className={cn(
             'relative transition-all duration-200',
             hasMoreCards && !isExpanded && 'cursor-pointer hover:scale-[1.02]',
-            isExpanded && 'absolute bottom-0 w-full left-0 z-20 backdrop-blur-sm',
+            isExpanded && 'absolute bottom-0 w-full left-0 z-0 backdrop-blur-sm',
           )}
           onMouseEnter={hasMoreCards && !isExpanded ? toggleExpanded : undefined}
           onMouseLeave={isExpanded ? toggleExpanded : undefined}
@@ -249,7 +249,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
             <>
               <div
                 ref={cardRef}
-                className="relative z-30 transition-all duration-200"
+                className="relative z-[3] transition-all duration-200"
                 onMouseEnter={() => setHoveredIndex(0)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
@@ -268,7 +268,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
               {/* Empty placeholder cards for stack effect */}
               {cards.length > 1 && (
                 <div
-                  className="absolute w-full left-0 z-20 transition-all duration-200"
+                  className="absolute w-full left-0 z-[2] transition-all duration-200"
                   style={{
                     bottom: `${cardHeight - 20}px`,
                     transform: 'scale(0.95)',
@@ -280,7 +280,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
 
               {cards.length > 2 && (
                 <div
-                  className="absolute w-full left-0 z-10 transition-all duration-200"
+                  className="absolute w-full left-0 z-[1] transition-all duration-200"
                   style={{
                     bottom: `${cardHeight - 5}px`,
                     transform: 'scale(0.9)',
