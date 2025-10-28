@@ -226,7 +226,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     if (!userId) {
       return;
     }
-
   } catch (error) {
     console.error('Error handling payment failure:', error);
   }

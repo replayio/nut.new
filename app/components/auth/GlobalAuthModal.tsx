@@ -32,7 +32,6 @@ export function GlobalAuthModal() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to add user to Intercom');
       }
-
     } catch (error) {
       console.error('Error adding user to Intercom:', error);
       toast.error('Failed to sync with Intercom (non-critical)');
