@@ -152,12 +152,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
 
       // Add bug report cards
-      const bugReportCards = (
-        appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []
-      ).map((report) => ({
-        id: report.name,
-        bugReport: report,
-      }));
+      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
+        (report) => ({
+          id: report.name,
+          bugReport: report,
+        }),
+      );
 
       newCards.push(...bugReportCards);
 
