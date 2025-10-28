@@ -160,8 +160,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       ]);
     }, [appSummary]);
 
-    console.log('infoCards', infoCards);
-
     const getComponentReference = useCallback(() => {
       if (!selectedElement?.tree?.length) {
         return undefined;

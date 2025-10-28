@@ -24,7 +24,5 @@ export async function supabaseSubmitFeedback(feedback: any) {
     return false;
   }
 
-  console.log('Feedback submitted successfully:', data);
-
   return true;
 }

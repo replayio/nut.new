@@ -33,7 +33,6 @@ export function GlobalAuthModal() {
         throw new Error(data.error || 'Failed to add user to Intercom');
       }
 
-      console.log('New contact created in Intercom');
     } catch (error) {
       console.error('Error adding user to Intercom:', error);
       toast.error('Failed to sync with Intercom (non-critical)');
