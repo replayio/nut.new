@@ -27,7 +27,7 @@ import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
-import { AppFeatureKind, AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
+import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { openFeatureModal } from '~/lib/stores/featureModal';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
@@ -114,18 +114,20 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
         );
 
-        setInfoCards(
-          appSummary.features
-            .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress)
+        setInfoCards((prevState) => [
+          ...prevState,
+          ...(appSummary.features ?? [])
+            // .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress)
             .map((feature) => {
-              const iconType =
+              const iconType: 'loading' | 'error' | 'success' =
                 feature.status === AppFeatureStatus.ImplementationInProgress
                   ? 'loading'
                   : feature.status === AppFeatureStatus.Failed
                     ? 'error'
                     : 'success';
 
-              const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
+              const variant: 'active' | 'default' =
+                feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
 
               // Find the index of this feature in the filtered array
               const modalIndex = filteredFeatures.findIndex((f) => f === feature);
@@ -144,9 +146,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     : undefined,
               };
             }),
-        );
+        ]);
       }
     }, [appSummary]);
+
+    useEffect(() => {
+      setInfoCards((prevState) => [
+        ...prevState,
+        ...(appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map((report) => ({
+          id: report.name,
+          bugReport: report,
+        })),
+      ]);
+    }, [appSummary]);
+
+    console.log('infoCards', infoCards);
 
     const getComponentReference = useCallback(() => {
       if (!selectedElement?.tree?.length) {

@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '~/lib/utils';
 import { Icon } from './Icon';
-import { CheckCircle, Info, AlertTriangle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Info, AlertTriangle, XCircle, Loader2, MoreHorizontal } from 'lucide-react';
 import { formatPascalCaseName } from '~/utils/names';
+import { BugReportComponent } from '~/components/chat/BugReportComponent';
+import type { BugReport } from '~/lib/persistence/messageAppSummary';
 
 const infoCardVariants = cva('flex items-start gap-3 rounded-2xl border p-4 transition-colors', {
   variants: {
@@ -43,22 +45,31 @@ const iconVariants = cva(
 );
 
 export interface InfoCardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof infoCardVariants> {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   iconType?: 'success' | 'info' | 'warning' | 'error' | 'loading';
-  showActionButton?: boolean;
-  onActionClick?: () => void;
+  actionButtons?: {
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+  }[];
   onCardClick?: () => void;
+  bugReport?: BugReport;
 }
 
 export interface InfoCardData {
   id: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   iconType?: 'success' | 'info' | 'warning' | 'error' | 'loading';
   variant?: 'default' | 'active' | 'warning';
-  onActionClick?: () => void;
+  actionButtons?: {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+  }[];
   onCardClick?: () => void;
+  bugReport?: BugReport;
 }
 const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
   (
@@ -69,13 +80,14 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
       title,
       description,
       iconType = 'success',
-      //   showActionButton = true,
-      //   onActionClick,
+      actionButtons,
       onCardClick,
+      bugReport,
       ...props
     },
     ref,
   ) => {
+    const [isOpen, setIsOpen] = useState(false);
     const getIcon = () => {
       switch (iconType) {
         case 'success':
@@ -104,32 +116,56 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
         {...props}
         onClick={onCardClick}
       >
-        {/* Icon */}
-        <div className={cn(iconVariants({ type: iconType }))}>
-          <Icon icon={IconComponent} size={16} className={iconType === 'loading' ? 'animate-spin' : ''} />
-        </div>
+        {bugReport ? (
+          <BugReportComponent report={bugReport} />
+        ) : (
+          <>
+            {/* Icon */}
+            <div className="flex flex-col items-center gap-2">
+              <div className={cn(iconVariants({ type: iconType }))}>
+                <Icon icon={IconComponent} size={16} className={iconType === 'loading' ? 'animate-spin' : ''} />
+              </div>
+            </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
-            {formatPascalCaseName(title)}
-          </h3>
-          <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
-        </div>
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
+                {title ? formatPascalCaseName(title) : ''}
+              </h3>
+              <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
+            </div>
 
-        {/* Action Button */}
-        {/* {showActionButton && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onActionClick?.();
-            }}
-            className="flex-shrink-0 p-1 w-8 h-8 flex items-center justify-center rounded-full transition-colors bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor"
-            aria-label="More options"
-          >
-            <Icon icon={MoreHorizontal} size={16} className="text-bolt-elements-textSecondary" />
-          </button>
-        )} */}
+            {/* Action Button */}
+            {actionButtons && actionButtons.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    setIsOpen(!isOpen);
+                    e.stopPropagation();
+                  }}
+                  className="flex-shrink-0 p-1 w-8 h-8 flex items-center justify-center rounded-full transition-colors bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor"
+                  aria-label="More options"
+                >
+                  <Icon icon={MoreHorizontal} size={16} className="text-bolt-elements-textSecondary" />
+                </button>
+                {isOpen && (
+                  <div className="absolute right-full top-0 mt-2 w-48 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg shadow-lg z-50">
+                    {actionButtons.map((button) => (
+                      <button
+                        key={button.label}
+                        onClick={button.onClick}
+                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3"
+                      >
+                        {button.icon}
+                        {button.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   },
@@ -151,6 +187,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     const [isExpanded, setIsExpanded] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [wrapperHeight, setWrapperHeight] = useState(80); // Default height
+    const [cardHeight, setCardHeight] = useState(80); // Track actual card height
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
     const [hasMoreCards, setHasMoreCards] = useState<boolean>(cards.length > 1);
@@ -172,9 +209,10 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     useEffect(() => {
       if (cardRef.current && !isExpanded) {
         const cardElement = cardRef.current;
-        const cardHeight = cardElement.offsetHeight;
+        const measuredHeight = cardElement.offsetHeight;
+        setCardHeight(measuredHeight);
         // Use the larger of the measured height or minimum 80px
-        setWrapperHeight(Math.max(cardHeight, 80));
+        setWrapperHeight(Math.max(measuredHeight, 80));
       }
     }, [cards, isExpanded]);
 
@@ -220,17 +258,19 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
                   description={cards[cards.length - 1].description}
                   iconType={cards[cards.length - 1].iconType}
                   variant={cards[cards.length - 1].variant}
-                  onActionClick={cards[cards.length - 1].onActionClick}
+                  actionButtons={cards[cards.length - 1].actionButtons}
                   className={cn('shadow-md', hoveredIndex === 0 && 'shadow-lg')}
                   onCardClick={cards[cards.length - 1].onCardClick}
+                  bugReport={cards[cards.length - 1].bugReport}
                 />
               </div>
 
               {/* Empty placeholder cards for stack effect */}
               {cards.length > 1 && (
                 <div
-                  className="absolute w-full bottom-[60px] left-0 z-20 transition-all duration-200"
+                  className="absolute w-full left-0 z-20 transition-all duration-200"
                   style={{
+                    bottom: `${cardHeight - 20}px`,
                     transform: 'scale(0.95)',
                   }}
                 >
@@ -240,8 +280,9 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
 
               {cards.length > 2 && (
                 <div
-                  className="absolute w-full bottom-[75px] left-0 z-10 transition-all duration-200"
+                  className="absolute w-full left-0 z-10 transition-all duration-200"
                   style={{
+                    bottom: `${cardHeight - 5}px`,
                     transform: 'scale(0.9)',
                   }}
                 >
@@ -250,7 +291,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
               )}
             </>
           ) : (
-            <div ref={scrollContainerRef} className="space-y-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
+            <div ref={scrollContainerRef} className="space-y-2 flex flex-col gap-1 max-h-[50vh] overflow-y-auto">
               {cards.map((card) => (
                 <InfoCard
                   key={card.id}
@@ -258,9 +299,10 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
                   description={card.description}
                   iconType={card.iconType}
                   variant={card.variant}
-                  onActionClick={card.onActionClick}
+                  actionButtons={card.actionButtons}
                   onCardClick={card.onCardClick}
                   className="shadow-sm"
+                  bugReport={card.bugReport}
                 />
               ))}
             </div>
