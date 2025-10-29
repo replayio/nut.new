@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
+import { autoFenceCodeBlocks } from '~/utils/markdown-preprocessor';
 
 interface MessageContentsProps {
   message: Message;
@@ -42,6 +43,12 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
   const firstReact = breadcrumbData?.firstReact;
   const lastReact = breadcrumbData?.lastReact;
   const lastHtml = breadcrumbData?.lastHtml;
+
+  // Process all messages to auto-fence code blocks and enable HTML parsing
+  // This allows code to be syntax highlighted even when not properly fenced
+  const processedContent = React.useMemo(() => {
+    return autoFenceCodeBlocks(message.content);
+  }, [message.content]);
 
   return (
     <div data-testid="message-content" className="overflow-hidden">
@@ -106,9 +113,7 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
         </div>
       )}
       <div className="prose prose-sm max-w-none text-bolt-elements-textPrimary">
-        <Markdown html onCheckboxChange={onCheckboxChange}>
-          {message.content}
-        </Markdown>
+        <Markdown onCheckboxChange={onCheckboxChange}>{processedContent}</Markdown>
       </div>
       {message.attachments && message.attachments.length > 0 && (
         <div className="mt-3 space-y-2">
