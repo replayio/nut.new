@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { TestUserId } from '~/lib/stores/userAuth';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -65,6 +66,8 @@ let supabaseAnonKey = '';
 let supabaseClientInstance: ReturnType<typeof createClient<Database>> | null = null;
 
 export async function getCurrentUser(): Promise<SupabaseUser | null> {
+  throw new Error('Not available');
+  /*
   try {
     const {
       data: { user },
@@ -75,11 +78,15 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
     console.error('Error getting current user:', error);
     return null;
   }
+  */
 }
 
 export async function getCurrentUserId(): Promise<string | null> {
+  return TestUserId;
+  /*
   const user = await getCurrentUser();
   return user?.id || null;
+  */
 }
 
 export async function getNutIsAdmin(): Promise<boolean> {
@@ -107,8 +114,11 @@ export async function getNutIsAdmin(): Promise<boolean> {
  * Checks if there is a currently authenticated user.
  */
 export async function isAuthenticated(): Promise<boolean> {
+  return true;
+  /*
   const user = await getCurrentUser();
   return user !== null;
+  */
 }
 
 export async function getCurrentAccessToken(): Promise<string | null> {
