@@ -44,11 +44,14 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
   const lastReact = breadcrumbData?.lastReact;
   const lastHtml = breadcrumbData?.lastHtml;
 
-  // Process all messages to auto-fence code blocks and enable HTML parsing
-  // This allows code to be syntax highlighted even when not properly fenced
+  // Process only user messages to auto-fence code blocks
+  // Assistant messages should already have proper code fencing
   const processedContent = React.useMemo(() => {
-    return autoFenceCodeBlocks(message.content);
-  }, [message.content]);
+    if (message.role === 'user') {
+      return autoFenceCodeBlocks(message.content);
+    }
+    return message.content;
+  }, [message.content, message.role]);
 
   return (
     <div data-testid="message-content" className="overflow-hidden">
