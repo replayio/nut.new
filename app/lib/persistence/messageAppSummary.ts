@@ -54,23 +54,20 @@ export interface AppAPI extends AppDetail {
 // The status of a feature describes its implementation and whether associated components
 // should be functional.
 export enum AppFeatureStatus {
-  // Not started, all components will be non-functional.
+  // Not started and has an associated cost which must be paid before work can start.
+  PaymentNeeded = 'PaymentNeeded',
+
+  // Not started but work can start immediately.
   NotStarted = 'NotStarted',
 
   // Implementation has started on implementing the feature's functionality.
   ImplementationInProgress = 'ImplementationInProgress',
 
-  // Functionality has been implemented but the app has not been validated.
+  // Functionality has finished implementation.
   Implemented = 'Implemented',
 
-  // Validation has started to test the feature's functionality.
-  ValidationInProgress = 'ValidationInProgress',
-
-  // Validation has completed and all tests pass. The feature should be functional.
-  Validated = 'Validated',
-
-  // The feature is implemented but we've given up on validating it.
-  ValidationFailed = 'ValidationFailed',
+  // Implementation work for the feature failed after several attempts.
+  Failed = 'Failed',
 }
 
 export enum AppFeatureKind {
@@ -85,10 +82,13 @@ export enum AppFeatureKind {
 
   // Write one or more integration tests and get them to pass.
   IntegrationTests = 'IntegrationTests',
+
+  // Bug fix
+  FixBug = 'FixBug',
 }
 
 export interface AppFeature {
-  // Short name for the feature.
+  // Short name for the feature. Unique within the app.
   name: string;
 
   // Kind of feature.
@@ -100,14 +100,14 @@ export interface AppFeature {
   // Time when this feature was created. 2025/8/30: Always present in newer apps.
   time?: string;
 
-  // Any existing feature in the Arboretum which will be used to implement this one.
-  arboretumRepositoryId?: string;
-
   // One sentence description of the feature.
   description: string;
 
   // One paragraph summary of the feature's requirements.
   summary: string;
+
+  // Cost of this feature in peanuts. If not set, the feature is free.
+  cost?: number;
 
   // Names of any components which the feature implements.
   componentNames?: string[];
@@ -129,6 +129,39 @@ export interface AppFeature {
   tests?: AppTest[];
 }
 
+export enum BugReportStatus {
+  // The bug is unresolved. It is either being worked on by a feature or has been
+  // escalated to developer support.
+  Open = 'Open',
+
+  // Work finished on the bug, waiting for confirmation from the user
+  // for whether the bug is resolved.
+  WaitingForFeedback = 'WaitingForFeedback',
+
+  // The user marked the bug as fixed.
+  Resolved = 'Resolved',
+
+  // The bug was not fixed successfully. The cost of the app was refunded.
+  Failed = 'Failed',
+}
+
+export interface BugReport {
+  // Unique name within the app for the bug report.
+  name: string;
+
+  // One sentence description of the problem with the app.
+  description: string;
+
+  // Current status of the bug report.
+  status: BugReportStatus;
+
+  // Any features that have attempted (or are still attempting) to fix this bug.
+  featureNames: string[];
+
+  // Any time at which the bug report was escalated to developer support.
+  escalateTime?: string;
+}
+
 // Describes a planned or implemented playwright test.
 export interface AppTest {
   title: string;
@@ -142,14 +175,22 @@ export interface AppTest {
 
 export enum AppUpdateReasonKind {
   DescribeLayout = 'DescribeLayout',
-  DescribeFeatures = 'DescribeFeatures',
+  StartDesignAPIs = 'StartDesignAPIs',
+  DesignAPIs = 'DesignAPIs',
+  BuildInitialApp = 'BuildInitialApp',
+  AddFeature = 'AddFeature',
   StartImplementFeature = 'StartImplementFeature',
-  StartValidateFeature = 'StartValidateFeature',
   FeatureImplemented = 'FeatureImplemented',
-  FeatureValidated = 'FeatureValidated',
-  MockupValidated = 'MockupValidated',
+  FeatureCanceled = 'FeatureCanceled',
+  StartMockup = 'StartMockup',
+  MockupImplemented = 'MockupImplemented',
+  SetSecrets = 'SetSecrets',
   RevertApp = 'RevertApp',
   CopyApp = 'CopyApp',
+  UpdateTemplate = 'UpdateTemplate',
+  ManualUpdate = 'ManualUpdate',
+  ResolveBugReport = 'ResolveBugReport',
+  EscalateBugReport = 'EscalateBugReport',
 }
 
 // Describes why the app's summary was updated.
@@ -173,7 +214,9 @@ export interface AppSummary {
   pages?: AppPage[];
   navigation?: string;
   features?: AppFeature[];
-  otherTests?: AppTest[];
+  bugReports?: BugReport[];
+  schema?: DatabaseSchema;
+  secrets?: AppDetail[];
   setSecrets?: string[];
 
   // The repository being described, if available.
@@ -206,5 +249,5 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
 }
 
 export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
-  return status && status != AppFeatureStatus.NotStarted && status != AppFeatureStatus.ImplementationInProgress;
+  return status && (status === AppFeatureStatus.Implemented || status === AppFeatureStatus.Failed);
 }

@@ -1,47 +1,42 @@
-import { useStore } from '@nanostores/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
-import { type DetectedError } from '~/lib/replay/MessageHandlerInterface';
-import { getDetectedErrors } from '~/lib/replay/MessageHandler';
-import { ChatMode } from '~/lib/replay/SendChatMessage';
-import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
-import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
+import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
+import { classNames } from '~/utils/classNames';
+import { useStore } from '@nanostores/react';
+import { useIsMobile } from '~/lib/hooks/useIsMobile';
 
-let gCurrentIFrame: HTMLIFrameElement | undefined;
+let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
 export function getCurrentIFrame() {
-  return gCurrentIFrame;
+  return gCurrentIFrameRef?.current ?? undefined;
 }
 
-interface PreviewProps {
-  handleSendMessage: (params: ChatMessageParams) => void;
-}
-
-export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
+export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isMobile } = useIsMobile();
 
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isElementPickerEnabled, setIsElementPickerEnabled] = useState(false);
+  const [isElementPickerReady, setIsElementPickerReady] = useState(false);
 
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
 
   const previewURL = useStore(workbenchStore.previewURL);
+
   const isSmallViewport = useViewport(800);
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
 
   // Use percentage for width
   const [widthPercent, setWidthPercent] = useState<number>(37.5); // 375px assuming 1000px window width initially
-
-  const [detectedError, setDetectedError] = useState<DetectedError | undefined>(undefined);
-  const [fixingError, setFixingError] = useState(false);
 
   const resizingState = useRef({
     isResizing: false,
@@ -54,35 +49,48 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
   // Define the scaling factor
   const SCALING_FACTOR = 2; // Adjust this value to increase/decrease sensitivity
 
-  gCurrentIFrame = iframeRef.current ?? undefined;
-
-  // Interval for sending getDetectedErrors message
-  useEffect(() => {
-    let lastDetectedError: DetectedError | undefined = undefined;
-    const interval = setInterval(async () => {
-      if (!iframeRef.current) {
-        return;
-      }
-
-      const detectedErrors = await getDetectedErrors(iframeRef.current);
-      const firstError: DetectedError | undefined = detectedErrors[0];
-      if (JSON.stringify(firstError) !== JSON.stringify(lastDetectedError)) {
-        setDetectedError(firstError);
-      }
-      lastDetectedError = firstError;
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [iframeRef.current]);
+  gCurrentIFrameRef = iframeRef;
 
   const reloadPreview = (route = '') => {
     if (iframeRef.current) {
       iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
-
-    setDetectedError(undefined);
-    setFixingError(false);
   };
+
+  // Send postMessage to control element picker in iframe
+  const toggleElementPicker = (enabled: boolean) => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        {
+          type: 'ELEMENT_PICKER_CONTROL',
+          enabled,
+        },
+        '*',
+      );
+    } else {
+      console.warn('[Preview] Cannot send message - iframe not ready');
+    }
+  };
+
+  // Listen for messages from iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'ELEMENT_PICKED') {
+        // Store the full element data including the react tree
+        workbenchStore.setSelectedElement({
+          component: event.data.react.component,
+          tree: event.data.react.tree,
+        });
+        setIsElementPickerEnabled(false);
+      } else if (event.data.type === 'ELEMENT_PICKER_STATUS') {
+      } else if (event.data.type === 'ELEMENT_PICKER_READY' && event.data.source === 'element-picker') {
+        setIsElementPickerReady(true);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   useEffect(() => {
     if (!previewURL) {
@@ -94,8 +102,7 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
 
     setUrl(previewURL);
     setIframeUrl(previewURL);
-    setDetectedError(undefined);
-    setFixingError(false);
+    setIsElementPickerReady(false);
   }, [previewURL]);
 
   // Handle OAuth authentication
@@ -208,13 +215,35 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
-      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50 p-3 flex items-center gap-2 shadow-sm">
-        <IconButton icon="i-ph:arrow-clockwise" onClick={() => reloadPreview()} />
-        <div className="flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary rounded-xl px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md">
+      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 p-3 flex items-center gap-2 shadow-sm">
+        <IconButton icon={<RotateCw size={20} />} onClick={() => reloadPreview()} />
+        {isElementPickerReady && !isMobile && (
+          <IconButton
+            className={classNames({
+              'bg-bolt-elements-background-depth-3': isElementPickerEnabled,
+            })}
+            iconClassName={isElementPickerEnabled ? 'text-[#4da3ff]' : ''}
+            icon={<Crosshair size={20} />}
+            onClick={() => {
+              const newState = !isElementPickerEnabled;
+              setIsElementPickerEnabled(newState);
+              toggleElementPicker(newState);
+            }}
+            title="Select element on page"
+          />
+        )}
+        <div
+          className={classNames(
+            'flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md',
+            {
+              'rounded-xl': !isSmallViewport,
+            },
+          )}
+        >
           <input
             title="URL"
             ref={inputRef}
-            className="w-full bg-transparent outline-none"
+            className="w-full bg-transparent border-none outline-none focus:ring-0 focus:ring-offset-0"
             type="text"
             value={url}
             onChange={(event) => {
@@ -238,21 +267,21 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
 
         {!isSmallViewport && (
           <IconButton
-            icon="i-ph:devices"
+            icon={<MonitorSmartphone size={20} />}
             onClick={toggleDeviceMode}
             title={isDeviceModeOn ? 'Switch to Responsive Mode' : 'Switch to Device Mode'}
           />
         )}
         {!isSmallViewport && (
           <IconButton
-            icon={isFullscreen ? 'i-ph:arrows-in' : 'i-ph:arrows-out'}
+            icon={isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
             onClick={toggleFullscreen}
             title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
           />
         )}
       </div>
 
-      <div className="flex-1 bg-bolt-elements-background-depth-2/30 flex justify-center items-center overflow-auto">
+      <div className="flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 flex justify-center items-center overflow-auto">
         <AppView
           isDeviceModeOn={isDeviceModeOn}
           iframeRef={iframeRef}
@@ -262,51 +291,6 @@ export const Preview = memo(({ handleSendMessage }: PreviewProps) => {
           widthPercent={widthPercent}
         />
       </div>
-
-      {/* Error Display Section */}
-      {detectedError && !fixingError && (
-        <div className="border-t border-bolt-elements-borderColor/50 bg-red-50 dark:bg-red-950/20 p-4">
-          <div className="font-semibold text-sm text-red-600 dark:text-red-300 mb-2">
-            Error: {detectedError.message}
-          </div>
-          {detectedError.details && (
-            <div className="text-xs text-red-600 dark:text-red-300 mb-3">{detectedError.details}</div>
-          )}
-          <button
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
-            onClick={async () => {
-              setFixingError(true);
-
-              if (iframeRef.current) {
-                const simulationData = await flushSimulationData();
-                let message = 'Fix the error I saw while using the app: ' + detectedError.message;
-                if (detectedError.details) {
-                  message += '\n\n' + detectedError.details;
-                }
-                handleSendMessage({
-                  messageInput: message,
-                  chatMode: ChatMode.FixDetectedError,
-                  sessionRepositoryId: workbenchStore.repositoryId.get(),
-                  simulationData,
-                  detectedError,
-                });
-              }
-            }}
-          >
-            Ask Nut to fix
-          </button>
-        </div>
-      )}
-
-      {/* Nut Working Display */}
-      {fixingError && (
-        <div className="border-t border-bolt-elements-borderColor/50 bg-blue-50 dark:bg-blue-950/20 p-3">
-          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            Nut is working on fixing the error...
-          </div>
-        </div>
-      )}
     </div>
   );
 });

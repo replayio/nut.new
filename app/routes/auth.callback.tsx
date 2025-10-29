@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from '@remix-run/react';
 import { getSupabase } from '~/lib/supabase/client';
+import { callNutAPI } from '~/lib/replay/NutAPI';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -70,12 +71,9 @@ export default function AuthCallback() {
             }
           }
 
-          console.log('Analytics tracking user', user);
-          console.log('Analytics tracking window', window.analytics);
           // Analytics tracking
           if (window.analytics && user) {
             const signInMethod = isEmailConfirm ? 'email' : isSignupFlow ? 'google_oauth' : 'google_oauth';
-            console.log('Analytics tracking', user);
 
             window.analytics.identify(user.id, {
               email: user.email,
@@ -89,6 +87,16 @@ export default function AuthCallback() {
               isSignupFlow || isEmailConfirm || new Date(user.created_at).getTime() > Date.now() - 60000; // Within last minute
 
             if (isNewUser) {
+              await callNutAPI(
+                'add-peanuts',
+                {
+                  userId: user.id,
+                  peanuts: 1000,
+                },
+                undefined,
+                user.id,
+              );
+
               // Track as signup
               window.analytics.identify(user.id, {
                 name: user.user_metadata.full_name,
@@ -124,7 +132,6 @@ export default function AuthCallback() {
         if (data.session && isValidRedirect(redirectTo)) {
           const decodedRedirect = decodeURIComponent(redirectTo!);
           // Remove sensitive information from logs
-          console.log('Authentication successful, redirecting user');
           navigate(decodedRedirect);
         } else {
           // Log security event if invalid redirect attempted
@@ -147,7 +154,7 @@ export default function AuthCallback() {
     <div className="min-h-screen bg-bolt-elements-background-depth-1 flex items-center justify-center px-4">
       <div className="text-center">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
-          <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin" />
         </div>
         <h2 className="text-xl font-semibold text-bolt-elements-textHeading mb-2">Completing sign in...</h2>
         <p className="text-bolt-elements-textSecondary">Please wait while we finish signing you in.</p>

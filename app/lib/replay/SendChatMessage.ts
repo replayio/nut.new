@@ -12,7 +12,8 @@ import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
 import type { SimulationData } from './MessageHandler';
-import type { DetectedError } from './MessageHandlerInterface';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 
 const logger = createScopedLogger('ChatMessage');
 
@@ -21,7 +22,6 @@ export type ChatResponseCallback = (response: ChatResponse) => void;
 export enum ChatMode {
   UserMessage = 'UserMessage',
   DevelopApp = 'DevelopApp',
-  FixDetectedError = 'FixDetectedError',
 }
 
 // Information about a component referenced on a page during a visit.
@@ -37,7 +37,6 @@ export interface VisitData {
   repositoryId: string;
   componentReference?: ChatReferenceComponent;
   simulationData?: SimulationData;
-  detectedError?: DetectedError;
 }
 
 export interface NutChatRequest {
@@ -45,6 +44,9 @@ export interface NutChatRequest {
   mode?: ChatMode;
   messages?: Message[];
   visit?: VisitData;
+  retryBugReportName?: string;
+  upFrontPricing?: boolean;
+  payFeatures?: boolean;
 }
 
 // Messages that are rendered normally in the chat.
@@ -85,6 +87,17 @@ export async function sendChatMessage(request: NutChatRequest, onResponse: ChatR
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
+  }
+
+  if (request.mode == ChatMode.UserMessage) {
+    const repositoryId = workbenchStore.repositoryId.get();
+    if (repositoryId) {
+      const simulationData = await flushSimulationData();
+      if (!request.visit) {
+        request.visit = { repositoryId };
+      }
+      request.visit.simulationData = simulationData;
+    }
   }
 
   logger.debug('sendChatMessage', JSON.stringify(request));

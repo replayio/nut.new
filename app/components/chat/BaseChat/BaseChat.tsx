@@ -26,6 +26,9 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
+import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
+import { openFeatureModal } from '~/lib/stores/featureModal';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -71,7 +74,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const user = useStore(userStore.user);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const selectedElement = useStore(workbenchStore.selectedElement);
+    const repositoryId = useStore(workbenchStore.repositoryId);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
+    const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
 
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -92,6 +98,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
 
     const hasShownWorkbench = useRef(false);
+
     useEffect(() => {
       if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
@@ -100,26 +107,82 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     }, [appSummary]);
 
-    const handleContinueBuilding = () => {
-      if (sendMessage) {
-        sendMessage({ chatMode: ChatMode.DevelopApp });
-      }
-    };
-
-    // Listen for continue building events from the global status modal
     useEffect(() => {
-      const handleContinueBuildingEvent = () => {
-        handleContinueBuilding();
-      };
+      const newCards: InfoCardData[] = [];
 
-      window.addEventListener('continueBuilding', handleContinueBuildingEvent);
-      return () => {
-        window.removeEventListener('continueBuilding', handleContinueBuildingEvent);
-      };
-    }, [sendMessage]);
+      // Add feature cards
+      if (appSummary?.features) {
+        // Create filtered features array for modal
+        const filteredFeatures = appSummary.features.filter(
+          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+        );
 
-    const handleSendMessage = (params: ChatMessageParams) => {
-      if (sendMessage) {
+        const featureCards = appSummary.features
+          .filter((f) => f.status === AppFeatureStatus.ImplementationInProgress && f.kind !== AppFeatureKind.FixBug)
+          .map((feature) => {
+            const iconType: 'loading' | 'error' | 'success' =
+              feature.status === AppFeatureStatus.ImplementationInProgress
+                ? 'loading'
+                : feature.status === AppFeatureStatus.Failed
+                  ? 'error'
+                  : 'success';
+
+            const variant: 'active' | 'default' =
+              feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
+
+            // Find the index of this feature in the filtered array
+            const modalIndex = filteredFeatures.findIndex((f) => f === feature);
+
+            return {
+              id: feature.name,
+              title: feature.name,
+              description: feature.description,
+              iconType,
+              variant,
+              onCardClick:
+                modalIndex !== -1
+                  ? () => {
+                      openFeatureModal(modalIndex, filteredFeatures.length);
+                    }
+                  : undefined,
+            };
+          });
+
+        newCards.push(...featureCards);
+      }
+
+      // Add bug report cards
+      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
+        (report) => ({
+          id: report.name,
+          bugReport: report,
+        }),
+      );
+
+      newCards.push(...bugReportCards);
+
+      setInfoCards(newCards);
+    }, [appSummary]);
+
+    const getComponentReference = useCallback(() => {
+      if (!selectedElement?.tree?.length) {
+        return undefined;
+      }
+
+      return {
+        componentNames: selectedElement.tree.map((component) => component.displayName || 'Anonymous'),
+      };
+    }, [selectedElement]);
+
+    const handleSendMessage = useCallback(
+      (params: ChatMessageParams) => {
+        if (!sendMessage) {
+          return;
+        }
+
+        const componentReference = params.componentReference ?? getComponentReference();
+        const sessionRepositoryId = params.sessionRepositoryId ?? repositoryId;
+
         // Mark discovery messages as interacted when user sends a response
         const messages = chatStore.messages.get();
         const updatedMessages = messages.map((message) => {
@@ -130,7 +193,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         });
         chatStore.messages.set(updatedMessages);
 
-        sendMessage(params);
+        const payload: ChatMessageParams = {
+          ...params,
+          componentReference,
+        };
+
+        if (sessionRepositoryId) {
+          payload.sessionRepositoryId = sessionRepositoryId;
+        }
+
+        sendMessage(payload);
         abortListening();
         setCheckedBoxes([]);
 
@@ -148,8 +220,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           } as React.ChangeEvent<HTMLTextAreaElement>;
           handleInputChange(syntheticEvent);
         }
-      }
-    };
+      },
+      [sendMessage, getComponentReference, repositoryId, abortListening, user, handleInputChange],
+    );
+
+    // Listen for continue building events from the global status modal
+    useEffect(() => {
+      const handleContinueBuildingEvent = () => {
+        handleSendMessage({ chatMode: ChatMode.DevelopApp });
+      };
+
+      window.addEventListener('continueBuilding', handleContinueBuildingEvent);
+      return () => {
+        window.removeEventListener('continueBuilding', handleContinueBuildingEvent);
+      };
+    }, [handleSendMessage]);
 
     const onLastMessageCheckboxChange = (checkboxText: string, checked: boolean) => {
       const newMessages = chatStore.messages.get().map((message) => {
@@ -206,7 +291,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
             'overflow-y-auto': !chatStarted,
             'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
-            'pt-2 pb-15 px-4': isSmallViewport && (!!appSummary || showMobileNav),
+            'pt-2 pb-16 px-4': isSmallViewport && (!!appSummary || showMobileNav),
             'p-6': !isSmallViewport && chatStarted,
             'p-6 pb-16': !isSmallViewport && !chatStarted,
           })}
@@ -235,11 +320,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
-                    <Messages
-                      ref={messageRef}
-                      onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                      sendMessage={sendMessage}
-                    />
+                    <>
+                      <Messages
+                        ref={messageRef}
+                        onLastMessageCheckboxChange={onLastMessageCheckboxChange}
+                        sendMessage={sendMessage}
+                      />
+                      {infoCards && infoCards.length > 0 && (
+                        <StackedInfoCard cards={infoCards} className="w-full mb-2" />
+                      )}
+                    </>
                   ) : null;
                 }}
               </ClientOnly>
@@ -263,7 +353,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </>
             )}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} handleSendMessage={handleSendMessage} />}</ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
         </div>
         {isSmallViewport && (appSummary || showMobileNav) && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
       </div>

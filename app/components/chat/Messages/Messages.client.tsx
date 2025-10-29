@@ -6,10 +6,10 @@ import {
   DISCOVERY_RATING_CATEGORY,
   getDiscoveryRating,
 } from '~/lib/persistence/message';
+import { User } from '~/components/ui/Icon';
 import {
   MessageContents,
   JumpToBottom,
-  AppCards,
   StartBuildingCard,
   SignInCard,
   AddPeanutsCard,
@@ -17,21 +17,43 @@ import {
   ContinueBuildCard,
   SubscriptionCard,
 } from './components';
-import { APP_SUMMARY_CATEGORY } from '~/lib/persistence/messageAppSummary';
+import {
+  APP_SUMMARY_CATEGORY,
+  AppFeatureKind,
+  isFeatureStatusImplemented,
+  type AppFeature,
+  type AppSummary,
+} from '~/lib/persistence/messageAppSummary';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
 import { userStore } from '~/lib/stores/auth';
 import { peanutsStore } from '~/lib/stores/peanuts';
-import { ChatMode, shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { openFeatureModal } from '~/lib/stores/featureModal';
+import { InfoCard } from '~/components/ui/InfoCard';
 
 interface MessagesProps {
   id?: string;
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
-  sendMessage?: (params: { messageInput: string; chatMode: ChatMode }) => void;
+  sendMessage?: (params: ChatMessageParams) => void;
+}
+
+function getUnpaidFeatureCost(appSummary: AppSummary | undefined, lastContinueBuildIteration: number) {
+  if ((appSummary?.iteration ?? 0) <= lastContinueBuildIteration) {
+    return 0;
+  }
+  let total = 0;
+  for (const { status, cost } of appSummary?.features || []) {
+    if (status === AppFeatureStatus.PaymentNeeded) {
+      total += cost ?? 0;
+    }
+  }
+  return total;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
@@ -48,18 +70,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const pendingMessageStatus = useStore(pendingMessageStatusStore);
     const hasAppSummary = !!useStore(chatStore.appSummary);
-    const completedFeatures = appSummary?.features
-      ?.slice(1)
-      .filter(
-        (feature) =>
-          feature.status === AppFeatureStatus.Validated ||
-          feature.status === AppFeatureStatus.Implemented ||
-          feature.status === AppFeatureStatus.ValidationInProgress ||
-          feature.status === AppFeatureStatus.ValidationFailed,
-      ).length;
+    const completedFeatures = appSummary?.features?.slice(1).filter((f) => isFeatureStatusImplemented(f.status)).length;
     const totalFeatures = appSummary?.features?.slice(1).length;
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const hasSubscription = useStore(subscriptionStore.hasSubscription);
+    const lastMessageIteration = useStore(chatStore.lastMessageIteration);
+
+    const unpaidFeatureCost = getUnpaidFeatureCost(appSummary, lastMessageIteration);
 
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
@@ -69,12 +86,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     useEffect(() => {
       const shouldShow =
-        !hasPendingMessage &&
-        !listenResponses &&
+        (unpaidFeatureCost || (!hasPendingMessage && !listenResponses)) &&
         appSummary?.features?.length &&
         !isFullyComplete &&
         peanutsRemaining !== undefined &&
-        peanutsRemaining > 0;
+        peanutsRemaining > 0 &&
+        peanutsRemaining >= unpaidFeatureCost;
 
       if (shouldShow) {
         const timer = setTimeout(() => {
@@ -85,7 +102,14 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       } else {
         setShowContinueBuildCard(false);
       }
-    }, [hasPendingMessage, listenResponses, appSummary?.features?.length, isFullyComplete, peanutsRemaining]);
+    }, [
+      hasPendingMessage,
+      listenResponses,
+      appSummary?.features?.length,
+      isFullyComplete,
+      peanutsRemaining,
+      unpaidFeatureCost,
+    ]);
 
     const setRefs = useCallback(
       (element: HTMLDivElement | null) => {
@@ -159,24 +183,90 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       }
     }, [startPlanningRating]);
 
-    // Helper function to get AppSummary creation time
-    const getAppSummaryTime = (appSummary: Message): string => {
-      try {
-        if (appSummary.content) {
-          const summaryData = JSON.parse(appSummary.content);
-          return summaryData.time;
-        }
-      } catch {
-        // Fall through to createTime
-      }
-      return appSummary.createTime || new Date().toISOString();
-    };
-
     // Helper function to filter, deduplicate, and sort messages
     const processMessageGroup = (messageGroup: Message[]): Message[] => {
       return messageGroup
         .filter((message, index, array) => array.findIndex((m) => m.id === message.id) === index)
         .sort((a, b) => new Date(a.createTime!).getTime() - new Date(b.createTime!).getTime());
+    };
+
+    // Helper function to create timeline items from messages and features
+    const createTimelineItems = () => {
+      const timelineItems: Array<{
+        type: 'message' | 'feature';
+        data: Message | AppFeature;
+        timestamp: Date;
+        id: string;
+      }> = [];
+
+      // Add messages
+      const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
+      displayableMessages.forEach((message) => {
+        if (message.createTime) {
+          timelineItems.push({
+            type: 'message',
+            data: message,
+            timestamp: new Date(message.createTime),
+            id: message.id,
+          });
+        }
+      });
+
+      // Add features
+      if (appSummary?.features) {
+        appSummary.features
+          .filter((f) => f.status === AppFeatureStatus.Implemented || f.status === AppFeatureStatus.Failed)
+          .forEach((feature) => {
+            if (feature.time) {
+              timelineItems.push({
+                type: 'feature',
+                data: feature,
+                timestamp: new Date(feature.time),
+                id: feature.name,
+              });
+            }
+          });
+      }
+
+      // Sort by timestamp
+      return timelineItems.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    };
+
+    const renderFeature = (feature: any) => {
+      const iconType =
+        feature.status === AppFeatureStatus.ImplementationInProgress
+          ? 'loading'
+          : feature.status === AppFeatureStatus.Failed
+            ? 'error'
+            : 'success';
+
+      const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
+
+      // Find the index of this feature in the filtered array for modal
+      const filteredFeatures =
+        appSummary?.features?.filter(
+          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+        ) || [];
+      const modalIndex = filteredFeatures.findIndex((f) => f === feature);
+
+      return (
+        <div className="mt-5">
+          <InfoCard
+            title={feature.name}
+            description={feature.description}
+            iconType={iconType}
+            variant={variant}
+            onCardClick={
+              modalIndex !== -1
+                ? () => {
+                    openFeatureModal(modalIndex, filteredFeatures.length);
+                  }
+                : undefined
+            }
+            className="shadow-sm"
+          />
+        </div>
+      );
     };
 
     const renderMessage = (message: Message, index: number) => {
@@ -216,10 +306,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/30':
                 isUserMessage,
               // Assistant messages
-              'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor/60':
+              'bg-bolt-elements-messages-background border-bolt-elements-borderColor hover:border-bolt-elements-borderColor border-opacity-60':
                 !isUserMessage && (!hasPendingMessage || (hasPendingMessage && !isLast)),
               // Last message when pending
-              'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor/50':
+              'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent border-bolt-elements-borderColor border-opacity-50':
                 !isUserMessage && hasPendingMessage && isLast,
             })}
           >
@@ -236,7 +326,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               <div className="flex items-center gap-3 mb-4">
                 {isUserMessage && (
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 text-white rounded-full shadow-lg">
-                    <div className="i-ph:user text-lg"></div>
+                    <User size={18} />
                   </div>
                 )}
 
@@ -278,45 +368,17 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
         >
           {(() => {
-            const firstAppSummary = messages.find((message) => message.category === APP_SUMMARY_CATEGORY);
-
-            if (!firstAppSummary) {
-              const displayableMessages = processMessageGroup(messages.filter(shouldDisplayMessage));
-              return (
-                <>
-                  {displayableMessages.map((message, index) => renderMessage(message, index))}
-                  <AppCards />
-                </>
-              );
-            }
-
-            const appSummaryTime = getAppSummaryTime(firstAppSummary);
-
-            const beforeMessages = processMessageGroup(
-              messages.filter(
-                (message) => shouldDisplayMessage(message) && message.createTime && message.createTime < appSummaryTime,
-              ),
-            );
-
-            const afterMessages = processMessageGroup(
-              messages.filter(
-                (message) =>
-                  shouldDisplayMessage(message) &&
-                  message.category !== APP_SUMMARY_CATEGORY &&
-                  message.createTime &&
-                  message.createTime > appSummaryTime,
-              ),
-            );
-
+            const timelineItems = createTimelineItems();
             return (
               <>
-                {beforeMessages.map((message, index) => renderMessage(message, index))}
-                <div className="w-full mt-5">
-                  <AppCards />
-                </div>
-                {afterMessages.length > 0 && (
-                  <div className="mt-5">{afterMessages.map((message, index) => renderMessage(message, index))}</div>
-                )}
+                {timelineItems.map((item, index) => {
+                  if (item.type === 'message') {
+                    return renderMessage(item.data as Message, index);
+                  } else if (item.type === 'feature') {
+                    return renderFeature(item.data as AppFeature);
+                  }
+                  return null;
+                })}
               </>
             );
           })()}
@@ -324,34 +386,29 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           {/* {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />} */}
 
           {user &&
-            (appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationFailed ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationInProgress ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.Validated ||
-              startPlanningRating === 10) &&
+            (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 &&
+            (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             hasSubscription && <AddPeanutsCard onMount={scrollToBottom} />}
 
           {user &&
-            (appSummary?.features?.[0]?.status === AppFeatureStatus.Implemented ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationFailed ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.ValidationInProgress ||
-              appSummary?.features?.[0]?.status === AppFeatureStatus.Validated ||
-              startPlanningRating === 10) &&
+            (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
             peanutsRemaining !== undefined &&
-            peanutsRemaining <= 0 &&
+            (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
             !hasSubscription && <SubscriptionCard onMount={scrollToBottom} />}
 
-          {listenResponses && appSummary?.features?.length && !isFullyComplete && (
-            <StopBuildCard onMount={scrollToBottom} />
-          )}
+          {!showContinueBuildCard &&
+            listenResponses &&
+            !hasPendingMessage &&
+            appSummary?.features?.length &&
+            !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
 
           {showContinueBuildCard && (
             <ContinueBuildCard
               onMount={scrollToBottom}
               sendMessage={sendMessage}
               setShowContinueBuildCard={setShowContinueBuildCard}
+              unpaidFeatureCost={unpaidFeatureCost}
             />
           )}
 

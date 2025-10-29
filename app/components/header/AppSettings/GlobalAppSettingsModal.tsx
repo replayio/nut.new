@@ -5,12 +5,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { AuthSelectorComponent } from './components/AuthSelectorComponent';
 import { SecretsComponent } from './components/SecretsComponent';
+import { PermissionsSelectionComponent } from './components/PermissionsSelectionComponent';
+import { ExperimentalFeaturesComponent } from './components/ExperimentalFeaturesComponent';
+import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
+import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
+import { userStore } from '~/lib/stores/userAuth';
+import CopyApp from './components/CopyApp';
+import { X, Settings, Type } from '~/components/ui/Icon';
+import { hasExperimentalFeatures } from '~/lib/stores/experimentalFeatures';
 
 export function GlobalAppSettingsModal() {
   const isOpen = useStore(appSettingsModalStore.isOpen);
   const loadingData = useStore(appSettingsModalStore.loadingData);
   const appSummary = useStore(chatStore.appSummary);
   const allSecrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+  const appId = useStore(chatStore.currentAppId);
+  const permissions = useStore(permissionsStore);
+  const isAppOwner = useStore(isAppOwnerStore);
+  const user = useStore(userStore.user);
 
   const handleCloseModal = () => {
     appSettingsModalStore.close();
@@ -62,7 +74,7 @@ export function GlobalAppSettingsModal() {
         <motion.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
 
         <motion.div
-          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor/50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
+          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor border-opacity-50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -73,7 +85,7 @@ export function GlobalAppSettingsModal() {
               onClick={handleCloseModal}
               className="w-10 h-10 rounded-2xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
             >
-              <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
+              <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
             </button>
           </div>
 
@@ -90,7 +102,7 @@ export function GlobalAppSettingsModal() {
               <>
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor">
-                    <div className="i-ph:gear text-2xl text-bolt-elements-textSecondary" />
+                    <Settings className="text-bolt-elements-textSecondary" size={24} />
                   </div>
                   <h2 className="text-2xl font-bold text-bolt-elements-textHeading">App Settings</h2>
                   <p className="text-bolt-elements-textSecondary mt-2">
@@ -103,18 +115,32 @@ export function GlobalAppSettingsModal() {
                   <div className="p-5 bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor">
                     <h3 className="text-base font-semibold text-bolt-elements-textHeading mb-3 flex items-center gap-2">
                       <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-sm bg-blue-500">
-                        <div className="i-ph:textbox text-lg text-white" />
+                        <Type className="text-white" size={18} />
                       </div>
                       App Name
                     </h3>
                     <ChatDescription />
                   </div>
 
+                  {/* Copy App */}
+                  {appId && isAppAccessAllowed(permissions, AppAccessKind.Copy, user?.email ?? '', isAppOwner) && (
+                    <CopyApp />
+                  )}
+
                   {/* Authentication Settings */}
                   {appSummary && <AuthSelectorComponent appSummary={appSummary} />}
 
+                  {/* Permissions */}
+                  {appId &&
+                    isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isAppOwner) && (
+                      <PermissionsSelectionComponent />
+                    )}
+
                   {/* API Integrations */}
                   {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
+
+                  {/* Experimental Features */}
+                  {appSummary && hasExperimentalFeatures() && <ExperimentalFeaturesComponent />}
                 </div>
 
                 {/* Action Buttons */}

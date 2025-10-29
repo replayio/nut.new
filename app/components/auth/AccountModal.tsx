@@ -5,7 +5,6 @@ import type { ReactElement } from 'react';
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
 import { createTopoffCheckout, cancelSubscription, manageBilling } from '~/lib/stripe/client';
-import { openSubscriptionModal } from '~/lib/stores/subscriptionModal';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
@@ -13,13 +12,15 @@ import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { toast } from 'react-toastify';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { User as UserIcon, Crown, Settings, RotateCw, List } from '~/components/ui/Icon';
 
 interface AccountModalProps {
   user: User | undefined;
-  onClose: () => void;
 }
 
-export const AccountModal = ({ user, onClose }: AccountModalProps) => {
+export const AccountModal = ({ user }: AccountModalProps) => {
+  const { isMobile } = useIsMobile();
   const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const [history, setHistory] = useState<PeanutHistoryEntry[]>([]);
@@ -136,10 +137,10 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
     return (
       <div
         key={`${item.time}-${index}`}
-        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2/50 rounded-xl border border-bolt-elements-borderColor/50 hover:bg-bolt-elements-background-depth-3/50 hover:border-bolt-elements-borderColor/70 transition-all duration-200 shadow-sm hover:shadow-md group backdrop-blur-sm"
+        className="p-4 sm:p-5 bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-xl border border-bolt-elements-borderColor border-opacity-50 hover:bg-bolt-elements-background-depth-3 bg-opacity-50 hover:border-bolt-elements-borderColor border-opacity-70 transition-all duration-200 shadow-sm hover:shadow-md group backdrop-blur-sm"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
-          <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/30 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30 font-medium self-start">
+          <div className="text-sm text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 bg-opacity-30 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor border-opacity-30 font-medium self-start">
             {formatTime(item.time)}
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -149,7 +150,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             <span className="text-bolt-elements-textSecondary transition-transform duration-200 group-hover:scale-110 hidden sm:inline">
               →
             </span>
-            <span className="text-bolt-elements-textHeading font-bold bg-bolt-elements-background-depth-3/30 px-2 py-1 rounded-md border border-bolt-elements-borderColor/30 self-start sm:self-auto">
+            <span className="text-bolt-elements-textHeading font-bold bg-bolt-elements-background-depth-3 bg-opacity-30 px-2 py-1 rounded-md border border-bolt-elements-borderColor border-opacity-30 self-start sm:self-auto">
               {item.peanutsRemaining} total
             </span>
           </div>
@@ -159,18 +160,6 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
         </div>
       </div>
     );
-  };
-
-  const handleSubscriptionToggle = async () => {
-    openSubscriptionModal();
-    if (window.analytics) {
-      window.analytics.track('Clicked View Plans button', {
-        timestamp: new Date().toISOString(),
-        userId: user?.id,
-        email: user?.email,
-      });
-    }
-    onClose();
   };
 
   const handleAddPeanuts = async () => {
@@ -264,10 +253,18 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   if (loading || loadingList) {
     return (
-      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm">
-        <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
+      <div
+        className={classNames(
+          'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm',
+          {
+            'rounded-b-2xl': isMobile,
+            'rounded-r-2xl': !isMobile,
+          },
+        )}
+      >
+        <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm backdrop-blur-sm">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
-            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor/30 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin" />
           </div>
           <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">Loading Account Data</h3>
           <p className="text-bolt-elements-textSecondary">Fetching your usage history and subscription details...</p>
@@ -278,32 +275,30 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
 
   return (
     <div
-      className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 max-w-4xl w-full mx-4 border border-bolt-elements-borderColor/50 overflow-y-auto max-h-[95vh] shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm"
+      className={classNames(
+        'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto h-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative backdrop-blur-sm',
+        {
+          'rounded-b-2xl': isMobile,
+          'rounded-r-2xl': !isMobile,
+        },
+      )}
       onClick={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
-        title="Close"
-      >
-        <div className="i-ph:x text-lg transition-transform duration-200 group-hover:scale-110" />
-      </button>
-
       <div className="text-center mb-8">
         <div className="mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/30 shadow-lg backdrop-blur-sm">
-            <div className="i-ph:user text-3xl text-bolt-elements-textPrimary" />
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor border-opacity-30 shadow-lg backdrop-blur-sm">
+            <UserIcon className="text-bolt-elements-textPrimary" size={30} />
           </div>
           <h1 className="text-4xl font-bold text-bolt-elements-textHeading mb-3 bg-gradient-to-r from-bolt-elements-textHeading to-bolt-elements-textSecondary bg-clip-text">
             Account
           </h1>
-          <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2/30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor/30">
+          <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30">
             {user?.email ?? 'unknown'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl p-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
+          <div className="bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-2xl p-6 border border-bolt-elements-borderColor border-opacity-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-2xl flex items-center justify-center shadow-lg border border-yellow-500/20">
                 <span className="text-3xl drop-shadow-sm">🥜</span>
@@ -317,10 +312,10 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
             </div>
           </div>
 
-          <div className="bg-bolt-elements-background-depth-2/50 rounded-2xl p-6 border border-bolt-elements-borderColor/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
+          <div className="bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-2xl p-6 border border-bolt-elements-borderColor border-opacity-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group backdrop-blur-sm">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl flex items-center justify-center shadow-lg border border-blue-500/20">
-                <div className="i-ph:crown text-2xl text-blue-600 transition-transform duration-200 group-hover:scale-110" />
+                <Crown className="text-blue-600 transition-transform duration-200 group-hover:scale-110" size={24} />
               </div>
             </div>
             <div className="text-center">
@@ -330,7 +325,7 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
                     {stripeSubscription.peanuts.toLocaleString()}
                   </div>
                   <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">Peanuts per month</div>
-                  <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3/50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor/30">
+                  <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 bg-opacity-50 px-3 py-1.5 rounded-lg border border-bolt-elements-borderColor border-opacity-30">
                     {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
                   <div className="text-xs text-bolt-elements-textSecondary mt-1">
@@ -362,80 +357,69 @@ export const AccountModal = ({ user, onClose }: AccountModalProps) => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2/30 rounded-2xl border border-bolt-elements-borderColor/30">
-          {!loading && (
-            <button
-              onClick={handleSubscriptionToggle}
-              disabled={loading}
-              className={classNames(
-                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px] bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
-                {
-                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
-                },
-              )}
-            >
-              <div className="i-ph:crown text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">View Plans</span>
-            </button>
-          )}
+        {stripeSubscription && !loading && (
+          <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30">
+            {stripeSubscription && !loading && (
+              <button
+                onClick={handleManageBilling}
+                disabled={loading}
+                className={classNames(
+                  'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                  'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
+                )}
+              >
+                <Settings className="transition-transform duration-200 group-hover:scale-110" size={20} />
+                <span className="transition-transform duration-200 group-hover:scale-105">Manage Billing</span>
+              </button>
+            )}
 
-          {stripeSubscription && !loading && (
-            <button
-              onClick={handleManageBilling}
-              disabled={loading}
-              className={classNames(
-                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-                'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
-              )}
-            >
-              <div className="i-ph:gear text-xl transition-transform duration-200 group-hover:scale-110" />
-              <span className="transition-transform duration-200 group-hover:scale-105">Manage Billing</span>
-            </button>
-          )}
-
-          {stripeSubscription && !loading && (
-            <button
-              onClick={handleAddPeanuts}
-              disabled={loading}
-              className={classNames(
-                'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
-                'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
-                {
-                  'opacity-60 cursor-not-allowed hover:scale-100': loading,
-                },
-              )}
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
-                  <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
-                </>
-              )}
-            </button>
-          )}
-        </div>
+            {stripeSubscription && !loading && (
+              <button
+                onClick={handleAddPeanuts}
+                disabled={loading}
+                className={classNames(
+                  'px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group flex items-center justify-center gap-3 min-h-[48px]',
+                  'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
+                  {
+                    'opacity-60 cursor-not-allowed hover:scale-100': loading,
+                  },
+                )}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span className="transition-transform duration-200 group-hover:scale-105">Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl transition-transform duration-200 group-hover:scale-110">🥜</span>
+                    <span className="transition-transform duration-200 group-hover:scale-105">Add 2000 Peanuts</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="border-t border-bolt-elements-borderColor/50 pt-8">
+      <div className="border-t border-bolt-elements-borderColor border-opacity-50 pt-8">
         <div className="flex items-center gap-4 mb-6">
           <div
             onClick={reloadAccountData}
             className="w-10 h-10 bg-bolt-elements-background-depth-2 rounded-xl flex items-center justify-center cursor-pointer border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           >
-            <div className="i-ph:clock-clockwise text-lg text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110" />
+            <RotateCw
+              className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+              size={18}
+            />
           </div>
           <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Usage History</h2>
         </div>
 
         {history.length === 0 ? (
-          <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor/30 shadow-sm backdrop-blur-sm">
-            <div className="w-20 h-20 bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-3 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor/50 shadow-lg">
-              <div className="i-ph:list text-3xl text-bolt-elements-textSecondary" />
+          <div className="text-center py-16 bg-gradient-to-br from-bolt-elements-background-depth-2/50 to-bolt-elements-background-depth-3/30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm backdrop-blur-sm">
+            <div className="w-20 h-20 bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-3 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor border-opacity-50 shadow-lg">
+              <List className="text-bolt-elements-textSecondary" size={30} />
             </div>
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No usage history available</h3>
             <p className="text-sm text-bolt-elements-textSecondary">

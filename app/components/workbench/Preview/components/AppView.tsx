@@ -7,6 +7,11 @@ import { useVibeAppAuthQuery } from '~/lib/hooks/useVibeAppAuth';
 import { chatStore } from '~/lib/stores/chat';
 import PreviewLoad from './PreviewLoad/PreviewLoad';
 import { isFeatureStatusImplemented } from '~/lib/persistence/messageAppSummary';
+import WithTooltip from '~/components/ui/Tooltip';
+import { Info } from '~/components/ui/Icon';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { classNames } from '~/utils/classNames';
+import useViewport from '~/lib/hooks/useViewport';
 
 export type ResizeSide = 'left' | 'right' | null;
 
@@ -30,7 +35,8 @@ const AppView = ({
   const repositoryId = useStore(workbenchStore.repositoryId);
   const appSummary = useStore(chatStore.appSummary);
   const isMockupImplemented = isFeatureStatusImplemented(appSummary?.features?.[0]?.status);
-
+  const initialBuildComplete = isFeatureStatusImplemented(appSummary?.features?.[2]?.status);
+  const isSmallViewport = useViewport(800);
   const handleTokenOrRepoChange = (params: URLSearchParams) => {
     setRedirectUrl(`https://${repositoryId}.http.replay.io/auth/callback#${params.toString()}`);
   };
@@ -57,16 +63,37 @@ const AppView = ({
       className="bg-bolt-elements-background-depth-1"
     >
       {previewURL ? (
-        <iframe
-          key={actualIframeUrl}
-          ref={iframeRef}
-          title="preview"
-          className="w-full h-full bg-white transition-all duration-300 opacity-100 rounded-b-xl"
-          src={actualIframeUrl}
-          allowFullScreen
-          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
-          loading="eager"
-        />
+        <div className={'relative w-full h-full'}>
+          <div
+            className={classNames('absolute inset-0', {
+              'p-[3px] app-progress-border opacity-80': !initialBuildComplete,
+              'rounded-b-xl': !isSmallViewport,
+            })}
+          >
+            <iframe
+              key={actualIframeUrl}
+              ref={iframeRef}
+              title="preview"
+              className={classNames('w-full h-full bg-white transition-all duration-300 opacity-100', {
+                'rounded-b-xl': !isSmallViewport,
+              })}
+              src={actualIframeUrl}
+              allowFullScreen
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms allow-modals"
+              loading="eager"
+            />
+          </div>
+          {!initialBuildComplete && (
+            <TooltipProvider>
+              <WithTooltip tooltip="Your app’s functionality hasn’t been built yet. This is a quick mockup showing the general structure.">
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 py-1 px-4 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm rounded-t-lg flex items-center gap-2 cursor-help">
+                  Preview (App build in progress)
+                  <Info size={14} />
+                </div>
+              </WithTooltip>
+            </TooltipProvider>
+          )}
+        </div>
       ) : (
         <div className="w-full h-full">{isMockupImplemented ? <PreviewLoad /> : <ProgressStatus />}</div>
       )}
@@ -75,7 +102,7 @@ const AppView = ({
         <>
           <div
             onMouseDown={(e) => startResizing(e, 'left')}
-            className="absolute top-0 left-0 w-4 -ml-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-r border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
+            className="absolute top-0 left-0 w-4 -ml-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2 bg-opacity-50 hover:bg-bolt-elements-background-depth-3 bg-opacity-70 flex items-center justify-center transition-all duration-200 select-none border-r border-bolt-elements-borderColor border-opacity-30 hover:border-bolt-elements-borderColor border-opacity-50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
             <div className="transition-transform duration-200 group-hover:scale-110">
@@ -84,7 +111,7 @@ const AppView = ({
           </div>
           <div
             onMouseDown={(e) => startResizing(e, 'right')}
-            className="absolute top-0 right-0 w-4 -mr-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2/50 hover:bg-bolt-elements-background-depth-3/70 flex items-center justify-center transition-all duration-200 select-none border-l border-bolt-elements-borderColor/30 hover:border-bolt-elements-borderColor/50 shadow-sm hover:shadow-md group"
+            className="absolute top-0 right-0 w-4 -mr-4 h-full cursor-ew-resize bg-bolt-elements-background-depth-2 bg-opacity-50 hover:bg-bolt-elements-background-depth-3 bg-opacity-70 flex items-center justify-center transition-all duration-200 select-none border-l border-bolt-elements-borderColor border-opacity-30 hover:border-bolt-elements-borderColor border-opacity-50 shadow-sm hover:shadow-md group"
             title="Drag to resize width"
           >
             <div className="transition-transform duration-200 group-hover:scale-110">

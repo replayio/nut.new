@@ -16,7 +16,6 @@ import { type ChatMessageAttachment, type Message } from '~/lib/persistence/mess
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { assert, generateRandomId, navigateApp } from '~/utils/nut';
 import { createAttachment as createAttachmentAPI } from '~/lib/replay/NutAPI';
-import type { DetectedError } from '~/lib/replay/MessageHandlerInterface';
 import type { SimulationData } from '~/lib/replay/MessageHandler';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 
@@ -26,12 +25,18 @@ function clearActiveChat() {
   gActiveChatMessageTelemetry = undefined;
 }
 
+interface ChatReferenceComponent {
+  componentNames: string[];
+}
+
 export interface ChatMessageParams {
   messageInput?: string;
   chatMode: ChatMode;
   sessionRepositoryId?: string;
   simulationData?: SimulationData;
-  detectedError?: DetectedError;
+  componentReference?: ChatReferenceComponent;
+  retryBugReportName?: string;
+  payFeatures?: boolean;
 }
 
 async function createAttachment(dataURL: string): Promise<ChatMessageAttachment> {
@@ -124,7 +129,15 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, simulationData, detectedError } = params;
+    const {
+      messageInput,
+      chatMode,
+      sessionRepositoryId,
+      simulationData,
+      componentReference,
+      retryBugReportName,
+      payFeatures,
+    } = params;
 
     if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
       return;
@@ -143,6 +156,7 @@ const ChatImplementer = memo(() => {
         attachments,
         content: messageInput ?? '',
         hasInteracted: false,
+        componentReference,
       };
 
       addChatMessage(userMessage);
@@ -178,7 +192,7 @@ const ChatImplementer = memo(() => {
       visit = {
         repositoryId: sessionRepositoryId,
         simulationData,
-        detectedError,
+        componentReference,
       };
     }
 
@@ -187,6 +201,8 @@ const ChatImplementer = memo(() => {
       mode: chatMode,
       messages,
       visit,
+      retryBugReportName,
+      payFeatures,
     });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {

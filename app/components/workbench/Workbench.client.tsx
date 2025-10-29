@@ -7,13 +7,11 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { Preview } from './Preview/Preview';
 import useViewport from '~/lib/hooks';
-import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { userStore } from '~/lib/stores/userAuth';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  handleSendMessage: (params: ChatMessageParams) => void;
 }
 
 const createWorkbenchVariants = (workbenchWidth: number) =>
@@ -34,7 +32,7 @@ const createWorkbenchVariants = (workbenchWidth: number) =>
     },
   }) satisfies Variants;
 
-export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -50,12 +48,12 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
         initial="closed"
         animate={showWorkbench ? 'open' : 'closed'}
         variants={workbenchVariants}
-        className="z-workbench"
+        className="z-[15] h-full"
       >
         <div
-          className={classNames('fixed mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier', {
-            'top-[calc(var(--header-height)+0rem)] bottom-13': isSmallViewport,
-            'top-[calc(var(--header-height)+1.5rem)] bottom-6': !isSmallViewport,
+          className={classNames('fixed mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier p-6', {
+            'top-[calc(54px+0rem)]': isSmallViewport,
+            'top-[calc(54px+1.5rem)] bottom-6': !isSmallViewport,
             'w-full': isSmallViewport,
             'left-0': showWorkbench && isSmallViewport,
             'left-[100%]': !showWorkbench,
@@ -66,12 +64,14 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
                   width: `${workbenchWidth}px`,
                   left: showWorkbench ? `${workbenchLeft}px` : '100%',
                 }
-              : undefined
+              : {
+                  height: 'calc(100vh - 54px - 3.5rem)',
+                }
           }
         >
           <div
             className={classNames('absolute inset-0', {
-              'lg:px-6': !isSmallViewport,
+              'px-6': !isSmallViewport,
             })}
           >
             <div
@@ -83,7 +83,7 @@ export const Workbench = memo(({ chatStarted, handleSendMessage }: WorkspaceProp
               )}
             >
               <div className="relative flex-1 overflow-hidden">
-                <Preview handleSendMessage={handleSendMessage} />
+                <Preview />
               </div>
             </div>
           </div>

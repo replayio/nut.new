@@ -3,7 +3,6 @@ import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
 import { json } from '~/lib/remix-types';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
-import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
@@ -12,23 +11,24 @@ import { logStore } from './lib/stores/logs';
 import { initializeAuth, userStore, isLoadingStore } from './lib/stores/auth';
 import { initializeUserStores } from './lib/stores/user';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
+import { Check, X } from 'lucide-react';
 import { Analytics } from '@vercel/analytics/remix';
 import GlobalFeedbackModal from './components/sidebar/Feedback/components/FeedbackModal';
 import { GlobalAccountModal } from './components/auth/GlobalAccountModal';
 import { GlobalAuthModal } from './components/auth/GlobalAuthModal';
 import AppHistoryModal from './components/workbench/VesionHistory/AppHistoryModal';
-import { GlobalSubscriptionModal } from './components/subscription/GlobalSubscriptionModal';
 import { GlobalStripeStatusModal } from './components/stripe/GlobalStripeStatusModal';
 import { GlobalAppCardModal } from './components/chat/Messages/components/GlobalAppCardModal';
 import { GlobalStatusModal } from './components/status-modal/GlobalStatusModal';
 import { GlobalDeployChatModal } from './components/header/DeployChat/components/GlobalDeployChatModal';
 import { GlobalAppSettingsModal } from './components/header/AppSettings/GlobalAppSettingsModal';
+import GlobalFeatureModal from './components/feature-modal/GlobalFeatureModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 import { analyticsCode } from './embeds/anayltics';
 
-import 'virtual:uno.css';
+import './styles/tailwind.css';
 
 interface LoaderData {
   ENV: {
@@ -46,7 +46,6 @@ export const links: LinksFunction = () => [
     type: 'image/svg+xml',
   },
   { rel: 'stylesheet', href: reactToastifyStyles },
-  { rel: 'stylesheet', href: tailwindReset },
   { rel: 'stylesheet', href: globalStyles },
   { rel: 'stylesheet', href: xtermStyles },
   {
@@ -209,17 +208,17 @@ export default function App() {
           closeButton={({ closeToast }) => {
             return (
               <button className="Toastify__close-button" onClick={closeToast}>
-                <div className="i-ph:x text-lg" />
+                <X className="text-lg" />
               </button>
             );
           }}
           icon={({ type }) => {
             switch (type) {
               case 'success': {
-                return <div className="i-ph:check-bold text-bolt-elements-icon-success text-2xl" />;
+                return <Check className="text-bolt-elements-icon-success text-2xl" />;
               }
               case 'error': {
-                return <div className="i-ph:warning-circle-bold text-bolt-elements-icon-error text-2xl" />;
+                return <div className="text-bolt-elements-icon-error text-2xl">⚠️</div>;
               }
             }
 
@@ -234,12 +233,12 @@ export default function App() {
         <GlobalAccountModal />
         <GlobalAuthModal />
         <AppHistoryModal />
-        <GlobalSubscriptionModal />
         <GlobalStripeStatusModal />
         <GlobalAppCardModal />
         <GlobalStatusModal />
         <GlobalDeployChatModal />
         <GlobalAppSettingsModal />
+        <GlobalFeatureModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />
