@@ -470,6 +470,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50',
             checkedBoxes && checkedBoxes.length > 0 ? 'rounded-b-2xl' : 'rounded-2xl',
             { 'animate-pulse': !input && !chatStarted },
+            { 'opacity-50 cursor-not-allowed': hasPendingMessage },
           )}
           onDragEnter={(e) => {
             e.preventDefault();
@@ -545,6 +546,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             maxHeight,
             overflowY: 'auto',
           }}
+          disabled={hasPendingMessage}
           placeholder={
             !chatStarted
               ? '✨ What do you want to build? Start typing here...'
