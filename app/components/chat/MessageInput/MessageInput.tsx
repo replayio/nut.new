@@ -53,7 +53,7 @@ import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
-import { Crosshair, Paperclip, X } from 'lucide-react';
+import { Check, Crosshair, Paperclip, X } from 'lucide-react';
 
 export interface MessageInputProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -319,8 +319,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <div className="flex flex-col gap-2">
             {checkedBoxes.map((text) => (
               <div className="flex items-center gap-3 text-bolt-elements-textPrimary text-sm" key={text}>
-                <div className="w-5 h-5 bg-green-500/10 rounded-full flex items-center justify-center">
-                  <div className="i-ph:check text-green-500 text-sm"></div>
+                <div className="w-6 h-6 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <Check size={16} className="text-green-500" />
                 </div>
                 <div className="font-medium">{text}</div>
               </div>
@@ -510,7 +510,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               event.preventDefault();
 
               if (hasPendingMessage) {
-                handleStop();
+                chatStore.showStopConfirmation.set(true);
                 return;
               }
 
@@ -569,34 +569,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <ClientOnly>
                   {() => (
                     <SendButton
-                      onClick={() => {
-                        if (hasPendingMessage) {
-                          handleStop();
-                          return;
-                        }
-
-                        if (fullInput.length > 0 || uploadedFiles.length > 0) {
-                          // Transform selectedElement to API format
-                          const componentReference = selectedElement?.tree
-                            ? {
-                                componentNames: selectedElement.tree.map(
-                                  (comp: ReactComponent) => comp.displayName || 'Anonymous',
-                                ),
-                              }
-                            : undefined;
-
-                          handleSendMessage({
-                            messageInput: fullInput,
-                            chatMode: ChatMode.UserMessage,
-                            componentReference,
-                          });
-
-                          // Clear selected element after sending
-                          if (selectedElement) {
-                            workbenchStore.setSelectedElement(null);
-                          }
-                        }
-                      }}
+                      handleStop={handleStop}
+                      handleSendMessage={handleSendMessage}
+                      fullInput={fullInput}
+                      uploadedFiles={uploadedFiles}
+                      checkedBoxes={checkedBoxes && checkedBoxes?.length > 0}
                     />
                   )}
                 </ClientOnly>
