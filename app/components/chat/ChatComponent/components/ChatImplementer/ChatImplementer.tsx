@@ -15,9 +15,9 @@ import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type ChatMessageAttachment, type Message } from '~/lib/persistence/message';
 // import { usingMockChat } from '~/lib/replay/MockChat';
 import { assert, generateRandomId, navigateApp } from '~/utils/nut';
-import { createAttachment as createAttachmentAPI } from '~/lib/replay/NutAPI';
-import type { SimulationData } from '~/lib/replay/MessageHandler';
+import { createAttachment as createAttachmentAPI, uploadVisitData } from '~/lib/replay/NutAPI';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
+import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
@@ -33,7 +33,6 @@ export interface ChatMessageParams {
   messageInput?: string;
   chatMode: ChatMode;
   sessionRepositoryId?: string;
-  simulationData?: SimulationData;
   componentReference?: ChatReferenceComponent;
   retryBugReportName?: string;
   payFeatures?: boolean;
@@ -133,7 +132,6 @@ const ChatImplementer = memo(() => {
       messageInput,
       chatMode,
       sessionRepositoryId,
-      simulationData,
       componentReference,
       retryBugReportName,
       payFeatures,
@@ -187,20 +185,21 @@ const ChatImplementer = memo(() => {
 
     const numAbortsAtStart = chatStore.numAborts.get();
 
-    let visit: VisitData | undefined;
-    if (sessionRepositoryId) {
-      visit = {
+    let visitDataId: string | undefined;
+    if (sessionRepositoryId && chatMode == ChatMode.UserMessage) {
+      const simulationData = await flushSimulationData();
+      visitDataId = await uploadVisitData({
         repositoryId: sessionRepositoryId,
         simulationData,
         componentReference,
-      };
+      });
     }
 
     await doSendMessage({
       appId,
       mode: chatMode,
       messages,
-      visit,
+      visitDataId,
       retryBugReportName,
       payFeatures,
     });

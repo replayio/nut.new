@@ -43,7 +43,7 @@ export interface NutChatRequest {
   appId: string;
   mode?: ChatMode;
   messages?: Message[];
-  visit?: VisitData;
+  visitDataId?: string;
   retryBugReportName?: string;
   upFrontPricing?: boolean;
   payFeatures?: boolean;
@@ -87,17 +87,6 @@ export async function sendChatMessage(request: NutChatRequest, onResponse: ChatR
   if (usingMockChat()) {
     await sendChatMessageMocked(onResponse);
     return;
-  }
-
-  if (request.mode == ChatMode.UserMessage) {
-    const repositoryId = workbenchStore.repositoryId.get();
-    if (repositoryId) {
-      const simulationData = await flushSimulationData();
-      if (!request.visit) {
-        request.visit = { repositoryId };
-      }
-      request.visit.simulationData = simulationData;
-    }
   }
 
   logger.debug('sendChatMessage', JSON.stringify(request));
