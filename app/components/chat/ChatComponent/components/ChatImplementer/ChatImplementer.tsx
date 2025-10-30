@@ -9,7 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
 // import Cookies from 'js-cookie';
 import { useSearchParams } from '@remix-run/react';
-import { type VisitData, ChatMode } from '~/lib/replay/SendChatMessage';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 // import { anthropicNumFreeUsesCookieName, maxFreeUses } from '~/utils/freeUses';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
 import { type ChatMessageAttachment, type Message } from '~/lib/persistence/message';
@@ -128,14 +128,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const {
-      messageInput,
-      chatMode,
-      sessionRepositoryId,
-      componentReference,
-      retryBugReportName,
-      payFeatures,
-    } = params;
+    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, payFeatures } = params;
 
     if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
       return;

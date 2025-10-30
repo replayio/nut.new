@@ -12,8 +12,6 @@ import { waitForTime } from '~/utils/nut';
 import type { ChatResponse } from '~/lib/persistence/response';
 import { getLastResponseTime } from './ResponseFilter';
 import type { SimulationData } from './MessageHandler';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 
 const logger = createScopedLogger('ChatMessage');
 

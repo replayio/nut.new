@@ -219,16 +219,14 @@ async function compressJSON(obj: any): Promise<ArrayBuffer> {
   // Convert JSON to string, then to Uint8Array
   const jsonString = JSON.stringify(obj);
   const blob = new Blob([jsonString]);
-  
+
   // Compress using gzip
-  const compressedStream = blob.stream().pipeThrough(
-    new CompressionStream('gzip')
-  );
-  
+  const compressedStream = blob.stream().pipeThrough(new CompressionStream('gzip'));
+
   // Get the compressed data as a buffer
   const compressedBlob = await new Response(compressedStream).blob();
   const buffer = await compressedBlob.arrayBuffer();
-  
+
   return buffer;
 }
 
