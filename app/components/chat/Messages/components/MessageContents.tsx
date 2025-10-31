@@ -25,11 +25,12 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 
 interface MessageContentsProps {
   message: Message;
+  messages?: Message[];
   onCheckboxChange?: (contents: string, checked: boolean) => void;
   sendMessage?: (params: ChatMessageParams) => void;
 }
 
-export function MessageContents({ message, onCheckboxChange, sendMessage }: MessageContentsProps) {
+export function MessageContents({ message, messages = [], onCheckboxChange, sendMessage }: MessageContentsProps) {
   const componentNames = message.componentReference?.componentNames || [];
 
   const isReactComponent = (name: string) => name && name[0] === name[0].toUpperCase();
@@ -108,7 +109,13 @@ export function MessageContents({ message, onCheckboxChange, sendMessage }: Mess
         </div>
       )}
       <div className="prose prose-sm max-w-none text-bolt-elements-textPrimary">
-        <Markdown html onCheckboxChange={onCheckboxChange} onChecklistSubmit={sendMessage}>
+        <Markdown
+          html
+          message={message}
+          messages={messages}
+          onCheckboxChange={onCheckboxChange}
+          onChecklistSubmit={sendMessage}
+        >
           {message.content}
         </Markdown>
       </div>
