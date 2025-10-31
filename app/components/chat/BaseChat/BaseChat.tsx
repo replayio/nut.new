@@ -151,27 +151,29 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
 
       // Add bug report cards
-      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map((report) => {
-        console.log('report', report);
+      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
+        (report) => {
+          console.log('report', report);
 
-        const filteredFeatures = appSummary?.features?.filter(
-          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
-        );
+          const filteredFeatures = appSummary?.features?.filter(
+            (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+          );
 
-        const featureIndex = filteredFeatures?.findIndex((f) => f.name === report.name);
+          const featureIndex = filteredFeatures?.findIndex((f) => f.name === report.name);
 
-        return {
-          id: report.name,
-          bugReport: report,
-          handleSendMessage,
-          onCardClick:
-                featureIndex !== undefined && featureIndex !== -1
-                  ? () => {
-                      openFeatureModal(featureIndex, filteredFeatures?.length ?? 0);
-                    }
-                  : undefined,
-        };
-      });
+          return {
+            id: report.name,
+            bugReport: report,
+            handleSendMessage,
+            onCardClick:
+              featureIndex !== undefined && featureIndex !== -1
+                ? () => {
+                    openFeatureModal(featureIndex, filteredFeatures?.length ?? 0);
+                  }
+                : undefined,
+          };
+        },
+      );
 
       newCards.push(...bugReportCards);
 
