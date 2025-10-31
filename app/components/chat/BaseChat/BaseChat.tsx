@@ -153,7 +153,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       // Add bug report cards
       const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
         (report) => {
-          console.log('report', report);
 
           const filteredFeatures = appSummary?.features?.filter(
             (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
@@ -288,8 +287,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       maxHeight: TEXTAREA_MAX_HEIGHT,
     };
 
-    console.log('appSummary', appSummary);
-    console.log('infoCards', infoCards);
     const baseChat = (
       <div
         ref={ref}
