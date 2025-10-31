@@ -21,13 +21,15 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
 interface MessageContentsProps {
   message: Message;
   onCheckboxChange?: (contents: string, checked: boolean) => void;
+  sendMessage?: (params: ChatMessageParams) => void;
 }
 
-export function MessageContents({ message, onCheckboxChange }: MessageContentsProps) {
+export function MessageContents({ message, onCheckboxChange, sendMessage }: MessageContentsProps) {
   const componentNames = message.componentReference?.componentNames || [];
 
   const isReactComponent = (name: string) => name && name[0] === name[0].toUpperCase();
@@ -106,7 +108,7 @@ export function MessageContents({ message, onCheckboxChange }: MessageContentsPr
         </div>
       )}
       <div className="prose prose-sm max-w-none text-bolt-elements-textPrimary">
-        <Markdown html onCheckboxChange={onCheckboxChange}>
+        <Markdown html onCheckboxChange={onCheckboxChange} onChecklistSubmit={sendMessage}>
           {message.content}
         </Markdown>
       </div>

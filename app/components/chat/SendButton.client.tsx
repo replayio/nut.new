@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
@@ -23,9 +23,8 @@ interface SendButtonProps {
   disabled?: boolean;
   handleStop?: () => void;
   handleSendMessage?: (params: ChatMessageParams) => void;
-  fullInput?: string;
+  input?: string;
   uploadedFiles?: File[];
-  checkedBoxes?: boolean;
 }
 
 const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
@@ -34,21 +33,13 @@ export const SendButton = ({
   disabled,
   handleStop,
   handleSendMessage,
-  fullInput = '',
+  input = '',
   uploadedFiles = [],
-  checkedBoxes = false,
 }: SendButtonProps) => {
   const hasPendingMessage = useStore(chatStore.hasPendingMessage);
   const selectedElement = useStore(workbenchStore.selectedElement) as SelectedElementData | null;
   const showStopConfirmation = useStore(chatStore.showStopConfirmation);
   const popupRef = useRef<HTMLDivElement>(null);
-  const [shouldBlink, setShouldBlink] = useState(false);
-
-  useEffect(() => {
-    if (checkedBoxes) {
-      setShouldBlink(true);
-    }
-  }, [checkedBoxes]);
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -94,7 +85,7 @@ export const SendButton = ({
       return;
     }
 
-    if (fullInput.length > 0 || uploadedFiles.length > 0) {
+    if (input.length > 0 || uploadedFiles.length > 0) {
       // Transform selectedElement to API format
       const componentReference = selectedElement?.tree
         ? {
@@ -103,7 +94,7 @@ export const SendButton = ({
         : undefined;
 
       handleSendMessage?.({
-        messageInput: fullInput,
+        messageInput: input,
         chatMode: ChatMode.UserMessage,
         componentReference,
       });
@@ -134,31 +125,13 @@ export const SendButton = ({
     <>
       <AnimatePresence>
         <TooltipProvider>
-          <WithTooltip tooltip={tooltipText} forceOpen={shouldBlink}>
+          <WithTooltip tooltip={tooltipText}>
             <motion.button
               className={className}
               initial={{ opacity: 0, y: 10 }}
-              animate={
-                shouldBlink
-                  ? {
-                      opacity: [1, 0.4, 1],
-                      y: 0,
-                    }
-                  : { opacity: 1, y: 0 }
-              }
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              transition={
-                shouldBlink
-                  ? {
-                      opacity: {
-                        repeat: Infinity,
-                        duration: 1.5,
-                        ease: 'easeInOut',
-                      },
-                      y: { ease: customEasingFn, duration: 0.17 },
-                    }
-                  : { ease: customEasingFn, duration: 0.17 }
-              }
+              transition={{ ease: customEasingFn, duration: 0.17 }}
               disabled={disabled}
               onClick={handleClick}
             >

@@ -344,7 +344,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               </div>
 
               <div className="w-full">
-                <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
+                <MessageContents message={message} onCheckboxChange={onCheckboxChange} sendMessage={sendMessage} />
               </div>
             </Suspense>
           </div>

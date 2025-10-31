@@ -95,8 +95,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
-
     const hasShownWorkbench = useRef(false);
 
     useEffect(() => {
@@ -204,7 +202,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
         sendMessage(payload);
         abortListening();
-        setCheckedBoxes([]);
 
         if (window.analytics && messages.length === 0) {
           window.analytics.track('Created a new chat', {
@@ -254,11 +251,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         return message;
       });
       chatStore.messages.set(newMessages);
-      if (checked) {
-        setCheckedBoxes((prev) => [...prev, checkboxText]);
-      } else {
-        setCheckedBoxes((prev) => prev.filter((box) => box !== checkboxText));
-      }
     };
 
     const messageInputProps: MessageInputProps = {
@@ -276,7 +268,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
-      checkedBoxes,
     };
 
     const baseChat = (
