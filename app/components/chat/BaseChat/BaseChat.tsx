@@ -95,8 +95,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
-
     const hasShownWorkbench = useRef(false);
 
     useEffect(() => {
@@ -154,11 +152,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
       // Add bug report cards
       const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
-        (report) => ({
-          id: report.name,
-          bugReport: report,
-          handleSendMessage,
-        }),
+        (report) => {
+          const filteredFeatures = appSummary?.features?.filter(
+            (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+          );
+
+          const featureIndex = filteredFeatures?.findIndex((f) => f.name === report.name);
+
+          return {
+            id: report.name,
+            bugReport: report,
+            handleSendMessage,
+            onCardClick:
+              featureIndex !== undefined && featureIndex !== -1
+                ? () => {
+                    openFeatureModal(featureIndex, filteredFeatures?.length ?? 0);
+                  }
+                : undefined,
+          };
+        },
       );
 
       newCards.push(...bugReportCards);
@@ -206,7 +218,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
         sendMessage(payload);
         abortListening();
-        setCheckedBoxes([]);
 
         if (window.analytics && messages.length === 0) {
           window.analytics.track('Created a new chat', {
@@ -256,11 +267,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         return message;
       });
       chatStore.messages.set(newMessages);
-      if (checked) {
-        setCheckedBoxes((prev) => [...prev, checkboxText]);
-      } else {
-        setCheckedBoxes((prev) => prev.filter((box) => box !== checkboxText));
-      }
     };
 
     const messageInputProps: MessageInputProps = {
@@ -278,7 +284,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
-      checkedBoxes,
     };
 
     const baseChat = (
@@ -329,11 +334,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         sendMessage={handleSendMessage}
                       />
                       {infoCards && infoCards.length > 0 && (
-                        <StackedInfoCard
-                          cards={infoCards}
-                          className="w-full mb-2"
-                          handleSendMessage={handleSendMessage}
-                        />
+                        <div className="flex justify-center">
+                          <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
+                            <StackedInfoCard
+                              cards={infoCards}
+                              className="w-full mb-2"
+                              handleSendMessage={handleSendMessage}
+                            />
+                          </div>
+                        </div>
                       )}
                     </>
                   ) : null;
