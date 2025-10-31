@@ -95,8 +95,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onTranscriptChange,
     });
 
-    const [checkedBoxes, setCheckedBoxes] = useState<string[]>([]);
-
     const hasShownWorkbench = useRef(false);
 
     useEffect(() => {
@@ -139,6 +137,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               description: feature.description,
               iconType,
               variant,
+              handleSendMessage,
               onCardClick:
                 modalIndex !== -1
                   ? () => {
@@ -156,6 +155,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         (report) => ({
           id: report.name,
           bugReport: report,
+          handleSendMessage,
         }),
       );
 
@@ -204,7 +204,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
         sendMessage(payload);
         abortListening();
-        setCheckedBoxes([]);
 
         if (window.analytics && messages.length === 0) {
           window.analytics.track('Created a new chat', {
@@ -254,11 +253,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         return message;
       });
       chatStore.messages.set(newMessages);
-      if (checked) {
-        setCheckedBoxes((prev) => [...prev, checkboxText]);
-      } else {
-        setCheckedBoxes((prev) => prev.filter((box) => box !== checkboxText));
-      }
     };
 
     const messageInputProps: MessageInputProps = {
@@ -276,7 +270,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       onStopListening: stopListening,
       minHeight: TEXTAREA_MIN_HEIGHT,
       maxHeight: TEXTAREA_MAX_HEIGHT,
-      checkedBoxes,
     };
 
     const baseChat = (
@@ -324,10 +317,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       <Messages
                         ref={messageRef}
                         onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                        sendMessage={sendMessage}
+                        sendMessage={handleSendMessage}
                       />
                       {infoCards && infoCards.length > 0 && (
-                        <StackedInfoCard cards={infoCards} className="w-full mb-2" />
+                        <StackedInfoCard
+                          cards={infoCards}
+                          className="w-full mb-2"
+                          handleSendMessage={handleSendMessage}
+                        />
                       )}
                     </>
                   ) : null;

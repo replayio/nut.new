@@ -40,7 +40,7 @@ interface MessagesProps {
   id?: string;
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
-  sendMessage?: (params: ChatMessageParams) => void;
+  sendMessage: (params: ChatMessageParams) => void;
 }
 
 function getUnpaidFeatureCost(appSummary: AppSummary | undefined, lastContinueBuildIteration: number) {
@@ -264,6 +264,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
                 : undefined
             }
             className="shadow-sm"
+            handleSendMessage={sendMessage}
           />
         </div>
       );
@@ -344,7 +345,12 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               </div>
 
               <div className="w-full">
-                <MessageContents message={message} onCheckboxChange={onCheckboxChange} />
+                <MessageContents
+                  message={message}
+                  messages={messages}
+                  onCheckboxChange={onCheckboxChange}
+                  sendMessage={sendMessage}
+                />
               </div>
             </Suspense>
           </div>
