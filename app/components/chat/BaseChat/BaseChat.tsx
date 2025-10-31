@@ -151,13 +151,27 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
 
       // Add bug report cards
-      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
-        (report) => ({
+      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map((report) => {
+        console.log('report', report);
+
+        const filteredFeatures = appSummary?.features?.filter(
+          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+        );
+
+        const featureIndex = filteredFeatures?.findIndex((f) => f.name === report.name);
+
+        return {
           id: report.name,
           bugReport: report,
           handleSendMessage,
-        }),
-      );
+          onCardClick:
+                featureIndex !== undefined && featureIndex !== -1
+                  ? () => {
+                      openFeatureModal(featureIndex, filteredFeatures?.length ?? 0);
+                    }
+                  : undefined,
+        };
+      });
 
       newCards.push(...bugReportCards);
 
@@ -272,6 +286,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       maxHeight: TEXTAREA_MAX_HEIGHT,
     };
 
+    console.log('appSummary', appSummary);
+    console.log('infoCards', infoCards);
     const baseChat = (
       <div
         ref={ref}
@@ -320,11 +336,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         sendMessage={handleSendMessage}
                       />
                       {infoCards && infoCards.length > 0 && (
-                        <StackedInfoCard
-                          cards={infoCards}
-                          className="w-full mb-2"
-                          handleSendMessage={handleSendMessage}
-                        />
+                        <div className="flex justify-center">
+                          <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
+                            <StackedInfoCard
+                              cards={infoCards}
+                              className="w-full mb-2"
+                              handleSendMessage={handleSendMessage}
+                            />
+                          </div>
+                        </div>
                       )}
                     </>
                   ) : null;
