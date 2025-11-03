@@ -151,7 +151,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
 
       // Add bug report cards
-      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved) ?? []).map(
+      const bugReportCards = (appSummary?.bugReports?.filter((a) => a.status !== BugReportStatus.Resolved && a.status !== BugReportStatus.Canceled) ?? []).map(
         (report) => {
           const filteredFeatures = appSummary?.features?.filter(
             (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
