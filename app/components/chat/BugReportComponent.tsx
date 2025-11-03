@@ -98,8 +98,12 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
             </>
           )}
 
-          {status !== BugReportStatus.Failed &&
-            <WithTooltip tooltip={status === BugReportStatus.WaitingForFeedback ? "Dismiss this bug report" : "Cancel this bug report"}>
+          {status !== BugReportStatus.Failed && (
+            <WithTooltip
+              tooltip={
+                status === BugReportStatus.WaitingForFeedback ? 'Dismiss this bug report' : 'Cancel this bug report'
+              }
+            >
               <button
                 onClick={(e) => handleCancel(e)}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors border border-red-500/20 hover:border-red-500/40 active:scale-95"
@@ -107,8 +111,7 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
                 <X size={18} />
               </button>
             </WithTooltip>
-          }
-
+          )}
 
           {status === BugReportStatus.Open && (
             <WithTooltip tooltip={escalateTime ? 'Escalated to developer support' : 'Fixing in progress'}>
