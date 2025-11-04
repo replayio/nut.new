@@ -59,6 +59,13 @@ export default async function handleRequest(
   // 🔒 SECURITY: Set comprehensive security headers
   responseHeaders.set('Cross-Origin-Opener-Policy', 'same-origin');
 
+  let connectSrcDirective =
+    "connect-src 'self' https://*.replay.io https://auth.nut.new https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://widget.intercom.io https://api.intercom.io https://api-iam.intercom.io wss://*.intercom.io https://telemetry.replay.io https://*.github.com https://*.githubusercontent.com https://*.sentry.io https://cdn.segment.com https://api.segment.io https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.lgrckt-in.com";
+
+  if (import.meta.env.DEV) {
+    connectSrcDirective += ' http://*.tail8ddab.ts.net';
+  }
+
   // Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
@@ -66,7 +73,7 @@ export default async function handleRequest(
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://*.replay.io https://auth.nut.new https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://widget.intercom.io https://api.intercom.io https://api-iam.intercom.io wss://*.intercom.io https://telemetry.replay.io https://*.github.com https://*.githubusercontent.com https://*.sentry.io https://cdn.segment.com https://api.segment.io https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.lgrckt-in.com",
+    connectSrcDirective,
     "frame-src 'self' https://js.stripe.com https://www.youtube.com https://www.youtube-nocookie.com https://intercom-sheets.com https://*.replay.io",
     "worker-src 'self' blob:",
     "object-src 'none'",
