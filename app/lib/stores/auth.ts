@@ -15,14 +15,14 @@ export const authStatusStore = {
   isLoggedIn: atom<boolean | null>(null),
 
   // Initialize auth status store
-  async init() {
+  init() {
     // subscribe to the userStore
     userStore.listen((user) => {
       this.isLoggedIn.set(!!user);
     });
 
-    // Check initial auth state
-    const authenticated = await isAuthenticated();
+    // Check initial auth state (now synchronous!)
+    const authenticated = isAuthenticated();
     this.isLoggedIn.set(authenticated);
   },
 };

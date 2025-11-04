@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { MessageUserInfo } from '~/lib/persistence/message';
+import { userStore } from '~/lib/stores/auth';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -51,13 +52,13 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
   }
 }
 
-export async function getCurrentUserId(): Promise<string | null> {
-  const user = await getCurrentUser();
+export function getCurrentUserId(): string | null {
+  const user = userStore.get();
   return user?.id || null;
 }
 
-export async function getCurrentUserInfo(): Promise<MessageUserInfo | undefined> {
-  const user = await getCurrentUser();
+export function getCurrentUserInfo(): MessageUserInfo | undefined {
+  const user = userStore.get();
   if (!user) {
     return undefined;
   }
@@ -69,8 +70,12 @@ export async function getCurrentUserInfo(): Promise<MessageUserInfo | undefined>
   };
 }
 
+/**
+ * Check if user is admin from the cached userStore and database
+ * Uses cached user to avoid unnecessary API calls
+ */
 export async function getNutIsAdmin(): Promise<boolean> {
-  const user = await getCurrentUser();
+  const user = userStore.get();
 
   if (!user) {
     return false;
@@ -79,7 +84,7 @@ export async function getNutIsAdmin(): Promise<boolean> {
   const { data: profileData, error: profileError } = await getSupabase()
     .from('profiles')
     .select('is_admin')
-    .eq('id', user?.id)
+    .eq('id', user.id)
     .single();
 
   if (profileError) {
@@ -91,10 +96,11 @@ export async function getNutIsAdmin(): Promise<boolean> {
 }
 
 /**
- * Checks if there is a currently authenticated user.
+ * Checks if there is a currently authenticated user (from cached userStore)
+ * This is synchronous and very fast as it reads from memory
  */
-export async function isAuthenticated(): Promise<boolean> {
-  const user = await getCurrentUser();
+export function isAuthenticated(): boolean {
+  const user = userStore.get();
   return user !== null;
 }
 
