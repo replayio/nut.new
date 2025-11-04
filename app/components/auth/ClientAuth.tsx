@@ -3,7 +3,10 @@ import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
+import {
+  // peanutsStore,
+  refreshPeanutsStore
+} from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';
 import { userStore } from '~/lib/stores/userAuth';
@@ -18,7 +21,7 @@ export function ClientAuth() {
   const [showProTooltip, setShowProTooltip] = useState(false);
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
   const stripeSubscription = useStore(subscriptionStore.subscription);
-  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
+  // const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -184,7 +187,7 @@ export function ClientAuth() {
                         {`${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`}
                       </div>
                       <div className="text-xs text-bolt-elements-textSecondary">
-                        {stripeSubscription.peanuts.toLocaleString()}/month
+                        {stripeSubscription.tier === 'builder' ? '$20' : '$0'}/month
                       </div>
                     </div>
                   </div>
@@ -194,7 +197,7 @@ export function ClientAuth() {
                 </div>
               )}
 
-              <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
+              {/* <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">🥜</span>
@@ -202,7 +205,7 @@ export function ClientAuth() {
                   </div>
                   <div className="text-bolt-elements-textHeading font-bold text-lg">{peanutsRemaining ?? '...'}</div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="p-3 space-y-2">
                 <div className="relative">

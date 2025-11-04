@@ -7,6 +7,8 @@ import { useEditAppTitle } from '~/lib/hooks/useEditAppTitle';
 import { forwardRef, type ForwardedRef } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { Check, Copy, PenLine, Trash2 } from '~/components/ui/Icon';
+import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { useStore } from '@nanostores/react';
 
 interface HistoryItemProps {
   item: AppLibraryEntry;
@@ -17,6 +19,7 @@ interface HistoryItemProps {
 export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   const { id: urlId } = useParams();
   const isActiveChat = urlId === item.id;
+  const stripeSubscription = useStore(subscriptionStore.subscription);
 
   const { editing, handleChange, handleBlur, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } =
     useEditAppTitle({
@@ -78,7 +81,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
                   toggleEditMode();
                 }}
               />
-              <Dialog.Trigger asChild>
+              {stripeSubscription?.tier === 'builder' && <Dialog.Trigger asChild>
                 <ChatActionButton
                   toolTipContent="Delete app"
                   icon={Trash2}
@@ -88,7 +91,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
                     onDelete?.(event);
                   }}
                 />
-              </Dialog.Trigger>
+              </Dialog.Trigger>}
             </div>
           </div>
         </a>

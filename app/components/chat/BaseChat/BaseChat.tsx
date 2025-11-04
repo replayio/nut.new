@@ -29,6 +29,10 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
 import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { openFeatureModal } from '~/lib/stores/featureModal';
+import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { toast } from 'react-toastify';
+import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
+import { PlanUpgradeBlock } from './components/PlanUpgradeBlock';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -78,7 +82,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const repositoryId = useStore(workbenchStore.repositoryId);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
+    const stripeSubscription = useStore(subscriptionStore.subscription);
+    const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
+  
+    const loadEntries = useCallback(() => {
+      setList(undefined);
+      database
+        .getAllAppEntries()
+        .then(setList)
+        .catch((error) => toast.error(error.message));
+    }, []);
 
+    useEffect(() => {
+      loadEntries();
+    }, []);
+
+    console.log('list', list);
+    
     const onTranscriptChange = useCallback(
       (transcript: string) => {
         if (handleInputChange) {
@@ -350,13 +370,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   ) : null;
                 }}
               </ClientOnly>
-              <ChatPromptContainer
+              {((stripeSubscription?.tier === 'builder' || (stripeSubscription?.tier === 'free' && list?.length === 0)) || chatStarted) ? <ChatPromptContainer
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles!}
                 imageDataList={imageDataList}
                 setImageDataList={setImageDataList!}
                 messageInputProps={messageInputProps}
-              />
+              /> :
+              <PlanUpgradeBlock />
+              }
             </div>
             {!chatStarted && (
               <>
