@@ -40,10 +40,10 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
     return user;
   } catch (error) {
     // Session missing errors are normal when user is not logged in
-    const isSessionMissingError = error instanceof Error && 
-                                  (error.message?.includes('Auth session missing') || 
-                                   error.message?.includes('session_missing'));
-    
+    const isSessionMissingError =
+      error instanceof Error &&
+      (error.message?.includes('Auth session missing') || error.message?.includes('session_missing'));
+
     if (!isSessionMissingError) {
       console.error('Error getting current user:', error);
     }
@@ -107,10 +107,10 @@ export async function getCurrentAccessToken(): Promise<string | null> {
     return session?.access_token || null;
   } catch (error) {
     // Session missing errors are normal when user is not logged in
-    const isSessionMissingError = error instanceof Error && 
-                                  (error.message?.includes('Auth session missing') || 
-                                   error.message?.includes('session_missing'));
-    
+    const isSessionMissingError =
+      error instanceof Error &&
+      (error.message?.includes('Auth session missing') || error.message?.includes('session_missing'));
+
     if (!isSessionMissingError) {
       console.error('Error getting access token:', error);
     }

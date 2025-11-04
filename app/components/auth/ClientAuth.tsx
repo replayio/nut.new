@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import { getSupabase } from '~/lib/supabase/client';
 
 import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';

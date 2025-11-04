@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { AccountModal } from './AccountModal';
 import { userStore } from '~/lib/stores/auth';
-import type { User } from '@supabase/supabase-js';
 import { SubscriptionModal } from '~/components/subscription/SubscriptionModal';
 import { subscriptionModalStore } from '~/lib/stores/subscriptionModal';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
