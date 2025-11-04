@@ -64,6 +64,11 @@ export async function initializeAuth() {
         userId: session.user.id,
         email: session.user.email,
       });
+    } else {
+      // No session - user is not logged in (this is normal)
+      userStore.set(null);
+      sessionStore.set(null);
+      logStore.logSystem('Auth initialized - no active session');
     }
 
     // Listen for auth changes
@@ -71,6 +76,14 @@ export async function initializeAuth() {
       data: { subscription },
     } = getSupabase().auth.onAuthStateChange(async (event, session) => {
       logStore.logSystem('Auth state changed', { event });
+
+      // Handle token refresh errors - clear invalid sessions
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        logStore.logSystem('Token refresh failed - clearing auth state');
+        userStore.set(null);
+        sessionStore.set(null);
+        return;
+      }
 
       if (session) {
         userStore.set(session.user);
@@ -177,6 +190,8 @@ export async function signOut() {
       throw error;
     }
 
+    userStore.set(null);
+    sessionStore.set(null);
     refreshPeanutsStore();
   } catch (error) {
     logStore.logError('Failed to sign out', error);
