@@ -8,6 +8,32 @@ import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { refreshPeanutsStore } from './peanuts';
 import { subscriptionStore } from './subscriptionStatus';
 
+// Development mode: Set to true to use mock user
+const USE_MOCK_USER = true;
+
+// Mock user data for development
+const MOCK_USER: User = {
+  id: 'edb004fa-ed84-4a32-a408-ee89232329fa',
+  aud: 'authenticated',
+  role: 'authenticated',
+  email: 'tester@test.com',
+  email_confirmed_at: '2025-11-05T18:41:39.448059Z',
+  phone: '',
+  confirmed_at: '2025-11-05T18:41:39.448059Z',
+  last_sign_in_at: '2025-11-05T18:58:01.620479845Z',
+  app_metadata: {
+    provider: 'email',
+    providers: ['email'],
+  },
+  user_metadata: {
+    email_verified: true,
+  },
+  identities: [],
+  created_at: '2025-11-05T18:41:39.442019Z',
+  updated_at: '2025-11-05T18:58:01.623696Z',
+  is_anonymous: false,
+};
+
 export const userStore = atom<User | null>(null);
 export const sessionStore = atom<Session | null>(null);
 export const isLoadingStore = atom<boolean>(true);
@@ -33,6 +59,18 @@ export async function initializeAuth() {
     authStatusStore.init();
 
     isLoadingStore.set(true);
+
+    // Development mode: Use mock user
+    if (USE_MOCK_USER) {
+      userStore.set(MOCK_USER);
+      sessionStore.set(null); // Mock session not needed for UI
+      logStore.logSystem('Auth initialized with MOCK USER', {
+        userId: MOCK_USER.id,
+        email: MOCK_USER.email,
+      });
+      isLoadingStore.set(false);
+      return () => {}; // Return empty cleanup function
+    }
 
     // We've seen Supabase Auth hang when there are multiple tabs open.
     // Handle this by using a timeout to ensure we don't wait indefinitely.
@@ -185,6 +223,13 @@ export async function updatePassword(newPassword: string) {
 export async function signOut() {
   try {
     isLoadingStore.set(true);
+
+    // Development mode: Prevent sign out when using mock user
+    if (USE_MOCK_USER) {
+      logStore.logSystem('Sign out blocked - using MOCK USER');
+      isLoadingStore.set(false);
+      return;
+    }
 
     // Try to sign out from Supabase, but don't fail if there's no session
     try {
