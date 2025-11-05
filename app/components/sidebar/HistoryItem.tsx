@@ -81,17 +81,19 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
                   toggleEditMode();
                 }}
               />
-              {stripeSubscription?.tier === 'builder' && <Dialog.Trigger asChild>
-                <ChatActionButton
-                  toolTipContent="Delete app"
-                  icon={Trash2}
-                  className="[&&]:hover:text-red-500"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    onDelete?.(event);
-                  }}
-                />
-              </Dialog.Trigger>}
+              {stripeSubscription?.tier === 'builder' && (
+                <Dialog.Trigger asChild>
+                  <ChatActionButton
+                    toolTipContent="Delete app"
+                    icon={Trash2}
+                    className="[&&]:hover:text-red-500"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      onDelete?.(event);
+                    }}
+                  />
+                </Dialog.Trigger>
+              )}
             </div>
           </div>
         </a>

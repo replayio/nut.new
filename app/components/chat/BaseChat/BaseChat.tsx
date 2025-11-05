@@ -87,7 +87,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const isSubscriptionStoreLoaded = useStore(subscriptionStore.isLoaded);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
     const [isLoadingList, setIsLoadingList] = useState(true);
-  
+
     const loadEntries = useCallback(() => {
       setIsLoadingList(true);
       database
@@ -101,7 +101,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       loadEntries();
     }, [loadEntries, user]);
 
-    
     const onTranscriptChange = useCallback(
       (transcript: string) => {
         if (handleInputChange) {
@@ -377,11 +376,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 }}
               </ClientOnly>
               {(() => {
-                const isLoadingData = 
-                  isAuthLoading || 
-                  (user && !isSubscriptionStoreLoaded) || 
-                  isLoadingList;
-                
+                const isLoadingData = isAuthLoading || (user && !isSubscriptionStoreLoaded) || isLoadingList;
+
                 if (isLoadingData && !chatStarted) {
                   return (
                     <div className="flex items-center justify-center min-h-[176.5px]">
@@ -392,15 +388,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     </div>
                   );
                 }
-                
+
                 const hasNoPaidPlan = !stripeSubscription || stripeSubscription.tier === 'free';
-                
-                const shouldShowUpgradeBlock = 
-                  user &&
-                  hasNoPaidPlan &&
-                  list &&
-                  list.length > 0 &&
-                  !chatStarted;
+
+                const shouldShowUpgradeBlock = user && hasNoPaidPlan && list && list.length > 0 && !chatStarted;
 
                 return shouldShowUpgradeBlock ? (
                   <PlanUpgradeBlock />

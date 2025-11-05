@@ -4,12 +4,15 @@ import type { User } from '@supabase/supabase-js';
 import type { ReactElement } from 'react';
 import {
   // peanutsStore,
-  refreshPeanutsStore
+  refreshPeanutsStore,
 } from '~/lib/stores/peanuts';
 import { useStore } from '@nanostores/react';
-import { 
+import {
   // createTopoffCheckout,
-  cancelSubscription, manageBilling, checkSubscriptionStatus } from '~/lib/stripe/client';
+  cancelSubscription,
+  manageBilling,
+  checkSubscriptionStatus,
+} from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
@@ -434,7 +437,9 @@ export const AccountModal = ({ user }: AccountModalProps) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 max-h-80 overflow-y-auto">{history.filter((item) => item.reason !== 'AddPeanuts').map(renderHistoryItem)}</div>
+          <div className="space-y-4 max-h-80 overflow-y-auto">
+            {history.filter((item) => item.reason !== 'AddPeanuts').map(renderHistoryItem)}
+          </div>
         )}
       </div>
 

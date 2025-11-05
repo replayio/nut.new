@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 import {
   // peanutsStore,
-  refreshPeanutsStore
+  refreshPeanutsStore,
 } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';

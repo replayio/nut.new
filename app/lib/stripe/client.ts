@@ -116,7 +116,11 @@ export const SUBSCRIPTION_TIERS = {
     peanuts: 2000,
     description: 'No limits on any features. Go nuts!',
     // features: ['2000 Peanuts per month (rolls over)', 'Pay-as-you-go to top off balance'],
-    features: ['Unlimited projects', 'Access to Built-in API connectors (SMS, Email, Calendar, etc.)', 'Priority Customer Support'],
+    features: [
+      'Unlimited projects',
+      'Access to Built-in API connectors (SMS, Email, Calendar, etc.)',
+      'Priority Customer Support',
+    ],
   },
 } as const;
 
