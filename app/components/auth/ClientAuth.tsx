@@ -19,6 +19,9 @@ export function ClientAuth() {
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
   const stripeSubscription = useStore(subscriptionStore.subscription);
   // const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
+  
+  // Check if this is the mock user (for development)
+  const isMockUser = user?.id === 'edb004fa-ed84-4a32-a408-ee89232329fa';
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -109,6 +112,9 @@ export function ClientAuth() {
               </span>
             )}
           </button>
+          {isMockUser && (
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-yellow-500 border-2 border-white rounded-full" title="Development Mode"></div>
+          )}
 
           {showDropdown && (
             <div
@@ -121,7 +127,14 @@ export function ClientAuth() {
                     <User className="text-bolt-elements-textPrimary" size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-bolt-elements-textSecondary mb-1">Signed in as</div>
+                    <div className="text-xs text-bolt-elements-textSecondary mb-1">
+                      Signed in as
+                      {isMockUser && (
+                        <span className="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-600 rounded text-[10px] font-bold">
+                          DEV MODE
+                        </span>
+                      )}
+                    </div>
                     <div className="font-medium text-bolt-elements-textPrimary truncate text-sm">{user.email}</div>
                   </div>
                 </div>
@@ -138,26 +151,7 @@ export function ClientAuth() {
                   </button>
                 </div>
               ) : (
-                <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Crown className="text-blue-600" size={18} />
-                      <span className="text-bolt-elements-textPrimary font-medium">Plan</span>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-bolt-elements-textHeading font-bold text-sm">
-                        {`${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`}
-                      </div>
-                      <div className="text-xs text-bolt-elements-textSecondary">
-                        {stripeSubscription.tier === 'builder' ? '$20' : '$0'}/month
-                      </div>
-                    </div>
-                  </div>
-                  {stripeSubscription?.cancelAtPeriodEnd && (
-                    <div className="text-xs text-yellow-500 mt-1 text-center">Cancels at period end</div>
-                  )}
-                </div>
+                null
               )}
 
               {/* <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
@@ -170,77 +164,7 @@ export function ClientAuth() {
                 </div>
               </div> */}
 
-              <div className="p-3 space-y-2">
-                <div className="relative">
-                  <a
-                    href="https://form.typeform.com/to/bFKqmqdX"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
-                    onClick={() => {
-                      if (window.analytics) {
-                        window.analytics.track('Clicked Pro Plan Waitlist button', {
-                          timestamp: new Date().toISOString(),
-                          userId: user?.id,
-                          email: user?.email,
-                        });
-                      }
-                    }}
-                    onMouseEnter={() => {
-                      const timeout = setTimeout(() => setShowProTooltip(true), 500);
-                      setProTooltipTimeout(timeout);
-                    }}
-                    onMouseLeave={() => {
-                      if (proTooltipTimeout) {
-                        clearTimeout(proTooltipTimeout);
-                        setProTooltipTimeout(null);
-                      }
-                      setShowProTooltip(false);
-                    }}
-                  >
-                    <Sparkles size={18} />
-                    <span>Pro Plan: Join the Waitlist</span>
-                  </a>
 
-                  {showProTooltip && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-lg p-3 shadow-lg z-20 backdrop-blur-sm">
-                      <div className="text-sm text-bolt-elements-textPrimary space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
-                          <span className="font-medium">Guaranteed Reliability</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
-                          <span className="font-medium">Up Front App Prices</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0"></div>
-                          <span className="font-medium">Priority Support</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Arrow */}
-                  <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-bolt-elements-background-depth-1"></div>
-                </div>
-
-                <button
-                  onClick={handleShowAccountModal}
-                  className="w-full px-4 py-3 bg-gradient-to-br from-blue-500 to-indigo-500 text-white hover:bg-gradient-to-br hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md"
-                >
-                  <Settings size={18} />
-                  <span>Account Settings</span>
-                </button>
-
-                <button
-                  onClick={handleSignOut}
-                  className="w-full px-4 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor rounded-lg transition-all duration-200 flex items-center gap-3 font-medium"
-                >
-                  <LogOut size={18} />
-                  <span>Sign Out</span>
-                </button>
-              </div>
             </div>
           )}
         </div>
