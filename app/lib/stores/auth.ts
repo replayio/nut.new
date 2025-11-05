@@ -8,8 +8,23 @@ import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { refreshPeanutsStore } from './peanuts';
 import { subscriptionStore } from './subscriptionStatus';
 
-// Development mode: Set to true to use mock user
-const USE_MOCK_USER = true;
+// Development mode: Check if we should use mock user
+// Works on localhost and Vercel preview builds for Test-Branch
+function shouldUseMockUser(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  
+  // Check if it's a Vercel preview deployment for Test-Branch
+  // Vercel preview URLs are like: nut-new-git-test-branch-yourteam.vercel.app
+  const isTestBranchPreview = hostname.includes('git-test-branch') || hostname.includes('test-branch');
+  
+  const useMock = isLocalhost || isTestBranchPreview;
+  console.log('[Auth] Mock user check:', { hostname, isLocalhost, isTestBranchPreview, useMock });
+  
+  return useMock;
+}
 
 // Mock user data for development
 const MOCK_USER: User = {
@@ -61,7 +76,7 @@ export async function initializeAuth() {
     isLoadingStore.set(true);
 
     // Development mode: Use mock user
-    if (USE_MOCK_USER) {
+    if (shouldUseMockUser()) {
       userStore.set(MOCK_USER);
       sessionStore.set(null); // Mock session not needed for UI
       logStore.logSystem('Auth initialized with MOCK USER', {
@@ -225,7 +240,7 @@ export async function signOut() {
     isLoadingStore.set(true);
 
     // Development mode: Prevent sign out when using mock user
-    if (USE_MOCK_USER) {
+    if (shouldUseMockUser()) {
       logStore.logSystem('Sign out blocked - using MOCK USER');
       isLoadingStore.set(false);
       return;
