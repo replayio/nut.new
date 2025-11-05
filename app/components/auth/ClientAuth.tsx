@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import { getSupabase } from '~/lib/supabase/client';
-import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 import {
   // peanutsStore,
@@ -9,14 +7,13 @@ import {
 } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { authModalStore } from '~/lib/stores/authModal';
-import { userStore } from '~/lib/stores/userAuth';
+import { signOut, userStore } from '~/lib/stores/auth';
 import { useStore } from '@nanostores/react';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { User, Crown, Sparkles, Settings, LogOut } from '~/components/ui/Icon';
 
 export function ClientAuth() {
-  const user = useStore(userStore.user);
-  const [loading, setLoading] = useState(true);
+  const user = useStore(userStore);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProTooltip, setShowProTooltip] = useState(false);
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -25,34 +22,6 @@ export function ClientAuth() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    async function getUser() {
-      try {
-        const { data } = await getSupabase().auth.getUser();
-        userStore.setUser(data.user ?? undefined);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    getUser();
-
-    const {
-      data: { subscription },
-    } = getSupabase().auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      userStore.setUser(session?.user ?? undefined);
-      if (session?.user) {
-        authModalStore.close();
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     if (showDropdown) {
@@ -83,8 +52,7 @@ export function ClientAuth() {
 
   const handleSignOut = async () => {
     try {
-      await getSupabase().auth.signOut();
-      userStore.clearUser();
+      await signOut();
       window.location.href = '/';
     } catch (error) {
       console.error('Sign out error:', error);
@@ -117,10 +85,6 @@ export function ClientAuth() {
     }
     setShowDropdown(false);
   };
-
-  if (loading) {
-    return <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />;
-  }
 
   const useAvatarURL = false;
 
@@ -167,7 +131,6 @@ export function ClientAuth() {
                 <div className="px-3 py-2 border-b border-bolt-elements-borderColor">
                   <button
                     onClick={handleSubscriptionToggle}
-                    disabled={loading}
                     className="w-full px-4 py-3 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium shadow-sm hover:shadow-md group"
                   >
                     <Crown className="transition-transform duration-200 group-hover:scale-110" size={20} />

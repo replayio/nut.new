@@ -143,6 +143,12 @@ export interface StripeStatus {
 export async function checkSubscriptionStatus() {
   try {
     const accessToken = await getCurrentAccessToken();
+
+    // If no access token, user is not logged in - return default
+    if (!accessToken) {
+      return { hasSubscription: false, subscription: null };
+    }
+
     const response = await fetch('/api/stripe/manage-subscription', {
       method: 'POST',
       headers: {
@@ -154,6 +160,11 @@ export async function checkSubscriptionStatus() {
       }),
     });
 
+    // 401/403 means not authenticated - this is expected when logged out
+    if (response.status === 401 || response.status === 403) {
+      return { hasSubscription: false, subscription: null };
+    }
+
     if (!response.ok) {
       throw new Error('Failed to check subscription status');
     }
@@ -161,7 +172,10 @@ export async function checkSubscriptionStatus() {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error checking subscription status:', error);
+    // Only log unexpected errors (not auth errors)
+    if (error instanceof Error && !error.message.includes('401') && !error.message.includes('403')) {
+      console.error('Error checking subscription status:', error);
+    }
     return { hasSubscription: false, subscription: null };
   }
 }
