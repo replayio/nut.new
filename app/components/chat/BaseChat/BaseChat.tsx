@@ -390,8 +390,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 }
 
                 const hasNoPaidPlan = !stripeSubscription || stripeSubscription.tier === 'free';
+                
+                // Check if this is the mock user (for development) - bypass upgrade block
+                const isMockUser = user?.id === 'edb004fa-ed84-4a32-a408-ee89232329fa';
 
-                const shouldShowUpgradeBlock = user && hasNoPaidPlan && list && list.length > 0 && !chatStarted;
+                const shouldShowUpgradeBlock = user && hasNoPaidPlan && list && list.length > 0 && !chatStarted && !isMockUser;
 
                 return shouldShowUpgradeBlock ? (
                   <PlanUpgradeBlock />
