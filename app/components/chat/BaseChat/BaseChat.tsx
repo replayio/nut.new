@@ -97,7 +97,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         .finally(() => setIsLoadingList(false));
     }, []);
 
-    // Load entries on mount and when user changes (login/logout)
     useEffect(() => {
       loadEntries();
     }, [loadEntries, user]);
@@ -375,10 +374,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 }}
               </ClientOnly>
               {(() => {
-                // Show loading state while auth or data is loading (prevents flash)
-                // 1. Auth is loading (determining if user exists)
-                // 2. User exists and subscription data is loading
-                // 3. App list is loading
                 const isLoadingData = 
                   isAuthLoading || 
                   (user && !isSubscriptionStoreLoaded) || 
@@ -386,7 +381,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 
                 if (isLoadingData && !chatStarted) {
                   return (
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center min-h-[176.5px]">
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary rounded-full animate-spin"></div>
                         <p className="text-sm text-bolt-elements-textSecondary">Loading...</p>
@@ -395,19 +390,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   );
                 }
                 
-                // Show PlanUpgradeBlock when:
-                // 1. User is logged in
-                // 2. User has free tier OR no paid subscription
-                // 3. User has at least one app (hit the limit)
-                // 4. Chat hasn't started yet
                 const hasNoPaidPlan = !stripeSubscription || stripeSubscription.tier === 'free';
                 
                 const shouldShowUpgradeBlock = 
-                  user &&                                    // User is logged in
-                  hasNoPaidPlan &&                           // No paid subscription
-                  list &&                                    // List exists
-                  list.length > 0 &&                         // Has at least 1 app (hit limit)
-                  !chatStarted;                              // Chat hasn't started
+                  user &&
+                  hasNoPaidPlan &&
+                  list &&
+                  list.length > 0 &&
+                  !chatStarted;
 
                 return shouldShowUpgradeBlock ? (
                   <PlanUpgradeBlock />
