@@ -21,7 +21,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore, isLoadingStore } from '~/lib/stores/auth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
@@ -75,7 +75,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
     const isSmallViewport = useViewport(800);
-    const user = useStore(userStore.user);
+    const user = useStore(userStore);
+    const isAuthLoading = useStore(isLoadingStore);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const selectedElement = useStore(workbenchStore.selectedElement);
@@ -83,21 +84,24 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const stripeSubscription = useStore(subscriptionStore.subscription);
+    const isSubscriptionStoreLoaded = useStore(subscriptionStore.isLoaded);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
+    const [isLoadingList, setIsLoadingList] = useState(true);
   
     const loadEntries = useCallback(() => {
-      setList(undefined);
+      setIsLoadingList(true);
       database
         .getAllAppEntries()
         .then(setList)
-        .catch((error) => toast.error(error.message));
+        .catch((error) => toast.error(error.message))
+        .finally(() => setIsLoadingList(false));
     }, []);
 
+    // Load entries on mount and when user changes (login/logout)
     useEffect(() => {
       loadEntries();
-    }, []);
+    }, [loadEntries, user]);
 
-    console.log('list', list);
     
     const onTranscriptChange = useCallback(
       (transcript: string) => {
@@ -370,15 +374,53 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   ) : null;
                 }}
               </ClientOnly>
-              {((stripeSubscription?.tier === 'builder' || (stripeSubscription?.tier === 'free' && list?.length === 0)) || chatStarted) ? <ChatPromptContainer
-                uploadedFiles={uploadedFiles}
-                setUploadedFiles={setUploadedFiles!}
-                imageDataList={imageDataList}
-                setImageDataList={setImageDataList!}
-                messageInputProps={messageInputProps}
-              /> :
-              <PlanUpgradeBlock />
-              }
+              {(() => {
+                // Show loading state while auth or data is loading (prevents flash)
+                // 1. Auth is loading (determining if user exists)
+                // 2. User exists and subscription data is loading
+                // 3. App list is loading
+                const isLoadingData = 
+                  isAuthLoading || 
+                  (user && !isSubscriptionStoreLoaded) || 
+                  isLoadingList;
+                
+                if (isLoadingData && !chatStarted) {
+                  return (
+                    <div className="flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary rounded-full animate-spin"></div>
+                        <p className="text-sm text-bolt-elements-textSecondary">Loading...</p>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Show PlanUpgradeBlock when:
+                // 1. User is logged in
+                // 2. User has free tier OR no paid subscription
+                // 3. User has at least one app (hit the limit)
+                // 4. Chat hasn't started yet
+                const hasNoPaidPlan = !stripeSubscription || stripeSubscription.tier === 'free';
+                
+                const shouldShowUpgradeBlock = 
+                  user &&                                    // User is logged in
+                  hasNoPaidPlan &&                           // No paid subscription
+                  list &&                                    // List exists
+                  list.length > 0 &&                         // Has at least 1 app (hit limit)
+                  !chatStarted;                              // Chat hasn't started
+
+                return shouldShowUpgradeBlock ? (
+                  <PlanUpgradeBlock />
+                ) : (
+                  <ChatPromptContainer
+                    uploadedFiles={uploadedFiles}
+                    setUploadedFiles={setUploadedFiles!}
+                    imageDataList={imageDataList}
+                    setImageDataList={setImageDataList!}
+                    messageInputProps={messageInputProps}
+                  />
+                );
+              })()}
             </div>
             {!chatStarted && (
               <>
