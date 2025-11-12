@@ -8,7 +8,7 @@ import { PermissionsSelectionComponent } from '~/components/header/AppSettings/c
 import { ExperimentalFeaturesComponent } from '~/components/header/AppSettings/components/ExperimentalFeaturesComponent';
 import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
 import { isAppOwnerStore, permissionsStore, setIsAppOwner } from '~/lib/stores/permissions';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import CopyApp from '~/components/header/AppSettings/components/CopyApp';
 import DownloadSourceCode from '~/components/header/AppSettings/components/DownloadSourceCode';
 import { Settings, Type } from '~/components/ui/Icon';
@@ -21,7 +21,7 @@ export const AppSettingsPanel = () => {
   const appId = useStore(chatStore.currentAppId);
   const permissions = useStore(permissionsStore);
   const isOwner = useStore(isAppOwnerStore);
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
 
   useEffect(() => {
     const loadIsOwner = async () => {
@@ -42,7 +42,7 @@ export const AppSettingsPanel = () => {
   return (
     <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm">
-        <div className="flex items-center gap-2 px-4 py-1">
+        <div className="flex items-center gap-2 px-4 h-[46px]">
           <div className="flex-1 text-bolt-elements-textSecondary text-sm font-medium truncate">
             App Settings
           </div>

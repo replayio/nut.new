@@ -9,7 +9,7 @@ import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
@@ -59,7 +59,7 @@ export const DiscussionPage = React.forwardRef<HTMLDivElement, DiscussionPagePro
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = 300;
     const isSmallViewport = useViewport(800);
-    const user = useStore(userStore.user);
+    const user = useStore(userStore);
     const selectedElement = useStore(workbenchStore.selectedElement);
     const repositoryId = useStore(workbenchStore.repositoryId);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);

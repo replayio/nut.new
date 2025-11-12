@@ -3,12 +3,12 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { useStore } from '@nanostores/react';
 import { classNames } from '~/utils/classNames';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import { Download } from '~/components/ui/Icon';
 import { useState } from 'react';
 
 const DownloadSourceCode = () => {
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
   const [isDownloading, setIsDownloading] = useState(false);
   const repositoryId = useStore(workbenchStore.repositoryId);
 

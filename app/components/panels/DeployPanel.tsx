@@ -5,7 +5,7 @@ import { lastDeployResult, deployApp } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/utils/nut';
 import { DeployStatus } from '~/components/header/DeployChat/DeployChatButton';
 import DeploymentSuccessful from '~/components/header/DeployChat/components/DeploymentSuccessful';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import { Rocket, CheckCircle, AlertTriangle } from '~/components/ui/Icon';
 import { deployModalStore } from '~/lib/stores/deployModal';
 import { useEffect } from 'react';
@@ -19,7 +19,7 @@ export const DeployPanel = () => {
   const error = useStore(deployModalStore.error);
   const databaseFound = useStore(deployModalStore.databaseFound);
   const loadingData = useStore(deployModalStore.loadingData);
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
   const appId = useStore(chatStore.currentAppId);
   const repositoryId = useStore(workbenchStore.repositoryId);
 
@@ -143,7 +143,7 @@ export const DeployPanel = () => {
   return (
     <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm">
-        <div className="flex items-center gap-2 px-4 py-1">
+        <div className="flex items-center gap-2 px-4 h-[46px]">
           <div className="flex-1 text-bolt-elements-textSecondary text-sm font-medium truncate">
             Deploy
           </div>

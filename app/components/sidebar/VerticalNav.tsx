@@ -5,7 +5,7 @@ import { activeSidebarTab, sidebarNavStore, type SidebarNavTab } from '~/lib/sto
 import { classNames } from '~/utils/classNames';
 import { chatStore } from '~/lib/stores/chat';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import { UserProfileMenu } from '~/components/header/UserProfileMenu';
 import type { LucideIcon } from 'lucide-react';
 import { database } from '~/lib/persistence/apps';
@@ -56,7 +56,7 @@ export const VerticalNav = () => {
   const appId = useStore(chatStore.currentAppId);
   const appSummary = useStore(chatStore.appSummary);
   const repositoryId = useStore(workbenchStore.repositoryId);
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
   const [_history, setHistory] = useState<AppSummary[]>([]);
 
   const handleTabClick = (tabId: SidebarNavTab) => {
@@ -82,7 +82,7 @@ export const VerticalNav = () => {
   }, [appSummary, appId]);
 
   return (
-    <div className="flex flex-col w-16 bg-bolt-elements-background-depth-1 py-1 h-full">
+    <div className="flex flex-col w-16 bg-bolt-elements-background-depth-1 py-2.5 h-full">
       {/* Nut Logo - Link to Homepage */}
       <a
         href="/"

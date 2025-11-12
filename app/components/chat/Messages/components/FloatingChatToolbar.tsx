@@ -7,7 +7,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
 import { isAppOwnerStore } from '~/lib/stores/permissions';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import { permissionsStore } from '~/lib/stores/permissions';
 import { useState } from 'react';
 import {
@@ -25,7 +25,7 @@ export function FloatingChatToolbar() {
   const appId = useStore(chatStore.currentAppId);
   const permissions = useStore(permissionsStore);
   const isAppOwner = useStore(isAppOwnerStore);
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
 
   const { editing, handleChange, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } = useEditAppTitle({
     initialTitle,
@@ -66,7 +66,7 @@ export function FloatingChatToolbar() {
   return (
     <>
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm">
-        <div className="flex items-center gap-2 px-4 py-1">
+        <div className="flex items-center gap-2 px-4 h-[46px]">
           {/* Menu Button */}
           <button
             onClick={() => sidebarMenuStore.toggle()}

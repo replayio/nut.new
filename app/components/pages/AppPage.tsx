@@ -13,7 +13,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
@@ -28,6 +28,7 @@ import type { MessageInput as MessageInputType } from '~/components/chat/Message
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { AppLoadingScreen } from '~/components/ui/AppLoadingScreen';
 import { useParams } from '@remix-run/react';
+import { FloatingChatToolbar } from '~/components/chat/Messages/components/FloatingChatToolbar';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -70,7 +71,7 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
     const appId = params.id;
     const appSummary = useStore(chatStore.appSummary);
     const isSmallViewport = useViewport(800);
-    const user = useStore(userStore.user);
+    const user = useStore(userStore);
     const { chatWidth } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const selectedElement = useStore(workbenchStore.selectedElement);
@@ -273,7 +274,7 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
           'flex-shrink-0': !isSmallViewport && !showWorkbench,
           'pb-2': isSmallViewport,
           'bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg overflow-hidden':
-            !isSmallViewport,
+            !isSmallViewport && !showWorkbench,
         })}
         style={!isSmallViewport && !showWorkbench ? { width: `${chatWidth}px` } : undefined}
       >
@@ -282,30 +283,31 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
             'h-full flex flex-col': true,
           })}
         >
+          <ClientOnly>{() => <FloatingChatToolbar />}</ClientOnly>
           <ClientOnly>
             {() => {
               return (
                 <>
                   {!isLoading && (
                     <>
-                      <motion.div layoutId="messages-container" className="flex-1 overflow-y-auto">
+                      <motion.div layoutId="messages-container" className="flex-1 overflow-y-auto relative">
                         <Messages
                           ref={messageRef}
                           onLastMessageCheckboxChange={onLastMessageCheckboxChange}
                           sendMessage={handleSendMessage}
                         />
-                      </motion.div>
-                      {infoCards && infoCards.length > 0 && (
-                        <div className="flex justify-center">
-                          <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
-                            <StackedInfoCard
-                              cards={infoCards}
-                              className="w-full mb-2"
-                              handleSendMessage={handleSendMessage}
-                            />
+                        {infoCards && infoCards.length > 0 && (
+                          <div className="sticky bottom-0 flex justify-center py-2 bg-gradient-to-t from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1 to-transparent pt-8 z-10">
+                            <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
+                              <StackedInfoCard
+                                cards={infoCards}
+                                className="w-full mb-2"
+                                handleSendMessage={handleSendMessage}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </motion.div>
                     </>
                   )}
                 </>
@@ -328,7 +330,7 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
       <div
         className={classNames('flex h-full flex-1 overflow-hidden', {
           'bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg':
-            !isSmallViewport,
+            !isSmallViewport && !showWorkbench,
         })}
       >
         {renderPanelContent()}
@@ -340,7 +342,7 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
     const appPage = (
       <motion.div
         ref={ref}
-        className="relative flex h-full w-full overflow-hidden"
+        className="relative flex h-full w-full overflow-hidden bg-bolt-elements-background-depth-1 transition-colors duration-300"
         data-chat-visible={showChat}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -350,16 +352,15 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
         <ClientOnly>{() => <VerticalNav />}</ClientOnly>
         <div
           ref={scrollRef}
-          className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden', {
-            'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
-            'pt-2 pb-16 px-4': isSmallViewport && (!!appSummary || showMobileNav),
-            'gap-2': !isSmallViewport && !showWorkbench,
+          className={classNames('w-full h-full flex flex-col lg:flex-row overflow-hidden py-2', {
+            'px-4': isSmallViewport && !appSummary && !showMobileNav && !showWorkbench,
+            'px-4 py-2': isSmallViewport && (!!appSummary || showMobileNav) && !showWorkbench,
           })}
         >
           {isSmallViewport ? (
             <>
               {renderPrimaryPanel()}
-              <ClientOnly>{() => <Workbench showWorkbench={showWorkbench} isLoading={isLoading} />}</ClientOnly>
+              <ClientOnly>{() => <Workbench chatStarted={!!appSummary} />}</ClientOnly>
             </>
           ) : showWorkbench ? (
             <ClientOnly>
@@ -369,12 +370,14 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
                   className="flex h-full w-full items-stretch"
                   autoSaveId="app-preview-layout"
                 >
-                  <ResizablePanel defaultSize={showChatPanel ? 45 : 35} minSize={30} className="flex">
-                    {renderPrimaryPanel()}
+                  <ResizablePanel defaultSize={showChatPanel ? 45 : 35} minSize={25} maxSize={35} className="flex">
+                    <div className="w-full h-full bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg overflow-hidden">
+                      {renderPrimaryPanel()}
+                    </div>
                   </ResizablePanel>
                   <ResizableHandle className="h-full w-2" />
-                  <ResizablePanel defaultSize={showChatPanel ? 55 : 65} minSize={25} className="flex">
-                    <Workbench layout="embedded" showWorkbench={showWorkbench} isLoading={isLoading} />
+                  <ResizablePanel defaultSize={showChatPanel ? 55 : 65} minSize={25} className="flex pr-2">
+                    <Workbench chatStarted={!!appSummary} layout="embedded" />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               )}

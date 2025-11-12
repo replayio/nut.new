@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { getSupabase } from '~/lib/supabase/client';
 import { useStore } from '@nanostores/react';
-import { peanutsStore, refreshPeanutsStore } from '~/lib/stores/peanuts';
 import { accountModalStore } from '~/lib/stores/accountModal';
-import { userStore } from '~/lib/stores/userAuth';
+import { userStore } from '~/lib/stores/auth';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { User, Crown, Sparkles, Settings, LogOut } from '~/components/ui/Icon';
 import { ThemeToggle } from '~/components/ui/ThemeToggle';
@@ -15,11 +14,10 @@ import {
 } from '~/components/ui/dropdown-menu';
 
 export function UserProfileMenu() {
-  const user = useStore(userStore.user);
+  const user = useStore(userStore);
   const [showProTooltip, setShowProTooltip] = useState(false);
   const [proTooltipTimeout, setProTooltipTimeout] = useState<NodeJS.Timeout | null>(null);
   const stripeSubscription = useStore(subscriptionStore.subscription);
-  const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
 
   const handleSignOut = async () => {
     try {
@@ -61,7 +59,7 @@ export function UserProfileMenu() {
   const useAvatarURL = false;
 
   return (
-    <DropdownMenu onOpenChange={(open) => open && refreshPeanutsStore()}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-white/20 hover:border-white/30 group">
           {useAvatarURL && user.user_metadata?.avatar_url ? (
@@ -113,9 +111,6 @@ export function UserProfileMenu() {
                   <div className="text-bolt-elements-textHeading font-bold text-sm">
                     {`${stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan`}
                   </div>
-                  <div className="text-xs text-bolt-elements-textSecondary">
-                    {stripeSubscription.peanuts.toLocaleString()}/month
-                  </div>
                 </div>
               </div>
               {stripeSubscription?.cancelAtPeriodEnd && (
@@ -123,16 +118,6 @@ export function UserProfileMenu() {
               )}
             </div>
           )}
-
-          <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🥜</span>
-                <span className="text-bolt-elements-textPrimary font-medium">Peanuts</span>
-              </div>
-              <div className="text-bolt-elements-textHeading font-bold text-lg">{peanutsRemaining ?? '...'}</div>
-            </div>
-          </div>
 
           <div className="px-6 py-4 border-b border-bolt-elements-borderColor">
             <ThemeToggle />
