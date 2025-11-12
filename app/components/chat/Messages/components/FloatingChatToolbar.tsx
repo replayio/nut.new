@@ -66,7 +66,7 @@ export function FloatingChatToolbar() {
   return (
     <>
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm">
-        <div className="flex items-center gap-2 px-4 h-[46px]">
+        <div className="flex items-center gap-2 px-4 h-[38px]">
           {/* Menu Button */}
           <button
             onClick={() => sidebarMenuStore.toggle()}

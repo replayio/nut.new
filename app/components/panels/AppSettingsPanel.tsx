@@ -42,7 +42,7 @@ export const AppSettingsPanel = () => {
   return (
     <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm">
-        <div className="flex items-center gap-2 px-4 h-[46px]">
+        <div className="flex items-center gap-2 px-4 h-[38px]">
           <div className="flex-1 text-bolt-elements-textSecondary text-sm font-medium truncate">
             App Settings
           </div>
