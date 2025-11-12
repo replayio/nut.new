@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { FloatingChatToolbar } from '~/components/chat/Messages/components/FloatingChatToolbar';
 import { SharedChatInput } from '~/components/chat/SharedChatInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { useStore } from '@nanostores/react';
@@ -229,7 +228,6 @@ export const DiscussionPage = React.forwardRef<HTMLDivElement, DiscussionPagePro
             })}
           >
             <div className="flex-1 overflow-hidden flex flex-col">
-              <ClientOnly>{() => <FloatingChatToolbar />}</ClientOnly>
               <ClientOnly>
                 {() => {
                   return (

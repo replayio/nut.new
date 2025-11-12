@@ -1,5 +1,13 @@
 import type { RefObject } from 'react';
-import { RotateCw, MonitorSmartphone, Maximize2, Minimize2, ChevronLeft, ChevronRight } from '~/components/ui/Icon';
+import {
+  RotateCw,
+  MonitorSmartphone,
+  Maximize2,
+  Minimize2,
+  ChevronLeft,
+  ChevronRight,
+  MousePointer,
+} from '~/components/ui/Icon';
 import { classNames } from '~/utils/classNames';
 
 export interface SafariBrowserProps {
@@ -11,8 +19,11 @@ export interface SafariBrowserProps {
   onForward?: () => void;
   onToggleDeviceMode?: () => void;
   onToggleFullscreen?: () => void;
+  onToggleElementPicker?: () => void;
   isDeviceModeOn?: boolean;
   isFullscreen?: boolean;
+  isElementPickerEnabled?: boolean;
+  isElementPickerReady?: boolean;
   inputRef?: RefObject<HTMLInputElement>;
   showAdvancedControls?: boolean;
   isMobile?: boolean;
@@ -27,8 +38,11 @@ export function SafariBrowser({
   onForward,
   onToggleDeviceMode,
   onToggleFullscreen,
+  onToggleElementPicker,
   isDeviceModeOn = false,
   isFullscreen = false,
+  isElementPickerEnabled = false,
+  isElementPickerReady = false,
   inputRef,
   showAdvancedControls = true,
   isMobile = false,
@@ -47,7 +61,7 @@ export function SafariBrowser({
               'rounded-lg transition-all duration-200 flex-shrink-0',
               onBack
                 ? 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2'
-                : 'text-bolt-elements-textTertiary opacity-40 cursor-not-allowed'
+                : 'text-bolt-elements-textTertiary opacity-40 cursor-not-allowed',
             )}
             title="Go back"
           >
@@ -60,7 +74,7 @@ export function SafariBrowser({
               'rounded-lg transition-all duration-200 flex-shrink-0',
               onForward
                 ? 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2'
-                : 'text-bolt-elements-textTertiary opacity-40 cursor-not-allowed'
+                : 'text-bolt-elements-textTertiary opacity-40 cursor-not-allowed',
             )}
             title="Go forward"
           >
@@ -100,6 +114,28 @@ export function SafariBrowser({
         <div className="flex items-center gap-2">
           {showAdvancedControls && (
             <>
+              <button
+                onClick={onToggleElementPicker}
+                disabled={!isElementPickerReady}
+                className={classNames(
+                  'p-1.5 rounded-lg transition-all duration-200',
+                  !isElementPickerReady
+                    ? 'text-bolt-elements-textTertiary opacity-40 cursor-not-allowed'
+                    : isElementPickerEnabled
+                      ? 'text-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
+                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2',
+                )}
+                title={
+                  !isElementPickerReady
+                    ? 'Element Picker Loading...'
+                    : isElementPickerEnabled
+                      ? 'Disable Element Picker'
+                      : 'Enable Element Picker'
+                }
+              >
+                <MousePointer size={18} />
+              </button>
+
               <button
                 onClick={onToggleDeviceMode}
                 className="p-1.5 rounded-lg text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-all duration-200"

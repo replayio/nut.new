@@ -360,8 +360,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     return (
       <div className="relative flex-1 min-h-0 flex flex-col">
-        <div ref={setRefs} className={classNames('flex-1 overflow-y-auto rounded-b-2xl w-full  mx-auto')}>
-          <div className="flex flex-col px-4 pb-6">
+        <div ref={setRefs} className={classNames('flex-1 overflow-y-auto rounded-b-2xl w-full mx-auto')}>
+          <div className="flex flex-col px-4 pb-6 max-w-3xl mx-auto">
             {(() => {
               const timelineItems = createTimelineItems();
               return (

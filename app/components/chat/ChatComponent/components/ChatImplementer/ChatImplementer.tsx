@@ -79,7 +79,7 @@ interface ChatImplementerProps {
 const ChatImplementer = memo(
   ({ ready, unauthorized, authorizedCopy, handleCopyApp, isCopying }: ChatImplementerProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0 || !ready);
+    const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
     const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
     const [searchParams] = useSearchParams();

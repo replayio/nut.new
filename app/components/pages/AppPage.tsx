@@ -6,7 +6,6 @@ import { Workbench } from '~/components/workbench/Workbench.client';
 import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { classNames } from '~/utils/classNames';
 import { Messages } from '~/components/chat/Messages/Messages.client';
-import { FloatingChatToolbar } from '~/components/chat/Messages/components/FloatingChatToolbar';
 import { SharedChatInput } from '~/components/chat/SharedChatInput';
 import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
@@ -283,7 +282,6 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
             'h-full flex flex-col': true,
           })}
         >
-          <ClientOnly>{() => <FloatingChatToolbar />}</ClientOnly>
           <ClientOnly>
             {() => {
               return (
