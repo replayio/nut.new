@@ -6,7 +6,6 @@ import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 import { useStore } from '@nanostores/react';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
 import { SafariBrowser } from './components/SafariBrowser';
-import { activeSidebarTab } from '~/lib/stores/sidebarNav';
 
 let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
@@ -31,7 +30,6 @@ export const Preview = memo(() => {
   const [currentNavigationIndex, setCurrentNavigationIndex] = useState(-1);
 
   const previewURL = useStore(workbenchStore.previewURL);
-  const currentSidebarTab = useStore(activeSidebarTab);
 
   const isSmallViewport = useViewport(800);
   // Toggle between responsive mode and device mode
@@ -113,31 +111,25 @@ export const Preview = memo(() => {
     }
   };
 
-  // Auto-enable element picker when on design tab
-  useEffect(() => {
-    if (currentSidebarTab === 'design-system' && isElementPickerReady && !isMobile) {
-      setIsElementPickerEnabled(true);
-      toggleElementPicker(true);
-    } else if (currentSidebarTab !== 'design-system' && isElementPickerEnabled) {
-      setIsElementPickerEnabled(false);
-      toggleElementPicker(false);
+  // Handle element picker toggle
+  const handleToggleElementPicker = () => {
+    if (!isElementPickerReady) {
+      return; // Don't allow toggling if element picker isn't ready
     }
-  }, [currentSidebarTab, isElementPickerReady, isMobile]);
+    const newState = !isElementPickerEnabled;
+    setIsElementPickerEnabled(newState);
+    toggleElementPicker(newState);
+  };
 
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'ELEMENT_PICKED') {
-        // Store the full element data including the react tree, fiber ID, and DOM attributes
-        workbenchStore.setSelectedElement({
-          component: event.data.react.component,
-          parentComponent: event.data.react.parentComponent, // Parent React component
-          tree: event.data.react.tree,
-          fiberId: event.data.react.fiberId, // Store the fiber ID for direct updates
-          domAttributes: event.data.react.domAttributes, // Store DOM attributes
-        });
+        // Element was picked, disable the picker
         setIsElementPickerEnabled(false);
+        toggleElementPicker(false);
       } else if (event.data.type === 'ELEMENT_PICKER_STATUS') {
+        // Element picker status message
       } else if (event.data.type === 'ELEMENT_PICKER_READY' && event.data.source === 'element-picker') {
         setIsElementPickerReady(true);
       }
@@ -287,8 +279,11 @@ export const Preview = memo(() => {
         onForward={currentNavigationIndex < navigationStack.length - 1 ? handleForward : undefined}
         onToggleDeviceMode={toggleDeviceMode}
         onToggleFullscreen={toggleFullscreen}
+        onToggleElementPicker={handleToggleElementPicker}
         isDeviceModeOn={isDeviceModeOn}
         isFullscreen={isFullscreen}
+        isElementPickerEnabled={isElementPickerEnabled}
+        isElementPickerReady={isElementPickerReady}
         inputRef={inputRef}
         showAdvancedControls={!isSmallViewport && !!previewURL}
         isMobile={isMobile}
