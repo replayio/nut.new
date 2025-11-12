@@ -54,8 +54,8 @@ export function ChatDescription() {
           </TooltipProvider>
         </div>
       ) : (
-        <div className="flex items-center justify-start w-full min-w-0">
-          <div className="text-center text-bolt-elements-textHeading font-medium pr-2 truncate max-w-100">
+        <div className="flex items-center justify-start w-full min-w-0 group">
+          <div className="text-center text-bolt-elements-textHeading font-medium truncate max-w-100">
             {currentTitle}
           </div>
           <TooltipProvider>
@@ -63,13 +63,13 @@ export function ChatDescription() {
               <WithTooltip tooltip="Rename chat">
                 <button
                   type="button"
-                  className="p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group flex-shrink-0"
+                  className="ml-2 p-1.5 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 flex-shrink-0 opacity-0 group-hover:opacity-100"
                   onClick={(event) => {
                     event.preventDefault();
                     toggleEditMode();
                   }}
                 >
-                  <PenLine className="text-lg transition-transform duration-200 group-hover:scale-110" size={18} />
+                  <PenLine className="transition-transform duration-200 hover:scale-110" size={16} />
                 </button>
               </WithTooltip>
             )}

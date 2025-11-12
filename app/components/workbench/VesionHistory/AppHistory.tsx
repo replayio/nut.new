@@ -167,7 +167,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
         </div>
       ) : (
         <div className="space-y-6">
-          {history.reverse().map((summary, index) => {
+          {[...history].reverse().map((summary, index) => {
             const reasonInfo = renderUpdateReason(summary.reason, history);
             const isLatest = index === 0;
             return (

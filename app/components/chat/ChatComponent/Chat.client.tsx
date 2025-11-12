@@ -7,10 +7,8 @@ import { toast } from 'react-toastify';
 import { getExistingAppResponses } from '~/lib/replay/SendChatMessage';
 import { chatStore, doListenAppResponses, onChatResponse } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
-import { Unauthorized } from '~/components/chat/Unauthorized';
 import { useStore } from '@nanostores/react';
 import { statusModalStore } from '~/lib/stores/statusModal';
-import { AppLoadingScreen } from '~/components/ui/AppLoadingScreen';
 import {
   isAppOwnerLoadingStore,
   isAppOwnerStore,
@@ -185,12 +183,12 @@ export function Chat() {
   }, [permissionsLoading, isAppOwnerLoading]);
 
   return (
-    <>
-      {!ready && initialAppId && !unauthorized && <AppLoadingScreen appId={initialAppId} />}
-      {ready && !unauthorized && <ChatImplementer />}
-      {ready && unauthorized && (
-        <Unauthorized authorizedCopy={authorizedCopy} handleCopyApp={handleCopyApp} isCopying={isCopying} />
-      )}
-    </>
+    <ChatImplementer
+      ready={ready}
+      unauthorized={unauthorized}
+      authorizedCopy={authorizedCopy}
+      handleCopyApp={handleCopyApp}
+      isCopying={isCopying}
+    />
   );
 }

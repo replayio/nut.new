@@ -87,6 +87,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
       onCardClick,
       bugReport,
       handleSendMessage,
+      children,
       ...props
     },
     ref,
@@ -115,7 +116,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
       <div
         ref={ref}
         className={cn(infoCardVariants({ variant, size, className }), {
-          'flex items-center cursor-pointer hover:bg-bolt-elements-background-depth-3': !!onCardClick,
+          'cursor-pointer hover:bg-bolt-elements-background-depth-3': !!onCardClick,
         })}
         {...props}
         onClick={onCardClick}
@@ -123,52 +124,58 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
         {bugReport ? (
           <BugReportComponent report={bugReport} handleSendMessage={handleSendMessage} />
         ) : (
-          <>
-            {/* Icon */}
-            <div className="flex flex-col items-center gap-2">
-              <div className={cn(iconVariants({ type: iconType }))}>
-                <Icon icon={IconComponent} size={16} className={iconType === 'loading' ? 'animate-spin' : ''} />
+          <div className="flex flex-col gap-3 w-full">
+            {/* Top row with icon, content, and action button */}
+            <div className="flex items-start gap-3 w-full">
+              {/* Icon */}
+              <div className="flex flex-col items-center gap-2">
+                <div className={cn(iconVariants({ type: iconType }))}>
+                  <Icon icon={IconComponent} size={16} className={iconType === 'loading' ? 'animate-spin' : ''} />
+                </div>
               </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
+                  {title ? formatPascalCaseName(title) : ''}
+                </h3>
+                <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
+              </div>
+
+              {/* Action Button */}
+              {actionButtons && actionButtons.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      setIsOpen(!isOpen);
+                      e.stopPropagation();
+                    }}
+                    className="flex-shrink-0 p-1 w-8 h-8 flex items-center justify-center rounded-full transition-colors bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor"
+                    aria-label="More options"
+                  >
+                    <Icon icon={MoreHorizontal} size={16} className="text-bolt-elements-textSecondary" />
+                  </button>
+                  {isOpen && (
+                    <div className="absolute right-full top-0 mt-2 w-48 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg shadow-lg z-14">
+                      {actionButtons.map((button) => (
+                        <button
+                          key={button.label}
+                          onClick={button.onClick}
+                          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3"
+                        >
+                          {button.icon}
+                          {button.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
-                {title ? formatPascalCaseName(title) : ''}
-              </h3>
-              <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
-            </div>
-
-            {/* Action Button */}
-            {actionButtons && actionButtons.length > 0 && (
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    setIsOpen(!isOpen);
-                    e.stopPropagation();
-                  }}
-                  className="flex-shrink-0 p-1 w-8 h-8 flex items-center justify-center rounded-full transition-colors bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor"
-                  aria-label="More options"
-                >
-                  <Icon icon={MoreHorizontal} size={16} className="text-bolt-elements-textSecondary" />
-                </button>
-                {isOpen && (
-                  <div className="absolute right-full top-0 mt-2 w-48 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg shadow-lg z-14">
-                    {actionButtons.map((button) => (
-                      <button
-                        key={button.label}
-                        onClick={button.onClick}
-                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3"
-                      >
-                        {button.icon}
-                        {button.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </>
+            {/* Children below the content */}
+            {children && <div className="w-full">{children}</div>}
+          </div>
         )}
       </div>
     );

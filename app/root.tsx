@@ -3,7 +3,7 @@ import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
 import { json } from '~/lib/remix-types';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
-import { themeStore } from './lib/stores/theme';
+import { themeStore, getEffectiveTheme } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect, useState } from 'react';
@@ -89,7 +89,7 @@ const inlineThemeCode = stripIndents`
   function setTutorialKitTheme() {
     let theme = localStorage.getItem('bolt_theme');
 
-    if (!theme) {
+    if (!theme || theme === 'system') {
       theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
@@ -137,7 +137,8 @@ function ThemeProvider() {
   const theme = useStore(themeStore);
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
+    const effectiveTheme = getEffectiveTheme(theme);
+    document.querySelector('html')?.setAttribute('data-theme', effectiveTheme);
   }, [theme]);
 
   return null;
@@ -187,6 +188,7 @@ export default function App() {
 
   // Only access stores on the client side
   const theme = useStore(themeStore);
+  const effectiveTheme = getEffectiveTheme(theme);
   const user = useStore(userStore);
   const isLoading = useStore(isLoadingStore);
 
@@ -229,7 +231,7 @@ export default function App() {
             return undefined;
           }}
           position="bottom-right"
-          theme={theme}
+          theme={effectiveTheme}
           pauseOnFocusLoss
           transition={toastAnimation}
         />

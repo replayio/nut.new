@@ -1,12 +1,13 @@
 import { useStore } from '@nanostores/react';
-import { useAnimate } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useSnapScroll } from '~/lib/hooks';
 import { database } from '~/lib/persistence/apps';
 import { addChatMessage, chatStore, doAbortChat, doSendMessage } from '~/lib/stores/chat';
-import { cubicEasingFn } from '~/utils/easings';
-import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
+import { LandingPage } from '~/components/pages/LandingPage';
+import { DiscussionPage } from '~/components/pages/DiscussionPage';
+import { AppPage } from '~/components/pages/AppPage';
 import { useSearchParams } from '@remix-run/react';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { ChatMessageTelemetry } from '~/lib/hooks/pingTelemetry';
@@ -16,6 +17,8 @@ import { createAttachment as createAttachmentAPI, uploadVisitData } from '~/lib/
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 import { flushSimulationData } from '~/components/chat/ChatComponent/functions/flushSimulationData';
 import { getCurrentUserInfo } from '~/lib/supabase/client';
+import { Unauthorized } from '~/components/chat/Unauthorized';
+import { workbenchStore } from '~/lib/stores/workbench';
 
 let gActiveChatMessageTelemetry: ChatMessageTelemetry | undefined;
 
@@ -65,179 +68,196 @@ async function createAttachment(dataURL: string): Promise<ChatMessageAttachment>
   };
 }
 
-const ChatImplementer = memo(() => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
-  const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
-  const [searchParams] = useSearchParams();
-  // const { isLoggedIn } = useAuthStatus();
-  const [input, setInput] = useState('');
+interface ChatImplementerProps {
+  ready: boolean;
+  unauthorized: boolean;
+  authorizedCopy: boolean;
+  handleCopyApp: () => Promise<void>;
+  isCopying: boolean;
+}
 
-  const showChat = useStore(chatStore.showChat);
+const ChatImplementer = memo(
+  ({ ready, unauthorized, authorizedCopy, handleCopyApp, isCopying }: ChatImplementerProps) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [chatStarted, setChatStarted] = useState(chatStore.messages.get().length > 0 || !ready);
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
+    const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
+    const [searchParams] = useSearchParams();
+    // const { isLoggedIn } = useAuthStatus();
+    const [input, setInput] = useState('');
 
-  const [animationScope, animate] = useAnimate();
+    const showChat = useStore(chatStore.showChat);
 
-  useEffect(() => {
-    const prompt = searchParams.get('prompt');
+    useEffect(() => {
+      const prompt = searchParams.get('prompt');
 
-    if (prompt) {
-      setInput(prompt);
-    }
-  }, [searchParams]);
+      if (prompt) {
+        setInput(prompt);
+      }
+    }, [searchParams]);
 
-  const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
+    useEffect(() => {
+      // Update chatStarted when messages load or when app becomes ready
+      if (ready && chatStore.messages.get().length > 0) {
+        setChatStarted(true);
+      }
+    }, [ready]);
 
-  const abort = () => {
-    if (gActiveChatMessageTelemetry) {
-      gActiveChatMessageTelemetry.abort('StopButtonClicked');
-      clearActiveChat();
-    }
+    const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
-    doAbortChat();
-  };
+    const abort = () => {
+      if (gActiveChatMessageTelemetry) {
+        gActiveChatMessageTelemetry.abort('StopButtonClicked');
+        clearActiveChat();
+      }
 
-  useEffect(() => {
-    const textarea = textareaRef.current;
+      doAbortChat();
+    };
 
-    if (textarea) {
-      textarea.style.height = 'auto';
+    useEffect(() => {
+      const textarea = textareaRef.current;
 
-      const scrollHeight = textarea.scrollHeight;
+      if (textarea) {
+        textarea.style.height = 'auto';
 
-      textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
-      textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
-    }
-  }, [input, textareaRef]);
+        const scrollHeight = textarea.scrollHeight;
 
-  const runAnimation = async () => {
-    if (chatStarted) {
-      return;
-    }
+        textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
+        textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
+      }
+    }, [input, textareaRef]);
 
-    await Promise.all([
-      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
-      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
-    ]);
+    const sendMessage = async (params: ChatMessageParams) => {
+      const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, payFeatures } =
+        params;
 
-    chatStore.started.set(true);
-
-    setChatStarted(true);
-  };
-
-  const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, payFeatures } = params;
-
-    if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
-      return;
-    }
-
-    gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
-
-    const chatId = generateRandomId();
-
-    if (messageInput || imageDataList.length) {
-      const userInfo = getCurrentUserInfo();
-      const attachments = await Promise.all(imageDataList.map(createAttachment));
-      const userMessage: Message = {
-        id: `user-${chatId}`,
-        userInfo,
-        createTime: new Date().toISOString(),
-        role: 'user',
-        attachments,
-        content: messageInput ?? '',
-        hasInteracted: false,
-        componentReference,
-      };
-
-      addChatMessage(userMessage);
-    }
-
-    let appId = chatStore.currentAppId.get();
-    if (!appId) {
-      try {
-        appId = await database.createApp();
-        chatStore.currentAppId.set(appId);
-        chatStore.appTitle.set('New App');
-
-        navigateApp(appId);
-      } catch (e) {
-        console.error('Failed to initialize chat', e);
-        toast.error('Failed to initialize chat');
-        chatStore.hasPendingMessage.set(false);
+      if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
         return;
       }
-    }
 
-    setUploadedFiles([]);
-    setImageDataList([]);
+      gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
 
-    runAnimation();
+      const chatId = generateRandomId();
 
-    const messages = chatStore.messages.get().filter(shouldDisplayMessage);
+      if (messageInput || imageDataList.length) {
+        const userInfo = await getCurrentUserInfo();
+        const attachments = await Promise.all(imageDataList.map(createAttachment));
+        const userMessage: Message = {
+          id: `user-${chatId}`,
+          userInfo,
+          createTime: new Date().toISOString(),
+          role: 'user',
+          attachments,
+          content: messageInput ?? '',
+          hasInteracted: false,
+          componentReference,
+        };
 
-    const numAbortsAtStart = chatStore.numAborts.get();
+        addChatMessage(userMessage);
+      }
 
-    let visitDataId: string | undefined;
-    if (sessionRepositoryId && chatMode == ChatMode.UserMessage) {
-      const simulationData = await flushSimulationData();
-      visitDataId = await uploadVisitData({
-        repositoryId: sessionRepositoryId,
-        simulationData,
-        componentReference,
+      let appId = chatStore.currentAppId.get();
+      if (!appId) {
+        try {
+          appId = await database.createApp();
+          chatStore.currentAppId.set(appId);
+          chatStore.appTitle.set('New App');
+
+          navigateApp(appId);
+        } catch (e) {
+          console.error('Failed to initialize chat', e);
+          toast.error('Failed to initialize chat');
+          chatStore.hasPendingMessage.set(false);
+          return;
+        }
+      }
+
+      setUploadedFiles([]);
+      setImageDataList([]);
+
+      // Trigger the page transition
+      if (!chatStarted) {
+        chatStore.started.set(true);
+        setChatStarted(true);
+      }
+
+      const messages = chatStore.messages.get().filter(shouldDisplayMessage);
+
+      const numAbortsAtStart = chatStore.numAborts.get();
+
+      let visitDataId: string | undefined;
+      if (sessionRepositoryId && chatMode == ChatMode.UserMessage) {
+        const simulationData = await flushSimulationData();
+        visitDataId = await uploadVisitData({
+          repositoryId: sessionRepositoryId,
+          simulationData,
+          componentReference,
+        });
+      }
+
+      await doSendMessage({
+        appId,
+        mode: chatMode,
+        messages,
+        visitDataId,
+        retryBugReportName,
+        payFeatures,
       });
+
+      if (chatStore.numAborts.get() != numAbortsAtStart) {
+        return;
+      }
+
+      gActiveChatMessageTelemetry.finish(messages.length, true);
+      clearActiveChat();
+
+      setInput('');
+      textareaRef.current?.blur();
+    };
+
+    /**
+     * Handles the change event for the textarea and updates the input state.
+     * @param event - The change event from the textarea.
+     */
+    const onTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(event.target.value);
+    };
+
+    const [messageRef, scrollRef] = useSnapScroll();
+    const showWorkbench = useStore(workbenchStore.showWorkbench);
+
+    if (unauthorized) {
+      return <Unauthorized authorizedCopy={authorizedCopy} handleCopyApp={handleCopyApp} isCopying={isCopying} />;
     }
 
-    await doSendMessage({
-      appId,
-      mode: chatMode,
-      messages,
-      visitDataId,
-      retryBugReportName,
-      payFeatures,
-    });
+    const sharedProps = {
+      textareaRef,
+      input,
+      handleInputChange: onTextareaChange,
+      sendMessage,
+      handleStop: abort,
+      uploadedFiles,
+      setUploadedFiles,
+      imageDataList,
+      setImageDataList,
+      messageRef,
+      scrollRef,
+      showChat,
+      isLoading: !ready,
+    };
 
-    if (chatStore.numAborts.get() != numAbortsAtStart) {
-      return;
-    }
-
-    gActiveChatMessageTelemetry.finish(messages.length, true);
-    clearActiveChat();
-
-    setInput('');
-    textareaRef.current?.blur();
-  };
-
-  /**
-   * Handles the change event for the textarea and updates the input state.
-   * @param event - The change event from the textarea.
-   */
-  const onTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(event.target.value);
-  };
-
-  const [messageRef, scrollRef] = useSnapScroll();
-
-  return (
-    <BaseChat
-      ref={animationScope}
-      textareaRef={textareaRef}
-      input={input}
-      showChat={showChat}
-      chatStarted={chatStarted}
-      sendMessage={sendMessage}
-      handleStop={abort}
-      messageRef={messageRef}
-      scrollRef={scrollRef}
-      handleInputChange={(e) => {
-        onTextareaChange(e);
-      }}
-      uploadedFiles={uploadedFiles}
-      setUploadedFiles={setUploadedFiles}
-      imageDataList={imageDataList}
-      setImageDataList={setImageDataList}
-    />
-  );
-});
+    return (
+      <AnimatePresence mode="wait">
+        {!chatStarted ? (
+          <LandingPage key="landing" {...sharedProps} />
+        ) : !showWorkbench ? (
+          <DiscussionPage key="discussion" {...sharedProps} />
+        ) : (
+          <AppPage key="app" {...sharedProps} />
+        )}
+      </AnimatePresence>
+    );
+  },
+);
 
 export default ChatImplementer;

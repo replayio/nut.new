@@ -12,6 +12,7 @@ import {
   JumpToBottom,
   StartBuildingCard,
   SignInCard,
+  AddPeanutsCard,
   StopBuildCard,
   ContinueBuildCard,
   SubscriptionCard,
@@ -27,21 +28,19 @@ import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { pendingMessageStatusStore } from '~/lib/stores/status';
 import { userStore } from '~/lib/stores/auth';
+import { peanutsStore } from '~/lib/stores/peanuts';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { AppFeatureStatus } from '~/lib/persistence/messageAppSummary';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { openFeatureModal } from '~/lib/stores/featureModal';
 import { InfoCard } from '~/components/ui/InfoCard';
-import type { AppLibraryEntry } from '~/lib/persistence/apps';
-import { buildAccessStore } from '~/lib/stores/buildAccess';
 
 interface MessagesProps {
   id?: string;
   className?: string;
   onLastMessageCheckboxChange?: (contents: string, checked: boolean) => void;
   sendMessage: (params: ChatMessageParams) => void;
-  list?: AppLibraryEntry[] | undefined;
 }
 
 function getUnpaidFeatureCost(appSummary: AppSummary | undefined, lastContinueBuildIteration: number) {
@@ -58,13 +57,13 @@ function getUnpaidFeatureCost(appSummary: AppSummary | undefined, lastContinueBu
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
-  ({ onLastMessageCheckboxChange, sendMessage, list }, ref) => {
+  ({ onLastMessageCheckboxChange, sendMessage }, ref) => {
     const [showJumpToBottom, setShowJumpToBottom] = useState(false);
     const [showContinueBuildCard, setShowContinueBuildCard] = useState(false);
     const user = useStore(userStore);
     const appSummary = useStore(chatStore.appSummary);
+    const peanutsRemaining = useStore(peanutsStore.peanutsRemaining);
     const listenResponses = useStore(chatStore.listenResponses);
-    const [showTopShadow, setShowTopShadow] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const messages = useStore(chatStore.messages);
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
@@ -75,9 +74,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const hasSubscription = useStore(subscriptionStore.hasSubscription);
     const lastMessageIteration = useStore(chatStore.lastMessageIteration);
-    const subscription = useStore(subscriptionStore.subscription);
+
     const unpaidFeatureCost = getUnpaidFeatureCost(appSummary, lastMessageIteration);
-    const hasBuildAccess = useStore(buildAccessStore.hasAccess);
 
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
@@ -90,7 +88,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         (unpaidFeatureCost || (!hasPendingMessage && !listenResponses)) &&
         appSummary?.features?.length &&
         !isFullyComplete &&
-        hasBuildAccess;
+        peanutsRemaining !== undefined &&
+        peanutsRemaining > 0 &&
+        peanutsRemaining >= unpaidFeatureCost;
 
       if (shouldShow) {
         const timer = setTimeout(() => {
@@ -106,9 +106,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       listenResponses,
       appSummary?.features?.length,
       isFullyComplete,
+      peanutsRemaining,
       unpaidFeatureCost,
-      subscription,
-      list,
     ]);
 
     const setRefs = useCallback(
@@ -133,7 +132,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
       setShowJumpToBottom(distanceFromBottom > 50);
-      setShowTopShadow(scrollTop > 10);
     };
 
     const scrollToBottom = () => {
@@ -243,7 +241,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
 
       // Find the index of this feature in the filtered array for modal
-      const filteredFeatures = appSummary?.features?.filter((f) => f.kind !== AppFeatureKind.DesignAPIs) || [];
+      const filteredFeatures =
+        appSummary?.features?.filter(
+          (f) => f.kind !== AppFeatureKind.BuildInitialApp && f.kind !== AppFeatureKind.DesignAPIs,
+        ) || [];
       const modalIndex = filteredFeatures.findIndex((f) => f === feature);
 
       return (
@@ -359,87 +360,121 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     return (
       <div className="relative flex-1 min-h-0 flex flex-col">
-        {showTopShadow && (
-          <div
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 h-px bg-bolt-elements-borderColor/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200"
-            style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}
-          />
-        )}
+        <div ref={setRefs} className={classNames('flex-1 overflow-y-auto rounded-b-2xl w-full  mx-auto')}>
+          <div className="flex flex-col px-4 pb-6">
+            {(() => {
+              const timelineItems = createTimelineItems();
+              return (
+                <>
+                  {timelineItems.map((item, index) => {
+                    if (item.type === 'message') {
+                      return renderMessage(item.data as Message, index);
+                    } else if (item.type === 'feature') {
+                      return renderFeature(item.data as AppFeature);
+                    }
+                    return null;
+                  })}
+                </>
+              );
+            })()}
 
-        <div
-          ref={setRefs}
-          className={classNames('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto')}
-        >
-          {(() => {
-            const timelineItems = createTimelineItems();
-            return (
-              <>
-                {timelineItems.map((item, index) => {
-                  if (item.type === 'message') {
-                    return renderMessage(item.data as Message, index);
-                  } else if (item.type === 'feature') {
-                    return renderFeature(item.data as AppFeature);
-                  }
-                  return null;
-                })}
-              </>
-            );
-          })()}
+            {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
 
-          {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
+            {user &&
+              (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
+              peanutsRemaining !== undefined &&
+              (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
+              hasSubscription && <AddPeanutsCard onMount={scrollToBottom} />}
 
-          {user &&
-            (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
-            (!hasBuildAccess || !hasSubscription) && <SubscriptionCard onMount={scrollToBottom} />}
+            {user &&
+              (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
+              peanutsRemaining !== undefined &&
+              (!peanutsRemaining || peanutsRemaining < unpaidFeatureCost) &&
+              !hasSubscription && <SubscriptionCard onMount={scrollToBottom} />}
 
-          {!showContinueBuildCard &&
-            listenResponses &&
-            !hasPendingMessage &&
-            appSummary?.features?.length &&
-            !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
+            {!showContinueBuildCard &&
+              listenResponses &&
+              !hasPendingMessage &&
+              appSummary?.features?.length &&
+              !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
 
-          {showContinueBuildCard && (
-            <ContinueBuildCard
-              onMount={scrollToBottom}
-              sendMessage={sendMessage}
-              setShowContinueBuildCard={setShowContinueBuildCard}
-              unpaidFeatureCost={unpaidFeatureCost}
-            />
-          )}
+            {showContinueBuildCard && (
+              <ContinueBuildCard
+                onMount={scrollToBottom}
+                sendMessage={sendMessage}
+                setShowContinueBuildCard={setShowContinueBuildCard}
+                unpaidFeatureCost={unpaidFeatureCost}
+              />
+            )}
 
-          {user && startPlanningRating === 10 && hasBuildAccess && (
-            <StartBuildingCard
-              startPlanningRating={startPlanningRating}
-              sendMessage={sendMessage}
-              onMount={scrollToBottom}
-            />
-          )}
+            {(() => {
+              // Debug logging
+              console.log('[StartBuildingCard Debug]', {
+                user: !!user,
+                hasAppSummary,
+                startPlanningRating,
+                featuresLength: appSummary?.features?.length,
+                firstFeatureStatus: appSummary?.features?.[0]?.status,
+                firstFeatureKind: appSummary?.features?.[0]?.kind,
+                hasPendingMessage,
+                listenResponses,
+              });
 
-          {hasPendingMessage && (
-            <div className="w-full mt-3">
-              <div className="flex gap-4 pl-6">
-                <div className="flex items-center gap-3 text-bolt-elements-textSecondary py-2">
-                  <div className="flex gap-1">
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
-                      style={{ animationDelay: '0ms' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
-                      style={{ animationDelay: '150ms' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
-                      style={{ animationDelay: '300ms' }}
-                    ></div>
+              // Show start building button when:
+              // 1. Discovery is complete (startPlanningRating === 10) OR
+              // 2. Planning is complete but building hasn't started (has appSummary but first feature not started)
+              const shouldShowStartBuilding =
+                user &&
+                !hasPendingMessage &&
+                !listenResponses &&
+                ((startPlanningRating === 10 && !hasAppSummary) ||
+                  (hasAppSummary &&
+                    appSummary?.features &&
+                    appSummary.features.length > 0 &&
+                    (appSummary.features[0].status === AppFeatureStatus.PlanningComplete ||
+                      appSummary.features[0].status === AppFeatureStatus.Open ||
+                      !appSummary.features[0].status)));
+
+              console.log('[StartBuildingCard] shouldShow:', shouldShowStartBuilding);
+
+              if (shouldShowStartBuilding) {
+                return (
+                  <StartBuildingCard
+                    startPlanningRating={startPlanningRating || 10}
+                    sendMessage={sendMessage}
+                    onMount={scrollToBottom}
+                  />
+                );
+              }
+              return null;
+            })()}
+
+            {hasPendingMessage && (
+              <div className="w-full mt-3">
+                <div className="flex gap-4 pl-6">
+                  <div className="flex items-center gap-3 text-bolt-elements-textSecondary py-2">
+                    <div className="flex gap-1">
+                      <div
+                        className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                        style={{ animationDelay: '0ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                        style={{ animationDelay: '150ms' }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                        style={{ animationDelay: '300ms' }}
+                      ></div>
+                    </div>
+                    {pendingMessageStatus && (
+                      <span className="text-sm font-medium opacity-60">{pendingMessageStatus}...</span>
+                    )}
                   </div>
-                  {pendingMessageStatus && (
-                    <span className="text-sm font-medium opacity-60">{pendingMessageStatus}...</span>
-                  )}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <JumpToBottom visible={showJumpToBottom} onClick={scrollToBottom} />
       </div>

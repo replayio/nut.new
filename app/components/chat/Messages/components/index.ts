@@ -1,6 +1,9 @@
 export { AppCard } from './AppCard';
 export { AuthSelectorCard } from './AuthSelectorCard';
+export { TweakCN } from './NameAndThemeInputs';
+export { ThemeEditor } from './ThemeEditor';
 export { FeaturesCard } from './FeaturesCard';
+export { FloatingChatToolbar } from './FloatingChatToolbar';
 export { JumpToBottom } from './JumpToBottom';
 export { MessageContents } from './MessageContents';
 export { SecretsCard } from './SecretsCard';
