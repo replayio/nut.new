@@ -375,7 +375,7 @@ export const AppPage = React.forwardRef<HTMLDivElement, AppPageProps>(
                       {renderPrimaryPanel()}
                     </div>
                   </ResizablePanel>
-                  <ResizableHandle className="h-full w-2" />
+                  <ResizableHandle />
                   <ResizablePanel defaultSize={showChatPanel ? 55 : 65} minSize={25} className="flex pr-2">
                     <Workbench chatStarted={!!appSummary} layout="embedded" />
                   </ResizablePanel>

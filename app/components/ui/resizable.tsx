@@ -32,20 +32,13 @@ export const ResizableHandle = React.forwardRef<HTMLDivElement, ResizableHandleP
     <ResizablePrimitiveHandle
       ref={ref}
       className={cn(
-        'relative flex items-center justify-center px-0.5',
-        'bg-bolt-elements-borderColor/40 transition-colors hover:bg-bolt-elements-borderColor/60',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus',
+        'relative flex items-center justify-center w-4 group cursor-col-resize',
+        'focus-visible:outline-none',
         className,
       )}
       {...props}
     >
-      {withHandle ? (
-        <div className="flex h-20 w-3 items-center justify-center rounded-full border border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 shadow-sm">
-          <div className="h-8 w-0.5 rounded-full bg-bolt-elements-borderColor/60" />
-        </div>
-      ) : (
-        <span className="pointer-events-none absolute inset-y-1/4 left-1/2 w-[2px] -translate-x-1/2 rounded bg-bolt-elements-borderColor/70" />
-      )}
+      <div className="h-12 w-1.5 rounded-full bg-white/20 group-hover:bg-white/30 transition-all" />
     </ResizablePrimitiveHandle>
   ),
 );
