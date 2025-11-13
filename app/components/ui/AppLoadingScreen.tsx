@@ -7,9 +7,9 @@ interface AppLoadingScreenProps {
 export const AppLoadingScreen = ({ appId }: AppLoadingScreenProps) => {
   return (
     <div className="h-full w-full flex items-center justify-center bg-bolt-elements-background-depth-1">
-      <div className="flex flex-col items-center space-y-6 max-w-md mx-auto px-6">
+      <div className="flex flex-col items-center space-y-4">
         <motion.div
-          className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg"
+          className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg"
           animate={{
             scale: [1, 1.05, 1],
             rotate: [0, 5, -5, 0],
@@ -20,28 +20,8 @@ export const AppLoadingScreen = ({ appId }: AppLoadingScreenProps) => {
             ease: 'easeInOut',
           }}
         >
-          <img src="/logo-styled.svg" alt="Nut.new" className="w-6 h-6" />
+          <img src="/logo-styled.svg" alt="Nut.new" className="w-8 h-8" />
         </motion.div>
-
-        <div className="text-center space-y-2">
-          <motion.h2
-            className="text-xl font-semibold text-bolt-elements-textHeading"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Loading your app
-          </motion.h2>
-          <motion.p
-            className="text-bolt-elements-textSecondary"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {appId ? `Fetching project ${appId.slice(0, 8)}...` : 'Preparing your workspace...'}
-          </motion.p>
-        </div>
-
         <div className="flex space-x-2">
           {[0, 1, 2].map((index) => (
             <motion.div
@@ -60,6 +40,14 @@ export const AppLoadingScreen = ({ appId }: AppLoadingScreenProps) => {
             />
           ))}
         </div>
+        <motion.p
+          className="text-sm text-bolt-elements-textSecondary"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {appId ? `Loading project ${appId.slice(0, 8)}...` : 'Loading your workspace...'}
+        </motion.p>
       </div>
     </div>
   );

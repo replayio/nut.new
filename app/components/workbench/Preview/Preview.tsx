@@ -1,13 +1,11 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
-import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
-import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { SafariBrowser } from './components/SafariBrowser';
 
 let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
@@ -28,6 +26,8 @@ export const Preview = memo(() => {
 
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
+  const [navigationStack, setNavigationStack] = useState<string[]>([]);
+  const [currentNavigationIndex, setCurrentNavigationIndex] = useState(-1);
 
   const previewURL = useStore(workbenchStore.previewURL);
 
@@ -57,6 +57,45 @@ export const Preview = memo(() => {
     }
   };
 
+  const handleBack = () => {
+    if (currentNavigationIndex > 0) {
+      const newIndex = currentNavigationIndex - 1;
+      const previousUrl = navigationStack[newIndex];
+      setCurrentNavigationIndex(newIndex);
+      setIframeUrl(previousUrl);
+      setUrl(previousUrl);
+    }
+  };
+
+  const handleForward = () => {
+    if (currentNavigationIndex < navigationStack.length - 1) {
+      const newIndex = currentNavigationIndex + 1;
+      const nextUrl = navigationStack[newIndex];
+      setCurrentNavigationIndex(newIndex);
+      setIframeUrl(nextUrl);
+      setUrl(nextUrl);
+    }
+  };
+
+  // Track navigation when URL changes
+  const previousUrlRef = useRef<string | undefined>();
+
+  useEffect(() => {
+    if (iframeUrl && iframeUrl !== previousUrlRef.current) {
+      previousUrlRef.current = iframeUrl;
+
+      // Truncate forward history if we're not at the end
+      const newStack = navigationStack.slice(0, currentNavigationIndex + 1);
+
+      // Only add if it's a different URL than the current one
+      if (newStack[newStack.length - 1] !== iframeUrl) {
+        newStack.push(iframeUrl);
+        setNavigationStack(newStack);
+        setCurrentNavigationIndex(newStack.length - 1);
+      }
+    }
+  }, [iframeUrl, navigationStack, currentNavigationIndex]);
+
   // Send postMessage to control element picker in iframe
   const toggleElementPicker = (enabled: boolean) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -72,17 +111,25 @@ export const Preview = memo(() => {
     }
   };
 
+  // Handle element picker toggle
+  const handleToggleElementPicker = () => {
+    if (!isElementPickerReady) {
+      return; // Don't allow toggling if element picker isn't ready
+    }
+    const newState = !isElementPickerEnabled;
+    setIsElementPickerEnabled(newState);
+    toggleElementPicker(newState);
+  };
+
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'ELEMENT_PICKED') {
-        // Store the full element data including the react tree
-        workbenchStore.setSelectedElement({
-          component: event.data.react.component,
-          tree: event.data.react.tree,
-        });
+        // Element was picked, disable the picker
         setIsElementPickerEnabled(false);
+        toggleElementPicker(false);
       } else if (event.data.type === 'ELEMENT_PICKER_STATUS') {
+        // Element picker status message
       } else if (event.data.type === 'ELEMENT_PICKER_READY' && event.data.source === 'element-picker') {
         setIsElementPickerReady(true);
       }
@@ -215,71 +262,32 @@ export const Preview = memo(() => {
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
-      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 p-3 flex items-center gap-2 shadow-sm">
-        <IconButton icon={<RotateCw size={20} />} onClick={() => reloadPreview()} />
-        {isElementPickerReady && !isMobile && (
-          <IconButton
-            className={classNames({
-              'bg-bolt-elements-background-depth-3': isElementPickerEnabled,
-            })}
-            iconClassName={isElementPickerEnabled ? 'text-[#4da3ff]' : ''}
-            icon={<Crosshair size={20} />}
-            onClick={() => {
-              const newState = !isElementPickerEnabled;
-              setIsElementPickerEnabled(newState);
-              toggleElementPicker(newState);
-            }}
-            title="Select element on page"
-          />
-        )}
-        <div
-          className={classNames(
-            'flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md',
-            {
-              'rounded-xl': !isSmallViewport,
-            },
-          )}
-        >
-          <input
-            title="URL"
-            ref={inputRef}
-            className="w-full bg-transparent border-none outline-none focus:ring-0 focus:ring-offset-0"
-            type="text"
-            value={url}
-            onChange={(event) => {
-              setUrl(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                if (url !== iframeUrl) {
-                  setIframeUrl(url);
-                } else {
-                  reloadPreview();
-                }
 
-                if (inputRef.current) {
-                  inputRef.current.blur();
-                }
-              }
-            }}
-          />
-        </div>
-
-        {!isSmallViewport && (
-          <IconButton
-            icon={<MonitorSmartphone size={20} />}
-            onClick={toggleDeviceMode}
-            title={isDeviceModeOn ? 'Switch to Responsive Mode' : 'Switch to Device Mode'}
-          />
-        )}
-        {!isSmallViewport && (
-          <IconButton
-            icon={isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-            onClick={toggleFullscreen}
-            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-          />
-        )}
-      </div>
+      {/* Always show browser chrome */}
+      <SafariBrowser
+        url={url}
+        onUrlChange={setUrl}
+        onUrlSubmit={() => {
+          if (url !== iframeUrl) {
+            setIframeUrl(url);
+          } else {
+            reloadPreview();
+          }
+        }}
+        onReload={() => reloadPreview()}
+        onBack={currentNavigationIndex > 0 ? handleBack : undefined}
+        onForward={currentNavigationIndex < navigationStack.length - 1 ? handleForward : undefined}
+        onToggleDeviceMode={toggleDeviceMode}
+        onToggleFullscreen={toggleFullscreen}
+        onToggleElementPicker={handleToggleElementPicker}
+        isDeviceModeOn={isDeviceModeOn}
+        isFullscreen={isFullscreen}
+        isElementPickerEnabled={isElementPickerEnabled}
+        isElementPickerReady={isElementPickerReady}
+        inputRef={inputRef}
+        showAdvancedControls={!isSmallViewport && !!previewURL}
+        isMobile={isMobile}
+      />
 
       <div className="flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 flex justify-center items-center overflow-auto">
         <AppView

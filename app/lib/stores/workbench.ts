@@ -17,6 +17,10 @@ interface ReactComponent {
 interface SelectedElementData {
   component: ReactComponent | null;
   tree: ReactComponent[];
+  children?: ReactComponent[];
+  fiberId?: string; // Fiber ID for direct React updates
+  domAttributes?: Record<string, unknown>; // DOM attributes from the element
+  parentComponent?: ReactComponent | null; // Parent React component
 }
 
 export class WorkbenchStore {

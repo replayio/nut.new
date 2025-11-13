@@ -12,6 +12,7 @@ import { userStore } from '~/lib/stores/auth';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
+  layout?: 'default' | 'embedded';
 }
 
 const createWorkbenchVariants = (workbenchWidth: number) =>
@@ -32,7 +33,7 @@ const createWorkbenchVariants = (workbenchWidth: number) =>
     },
   }) satisfies Variants;
 
-export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted, layout = 'default' }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -42,6 +43,28 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
 
   const isSmallViewport = useViewport(800);
 
+  // Embedded layout for ResizablePanel
+  if (layout === 'embedded') {
+    return (
+      chatStarted && (
+        <motion.div
+          initial={{ x: '100%', opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{
+            duration: 0.4,
+            ease: cubicEasingFn,
+          }}
+          className="h-full w-full flex flex-col bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-lg overflow-hidden rounded-xl"
+        >
+          <div className="relative flex-1 overflow-hidden">
+            <Preview />
+          </div>
+        </motion.div>
+      )
+    );
+  }
+
+  // Default fixed positioning layout
   return (
     chatStarted && (
       <motion.div

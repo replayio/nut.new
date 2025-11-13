@@ -90,7 +90,6 @@ export function Header() {
             }
           >
             <div className="flex items-center gap-3">
-              {(user || location.pathname === '/rebuild-broken-dreams') && <ThemeSwitch />}
               <ClientAuth />
             </div>
           </Suspense>
