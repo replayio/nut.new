@@ -24,7 +24,7 @@ export const FaqSection = () => {
     {
       question: 'Am I required to become a paying customer?',
       answer:
-        "Nope. You can cancel before the end of your three free months of the Builder Plan, and you will not be charged going forward.",
+        'Nope. You can cancel before the end of your three free months of the Builder Plan, and you will not be charged going forward.',
     },
     {
       question: "What if you can't help me get my app working?",

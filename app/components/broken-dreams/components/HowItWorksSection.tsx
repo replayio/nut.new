@@ -3,17 +3,18 @@ export const HowItWorksSection = () => {
     {
       number: 1,
       title: 'Create an account',
-      description: "So you can get familiar with Nut.new and its features.",
+      description: 'So you can get familiar with Nut.new and its features.',
     },
     {
       number: 2,
       title: 'Submit your broken app',
-      description: "We’ll review your submission, and follow up with an email with your discount code for 3 free months of the Builder Plan.",
+      description:
+        'We’ll review your submission, and follow up with an email with your discount code for 3 free months of the Builder Plan.',
     },
     {
       number: 3,
       title: 'Rebuild your app',
-      description: "Start rebuilding your app with Nut.new, and we’ll be on standby to help you if you get stuck.",
+      description: 'Start rebuilding your app with Nut.new, and we’ll be on standby to help you if you get stuck.',
     },
   ];
 
