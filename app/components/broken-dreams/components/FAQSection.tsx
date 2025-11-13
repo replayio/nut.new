@@ -14,7 +14,7 @@ export const FaqSection = () => {
     {
       question: 'Do I need to create a Nut.new account before submitting my app?',
       answer:
-        'Yes, it would make things easier if you create an account before filling out the submission form, and be sure to use the same email that is connected to your Nut.new account, so we can find it, and stuff it with free credits.',
+        'Yes, it would make things easier if you create an account before filling out the submission form, and be sure to use the same email that is connected to your Nut.new account.',
     },
     {
       question: 'What makes Nut.new different than other vibecoding tools out there?',
