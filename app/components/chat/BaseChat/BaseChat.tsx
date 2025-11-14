@@ -13,7 +13,6 @@ import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
 import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
 import styles from './BaseChat.module.scss';
-import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
 import { type MessageInputProps } from '~/components/chat/MessageInput/MessageInput';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { DISCOVERY_RESPONSE_CATEGORY } from '~/lib/persistence/message';
@@ -401,17 +400,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       setImageDataList={setImageDataList!}
                       messageInputProps={messageInputProps}
                     />
-                    {!chatStarted && (
-                      <>
-                        {ExamplePrompts((event: React.UIEvent, messageInput: string) => {
-                          if (hasPendingMessage) {
-                            handleStop?.();
-                            return;
-                          }
-                          handleSendMessage({ messageInput, chatMode: ChatMode.UserMessage });
-                        })}
-                      </>
-                    )}
                   </>
                 );
               })()}

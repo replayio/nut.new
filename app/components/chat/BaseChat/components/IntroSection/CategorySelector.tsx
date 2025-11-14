@@ -1,15 +1,15 @@
 import React from 'react';
 import { classNames } from '~/utils/classNames';
 
-interface Category {
+export interface IntroSectionCategory {
   name: string;
   count: number;
 }
 
 interface CategorySelectorProps {
-  categories: Category[];
+  categories: IntroSectionCategory[];
   selectedCategory?: string;
-  onCategorySelect?: (categoryName: string) => void;
+  onCategorySelect?: (categoryName: string | undefined) => void;
 }
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
@@ -24,7 +24,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         return (
           <button
             key={category.name}
-            onClick={() => onCategorySelect?.(category.name)}
+            onClick={() => onCategorySelect?.(isSelected ? undefined : category.name)}
             className={classNames(
               'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
               {
