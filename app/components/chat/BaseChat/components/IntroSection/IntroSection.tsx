@@ -2,8 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { AppCard } from './AppCard';
 import { referenceApps } from '~/lib/replay/ReferenceApps';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
-export const IntroSection: React.FC = () => {
+interface IntroSectionProps {
+  sendMessage: (params: ChatMessageParams) => void;
+}
+
+export const IntroSection: React.FC<IntroSectionProps> = ({ sendMessage }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
 
   const categories = useMemo(() => {
@@ -61,8 +66,9 @@ export const IntroSection: React.FC = () => {
               description={app.description}
               bulletPoints={app.bulletPoints}
               photo={app.photo}
-              appId={app.appId}
+              appPath={app.appPath}
               photoOnLeft={index % 2 === 0}
+              sendMessage={sendMessage}
             />
           ))}
         </div>

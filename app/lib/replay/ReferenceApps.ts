@@ -8,7 +8,7 @@ enum ReferenceAppCategory {
 }
 
 interface ReferenceApp {
-  appId?: string;
+  appPath?: string;
   appName: string;
   description: string;
   bulletPoints?: string[];
@@ -18,20 +18,20 @@ interface ReferenceApp {
 
 export const referenceApps: ReferenceApp[] = [
   {
-    appId: '9367f079-1026-4c76-b583-91bb59aaac17',
+    appPath: 'management/IssueTracker',
     appName: 'Issue Tracker',
     description: 'Track and manage issues across your projects',
     bulletPoints: ['Triage System', 'Personal Inboxes', 'Email Notifications'],
-    photo: 'https://picsum.photos/800/450',
+    photo: 'https://utfs.io/f/g4w5SXU7E8KdqUWQBDviRZOVD8n3oL79Tegv1adIFGkcmQ6H',
     categories: [ReferenceAppCategory.Business, ReferenceAppCategory.Technical],
   },
   {
-    appId: '9c41cf6c-e87a-4233-86a9-f862377c726e',
+    appPath: 'management/DocumentManager',
     appName: 'Team Wiki',
     description: 'Share and track your knowledge base and documents',
-    bulletPoints: ['Rich Documents', 'Comment System', 'Email Notifications'],
-    photo: 'https://picsum.photos/800/450',
-    categories: [ReferenceAppCategory.Business, ReferenceAppCategory.Personal],
+    bulletPoints: ['Rich Text Documents', 'Kanban Boards and Tables', 'Comment System'],
+    photo: 'https://utfs.io/f/g4w5SXU7E8Kd65diTnZrn27SvXDfJANF0dzKcZECW1mhuabT',
+    categories: [ReferenceAppCategory.Business],
   },
   {
     appName: 'Telemetry Board',

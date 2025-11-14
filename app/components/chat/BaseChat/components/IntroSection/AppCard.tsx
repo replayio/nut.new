@@ -1,14 +1,17 @@
 import React from 'react';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { classNames } from '~/utils/classNames';
-import { navigateApp } from '~/utils/nut';
+import { assert } from '~/utils/nut';
 
 interface AppCardProps {
   appName: string;
   description: string;
   bulletPoints?: string[];
   photo?: string;
-  appId?: string;
+  appPath?: string;
   photoOnLeft?: boolean;
+  sendMessage: (params: ChatMessageParams) => void;
 }
 
 export const AppCard: React.FC<AppCardProps> = ({
@@ -16,16 +19,21 @@ export const AppCard: React.FC<AppCardProps> = ({
   description,
   bulletPoints = [],
   photo,
-  appId,
+  appPath,
   photoOnLeft = true,
+  sendMessage,
 }) => {
   const handleClick = () => {
-    if (appId) {
-      navigateApp(appId);
-    }
+    assert(appPath, 'App path is required');
+
+    sendMessage({
+      messageInput: `Build me a new app based on '${appName}'`,
+      chatMode: ChatMode.DevelopApp,
+      referenceAppPath: appPath,
+    });
   };
 
-  const isClickable = !!appId;
+  const isClickable = !!appPath;
   const displayPhoto = photo || 'https://placehold.co/800x450/1e293b/94a3b8?text=Coming+Soon';
 
   return (

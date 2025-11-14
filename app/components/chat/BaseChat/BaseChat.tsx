@@ -336,7 +336,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           >
             {!chatStarted && (
               <>
-                <IntroSection />
+                <IntroSection sendMessage={handleSendMessage} />
               </>
             )}
             <div
