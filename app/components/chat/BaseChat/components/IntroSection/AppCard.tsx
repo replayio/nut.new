@@ -26,6 +26,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   };
 
   const isClickable = !!appId;
+  const displayPhoto = photo || 'https://placehold.co/800x450/1e293b/94a3b8?text=Coming+Soon';
 
   return (
     <div
@@ -54,16 +55,18 @@ export const AppCard: React.FC<AppCardProps> = ({
           })}
         >
           {/* Photo Section */}
-          {photo && (
-            <div className="relative w-full md:w-1/2 aspect-video md:aspect-auto md:h-full min-h-[200px] overflow-hidden bg-bolt-elements-background-depth-3 flex-shrink-0">
-              <img
-                src={photo}
-                alt={appName}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
+          <div className="relative w-full md:w-1/2 aspect-video md:aspect-auto md:h-full min-h-[200px] overflow-hidden bg-bolt-elements-background-depth-3 flex-shrink-0">
+            <img
+              src={displayPhoto}
+              alt={appName}
+              className={classNames('w-full h-full object-cover', {
+                'transition-transform duration-300 group-hover:scale-105': isClickable,
+              })}
+            />
+            {isClickable && (
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Content Section */}
           <div className="p-5 relative flex-1 flex flex-col justify-center">

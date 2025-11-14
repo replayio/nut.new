@@ -42,7 +42,7 @@ export const IntroSection: React.FC = () => {
         </h1>
 
         <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
-          Build and customize web apps for you and your work in minutes
+          Build and customize web apps for you and your team in minutes
         </p>
 
         <CategorySelector
