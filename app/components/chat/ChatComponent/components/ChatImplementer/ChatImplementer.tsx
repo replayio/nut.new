@@ -33,7 +33,7 @@ export interface ChatMessageParams {
   sessionRepositoryId?: string;
   componentReference?: ChatReferenceComponent;
   retryBugReportName?: string;
-  payFeatures?: boolean;
+  referenceAppPath?: string;
 }
 
 async function createAttachment(dataURL: string): Promise<ChatMessageAttachment> {
@@ -116,7 +116,6 @@ const ChatImplementer = memo(() => {
     }
 
     await Promise.all([
-      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
       animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
     ]);
 
@@ -126,7 +125,7 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, payFeatures } = params;
+    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, referenceAppPath } = params;
 
     if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
       return;
@@ -134,13 +133,11 @@ const ChatImplementer = memo(() => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
 
-    const chatId = generateRandomId();
-
     if (messageInput || imageDataList.length) {
       const userInfo = getCurrentUserInfo();
       const attachments = await Promise.all(imageDataList.map(createAttachment));
       const userMessage: Message = {
-        id: `user-${chatId}`,
+        id: `user-${generateRandomId()}`,
         userInfo,
         createTime: new Date().toISOString(),
         role: 'user',
@@ -194,7 +191,7 @@ const ChatImplementer = memo(() => {
       messages,
       visitDataId,
       retryBugReportName,
-      payFeatures,
+      referenceAppPath,
     });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {

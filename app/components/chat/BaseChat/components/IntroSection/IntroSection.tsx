@@ -1,86 +1,78 @@
-import React from 'react';
-import useViewport from '~/lib/hooks/useViewport';
-import { Hammer, FlaskConical, Rocket } from '~/components/ui/Icon';
+import React, { useState, useMemo } from 'react';
+import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
+import { ReferenceAppCard } from './ReferenceAppCard';
+import { referenceApps } from '~/lib/replay/ReferenceApps';
+import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
-export const IntroSection: React.FC = () => {
-  const isSmallViewport = useViewport(800);
+interface IntroSectionProps {
+  sendMessage: (params: ChatMessageParams) => void;
+}
 
-  if (isSmallViewport) {
-    return (
-      <div id="intro" className="max-w-4xl mx-auto text-center px-4 pt-4 mt-8">
-        <h1 className="text-3xl font-bold text-bolt-elements-textHeading mb-4 animate-fade-in leading-tight">
-          Build web apps
-          <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent block">
-            that work
-          </span>
-        </h1>
+export const IntroSection: React.FC<IntroSectionProps> = ({ sendMessage }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
 
-        <p className="text-base mb-6 text-bolt-elements-textSecondary animate-fade-in animation-delay-100 leading-relaxed max-w-lg mx-auto">
-          Build, test, and deploy your applications in minutes. From idea to going live with AI — no setup required.
-        </p>
+  const categories = useMemo(() => {
+    const sectionCategories: IntroSectionCategory[] = [];
+    for (const { categories } of referenceApps) {
+      for (const category of categories) {
+        const existing = sectionCategories.find((c) => c.name === category);
+        if (existing) {
+          existing.count++;
+        } else {
+          sectionCategories.push({ name: category, count: 1 });
+        }
+      }
+    }
+    sectionCategories.push({ name: 'All', count: referenceApps.length });
+    return sectionCategories;
+  }, []);
 
-        <div className="flex justify-center gap-4 mb-6 animate-fade-in animation-delay-200">
-          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
-            <div className="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center">
-              <Hammer className="text-blue-500" size={14} />
-            </div>
-            <span className="text-xs font-medium">Build</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
-            <div className="w-6 h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
-              <FlaskConical className="text-green-500" size={14} />
-            </div>
-            <span className="text-xs font-medium">Test</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-bolt-elements-textSecondary">
-            <div className="w-6 h-6 bg-purple-500/10 rounded-lg flex items-center justify-center">
-              <Rocket className="text-purple-500" size={14} />
-            </div>
-            <span className="text-xs font-medium">Deploy</span>
-          </div>
-        </div>
-      </div>
+  const filteredApps = useMemo(() => {
+    if (!selectedCategory) {
+      return [];
+    }
+    if (selectedCategory === 'All') {
+      return referenceApps;
+    }
+    return referenceApps.filter((app) =>
+      app.categories.some((category) => category === selectedCategory),
     );
-  }
+  }, [selectedCategory]);
 
   return (
-    <div id="intro" className="max-w-4xl mx-auto text-center px-6 lg:px-8 pt-4 mt-8">
-      <div className="inline-flex items-center gap-2 bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-full px-4 py-2 mb-8 animate-fade-in">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-        <span className="text-sm font-medium text-bolt-elements-textSecondary">We're in BETA</span>
+    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8 mb-4">
+      <div className="text-center mb-4">
+        <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
+          Own your tools
+        </h1>
+
+        <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
+          Build and customize web apps for you and your team in minutes
+        </p>
+
+        <CategorySelector
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
       </div>
 
-      <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
-        Build web apps
-        <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent ml-4">
-          that work
-        </span>
-      </h1>
-
-      <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
-        Build, test, and deploy your applications in minutes. From idea to going live with AI — no setup required.
-      </p>
-
-      <div className="flex flex-wrap justify-center gap-6 mb-8 animate-fade-in animation-delay-300">
-        <div className="flex items-center gap-2 text-bolt-elements-textSecondary">
-          <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
-            <Hammer className="text-blue-500" size={18} />
-          </div>
-          <span className="text-sm font-medium">Automated Build</span>
+      {filteredApps.length > 0 && (
+        <div className="space-y-6 animate-fade-in animation-delay-400 mb-8">
+          {filteredApps.map((app, index) => (
+            <ReferenceAppCard
+              key={app.appName}
+              appName={app.appName}
+              description={app.description}
+              bulletPoints={app.bulletPoints}
+              photo={app.photo}
+              appPath={app.appPath}
+              photoOnLeft={index % 2 === 0}
+              sendMessage={sendMessage}
+            />
+          ))}
         </div>
-        <div className="flex items-center gap-2 text-bolt-elements-textSecondary">
-          <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
-            <FlaskConical className="text-green-500" size={18} />
-          </div>
-          <span className="text-sm font-medium">Automatic Testing</span>
-        </div>
-        <div className="flex items-center gap-2 text-bolt-elements-textSecondary">
-          <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center">
-            <Rocket className="text-purple-500" size={18} />
-          </div>
-          <span className="text-sm font-medium">One-Click Deploy</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
