@@ -58,6 +58,7 @@ export const referenceApps: ReferenceApp[] = [
     appName: 'Study Buddy',
     description: 'Generate study materials for any topic',
     bulletPoints: ['PDF Imports', 'AI Generated Flash Cards'],
+    photo: 'https://picsum.photos/800/450',
     categories: [ReferenceAppCategory.Personal],
   },
   {

@@ -35,8 +35,8 @@ export const IntroSection: React.FC = () => {
   }, [selectedCategory]);
 
   return (
-    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8">
-      <div className="text-center mb-16">
+    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8 mb-4">
+      <div className="text-center mb-4">
         <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
           Own your tools
         </h1>
@@ -53,7 +53,7 @@ export const IntroSection: React.FC = () => {
       </div>
 
       {filteredApps.length > 0 && (
-        <div className="space-y-6 animate-fade-in animation-delay-400">
+        <div className="space-y-6 animate-fade-in animation-delay-400 mb-8">
           {filteredApps.map((app, index) => (
             <AppCard
               key={app.appName}
