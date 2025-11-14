@@ -53,14 +53,16 @@ export const IntroSection: React.FC = () => {
       </div>
 
       {filteredApps.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in animation-delay-400">
-          {filteredApps.map((app) => (
+        <div className="space-y-6 animate-fade-in animation-delay-400">
+          {filteredApps.map((app, index) => (
             <AppCard
               key={app.appName}
               appName={app.appName}
               description={app.description}
               bulletPoints={app.bulletPoints}
               photo={app.photo}
+              appId={app.appId}
+              photoOnLeft={index % 2 === 0}
             />
           ))}
         </div>
