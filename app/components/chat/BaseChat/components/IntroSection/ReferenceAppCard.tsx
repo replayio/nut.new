@@ -30,28 +30,8 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   const handleClick = async () => {
     assert(appPath, 'App path is required');
 
-    const messageInput = `Build me a new app based on '${appName}'`;
-
-    const userInfo = getCurrentUserInfo();
-    const userMessage: Message = {
-      id: `user-${generateRandomId()}`,
-      userInfo,
-      createTime: new Date().toISOString(),
-      role: 'user',
-      content: messageInput ?? '',
-      hasInteracted: false,
-    };
-
-    const appId = await database.createApp();
-    chatStore.currentAppId.set(appId);
-    chatStore.appTitle.set('New App');
-
-    navigateApp(appId);
-
-    addChatMessage(userMessage);
-
     sendMessage({
-      messageInput,
+      messageInput: `Build me a new app based on '${appName}'`,
       chatMode: ChatMode.UserMessage,
       referenceAppPath: appPath,
     });
