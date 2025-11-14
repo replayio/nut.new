@@ -28,7 +28,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 
     sendMessage({
       messageInput: `Build me a new app based on '${appName}'`,
-      chatMode: ChatMode.DevelopApp,
+      chatMode: ChatMode.UserMessage,
       referenceAppPath: appPath,
     });
   };
