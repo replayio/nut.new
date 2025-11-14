@@ -1,10 +1,14 @@
 import React from 'react';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { database } from '~/lib/persistence/apps';
+import type { Message } from '~/lib/persistence/message';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
+import { addChatMessage, chatStore } from '~/lib/stores/chat';
+import { getCurrentUserInfo } from '~/lib/supabase/client';
 import { classNames } from '~/utils/classNames';
-import { assert } from '~/utils/nut';
+import { assert, generateRandomId, navigateApp } from '~/utils/nut';
 
-interface AppCardProps {
+interface ReferenceAppCardProps {
   appName: string;
   description: string;
   bulletPoints?: string[];
@@ -14,7 +18,7 @@ interface AppCardProps {
   sendMessage: (params: ChatMessageParams) => void;
 }
 
-export const AppCard: React.FC<AppCardProps> = ({
+export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   appName,
   description,
   bulletPoints = [],
@@ -23,11 +27,31 @@ export const AppCard: React.FC<AppCardProps> = ({
   photoOnLeft = true,
   sendMessage,
 }) => {
-  const handleClick = () => {
+  const handleClick = async () => {
     assert(appPath, 'App path is required');
 
+    const messageInput = `Build me a new app based on '${appName}'`;
+
+    const userInfo = getCurrentUserInfo();
+    const userMessage: Message = {
+      id: `user-${generateRandomId()}`,
+      userInfo,
+      createTime: new Date().toISOString(),
+      role: 'user',
+      content: messageInput ?? '',
+      hasInteracted: false,
+    };
+
+    const appId = await database.createApp();
+    chatStore.currentAppId.set(appId);
+    chatStore.appTitle.set('New App');
+
+    navigateApp(appId);
+
+    addChatMessage(userMessage);
+
     sendMessage({
-      messageInput: `Build me a new app based on '${appName}'`,
+      messageInput,
       chatMode: ChatMode.UserMessage,
       referenceAppPath: appPath,
     });

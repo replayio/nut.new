@@ -134,13 +134,11 @@ const ChatImplementer = memo(() => {
 
     gActiveChatMessageTelemetry = new ChatMessageTelemetry(chatStore.messages.get().length);
 
-    const chatId = generateRandomId();
-
     if (messageInput || imageDataList.length) {
       const userInfo = getCurrentUserInfo();
       const attachments = await Promise.all(imageDataList.map(createAttachment));
       const userMessage: Message = {
-        id: `user-${chatId}`,
+        id: `user-${generateRandomId()}`,
         userInfo,
         createTime: new Date().toISOString(),
         role: 'user',

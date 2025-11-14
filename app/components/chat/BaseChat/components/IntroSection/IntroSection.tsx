@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
-import { AppCard } from './AppCard';
+import { ReferenceAppCard } from './ReferenceAppCard';
 import { referenceApps } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 
@@ -60,7 +60,7 @@ export const IntroSection: React.FC<IntroSectionProps> = ({ sendMessage }) => {
       {filteredApps.length > 0 && (
         <div className="space-y-6 animate-fade-in animation-delay-400 mb-8">
           {filteredApps.map((app, index) => (
-            <AppCard
+            <ReferenceAppCard
               key={app.appName}
               appName={app.appName}
               description={app.description}
