@@ -116,7 +116,6 @@ const ChatImplementer = memo(() => {
     }
 
     await Promise.all([
-      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
       animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
     ]);
 
