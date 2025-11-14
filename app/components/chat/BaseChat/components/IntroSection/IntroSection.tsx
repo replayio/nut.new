@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
+import { AppCard } from './AppCard';
 import { referenceApps } from '~/lib/replay/ReferenceApps';
 
 export const IntroSection: React.FC = () => {
@@ -21,21 +22,49 @@ export const IntroSection: React.FC = () => {
     return sectionCategories;
   }, []);
 
+  const filteredApps = useMemo(() => {
+    if (!selectedCategory) {
+      return [];
+    }
+    if (selectedCategory === 'All') {
+      return referenceApps;
+    }
+    return referenceApps.filter((app) =>
+      app.categories.some((category) => category === selectedCategory),
+    );
+  }, [selectedCategory]);
+
   return (
-    <div id="intro" className="max-w-4xl mx-auto text-center px-6 lg:px-8 mt-8">
-      <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
-        Own your tools
-      </h1>
+    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8">
+      <div className="text-center mb-16">
+        <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
+          Own your tools
+        </h1>
 
-      <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
-        Build and customize web apps for you and your work in minutes
-      </p>
+        <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
+          Build and customize web apps for you and your work in minutes
+        </p>
 
-      <CategorySelector
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-      />
+        <CategorySelector
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
+      </div>
+
+      {filteredApps.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in animation-delay-400">
+          {filteredApps.map((app) => (
+            <AppCard
+              key={app.appName}
+              appName={app.appName}
+              description={app.description}
+              bulletPoints={app.bulletPoints}
+              photo={app.photo}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
