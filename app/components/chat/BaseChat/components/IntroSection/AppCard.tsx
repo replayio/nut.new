@@ -1,6 +1,5 @@
 import React from 'react';
 import { classNames } from '~/utils/classNames';
-import { ChevronRight } from '~/components/ui/Icon';
 import { navigateApp } from '~/utils/nut';
 
 interface AppCardProps {
@@ -76,7 +75,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 
             {/* Bullet Points */}
             {bulletPoints.length > 0 && (
-              <ul className="space-y-2 mb-4">
+              <ul className="space-y-2">
                 {bulletPoints.map((point, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm text-bolt-elements-textSecondary">
                     <span className="text-bolt-elements-focus mt-1.5 flex-shrink-0">•</span>
@@ -84,19 +83,6 @@ export const AppCard: React.FC<AppCardProps> = ({
                   </li>
                 ))}
               </ul>
-            )}
-
-            {/* Click Indicator */}
-            {isClickable && (
-              <div className="mt-4 pt-4 border-t border-bolt-elements-borderColor border-opacity-30">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-bolt-elements-textSecondary">View details</span>
-                  <ChevronRight
-                    className="text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors duration-200"
-                    size={12}
-                  />
-                </div>
-              </div>
             )}
           </div>
         </div>
