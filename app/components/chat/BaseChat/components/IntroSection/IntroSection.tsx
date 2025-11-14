@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { CategorySelector } from './CategorySelector';
 
 export const IntroSection: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('Productivity');
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
 
   const categories = [
-    { name: 'Productivity', count: 12 },
-    { name: 'Health & Fitness', count: 9 },
-    { name: 'Business', count: 8 },
+    { name: 'Business', count: 12 },
+    { name: 'Technical Teams', count: 9 },
+    { name: 'Productivity', count: 8 },
     { name: 'Social Networking', count: 7 },
     { name: 'Marketplace', count: 6 },
     { name: 'Ecommerce', count: 10 },
@@ -21,7 +21,7 @@ export const IntroSection: React.FC = () => {
       </h1>
 
       <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
-        Build and customize web apps for you and your business in minutes
+        Build and customize web apps for you and your work in minutes
       </p>
 
       <CategorySelector
