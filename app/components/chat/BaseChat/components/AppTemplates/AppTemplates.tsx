@@ -36,14 +36,15 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     }
     return referenceApps.filter((app) => app.categories.some((category) => category === selectedCategory));
   }, [selectedCategory]);
-  console.log('filteredApps', filteredApps);
 
   return (
     <div className="max-w-4xl mx-auto px-6 lg:px-8 mt-8 mb-4">
       <div className="text-center mb-8 animate-fade-in animation-delay-100">
-        <h2 className="text-3xl lg:text-5xl font-bold  text-blue-600 dark:text-blue-500 mb-3">Start with a template</h2>
-        <p className="text-base lg:text-lg text-bolt-elements-textSecondary">
-          Don't want to start from scratch? Grab one and customize it to your needs.
+        <h2 className="text-2xl lg:text-3xl font-bold  text-blue-600 dark:text-blue-500 mb-3">
+          Not sure where to start?
+        </h2>
+        <p className="text-base text-bolt-elements-textSecondary">
+          Customize one of our reference apps to exactly what you need.
         </p>
       </div>
 
