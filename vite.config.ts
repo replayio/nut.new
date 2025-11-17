@@ -28,7 +28,7 @@ export default defineConfig((config) => {
     },
     build: {
       target: 'esnext',
-      sourcemap: 'hidden', // Use 'hidden' sourcemaps to avoid sourcemap resolution errors
+      sourcemap: false, // Disable sourcemaps to avoid resolution errors
     },
     plugins: [
       remixVitePlugin({
