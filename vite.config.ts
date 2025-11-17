@@ -28,7 +28,7 @@ export default defineConfig((config) => {
     },
     build: {
       target: 'esnext',
-      sourcemap: true,
+      sourcemap: 'hidden', // Use 'hidden' sourcemaps to avoid sourcemap resolution errors
     },
     plugins: [
       remixVitePlugin({
@@ -48,6 +48,11 @@ export default defineConfig((config) => {
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'replay',
           project: 'nut',
+          sourcemaps: {
+            assets: './build/**',
+            ignore: ['node_modules'],
+            validate: false, // Disable sourcemap validation to avoid resolution errors
+          },
         }),
     ],
     envPrefix: [
