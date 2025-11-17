@@ -245,6 +245,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 interface TweakCNProps {
   selectedTheme?: string;
   hoveredTheme?: string | null;
+  originalVariables?: Record<string, string> | null;
   onThemeChange?: (theme: string) => void;
   onThemeModeChange?: (mode: 'light' | 'dark') => void;
 }
@@ -252,6 +253,7 @@ interface TweakCNProps {
 export const TweakCN: React.FC<TweakCNProps> = ({
   selectedTheme: externalSelectedTheme,
   hoveredTheme: externalHoveredTheme,
+  originalVariables,
   onThemeChange: _onThemeChange,
   onThemeModeChange,
 }) => {
@@ -856,68 +858,94 @@ export const TweakCN: React.FC<TweakCNProps> = ({
       return;
     }
 
-    // Get current variables from iframe before resetting and applying new theme
-    const iframe = getIframe();
-    if (iframe?.contentWindow) {
-      const requestId = Date.now().toString();
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data?.id === requestId && event.data?.response && event.data?.source === '@@replay-nut') {
-          window.removeEventListener('message', handleMessage);
+    // Use stored original variables if available, otherwise request from iframe
+    if (originalVariables && Object.keys(originalVariables).length > 0) {
+      // We have the original variables stored - use them for comparison
+      console.log('[TweakCN] Using stored original variables for comparison');
+      console.log('[TweakCN] Original variables:', originalVariables);
+      console.log('[TweakCN] Selected theme:', selectedTheme);
 
-          const currentVariables = event.data.response as Record<string, string>;
-
-          // Reset theme changes first
-          resetThemeChanges();
-
-          // Diff and mark all changes before applying new theme
-          if (currentVariables && Object.keys(currentVariables).length > 0) {
-            console.log('[TweakCN] Current variables from iframe:', currentVariables);
-            console.log('[TweakCN] Selected theme:', selectedTheme);
-            const changeCount = diffAndMarkThemeChanges(currentVariables, selectedTheme);
-            console.log(`[TweakCN] Theme change will modify ${changeCount} variables`);
-          } else {
-            console.warn('[TweakCN] No current variables received from iframe or empty object');
-          }
-
-          // Now apply the new theme
-          sendThemeToIframe(selectedTheme);
-          loadThemeIntoState(selectedTheme);
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Try to request current variables, but handle gracefully if not supported
-      try {
-        iframe.contentWindow.postMessage(
-          {
-            id: requestId,
-            request: 'get-custom-variables',
-            source: '@@replay-nut',
-          },
-          '*',
-        );
-      } catch (error) {
-        console.warn('[TweakCN] Failed to request custom variables:', error);
-        // If request fails, just apply theme without diffing
-        resetThemeChanges();
-        sendThemeToIframe(selectedTheme);
-        loadThemeIntoState(selectedTheme);
-        return;
-      }
-
-      setTimeout(() => {
-        window.removeEventListener('message', handleMessage);
-        // Fallback: if no response, just apply theme without diffing
-        resetThemeChanges();
-        sendThemeToIframe(selectedTheme);
-        loadThemeIntoState(selectedTheme);
-      }, 5000);
-    } else {
-      // No iframe, just reset and apply theme
+      // Reset theme changes first
       resetThemeChanges();
+
+      // Diff and mark all changes before applying new theme
+      const changeCount = diffAndMarkThemeChanges(originalVariables, selectedTheme);
+      console.log(`[TweakCN] Theme change will modify ${changeCount} variables`);
+
+      // Now apply the new theme
       sendThemeToIframe(selectedTheme);
       loadThemeIntoState(selectedTheme);
+    } else {
+      // Fallback: Get current variables from iframe before resetting and applying new theme
+      console.log('[TweakCN] No stored original variables, requesting from iframe');
+      const iframe = getIframe();
+      if (iframe?.contentWindow) {
+        const requestId = Date.now().toString();
+        let messageHandled = false;
+
+        const handleMessage = (event: MessageEvent) => {
+          if (event.data?.id === requestId && event.data?.response && event.data?.source === '@@replay-nut') {
+            messageHandled = true;
+            window.removeEventListener('message', handleMessage);
+
+            const currentVariables = event.data.response as Record<string, string>;
+
+            // Reset theme changes first
+            resetThemeChanges();
+
+            // Diff and mark all changes before applying new theme
+            if (currentVariables && Object.keys(currentVariables).length > 0) {
+              console.log('[TweakCN] Current variables from iframe:', currentVariables);
+              console.log('[TweakCN] Selected theme:', selectedTheme);
+              const changeCount = diffAndMarkThemeChanges(currentVariables, selectedTheme);
+              console.log(`[TweakCN] Theme change will modify ${changeCount} variables`);
+            } else {
+              console.warn('[TweakCN] No current variables received from iframe or empty object');
+            }
+
+            // Now apply the new theme
+            sendThemeToIframe(selectedTheme);
+            loadThemeIntoState(selectedTheme);
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        // Try to request current variables, but handle gracefully if not supported
+        try {
+          iframe.contentWindow.postMessage(
+            {
+              id: requestId,
+              request: 'get-custom-variables',
+              source: '@@replay-nut',
+            },
+            '*',
+          );
+        } catch (error) {
+          console.warn('[TweakCN] Failed to request custom variables:', error);
+          // If request fails, just apply theme without diffing
+          resetThemeChanges();
+          sendThemeToIframe(selectedTheme);
+          loadThemeIntoState(selectedTheme);
+          return;
+        }
+
+        setTimeout(() => {
+          window.removeEventListener('message', handleMessage);
+          // Fallback: if no response and message wasn't already handled, apply theme without diffing
+          if (!messageHandled) {
+            console.warn('[TweakCN] No response from iframe after 5s, applying theme without change detection');
+            resetThemeChanges();
+            sendThemeToIframe(selectedTheme);
+            loadThemeIntoState(selectedTheme);
+          }
+        }, 5000);
+      } else {
+        // No iframe, just reset and apply theme
+        resetThemeChanges();
+        sendThemeToIframe(selectedTheme);
+        loadThemeIntoState(selectedTheme);
+      }
     }
   }, [selectedTheme]);
 

@@ -37,6 +37,7 @@ export const DesignSystemPanel = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [themeKey, setThemeKey] = useState(0); // Key to force TweakCN remount on reset
   const originalThemeRef = useRef<string | null>(null); // Store original theme when dropdown opens
+  const originalVariablesRef = useRef<Record<string, string> | null>(null); // Store original CSS variables from iframe
   const hasLoadedThemeRef = useRef(false);
   const availableThemes = getAvailableThemes();
 
@@ -100,6 +101,9 @@ export const DesignSystemPanel = () => {
 
           const currentVariables = event.data.response as Record<string, string>;
           if (currentVariables && Object.keys(currentVariables).length > 0) {
+            // Store the original variables for comparison when themes change
+            originalVariablesRef.current = { ...currentVariables };
+
             // Try to find a matching theme
             const matchingTheme = findMatchingTheme(currentVariables);
             if (matchingTheme) {
@@ -114,6 +118,7 @@ export const DesignSystemPanel = () => {
             }
           } else {
             // No variables found, default to first available theme
+            originalVariablesRef.current = null;
             setSelectedTheme(availableThemes[0]?.name || 'modern-minimal');
             setIsCustomTheme(false);
             setThemeKey((prev) => prev + 1); // Force TweakCN to reload
@@ -138,6 +143,7 @@ export const DesignSystemPanel = () => {
       }, 5000);
     } else {
       // No iframe found, default to first available theme
+      originalVariablesRef.current = null;
       setSelectedTheme(availableThemes[0]?.name || 'modern-minimal');
       setIsCustomTheme(false);
       setIsLoading(false);
@@ -154,6 +160,7 @@ export const DesignSystemPanel = () => {
     } else if (activeTab !== 'design-system') {
       // Reset when leaving design tab
       hasLoadedThemeRef.current = false;
+      originalVariablesRef.current = null;
       setSelectedTheme(null);
       setIsCustomTheme(false);
       setIsLoading(false);
@@ -170,6 +177,7 @@ export const DesignSystemPanel = () => {
       setIsCustomTheme(false);
       setIsLoading(true);
       hasLoadedThemeRef.current = false;
+      originalVariablesRef.current = null; // Clear stored original variables
       setThemeKey((prev) => prev + 1); // Force TweakCN to remount
       waitingForReload = true;
     };
@@ -407,6 +415,7 @@ export const DesignSystemPanel = () => {
             key={themeKey}
             selectedTheme={selectedTheme}
             hoveredTheme={hoveredTheme}
+            originalVariables={originalVariablesRef.current}
             onThemeChange={handleThemeChange}
             onThemeModeChange={sendThemeModeToIframe}
           />
