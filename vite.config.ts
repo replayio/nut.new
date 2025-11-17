@@ -29,6 +29,15 @@ export default defineConfig((config) => {
     build: {
       target: 'esnext',
       sourcemap: false, // Disable sourcemaps to avoid resolution errors
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress sourcemap resolution warnings
+          if (warning.message?.includes('Error when using sourcemap for reporting an error')) {
+            return;
+          }
+          warn(warning);
+        },
+      },
     },
     plugins: [
       remixVitePlugin({
@@ -48,19 +57,10 @@ export default defineConfig((config) => {
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'replay',
           project: 'nut',
-          sourcemaps: {
-            assets: './build/**',
-            ignore: ['node_modules'],
-            validate: false, // Disable sourcemap validation to avoid resolution errors
-          },
+          // Sourcemaps disabled in build config, so no sourcemap upload needed
         }),
     ],
-    envPrefix: [
-      'VITE_',
-      'SUPABASE_URL',
-      'SUPABASE_ANON_KEY',
-      'INTERCOM_APP_ID',
-    ],
+    envPrefix: ['VITE_', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'INTERCOM_APP_ID'],
     css: {
       preprocessorOptions: {
         scss: {
