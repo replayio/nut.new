@@ -115,9 +115,7 @@ const ChatImplementer = memo(() => {
       return;
     }
 
-    await Promise.all([
-      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
-    ]);
+    await Promise.all([animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn })]);
 
     chatStore.started.set(true);
 
@@ -125,7 +123,8 @@ const ChatImplementer = memo(() => {
   };
 
   const sendMessage = async (params: ChatMessageParams) => {
-    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, referenceAppPath } = params;
+    const { messageInput, chatMode, sessionRepositoryId, componentReference, retryBugReportName, referenceAppPath } =
+      params;
 
     if ((messageInput?.length === 0 && imageDataList.length === 0) || chatStore.hasPendingMessage.get()) {
       return;
@@ -153,7 +152,7 @@ const ChatImplementer = memo(() => {
     let appId = chatStore.currentAppId.get();
     if (!appId) {
       try {
-        appId = await database.createApp();
+        appId = await database.createApp(referenceAppPath);
         chatStore.currentAppId.set(appId);
         chatStore.appTitle.set('New App');
 
@@ -191,7 +190,6 @@ const ChatImplementer = memo(() => {
       messages,
       visitDataId,
       retryBugReportName,
-      referenceAppPath,
     });
 
     if (chatStore.numAborts.get() != numAbortsAtStart) {

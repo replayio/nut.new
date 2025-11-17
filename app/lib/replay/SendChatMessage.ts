@@ -43,7 +43,6 @@ export interface NutChatRequest {
   messages?: Message[];
   visitDataId?: string;
   retryBugReportName?: string;
-  referenceAppPath?: string;
 }
 
 // Messages that are rendered normally in the chat.

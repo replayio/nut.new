@@ -1,12 +1,8 @@
 import React from 'react';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
-import { database } from '~/lib/persistence/apps';
-import type { Message } from '~/lib/persistence/message';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
-import { addChatMessage, chatStore } from '~/lib/stores/chat';
-import { getCurrentUserInfo } from '~/lib/supabase/client';
 import { classNames } from '~/utils/classNames';
-import { assert, generateRandomId, navigateApp } from '~/utils/nut';
+import { assert } from '~/utils/nut';
 
 interface ReferenceAppCardProps {
   appName: string;
@@ -43,8 +39,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   return (
     <div
       className={classNames('relative rounded-xl transition-all duration-300 shadow-sm group', {
-        'cursor-pointer hover:shadow-xl hover:shadow-bolt-elements-focus/10 hover:scale-[1.02]':
-          isClickable,
+        'cursor-pointer hover:shadow-xl hover:shadow-bolt-elements-focus/10 hover:scale-[1.02]': isClickable,
       })}
       onClick={handleClick}
     >
@@ -84,9 +79,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
           <div className="p-5 relative flex-1 flex flex-col justify-center">
             <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">{appName}</h3>
 
-            <p className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-4">
-              {description}
-            </p>
+            <p className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-4">{description}</p>
 
             {/* Bullet Points */}
             {bulletPoints.length > 0 && (

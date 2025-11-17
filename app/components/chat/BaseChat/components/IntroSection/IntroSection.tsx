@@ -34,9 +34,7 @@ export const IntroSection: React.FC<IntroSectionProps> = ({ sendMessage }) => {
     if (selectedCategory === 'All') {
       return referenceApps;
     }
-    return referenceApps.filter((app) =>
-      app.categories.some((category) => category === selectedCategory),
-    );
+    return referenceApps.filter((app) => app.categories.some((category) => category === selectedCategory));
   }, [selectedCategory]);
 
   return (

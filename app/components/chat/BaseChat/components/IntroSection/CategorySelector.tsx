@@ -25,15 +25,12 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           <button
             key={category.name}
             onClick={() => onCategorySelect?.(isSelected ? undefined : category.name)}
-            className={classNames(
-              'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-              {
-                'bg-purple-100/50 dark:bg-purple-500/10 text-bolt-elements-textHeading border border-transparent hover:border-bolt-elements-borderColor/50':
-                  !isSelected,
-                'bg-transparent text-bolt-elements-textHeading border-2 border-purple-600 dark:border-purple-400':
-                  isSelected,
-              },
-            )}
+            className={classNames('px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200', {
+              'bg-purple-100/50 dark:bg-purple-500/10 text-bolt-elements-textHeading border border-transparent hover:border-bolt-elements-borderColor/50':
+                !isSelected,
+              'bg-transparent text-bolt-elements-textHeading border-2 border-purple-600 dark:border-purple-400':
+                isSelected,
+            })}
           >
             <span className="text-bolt-elements-textHeading">{category.name}</span>
             <span className="text-bolt-elements-textSecondary ml-1">({category.count})</span>
@@ -43,4 +40,3 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
     </div>
   );
 };
-

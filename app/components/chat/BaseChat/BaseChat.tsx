@@ -70,7 +70,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-    const hasPendingMessage = useStore(chatStore.hasPendingMessage);
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
     const isSmallViewport = useViewport(800);
