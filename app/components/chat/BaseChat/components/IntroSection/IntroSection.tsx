@@ -1,76 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
-import { ReferenceAppCard } from './ReferenceAppCard';
-import { referenceApps } from '~/lib/replay/ReferenceApps';
-import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
-
-interface IntroSectionProps {
-  sendMessage: (params: ChatMessageParams) => void;
-}
-
-export const IntroSection: React.FC<IntroSectionProps> = ({ sendMessage }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
-
-  const categories = useMemo(() => {
-    const sectionCategories: IntroSectionCategory[] = [];
-    for (const { categories } of referenceApps) {
-      for (const category of categories) {
-        const existing = sectionCategories.find((c) => c.name === category);
-        if (existing) {
-          existing.count++;
-        } else {
-          sectionCategories.push({ name: category, count: 1 });
-        }
-      }
-    }
-    sectionCategories.push({ name: 'All', count: referenceApps.length });
-    return sectionCategories;
-  }, []);
-
-  const filteredApps = useMemo(() => {
-    if (!selectedCategory) {
-      return [];
-    }
-    if (selectedCategory === 'All') {
-      return referenceApps;
-    }
-    return referenceApps.filter((app) => app.categories.some((category) => category === selectedCategory));
-  }, [selectedCategory]);
-
+export const IntroSection = () => {
   return (
-    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8 mb-4">
-      <div className="text-center mb-4">
-        <h1 className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-tight">
-          Own your tools
+    <div id="intro" className="max-w-4xl mx-auto px-6 lg:px-8 mt-8 mb-4 overflow-visible">
+      <div className="text-center mb-4 overflow-visible">
+        <h1
+          className="text-4xl lg:text-7xl font-bold text-bolt-elements-textHeading mb-6 animate-fade-in animation-delay-100 leading-[1.2] pb-6 overflow-visible"
+          style={{ lineHeight: '1.2', paddingBottom: '1.5rem' }}
+        >
+          Build web apps that work &
+          <span className="inline-block ml-4 bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+            own your tools.
+          </span>
         </h1>
 
         <p className="text-lg lg:text-xl mb-10 text-bolt-elements-textSecondary animate-fade-in animation-delay-200 leading-relaxed max-w-2xl mx-auto">
           Build and customize web apps for you and your team in minutes
         </p>
-
-        <CategorySelector
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
-        />
       </div>
-
-      {filteredApps.length > 0 && (
-        <div className="space-y-6 animate-fade-in animation-delay-400 mb-8">
-          {filteredApps.map((app, index) => (
-            <ReferenceAppCard
-              key={app.appName}
-              appName={app.appName}
-              description={app.description}
-              bulletPoints={app.bulletPoints}
-              photo={app.photo}
-              appPath={app.appPath}
-              photoOnLeft={index % 2 === 0}
-              sendMessage={sendMessage}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

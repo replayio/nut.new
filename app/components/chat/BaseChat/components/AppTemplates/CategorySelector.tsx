@@ -25,10 +25,10 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           <button
             key={category.name}
             onClick={() => onCategorySelect?.(isSelected ? undefined : category.name)}
-            className={classNames('px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200', {
-              'bg-purple-100/50 dark:bg-purple-500/10 text-bolt-elements-textHeading border border-transparent hover:border-bolt-elements-borderColor/50':
+            className={classNames('px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200', {
+              'bg-purple-100/50 dark:bg-purple-500/10 text-bolt-elements-textHeading border border-transparent hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-purple-100/70 dark:hover:bg-purple-500/20':
                 !isSelected,
-              'bg-transparent text-bolt-elements-textHeading border-2 border-purple-600 dark:border-purple-400':
+              'bg-transparent text-bolt-elements-textHeading border-2 border-black dark:border-white shadow-sm':
                 isSelected,
             })}
           >

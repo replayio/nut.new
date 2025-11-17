@@ -32,6 +32,7 @@ import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { PlanUpgradeBlock } from './components/PlanUpgradeBlock';
+import AppTemplates from './components/AppTemplates/AppTemplates';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -335,7 +336,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           >
             {!chatStarted && (
               <>
-                <IntroSection sendMessage={handleSendMessage} />
+                <IntroSection />
               </>
             )}
             <div
@@ -402,6 +403,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   </>
                 );
               })()}
+              {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
             </div>
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
