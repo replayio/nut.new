@@ -398,15 +398,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         data-chat-visible={showChat}
       >
         {user && (
-          <>
-            <div className="fixed left-0 top-0 bottom-0 z-30">
-              <ClientOnly>{() => <VerticalNav />}</ClientOnly>
-            </div>
-            <ClientOnly>
-              {() => <Sidebar isOpen={isSidebarOpen} onToggle={() => sidebarMenuStore.toggle()} />}
-            </ClientOnly>
-          </>
+          <div className="fixed left-0 top-0 bottom-0 z-30">
+            <ClientOnly>{() => <VerticalNav />}</ClientOnly>
+          </div>
         )}
+        <ClientOnly>{() => <Sidebar isOpen={isSidebarOpen} onToggle={() => sidebarMenuStore.toggle()} />}</ClientOnly>
         <div className={classNames('flex-1 h-full relative', { 'ml-16': user })}>
           {shouldUseResizable ? (
             <ResizablePanelGroup

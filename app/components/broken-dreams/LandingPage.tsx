@@ -36,11 +36,9 @@ const LandingPage = () => {
           </div>
         )}
         <main className="pt-6 sm:pt-20 pb-8">
-          {isLoggedIn && (
-            <ClientOnly>
-              {() => <Sidebar isOpen={isSidebarOpen} onToggle={() => sidebarMenuStore.toggle()} />}
-            </ClientOnly>
-          )}
+          <ClientOnly>
+            {() => <Sidebar isOpen={isSidebarOpen} onToggle={() => sidebarMenuStore.toggle()} />}
+          </ClientOnly>
           <div className="max-w-6xl mx-auto px-6">
             <VideoSection />
 

@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-import { Button } from '~/components/ui/button';
-
 import { MessageSquare, Trash2, PenLine, LogIn } from '~/components/ui/Icon';
 
 import { ScrollArea } from '~/components/ui/scroll-area';
@@ -163,10 +161,13 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           {user ? (
             <UserProfileMenu />
           ) : (
-            <Button onClick={handleLoginClick} variant="ghost" size="sm" className="h-8 px-3 text-xs">
-              <LogIn size={14} className="mr-1" />
+            <button
+              onClick={handleLoginClick}
+              className="h-8 px-3 text-xs rounded-md font-medium transition-colors bg-bolt-elements-button-primary-background text-bolt-elements-button-primary-text hover:bg-bolt-elements-button-primary-backgroundHover flex items-center justify-center gap-1"
+            >
+              <LogIn size={14} />
               Login
-            </Button>
+            </button>
           )}
         </div>
       </div>

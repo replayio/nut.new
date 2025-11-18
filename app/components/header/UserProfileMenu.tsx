@@ -15,12 +15,41 @@ export function UserProfileMenu() {
   const theme = useStore(themeStore);
   const [showDropdown, setShowDropdown] = useState(false);
   const [domLoaded, setDomLoaded] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setDomLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (showDropdown && buttonRef.current) {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (!buttonRef.current) {
+          return;
+        }
+
+        const buttonRect = buttonRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        // Approximate dropdown height (estimate based on content)
+        const dropdownHeight = 300;
+
+        // If there's not enough space below but enough space above, open upward
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+          setOpenUpward(true);
+        } else {
+          setOpenUpward(false);
+        }
+      });
+    } else {
+      // Reset when dropdown closes
+      setOpenUpward(false);
+    }
+  }, [showDropdown]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -77,7 +106,10 @@ export function UserProfileMenu() {
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute bottom-full left-0 mb-2 py-3 w-64 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-[100]"
+          className={classNames(
+            'absolute left-0 py-3 w-64 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl shadow-2xl z-[100]',
+            openUpward ? 'bottom-full mb-2' : 'top-full mt-2',
+          )}
         >
           <div className="px-4 py-3 border-b border-bolt-elements-borderColor">
             <div className="text-xs text-bolt-elements-textSecondary mb-1">Signed in as</div>
