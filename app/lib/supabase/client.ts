@@ -32,7 +32,52 @@ let supabaseAnonKey = '';
 // Add a singleton client instance
 let supabaseClientInstance: ReturnType<typeof createClient<Database>> | null = null;
 
+// Mock user override flag - should match the one in auth.ts
+const USE_MOCK_USER = true;
+
+const MOCK_USER: SupabaseUser = {
+  id: 'edb004fa-ed84-4a32-a408-ee89232329fa',
+  email: 'tester@test.com',
+  email_confirmed_at: '2025-11-05T18:41:39.448059Z',
+  created_at: '2025-11-05T18:41:39.442019Z',
+  last_sign_in_at: '2025-11-18T15:37:49.825218626Z',
+  updated_at: '2025-11-18T15:37:49.830586Z',
+  app_metadata: {
+    provider: 'email',
+    providers: ['email'],
+  },
+  user_metadata: {
+    email_verified: true,
+  },
+  aud: 'authenticated',
+  role: 'authenticated',
+  phone: '',
+  is_anonymous: false,
+  identities: [
+    {
+      id: 'edb004fa-ed84-4a32-a408-ee89232329fa',
+      user_id: 'edb004fa-ed84-4a32-a408-ee89232329fa',
+      identity_id: '4e95c4ba-a45a-4885-8145-c6b5b3ed8597',
+      provider: 'email',
+      created_at: '2025-11-05T18:41:39.445807Z',
+      updated_at: '2025-11-05T18:41:39.445807Z',
+      last_sign_in_at: '2025-11-05T18:41:39.445754Z',
+      identity_data: {
+        email: 'tester@test.com',
+        email_verified: false,
+        phone_verified: false,
+        sub: 'edb004fa-ed84-4a32-a408-ee89232329fa',
+      },
+    } as any,
+  ],
+};
+
 export async function getCurrentUser(): Promise<SupabaseUser | null> {
+  // Mock user override
+  if (USE_MOCK_USER) {
+    return MOCK_USER;
+  }
+
   try {
     const {
       data: { user },
@@ -53,11 +98,26 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
 }
 
 export function getCurrentUserId(): string | null {
+  // Mock user override
+  if (USE_MOCK_USER) {
+    return MOCK_USER.id;
+  }
+
   const user = userStore.get();
   return user?.id || null;
 }
 
 export function getCurrentUserInfo(): MessageUserInfo | undefined {
+  // Mock user override
+  if (USE_MOCK_USER) {
+    return {
+      id: MOCK_USER.id,
+      email: MOCK_USER.email || undefined,
+      name: MOCK_USER.user_metadata?.name,
+      avatar_url: MOCK_USER.user_metadata?.avatar_url,
+    };
+  }
+
   const user = userStore.get();
   if (!user) {
     return undefined;
@@ -100,11 +160,21 @@ export async function getNutIsAdmin(): Promise<boolean> {
  * This is synchronous and very fast as it reads from memory
  */
 export function isAuthenticated(): boolean {
+  // Mock user override
+  if (USE_MOCK_USER) {
+    return true;
+  }
+
   const user = userStore.get();
   return user !== null;
 }
 
 export async function getCurrentAccessToken(): Promise<string | null> {
+  // Mock user override - return a mock token
+  if (USE_MOCK_USER) {
+    return 'mock-access-token-for-testing';
+  }
+
   try {
     const {
       data: { session },
