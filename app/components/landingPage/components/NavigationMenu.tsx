@@ -1,45 +1,52 @@
 import { useIsMobile } from "~/lib/hooks/useIsMobile"
-import { Link } from "@remix-run/react"
+// import { Link } from "@remix-run/react"
 import {
   NavigationMenu,
-  NavigationMenuContent,
+  // NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger
+  // NavigationMenuTrigger
 } from "~/components/ui/ui/navigation-menu"
 import { accountModalStore } from "~/lib/stores/accountModal"
 import { cn } from "~/lib/utils"
 
 // Getting Started dropdown items
-const gettingStartedItems = [
-  {
-    title: "Quick Start Guide",
-    href: "/getting-started",
-    description: "Learn the basics of building apps with Nut",
-  },
-  {
-    title: "Documentation",
-    href: "/docs",
-    description: "Comprehensive guides and API reference",
-  },
-  {
-    title: "Tutorials",
-    href: "/tutorials",
-    description: "Step-by-step tutorials for common use cases",
-  },
-  {
-    title: "Examples",
-    href: "/examples",
-    description: "Real-world examples and templates",
-  },
-]
+// const gettingStartedItems = [
+//   {
+//     title: "Quick Start Guide",
+//     href: "/getting-started",
+//     description: "Learn the basics of building apps with Nut",
+//   },
+//   {
+//     title: "Documentation",
+//     href: "/docs",
+//     description: "Comprehensive guides and API reference",
+//   },
+//   {
+//     title: "Tutorials",
+//     href: "/tutorials",
+//     description: "Step-by-step tutorials for common use cases",
+//   },
+//   {
+//     title: "Examples",
+//     href: "/examples",
+//     description: "Real-world examples and templates",
+//   },
+// ]
 
 export function NavigationMenuComponent() {
   const device = useIsMobile()
 
   const handleViewPlans = () => {
     accountModalStore.open('billing')
+  }
+
+  const handleScrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   return (
@@ -60,7 +67,7 @@ export function NavigationMenuComponent() {
         </NavigationMenuItem>
 
         {/* Getting Started with Nut - Dropdown */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(
               "text-gray-950 dark:text-white bg-transparent",
@@ -92,26 +99,40 @@ export function NavigationMenuComponent() {
               </div>
             </div>
           </NavigationMenuContent>
+        </NavigationMenuItem> */}
+
+        {/* Features */}
+        <NavigationMenuItem>
+          <button
+            onClick={() => handleScrollToSection('features')}
+            className={cn(
+              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
+              "hover:text-gray-700 dark:hover:text-gray-300",
+              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
+            )}
+          >
+            Features
+          </button>
         </NavigationMenuItem>
 
         {/* Showcase Gallery */}
         <NavigationMenuItem>
-          <NavigationMenuLink
-            href="/showcase"
+          <button
+            onClick={() => handleScrollToSection('showcase-gallery')}
             className={cn(
               "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
               "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent"
+              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
             )}
           >
             Showcase Gallery
-          </NavigationMenuLink>
+          </button>
         </NavigationMenuItem>
 
         {/* Plans & Pricing */}
         <NavigationMenuItem>
           <button
-            onClick={handleViewPlans}
+            onClick={() => handleScrollToSection('pricing')}
             className={cn(
               "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
               "hover:text-gray-700 dark:hover:text-gray-300",
@@ -124,16 +145,16 @@ export function NavigationMenuComponent() {
 
         {/* FAQ */}
         <NavigationMenuItem>
-          <NavigationMenuLink
-            href="/faq"
+          <button
+            onClick={() => handleScrollToSection('faq')}
             className={cn(
               "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
               "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent"
+              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
             )}
           >
             FAQ
-          </NavigationMenuLink>
+          </button>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

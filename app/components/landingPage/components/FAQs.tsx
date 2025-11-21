@@ -69,7 +69,7 @@ export default function FAQs() {
   };
 
   return (
-    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 mt-12">
+    <div id="faq" className="w-full py-12 px-4 sm:px-6 lg:px-8 mt-12">
       <div className="w-full">
         {/* Header */}
         <div className="flex flex-col mb-12">

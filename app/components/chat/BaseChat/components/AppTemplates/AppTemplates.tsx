@@ -38,7 +38,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   }, [selectedCategory]);
 
   return (
-    <div className="w-full mx-auto px-6 lg:px-8 mt-8 mb-4">
+    <div id="showcase-gallery" className="w-full mx-auto px-6 lg:px-8 mt-8 mb-4">
        <div className="flex flex-col mb-12 animate-fade-in animation-delay-100">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
             <span className="text-bolt-elements-textHeading">Not sure</span>

@@ -121,7 +121,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 mt-12">
+    <div id="pricing" className="w-full py-12 px-4 sm:px-6 lg:px-8 mt-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col mb-12">
