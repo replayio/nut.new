@@ -87,7 +87,7 @@ export function PricingCard({
     <div
       className={cn(
         'relative p-6 rounded-2xl transition-all duration-300',
-        'min-h-[500px] flex flex-col w-[340px]',
+        'min-h-[500px] flex flex-col w-full max-w-[340px] md:w-[340px]',
         // Base card styling - same dark background for all cards
         'bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-2',
         {

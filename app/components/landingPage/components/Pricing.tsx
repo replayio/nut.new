@@ -137,7 +137,7 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="flex items-stretch justify-center gap-2 mb-12 relative">
+        <div className="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 mb-12 relative">
           {pricingPlans.map((plan) => (
             <PricingCard
               key={plan.id}
@@ -152,7 +152,7 @@ export default function Pricing() {
               titleColor={plan.titleColor}
               featuresLabel={plan.featuresLabel}
               className={cn({
-                'scale-110 z-10': plan.emphasized,
+                'md:scale-110 z-10': plan.emphasized,
               })}
             />
           ))}
