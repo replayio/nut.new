@@ -145,10 +145,10 @@ export function NavigationMenuComponent() {
               'bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer',
             )}
           >
-            FAQ
+            FAQs
           </button>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
-}
+};

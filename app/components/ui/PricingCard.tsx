@@ -106,4 +106,4 @@ export function PricingCard({
       </div>
     </div>
   );
-}
+};
