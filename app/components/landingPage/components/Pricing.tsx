@@ -52,7 +52,7 @@ export default function Pricing() {
     {
       id: 'pro',
       title: 'Pro',
-      description: 'Build apps effortlessly',
+      description: 'Coming soon',
       price: '$199',
       pricePeriod: '/month',
       emphasized: false,
