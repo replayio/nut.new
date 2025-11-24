@@ -38,9 +38,9 @@ export default function Explanation() {
 
   return (
     <div id="features" className="w-full py-12 px-4 sm:px-6 lg:px-8 mt-12">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
-        <div className="mb-12">
+        <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
             <span className="text-bolt-elements-textHeading">With you,</span>
             <br />
@@ -52,7 +52,7 @@ export default function Explanation() {
         </div>
 
         {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
