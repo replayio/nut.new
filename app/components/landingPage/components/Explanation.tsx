@@ -56,27 +56,17 @@ export default function Explanation() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div
-                key={index}
-                className="flex flex-col items-start"
-              >
+              <div key={index} className="flex flex-col items-start">
                 {/* Icon */}
                 <div className="mb-4 p-3 rounded-lg border-2 border-green-500/50 bg-bolt-elements-background-depth-2">
-                  <IconComponent
-                    className="text-green-500 dark:text-green-400"
-                    size={32}
-                  />
+                  <IconComponent className="text-green-500 dark:text-green-400" size={32} />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">
-                  {feature.title}
-                </h3>
+                <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">{feature.title}</h3>
 
                 {/* Description */}
-                <p className="text-bolt-elements-textSecondary leading-relaxed">
-                  {feature.description}
-                </p>
+                <p className="text-bolt-elements-textSecondary leading-relaxed">{feature.description}</p>
               </div>
             );
           })}
@@ -91,7 +81,7 @@ export default function Explanation() {
               'bg-gradient-to-r from-green-500 to-emerald-500',
               'hover:from-green-600 hover:to-emerald-600',
               'shadow-lg hover:shadow-xl transition-all duration-200',
-              'hover:scale-105'
+              'hover:scale-105',
             )}
           >
             Start Building
@@ -101,4 +91,3 @@ export default function Explanation() {
     </div>
   );
 }
-

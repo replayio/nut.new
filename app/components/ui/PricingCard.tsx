@@ -1,6 +1,5 @@
 import { CheckCircle, XCircle, Info } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import { Button } from '~/components/ui/ui/button';
 
 export interface PricingFeature {
   name: string;
@@ -16,8 +15,6 @@ export interface PricingCardProps {
   price: string;
   pricePeriod?: string;
   features: PricingFeature[];
-  buttonState: PricingCardButtonState;
-  onPurchase?: () => void;
   emphasized?: boolean;
   titleColor?: string;
   className?: string;
@@ -30,64 +27,15 @@ export function PricingCard({
   price,
   pricePeriod = '/month',
   features,
-  buttonState,
-  onPurchase,
   emphasized = false,
   titleColor,
   className,
-  featuresLabel,
 }: PricingCardProps) {
-  const renderButton = () => {
-    switch (buttonState) {
-      case 'current':
-        return (
-          <button
-            disabled
-            className={cn(
-              'w-full px-4 py-3 rounded-lg text-sm font-medium transition-all',
-              'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
-              'cursor-not-allowed border-none'
-            )}
-          >
-            Starter Plan
-          </button>
-        );
-      case 'purchase':
-        return (
-          <Button
-            onClick={onPurchase}
-            className={cn(
-              'w-full px-4 py-3 rounded-lg text-sm font-semibold text-white',
-              'bg-gradient-to-r from-green-500 to-emerald-500',
-              'hover:from-green-600 hover:to-emerald-600',
-              'shadow-lg hover:shadow-xl transition-all duration-200',
-              'hover:scale-105'
-            )}
-          >
-            Purchase plan.
-          </Button>
-        );
-      case 'coming-soon':
-        return (
-          <button
-            disabled
-            className={cn(
-              'w-full px-4 py-3 rounded-lg text-sm font-medium transition-all',
-              'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
-              'cursor-not-allowed border-none'
-            )}
-          >
-            Coming soon.
-          </button>
-        );
-    }
-  };
-
   return (
     <div
       className={cn(
         'relative p-6 rounded-2xl transition-all duration-300',
-        'min-h-[500px] flex flex-col w-full max-w-[340px] md:w-[340px]',
+        'flex flex-col w-full max-w-[340px] md:w-[340px]',
         // Base card styling - same dark background for all cards
         'bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-2',
         {
@@ -96,7 +44,7 @@ export function PricingCard({
           // Default - subtle gray border and shadow
           'border border-gray-700/50 dark:border-gray-600/30 shadow-lg': !emphasized,
         },
-        className
+        className,
       )}
     >
       {/* Gradient overlay at bottom for emphasized card */}
@@ -108,7 +56,7 @@ export function PricingCard({
         <h3
           className={cn(
             'text-2xl font-bold mb-2',
-            titleColor || (emphasized ? 'text-green-500 dark:text-green-400' : 'text-bolt-elements-textHeading')
+            titleColor || (emphasized ? 'text-green-500 dark:text-green-400' : 'text-bolt-elements-textHeading'),
           )}
         >
           {title}
@@ -116,17 +64,13 @@ export function PricingCard({
         <p className="text-sm text-bolt-elements-textSecondary mb-4">{description}</p>
         <div className="mb-4">
           <span className="text-4xl font-bold text-bolt-elements-textHeading">{price}</span>
-          {pricePeriod && (
-            <span className="text-sm text-bolt-elements-textSecondary ml-1">{pricePeriod}</span>
-          )}
+          {pricePeriod && <span className="text-sm text-bolt-elements-textSecondary ml-1">{pricePeriod}</span>}
         </div>
       </div>
 
       {/* Features */}
-      <div className="flex-1 mb-6">
-        <h4 className="text-sm font-semibold text-bolt-elements-textHeading mb-3">
-          {featuresLabel || (emphasized ? 'Everything in Basic, plus:' : "What's included:")}
-        </h4>
+      <div className="">
+        <h4 className="text-sm font-semibold text-bolt-elements-textHeading mb-3">What's included:</h4>
         <div className="space-y-3">
           {features.map((feature, index) => (
             <div key={index} className="flex items-start gap-2">
@@ -143,7 +87,7 @@ export function PricingCard({
                     'text-sm',
                     feature.included
                       ? 'text-bolt-elements-textHeading'
-                      : 'text-bolt-elements-textSecondary line-through'
+                      : 'text-bolt-elements-textSecondary line-through',
                   )}
                 >
                   {feature.name}
@@ -160,10 +104,6 @@ export function PricingCard({
           ))}
         </div>
       </div>
-
-      {/* Button */}
-      <div className="mt-auto">{renderButton()}</div>
     </div>
   );
 }
-

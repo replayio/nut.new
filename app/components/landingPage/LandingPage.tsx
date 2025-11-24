@@ -19,66 +19,61 @@ export const TEXTAREA_MIN_HEIGHT = 76;
 export const TEXTAREA_MAX_HEIGHT = 200;
 
 const LandingPage = () => {
-    const isSmallViewport = useViewport(800);
-    const user = useStore(userStore);
-    const showWorkbench = useStore(workbenchStore.showWorkbench);
-    const { chatWidth } = useLayoutWidths(!!user);
-    const ref = useRef<HTMLDivElement>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
+  const isSmallViewport = useViewport(800);
+  const user = useStore(userStore);
+  const showWorkbench = useStore(workbenchStore.showWorkbench);
+  const { chatWidth } = useLayoutWidths(!!user);
+  const ref = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-    const [imageDataList, setImageDataList] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [imageDataList, setImageDataList] = useState<string[]>([]);
 
-    const messageInputProps: MessageInputProps = {
-        uploadedFiles,
-        setUploadedFiles,
-        imageDataList,
-        setImageDataList,
-        minHeight: TEXTAREA_MIN_HEIGHT,
-        maxHeight: TEXTAREA_MAX_HEIGHT,
-      };
+  const messageInputProps: MessageInputProps = {
+    uploadedFiles,
+    setUploadedFiles,
+    imageDataList,
+    setImageDataList,
+    minHeight: TEXTAREA_MIN_HEIGHT,
+    maxHeight: TEXTAREA_MAX_HEIGHT,
+  };
 
-    const handleSendMessage = (params: ChatMessageParams) => {
-        console.log(params);
-    };
+  const handleSendMessage = (params: ChatMessageParams) => {
+    console.log(params);
+  };
 
   return (
-    <div
-        ref={ref}
-        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
+    <div ref={ref} className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}>
+      <div
+        ref={scrollRef}
+        className={classNames('w-full h-full flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto', {
+          'pt-2 pb-2 px-4': isSmallViewport,
+          'pt-12 px-6 pb-16': !isSmallViewport,
+        })}
+      >
+        <div
+          className={classNames(styles.Chat, 'landing-page-layout flex flex-col min-h-full flex-shrink-0', {
+            'flex-grow': isSmallViewport,
+            'pb-2': isSmallViewport,
+          })}
+          style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
         >
-            <div
-                ref={scrollRef}
-                className={classNames('w-full h-full flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto', {
-                    'pt-2 pb-2 px-4': isSmallViewport,
-                    'pt-12 px-6 pb-16': !isSmallViewport,
-                })}
-            >
-                <div
-                    className={classNames(styles.Chat, 'landing-page-layout flex flex-col min-h-full flex-shrink-0', {
-                        'flex-grow': isSmallViewport,
-                        'pb-2': isSmallViewport,
-                    })}
-                    style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
-                >
-                    <IntroSection />
-                    <div
-                        className={classNames('px-2')}
-                    >
-                    <ChatPromptContainer
-                      uploadedFiles={uploadedFiles}
-                      setUploadedFiles={setUploadedFiles!}
-                      imageDataList={imageDataList}
-                      setImageDataList={setImageDataList!}
-                      messageInputProps={messageInputProps}
-                    />
-                    <Pricing />
-                    <Explanation />
-                    <AppTemplates sendMessage={handleSendMessage} />
-                    <FAQs />
-                </div>
-            </div>
+          <IntroSection />
+          <div className={classNames('px-2')}>
+            <ChatPromptContainer
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles!}
+              imageDataList={imageDataList}
+              setImageDataList={setImageDataList!}
+              messageInputProps={messageInputProps}
+            />
+            <Pricing />
+            <Explanation />
+            <AppTemplates sendMessage={handleSendMessage} />
+            <FAQs />
+          </div>
         </div>
+      </div>
     </div>
   );
 };

@@ -1,11 +1,5 @@
-import { useState } from 'react';
-import { toast } from 'react-toastify';
-import { useStore } from '@nanostores/react';
-import { userStore } from '~/lib/stores/auth';
-import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { createSubscriptionCheckout } from '~/lib/stripe/client';
-import { PricingCard } from '../../ui/PricingCard';
-import type { PricingFeature, PricingCardButtonState } from '../../ui/PricingCard';
+import { PricingCard } from '~/components/ui/PricingCard';
+import type { PricingFeature } from '~/components/ui/PricingCard';
 import { Button } from '~/components/ui/ui/button';
 import { cn } from '~/lib/utils';
 
@@ -22,39 +16,6 @@ interface PricingPlan {
 }
 
 export default function Pricing() {
-  const user = useStore(userStore);
-  const stripeSubscription = useStore(subscriptionStore.subscription);
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const currentTier = stripeSubscription?.tier || 'free';
-
-  const handlePurchase = async (tier: 'builder' | 'pro') => {
-    if (!user?.id || !user?.email) {
-      toast.error('Please sign in to subscribe');
-      return;
-    }
-
-    if (tier === currentTier) {
-      toast.info('You are already subscribed to this tier');
-      return;
-    }
-
-    if (tier === 'pro') {
-      toast.info('Pro plan coming soon!');
-      return;
-    }
-
-    setLoading(tier);
-
-    try {
-      await createSubscriptionCheckout('builder');
-    } catch (error) {
-      console.error('Error creating subscription:', error);
-      toast.error('Failed to create subscription. Please try again.');
-      setLoading(null);
-    }
-  };
-
   const pricingPlans: PricingPlan[] = [
     {
       id: 'free',
@@ -97,23 +58,17 @@ export default function Pricing() {
       emphasized: false,
       features: [
         { name: 'Unlimited projects', included: true, tooltip: 'Build as many apps as you want' },
-        { name: 'VIP Customer Support', included: true, tooltip: '24/7 priority support with dedicated account manager' },
+        {
+          name: 'VIP Customer Support',
+          included: true,
+          tooltip: '24/7 priority support with dedicated account manager',
+        },
         { name: 'API connectors', included: true, tooltip: 'Connect to external APIs' },
         { name: 'Download your code', included: true, tooltip: 'Download your project source code' },
         { name: 'Deploy your applications', included: true, tooltip: 'Deploy apps to production' },
       ],
     },
   ];
-
-  const getButtonState = (planId: 'free' | 'builder' | 'pro'): PricingCardButtonState => {
-    if (planId === currentTier) {
-      return 'current';
-    }
-    if (planId === 'pro') {
-      return 'coming-soon';
-    }
-    return 'purchase';
-  };
 
   const handleStartBuilding = () => {
     // Navigate to home or start building flow
@@ -146,8 +101,6 @@ export default function Pricing() {
               price={plan.price}
               pricePeriod={plan.pricePeriod}
               features={plan.features}
-              buttonState={getButtonState(plan.id)}
-              onPurchase={() => handlePurchase(plan.id as 'builder' | 'pro')}
               emphasized={plan.emphasized}
               titleColor={plan.titleColor}
               featuresLabel={plan.featuresLabel}
@@ -167,7 +120,7 @@ export default function Pricing() {
               'bg-gradient-to-r from-green-500 to-emerald-500',
               'hover:from-green-600 hover:to-emerald-600',
               'shadow-lg hover:shadow-xl transition-all duration-200',
-              'hover:scale-105'
+              'hover:scale-105',
             )}
           >
             Start Building

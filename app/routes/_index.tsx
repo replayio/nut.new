@@ -44,7 +44,7 @@ export default function Index() {
   return (
     <PageContainer>
       <Suspense fallback={<Nothing />}>
-        <ClientOnly fallback={<BaseChat />}>{() => user ? <Chat /> : <LandingPage />}</ClientOnly>
+        <ClientOnly fallback={<BaseChat />}>{() => (user ? <Chat /> : <LandingPage />)}</ClientOnly>
       </Suspense>
     </PageContainer>
   );

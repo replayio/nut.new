@@ -39,16 +39,16 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
 
   return (
     <div id="showcase-gallery" className="w-full mx-auto px-6 lg:px-8 mt-8 mb-4">
-       <div className="flex flex-col mb-12 animate-fade-in animation-delay-100">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="text-bolt-elements-textHeading">Not sure</span>
-            <br />
-            <span className="text-green-500 dark:text-green-400"> where to start?</span>
-          </h1>
-          <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
-            Customize one of our reference apps to exactly what you need.
-          </p>
-        </div>
+      <div className="flex flex-col mb-12 animate-fade-in animation-delay-100">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+          <span className="text-bolt-elements-textHeading">Not sure</span>
+          <br />
+          <span className="text-green-500 dark:text-green-400"> where to start?</span>
+        </h1>
+        <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
+          Customize one of our reference apps to exactly what you need.
+        </p>
+      </div>
 
       <CategorySelector
         categories={categories}

@@ -1,4 +1,3 @@
-import { useIsMobile } from "~/lib/hooks/useIsMobile"
 // import { Link } from "@remix-run/react"
 import {
   NavigationMenu,
@@ -7,9 +6,8 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   // NavigationMenuTrigger
-} from "~/components/ui/ui/navigation-menu"
-import { accountModalStore } from "~/lib/stores/accountModal"
-import { cn } from "~/lib/utils"
+} from '~/components/ui/ui/navigation-menu';
+import { cn } from '~/lib/utils';
 
 // Getting Started dropdown items
 // const gettingStartedItems = [
@@ -36,18 +34,12 @@ import { cn } from "~/lib/utils"
 // ]
 
 export function NavigationMenuComponent() {
-  const device = useIsMobile()
-
-  const handleViewPlans = () => {
-    accountModalStore.open('billing')
-  }
-
   const handleScrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
+    const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
+  };
 
   return (
     <NavigationMenu>
@@ -57,9 +49,9 @@ export function NavigationMenuComponent() {
           <NavigationMenuLink
             href="/"
             className={cn(
-              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
-              "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent"
+              'text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium',
+              'hover:text-gray-700 dark:hover:text-gray-300',
+              'bg-transparent hover:bg-transparent focus:bg-transparent',
             )}
           >
             Home
@@ -106,9 +98,9 @@ export function NavigationMenuComponent() {
           <button
             onClick={() => handleScrollToSection('features')}
             className={cn(
-              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
-              "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
+              'text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium',
+              'hover:text-gray-700 dark:hover:text-gray-300',
+              'bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer',
             )}
           >
             Features
@@ -120,9 +112,9 @@ export function NavigationMenuComponent() {
           <button
             onClick={() => handleScrollToSection('showcase-gallery')}
             className={cn(
-              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
-              "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
+              'text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium',
+              'hover:text-gray-700 dark:hover:text-gray-300',
+              'bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer',
             )}
           >
             Showcase Gallery
@@ -134,9 +126,9 @@ export function NavigationMenuComponent() {
           <button
             onClick={() => handleScrollToSection('pricing')}
             className={cn(
-              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
-              "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
+              'text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium',
+              'hover:text-gray-700 dark:hover:text-gray-300',
+              'bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer',
             )}
           >
             Plans & Pricing
@@ -148,9 +140,9 @@ export function NavigationMenuComponent() {
           <button
             onClick={() => handleScrollToSection('faq')}
             className={cn(
-              "text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium",
-              "hover:text-gray-700 dark:hover:text-gray-300",
-              "bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer"
+              'text-gray-950 dark:text-white px-4 py-2 rounded-md transition-colors text-sm font-medium',
+              'hover:text-gray-700 dark:hover:text-gray-300',
+              'bg-transparent hover:bg-transparent focus:bg-transparent border-none cursor-pointer',
             )}
           >
             FAQ
@@ -158,5 +150,5 @@ export function NavigationMenuComponent() {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  )
+  );
 }
