@@ -162,6 +162,42 @@ export interface BugReport {
   escalateTime?: string;
 }
 
+// Status of a block change request that has been generated for an app.
+export enum BlockChangeStatus {
+  // The change is associated with a bug report that hasn't been resolved yet.
+  Unresolved = "Unresolved",
+
+  // The user needs to approve or deny the request.
+  Pending = "Pending",
+
+  // Request was denied by the user.
+  Denied = "Denied",
+
+  // Request was approved by the user. It has been submitted and may or may not be upstreamed.
+  Approved = "Approved",
+}
+
+// Change requests are generated automatically by Nut while working on apps.
+export interface BlockChangeRequest {
+  // Current status of the request.
+  status: BlockChangeStatus;
+
+  // Any feature in the app which the change request is associated with.
+  featureName: string | undefined;
+
+  // Short name for the change request.
+  name: string;
+
+  // Longer description of the change request.
+  description: string;
+
+  // Path to any existing block that is being changed.
+  blockPath?: string;
+
+  // Any diff with suggested code changes to the existing block.
+  blockDiff?: string;
+}
+
 // Describes a planned or implemented playwright test.
 export interface AppTest {
   title: string;
@@ -214,6 +250,7 @@ export interface AppSummary {
   navigation?: string;
   features?: AppFeature[];
   bugReports?: BugReport[];
+  blockChangeRequests?: BlockChangeRequest[];
   schema?: DatabaseSchema;
   secrets?: AppDetail[];
   setSecrets?: string[];
