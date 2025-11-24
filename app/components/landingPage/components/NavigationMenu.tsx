@@ -151,4 +151,4 @@ export function NavigationMenuComponent() {
       </NavigationMenuList>
     </NavigationMenu>
   );
-};
+}

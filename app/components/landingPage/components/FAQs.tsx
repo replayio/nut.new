@@ -14,20 +14,20 @@ export default function Faqs() {
       answer: (
         <div className="flex flex-col gap-4 text-balance">
           <p>
-            Our secret sauce is Replay, our powerful code debugging tool. Before building Nut.new, the team at Replay
-            built an insanely good deterministic browser-based code debugger that recorded billions of activities as
-            your code runs and makes sense of it all to then correct issues.
+            Our secret sauce is Replay, our powerful code debugging tool. Before building Replay.Builder, the team at
+            Replay built an insanely good deterministic browser-based code debugger that recorded billions of activities
+            as your code runs and makes sense of it all to then correct issues.
           </p>
-          <p>Nut.new was built with this core debugging engine inside it.</p>
+          <p>Replay.Builder was built with this core debugging engine inside it.</p>
         </div>
       ),
     },
     {
-      question: 'Can I use Nut.new for free?',
+      question: 'Can I use Replay.Builder for free?',
       answer: (
         <p className="text-balance">
           It's the age-old question. Short answer is, yes. All new customers start on the Free plan, where you can build
-          one app, from start to finish. Nuts? Nope. It's Nut.
+          one app, from start to finish.
         </p>
       ),
     },
@@ -134,4 +134,4 @@ export default function Faqs() {
       </div>
     </div>
   );
-};
+}

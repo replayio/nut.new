@@ -10,7 +10,6 @@ import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { database } from '~/lib/persistence/apps';
 import { buildAccessStore } from '~/lib/stores/buildAccess';
 import { BaseChat } from '~/components/chat/BaseChat/BaseChat';
-import LandingPage from '~/components/landingPage/LandingPage';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Nut' }];
@@ -44,7 +43,7 @@ export default function Index() {
   return (
     <PageContainer>
       <Suspense fallback={<Nothing />}>
-        <ClientOnly fallback={<BaseChat />}>{() => (user ? <Chat /> : <LandingPage />)}</ClientOnly>
+        <ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
       </Suspense>
     </PageContainer>
   );

@@ -69,18 +69,17 @@ export function Header() {
           />
         )}
         {!user && (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8">
-              <img src="/logo-styled.svg" alt="NUT.NEW" className="w-full h-full" />
+          <a href="/">
+            <div className="flex items-center gap-3">
+              <h1 className="text-bolt-elements-textHeading font-bold text-xl">
+                REPLAY<span className="text-green-500">.BUILDER</span>
+              </h1>
             </div>
-            <h1 className="text-bolt-elements-textHeading font-bold text-xl">
-              NUT<span className="text-green-500">.NEW</span>
-            </h1>
-          </div>
+          </a>
         )}
         {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
-      {!user && location.pathname === '/' && <NavigationMenuComponent />}
+      {!user && !chatStarted && <NavigationMenuComponent />}
 
       {appSummary && !isSmallViewport && (
         <div className="flex-1 flex justify-center">

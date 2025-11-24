@@ -12,14 +12,14 @@ export const FaqSection = () => {
 
   const faqItems: FAQItem[] = [
     {
-      question: 'Do I need to create a Nut.new account before submitting my app?',
+      question: 'Do I need to create a Replay.Builder account before submitting my app?',
       answer:
-        'Yes, it would make things easier if you create an account before filling out the submission form, and be sure to use the same email that is connected to your Nut.new account.',
+        'Yes, it would make things easier if you create an account before filling out the submission form, and be sure to use the same email that is connected to your Replay.Builder account.',
     },
     {
-      question: 'What makes Nut.new different than other vibecoding tools out there?',
+      question: 'What makes Replay.Builder different than other vibecoding tools out there?',
       answer:
-        "This is our favorite question to answer. Other vibecoding tools are simply wrappers on an LLM. This is why it's so common that people get into debugging death spirals. The LLMs are just not great at iterating and evolving code. They hallucinate, they lose context, and one small change can lead you down a path of frustration.\n\nNut was built from the ground up with a different philosophy that, hey, AI (LLMs) writes buggy code. Accepting that fact, we built Nut.new around our already existing code debugging tools. Nut.new thoroughly tests your app from top to bottom, front-end to back-end, and instructs the LLM what went wrong and how to fix it.",
+        "This is our favorite question to answer. Other vibecoding tools are simply wrappers on an LLM. This is why it's so common that people get into debugging death spirals. The LLMs are just not great at iterating and evolving code. They hallucinate, they lose context, and one small change can lead you down a path of frustration.\n\nNut was built from the ground up with a different philosophy that, hey, AI (LLMs) writes buggy code. Accepting that fact, we built Replay.Builder around our already existing code debugging tools. Replay.Builder thoroughly tests your app from top to bottom, front-end to back-end, and instructs the LLM what went wrong and how to fix it.",
     },
     {
       question: 'Am I required to become a paying customer?',
@@ -34,7 +34,7 @@ export const FaqSection = () => {
     {
       question: 'What makes the team confident they can rebuild my broken app, anyway?',
       answer:
-        "So glad you asked! Our team has been spending their careers creating code debugging software, and it turns out that vibecoding with AI writes a lot of buggy code (go figure!). We built Nut.new around our core deterministic debugging tools, which makes us very very different from all of the other vibecoder tools out there.\n\nWe are NOT just a wrapper on an LLM. Nut writes code, but it also writes automated tests to verify that the code it wrote actually works. When it doesn't work, we use our baked-in debugging software (Replay) to analyze what happened in your entire code base, and helps the AI fix it.",
+        "So glad you asked! Our team has been spending their careers creating code debugging software, and it turns out that vibecoding with AI writes a lot of buggy code (go figure!). We built Replay.Builder around our core deterministic debugging tools, which makes us very very different from all of the other vibecoder tools out there.\n\nWe are NOT just a wrapper on an LLM. Nut writes code, but it also writes automated tests to verify that the code it wrote actually works. When it doesn't work, we use our baked-in debugging software (Replay) to analyze what happened in your entire code base, and helps the AI fix it.",
     },
   ];
 
