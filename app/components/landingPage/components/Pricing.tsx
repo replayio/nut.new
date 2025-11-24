@@ -35,7 +35,7 @@ export default function Pricing() {
     {
       id: 'builder',
       title: 'Builder',
-      description: 'No limits on any features. Go nuts!',
+      description: 'No limits on any features.',
       price: '$49',
       pricePeriod: '/month',
       emphasized: true,
