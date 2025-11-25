@@ -36,7 +36,7 @@ import AppTemplates from './components/AppTemplates/AppTemplates';
 import Pricing from '~/components/landingPage/components/Pricing';
 import FAQs from '~/components/landingPage/components/FAQs';
 import Explanation from '~/components/landingPage/components/Explanation';
-import { designPanelStore } from '~/lib/stores/designPanel';
+import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { DesignSystemPanel } from '~/components/panels/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignToolbar';
 

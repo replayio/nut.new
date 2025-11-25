@@ -35,7 +35,7 @@ import WithTooltip from '~/components/ui/Tooltip';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 import { Crosshair, Paperclip, X, Palette } from 'lucide-react';
 import { buildAccessStore } from '~/lib/stores/buildAccess';
-import { designPanelStore } from '~/lib/stores/designPanel';
+import { designPanelStore } from '~/lib/stores/designSystemStore';
 
 interface ReactComponent {
   displayName?: string;

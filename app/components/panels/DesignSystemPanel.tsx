@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
-import { designPanelStore } from '~/lib/stores/designPanel';
+import { designPanelStore, markThemeChanged, markThemesSaved, resetThemeChanges } from '~/lib/stores/designSystemStore';
 import { getAvailableThemes, findMatchingTheme, getThemeCSSVariables } from '~/lib/replay/themeHelper';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { Sun, Moon, ChevronRight, Palette, Type, Settings, ArrowLeft } from 'lucide-react';
@@ -8,11 +8,10 @@ import { ThemePicker } from '~/components/ui/theme-picker';
 import type { ThemeOption } from '~/components/ui/theme-picker';
 import { classNames } from '~/utils/classNames';
 import { TweakCn } from '~/components/chat/Messages/components';
-import { themeChangesStore, markThemeChanged, markThemesSaved, resetThemeChanges } from '~/lib/stores/themeChanges';
 import { chatStore } from '~/lib/stores/chat';
 import { callNutAPI } from '~/lib/replay/NutAPI';
 import { toast } from 'react-toastify';
-import { FontPicker } from '~/components/ui/font-picker';
+import { MultiSelect } from '~/components/ui/multiselect';
 import { RadiusSelector, SpacingSelector, BorderWidthSelector } from '~/components/ui/PresetSelector';
 import { sansSerifFonts, CUSTOM_THEME_NAME } from '~/lib/theme/config';
 import {
@@ -29,7 +28,7 @@ type ViewType = 'overview' | 'colors' | 'typography';
 
 export const DesignSystemPanel = () => {
   const isVisible = useStore(designPanelStore.isVisible);
-  const themeChanges = useStore(themeChangesStore);
+  const themeChanges = useStore(designPanelStore.themeChanges);
   const appId = useStore(chatStore.currentAppId);
 
   const [currentView, setCurrentView] = useState<ViewType>('overview');
@@ -523,15 +522,15 @@ export const DesignSystemPanel = () => {
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <FontPicker
-            value={currentFont}
-            onChange={handleFontChange}
-            fontOptions={sansSerifFonts}
+          <MultiSelect
+            defaultValue={currentFont}
+            onValueChange={handleFontChange}
+            options={sansSerifFonts}
             placeholder="Select fonts..."
             maxCount={3}
             hideSelectAll
-            onFontHover={handleFontHover}
-            onFontHoverEnd={handleFontHoverEnd}
+            onOptionHover={(option) => handleFontHover(option.value)}
+            onOptionHoverEnd={handleFontHoverEnd}
           />
         </div>
       </div>

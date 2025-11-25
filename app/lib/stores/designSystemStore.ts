@@ -1,5 +1,11 @@
 import { atom } from 'nanostores';
 
+export interface DesignPanelHandlers {
+  onSave?: () => void;
+  onDiscard?: () => void;
+  isSaving?: boolean;
+}
+
 export interface ThemeChange {
   oldValue: string;
   newValue: string;
@@ -14,7 +20,7 @@ export interface ThemeChanges {
   currentTheme: 'light' | 'dark';
 }
 
-const initialState: ThemeChanges = {
+const initialThemeChangesState: ThemeChanges = {
   hasChanges: false,
   lightThemeChanges: {},
   darkThemeChanges: {},
@@ -23,30 +29,33 @@ const initialState: ThemeChanges = {
   currentTheme: 'light',
 };
 
-export const themeChangesStore = atom<ThemeChanges>(initialState);
+export const designPanelStore = {
+  isVisible: atom(false),
+  handlers: atom<DesignPanelHandlers>({}),
+  themeChanges: atom<ThemeChanges>(initialThemeChangesState),
+};
 
-// Actions
-
+// Actions for themeChanges
 export const markThemeChanged = (
   variableName: string,
   oldValue: string,
   newValue: string,
   isDark: boolean | 'app-settings' = false,
 ) => {
-  const current = themeChangesStore.get();
+  const current = designPanelStore.themeChanges.get();
 
   const change: ThemeChange = { oldValue, newValue };
 
   if (isDark === 'app-settings') {
     // This is an app setting (like radius, spacing, font)
-    themeChangesStore.set({
+    designPanelStore.themeChanges.set({
       ...current,
       hasChanges: true,
       appSettingsChanges: { ...current.appSettingsChanges, [variableName]: change },
     });
   } else {
     // This is a theme color variable
-    themeChangesStore.set({
+    designPanelStore.themeChanges.set({
       ...current,
       hasChanges: true,
       lightThemeChanges: isDark ? current.lightThemeChanges : { ...current.lightThemeChanges, [variableName]: change },
@@ -57,7 +66,7 @@ export const markThemeChanged = (
 };
 
 export const markThemesSaved = () => {
-  themeChangesStore.set({
+  designPanelStore.themeChanges.set({
     hasChanges: false,
     lightThemeChanges: {},
     darkThemeChanges: {},
@@ -68,7 +77,7 @@ export const markThemesSaved = () => {
 };
 
 export const resetThemeChanges = () => {
-  themeChangesStore.set(initialState);
+  designPanelStore.themeChanges.set(initialThemeChangesState);
 };
 
 // Global reset function that can be called to trigger theme reset

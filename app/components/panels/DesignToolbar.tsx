@@ -1,13 +1,12 @@
 import React from 'react';
 import { useStore } from '@nanostores/react';
-import { designPanelStore } from '~/lib/stores/designPanel';
-import { themeChangesStore } from '~/lib/stores/themeChanges';
+import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { classNames } from '~/utils/classNames';
 import { Save, X } from 'lucide-react';
 
 export const DesignToolbar = () => {
   const handlers = useStore(designPanelStore.handlers);
-  const themeChanges = useStore(themeChangesStore);
+  const themeChanges = useStore(designPanelStore.themeChanges);
   const isDesignPanelVisible = useStore(designPanelStore.isVisible);
   const isSaving = handlers.isSaving || false;
 

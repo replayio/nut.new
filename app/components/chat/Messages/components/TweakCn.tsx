@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FontPicker } from '~/components/ui/font-picker';
+import { MultiSelect } from '~/components/ui/multiselect';
 import { ColorPicker } from '~/components/ui/ColorPicker';
 import { Layout, Type, Settings } from '~/components/ui/Icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 import { RadiusSelector, SpacingSelector, BorderWidthSelector } from '~/components/ui/PresetSelector';
 import { classNames } from '~/utils/classNames';
-import { markThemeChanged, resetThemeChanges } from '~/lib/stores/themeChanges';
+import { markThemeChanged, resetThemeChanges } from '~/lib/stores/designSystemStore';
 import { getThemeCSSVariables } from '~/lib/replay/themeHelper';
 import {
   sansSerifFonts,
@@ -50,11 +50,9 @@ export const TweakCn: React.FC<TweakCnProps> = ({
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState<TabType>('colors');
   const activeTab = activeTabOverride !== undefined ? activeTabOverride : internalActiveTab;
-  const [internalSelectedTheme, setInternalSelectedTheme] = useState<string>('modern-minimal');
-  const [internalHoveredTheme, setInternalHoveredTheme] = useState<string | null>(null);
 
-  const selectedTheme = externalSelectedTheme || internalSelectedTheme;
-  const hoveredTheme = externalHoveredTheme !== undefined ? externalHoveredTheme : internalHoveredTheme;
+  const selectedTheme = externalSelectedTheme || 'modern-minimal';
+  const hoveredTheme = externalHoveredTheme !== undefined ? externalHoveredTheme : null;
 
   const [customTheme, setCustomTheme] = useState<Record<string, string>>({});
   const [_hoveredCustomization, setHoveredCustomization] = useState<Record<string, string> | null>(null);
@@ -253,16 +251,6 @@ export const TweakCn: React.FC<TweakCnProps> = ({
       }
     }
   }, [hoveredTheme, selectedTheme, customTheme]);
-
-  // Handle theme selection
-  const _handleThemeSelect = (themeName: string) => {
-    if (_onThemeChange) {
-      _onThemeChange(themeName);
-    } else {
-      setInternalSelectedTheme(themeName);
-    }
-    setInternalHoveredTheme(null);
-  };
 
   // Handle font selection
   const handleFontSelect = (fontType: 'sans' | 'serif' | 'mono', fonts: string[]) => {
@@ -477,41 +465,41 @@ export const TweakCn: React.FC<TweakCnProps> = ({
                 <CollapsibleContent className="space-y-3">
                   <div className="space-y-2">
                     <label className="text-xs text-bolt-elements-textSecondary">Sans-serif Font</label>
-                    <FontPicker
-                      value={sansSerifFont}
-                      onChange={(value) => handleFontSelect('sans', value)}
-                      fontOptions={sansSerifFonts}
+                    <MultiSelect
+                      defaultValue={sansSerifFont}
+                      onValueChange={(value) => handleFontSelect('sans', value)}
+                      options={sansSerifFonts}
                       placeholder="Select sans-serif fonts..."
                       maxCount={5}
                       hideSelectAll
-                      onFontHover={(fontName) => handleFontHover('sans', fontName)}
-                      onFontHoverEnd={() => handleFontHoverEnd('sans')}
+                      onOptionHover={(option) => handleFontHover('sans', option.value)}
+                      onOptionHoverEnd={() => handleFontHoverEnd('sans')}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs text-bolt-elements-textSecondary">Serif Font</label>
-                    <FontPicker
-                      value={serifFont}
-                      onChange={(value) => handleFontSelect('serif', value)}
-                      fontOptions={serifFonts}
+                    <MultiSelect
+                      defaultValue={serifFont}
+                      onValueChange={(value) => handleFontSelect('serif', value)}
+                      options={serifFonts}
                       placeholder="Select serif fonts..."
                       maxCount={5}
                       hideSelectAll
-                      onFontHover={(fontName) => handleFontHover('serif', fontName)}
-                      onFontHoverEnd={() => handleFontHoverEnd('serif')}
+                      onOptionHover={(option) => handleFontHover('serif', option.value)}
+                      onOptionHoverEnd={() => handleFontHoverEnd('serif')}
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs text-bolt-elements-textSecondary">Monospace Font</label>
-                    <FontPicker
-                      value={monoFont}
-                      onChange={(value) => handleFontSelect('mono', value)}
-                      fontOptions={monoFonts}
+                    <MultiSelect
+                      defaultValue={monoFont}
+                      onValueChange={(value) => handleFontSelect('mono', value)}
+                      options={monoFonts}
                       placeholder="Select mono fonts..."
                       maxCount={5}
                       hideSelectAll
-                      onFontHover={(fontName) => handleFontHover('mono', fontName)}
-                      onFontHoverEnd={() => handleFontHoverEnd('mono')}
+                      onOptionHover={(option) => handleFontHover('mono', option.value)}
+                      onOptionHoverEnd={() => handleFontHoverEnd('mono')}
                     />
                   </div>
                 </CollapsibleContent>

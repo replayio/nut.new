@@ -1,5 +1,5 @@
 import { getThemeCSSVariables, flattenThemeVariablesWithModes } from '~/lib/replay/themeHelper';
-import { markThemeChanged } from '~/lib/stores/themeChanges';
+import { markThemeChanged } from '~/lib/stores/designSystemStore';
 
 // Get iframe reference
 export const getIframe = (): HTMLIFrameElement | null => {
