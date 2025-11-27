@@ -334,7 +334,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             }}
           >
             <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
-              <div ref={scrollRef} className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden pl-6 pt-6 pb-6 pr-2">
+              <div
+                ref={scrollRef}
+                className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden pl-6 pt-6 pb-6 pr-2"
+              >
                 <div className={classNames(styles.Chat, 'flex flex-col h-full w-full')}>
                   <div className="h-full flex flex-col">
                     <ClientOnly>
