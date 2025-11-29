@@ -255,4 +255,4 @@ export const AuthRequiredSecret = 'VITE_AUTH_REQUIRED';
 export const AppMessagesSecret = 'VITE_ENABLE_APP_MESSAGES';
 
 // Secret which controls generation and upstreaming of changes to prebuilt blocks as the app is developed.
-export const DisableAppBlockChangesSecret = "DISABLE_APP_BLOCK_CHANGES";
+export const DisableAppBlockChangesSecret = 'DISABLE_APP_BLOCK_CHANGES';

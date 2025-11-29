@@ -337,7 +337,9 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <MessageSquare
-                  className={disableAppBlockChanges ? 'text-bolt-elements-icon-success' : 'text-bolt-elements-textPrimary'}
+                  className={
+                    disableAppBlockChanges ? 'text-bolt-elements-icon-success' : 'text-bolt-elements-textPrimary'
+                  }
                   size={18}
                 />
                 <div className="flex flex-col">
