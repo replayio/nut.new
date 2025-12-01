@@ -7,7 +7,6 @@ import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
 import Components from './components/Components';
 import Events from './components/Events';
-import FeatureDebugControls from './components/FeatureDebugControls';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPascalCaseName } from '~/utils/names';
 import { useStore } from '@nanostores/react';
@@ -111,10 +110,7 @@ const Features = () => {
             </div>
           </div>
 
-          <div className="flex-shrink-0 flex items-center gap-2">
-            {renderFeatureStatus(status)}
-            <FeatureDebugControls featureName={feature?.name} />
-          </div>
+          <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
         </div>
 
         <AnimatePresence>

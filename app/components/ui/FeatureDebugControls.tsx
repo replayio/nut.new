@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { userStore } from '~/lib/stores/auth';
 import { chatStore } from '~/lib/stores/chat';
 import { isAdmin } from '~/lib/utils';
-import { getChatIdsForFeature } from './Events';
+import { getChatIdsForFeature } from '~/components/workbench/Preview/components/PlanView/components/Features/components/Events';
 import type { ChatResponse } from '~/lib/persistence/response';
 
 interface FeatureDebugControlsProps {
@@ -69,3 +69,4 @@ const FeatureDebugControls = ({ featureName }: FeatureDebugControlsProps) => {
 };
 
 export default FeatureDebugControls;
+
