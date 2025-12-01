@@ -69,4 +69,3 @@ const FeatureDebugControls = ({ featureName }: FeatureDebugControlsProps) => {
 };
 
 export default FeatureDebugControls;
-
