@@ -6,16 +6,53 @@ import Tests from './components/Tests';
 import DefinedApis from './components/DefinedApis';
 import DatabaseChanges from './components/DatabaseChanges';
 import Components from './components/Components';
-import Events from './components/Events';
+import Events, { getChatIdsForFeature } from './components/Events';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPascalCaseName } from '~/utils/names';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { assert } from '~/utils/nut';
+import { userStore } from '~/lib/stores/auth';
+import { isAdmin } from '~/lib/utils';
+import type { ChatResponse } from '~/lib/persistence/response';
+
+function makeFeatureDebugUrl(eventResponses: ChatResponse[], featureName: string | undefined): string {
+  const chatIds = getChatIdsForFeature(eventResponses, featureName);
+  if (!chatIds.length) {
+    return '';
+  }
+
+  const filters = chatIds.map((chatId) => ({
+    column: 'telemetry.data.nut.chat_id',
+    op: 'contains',
+    value: chatId,
+  }));
+
+  const query = {
+    time_range: 28 * 24 * 60 * 60, // past 28 days
+    granularity: 0,
+    breakdowns: ['telemetry.category'],
+    calculations: [
+      { op: 'COUNT' },
+      { op: 'AVG', column: 'telemetry.data.success' },
+      { op: 'AVG', column: 'telemetry.data.fatal' },
+    ],
+    filters,
+    filter_combination: 'OR',
+    orders: [{ op: 'COUNT', order: 'descending' }],
+    havings: [] as any[],
+    limit: 100,
+  };
+
+  const encodedQuery = encodeURIComponent(JSON.stringify(query));
+  return `https://ui.honeycomb.io/replay/datasets/backend?query=${encodedQuery}`;
+}
 
 const Features = () => {
   const appSummary = useStore(chatStore.appSummary);
   assert(appSummary, 'App summary is required');
+  const user = useStore(userStore);
+  const eventResponses = useStore(chatStore.events);
 
   const [collapsedFeatures, setCollapsedFeatures] = useState<Set<number>>(new Set());
 
@@ -110,7 +147,22 @@ const Features = () => {
             </div>
           </div>
 
-          <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
+          <div className="flex-shrink-0 flex items-center gap-2">
+            {renderFeatureStatus(status)}
+            {isAdmin(user) && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const url = makeFeatureDebugUrl(eventResponses, feature?.name);
+                  window.open(url, '_blank');
+                }}
+                className="text-lg hover:scale-110 transition-transform"
+                title="Show backend events"
+              >
+                🐛
+              </button>
+            )}
+          </div>
         </div>
 
         <AnimatePresence>
