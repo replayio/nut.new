@@ -32,9 +32,16 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
       return;
     }
 
-    const { response } = await callNutAPI('resolve-bug-report', { appId, bugReportName: report.name });
-    if (response) {
-      onChatResponse(response, 'ResolveBugReport');
+    try {
+      const { response } = await callNutAPI('resolve-bug-report', { appId, bugReportName: report.name });
+      if (response) {
+        onChatResponse(response, 'ResolveBugReport');
+      }
+    } catch (error) {
+      toast.error('Failed to resolve bug report');
+      console.error('Error resolving bug report:', error);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -63,10 +70,18 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
       return;
     }
 
-    const { response } = await callNutAPI('cancel-bug-report', { appId, bugReportName: report.name });
-    if (response) {
-      onChatResponse(response, 'CancelBugReport');
+    try {
+      const { response } = await callNutAPI('cancel-bug-report', { appId, bugReportName: report.name });
+      if (response) {
+        onChatResponse(response, 'CancelBugReport');
+      }
+    } catch (error) {
+      toast.error('Failed to cancel bug report');
+      console.error('Error canceling bug report:', error);
+    } finally {
+      setProcessing(false);
     }
+
   };
 
   const { status, escalateTime } = report;
