@@ -81,7 +81,6 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
     } finally {
       setProcessing(false);
     }
-
   };
 
   const { status, escalateTime } = report;
