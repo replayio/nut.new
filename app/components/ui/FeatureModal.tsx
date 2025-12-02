@@ -16,6 +16,7 @@ import Components from '~/components/workbench/Preview/components/PlanView/compo
 import Events from '~/components/workbench/Preview/components/PlanView/components/Features/components/Events';
 import Pages from '~/components/workbench/Preview/components/PlanView/components/Pages';
 import type { AppFeature } from '~/lib/persistence/messageAppSummary';
+import FeatureDebugControls from '~/components/ui/FeatureDebugControls';
 
 interface IntegrationTestsModalContentProps {
   integrationTests: AppFeature[];
@@ -390,12 +391,14 @@ const FeatureModal: React.FC = () => {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-1">
                 {/* Feature Info */}
                 <div className="flex-1">
                   <h2 className="flex items-center gap-2 text-xl font-bold text-bolt-elements-textHeading">
                     {name}
                     <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
+                    <div className="flex-1" />
+                    <FeatureDebugControls featureName={currentFeature.name} />
                   </h2>
                   <p className="text-bolt-elements-textSecondary mt-1">{description}</p>
                 </div>
