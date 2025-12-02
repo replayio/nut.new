@@ -199,7 +199,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             variant: 'active',
             handleSendMessage,
             onCardClick: () => {
-              openIntegrationTestsModal();
+              openIntegrationTestsModal('in-progress');
             },
           });
         }

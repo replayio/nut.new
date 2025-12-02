@@ -61,7 +61,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const subscription = useStore(subscriptionStore.subscription);
     const hasBuildAccess = useStore(buildAccessStore.hasAccess);
-    console.log('appSummary', appSummary);
 
     // Lazy loading state
     const [visibleItemsCount, setVisibleItemsCount] = useState(25);
@@ -282,6 +281,20 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         }
       });
 
+      // Helper to check if an IntegrationTests feature has valid test results
+      // Filter out features that are "Implemented" but have no test statuses defined
+      const hasValidTestResults = (feature: AppFeature): boolean => {
+        if (feature.kind !== AppFeatureKind.IntegrationTests) {
+          return true;
+        }
+        // If the feature is Implemented but all tests have no status, filter it out
+        if (feature.status === AppFeatureStatus.Implemented) {
+          const hasAnyTestStatus = feature.tests?.some((test) => test.status !== undefined);
+          return hasAnyTestStatus === true;
+        }
+        return true;
+      };
+
       // Add features
       if (appSummary?.features) {
         const integrationTests: AppFeature[] = [];
@@ -293,10 +306,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             if (feature.time) {
               // Group IntegrationTests features
               if (feature.kind === AppFeatureKind.IntegrationTests) {
-                integrationTests.push(feature);
-                const featureTime = new Date(feature.time);
-                if (!earliestIntegrationTestTime || featureTime < earliestIntegrationTestTime) {
-                  earliestIntegrationTestTime = featureTime;
+                // Only add if it has valid test results
+                if (hasValidTestResults(feature)) {
+                  integrationTests.push(feature);
+                  const featureTime = new Date(feature.time);
+                  if (!earliestIntegrationTestTime || featureTime < earliestIntegrationTestTime) {
+                    earliestIntegrationTestTime = featureTime;
+                  }
                 }
               } else {
                 // Add non-IntegrationTests features normally
@@ -381,7 +397,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             iconType={iconType}
             variant={variant}
             onCardClick={() => {
-              openIntegrationTestsModal();
+              openIntegrationTestsModal('completed');
             }}
             className="shadow-sm"
             handleSendMessage={sendMessage}

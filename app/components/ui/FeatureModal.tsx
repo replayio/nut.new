@@ -202,7 +202,16 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
 
                           {test.definedAPIs && test.definedAPIs.length > 0 && <DefinedApis feature={test} />}
 
-                          {test.tests && test.tests.length > 0 && <Tests featureTests={test.tests} />}
+                          {test.tests && test.tests.length > 0 && (
+                            <Tests
+                              status={test.status}
+                              featureTests={
+                                test.status === AppFeatureStatus.Implemented
+                                  ? test.tests.filter((t) => t.status)
+                                  : test.tests
+                              }
+                            />
+                          )}
 
                           <Events featureName={test.name} />
                         </div>
@@ -228,9 +237,43 @@ const FeatureModal: React.FC = () => {
     return null;
   }
 
+  // Helper to check if an IntegrationTests feature has valid test results
+  // Filter out features that are "Implemented" but have no test statuses defined
+  const hasValidTestResults = (feature: AppFeature): boolean => {
+    if (feature.kind !== AppFeatureKind.IntegrationTests) {
+      return true;
+    }
+    // If the feature is Implemented but all tests have no status, filter it out
+    if (feature.status === AppFeatureStatus.Implemented) {
+      const hasAnyTestStatus = feature.tests?.some((test) => test.status !== undefined);
+      return hasAnyTestStatus === true;
+    }
+    return true;
+  };
+
   // If showing IntegrationTests group
   if (modalState.isIntegrationTestsGroup) {
-    const integrationTests = appSummary.features.filter((feature) => feature.kind === AppFeatureKind.IntegrationTests);
+    const integrationTests = appSummary.features.filter((feature) => {
+      if (feature.kind !== AppFeatureKind.IntegrationTests) {
+        return false;
+      }
+
+      // Filter out features without valid test results
+      if (!hasValidTestResults(feature)) {
+        return false;
+      }
+
+      // Filter based on the filter type
+      if (modalState.integrationTestsFilter === 'in-progress') {
+        return (
+          feature.status === AppFeatureStatus.ImplementationInProgress || feature.status === AppFeatureStatus.NotStarted
+        );
+      } else if (modalState.integrationTestsFilter === 'completed') {
+        return feature.status === AppFeatureStatus.Implemented || feature.status === AppFeatureStatus.Failed;
+      }
+
+      return true;
+    });
 
     return (
       <IntegrationTestsModalContent
@@ -387,7 +430,15 @@ const FeatureModal: React.FC = () => {
                   )}
 
                   {currentFeature.tests && currentFeature.tests.length > 0 && (
-                    <Tests featureTests={currentFeature.tests} />
+                    <Tests
+                      status={currentFeature.status}
+                      featureTests={
+                        currentFeature.kind === AppFeatureKind.IntegrationTests &&
+                        currentFeature.status === AppFeatureStatus.Implemented
+                          ? currentFeature.tests.filter((test) => test.status)
+                          : currentFeature.tests
+                      }
+                    />
                   )}
 
                   <Events featureName={currentFeature.name} />
