@@ -4,12 +4,14 @@ export interface FeatureModalState {
   isOpen: boolean;
   currentFeatureIndex: number;
   totalFeatures: number;
+  isIntegrationTestsGroup?: boolean; // Flag to indicate if showing grouped IntegrationTests
 }
 
 export const featureModalStore = atom<FeatureModalState>({
   isOpen: false,
   currentFeatureIndex: 0,
   totalFeatures: 0,
+  isIntegrationTestsGroup: false,
 });
 
 export const openFeatureModal = (featureIndex: number, totalFeatures: number) => {
@@ -17,6 +19,16 @@ export const openFeatureModal = (featureIndex: number, totalFeatures: number) =>
     isOpen: true,
     currentFeatureIndex: featureIndex,
     totalFeatures,
+    isIntegrationTestsGroup: false,
+  });
+};
+
+export const openIntegrationTestsModal = () => {
+  featureModalStore.set({
+    isOpen: true,
+    currentFeatureIndex: 0,
+    totalFeatures: 0,
+    isIntegrationTestsGroup: true,
   });
 };
 
