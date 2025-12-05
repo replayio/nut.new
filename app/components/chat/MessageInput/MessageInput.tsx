@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { classNames } from '~/utils/classNames';
-import { SendButton } from '~/components/chat/SendButton.client';
-import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { StartBuildingButton } from '~/components/chat/StartBuildingButton';
 import { chatStore } from '~/lib/stores/chat';
@@ -33,9 +31,28 @@ import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
-import { Crosshair, Paperclip, X, Palette } from 'lucide-react';
+import { Crosshair, X, Palette, Plus } from 'lucide-react';
 import { buildAccessStore } from '~/lib/stores/buildAccess';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
+
+// const AudioWaveIcon = () => (
+//   <svg
+//     width="16"
+//     height="16"
+//     viewBox="0 0 16 16"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//     className="#F97391"
+//   >
+//     <path
+//       d="M3 6V10M5.5 5V11M8 3V13M10.5 5V11M13 6V10"
+//       stroke="#F97391"
+//       strokeWidth="1.5"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//   </svg>
+// )
 
 interface ReactComponent {
   displayName?: string;
@@ -316,7 +333,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div
       className={classNames(
-        'relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor backdrop-blur rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:border-bolt-elements-focus/30',
+        'relative bg-transparent rounded-xl transition-all duration-300',
       )}
     >
       {selectedElement && (
@@ -452,14 +469,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       )}
 
       <div className="relative">
+        {/* Custom styled placeholder */}
+        {!input && !chatStarted && (
+          <div className="absolute left-4 top-3 pointer-events-none text-base">
+            <span className="text-gray-400 dark:text-gray-500">What would you like </span>
+            <span className="text-rose-500 font-medium">Replay.Builder to build?</span>
+            <span className="text-gray-400 dark:text-gray-500"> Click here</span>
+          </div>
+        )}
         <textarea
           ref={textareaRef}
           className={classNames(
-            'w-full px-6 py-4 pr-20 border-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-base rounded-t-2xl',
-            'transition-all duration-200',
-            'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50',
-            { 'animate-pulse': !input && !chatStarted },
+            'w-full px-4 py-3 pr-4 border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base',
+            'transition-all duration-200 focus:outline-none',
             { 'opacity-50 cursor-not-allowed': hasPendingMessage },
+            // Hide native placeholder when custom placeholder is shown
+            { 'placeholder-transparent': !chatStarted },
+            { 'placeholder-gray-400 dark:placeholder-gray-500': chatStarted },
           )}
           onDragEnter={(e) => {
             e.preventDefault();
@@ -536,62 +562,48 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             overflowY: 'auto',
           }}
           disabled={hasPendingMessage}
-          placeholder={
-            !chatStarted
-              ? '✨ What do you want to build? Start typing here...'
-              : getPlaceholderText(chatStarted, hasAppSummary)
-          }
+          placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
           translate="no"
         />
 
+        {/* Start Building Button - shown when discovery rating is high enough */}
         {(() => {
-          const showSendButton = (hasPendingMessage || input.length > 0 || uploadedFiles.length > 0) && chatStarted;
           const showStartBuildingButton =
-            user && startPlanningRating > 0 && !showSendButton && !hasAppSummary && hasBuildAccess;
+            user && startPlanningRating > 0 && !hasAppSummary && hasBuildAccess && !hasPendingMessage;
 
-          return (
-            <>
-              {showSendButton && (
-                <ClientOnly>
-                  {() => (
-                    <SendButton
-                      handleStop={handleStop}
-                      handleSendMessage={handleSendMessage}
-                      input={input}
-                      uploadedFiles={uploadedFiles}
-                    />
-                  )}
-                </ClientOnly>
+          return showStartBuildingButton ? (
+            <ClientOnly>
+              {() => (
+                <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />
               )}
-
-              {showStartBuildingButton && (
-                <ClientOnly>
-                  {() => (
-                    <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />
-                  )}
-                </ClientOnly>
-              )}
-            </>
-          );
+            </ClientOnly>
+          ) : null;
         })()}
       </div>
 
-      <div className="flex justify-between items-center rounded-b-2xl px-4 py-3">
-        <div className="flex gap-2 items-center">
-          {!isMobile && !isTablet && (
+      <div className="flex justify-between items-center px-4 py-3">
+        <div className="flex gap-3 items-center">
+          {/* {!isMobile && !isTablet && (
             <TooltipProvider>
               <WithTooltip tooltip={isListening ? 'Stop listening' : 'Start speech recognition'}>
                 <div>
-                  <SpeechRecognitionButton
-                    isListening={isListening}
-                    onStart={onStartListening}
-                    onStop={onStopListening}
+                  <button
+                    onClick={isListening ? onStopListening : onStartListening}
                     disabled={hasPendingMessage}
-                  />
+                    className={classNames(
+                      'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
+                      isListening
+                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-500'
+                        : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
+                      { 'opacity-50 cursor-not-allowed': hasPendingMessage },
+                    )}
+                  >
+                    <AudioWaveIcon />
+                  </button>
                 </div>
               </WithTooltip>
             </TooltipProvider>
-          )}
+          )} */}
 
           <TooltipProvider>
             <WithTooltip
@@ -605,64 +617,83 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               }
             >
               <button
-                className="w-8 h-8 rounded-lg bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                className="w-10 h-10 rounded-full border-2 border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500 transition-all duration-200 flex items-center justify-center"
                 onClick={handleFileUpload}
               >
-                <Paperclip size={18} />
+                <Plus size={18} />
               </button>
             </WithTooltip>
           </TooltipProvider>
 
           {chatStarted && (
-            <>
-              {!isMobile && !isTablet && <div className="w-px h-5 bg-bolt-elements-borderColor" />}
-              <TooltipProvider>
-                <WithTooltip
-                  tooltip={
+            <TooltipProvider>
+              <WithTooltip
+                tooltip={
+                  hasPendingMessage
+                    ? 'Design panel is disabled while generating code'
+                    : isDesignPanelVisible
+                      ? 'Hide Design Panel'
+                      : 'Show Design Panel'
+                }
+              >
+                <button
+                  className={classNames(
+                    'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
                     hasPendingMessage
-                      ? 'Design panel is disabled while generating code'
+                      ? 'border-gray-300 dark:border-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
                       : isDesignPanelVisible
-                        ? 'Hide Design Panel'
-                        : 'Show Design Panel'
-                  }
+                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-500'
+                        : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
+                  )}
+                  onClick={() => {
+                    if (!hasPendingMessage) {
+                      designPanelStore.isVisible.set(!isDesignPanelVisible);
+                    }
+                  }}
+                  disabled={hasPendingMessage}
                 >
-                  <button
-                    className={classNames(
-                      'w-8 h-8 rounded-lg border transition-all duration-200 flex items-center justify-center',
-                      hasPendingMessage
-                        ? 'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor text-bolt-elements-textSecondary opacity-50 cursor-not-allowed'
-                        : isDesignPanelVisible
-                          ? 'bg-bolt-elements-background-depth-4 border-bolt-elements-focus/50 text-bolt-elements-textPrimary'
-                          : 'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
-                    )}
-                    onClick={() => {
-                      if (!hasPendingMessage) {
-                        designPanelStore.isVisible.set(!isDesignPanelVisible);
-                      }
-                    }}
-                    disabled={hasPendingMessage}
-                  >
-                    <Palette size={18} />
-                  </button>
-                </WithTooltip>
-              </TooltipProvider>
-            </>
+                  <Palette size={18} />
+                </button>
+              </WithTooltip>
+            </TooltipProvider>
           )}
         </div>
 
-        {input.length > 3 && (
-          <div className="flex items-center gap-2 text-xs text-bolt-elements-textTertiary">
-            <span>Press</span>
-            <kbd className="px-2 py-1 rounded-md bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor font-mono text-xs">
-              Shift
-            </kbd>
-            <span>+</span>
-            <kbd className="px-2 py-1 rounded-md bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor font-mono text-xs">
-              ↵
-            </kbd>
-            <span>for new line</span>
-          </div>
-        )}
+        {/* Send Button - Always visible */}
+        <button
+          onClick={() => {
+            if (hasPendingMessage) {
+              chatStore.showStopConfirmation.set(true);
+              return;
+            }
+            if (input.length > 0 || uploadedFiles.length > 0) {
+              const componentReference = selectedElement?.tree
+                ? {
+                    componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
+                  }
+                : undefined;
+
+              handleSendMessage({
+                messageInput: input,
+                chatMode: ChatMode.UserMessage,
+                componentReference,
+              });
+
+              if (selectedElement) {
+                workbenchStore.setSelectedElement(null);
+              }
+            }
+          }}
+          disabled={hasPendingMessage && !input.length && !uploadedFiles.length}
+          className={classNames(
+            'px-5 py-2.5 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2',
+            'bg-gradient-to-r from-rose-500 to-rose-400 hover:from-rose-600 hover:to-rose-500',
+            'shadow-md hover:shadow-lg',
+          )}
+        >
+          <span>Send</span>
+          <span className="text-white/70 text-sm">⌘Enter</span>
+        </button>
       </div>
     </div>
   );
@@ -671,7 +702,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 function getPlaceholderText(chatStarted: boolean, hasAppSummary: boolean) {
   if (!chatStarted) {
     // There is no app and no messages have been sent yet.
-    return 'What do you want to build?';
+    return 'What would you like Replay.Builder to build? Click here';
   }
 
   if (!hasAppSummary) {

@@ -80,7 +80,7 @@ export function Header() {
           <a href="/">
             <div className="flex items-center gap-3">
               <h1 className="text-bolt-elements-textHeading font-bold text-xl">
-                REPLAY<span className="text-green-500">.BUILDER</span>
+                REPLAY<span className="text-rose-500">.BUILDER</span>
               </h1>
             </div>
           </a>

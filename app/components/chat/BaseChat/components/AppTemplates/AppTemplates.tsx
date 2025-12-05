@@ -43,7 +43,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
           <span className="text-bolt-elements-textHeading">Not sure</span>
           <br />
-          <span className="text-green-500 dark:text-green-400"> where to start?</span>
+          <span className="text-rose-500 dark:text-rose-400"> where to start?</span>
         </h1>
         <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
           Customize one of our reference apps to exactly what you need.

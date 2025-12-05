@@ -84,7 +84,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
               {bulletPoints.map((point, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <CheckCircle
-                    className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"
+                    className="text-rose-500 dark:text-rose-400 mt-0.5 flex-shrink-0"
                     size={20}
                     strokeWidth={2.5}
                   />
