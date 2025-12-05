@@ -525,10 +525,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     </>
                   ) : null;
                 })()}
-                {!user && !chatStarted && <Pricing />}
-                {!user && !chatStarted && <Explanation />}
+                {/* {!user && !chatStarted && <Pricing />}
+                {!user && !chatStarted && <Explanation />} */}
                 {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
-                {!user && !chatStarted && <FAQs />}
+                {/* {!user && !chatStarted && <FAQs />} */}
               </div>
             </div>
             <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>

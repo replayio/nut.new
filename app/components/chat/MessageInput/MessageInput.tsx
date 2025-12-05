@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { classNames } from '~/utils/classNames';
 import { SendButton } from '~/components/chat/SendButton.client';
@@ -99,6 +99,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const { isMobile, isTablet } = useIsMobile();
   const hasBuildAccess = useStore(buildAccessStore.hasAccess);
   const isDesignPanelVisible = useStore(designPanelStore.isVisible);
+
+  // Focus textarea if URL has focus=true parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('focus') === 'true' && textareaRef?.current) {
+      textareaRef.current.focus();
+    }
+  }, [textareaRef]);
 
   // Helper functions for element highlighting
   const highlightElement = (component: ReactComponent) => {
@@ -447,7 +455,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <textarea
           ref={textareaRef}
           className={classNames(
-            'w-full px-6 py-4 pr-20 border-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-base',
+            'w-full px-6 py-4 pr-20 border-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-base rounded-t-2xl',
             'transition-all duration-200',
             'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50',
             { 'animate-pulse': !input && !chatStarted },
