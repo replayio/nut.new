@@ -78,7 +78,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
             {bulletPoints.map((point, index) => (
               <span
                 key={index}
-                className="px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/20 rounded-full"
+                className="px-3 py-1.5 text-sm font-medium text-rose-600 bg-gray-200 rounded-full"
               >
                 {point}
               </span>
