@@ -76,10 +76,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
         {bulletPoints.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {bulletPoints.map((point, index) => (
-              <span
-                key={index}
-                className="px-3 py-1.5 text-sm font-medium text-rose-600 bg-gray-200 rounded-full"
-              >
+              <span key={index} className="px-3 py-1.5 text-sm font-medium text-rose-600 bg-gray-200 rounded-full">
                 {point}
               </span>
             ))}

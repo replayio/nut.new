@@ -161,8 +161,6 @@ export function SubscriptionModal() {
                             isCurrentTier,
                           'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border border-rose-500/50 hover:border-rose-400 hover:scale-105':
                             !isFree && !isCurrentTier && !isLoading,
-                          'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border border-rose-500/50 hover:border-rose-400 hover:scale-105':
-                            isFree && !isCurrentTier && !isLoading,
                           'opacity-50 cursor-not-allowed hover:scale-100': isLoading,
                         },
                       )}
