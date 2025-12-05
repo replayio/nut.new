@@ -38,7 +38,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   }, [selectedCategory]);
 
   return (
-    <div id="showcase-gallery" className="w-full mx-auto px-6 lg:px-8 mt-8 mb-4">
+    <div id="showcase-gallery" className="w-full mx-auto px-6 lg:px-8 mt-24 mb-4">
       <div className="flex flex-col mb-12 animate-fade-in animation-delay-100">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
           <span className="text-bolt-elements-textHeading">Not sure</span>
@@ -56,10 +56,11 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
         onCategorySelect={setSelectedCategory}
       />
 
-      <div className="max-w-4xl mx-auto">
-        {filteredApps.length > 0 && (
-          <div className="space-y-14 animate-fade-in animation-delay-400 mb-8">
-            {filteredApps.map((app, index) => (
+      {/* Horizontal scrolling card container */}
+      {filteredApps.length > 0 && (
+        <div className="overflow-x-auto pb-4 -mx-6 px-6 animate-fade-in animation-delay-400 mb-8">
+          <div className="flex gap-6" style={{ minWidth: 'min-content' }}>
+            {filteredApps.map((app) => (
               <ReferenceAppCard
                 key={app.appName}
                 appName={app.appName}
@@ -67,13 +68,12 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                 bulletPoints={app.bulletPoints}
                 photo={app.photo}
                 appPath={app.appPath}
-                photoOnLeft={index % 2 === 0}
                 sendMessage={sendMessage}
               />
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

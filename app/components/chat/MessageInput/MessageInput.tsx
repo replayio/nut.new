@@ -25,7 +25,7 @@ import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { userStore } from '~/lib/stores/auth';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
+// import { useIsMobile } from '~/lib/hooks/useIsMobile';
 import { processImage, validateImageFile, formatFileSize } from '~/utils/imageProcessing';
 import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -95,14 +95,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   input = '',
   handleInputChange = () => {},
   handleSendMessage = () => {},
-  handleStop = () => {},
+  // handleStop = () => {},
   uploadedFiles = [],
   setUploadedFiles = () => {},
   imageDataList = [],
   setImageDataList = () => {},
-  isListening = false,
-  onStartListening = () => {},
-  onStopListening = () => {},
+  // isListening = false,
+  // onStartListening = () => {},
+  // onStopListening = () => {},
   minHeight = 76,
   maxHeight = 200,
 }) => {
@@ -113,7 +113,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasAppSummary = !!appSummary;
   const user = useStore(userStore);
   const selectedElement = useStore(workbenchStore.selectedElement) as SelectedElementData | null;
-  const { isMobile, isTablet } = useIsMobile();
+  // const { isMobile, isTablet } = useIsMobile();
   const hasBuildAccess = useStore(buildAccessStore.hasAccess);
   const isDesignPanelVisible = useStore(designPanelStore.isVisible);
 
@@ -331,11 +331,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div
-      className={classNames(
-        'relative bg-transparent rounded-xl transition-all duration-300',
-      )}
-    >
+    <div className={classNames('relative bg-transparent rounded-xl transition-all duration-300')}>
       {selectedElement && (
         <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor px-4 py-3">
           <div className="flex items-center justify-between">
@@ -573,9 +569,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
           return showStartBuildingButton ? (
             <ClientOnly>
-              {() => (
-                <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />
-              )}
+              {() => <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />}
             </ClientOnly>
           ) : null;
         })()}
