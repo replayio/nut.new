@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import AppView, { type ResizeSide } from './components/AppView';
@@ -8,11 +8,44 @@ import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { useDevToolsInspector, type InspectedElement, type ElementTreeNode } from '~/lib/devtools';
+import { DEVTOOLS_MESSAGE_SOURCE } from '~/lib/devtools/DevToolsBridge';
 
 let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
 export function getCurrentIFrame() {
   return gCurrentIFrameRef?.current ?? undefined;
+}
+
+/**
+ * Convert DevTools element to workbench store format
+ */
+function convertDevToolsElementToStoreFormat(
+  element: InspectedElement,
+  tree: ElementTreeNode[],
+): { component: Parameters<typeof workbenchStore.setSelectedElement>[0] extends infer T ? T extends { component: infer C } ? C : never : never; tree: Parameters<typeof workbenchStore.setSelectedElement>[0] extends infer T ? T extends { tree: infer C } ? C : never : never } {
+  // Convert inspected element to component format
+  const component = {
+    displayName: element.displayName || undefined,
+    name: element.displayName || undefined,
+    props: element.props,
+    state: element.state,
+    type: element.type === 'function' ? 'function' as const : element.type === 'class' ? 'class' as const : 'host' as const,
+    source: element.source ? {
+      fileName: element.source.fileName || undefined,
+      lineNumber: element.source.lineNumber || undefined,
+      columnNumber: element.source.columnNumber || undefined,
+    } : undefined,
+  };
+
+  // Convert tree to the expected format
+  const convertedTree = tree.map((node) => ({
+    displayName: node.displayName || undefined,
+    name: node.displayName || undefined,
+    type: node.type === 1 ? 'function' as const : node.type === 2 ? 'class' as const : 'host' as const,
+  }));
+
+  return { component, tree: convertedTree };
 }
 
 export const Preview = memo(() => {
@@ -25,9 +58,11 @@ export const Preview = memo(() => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isElementPickerEnabled, setIsElementPickerEnabled] = useState(false);
   const [isElementPickerReady, setIsElementPickerReady] = useState(false);
+  const [useDevToolsMode, setUseDevToolsMode] = useState(false);
 
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
+  const [contentWindow, setContentWindow] = useState<Window | null>(null);
 
   const previewURL = useStore(workbenchStore.previewURL);
 
@@ -51,14 +86,39 @@ export const Preview = memo(() => {
 
   gCurrentIFrameRef = iframeRef;
 
+  // DevTools inspector callbacks
+  const handleDevToolsElementSelected = useCallback((element: InspectedElement | null, tree: ElementTreeNode[]) => {
+    if (element) {
+      const converted = convertDevToolsElementToStoreFormat(element, tree);
+      workbenchStore.setSelectedElement(converted);
+      setIsElementPickerEnabled(false);
+    }
+  }, []);
+
+  const handleDevToolsInspectingChange = useCallback((inspecting: boolean) => {
+    setIsElementPickerEnabled(inspecting);
+  }, []);
+
+  const handleDevToolsReady = useCallback(() => {
+    setIsElementPickerReady(true);
+    setUseDevToolsMode(true);
+  }, []);
+
+  // Initialize DevTools inspector hook
+  const devtools = useDevToolsInspector(contentWindow, {
+    onElementSelected: handleDevToolsElementSelected,
+    onInspectingChange: handleDevToolsInspectingChange,
+    onReady: handleDevToolsReady,
+  });
+
   const reloadPreview = (route = '') => {
     if (iframeRef.current) {
       iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
   };
 
-  // Send postMessage to control element picker in iframe
-  const toggleElementPicker = (enabled: boolean) => {
+  // Send postMessage to control element picker in iframe (legacy mode)
+  const toggleLegacyElementPicker = (enabled: boolean) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
         {
@@ -72,9 +132,23 @@ export const Preview = memo(() => {
     }
   };
 
-  // Listen for messages from iframe
+  // Toggle element picker - uses DevTools if available, falls back to legacy
+  const toggleElementPicker = useCallback((enabled: boolean) => {
+    if (useDevToolsMode && devtools.isReady) {
+      if (enabled) {
+        devtools.startInspecting();
+      } else {
+        devtools.stopInspecting();
+      }
+    } else {
+      toggleLegacyElementPicker(enabled);
+    }
+  }, [useDevToolsMode, devtools]);
+
+  // Listen for messages from iframe (legacy element picker and DevTools backend ready)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Legacy element picker messages
       if (event.data.type === 'ELEMENT_PICKED') {
         // Store the full element data including the react tree
         workbenchStore.setSelectedElement({
@@ -83,19 +157,52 @@ export const Preview = memo(() => {
         });
         setIsElementPickerEnabled(false);
       } else if (event.data.type === 'ELEMENT_PICKER_STATUS') {
+        // Status update from legacy picker
       } else if (event.data.type === 'ELEMENT_PICKER_READY' && event.data.source === 'element-picker') {
-        setIsElementPickerReady(true);
+        // Legacy element picker is ready
+        if (!useDevToolsMode) {
+          setIsElementPickerReady(true);
+        }
+      }
+      // DevTools backend ready message
+      else if (event.data.source === DEVTOOLS_MESSAGE_SOURCE && event.data.type === 'devtools-backend-ready') {
+        // DevTools backend is initialized in iframe
+        setUseDevToolsMode(true);
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [useDevToolsMode]);
+
+  // Update contentWindow when iframe loads
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+
+    const handleLoad = () => {
+      setContentWindow(iframe.contentWindow);
+    };
+
+    iframe.addEventListener('load', handleLoad);
+
+    // If iframe is already loaded, set contentWindow
+    if (iframe.contentWindow) {
+      setContentWindow(iframe.contentWindow);
+    }
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+    };
+  }, [iframeUrl]);
 
   useEffect(() => {
     if (!previewURL) {
       setUrl('');
       setIframeUrl(undefined);
+      setContentWindow(null);
 
       return;
     }
@@ -103,6 +210,8 @@ export const Preview = memo(() => {
     setUrl(previewURL);
     setIframeUrl(previewURL);
     setIsElementPickerReady(false);
+    setUseDevToolsMode(false);
+    setContentWindow(null);
   }, [previewURL]);
 
   // Handle OAuth authentication
