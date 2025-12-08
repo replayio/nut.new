@@ -1,7 +1,9 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { designPanelStore } from '~/lib/stores/designSystemStore';
 import AppView, { type ResizeSide } from './components/AppView';
+import MultiDevicePreview, { type MultiDevicePreviewRef } from './components/InfiniteCanvas/MultiDevicePreview';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
 import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
@@ -17,9 +19,11 @@ export function getCurrentIFrame() {
 
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const multiDevicePreviewRef = useRef<MultiDevicePreviewRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isMobile } = useIsMobile();
+  const isMouseOverPreviewRef = useRef(false);
 
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -52,21 +56,26 @@ export const Preview = memo(() => {
   gCurrentIFrameRef = iframeRef;
 
   const reloadPreview = (route = '') => {
-    if (iframeRef.current) {
+    if (isDeviceModeOn && multiDevicePreviewRef.current) {
+      multiDevicePreviewRef.current.reloadAll();
+    } else if (iframeRef.current) {
       iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
   };
 
-  // Send postMessage to control element picker in iframe
+  // Send postMessage to control element picker in iframe(s)
   const toggleElementPicker = (enabled: boolean) => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        {
-          type: 'ELEMENT_PICKER_CONTROL',
-          enabled,
-        },
-        '*',
-      );
+    const message = {
+      type: 'ELEMENT_PICKER_CONTROL',
+      enabled,
+    };
+
+    if (isDeviceModeOn && multiDevicePreviewRef.current) {
+      // Send to all iframes in device mode
+      multiDevicePreviewRef.current.postMessageToAll(message);
+    } else if (iframeRef.current?.contentWindow) {
+      // Send to single iframe in responsive mode
+      iframeRef.current.contentWindow.postMessage(message, '*');
     } else {
       console.warn('[Preview] Cannot send message - iframe not ready');
     }
@@ -82,7 +91,17 @@ export const Preview = memo(() => {
           tree: event.data.react.tree,
         });
         setIsElementPickerEnabled(false);
+
+        // Disable element picker on all iframes after picking
+        const disableMessage = { type: 'ELEMENT_PICKER_CONTROL', enabled: false };
+        if (multiDevicePreviewRef.current) {
+          multiDevicePreviewRef.current.postMessageToAll(disableMessage);
+        }
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage(disableMessage, '*');
+        }
       } else if (event.data.type === 'ELEMENT_PICKER_STATUS') {
+        // Status update from iframe
       } else if (event.data.type === 'ELEMENT_PICKER_READY' && event.data.source === 'element-picker') {
         setIsElementPickerReady(true);
       }
@@ -210,6 +229,57 @@ export const Preview = memo(() => {
     };
   }, []);
 
+  // Prevent back navigation (two-finger swipe) when over preview
+  useEffect(() => {
+    // Push a state to track navigation
+    window.history.pushState({ preventBack: true }, '');
+
+    let isRestoringState = false;
+
+    const handlePopState = (_event: PopStateEvent) => {
+      if (isRestoringState) {
+        isRestoringState = false;
+        return;
+      }
+
+      const themeChanges = designPanelStore.themeChanges.get();
+      const hasUnsavedChanges = themeChanges.hasChanges;
+
+      if (isMouseOverPreviewRef.current && hasUnsavedChanges) {
+        const confirmed = window.confirm(
+          'You have unsaved changes in the design panel. Are you sure you want to navigate away?',
+        );
+        if (!confirmed) {
+          isRestoringState = true;
+          window.history.pushState({ preventBack: true }, '');
+          return;
+        }
+      } else if (isMouseOverPreviewRef.current) {
+        const confirmed = window.confirm('Are you sure you want to navigate away?');
+        if (!confirmed) {
+          isRestoringState = true;
+          window.history.pushState({ preventBack: true }, '');
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Track mouse position over preview area
+  const handleMouseEnter = () => {
+    isMouseOverPreviewRef.current = true;
+  };
+
+  const handleMouseLeave = () => {
+    isMouseOverPreviewRef.current = false;
+  };
+
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
       {isPortDropdownOpen && (
@@ -281,15 +351,23 @@ export const Preview = memo(() => {
         )}
       </div>
 
-      <div className="flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 flex justify-center items-center overflow-auto">
-        <AppView
-          isDeviceModeOn={isDeviceModeOn}
-          iframeRef={iframeRef}
-          iframeUrl={iframeUrl ?? ''}
-          previewURL={url}
-          startResizing={startResizing}
-          widthPercent={widthPercent}
-        />
+      <div
+        className={`flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 ${isDeviceModeOn ? 'overflow-hidden' : 'flex justify-center items-center overflow-auto'}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {isDeviceModeOn ? (
+          <MultiDevicePreview ref={multiDevicePreviewRef} iframeUrl={iframeUrl ?? ''} />
+        ) : (
+          <AppView
+            isDeviceModeOn={isDeviceModeOn}
+            iframeRef={iframeRef}
+            iframeUrl={iframeUrl ?? ''}
+            previewURL={url}
+            startResizing={startResizing}
+            widthPercent={widthPercent}
+          />
+        )}
       </div>
     </div>
   );
