@@ -101,25 +101,20 @@ export function Header() {
       )}
 
       {/* Desktop view - show ClientAuth directly */}
-      {(!isSmallViewport || chatStarted || user) && (
-        <ClientOnly>
-          {() => (
-            <Suspense
-              fallback={
-                <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor gap-2" />
-              }
-            >
-              <div className="flex items-center gap-3">
-                <ThemeSwitch />
-                <ClientAuth />
-              </div>
-            </Suspense>
-          )}
-        </ClientOnly>
-      )}
-
-      {/* Mobile view - show menu icon with dropdown */}
-      {isSmallViewport && !chatStarted && !user && <MobileMenu handleScrollToSection={handleScrollToSection} />}
+      <ClientOnly>
+        {() => (
+          <Suspense
+            fallback={
+              <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor gap-2" />
+            }
+          >
+            <div className="flex items-center gap-3">
+              <ThemeSwitch />
+              <ClientAuth />
+            </div>
+          </Suspense>
+        )}
+      </ClientOnly>
     </header>
   );
 }
