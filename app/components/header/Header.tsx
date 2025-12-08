@@ -21,7 +21,6 @@ import { PanelLeft } from '~/components/ui/Icon';
 import { useEffect } from 'react';
 import { useLocation } from '@remix-run/react';
 // import { NavigationMenuComponent } from '~/components/header/components/NavigationMenu';
-import { MobileMenu } from '~/components/header/components/MobileMenu';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 export function Header() {
@@ -33,13 +32,6 @@ export function Header() {
   const repositoryId = useStore(workbenchStore.pendingRepositoryId);
   const [history, setHistory] = useState<AppSummary[]>([]);
   const location = useLocation();
-
-  const handleScrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   const fetchHistory = async () => {
     try {
