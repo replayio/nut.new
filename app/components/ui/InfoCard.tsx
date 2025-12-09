@@ -139,17 +139,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
               </h3>
               {description && (
                 <WithTooltip tooltip={description} maxWidth={400}>
-                  <p className="text-sm mt-1 truncate text-bolt-elements-textSecondary">{`Checking if TooltipProvider is needed. Searching for InfoCard usage:
-Updated the InfoCard component to match the BugReportComponent. Changes:
-Added WithTooltip import — Imported the tooltip component
-Wrapped description with tooltip — Wrapped the description paragraph with WithTooltip to show the full text on hover
-Added truncation — Added the truncate class to limit the description to one line
-Conditional rendering — Only render the tooltip if description exists
-The description now:
-Shows only one line with an ellipsis (truncate)
-Displays the full description in a tooltip on hover
-Uses a max width of 400px for the tooltip
-Since BaseChat.tsx already wraps the content with TooltipProvider (line 539), the tooltip should work correctly. The implementation matches the BugReportComponent pattern.`}</p>
+                  <p className="text-sm mt-1 truncate text-bolt-elements-textSecondary">{description}</p>
                 </WithTooltip>
               )}
             </div>
