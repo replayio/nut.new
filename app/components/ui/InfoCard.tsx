@@ -7,6 +7,7 @@ import { formatPascalCaseName } from '~/utils/names';
 import { BugReportComponent } from '~/components/chat/BugReportComponent';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import WithTooltip from './Tooltip';
 
 const infoCardVariants = cva('flex items-start gap-3 rounded-2xl border p-4 transition-colors', {
   variants: {
@@ -136,7 +137,21 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
               <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
                 {title ? formatPascalCaseName(title) : ''}
               </h3>
-              <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
+              {description && (
+                <WithTooltip tooltip={description} maxWidth={400}>
+                  <p className="text-sm mt-1 truncate text-bolt-elements-textSecondary">{`Checking if TooltipProvider is needed. Searching for InfoCard usage:
+Updated the InfoCard component to match the BugReportComponent. Changes:
+Added WithTooltip import — Imported the tooltip component
+Wrapped description with tooltip — Wrapped the description paragraph with WithTooltip to show the full text on hover
+Added truncation — Added the truncate class to limit the description to one line
+Conditional rendering — Only render the tooltip if description exists
+The description now:
+Shows only one line with an ellipsis (truncate)
+Displays the full description in a tooltip on hover
+Uses a max width of 400px for the tooltip
+Since BaseChat.tsx already wraps the content with TooltipProvider (line 539), the tooltip should work correctly. The implementation matches the BugReportComponent pattern.`}</p>
+                </WithTooltip>
+              )}
             </div>
 
             {/* Action Button */}
