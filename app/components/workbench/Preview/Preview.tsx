@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { setIsElementPickerEnabled, setIsElementPickerReady } from '~/lib/stores/elementPicker';
 import AppView, { type ResizeSide } from './components/AppView';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
@@ -51,6 +52,8 @@ export const Preview = memo(() => {
     if (iframeRef.current) {
       iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
+    setIsElementPickerReady(false);
+    setIsElementPickerEnabled(false);
   };
 
   useEffect(() => {
@@ -63,6 +66,8 @@ export const Preview = memo(() => {
 
     setUrl(previewURL);
     setIframeUrl(previewURL);
+    setIsElementPickerReady(false);
+    setIsElementPickerEnabled(false);
   }, [previewURL]);
 
   // Handle OAuth authentication

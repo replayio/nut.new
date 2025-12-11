@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { classNames } from '~/utils/classNames';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
@@ -34,6 +34,7 @@ import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 import { Crosshair, X, Palette, Plus, MousePointerClickIcon } from 'lucide-react';
 import { buildAccessStore } from '~/lib/stores/buildAccess';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
+import { elementPickerStore, setIsElementPickerEnabled, setIsElementPickerReady } from '~/lib/stores/elementPicker';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
 
 // const AudioWaveIcon = () => (
@@ -118,8 +119,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasBuildAccess = useStore(buildAccessStore.hasAccess);
   const isDesignPanelVisible = useStore(designPanelStore.isVisible);
   const { isMobile } = useIsMobile();
-  const [isElementPickerEnabled, setIsElementPickerEnabled] = useState(false);
-  const [isElementPickerReady, setIsElementPickerReady] = useState(false);
+  const isElementPickerEnabled = useStore(elementPickerStore.isEnabled);
+  const isElementPickerReady = useStore(elementPickerStore.isReady);
 
   // Focus textarea if URL has focus=true parameter
   useEffect(() => {
