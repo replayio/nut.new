@@ -692,28 +692,38 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   <Palette size={18} />
                 </button>
               </WithTooltip>
-              {isElementPickerReady && !isMobile && (
-                <TooltipProvider>
-                  <WithTooltip
-                    tooltip={isElementPickerEnabled ? 'Stop selecting element' : 'Select element in app preview'}
-                  >
-                    <button
-                      className={classNames(
-                        'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
-                        isElementPickerEnabled
+              {!isMobile && (
+                <WithTooltip
+                  tooltip={
+                    !isElementPickerReady || isMobile
+                      ? 'Element picker not available'
+                      : isElementPickerEnabled
+                        ? 'Stop selecting element'
+                        : 'Select element in app preview'
+                  }
+                >
+                  <button
+                    className={classNames(
+                      'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
+                      !isElementPickerReady || isMobile
+                        ? 'border-gray-300 dark:border-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
+                        : isElementPickerEnabled
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-500'
                           : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
-                      )}
-                      onClick={() => {
-                        const newState = !isElementPickerEnabled;
-                        setIsElementPickerEnabled(newState);
-                        toggleElementPicker(newState);
-                      }}
-                    >
-                      <MousePointerClickIcon size={18} />
-                    </button>
-                  </WithTooltip>
-                </TooltipProvider>
+                    )}
+                    onClick={() => {
+                      if (!isElementPickerReady || isMobile) {
+                        return;
+                      }
+                      const newState = !isElementPickerEnabled;
+                      setIsElementPickerEnabled(newState);
+                      toggleElementPicker(newState);
+                    }}
+                    disabled={!isElementPickerReady || isMobile}
+                  >
+                    <MousePointerClickIcon size={18} />
+                  </button>
+                </WithTooltip>
               )}
             </TooltipProvider>
           )}
