@@ -248,7 +248,12 @@ export function parseAppSummaryMessage(message: Message): AppSummary | undefined
 }
 
 export function isFeatureStatusImplemented(status?: AppFeatureStatus) {
-  return status && (status === AppFeatureStatus.Implemented || status === AppFeatureStatus.Failed || status === AppFeatureStatus.Canceled);
+  return (
+    status &&
+    (status === AppFeatureStatus.Implemented ||
+      status === AppFeatureStatus.Failed ||
+      status === AppFeatureStatus.Canceled)
+  );
 }
 
 // Secret which controls whether users must be logged in.
