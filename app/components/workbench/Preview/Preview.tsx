@@ -2,14 +2,14 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
+import { setIsElementPickerEnabled, setIsElementPickerReady } from '~/lib/stores/elementPicker';
 import AppView, { type ResizeSide } from './components/AppView';
 import MultiDevicePreview, { type MultiDevicePreviewRef } from './components/InfiniteCanvas/MultiDevicePreview';
 import useViewport from '~/lib/hooks';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
-import { RotateCw, Crosshair, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
+import { RotateCw, MonitorSmartphone, Maximize2, Minimize2 } from '~/components/ui/Icon';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
 
 let gCurrentIFrameRef: React.RefObject<HTMLIFrameElement> | undefined;
 
@@ -27,8 +27,6 @@ export const Preview = memo(() => {
 
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isElementPickerEnabled, setIsElementPickerEnabled] = useState(false);
-  const [isElementPickerReady, setIsElementPickerReady] = useState(false);
 
   const [url, setUrl] = useState('');
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
@@ -61,6 +59,8 @@ export const Preview = memo(() => {
     } else if (iframeRef.current) {
       iframeRef.current.src = iframeUrl + route + '?forceReload=' + Date.now();
     }
+    setIsElementPickerReady(false);
+    setIsElementPickerEnabled(false);
   };
 
   // Send postMessage to control element picker in iframe(s)
@@ -122,6 +122,7 @@ export const Preview = memo(() => {
     setUrl(previewURL);
     setIframeUrl(previewURL);
     setIsElementPickerReady(false);
+    setIsElementPickerEnabled(false);
   }, [previewURL]);
 
   // Handle OAuth authentication
@@ -287,21 +288,6 @@ export const Preview = memo(() => {
       )}
       <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 p-3 flex items-center gap-2 shadow-sm">
         <IconButton icon={<RotateCw size={20} />} onClick={() => reloadPreview()} />
-        {isElementPickerReady && !isMobile && (
-          <IconButton
-            className={classNames({
-              'bg-bolt-elements-background-depth-3': isElementPickerEnabled,
-            })}
-            iconClassName={isElementPickerEnabled ? 'text-[#4da3ff]' : ''}
-            icon={<Crosshair size={20} />}
-            onClick={() => {
-              const newState = !isElementPickerEnabled;
-              setIsElementPickerEnabled(newState);
-              toggleElementPicker(newState);
-            }}
-            title="Select element on page"
-          />
-        )}
         <div
           className={classNames(
             'flex items-center gap-2 flex-grow bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textSecondary px-4 py-2 text-sm hover:bg-bolt-elements-background-depth-3 hover:border-bolt-elements-borderColor focus-within:bg-bolt-elements-background-depth-3 focus-within:border-blue-500/50 focus-within:text-bolt-elements-textPrimary transition-all duration-200 shadow-sm hover:shadow-md',

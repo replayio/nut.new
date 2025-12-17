@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from '@remix-run/react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
 import { referenceApps } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { ChatMode } from '~/lib/replay/SendChatMessage';
 
 interface AppTemplatesProps {
   sendMessage: (params: ChatMessageParams) => void;
@@ -10,6 +12,39 @@ interface AppTemplatesProps {
 
 const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>('All');
+  const [searchParams] = useSearchParams();
+  const hasHandledAppPath = useRef(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
+
+  // Handle appPath URL parameter - automatically trigger customize action
+  useEffect(() => {
+    if (hasHandledAppPath.current) {
+      return;
+    }
+
+    const appPathParam = searchParams.get('appPath');
+    if (!appPathParam) {
+      return;
+    }
+
+    // Find the matching app in referenceApps
+    const matchingApp = referenceApps.find((app) => app.appPath === appPathParam);
+    if (!matchingApp || !matchingApp.appPath) {
+      return;
+    }
+
+    // Mark as handled to prevent multiple triggers
+    hasHandledAppPath.current = true;
+
+    // Automatically trigger the customize action
+    sendMessage({
+      messageInput: `Build me a new app based on '${matchingApp.appName}'`,
+      chatMode: ChatMode.UserMessage,
+      referenceAppPath: matchingApp.appPath,
+    });
+  }, [searchParams, sendMessage]);
 
   const categories = useMemo(() => {
     const sectionCategories: IntroSectionCategory[] = [];
@@ -37,16 +72,57 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     return referenceApps.filter((app) => app.categories.some((category) => category === selectedCategory));
   }, [selectedCategory]);
 
+  // Drag-to-scroll handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) {
+      return;
+    }
+
+    // Don't start dragging if clicking on a button or interactive element
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'BUTTON' || target.closest('button')) {
+      return;
+    }
+
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.pageX - scrollContainerRef.current.offsetLeft,
+      scrollLeft: scrollContainerRef.current.scrollLeft,
+    };
+
+    // Prevent text selection during drag
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollContainerRef.current) {
+      return;
+    }
+
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - dragStartRef.current.x) * 1.5; // Scroll speed multiplier
+    scrollContainerRef.current.scrollLeft = dragStartRef.current.scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div id="showcase-gallery" className="w-full mx-auto mt-24 mb-4">
       <div className="max-w-[1337px] mx-auto flex flex-col mb-12 animate-fade-in animation-delay-100">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-          <span className="text-bolt-elements-textHeading">Not sure</span>
+          <span className="text-bolt-elements-textHeading">Start with</span>
           <br />
-          <span className="text-rose-500 dark:text-rose-400"> where to start?</span>
+          <span className="text-rose-500 dark:text-rose-400">a fully working app</span>
         </h1>
         <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
-          Customize one of our reference apps to exactly what you need.
+          Ready to use out-of-the-box (but can be aligned to your needs)
         </p>
       </div>
 
@@ -58,7 +134,20 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
 
       {/* Horizontal scrolling card container */}
       {filteredApps.length > 0 && (
-        <div className="overflow-x-auto pb-4 px-2 animate-fade-in animation-delay-400 mb-8">
+        <div
+          ref={scrollContainerRef}
+          className={`overflow-x-auto pb-4 px-2 animate-fade-in animation-delay-400 mb-8 ${
+            isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
+          }`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            scrollbarWidth: 'thin',
+            scrollBehavior: isDragging ? 'auto' : 'smooth',
+          }}
+        >
           <div className="flex gap-6" style={{ minWidth: 'min-content' }}>
             {filteredApps.map((app) => (
               <ReferenceAppCard

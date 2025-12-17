@@ -7,12 +7,13 @@ import { formatPascalCaseName } from '~/utils/names';
 import { BugReportComponent } from '~/components/chat/BugReportComponent';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import WithTooltip from './Tooltip';
 
 const infoCardVariants = cva('flex items-start gap-3 rounded-2xl border p-4 transition-colors', {
   variants: {
     variant: {
       default: 'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor',
-      active: 'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColorActive border-2',
+      active: 'bg-bolt-elements-background-depth-2 border-green-500 border-2',
       warning: 'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColorWarning border-2',
     },
     size: {
@@ -136,7 +137,11 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
               <h3 className="font-semibold text-sm leading-tight text-bolt-elements-textHeading">
                 {title ? formatPascalCaseName(title) : ''}
               </h3>
-              <p className="text-sm mt-1 leading-relaxed text-bolt-elements-textSecondary">{description}</p>
+              {description && (
+                <WithTooltip tooltip={description} maxWidth={400}>
+                  <p className="text-sm mt-1 truncate text-bolt-elements-textSecondary">{description}</p>
+                </WithTooltip>
+              )}
             </div>
 
             {/* Action Button */}
