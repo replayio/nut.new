@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { REFERENCE_APP_PLACEHOLDER_PHOTO } from '~/lib/replay/ReferenceApps';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { classNames } from '~/utils/classNames';
 import { assert } from '~/utils/nut';
@@ -36,7 +37,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
     });
   };
 
-  const displayPhoto = photo || 'https://placehold.co/800x450/1e293b/94a3b8?text=Coming+Soon';
+  const displayPhoto = photo || REFERENCE_APP_PLACEHOLDER_PHOTO;
 
   return (
     <div

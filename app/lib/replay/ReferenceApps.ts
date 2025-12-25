@@ -1,6 +1,9 @@
 // Describes all the reference apps that can be used for customization
 // during app building.
 
+// Placeholder image URL for reference apps without a screenshot
+export const REFERENCE_APP_PLACEHOLDER_PHOTO = 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Photo';
+
 // Release stage of a reference app.
 export enum ReferenceAppStage {
   Alpha = 'Alpha',

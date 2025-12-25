@@ -1,5 +1,6 @@
 import React from 'react';
 import type { LandingPageIndexEntry } from '~/lib/replay/ReferenceApps';
+import { REFERENCE_APP_PLACEHOLDER_PHOTO } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { assert } from '~/utils/nut';
@@ -25,7 +26,7 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
     });
   };
 
-  const displayPhoto = app.screenshotURL || 'https://placehold.co/800x450/1e293b/94a3b8?text=Coming+Soon';
+  const displayPhoto = app.screenshotURL || REFERENCE_APP_PLACEHOLDER_PHOTO;
 
   return (
     <div className="max-w-[1337px] mx-auto mt-8 mb-8 animate-fade-in">
