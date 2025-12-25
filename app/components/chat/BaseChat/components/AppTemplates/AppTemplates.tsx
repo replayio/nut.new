@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from '@remix-run/react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
-import { referenceApps } from '~/lib/replay/ReferenceApps';
+import { fetchReferenceApps, type LandingPageIndexEntry } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
@@ -17,10 +17,30 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
+  const [referenceApps, setReferenceApps] = useState<LandingPageIndexEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch reference apps on mount
+  useEffect(() => {
+    const loadReferenceApps = async () => {
+      try {
+        setIsLoading(true);
+        const apps = await fetchReferenceApps();
+        // Transform the API response to match the component's expected format
+        setReferenceApps(apps);
+      } catch (error) {
+        console.error('Failed to fetch reference apps:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadReferenceApps();
+  }, []);
 
   // Handle appPath URL parameter - automatically trigger customize action
   useEffect(() => {
-    if (hasHandledAppPath.current) {
+    if (hasHandledAppPath.current || referenceApps.length === 0) {
       return;
     }
 
@@ -30,8 +50,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     }
 
     // Find the matching app in referenceApps
-    const matchingApp = referenceApps.find((app) => app.appPath === appPathParam);
-    if (!matchingApp || !matchingApp.appPath) {
+    const matchingApp = referenceApps.find((app) => app.referenceAppPath === appPathParam);
+    if (!matchingApp) {
       return;
     }
 
@@ -40,27 +60,27 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
 
     // Automatically trigger the customize action
     sendMessage({
-      messageInput: `Build me a new app based on '${matchingApp.appName}'`,
+      messageInput: `Build me a new app based on '${matchingApp.name}'`,
       chatMode: ChatMode.UserMessage,
-      referenceAppPath: matchingApp.appPath,
+      referenceAppPath: matchingApp.referenceAppPath,
     });
-  }, [searchParams, sendMessage]);
+  }, [searchParams, sendMessage, referenceApps]);
 
   const categories = useMemo(() => {
     const sectionCategories: IntroSectionCategory[] = [];
     sectionCategories.push({ name: 'All', count: referenceApps.length });
-    for (const { categories } of referenceApps) {
-      for (const category of categories) {
-        const existing = sectionCategories.find((c) => c.name === category);
+    for (const { tags } of referenceApps) {
+      for (const tag of tags) {
+        const existing = sectionCategories.find((c) => c.name === tag);
         if (existing) {
           existing.count++;
         } else {
-          sectionCategories.push({ name: category, count: 1 });
+          sectionCategories.push({ name: tag, count: 1 });
         }
       }
     }
     return sectionCategories;
-  }, []);
+  }, [referenceApps]);
 
   const filteredApps = useMemo(() => {
     if (!selectedCategory) {
@@ -69,8 +89,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     if (selectedCategory === 'All') {
       return referenceApps;
     }
-    return referenceApps.filter((app) => app.categories.some((category) => category === selectedCategory));
-  }, [selectedCategory]);
+    return referenceApps.filter((app) => app.tags.some((category) => category === selectedCategory));
+  }, [selectedCategory, referenceApps]);
 
   // Drag-to-scroll handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -126,11 +146,20 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
         </p>
       </div>
 
-      <CategorySelector
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-bolt-elements-borderColor border-t-rose-500 rounded-full animate-spin" />
+            <p className="text-bolt-elements-textSecondary">Loading apps...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <CategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={setSelectedCategory}
+          />
 
       {/* Horizontal scrolling card container */}
       {filteredApps.length > 0 && (
@@ -151,17 +180,19 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
           <div className="flex gap-6" style={{ minWidth: 'min-content' }}>
             {filteredApps.map((app) => (
               <ReferenceAppCard
-                key={app.appName}
-                appName={app.appName}
-                description={app.description}
+                key={app.name}
+                appName={app.name}
+                description={app.shortDescription}
                 bulletPoints={app.bulletPoints}
-                photo={app.photo}
-                appPath={app.appPath}
+                photo={app.screenshotURL}
+                appPath={app.referenceAppPath}
                 sendMessage={sendMessage}
               />
             ))}
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
