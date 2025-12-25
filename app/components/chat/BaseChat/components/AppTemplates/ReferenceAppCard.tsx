@@ -13,6 +13,7 @@ interface ReferenceAppCardProps {
   photoOnLeft?: boolean;
   sendMessage: (params: ChatMessageParams) => void;
   className?: string;
+  onClick?: () => void;
 }
 
 export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
@@ -23,6 +24,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   appPath,
   sendMessage,
   className,
+  onClick,
 }) => {
   const handleCustomize = async () => {
     assert(appPath, 'App path is required');
@@ -38,8 +40,11 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
 
   return (
     <div
+      onClick={onClick}
+      data-card-clickable={onClick ? 'true' : undefined}
       className={classNames(
         'group relative overflow-hidden rounded-lg flex flex-col justify-end items-start gap-4 p-4 border block w-full h-[369px] aspect-video border-[var(--base-border,#E5E5E5)] transition-all duration-300',
+        onClick ? 'cursor-pointer hover:border-rose-500 hover:shadow-lg' : '',
         className,
       )}
     >

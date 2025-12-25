@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from '@remix-run/react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
+import { ReferenceAppLandingPage } from './ReferenceAppLandingPage';
 import { fetchReferenceApps, type LandingPageIndexEntry, ReferenceAppStage } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
@@ -21,6 +22,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
   const [referenceApps, setReferenceApps] = useState<LandingPageIndexEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedApp, setSelectedApp] = useState<LandingPageIndexEntry | null>(null);
+  const landingPageRef = useRef<HTMLDivElement>(null);
 
   // Fetch reference apps on mount
   useEffect(() => {
@@ -118,9 +121,9 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
       return;
     }
 
-    // Don't start dragging if clicking on a button or interactive element
+    // Don't start dragging if clicking on a button, interactive element, or card
     const target = e.target as HTMLElement;
-    if (target.tagName === 'BUTTON' || target.closest('button')) {
+    if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('[data-card-clickable]')) {
       return;
     }
 
@@ -211,9 +214,27 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                 photo={app.screenshotURL}
                 appPath={app.referenceAppPath}
                 sendMessage={sendMessage}
+                onClick={() => {
+                  setSelectedApp(app);
+                  // Scroll to landing page after state update
+                  setTimeout(() => {
+                    landingPageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                }}
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Reference App Landing Page */}
+      {selectedApp && (
+        <div ref={landingPageRef}>
+          <ReferenceAppLandingPage
+            app={selectedApp}
+            sendMessage={sendMessage}
+            onClose={() => setSelectedApp(null)}
+          />
         </div>
       )}
         </>
