@@ -10,15 +10,19 @@ interface CategorySelectorProps {
   categories: IntroSectionCategory[];
   selectedCategory?: string;
   onCategorySelect?: (categoryName: string | undefined) => void;
+  showAlpha: boolean;
+  onShowAlphaChange: (showAlpha: boolean) => void;
 }
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
   categories,
   selectedCategory,
   onCategorySelect,
+  showAlpha,
+  onShowAlphaChange,
 }) => {
   return (
-    <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in animation-delay-300">
+    <div className="flex flex-wrap justify-center items-center gap-3 mb-8 animate-fade-in animation-delay-300">
       {categories.map((category) => {
         const isSelected = selectedCategory === category.name;
         return (
@@ -37,6 +41,15 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           </button>
         );
       })}
+      <label className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-bolt-elements-textHeading cursor-pointer hover:bg-purple-100/50 dark:hover:bg-purple-500/10 transition-all duration-200">
+        <input
+          type="checkbox"
+          checked={showAlpha}
+          onChange={(e) => onShowAlphaChange(e.target.checked)}
+          className="w-4 h-4 rounded border-gray-300 text-rose-500 focus:ring-rose-500 focus:ring-2 cursor-pointer"
+        />
+        <span>Include Alpha Apps</span>
+      </label>
     </div>
   );
 };

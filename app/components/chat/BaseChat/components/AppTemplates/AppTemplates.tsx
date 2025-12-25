@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from '@remix-run/react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
-import { fetchReferenceApps, type LandingPageIndexEntry } from '~/lib/replay/ReferenceApps';
+import { fetchReferenceApps, type LandingPageIndexEntry, ReferenceAppStage } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
@@ -12,6 +12,7 @@ interface AppTemplatesProps {
 
 const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>('All');
+  const [showAlpha, setShowAlpha] = useState(false);
   const [searchParams] = useSearchParams();
   const hasHandledAppPath = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -66,10 +67,18 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     });
   }, [searchParams, sendMessage, referenceApps]);
 
+  // Filter apps by stage first (before calculating categories)
+  const stageFilteredApps = useMemo(() => {
+    if (showAlpha) {
+      return referenceApps;
+    }
+    return referenceApps.filter((app) => app.stage !== ReferenceAppStage.Alpha);
+  }, [referenceApps, showAlpha]);
+
   const categories = useMemo(() => {
     const sectionCategories: IntroSectionCategory[] = [];
-    sectionCategories.push({ name: 'All', count: referenceApps.length });
-    for (const { tags } of referenceApps) {
+    sectionCategories.push({ name: 'All', count: stageFilteredApps.length });
+    for (const { tags } of stageFilteredApps) {
       for (const tag of tags) {
         const existing = sectionCategories.find((c) => c.name === tag);
         if (existing) {
@@ -80,17 +89,17 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
       }
     }
     return sectionCategories;
-  }, [referenceApps]);
+  }, [stageFilteredApps]);
 
   const filteredApps = useMemo(() => {
     if (!selectedCategory) {
       return [];
     }
     if (selectedCategory === 'All') {
-      return referenceApps;
+      return stageFilteredApps;
     }
-    return referenceApps.filter((app) => app.tags.some((category) => category === selectedCategory));
-  }, [selectedCategory, referenceApps]);
+    return stageFilteredApps.filter((app) => app.tags.some((category) => category === selectedCategory));
+  }, [selectedCategory, stageFilteredApps]);
 
   // Drag-to-scroll handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -159,6 +168,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
             categories={categories}
             selectedCategory={selectedCategory}
             onCategorySelect={setSelectedCategory}
+            showAlpha={showAlpha}
+            onShowAlphaChange={setShowAlpha}
           />
 
       {/* Horizontal scrolling card container */}

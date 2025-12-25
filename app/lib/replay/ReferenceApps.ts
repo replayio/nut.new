@@ -2,7 +2,7 @@
 // during app building.
 
 // Release stage of a reference app.
-enum ReferenceAppStage {
+export enum ReferenceAppStage {
   Alpha = 'Alpha',
   Beta = 'Beta',
   Release = 'Release',
