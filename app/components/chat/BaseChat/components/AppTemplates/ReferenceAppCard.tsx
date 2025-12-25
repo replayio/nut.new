@@ -35,7 +35,6 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   };
 
   const displayPhoto = photo || 'https://placehold.co/800x450/1e293b/94a3b8?text=Coming+Soon';
-  const isClickable = !!appPath;
 
   return (
     <div
@@ -119,19 +118,6 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
           </div>
         )}
       </div>
-
-      {/* Hover state: Buttons - centered */}
-      {isClickable && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto">
-          {/* Customize it button */}
-          <button
-            onClick={handleCustomize}
-            className="px-6 py-3 bg-rose-500 text-white font-semibold rounded-full hover:bg-rose-600 transition-colors duration-200 whitespace-nowrap"
-          >
-            Customize it
-          </button>
-        </div>
-      )}
     </div>
   );
 };

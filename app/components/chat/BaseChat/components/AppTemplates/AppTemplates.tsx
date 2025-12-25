@@ -13,6 +13,7 @@ interface AppTemplatesProps {
 const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>('All');
   const [showAlpha, setShowAlpha] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchParams] = useSearchParams();
   const hasHandledAppPath = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -92,14 +93,24 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   }, [stageFilteredApps]);
 
   const filteredApps = useMemo(() => {
+    let apps = stageFilteredApps;
+
+    // Filter by category
     if (!selectedCategory) {
       return [];
     }
-    if (selectedCategory === 'All') {
-      return stageFilteredApps;
+    if (selectedCategory !== 'All') {
+      apps = apps.filter((app) => app.tags.some((category) => category === selectedCategory));
     }
-    return stageFilteredApps.filter((app) => app.tags.some((category) => category === selectedCategory));
-  }, [selectedCategory, stageFilteredApps]);
+
+    // Filter by search term (case-insensitive match on app names)
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      apps = apps.filter((app) => app.name.toLowerCase().includes(searchLower));
+    }
+
+    return apps;
+  }, [selectedCategory, stageFilteredApps, searchTerm]);
 
   // Drag-to-scroll handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -170,6 +181,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
             onCategorySelect={setSelectedCategory}
             showAlpha={showAlpha}
             onShowAlphaChange={setShowAlpha}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
           />
 
       {/* Horizontal scrolling card container */}
