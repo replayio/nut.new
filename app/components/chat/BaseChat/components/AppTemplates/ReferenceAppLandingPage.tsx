@@ -189,14 +189,33 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
                     <p className="text-bolt-elements-textSecondary">{feature.description}</p>
                     {feature.artifactURLs && feature.artifactURLs.length > 0 && (
                       <div className="mt-2 flex gap-2 flex-wrap">
-                        {feature.artifactURLs.map((url, urlIndex) => (
-                          <img
-                            key={urlIndex}
-                            src={url}
-                            alt={feature.name}
-                            className="max-w-xs rounded-lg border border-bolt-elements-borderColor"
-                          />
-                        ))}
+                        {feature.artifactURLs.map((url, urlIndex) => {
+                          const isVideo = url.toLowerCase().endsWith('.webm') || 
+                                         url.toLowerCase().endsWith('.mp4') || 
+                                         url.toLowerCase().endsWith('.mov');
+                          
+                          return isVideo ? (
+                            <div key={urlIndex} className="relative max-w-xs">
+                              <video
+                                src={url}
+                                controls={true}
+                                playsInline
+                                preload="metadata"
+                                className="w-full rounded-lg border border-bolt-elements-borderColor"
+                                style={{ display: 'block', height: 'auto' }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          ) : (
+                            <img
+                              key={urlIndex}
+                              src={url}
+                              alt={feature.name}
+                              className="max-w-xs rounded-lg border border-bolt-elements-borderColor"
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -245,16 +264,6 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
             >
               Build me a new app based on this
             </button>
-            {app.landingPageURL && (
-              <a
-                href={app.landingPageURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-bolt-elements-backgroundHover hover:bg-bolt-elements-backgroundHover/80 text-bolt-elements-textHeading font-medium rounded-lg border border-bolt-elements-borderColor transition-colors"
-              >
-                View Live Demo
-              </a>
-            )}
           </div>
         </div>
       </div>
