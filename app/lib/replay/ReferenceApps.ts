@@ -33,10 +33,10 @@ export interface LandingPageIndexEntry {
 // A kind of feature which can be in the landing page content.
 enum LandingPageFeatureKind {
   // Show a page of the app and its functionality.
-  Page = "Page",
+  Page = 'Page',
 
   // Integration with an external service.
-  Integration = "Integration",
+  Integration = 'Integration',
 }
 
 interface LandingPageFeature {

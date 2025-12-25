@@ -11,11 +11,7 @@ interface ReferenceAppLandingPageProps {
   onClose: () => void;
 }
 
-export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = ({
-  app,
-  sendMessage,
-  onClose,
-}) => {
+export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = ({ app, sendMessage, onClose }) => {
   const [landingPageContent, setLandingPageContent] = useState<LandingPageContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,9 +87,7 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
               {error || 'Failed to load landing page content. Using basic information.'}
             </p>
             <div className="mb-6">
-              <p className="text-lg text-bolt-elements-textSecondary leading-relaxed">
-                {app.shortDescription}
-              </p>
+              <p className="text-lg text-bolt-elements-textSecondary leading-relaxed">{app.shortDescription}</p>
             </div>
             {app.bulletPoints && app.bulletPoints.length > 0 && (
               <div className="mb-6">
@@ -140,18 +134,12 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
         <div className="p-6">
           {/* Screenshot */}
           <div className="mb-6 rounded-lg overflow-hidden">
-            <img
-              src={displayPhoto}
-              alt={displayData.name}
-              className="w-full h-auto object-cover"
-            />
+            <img src={displayPhoto} alt={displayData.name} className="w-full h-auto object-cover" />
           </div>
 
           {/* Short Description */}
           <div className="mb-6">
-            <p className="text-lg text-bolt-elements-textSecondary leading-relaxed">
-              {displayData.shortDescription}
-            </p>
+            <p className="text-lg text-bolt-elements-textSecondary leading-relaxed">{displayData.shortDescription}</p>
           </div>
 
           {/* Long Description (from landing page content) */}
@@ -190,10 +178,11 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
                     {feature.artifactURLs && feature.artifactURLs.length > 0 && (
                       <div className="mt-2 flex gap-2 flex-wrap">
                         {feature.artifactURLs.map((url, urlIndex) => {
-                          const isVideo = url.toLowerCase().endsWith('.webm') || 
-                                         url.toLowerCase().endsWith('.mp4') || 
-                                         url.toLowerCase().endsWith('.mov');
-                          
+                          const isVideo =
+                            url.toLowerCase().endsWith('.webm') ||
+                            url.toLowerCase().endsWith('.mp4') ||
+                            url.toLowerCase().endsWith('.mov');
+
                           return isVideo ? (
                             <div key={urlIndex} className="relative max-w-xs">
                               <video
@@ -270,4 +259,3 @@ export const ReferenceAppLandingPage: React.FC<ReferenceAppLandingPageProps> = (
     </div>
   );
 };
-

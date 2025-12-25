@@ -188,55 +188,53 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
             onSearchChange={setSearchTerm}
           />
 
-      {/* Horizontal scrolling card container */}
-      {filteredApps.length > 0 && (
-        <div
-          ref={scrollContainerRef}
-          className={`overflow-x-auto pb-4 px-2 animate-fade-in animation-delay-400 mb-8 ${
-            isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
-          }`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-          style={{
-            scrollbarWidth: 'thin',
-            scrollBehavior: isDragging ? 'auto' : 'smooth',
-          }}
-        >
-          <div className="flex gap-6" style={{ minWidth: 'min-content' }}>
-            {filteredApps.map((app) => (
-              <ReferenceAppCard
-                key={app.name}
-                appName={app.name}
-                description={app.shortDescription}
-                bulletPoints={app.bulletPoints}
-                photo={app.screenshotURL}
-                appPath={app.referenceAppPath}
-                sendMessage={sendMessage}
-                onClick={() => {
-                  setSelectedApp(app);
-                  // Scroll to landing page after state update
-                  setTimeout(() => {
-                    landingPageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 100);
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+          {/* Horizontal scrolling card container */}
+          {filteredApps.length > 0 && (
+            <div
+              ref={scrollContainerRef}
+              className={`overflow-x-auto pb-4 px-2 animate-fade-in animation-delay-400 mb-8 ${
+                isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
+              }`}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              style={{
+                scrollbarWidth: 'thin',
+                scrollBehavior: isDragging ? 'auto' : 'smooth',
+              }}
+            >
+              <div className="flex gap-6" style={{ minWidth: 'min-content' }}>
+                {filteredApps.map((app) => (
+                  <ReferenceAppCard
+                    key={app.name}
+                    appName={app.name}
+                    description={app.shortDescription}
+                    bulletPoints={app.bulletPoints}
+                    photo={app.screenshotURL}
+                    onClick={() => {
+                      setSelectedApp(app);
+                      // Scroll to landing page after state update
+                      setTimeout(() => {
+                        landingPageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Reference App Landing Page */}
-      {selectedApp && (
-        <div ref={landingPageRef}>
-          <ReferenceAppLandingPage
-            app={selectedApp}
-            sendMessage={sendMessage}
-            onClose={() => setSelectedApp(null)}
-          />
-        </div>
-      )}
+          {/* Reference App Landing Page */}
+          {selectedApp && (
+            <div ref={landingPageRef}>
+              <ReferenceAppLandingPage
+                app={selectedApp}
+                sendMessage={sendMessage}
+                onClose={() => setSelectedApp(null)}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

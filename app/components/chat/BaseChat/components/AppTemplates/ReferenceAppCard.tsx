@@ -1,18 +1,13 @@
 import React from 'react';
-import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { REFERENCE_APP_PLACEHOLDER_PHOTO } from '~/lib/replay/ReferenceApps';
-import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { classNames } from '~/utils/classNames';
-import { assert } from '~/utils/nut';
 
 interface ReferenceAppCardProps {
   appName: string;
   description: string;
   bulletPoints?: string[];
   photo?: string;
-  appPath?: string;
   photoOnLeft?: boolean;
-  sendMessage: (params: ChatMessageParams) => void;
   className?: string;
   onClick?: () => void;
 }
@@ -22,21 +17,9 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   description,
   bulletPoints = [],
   photo,
-  appPath,
-  sendMessage,
   className,
   onClick,
 }) => {
-  const handleCustomize = async () => {
-    assert(appPath, 'App path is required');
-
-    sendMessage({
-      messageInput: `Build me a new app based on '${appName}'`,
-      chatMode: ChatMode.UserMessage,
-      referenceAppPath: appPath,
-    });
-  };
-
   const displayPhoto = photo || REFERENCE_APP_PLACEHOLDER_PHOTO;
 
   return (
