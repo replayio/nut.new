@@ -40,6 +40,7 @@ import AppTemplates from './components/AppTemplates/AppTemplates';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { DesignSystemPanel } from '~/components/panels/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignToolbar';
+import SideBar from '~/components/sidebar/side-bar.client';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -347,7 +348,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
-        {user && <ClientOnly>{() => <Menu />}</ClientOnly>}
+        {/* {user && <ClientOnly>{() => <Menu />}</ClientOnly>} */}
+        <ClientOnly>{() => <SideBar />}</ClientOnly>
         {chatStarted && !isSmallViewport && showWorkbench ? (
           <ResizablePanelGroup
             key={panelSizeKey}

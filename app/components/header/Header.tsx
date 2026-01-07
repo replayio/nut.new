@@ -4,8 +4,6 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { Suspense, useState } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
-import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
-import { IconButton } from '~/components/ui/IconButton';
 import { userStore } from '~/lib/stores/auth';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { DeployChatButton } from './components/DeployChat/DeployChatButton';
@@ -59,15 +57,6 @@ export function Header() {
       )}
     >
       <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
-        {user && (
-          <IconButton
-            onClick={() => sidebarMenuStore.toggle()}
-            data-testid="sidebar-icon"
-            icon={<PanelLeft />}
-            size="xl"
-            title="Toggle Sidebar"
-          />
-        )}
         {!user && location.pathname === '/' && (
           <a href="/">
             <div className="flex items-center gap-3">
@@ -91,22 +80,6 @@ export function Header() {
           </div>
         </div>
       )}
-
-      {/* Desktop view - show ClientAuth directly */}
-      <ClientOnly>
-        {() => (
-          <Suspense
-            fallback={
-              <div className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 animate-pulse border border-bolt-elements-borderColor gap-2" />
-            }
-          >
-            <div className="flex items-center gap-3">
-              <ThemeSwitch />
-              <ClientAuth />
-            </div>
-          </Suspense>
-        )}
-      </ClientOnly>
     </header>
   );
 }
