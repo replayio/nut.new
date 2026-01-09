@@ -221,11 +221,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
           )}
 
           {/* Reference App Modal */}
-          <ReferenceAppModal
-            app={selectedApp}
-            sendMessage={sendMessage}
-            onClose={() => setSelectedApp(null)}
-          />
+          <ReferenceAppModal app={selectedApp} sendMessage={sendMessage} onClose={() => setSelectedApp(null)} />
         </>
       )}
     </div>

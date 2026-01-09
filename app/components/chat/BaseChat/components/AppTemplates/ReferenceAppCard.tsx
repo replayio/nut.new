@@ -21,7 +21,7 @@ interface ReferenceAppCardProps {
 export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
   appName,
   description,
-  bulletPoints = [],
+  // bulletPoints = [],
   photo,
   className,
   appPath,

@@ -107,4 +107,3 @@ export const ReferenceAppModal: React.FC<ReferenceAppModalProps> = ({ app, sendM
     </AnimatePresence>
   );
 };
-
