@@ -34,13 +34,14 @@ import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { PlanUpgradeBlock } from './components/PlanUpgradeBlock';
 import AppTemplates from './components/AppTemplates/AppTemplates';
-// import Pricing from '~/components/landingPage/components/Pricing';
-// import FAQs from '~/components/landingPage/components/FAQs';
-// import Explanation from '~/components/landingPage/components/Explanation';
-import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { DesignSystemPanel } from '~/components/panels/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignToolbar';
+import { SettingsPanel } from '~/components/panels/SettingsPanel';
+import { HistoryPanel } from '~/components/panels/HistoryPanel';
+import { ChatPanel } from '~/components/panels/ChatPanel';
 import SideBar from '~/components/sidebar/side-bar.client';
+import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
+import { designPanelStore } from '~/lib/stores/designSystemStore';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -89,7 +90,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const selectedElement = useStore(workbenchStore.selectedElement);
     const repositoryId = useStore(workbenchStore.repositoryId);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
-    const isDesignPanelVisible = useStore(designPanelStore.isVisible);
+    const activePanel = useStore(sidebarPanelStore.activePanel);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const stripeSubscription = useStore(subscriptionStore.subscription);
     const isSubscriptionStoreLoaded = useStore(subscriptionStore.isLoaded);
@@ -134,6 +135,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         hasShownWorkbench.current = true;
       }
     }, [appSummary]);
+
+    // Sync designPanelStore.isVisible with sidebar panel state
+    useEffect(() => {
+      const shouldShowDesignPanel = activePanel === 'design';
+      designPanelStore.isVisible.set(shouldShowDesignPanel);
+    }, [activePanel]);
 
     useEffect(() => {
       const newCards: InfoCardData[] = [];
@@ -342,14 +349,47 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       maxHeight: TEXTAREA_MAX_HEIGHT,
     };
 
+    // Render the appropriate panel based on activePanel
+    const renderActivePanel = () => {
+      switch (activePanel) {
+        case 'design':
+          return (
+            <>
+              <DesignSystemPanel />
+              <DesignToolbar />
+            </>
+          );
+        case 'settings':
+          return <SettingsPanel />;
+        case 'history':
+          return <HistoryPanel />;
+        case 'chat':
+        default:
+          return (
+            <ChatPanel
+              messageRef={messageRef}
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles!}
+              imageDataList={imageDataList}
+              setImageDataList={setImageDataList!}
+              messageInputProps={messageInputProps}
+              infoCards={infoCards}
+              handleSendMessage={handleSendMessage}
+              onLastMessageCheckboxChange={onLastMessageCheckboxChange}
+              list={list}
+            />
+          );
+      }
+    };
+
     const baseChat = (
       <div
         ref={ref}
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
-        {/* {user && <ClientOnly>{() => <Menu />}</ClientOnly>} */}
-        <ClientOnly>{() => <SideBar />}</ClientOnly>
+        {user && !chatStarted && <ClientOnly>{() => <Menu />}</ClientOnly>}
+        {user && !isSmallViewport && chatStarted && <ClientOnly>{() => <SideBar />}</ClientOnly>}
         {chatStarted && !isSmallViewport && showWorkbench ? (
           <ResizablePanelGroup
             key={panelSizeKey}
@@ -368,49 +408,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               >
                 <div className={classNames(styles.Chat, 'flex flex-col h-full w-full')}>
                   <div className="h-full flex flex-col">
-                    <ClientOnly>
-                      {() => {
-                        if (isDesignPanelVisible) {
-                          return (
-                            <>
-                              <DesignSystemPanel />
-                              <DesignToolbar />
-                            </>
-                          );
-                        }
-
-                        return (
-                          <>
-                            <Messages
-                              ref={messageRef}
-                              onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                              sendMessage={handleSendMessage}
-                              list={list}
-                            />
-                            {infoCards && infoCards.length > 0 && (
-                              <div className="flex justify-center">
-                                <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
-                                  <StackedInfoCard
-                                    cards={infoCards}
-                                    className="w-full mb-2"
-                                    handleSendMessage={handleSendMessage}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        );
-                      }}
-                    </ClientOnly>
-                    {!isDesignPanelVisible && (
-                      <ChatPromptContainer
-                        uploadedFiles={uploadedFiles}
-                        setUploadedFiles={setUploadedFiles!}
-                        imageDataList={imageDataList}
-                        setImageDataList={setImageDataList!}
-                        messageInputProps={messageInputProps}
-                      />
-                    )}
+                    <ClientOnly>{() => renderActivePanel()}</ClientOnly>
                   </div>
                 </div>
               </div>
@@ -461,36 +459,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       return null;
                     }
 
-                    if (isDesignPanelVisible) {
-                      return (
-                        <>
-                          <DesignSystemPanel />
-                          <DesignToolbar />
-                        </>
-                      );
-                    }
-
-                    return (
-                      <>
-                        <Messages
-                          ref={messageRef}
-                          onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-                          sendMessage={handleSendMessage}
-                          list={list}
-                        />
-                        {infoCards && infoCards.length > 0 && (
-                          <div className="flex justify-center">
-                            <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
-                              <StackedInfoCard
-                                cards={infoCards}
-                                className="w-full mb-2"
-                                handleSendMessage={handleSendMessage}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    );
+                    return renderActivePanel();
                   }}
                 </ClientOnly>
                 {(() => {
@@ -513,7 +482,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                   return shouldShowUpgradeBlock ? (
                     <PlanUpgradeBlock />
-                  ) : !isDesignPanelVisible ? (
+                  ) : !chatStarted ? (
                     <>
                       <ChatPromptContainer
                         uploadedFiles={uploadedFiles}
@@ -525,10 +494,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     </>
                   ) : null;
                 })()}
-                {/* {!user && !chatStarted && <Pricing />}
-                {!user && !chatStarted && <Explanation />} */}
                 {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
-                {/* {!user && !chatStarted && <FAQs />} */}
               </div>
             </div>
             <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>

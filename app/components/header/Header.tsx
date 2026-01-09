@@ -57,7 +57,7 @@ export function Header() {
       )}
     >
       <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
-        {!user && location.pathname === '/' && (
+        {location.pathname === '/' && (
           <a href="/">
             <div className="flex items-center gap-3">
               <h1 className="text-bolt-elements-textHeading font-bold text-xl">
@@ -80,6 +80,8 @@ export function Header() {
           </div>
         </div>
       )}
+
+      {!chatStarted && <ClientAuth />}
     </header>
   );
 }

@@ -1,6 +1,6 @@
 import { atom } from 'nanostores';
 
-export type SidebarPanel = 'chat' | 'theme' | 'settings' | 'history' | null;
+export type SidebarPanel = 'chat' | 'design' | 'settings' | 'history' | null;
 
 export class SidebarPanelStore {
   activePanel = atom<SidebarPanel>('chat');
