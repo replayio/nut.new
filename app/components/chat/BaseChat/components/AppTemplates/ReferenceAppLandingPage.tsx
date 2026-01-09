@@ -47,9 +47,6 @@ const FeatureCard: React.FC<{
   return (
     <div className="group relative bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-1 rounded-xl p-5 border border-bolt-elements-borderColor hover:border-rose-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/5">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
-          <Check size={16} className="text-white" />
-        </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-base font-semibold text-bolt-elements-textPrimary mb-1.5 group-hover:text-rose-500 transition-colors">
             {name}
