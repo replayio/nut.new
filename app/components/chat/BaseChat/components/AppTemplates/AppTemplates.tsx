@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from '@remix-run/react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
-import { ReferenceAppLandingPage } from './ReferenceAppLandingPage';
+import { ReferenceAppModal } from './ReferenceAppModal';
 import { getLandingPageIndex, type LandingPageIndexEntry, ReferenceAppStage } from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
@@ -23,7 +23,6 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [referenceApps, setReferenceApps] = useState<LandingPageIndexEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<LandingPageIndexEntry | null>(null);
-  const landingPageRef = useRef<HTMLDivElement>(null);
 
   // Fetch reference apps on mount
   useEffect(() => {
@@ -212,29 +211,21 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                     description={app.shortDescription}
                     bulletPoints={app.bulletPoints}
                     photo={app.screenshotURL}
-                    onClick={() => {
-                      setSelectedApp(app);
-                      // Scroll to landing page after state update
-                      setTimeout(() => {
-                        landingPageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 100);
-                    }}
+                    appPath={app.referenceAppPath}
+                    sendMessage={sendMessage}
+                    onClick={() => setSelectedApp(app)}
                   />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Reference App Landing Page */}
-          {selectedApp && (
-            <div ref={landingPageRef}>
-              <ReferenceAppLandingPage
-                app={selectedApp}
-                sendMessage={sendMessage}
-                onClose={() => setSelectedApp(null)}
-              />
-            </div>
-          )}
+          {/* Reference App Modal */}
+          <ReferenceAppModal
+            app={selectedApp}
+            sendMessage={sendMessage}
+            onClose={() => setSelectedApp(null)}
+          />
         </>
       )}
     </div>
