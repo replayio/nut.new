@@ -8,7 +8,6 @@ import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { classNames } from '~/utils/classNames';
-import { Messages } from '~/components/chat/Messages/Messages.client';
 import { IntroSection } from '~/components/chat/BaseChat/components/IntroSection/IntroSection';
 import { ChatPromptContainer } from '~/components/chat/BaseChat/components/ChatPromptContainer/ChatPromptContainer';
 import { useSpeechRecognition } from '~/hooks/useSpeechRecognition';
@@ -25,7 +24,7 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { StackedInfoCard, type InfoCardData } from '~/components/ui/InfoCard';
+import { type InfoCardData } from '~/components/ui/InfoCard';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '~/components/ui/resizable';
 import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featureModal';
