@@ -158,14 +158,18 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
 
   // Navigation functions for mobile arrows
   const scrollPrev = useCallback(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current) {
+      return;
+    }
     const container = scrollContainerRef.current;
     const slideWidth = container.clientWidth;
     container.scrollBy({ left: -slideWidth, behavior: 'smooth' });
   }, []);
 
   const scrollNext = useCallback(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current) {
+      return;
+    }
     const container = scrollContainerRef.current;
     const slideWidth = container.clientWidth;
     container.scrollBy({ left: slideWidth, behavior: 'smooth' });
