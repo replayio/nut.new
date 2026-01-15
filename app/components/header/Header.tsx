@@ -73,7 +73,6 @@ export function Header() {
       {appSummary && !isSmallViewport && (
         <div className="flex-1 flex justify-center">
           <div className="flex items-center gap-3">
-            {history.length > 0 && <ViewVersionHistoryButton />}
             {repositoryId && <DownloadButton />}
             {repositoryId && appId && <AppSettingsButton />}
             {repositoryId && appId && <DeployChatButton />}

@@ -41,6 +41,7 @@ import { ChatPanel } from '~/components/panels/ChatPanel';
 import SideBar from '~/components/sidebar/side-bar.client';
 import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
+import { TopNav } from '../TopNav';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -390,17 +391,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         {user && !chatStarted && <ClientOnly>{() => <Menu />}</ClientOnly>}
         {user && !isSmallViewport && chatStarted && <ClientOnly>{() => <SideBar />}</ClientOnly>}
         {chatStarted && !isSmallViewport && showWorkbench ? (
-          <ResizablePanelGroup
-            key={panelSizeKey}
-            direction="horizontal"
-            className="w-full h-full"
-            onLayout={(sizes) => {
-              if (sizes[0] !== undefined) {
-                setChatPanelSize(sizes[0]);
-              }
-            }}
-          >
-            <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <TopNav />
+            <ResizablePanelGroup
+              key={panelSizeKey}
+              direction="horizontal"
+              className="w-full flex-1"
+              onLayout={(sizes) => {
+                if (sizes[0] !== undefined) {
+                  setChatPanelSize(sizes[0]);
+                }
+              }}
+            >
+              <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
               <div
                 ref={scrollRef}
                 className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden pl-6 pt-6 pb-6 pr-2"
@@ -417,6 +420,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>{() => <Workbench chatStarted={chatStarted} isResizable />}</ClientOnly>
             </ResizablePanel>
           </ResizablePanelGroup>
+          </div>
         ) : (
           <div
             ref={scrollRef}
