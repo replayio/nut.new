@@ -393,33 +393,35 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         {chatStarted && !isSmallViewport && showWorkbench ? (
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <TopNav />
-            <ResizablePanelGroup
-              key={panelSizeKey}
-              direction="horizontal"
-              className="w-full flex-1"
-              onLayout={(sizes) => {
-                if (sizes[0] !== undefined) {
-                  setChatPanelSize(sizes[0]);
-                }
-              }}
-            >
-              <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
-              <div
-                ref={scrollRef}
-                className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden pl-6 pt-6 pb-6 pr-2"
-              >
-                <div className={classNames(styles.Chat, 'flex flex-col h-full w-full')}>
-                  <div className="h-full flex flex-col">
-                    <ClientOnly>{() => renderActivePanel()}</ClientOnly>
+            <div className="flex-1 flex flex-col h-full overflow-hidden pr-2 pb-2">
+                <ResizablePanelGroup
+                  key={panelSizeKey}
+                  direction="horizontal"
+                  className="w-full flex-1 border rounded-md border-bolt-elements-borderColor bg-background"
+                  onLayout={(sizes) => {
+                    if (sizes[0] !== undefined) {
+                      setChatPanelSize(sizes[0]);
+                    }
+                  }}
+                >
+                  <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
+                  <div
+                    ref={scrollRef}
+                    className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden p-2"
+                  >
+                    <div className={classNames(styles.Chat, 'flex flex-col h-full w-full')}>
+                      <div className="h-full flex flex-col">
+                        <ClientOnly>{() => renderActivePanel()}</ClientOnly>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={100 - chatPanelSize} minSize={30} className="h-full">
-              <ClientOnly>{() => <Workbench chatStarted={chatStarted} isResizable />}</ClientOnly>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={100 - chatPanelSize} minSize={30} className="h-full">
+                  <ClientOnly>{() => <Workbench chatStarted={chatStarted} isResizable />}</ClientOnly>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
           </div>
         ) : (
           <div

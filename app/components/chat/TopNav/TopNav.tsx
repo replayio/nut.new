@@ -17,7 +17,7 @@ export function TopNav() {
   };
 
   return (
-    <nav className="flex items-center justify-between h-[60px] px-4 bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor">
+    <nav className="flex items-center justify-between h-[60px] pr-2 bg-bolt-elements-background-depth-2">
       {/* Left section: Back button + Project title */}
       <div className="flex items-center gap-1 flex-1 min-w-0">
         <Button

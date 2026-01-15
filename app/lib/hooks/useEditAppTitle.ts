@@ -135,8 +135,13 @@ export function useEditAppTitle({
       if (e.key === 'Escape') {
         await handleBlur();
       }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        await handleSubmit(e);
+      }
     },
-    [handleBlur],
+    [handleBlur, handleSubmit, currentTitle],
   );
 
   return {

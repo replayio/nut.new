@@ -4,7 +4,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
 import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
 import { userStore } from '~/lib/stores/auth';
-import { Check, PenLine } from '~/components/ui/Icon';
+import { Check } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
@@ -55,7 +55,7 @@ export function ProjectTitle() {
       ) : (
         <div className="flex items-center gap-2 min-w-0">
           <span
-           className="text-sm font-medium text-bolt-elements-textPrimary truncate max-w-[200px]"
+           className="text-sm font-medium text-bolt-elements-textPrimary truncate max-w-[200px] cursor-pointer"
            onClick={toggleEditMode}
            >
             {currentTitle}
