@@ -14,7 +14,7 @@ import useViewport from '~/lib/hooks';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { database } from '~/lib/persistence/apps';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
-import { includeHistorySummary } from '~/components/workbench/VesionHistory/AppHistory';
+import { includeHistorySummary } from '~/components/panels/HistoryPanel/AppHistory';
 import { PanelLeft } from '~/components/ui/Icon';
 import { useEffect } from 'react';
 import { useLocation } from '@remix-run/react';

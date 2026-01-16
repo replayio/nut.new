@@ -1,23 +1,13 @@
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { History } from 'lucide-react';
-import AppHistory from '~/components/workbench/VesionHistory/AppHistory';
+import AppHistory from '~/components/panels/HistoryPanel/AppHistory';
 
 export const HistoryPanel = () => {
   const appId = useStore(chatStore.currentAppId);
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm rounded-t-xl">
-        <div className="flex items-center justify-between px-4 h-[38px]">
-          <div className="flex items-center gap-2">
-            <History size={16} className="text-bolt-elements-textSecondary" />
-            <span className="text-bolt-elements-textSecondary text-sm font-medium">Version History</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-lg overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {!appId ? (
