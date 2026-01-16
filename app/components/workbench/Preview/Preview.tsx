@@ -372,7 +372,6 @@ export const Preview = memo(() => {
 
   return (
     <TooltipProvider>
-
       <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
         {isPortDropdownOpen && (
           <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
@@ -381,7 +380,7 @@ export const Preview = memo(() => {
         {/* Top Navigation Bar */}
         <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center gap-2">
           {/* Left: Preview/Editor Toggle */}
-          <div className="flex items-center h-9 bg-muted rounded-lg p-1">
+          {!isMobile && <div className="flex items-center h-9 bg-muted rounded-lg p-1">
             <button
               onClick={() => {
                 setActiveMode('preview')
@@ -413,7 +412,7 @@ export const Preview = memo(() => {
               <Paintbrush size={16} />
               Editor
             </button>
-          </div>
+          </div>}
 
           {/* Center: Device Selector + URL */}
           <div className="flex-1 flex h-9 w-fit items-center justify-center gap-1 border border-border border-solid rounded-full px-1">

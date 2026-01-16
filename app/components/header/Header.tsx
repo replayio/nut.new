@@ -5,7 +5,7 @@ import { classNames } from '~/utils/classNames';
 import { Suspense, useState } from 'react';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { userStore } from '~/lib/stores/auth';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { ChatDescription } from '~/components/panels/SettingsPanel/components/ChatDescription.client';
 import { DeployChatButton } from './components/DeployChat/DeployChatButton';
 import { AppSettingsButton } from './components/AppSettings/AppSettingsButton';
 import { DownloadButton } from './components/DownloadButton';

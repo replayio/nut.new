@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
-import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
-import { AuthSelectorComponent } from '~/components/header/components/AppSettings/components/AuthSelectorComponent';
-import { SecretsComponent } from '~/components/header/components/AppSettings/components/SecretsComponent';
-import { PermissionsSelectionComponent } from '~/components/header/components/AppSettings/components/PermissionsSelectionComponent';
-import { ExperimentalFeaturesComponent } from '~/components/header/components/AppSettings/components/ExperimentalFeaturesComponent';
+import { ChatDescription } from '~/components/panels/SettingsPanel/components/ChatDescription.client';
+import { AuthSelectorComponent } from './components/AuthSelectorComponent';
+import { SecretsComponent } from './components/SecretsComponent';
+import { PermissionsSelectionComponent } from './components/PermissionsSelectionComponent';
+import { ExperimentalFeaturesComponent } from './components/ExperimentalFeaturesComponent';
 import { AppAccessKind, isAppAccessAllowed, isAppOwner } from '~/lib/api/permissions';
 import { isAppOwnerStore, permissionsStore, setIsAppOwner } from '~/lib/stores/permissions';
 import { userStore } from '~/lib/stores/auth';
-import CopyApp from '~/components/header/components/AppSettings/components/CopyApp';
-import ClearAppHistory from '~/components/header/components/AppSettings/components/ClearAppHistory';
+import CopyApp from './components/CopyApp';
+import ClearAppHistory from './components/ClearAppHistory';
 import { Settings, Type } from 'lucide-react';
 import { Skeleton } from '~/components/ui/Skeleton';
 
@@ -36,17 +36,7 @@ export const SettingsPanel = () => {
   const isLoading = !appSummary && appId;
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor border-opacity-50 shadow-sm rounded-t-xl">
-        <div className="flex items-center justify-between px-4 h-[38px]">
-          <div className="flex items-center gap-2">
-            <Settings size={16} className="text-bolt-elements-textSecondary" />
-            <span className="text-bolt-elements-textSecondary text-sm font-medium">Settings</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-lg overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
@@ -69,41 +59,61 @@ export const SettingsPanel = () => {
             </p>
           </div>
         ) : (
-          <div className="p-6 space-y-6">
-            {/* App Name Section */}
-            <div className="p-4 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor">
+          <div className="p-4 space-y-6">
+            <div>
               <h3 className="text-sm font-semibold text-bolt-elements-textHeading mb-3 flex items-center gap-2">
-                <div className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center shadow-sm bg-blue-500">
-                  <Type className="text-white" size={14} />
-                </div>
                 Application Name
               </h3>
               <ChatDescription />
             </div>
 
             {/* Authentication Settings */}
-            {appSummary && <AuthSelectorComponent appSummary={appSummary} />}
-
-            {/* API Integrations */}
-            {appSummary && allSecrets.length > 0 && <SecretsComponent appSummary={appSummary} />}
-
-            {/* Experimental Features */}
-            {appSummary && <ExperimentalFeaturesComponent appSummary={appSummary} />}
+            {appSummary && (
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
+                <AuthSelectorComponent appSummary={appSummary} />
+              </>
+            )}
 
             {/* Permissions */}
             {appId &&
               isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isOwner) && (
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
                 <PermissionsSelectionComponent />
-              )}
+              </>
+            )}
+
+            {/* API Integrations */}
+            {appSummary && allSecrets.length > 0 && (
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
+                <SecretsComponent appSummary={appSummary} />
+              </>
+            )}
+
+            {/* Experimental Features */}
+            {appSummary && (
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
+                <ExperimentalFeaturesComponent appSummary={appSummary} />
+              </>
+            )}
 
             {/* Copy App */}
             {appId && isAppAccessAllowed(permissions, AppAccessKind.Copy, user?.email ?? '', isOwner) && (
-              <CopyApp />
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
+                <CopyApp />
+              </>
             )}
 
             {/* Clear App History */}
             {appId && isAppAccessAllowed(permissions, AppAccessKind.Delete, user?.email ?? '', isOwner) && (
-              <ClearAppHistory />
+              <>
+                <div className="border-t border-bolt-elements-borderColor" />
+                <ClearAppHistory />
+              </>
             )}
           </div>
         )}

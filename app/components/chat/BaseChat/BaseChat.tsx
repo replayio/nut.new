@@ -35,7 +35,7 @@ import { PlanUpgradeBlock } from './components/PlanUpgradeBlock';
 import AppTemplates from './components/AppTemplates/AppTemplates';
 import { DesignSystemPanel } from '~/components/panels/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignToolbar';
-import { SettingsPanel } from '~/components/panels/SettingsPanel';
+import { SettingsPanel } from '~/components/panels/SettingsPanel/SettingsPanel';
 import { HistoryPanel } from '~/components/panels/HistoryPanel';
 import { ChatPanel } from '~/components/panels/ChatPanel';
 import SideBar from '~/components/sidebar/side-bar.client';
