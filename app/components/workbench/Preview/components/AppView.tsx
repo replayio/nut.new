@@ -64,7 +64,6 @@ const AppView = ({
           <div
             className={classNames('absolute inset-0', {
               'p-[3px] app-progress-border opacity-80': !initialBuildComplete,
-              'rounded-b-xl': !isSmallViewport,
             })}
           >
             <iframe
@@ -72,7 +71,6 @@ const AppView = ({
               ref={iframeRef}
               title="preview"
               className={classNames('w-full h-full bg-white transition-all duration-300 opacity-100', {
-                'rounded-b-xl': !isSmallViewport,
               })}
               src={actualIframeUrl}
               allowFullScreen

@@ -7,7 +7,6 @@ import {
   getDiscoveryRating,
 } from '~/lib/persistence/message';
 import {
-  JumpToBottom,
   StartBuildingCard,
   SignInCard,
   StopBuildCard,
@@ -16,6 +15,7 @@ import {
   UserMessage,
   AssistantMessage,
   PendingIndicator,
+  MessageNavigator,
 } from './components';
 import {
   APP_SUMMARY_CATEGORY,
@@ -52,7 +52,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const user = useStore(userStore);
     const appSummary = useStore(chatStore.appSummary);
     const listenResponses = useStore(chatStore.listenResponses);
-    const [showTopShadow, setShowTopShadow] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const messages = useStore(chatStore.messages);
     const hasPendingMessage = useStore(chatStore.hasPendingMessage);
@@ -71,11 +70,54 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const previousScrollHeight = useRef<number>(0);
     const hasScrolledRef = useRef(false);
 
+    // Message navigation state
+    const [currentNavigationIndex, setCurrentNavigationIndex] = useState<number>(-1);
+    const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
     // Calculate startPlanningRating for the card display
     let startPlanningRating = 0;
     if (!hasPendingMessage && !hasAppSummary) {
       startPlanningRating = getDiscoveryRating(messages || []);
     }
+
+    // Extract user messages for navigation
+    const userMessagesForNav = React.useMemo(() => {
+      return messages
+        .filter((m) => m.role === 'user' && shouldDisplayMessage(m))
+        .map((m, idx) => ({
+          id: m.id,
+          content: typeof m.content === 'string' ? m.content : '',
+          index: idx,
+        }));
+    }, [messages]);
+
+    // Initialize navigation index to last message when messages change
+    useEffect(() => {
+      if (userMessagesForNav.length > 0 && currentNavigationIndex === -1) {
+        setCurrentNavigationIndex(userMessagesForNav.length - 1);
+      }
+    }, [userMessagesForNav.length, currentNavigationIndex]);
+
+    // Handle navigation to a specific user message
+    const handleNavigateToMessage = useCallback((navIndex: number) => {
+      setCurrentNavigationIndex(navIndex);
+      const targetMessage = userMessagesForNav[navIndex];
+      if (targetMessage) {
+        const element = messageRefs.current.get(targetMessage.id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }, [userMessagesForNav]);
+
+    // Register message ref for scrolling
+    const setMessageRef = useCallback((id: string, element: HTMLDivElement | null) => {
+      if (element) {
+        messageRefs.current.set(id, element);
+      } else {
+        messageRefs.current.delete(id);
+      }
+    }, []);
 
     useEffect(() => {
       const shouldShow =
@@ -119,7 +161,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       }
 
       setShowJumpToBottom(distanceFromBottom > 50);
-      setShowTopShadow(scrollTop > 10);
     };
 
     // Load more items when scrolling to the top
@@ -462,14 +503,15 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       // Use the appropriate message component based on role
       if (isUserMessage) {
         return (
-          <UserMessage
-            key={message.id || index}
-            message={message}
-            messages={messages}
-            isFirst={isFirst}
-            onCheckboxChange={onCheckboxChange}
-            sendMessage={sendMessage}
-          />
+          <div key={message.id || index} ref={(el) => setMessageRef(message.id, el)}>
+            <UserMessage
+              message={message}
+              messages={messages}
+              isFirst={isFirst}
+              onCheckboxChange={onCheckboxChange}
+              sendMessage={sendMessage}
+            />
+          </div>
         );
       }
 
@@ -489,16 +531,21 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
     return (
       <div className="relative flex-1 min-h-0 flex flex-col">
-        {showTopShadow && (
-          <div
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 h-px bg-border/30 shadow-sm z-2 pointer-events-none transition-opacity duration-200"
-            style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}
-          />
+        {/* Message Navigator */}
+        {userMessagesForNav.length > 0 && (
+          <div>
+            <MessageNavigator
+              userMessages={userMessagesForNav}
+              currentIndex={currentNavigationIndex >= 0 ? currentNavigationIndex : userMessagesForNav.length - 1}
+              onNavigate={handleNavigateToMessage}
+              onScrollToBottom={scrollToBottom}
+              showJumpToBottom={showJumpToBottom}
+            />
+          </div>
         )}
-
         <div
           ref={setRefs}
-          className={cn('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto px-1')}
+          className={cn('flex-1 overflow-y-auto rounded-b-2xl', 'flex flex-col w-full max-w-chat pb-6 mx-auto px-2')}
         >
           {(() => {
             const timelineItems = createTimelineItems();
@@ -568,7 +615,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             <PendingIndicator status={pendingMessageStatus} />
           )}
         </div>
-        <JumpToBottom visible={showJumpToBottom} onClick={scrollToBottom} />
       </div>
     );
   },

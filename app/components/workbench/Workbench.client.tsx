@@ -47,7 +47,7 @@ export const Workbench = memo(({ chatStarted, isResizable }: WorkspaceProps) => 
   if (isResizable && chatStarted) {
     return (
       <div className="h-full w-full p-2">
-        <div className="h-full flex flex-col bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-lg overflow-hidden rounded-xl">
+        <div className="h-full flex flex-col bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-lg overflow-hidden rounded-md">
           <div className="relative flex-1 overflow-hidden">
             <Preview />
           </div>
@@ -92,7 +92,7 @@ export const Workbench = memo(({ chatStarted, isResizable }: WorkspaceProps) => 
               className={classNames(
                 'h-full flex flex-col bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-lg overflow-hidden',
                 {
-                  'rounded-xl': !isSmallViewport,
+                  'rounded-md': !isSmallViewport,
                 },
               )}
             >

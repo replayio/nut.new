@@ -52,7 +52,7 @@ export function UserMessage({
             </div>
           }
         >
-          <div className="flex-1 px-4 rounded-lg bg-card border border-border">
+          <div className="flex-1 px-4 rounded-md bg-card border border-border">
             <MessageContents
               message={message}
               messages={messages}

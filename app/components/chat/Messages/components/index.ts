@@ -6,6 +6,7 @@ export { FeaturesCard } from './FeaturesCard';
 export { JumpToBottom } from './JumpToBottom';
 export { MessageActions } from './MessageActions';
 export { MessageContents } from './MessageContents';
+export { MessageNavigator } from './MessageNavigator';
 export { PendingIndicator } from './PendingIndicator';
 export { SecretsCard } from './SecretsCard';
 export { SignInCard } from './SignInCard';
