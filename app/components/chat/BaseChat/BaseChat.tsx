@@ -131,7 +131,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     useEffect(() => {
       if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
         workbenchStore.setShowWorkbench(true);
-        mobileNavStore.setActiveTab('preview');
+        mobileNavStore.setActiveTab('canvas');
         hasShownWorkbench.current = true;
       }
     }, [appSummary]);
@@ -423,7 +423,27 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </ResizablePanelGroup>
             </div>
           </div>
+        ) : chatStarted && isSmallViewport ? (
+          /* Mobile view when chat started */
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <TopNav />
+            <div
+              ref={scrollRef}
+              className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto pb-20"
+            >
+              <ClientOnly>
+                {() => {
+                  // On mobile, show workbench when canvas tab is active
+                  if (showWorkbench) {
+                    return <Workbench chatStarted={chatStarted} />;
+                  }
+                  return renderActivePanel();
+                }}
+              </ClientOnly>
+            </div>
+          </div>
         ) : (
+          /* Landing page or desktop without workbench */
           <div
             ref={scrollRef}
             className={classNames('w-full h-full flex flex-col lg:flex-row overflow-x-hidden', {
@@ -446,6 +466,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               })}
               style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
             >
+              {chatStarted && <TopNav />}
               {!chatStarted && (
                 <>
                   <IntroSection />

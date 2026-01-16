@@ -373,7 +373,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     setTimeout(() => {
       workbenchStore.setShowWorkbench(true);
       mobileNavStore.setShowMobileNav(true);
-      mobileNavStore.setActiveTab('preview');
+      mobileNavStore.setActiveTab('canvas');
     }, 2000);
   };
 

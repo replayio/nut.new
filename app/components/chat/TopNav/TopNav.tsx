@@ -7,11 +7,13 @@ import { TopNavDownloadButton } from './TopNavDownloadButton';
 import { TopNavDeployButton } from './TopNavDeployButton';
 import { ArrowLeft } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
+import { ClientAuth } from '~/components/auth/ClientAuth';
+import useViewport from '~/lib/hooks';
 
 export function TopNav() {
   const appId = useStore(chatStore.currentAppId);
   const repositoryId = useStore(workbenchStore.pendingRepositoryId);
-
+  const isSmallViewport = useViewport(800);
   const handleBack = () => {
     window.location.href = '/';
   };
@@ -40,6 +42,7 @@ export function TopNav() {
         {appId && <ShareButton />}
         {repositoryId && <TopNavDownloadButton />}
         {repositoryId && appId && <TopNavDeployButton />}
+        {isSmallViewport && <ClientAuth />}
       </div>
     </nav>
   );
