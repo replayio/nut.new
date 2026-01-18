@@ -14,7 +14,7 @@ interface TabConfig {
 const tabs: TabConfig[] = [
   { id: 'chat', label: 'Chat', icon: <MessageCircle size={20} /> },
   { id: 'canvas', label: 'Canvas', icon: <Monitor size={20} /> },
-  { id: 'theme', label: 'Theme', icon: <Palette size={20} /> },
+  // { id: 'theme', label: 'Theme', icon: <Palette size={20} /> },
   { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   { id: 'history', label: 'History', icon: <History size={20} /> },
 ];
@@ -40,9 +40,9 @@ export const MobileNav = () => {
       case 'chat':
         sidebarPanelStore.setActivePanel('chat');
         break;
-      case 'theme':
-        sidebarPanelStore.setActivePanel('design');
-        break;
+      // case 'theme':
+      //   sidebarPanelStore.setActivePanel('design');
+      //   break;
       case 'settings':
         sidebarPanelStore.setActivePanel('settings');
         break;

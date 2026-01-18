@@ -510,7 +510,7 @@ export const Preview = memo(() => {
         </div>
 
         {/* Bottom: Breadcrumb Navigation */}
-        <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
+        {!isMobile && <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
           {(() => {
             if (!selectedElement?.tree || selectedElement.tree.length === 0) {
               return (
@@ -614,7 +614,7 @@ export const Preview = memo(() => {
               </Breadcrumb>
             );
           })()}
-        </div>
+        </div>}
       </div>
     </TooltipProvider>
   );

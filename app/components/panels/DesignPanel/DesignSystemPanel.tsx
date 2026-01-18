@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
 import { designPanelStore, markThemeChanged, markThemesSaved, resetThemeChanges } from '~/lib/stores/designSystemStore';
 import { getAvailableThemes, findMatchingTheme, getThemeCSSVariables } from '~/lib/replay/themeHelper';
