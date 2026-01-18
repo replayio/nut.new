@@ -23,9 +23,9 @@ export function SideBar() {
   return (
     <aside className="flex flex-col items-center h-full w-[72px] bg-bolt-elements-background-depth-2">
       {/* Logo */}
-      <div className="flex items-center justify-center w-14 h-14 m-2">
+      <a href="/" className="flex items-center justify-center w-14 h-14 m-2">
         <img src="/logo.svg" alt="Logo" className="w-9 h-9" />
-      </div>
+      </a>
 
       {/* Navigation Items */}
       <nav className="flex flex-col items-center gap-1 flex-1 w-full px-2 py-1">

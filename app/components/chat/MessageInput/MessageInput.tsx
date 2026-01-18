@@ -25,7 +25,6 @@ import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { userStore } from '~/lib/stores/auth';
-// import { useIsMobile } from '~/lib/hooks/useIsMobile';
 import { processImage, validateImageFile, formatFileSize } from '~/utils/imageProcessing';
 import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -34,14 +33,11 @@ import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
 import { 
   Crosshair,
   X,
-  Palette,
   Plus,
-  // MousePointerClickIcon 
+  // Mic,
 } from 'lucide-react';
 import { buildAccessStore } from '~/lib/stores/buildAccess';
-import { designPanelStore } from '~/lib/stores/designSystemStore';
-// import { elementPickerStore, setIsElementPickerEnabled, setIsElementPickerReady } from '~/lib/stores/elementPicker';
-// import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { Button } from '~/components/ui/button';
 
 // const AudioWaveIcon = () => (
 //   <svg
@@ -121,12 +117,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasAppSummary = !!appSummary;
   const user = useStore(userStore);
   const selectedElement = useStore(workbenchStore.selectedElement) as SelectedElementData | null;
-  // const { isMobile, isTablet } = useIsMobile();
   const hasBuildAccess = useStore(buildAccessStore.hasAccess);
-  const isDesignPanelVisible = useStore(designPanelStore.isVisible);
-  // const { isMobile } = useIsMobile();
-  // const isElementPickerEnabled = useStore(elementPickerStore.isEnabled);
-  // const isElementPickerReady = useStore(elementPickerStore.isReady);
 
   // Focus textarea if URL has focus=true parameter
   useEffect(() => {
@@ -135,22 +126,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       textareaRef.current.focus();
     }
   }, [textareaRef]);
-
-  // Send postMessage to control element picker in iframe
-  // const toggleElementPicker = (enabled: boolean) => {
-  //   const iframe = getCurrentIFrame();
-  //   if (iframe && iframe.contentWindow) {
-  //     iframe.contentWindow.postMessage(
-  //       {
-  //         type: 'ELEMENT_PICKER_CONTROL',
-  //         enabled,
-  //       },
-  //       '*',
-  //     );
-  //   } else {
-  //     console.warn('[Preview] Cannot send message - iframe not ready');
-  //   }
-  // };
 
   // Helper functions for element highlighting
   const highlightElement = (component: ReactComponent) => {
@@ -378,7 +353,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className={classNames('relative bg-transparent rounded-xl transition-all duration-300')}>
+    <div className={classNames('relative transition-all duration-300')}>
       {selectedElement && (
         <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor px-4 py-3">
           <div className="flex items-center justify-between">
@@ -511,266 +486,184 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
 
-      <div className="relative">
-        {/* Custom styled placeholder */}
-        {!input && !chatStarted && (
-          <div className="absolute left-4 top-3 pointer-events-none text-base">
-            <span className="text-gray-400 dark:text-gray-500 animate-pulse animation-delay-200">
-              What would you like{' '}
-            </span>
-            <span className="text-rose-500 font-medium animate-pulse animation-delay-200">
-              Replay Builder to build?
-            </span>
+      {/* Main input container with white background */}
+      <div className="bg-background rounded-md border border-bolt-elements-borderColor">
+        {/* Textarea area */}
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            className={classNames(
+              'w-full p-3 border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base rounded-md',
+              'focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-none active:border-none',
+              { 'opacity-50 cursor-not-allowed': hasPendingMessage },
+              'placeholder:text-bolt-elements-textSecondary',
+            )}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.boxShadow = 'none';
+
+              const files = Array.from(e.dataTransfer.files);
+              files.forEach((file) => {
+                if (file.type.startsWith('image/')) {
+                  const reader = new FileReader();
+
+                  reader.onload = (e) => {
+                    const base64Image = e.target?.result as string;
+                    setUploadedFiles([...uploadedFiles, file]);
+                    setImageDataList([...imageDataList, base64Image]);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              });
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                if (event.shiftKey) {
+                  return;
+                }
+
+                event.preventDefault();
+
+                if (hasPendingMessage) {
+                  chatStore.showStopConfirmation.set(true);
+                  return;
+                }
+
+                if (event.nativeEvent.isComposing) {
+                  return;
+                }
+
+                // Transform selectedElement to API format
+                const componentReference = selectedElement?.tree
+                  ? {
+                      componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
+                    }
+                  : undefined;
+
+                handleSendMessage({
+                  messageInput: input,
+                  chatMode: ChatMode.UserMessage,
+                  componentReference,
+                });
+
+                // Clear selected element after sending
+                if (selectedElement) {
+                  workbenchStore.setSelectedElement(null);
+                }
+              }
+            }}
+            value={input}
+            onChange={handleInputChange}
+            onPaste={handlePaste}
+            style={{
+              minHeight,
+              maxHeight,
+              overflowY: 'auto',
+            }}
+            disabled={hasPendingMessage}
+            placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
+            translate="no"
+          />
+
+          {/* Start Building Button - shown when discovery rating is high enough */}
+          {(() => {
+            const showStartBuildingButton =
+              user && startPlanningRating > 0 && !hasAppSummary && hasBuildAccess && !hasPendingMessage;
+
+            return showStartBuildingButton ? (
+              <ClientOnly>
+                {() => <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />}
+              </ClientOnly>
+            ) : null;
+          })()}
+        </div>
+
+        {/* Bottom controls */}
+        <div className="flex justify-between items-center p-2">
+          <div className="flex gap-2 items-center">
+            {/* Microphone button */}
+            {/* <TooltipProvider>
+              <WithTooltip tooltip={isListening ? 'Stop listening' : 'Start speech recognition'}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-8 h-8 rounded-full bg-background border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 p-2 aspect-square"
+                  disabled={hasPendingMessage}
+                  onClick={isListening ? onStopListening : onStartListening}
+                >
+                  <Mic size={16} className="text-bolt-elements-textPrimary" />
+                </Button>
+              </WithTooltip>
+            </TooltipProvider> */}
+
+            {/* Plus/Upload button */}
+            <TooltipProvider>
+              <WithTooltip
+                tooltip={
+                  <div className="text-xs">
+                    <div className="font-medium mb-1 text-bolt-elements-textHeading">Upload Image</div>
+                    <div>✅ Supports: JPEG, PNG, GIF, WebP</div>
+                    <div>🔄 Converts: SVG, BMP, TIFF → JPEG</div>
+                    <div>📐 Auto-resizes large images (&gt;500KB)</div>
+                  </div>
+                }
+              >
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-8 h-8 rounded-full bg-background border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 p-2 aspect-square"
+                  onClick={handleFileUpload}
+                >
+                  <Plus size={16} className="text-bolt-elements-textPrimary" />
+                </Button>
+              </WithTooltip>
+            </TooltipProvider>
           </div>
-        )}
-        <textarea
-          ref={textareaRef}
-          className={classNames(
-            'w-full px-4 py-3 pr-4 border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base',
-            'transition-all duration-200 focus:outline-none',
-            { 'opacity-50 cursor-not-allowed': hasPendingMessage },
-            // Hide native placeholder when custom placeholder is shown
-            { 'placeholder-transparent': !chatStarted },
-            { 'placeholder-gray-400 dark:placeholder-gray-500': chatStarted },
-          )}
-          onDragEnter={(e) => {
-            e.preventDefault();
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault();
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.currentTarget.style.boxShadow = 'none';
 
-            const files = Array.from(e.dataTransfer.files);
-            files.forEach((file) => {
-              if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-
-                reader.onload = (e) => {
-                  const base64Image = e.target?.result as string;
-                  setUploadedFiles([...uploadedFiles, file]);
-                  setImageDataList([...imageDataList, base64Image]);
-                };
-                reader.readAsDataURL(file);
-              }
-            });
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              if (event.shiftKey) {
-                return;
-              }
-
-              event.preventDefault();
-
+          {/* Send Button */}
+          <Button
+            onClick={() => {
               if (hasPendingMessage) {
                 chatStore.showStopConfirmation.set(true);
                 return;
               }
-
-              if (event.nativeEvent.isComposing) {
-                return;
-              }
-
-              // Transform selectedElement to API format
-              const componentReference = selectedElement?.tree
-                ? {
-                    componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
-                  }
-                : undefined;
-
-              handleSendMessage({
-                messageInput: input,
-                chatMode: ChatMode.UserMessage,
-                componentReference,
-              });
-
-              // Clear selected element after sending
-              if (selectedElement) {
-                workbenchStore.setSelectedElement(null);
-              }
-            }
-          }}
-          value={input}
-          onChange={handleInputChange}
-          onPaste={handlePaste}
-          style={{
-            minHeight,
-            maxHeight,
-            overflowY: 'auto',
-          }}
-          disabled={hasPendingMessage}
-          placeholder={getPlaceholderText(chatStarted, hasAppSummary)}
-          translate="no"
-        />
-
-        {/* Start Building Button - shown when discovery rating is high enough */}
-        {(() => {
-          const showStartBuildingButton =
-            user && startPlanningRating > 0 && !hasAppSummary && hasBuildAccess && !hasPendingMessage;
-
-          return showStartBuildingButton ? (
-            <ClientOnly>
-              {() => <StartBuildingButton onClick={handleStartBuilding} startPlanningRating={startPlanningRating} />}
-            </ClientOnly>
-          ) : null;
-        })()}
-      </div>
-
-      <div className="flex justify-between items-center px-4 py-3">
-        <div className="flex gap-3 items-center">
-          {/* {!isMobile && !isTablet && (
-            <TooltipProvider>
-              <WithTooltip tooltip={isListening ? 'Stop listening' : 'Start speech recognition'}>
-                <div>
-                  <button
-                    onClick={isListening ? onStopListening : onStartListening}
-                    disabled={hasPendingMessage}
-                    className={classNames(
-                      'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
-                      isListening
-                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-500'
-                        : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
-                      { 'opacity-50 cursor-not-allowed': hasPendingMessage },
-                    )}
-                  >
-                    <AudioWaveIcon />
-                  </button>
-                </div>
-              </WithTooltip>
-            </TooltipProvider>
-          )} */}
-
-          <TooltipProvider>
-            <WithTooltip
-              tooltip={
-                <div className="text-xs">
-                  <div className="font-medium mb-1 text-bolt-elements-textHeading">Upload Image</div>
-                  <div>✅ Supports: JPEG, PNG, GIF, WebP</div>
-                  <div>🔄 Converts: SVG, BMP, TIFF → JPEG</div>
-                  <div>📐 Auto-resizes large images (&gt;500KB)</div>
-                </div>
-              }
-            >
-              <button
-                className="w-10 h-10 rounded-full border-2 border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500 transition-all duration-200 flex items-center justify-center"
-                onClick={handleFileUpload}
-              >
-                <Plus size={18} />
-              </button>
-            </WithTooltip>
-          </TooltipProvider>
-
-          {chatStarted && (
-            <TooltipProvider>
-              <WithTooltip
-                tooltip={
-                  hasPendingMessage
-                    ? 'Design panel is disabled while generating code'
-                    : isDesignPanelVisible
-                      ? 'Hide Design Panel'
-                      : 'Show Design Panel'
-                }
-              >
-                <button
-                  className={classNames(
-                    'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
-                    hasPendingMessage
-                      ? 'border-gray-300 dark:border-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
-                      : isDesignPanelVisible
-                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-500'
-                        : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
-                  )}
-                  onClick={() => {
-                    if (!hasPendingMessage) {
-                      designPanelStore.isVisible.set(!isDesignPanelVisible);
+              if (input.length > 0 || uploadedFiles.length > 0) {
+                const componentReference = selectedElement?.tree
+                  ? {
+                      componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
                     }
-                  }}
-                  disabled={hasPendingMessage}
-                >
-                  <Palette size={18} />
-                </button>
-              </WithTooltip>
-              {/* {!isMobile && (
-                <WithTooltip
-                  tooltip={
-                    !isElementPickerReady || isMobile
-                      ? 'Element picker not available'
-                      : isElementPickerEnabled
-                        ? 'Stop selecting element'
-                        : 'Select element in app preview'
-                  }
-                >
-                  <button
-                    className={classNames(
-                      'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
-                      !isElementPickerReady || isMobile
-                        ? 'border-gray-300 dark:border-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
-                        : isElementPickerEnabled
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-500'
-                          : 'border-rose-300 dark:border-rose-500/50 bg-transparent text-rose-400 dark:text-rose-400 hover:border-rose-400 hover:text-rose-500',
-                    )}
-                    onClick={() => {
-                      if (!isElementPickerReady || isMobile) {
-                        return;
-                      }
-                      const newState = !isElementPickerEnabled;
-                      setIsElementPickerEnabled(newState);
-                      toggleElementPicker(newState);
-                    }}
-                    disabled={!isElementPickerReady || isMobile}
-                  >
-                    <MousePointerClickIcon size={18} />
-                  </button>
-                </WithTooltip>
-              )} */}
-            </TooltipProvider>
-          )}
-        </div>
+                  : undefined;
 
-        {/* Send Button - Always visible */}
-        <button
-          onClick={() => {
-            if (hasPendingMessage) {
-              chatStore.showStopConfirmation.set(true);
-              return;
-            }
-            if (input.length > 0 || uploadedFiles.length > 0) {
-              const componentReference = selectedElement?.tree
-                ? {
-                    componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
-                  }
-                : undefined;
+                handleSendMessage({
+                  messageInput: input,
+                  chatMode: ChatMode.UserMessage,
+                  componentReference,
+                });
 
-              handleSendMessage({
-                messageInput: input,
-                chatMode: ChatMode.UserMessage,
-                componentReference,
-              });
-
-              if (selectedElement) {
-                workbenchStore.setSelectedElement(null);
+                if (selectedElement) {
+                  workbenchStore.setSelectedElement(null);
+                }
               }
-            }
-          }}
-          disabled={hasPendingMessage && !input.length && !uploadedFiles.length}
-          className={classNames(
-            'px-5 py-2.5 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2',
-            'bg-rose-500 hover:bg-rose-600',
-            'shadow-md hover:shadow-lg',
-          )}
-        >
-          <span>Send</span>
-          <span className="text-white/70 text-sm">⌘Enter</span>
-        </button>
+            }}
+            disabled={hasPendingMessage && !input.length && !uploadedFiles.length}
+            className="px-5 py-2.5 rounded-full font-medium bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 transition-all duration-200 flex items-center gap-2"
+          >
+            <span>Send</span>
+            <span className="text-white/70 text-sm">⌘Enter</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
