@@ -11,6 +11,7 @@ import useViewport from '~/lib/hooks';
 export function ClientAuth() {
   const user = useStore(userStore);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const isSmallViewport = useViewport(800);
 
@@ -37,6 +38,16 @@ export function ClientAuth() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDropdown]);
+
+  useEffect(() => {
+    if (showDropdown && buttonRef.current && !isSmallViewport) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: buttonRect.top,
+        left: buttonRect.left,
+      });
+    }
+  }, [showDropdown, isSmallViewport]);
 
   const handleSignOut = async () => {
     try {
@@ -74,7 +85,6 @@ export function ClientAuth() {
     setShowDropdown(false);
   };
 
-  console.log('subscription', stripeSubscription);
   return (
     <>
       {user ? (
@@ -195,7 +205,12 @@ export function ClientAuth() {
             /* Desktop: Dropdown menu */
             <div
               ref={dropdownRef}
-              className="absolute bottom-full left-0 mb-3 w-64 bg-card border border-border rounded-md shadow-lg z-[100]"
+              className="fixed w-64 bg-card border border-border rounded-md shadow-lg z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                transform: 'translateY(calc(-100% - 12px))',
+              }}
             >
               {/* User Header */}
               <div className="px-5 py-4 border-b border-border">
@@ -263,9 +278,9 @@ export function ClientAuth() {
       ) : (
         <button
           onClick={() => authModalStore.open(false)}
-          className="px-4 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
+          className="w-full px-4 py-1.5 bg-rose-500 text-white rounded-xl hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
         >
-          <span className="transition-transform duration-200 group-hover:scale-105">Sign In</span>
+          <span className="transition-transform duration-200 group-hover:scale-105">Log In</span>
         </button>
       )}
     </>

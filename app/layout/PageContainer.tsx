@@ -38,8 +38,6 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
   return (
     <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black app-height">
       {!chatStarted && !isLoggedIn && !isLoading && location.pathname === '/' && <BrokenDreamsBanner />}
-      {!chatStarted && <Header />}
-      <BackgroundRays />
       <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
       {!chatStarted && !isSmallViewport && <Footer />}
     </div>

@@ -388,7 +388,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
-        {user && !chatStarted && <ClientOnly>{() => <Menu />}</ClientOnly>}
+        {!chatStarted && <ClientOnly>{() => <Menu />}</ClientOnly>}
         {user && !isSmallViewport && chatStarted && <ClientOnly>{() => <SideBar />}</ClientOnly>}
         {chatStarted && !isSmallViewport && showWorkbench ? (
           <div className="flex-1 flex flex-col h-full overflow-hidden">

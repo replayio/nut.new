@@ -1,43 +1,20 @@
-import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { SettingsWindow } from '~/components/settings/SettingsWindow';
-//import { SettingsButton } from '~/components/ui/SettingsButton';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import { chatStore } from '~/lib/stores/chat';
-import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import Cookies from 'js-cookie';
-import Feedback from './Feedback/FeedbackButton';
 import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import useViewport from '~/lib/hooks';
-import { X, Plus, Search, Folder, FolderOpen } from '~/components/ui/Icon';
-
-const menuVariants = {
-  closed: {
-    opacity: 0,
-    visibility: 'hidden',
-    left: '-150px',
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-  open: {
-    opacity: 1,
-    visibility: 'initial',
-    left: 0,
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-} satisfies Variants;
+import { X, Plus, Search, Folder, FolderOpen, Home, PanelLeft } from '~/components/ui/Icon';
+import { classNames } from '~/utils/classNames';
+import { ClientAuth } from '../auth/ClientAuth';
 
 type DialogContent = { type: 'delete'; item: AppLibraryEntry } | null;
 
@@ -51,6 +28,10 @@ export const Menu = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
   const isSmallViewport = useViewport(800);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
@@ -95,8 +76,38 @@ export const Menu = () => {
   useEffect(() => {
     if (isOpen) {
       loadEntries();
+    } else {
+      // Clear search when menu closes
+      setSearchValue('');
+      setIsSearchFocused(false);
+      if (searchInputRef.current) {
+        searchInputRef.current.value = '';
+      }
     }
   }, [isOpen]);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+K or Cmd+K for search
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        setIsSearchFocused(true);
+        // Focus the input after state update
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 0);
+      }
+      // Ctrl+N or Cmd+N for new app
+      if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+        event.preventDefault();
+        window.location.href = '/';
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!isSmallViewport) {
@@ -182,12 +193,12 @@ export const Menu = () => {
   };
 
   return (
-    <motion.div
+    <div
       ref={menuRef}
-      initial="closed"
-      animate={isOpen ? 'open' : 'closed'}
-      variants={menuVariants}
-      className="flex selection-accent flex-col side-menu fixed top-0 w-full md:w-[350px] h-full bg-bolt-elements-background-depth-2 border-r md:rounded-r-3xl border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-shadow duration-300"
+      className={classNames(
+        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300',
+        isCollapsed ? 'md:w-[60px]' : 'md:w-[250px]',
+      )}
     >
       <div className="md:hidden flex justify-end p-4">
         <button
@@ -198,56 +209,185 @@ export const Menu = () => {
         </button>
       </div>
 
-      <div className="h-[55px] md:block hidden" />
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-        <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50">
-          <div className="flex items-center gap-3 mb-6">
-            {/* <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-bolt-elements-borderColor border-opacity-50 p-1.5 bg-gradient-to-br from-blue-500/10 to-green-500/10 shadow-sm">
-              <img src="/logo-styled.svg" alt="Replay Builder" className="w-full h-full" />
-            </div> */}
-            <h1 className="text-bolt-elements-textHeading font-bold text-xl">Replay Builder</h1>
+        {/* Header */}
+        <div className={classNames('py-4 border-b border-bolt-elements-borderColor border-opacity-50', isCollapsed ? 'px-2' : 'px-6')}>
+          <div className={classNames('flex items-center mb-6 w-full', isCollapsed ? 'justify-center' : 'justify-between')}>
+            <div className={classNames('flex items-center w-full', isCollapsed ? 'group relative' : 'gap-3')}>
+              {isCollapsed ? (
+                <div className="relative w-8 h-8">
+                  {/* Logo - shows by default when collapsed, hidden on hover */}
+                  <div className="w-8 h-8 flex items-center justify-center group-hover:opacity-0 group-hover:pointer-events-none transition-opacity">
+                    <div className="relative w-6 h-6">
+                      <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
+                    </div>
+                  </div>
+                  {/* PanelLeft button - hidden by default when collapsed, shows on hover in same position */}
+                  <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
+                    aria-label="Expand sidebar"
+                  >
+                    <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full flex justify-between items-center">
+                  {/* Logo - always visible when expanded */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <div className="relative w-6 h-6">
+                        <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
+                      </div>
+                    </div>
+                    <h1 className="text-bolt-elements-textHeading font-bold text-xl">Replay</h1>
+                  </div>
+                  {/* PanelLeft button - always visible when expanded */}
+                  <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors"
+                    aria-label="Collapse sidebar"
+                  >
+                    <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
+          {/* Menu Items */}
+          <div className="space-y-1">
+            {/* Home */}
             <a
               href="/"
-              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 rounded-xl px-4 py-3 transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] border border-white/20 hover:border-white/30 group"
+              className={classNames(
+                'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
+                isCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
+                window.location.pathname === '/' || window.location.pathname === ''
+                  ? 'bg-bolt-elements-background-depth-1'
+                  : 'hover:bg-bolt-elements-background-depth-1',
+              )}
+              title={isCollapsed ? 'Home' : undefined}
             >
-              <Plus className="transition-transform duration-200 group-hover:scale-110" size={18} />
-              <span className="transition-transform duration-200 group-hover:scale-105">New App</span>
+              <Home size={18} className="text-bolt-elements-textPrimary" />
+              {!isCollapsed && <span className="text-sm font-medium">Home</span>}
             </a>
-          </div>
-        </div>
 
-        <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50">
-          <div className="relative group">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bolt-elements-textTertiary group-focus-within:text-blue-500 transition-colors duration-200">
-              <Search size={18} />
-            </div>
-            <input
-              className="w-full bg-bolt-elements-background-depth-3 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-bolt-elements-textTertiary text-bolt-elements-textPrimary border border-bolt-elements-borderColor border-opacity-50 transition-all duration-200 shadow-sm focus:shadow-md hover:shadow-sm"
-              type="search"
-              placeholder="Search apps..."
-              onChange={handleSearchChange}
-              aria-label="Search apps"
-            />
-          </div>
-        </div>
+            {/* New App */}
+            {!isCollapsed ? (
+              <a
+                href="/"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <Plus size={18} className="text-bolt-elements-textPrimary" />
+                  <span className="text-sm font-medium">New App</span>
+                </div>
+                <span className="text-xs text-bolt-elements-textSecondary">Ctrl+N</span>
+              </a>
+            ) : (
+              <a
+                href="/"
+                className="w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors"
+                title="New App"
+              >
+                <Plus size={18} className="text-bolt-elements-textPrimary" />
+              </a>
+            )}
 
-        <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
-          <div className="flex items-center gap-3">
-            <Folder className="text-bolt-elements-textSecondary" size={18} />
-            <h3 className="text-bolt-elements-textHeading font-semibold">Your Apps</h3>
-            {list && list.length > 0 && (
-              <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-30 font-medium shadow-sm">
-                {list.length}
-              </span>
+            {/* Search - transforms to input when clicked */}
+            {!isCollapsed && (!isSearchFocused && !searchValue ? (
+              <button
+                onClick={() => {
+                  setIsSearchFocused(true);
+                  // Focus the input after state update
+                  setTimeout(() => {
+                    searchInputRef.current?.focus();
+                  }, 0);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <Search size={18} className="text-bolt-elements-textPrimary" />
+                  <span className="text-sm font-medium">Search</span>
+                </div>
+                <span className="text-xs text-bolt-elements-textSecondary">Ctrl+K</span>
+              </button>
+            ) : (
+              <div className="relative w-full">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bolt-elements-textTertiary">
+                  <Search size={18} />
+                </div>
+                <input
+                  ref={searchInputRef}
+                  className="w-full bg-bolt-elements-background-depth-1 pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-bolt-elements-textTertiary text-bolt-elements-textPrimary border border-bolt-elements-borderColor border-opacity-50 transition-all duration-200"
+                  type="search"
+                  placeholder="Search apps..."
+                  value={searchValue}
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                    handleSearchChange(e);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchValue('');
+                      handleSearchChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+                      searchInputRef.current?.blur();
+                      setIsSearchFocused(false);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Keep search visible if there's a search term
+                    if (!searchValue) {
+                      setIsSearchFocused(false);
+                    }
+                  }}
+                  aria-label="Search apps"
+                />
+              </div>
+            ))}
+            {isCollapsed && (
+              <button
+                onClick={() => {
+                  setIsCollapsed(false);
+                  setIsSearchFocused(true);
+                  setTimeout(() => {
+                    searchInputRef.current?.focus();
+                  }, 0);
+                }}
+                className="w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors"
+                title="Search"
+              >
+                <Search size={18} className="text-bolt-elements-textPrimary" />
+              </button>
             )}
           </div>
         </div>
-        <div className="flex-1 overflow-auto px-6 pb-4">
-          {filteredList.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1 bg-opacity-30 rounded-xl mx-2 border border-bolt-elements-borderColor border-opacity-30 mt-4">
+
+        {!isCollapsed && (
+          <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
+            <div className="flex items-center gap-3">
+              <Folder className="text-bolt-elements-textSecondary" size={18} />
+              <h3 className="text-bolt-elements-textHeading font-semibold">Your Projects</h3>
+              {list && list.length > 0 && (
+                <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-30 font-medium shadow-sm">
+                  {list.length}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        {isCollapsed && (
+          <div className="px-2 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
+            <div className="flex items-center justify-center">
+              <Folder className="text-bolt-elements-textSecondary" size={18} />
+            </div>
+          </div>
+        )}
+        {!isCollapsed && (
+          <div className="flex-1 overflow-auto px-2 pb-4">
+            {filteredList.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1 bg-opacity-30 rounded-md border border-bolt-elements-borderColor border-opacity-30 mt-2">
               {list === undefined ? (
                 <>
                   <div className="w-10 h-10 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin mb-4 shadow-sm" />
@@ -332,19 +472,14 @@ export const Menu = () => {
               )}
             </Dialog>
           </DialogRoot>
-        </div>
-
-        <div className="border-t border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50 backdrop-blur-sm px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* For now settings are disabled as we don't have any <SettingsButton onClick={() => setIsSettingsOpen(true)} /> */}
-              {/* <div className="h-6 w-px bg-bolt-elements-borderColor/50" /> */}
-              <Feedback />
-            </div>
           </div>
+        )}
+
+        <div className={classNames('py-4 mt-auto px-2 relative overflow-visible')}>
+          <ClientAuth />
         </div>
       </div>
       <SettingsWindow open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-    </motion.div>
+    </div>
   );
 };
