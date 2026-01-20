@@ -17,15 +17,17 @@ export const DEFAULT_THEME = 'light';
 
 export const themeStore = atom<Theme>(initStore());
 
-function initStore() {
-  if (!import.meta.env.SSR) {
-    const persistedTheme = localStorage.getItem(kTheme) as Theme | undefined;
-    const themeAttribute = document.querySelector('html')?.getAttribute('data-theme');
+function initStore(): Theme {
+  // if (!import.meta.env.SSR) {
+  //   const persistedTheme = localStorage.getItem(kTheme) as Theme | undefined;
+  //   const themeAttribute = document.querySelector('html')?.getAttribute('data-theme');
 
-    return persistedTheme ?? (themeAttribute as Theme) ?? DEFAULT_THEME;
-  }
+  //   return persistedTheme ?? (themeAttribute as Theme) ?? DEFAULT_THEME;
+  // }
 
-  return DEFAULT_THEME;
+  // return DEFAULT_THEME;
+  // Lock theme to light mode
+  return 'light';
 }
 
 function getEffectiveTheme(theme: Theme): 'dark' | 'light' {
@@ -51,30 +53,38 @@ function setupSystemThemeListener() {
 }
 
 export function setTheme(theme: Theme) {
-  themeStore.set(theme);
-  logStore.logSystem(`Theme changed to ${theme} mode`);
-  localStorage.setItem(kTheme, theme);
-  const effectiveTheme = getEffectiveTheme(theme);
-  document.querySelector('html')?.setAttribute('data-theme', effectiveTheme);
+  // themeStore.set(theme);
+  // logStore.logSystem(`Theme changed to ${theme} mode`);
+  // localStorage.setItem(kTheme, theme);
+  // const effectiveTheme = getEffectiveTheme(theme);
+  // document.querySelector('html')?.setAttribute('data-theme', effectiveTheme);
 
-  // Setup system theme listener if theme is 'system'
-  if (theme === 'system') {
-    setupSystemThemeListener();
-  }
+  // // Setup system theme listener if theme is 'system'
+  // if (theme === 'system') {
+  //   setupSystemThemeListener();
+  // }
+  // Lock theme to light mode - ignore any theme changes
+  themeStore.set('light');
+  logStore.logSystem(`Theme locked to light mode`);
+  localStorage.setItem(kTheme, 'light');
+  document.querySelector('html')?.setAttribute('data-theme', 'light');
 }
 
-// Initialize theme on load
+// Initialize theme on load - always light mode
 if (!import.meta.env.SSR) {
-  const initialTheme = themeStore.get();
-  const effectiveTheme = getEffectiveTheme(initialTheme);
-  document.querySelector('html')?.setAttribute('data-theme', effectiveTheme);
-  if (initialTheme === 'system') {
-    setupSystemThemeListener();
-  }
+  // const initialTheme = themeStore.get();
+  // const effectiveTheme = getEffectiveTheme(initialTheme);
+  // document.querySelector('html')?.setAttribute('data-theme', effectiveTheme);
+  // if (initialTheme === 'system') {
+  //   setupSystemThemeListener();
+  // }
+  document.querySelector('html')?.setAttribute('data-theme', 'light');
 }
 
 export function toggleTheme() {
-  const currentTheme = themeStore.get();
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  setTheme(newTheme);
+  // const currentTheme = themeStore.get();
+  // const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  // setTheme(newTheme);
+  // Theme is locked to light mode - do nothing
+  setTheme('light');
 }
