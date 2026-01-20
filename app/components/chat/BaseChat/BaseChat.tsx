@@ -31,7 +31,6 @@ import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featur
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
-import { PlanUpgradeBlock } from './components/PlanUpgradeBlock';
 import AppTemplates from './components/AppTemplates/AppTemplates';
 import { DesignSystemPanel } from '~/components/panels/DesignPanel/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignPanel/DesignToolbar';
@@ -92,7 +91,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const activePanel = useStore(sidebarPanelStore.activePanel);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
-    const stripeSubscription = useStore(subscriptionStore.subscription);
     const isSubscriptionStoreLoaded = useStore(subscriptionStore.isLoaded);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
     const [isLoadingList, setIsLoadingList] = useState(true);
@@ -496,23 +494,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     );
                   }
 
-                  const hasNoPaidPlan = !stripeSubscription || stripeSubscription.tier === 'free';
-
-                  const shouldShowUpgradeBlock = user && hasNoPaidPlan && list && list.length > 0 && !chatStarted;
-
-                  return shouldShowUpgradeBlock ? (
-                    <PlanUpgradeBlock />
-                  ) : !chatStarted ? (
-                    <>
-                      <ChatPromptContainer
-                        uploadedFiles={uploadedFiles}
-                        setUploadedFiles={setUploadedFiles!}
-                        imageDataList={imageDataList}
-                        setImageDataList={setImageDataList!}
-                        messageInputProps={messageInputProps}
-                      />
-                    </>
-                  ) : null;
+                  return (
+                    <ChatPromptContainer
+                      uploadedFiles={uploadedFiles}
+                      setUploadedFiles={setUploadedFiles!}
+                      imageDataList={imageDataList}
+                      setImageDataList={setImageDataList!}
+                      messageInputProps={messageInputProps}
+                    />
+                  );
                 })()}
                 {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
               </div>

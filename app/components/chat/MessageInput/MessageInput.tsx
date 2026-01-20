@@ -36,7 +36,6 @@ import {
   Plus,
   // Mic,
 } from 'lucide-react';
-import { buildAccessStore } from '~/lib/stores/buildAccess';
 import { Button } from '~/components/ui/button';
 
 // const AudioWaveIcon = () => (
@@ -117,7 +116,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const hasAppSummary = !!appSummary;
   const user = useStore(userStore);
   const selectedElement = useStore(workbenchStore.selectedElement) as SelectedElementData | null;
-  const hasBuildAccess = useStore(buildAccessStore.hasAccess);
 
   // Focus textarea if URL has focus=true parameter
   useEffect(() => {
@@ -582,7 +580,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           {/* Start Building Button - shown when discovery rating is high enough */}
           {(() => {
             const showStartBuildingButton =
-              user && startPlanningRating > 0 && !hasAppSummary && hasBuildAccess && !hasPendingMessage;
+              user && startPlanningRating > 0 && !hasAppSummary && !hasPendingMessage;
 
             return showStartBuildingButton ? (
               <ClientOnly>

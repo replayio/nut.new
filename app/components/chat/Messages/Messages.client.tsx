@@ -11,7 +11,6 @@ import {
   SignInCard,
   StopBuildCard,
   ContinueBuildCard,
-  SubscriptionCard,
   UserMessage,
   AssistantMessage,
   PendingIndicator,
@@ -35,7 +34,6 @@ import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featureModal';
 import { InfoCard } from '~/components/ui/InfoCard';
 import type { AppLibraryEntry } from '~/lib/persistence/apps';
-import { buildAccessStore } from '~/lib/stores/buildAccess';
 
 interface MessagesProps {
   id?: string;
@@ -61,7 +59,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     const totalFeatures = appSummary?.features?.length;
     const isFullyComplete = completedFeatures === totalFeatures && totalFeatures && totalFeatures > 0;
     const subscription = useStore(subscriptionStore.subscription);
-    const hasBuildAccess = useStore(buildAccessStore.hasAccess);
 
     // Lazy loading state
     const [visibleItemsCount, setVisibleItemsCount] = useState(25);
@@ -123,8 +120,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     }, []);
 
     useEffect(() => {
-      const shouldShow =
-        !hasPendingMessage && !listenResponses && appSummary?.features?.length && !isFullyComplete && hasBuildAccess;
+      const shouldShow = !hasPendingMessage && !listenResponses && appSummary?.features?.length && !isFullyComplete;
 
       if (shouldShow) {
         const timer = setTimeout(() => {
@@ -588,10 +584,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 
           {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
 
-          {user &&
-            (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) &&
-            !hasBuildAccess && <SubscriptionCard onMount={scrollToBottom} />}
-
           {!showContinueBuildCard &&
             listenResponses &&
             !hasPendingMessage &&
@@ -606,7 +598,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             />
           )}
 
-          {user && startPlanningRating === 10 && hasBuildAccess && (
+          {user && startPlanningRating === 10 && (
             <StartBuildingCard
               startPlanningRating={startPlanningRating}
               sendMessage={sendMessage}
