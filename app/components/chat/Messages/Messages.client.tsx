@@ -14,7 +14,6 @@ import {
   SignInCard,
   StopBuildCard,
   ContinueBuildCard,
-  SubscriptionCard,
 } from './components';
 import {
   APP_SUMMARY_CATEGORY,
@@ -572,10 +571,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           })()}
 
           {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
-
-          {user && (isFeatureStatusImplemented(appSummary?.features?.[0]?.status) || startPlanningRating === 10) && (
-            <SubscriptionCard onMount={scrollToBottom} />
-          )}
 
           {!showContinueBuildCard &&
             listenResponses &&
