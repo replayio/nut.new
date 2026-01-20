@@ -452,7 +452,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
               'pt-2 pb-16 px-4': isSmallViewport && (!!appSummary || showMobileNav),
               'p-6': !isSmallViewport && chatStarted,
-              'pt-12 px-6 pb-16': !isSmallViewport && !chatStarted,
+              'pt-12 px-2 pb-16': !isSmallViewport && !chatStarted,
             })}
           >
             <div

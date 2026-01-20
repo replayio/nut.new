@@ -182,8 +182,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   return (
     <div id="showcase-gallery" className={classNames("w-full mx-auto mt-24 mb-4",
       {
-        'md:pl-[250px]': isSidebarOpen,
-        'md:pl-[40px]': !isSidebarOpen,
+        'md:pl-[260px]': isSidebarOpen,
+        'md:pl-[60px]': !isSidebarOpen,
       }
     )}>
       <div className="max-w-[1337px] mx-auto flex flex-col mb-12 animate-fade-in animation-delay-100">
