@@ -5,10 +5,15 @@ import { authModalStore } from '~/lib/stores/authModal';
 import { signOut, userStore } from '~/lib/stores/auth';
 import { useStore } from '@nanostores/react';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { User, Settings, LogOut, Wand2, CreditCard, Bell, ArrowLeft } from 'lucide-react';
+import { User, Settings, LogOut, Wand2, CreditCard, Bell, ArrowLeft, LogIn } from 'lucide-react';
 import useViewport from '~/lib/hooks';
+import { classNames } from '~/utils/classNames';
 
-export function ClientAuth() {
+interface ClientAuthProps {
+  isSidebarCollapsed?: boolean;
+}
+
+export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
   const user = useStore(userStore);
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
@@ -278,9 +283,14 @@ export function ClientAuth() {
       ) : (
         <button
           onClick={() => authModalStore.open(false)}
-          className="w-full px-4 py-1.5 bg-rose-500 text-white rounded-xl hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
+          className={classNames(
+            'h-10 bg-rose-500 text-white rounded-full hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/30 group',
+            isSidebarCollapsed ? 'w-full flex items-center justify-center' : 'w-full px-4 py-1.5',
+          )}
         >
-          <span className="transition-transform duration-200 group-hover:scale-105">Log In</span>
+          <span className="transition-transform duration-200 flex items-center justify-center">
+            {isSidebarCollapsed && !isSmallViewport ? <LogIn size={20} /> : 'Log In'}
+          </span>
         </button>
       )}
     </>

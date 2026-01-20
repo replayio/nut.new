@@ -31,7 +31,7 @@ export const Menu = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
@@ -155,31 +155,6 @@ export const Menu = () => {
     };
   }, [isSmallViewport, isOpen]);
 
-  useEffect(() => {
-    if (isSmallViewport) {
-      return undefined;
-    }
-
-    const enterThreshold = 40;
-    const exitThreshold = 40;
-
-    function onMouseMove(event: MouseEvent) {
-      if (event.pageX < enterThreshold) {
-        sidebarMenuStore.open();
-      }
-
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        sidebarMenuStore.close();
-      }
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, [isSmallViewport, isOpen]);
-
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
 
@@ -192,29 +167,27 @@ export const Menu = () => {
     }
   };
 
+  // On mobile, only show menu when isOpen is true, and always show expanded (not collapsed)
+  const shouldShowMenu = !isSmallViewport || isOpen;
+  const effectiveCollapsed = isSmallViewport ? false : isCollapsed;
+
+  if (!shouldShowMenu) {
+    return null;
+  }
+
   return (
     <div
       ref={menuRef}
       className={classNames(
-        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300',
-        isCollapsed ? 'md:w-[60px]' : 'md:w-[250px]',
+        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300',        effectiveCollapsed ? 'md:w-[60px]' : 'md:w-[260px]',
       )}
     >
-      <div className="md:hidden flex justify-end p-4">
-        <button
-          onClick={() => sidebarMenuStore.close()}
-          className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-1 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
-        >
-          <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
-        </button>
-      </div>
-
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         {/* Header */}
-        <div className={classNames('py-4 border-b border-bolt-elements-borderColor border-opacity-50', isCollapsed ? 'px-2' : 'px-6')}>
-          <div className={classNames('flex items-center mb-6 w-full', isCollapsed ? 'justify-center' : 'justify-between')}>
-            <div className={classNames('flex items-center w-full', isCollapsed ? 'group relative' : 'gap-3')}>
-              {isCollapsed ? (
+        <div className={classNames('py-4 border-b border-bolt-elements-borderColor border-opacity-50', effectiveCollapsed ? 'px-2' : 'px-6')}>
+          <div className={classNames('flex items-center mb-6 w-full', effectiveCollapsed ? 'justify-center' : 'justify-between')}>
+            <div className={classNames('flex items-center w-full', effectiveCollapsed ? 'group relative' : 'gap-3')}>
+              {effectiveCollapsed ? (
                 <div className="relative w-8 h-8">
                   {/* Logo - shows by default when collapsed, hidden on hover */}
                   <div className="w-8 h-8 flex items-center justify-center group-hover:opacity-0 group-hover:pointer-events-none transition-opacity">
@@ -224,9 +197,16 @@ export const Menu = () => {
                   </div>
                   {/* PanelLeft button - hidden by default when collapsed, shows on hover in same position */}
                   <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    onClick={() => {
+                      if (isSmallViewport) {
+                        sidebarMenuStore.close();
+                      } else {
+                        setIsCollapsed(!isCollapsed);
+                        sidebarMenuStore.open();
+                      }
+                    }}
                     className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
-                    aria-label="Expand sidebar"
+                    aria-label={isSmallViewport ? 'Close sidebar' : 'Expand sidebar'}
                   >
                     <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
                   </button>
@@ -244,9 +224,16 @@ export const Menu = () => {
                   </div>
                   {/* PanelLeft button - always visible when expanded */}
                   <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    onClick={() => {
+                      if (isSmallViewport) {
+                        sidebarMenuStore.close();
+                      } else {
+                        setIsCollapsed(!isCollapsed);
+                        sidebarMenuStore.close();
+                      }
+                    }}
                     className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors"
-                    aria-label="Collapse sidebar"
+                    aria-label={isSmallViewport ? 'Close sidebar' : 'Collapse sidebar'}
                   >
                     <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
                   </button>
@@ -262,19 +249,19 @@ export const Menu = () => {
               href="/"
               className={classNames(
                 'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
-                isCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
+                effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
                 window.location.pathname === '/' || window.location.pathname === ''
                   ? 'bg-bolt-elements-background-depth-1'
                   : 'hover:bg-bolt-elements-background-depth-1',
               )}
-              title={isCollapsed ? 'Home' : undefined}
+              title={effectiveCollapsed ? 'Home' : undefined}
             >
               <Home size={18} className="text-bolt-elements-textPrimary" />
-              {!isCollapsed && <span className="text-sm font-medium">Home</span>}
+              {!effectiveCollapsed && <span className="text-sm font-medium">Home</span>}
             </a>
 
             {/* New App */}
-            {!isCollapsed ? (
+            {!effectiveCollapsed ? (
               <a
                 href="/"
                 className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group"
@@ -296,7 +283,7 @@ export const Menu = () => {
             )}
 
             {/* Search - transforms to input when clicked */}
-            {!isCollapsed && (!isSearchFocused && !searchValue ? (
+            {!effectiveCollapsed && (!isSearchFocused && !searchValue ? (
               <button
                 onClick={() => {
                   setIsSearchFocused(true);
@@ -346,14 +333,22 @@ export const Menu = () => {
                 />
               </div>
             ))}
-            {isCollapsed && (
+            {effectiveCollapsed && (
               <button
                 onClick={() => {
-                  setIsCollapsed(false);
-                  setIsSearchFocused(true);
-                  setTimeout(() => {
-                    searchInputRef.current?.focus();
-                  }, 0);
+                  if (isSmallViewport) {
+                    sidebarMenuStore.close();
+                    setIsSearchFocused(true);
+                    setTimeout(() => {
+                      searchInputRef.current?.focus();
+                    }, 0);
+                  } else {
+                    setIsCollapsed(false);
+                    setIsSearchFocused(true);
+                    setTimeout(() => {
+                      searchInputRef.current?.focus();
+                    }, 0);
+                  }
                 }}
                 className="w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors"
                 title="Search"
@@ -364,7 +359,7 @@ export const Menu = () => {
           </div>
         </div>
 
-        {!isCollapsed && (
+        {!effectiveCollapsed && (
           <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
             <div className="flex items-center gap-3">
               <Folder className="text-bolt-elements-textSecondary" size={18} />
@@ -377,14 +372,14 @@ export const Menu = () => {
             </div>
           </div>
         )}
-        {isCollapsed && (
+        {effectiveCollapsed && (
           <div className="px-2 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
             <div className="flex items-center justify-center">
               <Folder className="text-bolt-elements-textSecondary" size={18} />
             </div>
           </div>
         )}
-        {!isCollapsed && (
+        {!effectiveCollapsed && (
           <div className="flex-1 overflow-auto px-2 pb-4">
             {filteredList.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1 bg-opacity-30 rounded-md border border-bolt-elements-borderColor border-opacity-30 mt-2">
@@ -476,7 +471,7 @@ export const Menu = () => {
         )}
 
         <div className={classNames('py-4 mt-auto px-2 relative overflow-visible')}>
-          <ClientAuth />
+          <ClientAuth isSidebarCollapsed={isCollapsed} />
         </div>
       </div>
       <SettingsWindow open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
