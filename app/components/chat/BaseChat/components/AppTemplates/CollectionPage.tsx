@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import type { CollectionPageIndexEntry, CollectionPageContent, LandingPageIndexEntry } from '~/lib/replay/ReferenceApps';
+import type {
+  CollectionPageIndexEntry,
+  CollectionPageContent,
+  LandingPageIndexEntry,
+} from '~/lib/replay/ReferenceApps';
 import { getCollectionPageContent } from '~/lib/replay/ReferenceApps';
 import { X } from 'lucide-react';
 
@@ -103,7 +107,7 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ collection, refe
               {collectionContent.apps.map((collectionApp, index) => {
                 // Find the matching reference app from the full list
                 const matchingApp = referenceApps.find(
-                  (app) => app.referenceAppPath === collectionApp.referenceAppPath
+                  (app) => app.referenceAppPath === collectionApp.referenceAppPath,
                 );
 
                 if (!matchingApp) {
@@ -162,4 +166,3 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ collection, refe
     </div>
   );
 };
-

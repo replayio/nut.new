@@ -5,7 +5,13 @@ import { CategorySelector, type IntroSectionCategory } from './CategorySelector'
 import { ReferenceAppCard } from './ReferenceAppCard';
 import { ReferenceAppModal } from './ReferenceAppModal';
 import { CollectionModal } from './CollectionModal';
-import { getLandingPageIndex, type LandingPageIndexEntry, ReferenceAppStage, getCollections, type CollectionPageIndexEntry } from '~/lib/replay/ReferenceApps';
+import {
+  getLandingPageIndex,
+  type LandingPageIndexEntry,
+  ReferenceAppStage,
+  getCollections,
+  type CollectionPageIndexEntry,
+} from '~/lib/replay/ReferenceApps';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 
@@ -293,9 +299,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
             <div className="max-w-[1337px] mx-auto px-4 sm:px-6 animate-fade-in animation-delay-600">
               <div className="mb-6">
                 <h2 className="text-2xl md:text-3xl font-bold text-bolt-elements-textHeading mb-2">Collections</h2>
-                <p className="text-bolt-elements-textSecondary">
-                  Apps for different use cases
-                </p>
+                <p className="text-bolt-elements-textSecondary">Apps for different use cases</p>
               </div>
 
               {isLoadingCollections ? (

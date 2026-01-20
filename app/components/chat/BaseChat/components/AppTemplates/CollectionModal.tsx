@@ -10,12 +10,7 @@ interface CollectionModalProps {
   onAppClick: (app: LandingPageIndexEntry) => void;
 }
 
-export const CollectionModal: React.FC<CollectionModalProps> = ({
-  collection,
-  referenceApps,
-  onClose,
-  onAppClick,
-}) => {
+export const CollectionModal: React.FC<CollectionModalProps> = ({ collection, referenceApps, onClose, onAppClick }) => {
   // Lock body scroll when modal is open
   useEffect(() => {
     if (collection) {
@@ -110,4 +105,3 @@ export const CollectionModal: React.FC<CollectionModalProps> = ({
     </AnimatePresence>
   );
 };
-
