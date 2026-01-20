@@ -11,10 +11,7 @@ interface ShareButtonProps {
   asMenuItem?: boolean;
 }
 
-export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(function ShareButton(
-  { asMenuItem, ...props },
-  ref,
-) {
+export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ asMenuItem, ...props }, ref) => {
   const appId = useStore(chatStore.currentAppId);
   const [copying, setCopying] = useState(false);
 

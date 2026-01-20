@@ -33,9 +33,7 @@ const ClearAppHistory = () => {
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-medium text-bolt-elements-textPrimary">Clear Chat History</h3>
-        <p className="text-xs text-bolt-elements-textSecondary mt-1">
-          Remove all chat messages from this application
-        </p>
+        <p className="text-xs text-bolt-elements-textSecondary mt-1">Remove all chat messages from this application</p>
       </div>
 
       <div className="p-4 border border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-2">

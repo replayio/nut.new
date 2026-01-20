@@ -9,7 +9,7 @@ interface SideNavButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 /**
  * SideNavButton - Navigation button for the sidebar
- * 
+ *
  * States:
  * - Unselected + Idle: transparent background, subtle shadow
  * - Unselected + Hover: light gray background (#F3F4F6)
@@ -30,26 +30,22 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
           'group relative flex flex-col items-center justify-center',
           'w-14 h-14 gap-2 rounded-lg',
           'text-sm font-medium transition-all duration-200',
-          
+
           // Typography
           'text-foreground',
-          
+
           // Default shadow (xs shadow from Figma)
           'shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]',
-          
+
           // Focus styles - 3px ring
           'focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30',
-          
+
           // Disabled state
           'disabled:pointer-events-none disabled:opacity-50',
-          
+
           // Unselected state
-          !isSelected && [
-            'bg-transparent',
-            'hover:bg-muted/50',
-            'active:bg-muted/70',
-          ],
-          
+          !isSelected && ['bg-transparent', 'hover:bg-muted/50', 'active:bg-muted/70'],
+
           // Selected state
           isSelected && [
             'bg-background',
@@ -57,34 +53,37 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
             'shadow-sm',
             'hover:bg-gradient-to-t hover:from-primary/5 hover:to-transparent',
           ],
-          
-          className
+
+          className,
         )}
         {...props}
       >
         {/* Icon container */}
-        <span className={cn(
-          'flex items-center justify-center w-5 h-5',
-          'transition-colors duration-200',
-          !isSelected && 'text-muted-foreground group-hover:text-foreground',
-          isSelected && 'text-foreground',
-        )}>
+        <span
+          className={cn(
+            'flex items-center justify-center w-5 h-5',
+            'transition-colors duration-200',
+            !isSelected && 'text-muted-foreground group-hover:text-foreground',
+            isSelected && 'text-foreground',
+          )}
+        >
           {icon}
         </span>
-        
+
         {/* Label */}
-        <span className={cn(
-          'text-[11px] leading-none font-medium',
-          'transition-colors duration-200',
-          !isSelected && 'text-muted-foreground group-hover:text-foreground',
-          isSelected && 'text-foreground',
-        )}>
+        <span
+          className={cn(
+            'text-[11px] leading-none font-medium',
+            'transition-colors duration-200',
+            !isSelected && 'text-muted-foreground group-hover:text-foreground',
+            isSelected && 'text-foreground',
+          )}
+        >
           {label}
         </span>
       </button>
     );
-  }
+  },
 );
 
 SideNavButton.displayName = 'SideNavButton';
-

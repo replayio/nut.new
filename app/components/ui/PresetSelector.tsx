@@ -68,11 +68,7 @@ interface RadiusSelectorProps {
   onChange: (value: number) => void;
 }
 
-export const RadiusSelector: React.FC<RadiusSelectorProps> = ({
-  title = 'Roundness',
-  currentValue,
-  onChange,
-}) => {
+export const RadiusSelector: React.FC<RadiusSelectorProps> = ({ title = 'Roundness', currentValue, onChange }) => {
   const presets: PresetOption[] = [
     { value: 0, label: 'None', previewRadius: '0' },
     { value: 0.375, label: 'Small', previewRadius: '4px' },
@@ -107,11 +103,7 @@ interface SpacingSelectorProps {
   onChange: (value: number) => void;
 }
 
-export const SpacingSelector: React.FC<SpacingSelectorProps> = ({
-  title = 'Space',
-  currentValue,
-  onChange,
-}) => {
+export const SpacingSelector: React.FC<SpacingSelectorProps> = ({ title = 'Space', currentValue, onChange }) => {
   const presets: PresetOption[] = [
     { value: 4, label: 'Small' },
     { value: 5, label: 'Medium' },
@@ -130,10 +122,7 @@ export const SpacingSelector: React.FC<SpacingSelectorProps> = ({
           {/* Spacing visual: horizontal lines with gaps */}
           <div className="flex items-center justify-center gap-0.5">
             <div className="w-0.5 h-6 border-l border-dashed border-bolt-elements-textSecondary" />
-            <div 
-              className="flex items-center justify-center"
-              style={{ width: `${preset.value * 3}px` }}
-            >
+            <div className="flex items-center justify-center" style={{ width: `${preset.value * 3}px` }}>
               <div className="w-full border-t border-dashed border-bolt-elements-textSecondary" />
             </div>
             <div className="w-0.5 h-6 border-r border-dashed border-bolt-elements-textSecondary" />

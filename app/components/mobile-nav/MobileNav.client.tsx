@@ -3,7 +3,7 @@ import { classNames } from '~/utils/classNames';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { mobileNavStore, type MobileNavTab } from '~/lib/stores/mobileNav';
 import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
-import { MessageCircle, Monitor, Palette, Settings, History } from 'lucide-react';
+import { MessageCircle, Monitor, Settings, History } from 'lucide-react';
 
 interface TabConfig {
   id: MobileNavTab;

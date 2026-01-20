@@ -53,7 +53,7 @@ export function MessageNavigator({
           disabled={!canGoBack}
           className={cn(
             'h-7 w-7 text-bolt-elements-textSecondary',
-            canGoBack && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2'
+            canGoBack && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2',
           )}
         >
           <ChevronLeft size={16} />
@@ -65,7 +65,7 @@ export function MessageNavigator({
           disabled={!canGoForward}
           className={cn(
             'h-7 w-7 text-bolt-elements-textSecondary',
-            canGoForward && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2'
+            canGoForward && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2',
           )}
         >
           <ChevronRight size={16} />

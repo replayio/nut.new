@@ -31,4 +31,3 @@ export class SidebarPanelStore {
 }
 
 export const sidebarPanelStore = new SidebarPanelStore();
-

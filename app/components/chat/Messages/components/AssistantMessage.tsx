@@ -42,9 +42,7 @@ export function AssistantMessage({
         className={cn(
           'flex flex-col gap-1 rounded-none transition-all duration-200',
           // Pending last message has fade effect
-          isPending && isLast
-            ? 'bg-gradient-to-b from-background from-30% to-transparent'
-            : ''
+          isPending && isLast ? 'bg-gradient-to-b from-background from-30% to-transparent' : '',
         )}
       >
         {/* Thinking Section (collapsible) */}
@@ -77,14 +75,9 @@ export function AssistantMessage({
 
         {/* Action Buttons - Appear on hover */}
         <div className="flex items-center justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-200 pt-2">
-          <MessageActions
-            messageContent={message.content}
-            showBranch={true}
-            showRetry={true}
-          />
+          <MessageActions messageContent={message.content} showBranch={true} showRetry={true} />
         </div>
       </div>
     </div>
   );
 }
-

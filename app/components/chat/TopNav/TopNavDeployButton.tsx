@@ -66,9 +66,7 @@ export function TopNavDeployButton() {
 
   return (
     <TooltipProvider>
-      <WithTooltip
-        tooltip={isDeploying ? 'Deploying...' : isDeployed ? 'Deployed' : 'Deploy App'}
-      >
+      <WithTooltip tooltip={isDeploying ? 'Deploying...' : isDeployed ? 'Deployed' : 'Deploy App'}>
         <Button
           variant="outline"
           onClick={handleOpenModal}

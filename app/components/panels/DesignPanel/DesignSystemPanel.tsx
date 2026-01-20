@@ -624,22 +624,13 @@ export const DesignSystemPanel = () => {
       <div className="border-t border-bolt-elements-borderColor" />
 
       {/* Roundness Section */}
-      <RadiusSelector
-        currentValue={radius}
-        onChange={handleRadiusChange}
-      />
+      <RadiusSelector currentValue={radius} onChange={handleRadiusChange} />
 
       {/* Space Section */}
-      <SpacingSelector
-        currentValue={spacingUnit}
-        onChange={handleSpacingUnitChange}
-      />
+      <SpacingSelector currentValue={spacingUnit} onChange={handleSpacingUnitChange} />
 
       {/* Stroke Section */}
-      <BorderWidthSelector
-        currentValue={borderWidth}
-        onChange={handleBorderWidthChange}
-      />
+      <BorderWidthSelector currentValue={borderWidth} onChange={handleBorderWidthChange} />
     </div>
   );
 

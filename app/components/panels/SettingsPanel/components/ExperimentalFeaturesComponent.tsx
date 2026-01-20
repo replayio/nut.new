@@ -38,9 +38,7 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
       ]);
 
       setSetSecrets((prev) =>
-        appMessagesEnabled
-          ? prev.filter((s) => s !== AppMessagesSecret)
-          : [...prev, AppMessagesSecret]
+        appMessagesEnabled ? prev.filter((s) => s !== AppMessagesSecret) : [...prev, AppMessagesSecret],
       );
 
       toast.success('In-app feedback settings updated');
@@ -66,7 +64,7 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
       setSetSecrets((prev) =>
         disableAppBlockChanges
           ? prev.filter((s) => s !== DisableAppBlockChangesSecret)
-          : [...prev, DisableAppBlockChangesSecret]
+          : [...prev, DisableAppBlockChangesSecret],
       );
 
       toast.success('Builder improvements settings updated');

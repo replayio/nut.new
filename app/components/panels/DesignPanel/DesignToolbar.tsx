@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { classNames } from '~/utils/classNames';
 import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
-import { Button } from '../../ui/button';
+import { Button } from '~/components/ui/button';
 
 export const DesignToolbar = () => {
   const handlers = useStore(designPanelStore.handlers);
@@ -25,10 +25,14 @@ export const DesignToolbar = () => {
   return (
     <div className="bg-bolt-elements-background-depth-1 px-4 py-3 flex items-center justify-between border-t border-bolt-elements-borderColor">
       <Button
-        onClick={hasChanges ? handleDiscard : () => {
-          designPanelStore.isVisible.set(false);
-          sidebarPanelStore.setActivePanel('chat');
-        }}
+        onClick={
+          hasChanges
+            ? handleDiscard
+            : () => {
+                designPanelStore.isVisible.set(false);
+                sidebarPanelStore.setActivePanel('chat');
+              }
+        }
         className={classNames(
           'flex-1 h-10 text-sm font-medium rounded-full transition-all duration-200',
           'border border-bolt-elements-borderColor',
@@ -45,9 +49,7 @@ export const DesignToolbar = () => {
       <Button
         onClick={handlers.onSave}
         disabled={!hasChanges || isSaving}
-        className={classNames(
-          'flex-1 h-10 text-sm font-medium rounded-full transition-all duration-200',
-        )}
+        className={classNames('flex-1 h-10 text-sm font-medium rounded-full transition-all duration-200')}
         variant="outline"
         title={hasChanges ? (isSaving ? 'Saving...' : 'Save theme changes') : 'No changes to save'}
       >

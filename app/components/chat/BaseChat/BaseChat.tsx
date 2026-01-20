@@ -41,7 +41,7 @@ import { ChatPanel } from '~/components/panels/ChatPanel';
 import SideBar from '~/components/sidebar/side-bar.client';
 import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
-import { TopNav } from '../TopNav';
+import { TopNav } from '~/components/chat/TopNav';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -394,21 +394,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <TopNav />
             <div className="flex-1 flex flex-col h-full overflow-hidden pr-2 pb-2">
-                <ResizablePanelGroup
-                  key={panelSizeKey}
-                  direction="horizontal"
-                  className="w-full flex-1 border rounded-md border-bolt-elements-borderColor bg-background"
-                  onLayout={(sizes) => {
-                    if (sizes[0] !== undefined) {
-                      setChatPanelSize(sizes[0]);
-                    }
-                  }}
-                >
-                  <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
-                  <div
-                    ref={scrollRef}
-                    className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden p-2"
-                  >
+              <ResizablePanelGroup
+                key={panelSizeKey}
+                direction="horizontal"
+                className="w-full flex-1 border rounded-md border-bolt-elements-borderColor bg-background"
+                onLayout={(sizes) => {
+                  if (sizes[0] !== undefined) {
+                    setChatPanelSize(sizes[0]);
+                  }
+                }}
+              >
+                <ResizablePanel defaultSize={chatPanelSize} minSize={20} maxSize={60} className="h-full">
+                  <div ref={scrollRef} className="w-full h-full flex flex-col overflow-x-hidden overflow-y-hidden p-2">
                     <div className={classNames(styles.Chat, 'flex flex-col h-full w-full')}>
                       <div className="h-full flex flex-col">
                         <ClientOnly>{() => renderActivePanel()}</ClientOnly>
@@ -427,10 +424,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           /* Mobile view when chat started */
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <TopNav />
-            <div
-              ref={scrollRef}
-              className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto pb-20"
-            >
+            <div ref={scrollRef} className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto pb-20">
               <ClientOnly>
                 {() => {
                   // On mobile, show workbench when canvas tab is active

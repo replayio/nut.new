@@ -100,11 +100,7 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {user.user_metadata?.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url}
-                alt="User avatar"
-                className="w-full h-full object-cover"
-              />
+              <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-muted flex items-center justify-center">
                 <User size={20} className="text-muted-foreground" />

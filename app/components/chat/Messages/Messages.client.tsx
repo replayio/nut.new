@@ -99,16 +99,19 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     }, [userMessagesForNav.length, currentNavigationIndex]);
 
     // Handle navigation to a specific user message
-    const handleNavigateToMessage = useCallback((navIndex: number) => {
-      setCurrentNavigationIndex(navIndex);
-      const targetMessage = userMessagesForNav[navIndex];
-      if (targetMessage) {
-        const element = messageRefs.current.get(targetMessage.id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const handleNavigateToMessage = useCallback(
+      (navIndex: number) => {
+        setCurrentNavigationIndex(navIndex);
+        const targetMessage = userMessagesForNav[navIndex];
+        if (targetMessage) {
+          const element = messageRefs.current.get(targetMessage.id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
-      }
-    }, [userMessagesForNav]);
+      },
+      [userMessagesForNav],
+    );
 
     // Register message ref for scrolling
     const setMessageRef = useCallback((id: string, element: HTMLDivElement | null) => {
@@ -611,9 +614,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
             />
           )}
 
-          {hasPendingMessage && (
-            <PendingIndicator status={pendingMessageStatus} />
-          )}
+          {hasPendingMessage && <PendingIndicator status={pendingMessageStatus} />}
         </div>
       </div>
     );

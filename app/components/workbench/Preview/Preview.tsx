@@ -1,23 +1,11 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
-import {
-  elementPickerStore,
-  setIsElementPickerEnabled,
-  setIsElementPickerReady,
-} from '~/lib/stores/elementPicker';
+import { elementPickerStore, setIsElementPickerEnabled, setIsElementPickerReady } from '~/lib/stores/elementPicker';
 import AppView, { type ResizeSide } from './components/AppView';
 import MultiDevicePreview, { type MultiDevicePreviewRef } from './components/InfiniteCanvas/MultiDevicePreview';
 import { useVibeAppAuthPopup } from '~/lib/hooks/useVibeAppAuth';
-import {
-  Monitor,
-  ExternalLink,
-  Eye,
-  Paintbrush,
-  Shrink,
-  RefreshCcw,
-  Fullscreen,
-} from 'lucide-react';
+import { Monitor, ExternalLink, Eye, Paintbrush, Shrink, RefreshCcw, Fullscreen } from 'lucide-react';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { Button } from '~/components/ui/button';
@@ -380,39 +368,41 @@ export const Preview = memo(() => {
         {/* Top Navigation Bar */}
         <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center gap-2">
           {/* Left: Preview/Editor Toggle */}
-          {!isMobile && <div className="flex items-center h-9 bg-muted rounded-lg p-1">
-            <button
-              onClick={() => {
-                setActiveMode('preview')
-                handleElementPickerToggle()
-              }}
-              className={classNames(
-                'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
-                activeMode === 'preview'
-                  ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                  : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
-              )}
-            >
-              <Eye size={16} />
-              Preview
-            </button>
-            <button
-              onClick={() => {
-                setActiveMode('editor')
-                handleElementPickerToggle()
-              }}
-              className={classNames(
-                'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
-                activeMode === 'editor'
-                  ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                  : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
-              )}
-              disabled={!isElementPickerReady || isMobile}
-            >
-              <Paintbrush size={16} />
-              Editor
-            </button>
-          </div>}
+          {!isMobile && (
+            <div className="flex items-center h-9 bg-muted rounded-lg p-1">
+              <button
+                onClick={() => {
+                  setActiveMode('preview');
+                  handleElementPickerToggle();
+                }}
+                className={classNames(
+                  'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
+                  activeMode === 'preview'
+                    ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
+                    : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                )}
+              >
+                <Eye size={16} />
+                Preview
+              </button>
+              <button
+                onClick={() => {
+                  setActiveMode('editor');
+                  handleElementPickerToggle();
+                }}
+                className={classNames(
+                  'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
+                  activeMode === 'editor'
+                    ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
+                    : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                )}
+                disabled={!isElementPickerReady || isMobile}
+              >
+                <Paintbrush size={16} />
+                Editor
+              </button>
+            </div>
+          )}
 
           {/* Center: Device Selector + URL */}
           <div className="flex-1 flex h-9 w-fit items-center justify-center gap-1 border border-border border-solid rounded-full px-1">
@@ -510,111 +500,121 @@ export const Preview = memo(() => {
         </div>
 
         {/* Bottom: Breadcrumb Navigation */}
-        {!isMobile && <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
-          {(() => {
-            if (!selectedElement?.tree || selectedElement.tree.length === 0) {
+        {!isMobile && (
+          <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
+            {(() => {
+              if (!selectedElement?.tree || selectedElement.tree.length === 0) {
+                return (
+                  <Breadcrumb>
+                    <BreadcrumbList className="text-sm">
+                      <BreadcrumbItem>
+                        <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium">
+                          {selectedElement?.component?.displayName || 'Selection'}
+                        </BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                );
+              }
+
+              const originalTree = selectedElement.tree as ReactComponent[];
+              const breadcrumb = buildBreadcrumbData(originalTree, {
+                getDisplayName: (comp) => comp.displayName || comp.name,
+                getKind: (comp) => (comp.type === 'function' || comp.type === 'class' ? 'react' : 'html'),
+              });
+
+              if (!breadcrumb) {
+                return null;
+              }
+
+              const { htmlElements, firstReact, lastReact, lastHtml } = breadcrumb;
+              const lastReactComponent = lastReact?.item as ReactComponent | undefined;
+              const firstReactComponent = firstReact?.item as ReactComponent | undefined;
+              const lastHtmlComponent = lastHtml?.item as ReactComponent | undefined;
+              const lastReactDisplayName = lastReact?.displayName;
+              const firstReactDisplayName = firstReact?.displayName;
+
               return (
                 <Breadcrumb>
                   <BreadcrumbList className="text-sm">
-                    <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium">
-                        {selectedElement?.component?.displayName || 'Selection'}
-                      </BreadcrumbPage>
-                    </BreadcrumbItem>
+                    {/* Show last React component (if different from first) */}
+                    {lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName && (
+                      <BreadcrumbItem>
+                        <BreadcrumbPage
+                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary cursor-pointer transition-colors"
+                          onMouseEnter={() => highlightElement(lastReactComponent)}
+                          onMouseLeave={clearHighlight}
+                          onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
+                        >
+                          {lastReactDisplayName?.split('$')[0] ||
+                            lastReactDisplayName ||
+                            lastReactComponent.name ||
+                            'Component'}
+                        </BreadcrumbPage>
+                      </BreadcrumbItem>
+                    )}
+
+                    {/* Ellipsis dropdown for HTML elements (if more than 1) */}
+                    {htmlElements.length > 1 && (
+                      <>
+                        {lastReactComponent &&
+                          firstReactComponent &&
+                          lastReactDisplayName !== firstReactDisplayName && (
+                            <BreadcrumbSeparator>/</BreadcrumbSeparator>
+                          )}
+                        <BreadcrumbItem>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="flex items-center gap-1 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors">
+                              <BreadcrumbEllipsis className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              {htmlElements.slice(1, -1).map((node, index: number) => {
+                                const component = node.item as ReactComponent;
+                                return (
+                                  <DropdownMenuItem
+                                    key={index}
+                                    className="cursor-pointer"
+                                    onMouseEnter={() => highlightElement(component)}
+                                    onMouseLeave={clearHighlight}
+                                    onClick={() => updateTreeToComponent(component, originalTree)}
+                                  >
+                                    {node.displayName || component.name || 'unknown'}
+                                  </DropdownMenuItem>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </BreadcrumbItem>
+                      </>
+                    )}
+
+                    {/* Show last HTML element */}
+                    {lastHtmlComponent && (
+                      <>
+                        {(htmlElements.length > 1 ||
+                          (lastReactComponent &&
+                            firstReactComponent &&
+                            lastReactDisplayName !== firstReactDisplayName)) && (
+                          <BreadcrumbSeparator>/</BreadcrumbSeparator>
+                        )}
+                        <BreadcrumbItem>
+                          <BreadcrumbPage
+                            className="text-bolt-elements-textPrimary font-medium hover:text-bolt-elements-textSecondary cursor-pointer transition-colors"
+                            onMouseEnter={() => highlightElement(lastHtmlComponent)}
+                            onMouseLeave={clearHighlight}
+                            onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
+                          >
+                            {lastHtml?.displayName || lastHtmlComponent.name || 'element'}
+                          </BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </>
+                    )}
                   </BreadcrumbList>
                 </Breadcrumb>
               );
-            }
-
-            const originalTree = selectedElement.tree as ReactComponent[];
-            const breadcrumb = buildBreadcrumbData(originalTree, {
-              getDisplayName: (comp) => comp.displayName || comp.name,
-              getKind: (comp) => (comp.type === 'function' || comp.type === 'class' ? 'react' : 'html'),
-            });
-
-            if (!breadcrumb) {
-              return null;
-            }
-
-            const { htmlElements, firstReact, lastReact, lastHtml } = breadcrumb;
-            const lastReactComponent = lastReact?.item as ReactComponent | undefined;
-            const firstReactComponent = firstReact?.item as ReactComponent | undefined;
-            const lastHtmlComponent = lastHtml?.item as ReactComponent | undefined;
-            const lastReactDisplayName = lastReact?.displayName;
-            const firstReactDisplayName = firstReact?.displayName;
-
-            return (
-              <Breadcrumb>
-                <BreadcrumbList className="text-sm">
-                  {/* Show last React component (if different from first) */}
-                  {lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName && (
-                    <BreadcrumbItem>
-                      <BreadcrumbPage
-                        className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary cursor-pointer transition-colors"
-                        onMouseEnter={() => highlightElement(lastReactComponent)}
-                        onMouseLeave={clearHighlight}
-                        onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
-                      >
-                        {lastReactDisplayName?.split('$')[0] || lastReactDisplayName || lastReactComponent.name || 'Component'}
-                      </BreadcrumbPage>
-                    </BreadcrumbItem>
-                  )}
-
-                  {/* Ellipsis dropdown for HTML elements (if more than 1) */}
-                  {htmlElements.length > 1 && (
-                    <>
-                      {lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName && (
-                        <BreadcrumbSeparator>/</BreadcrumbSeparator>
-                      )}
-                      <BreadcrumbItem>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="flex items-center gap-1 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors">
-                            <BreadcrumbEllipsis className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            {htmlElements.slice(1, -1).map((node, index: number) => {
-                              const component = node.item as ReactComponent;
-                              return (
-                                <DropdownMenuItem
-                                  key={index}
-                                  className="cursor-pointer"
-                                  onMouseEnter={() => highlightElement(component)}
-                                  onMouseLeave={clearHighlight}
-                                  onClick={() => updateTreeToComponent(component, originalTree)}
-                                >
-                                  {node.displayName || component.name || 'unknown'}
-                                </DropdownMenuItem>
-                              );
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </BreadcrumbItem>
-                    </>
-                  )}
-
-                  {/* Show last HTML element */}
-                  {lastHtmlComponent && (
-                    <>
-                      {(htmlElements.length > 1 || (lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName)) && (
-                        <BreadcrumbSeparator>/</BreadcrumbSeparator>
-                      )}
-                      <BreadcrumbItem>
-                        <BreadcrumbPage
-                          className="text-bolt-elements-textPrimary font-medium hover:text-bolt-elements-textSecondary cursor-pointer transition-colors"
-                          onMouseEnter={() => highlightElement(lastHtmlComponent)}
-                          onMouseLeave={clearHighlight}
-                          onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
-                        >
-                          {lastHtml?.displayName || lastHtmlComponent.name || 'element'}
-                        </BreadcrumbPage>
-                      </BreadcrumbItem>
-                    </>
-                  )}
-                </BreadcrumbList>
-              </Breadcrumb>
-            );
-          })()}
-        </div>}
+            })()}
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

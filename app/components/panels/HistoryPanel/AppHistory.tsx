@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { database } from '~/lib/persistence/apps';
 import { AppUpdateReasonKind, type AppSummary, type AppUpdateReason } from '~/lib/persistence/messageAppSummary';
-import { assert } from '~/utils/nut';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Search } from 'lucide-react';
 import {
@@ -77,7 +76,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
   };
 
   const getReasonText = (reason: AppUpdateReason | undefined, allHistory: AppSummary[]) => {
-    if (!reason) return 'Unknown';
+    if (!reason) {
+      return 'Unknown';
+    }
     switch (reason.kind) {
       case AppUpdateReasonKind.FeatureImplemented:
         return reason.featureName || 'Feature implemented';
@@ -112,7 +113,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
     // Apply filter
     if (filterType !== 'all') {
       filtered = filtered.filter((summary) => {
-        if (!summary.reason) return false;
+        if (!summary.reason) {
+          return false;
+        }
         switch (filterType) {
           case 'feature':
             return summary.reason.kind === AppUpdateReasonKind.FeatureImplemented;
@@ -141,10 +144,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
 
   // Pagination
   const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
-  const paginatedHistory = filteredHistory.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedHistory = filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const currentVersion = history.length > 0 ? history[0] : null;
 
@@ -249,9 +249,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
                       <MoreHorizontal size={16} className="text-bolt-elements-textSecondary" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleOpenPreview(summary)}>
-                        Open preview
-                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleOpenPreview(summary)}>Open preview</DropdownMenuItem>
                       {!isCurrentVersion && (
                         <DropdownMenuItem onClick={() => handleRevertToVersion(summary)}>
                           Revert to this version
@@ -279,8 +277,8 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
           <span className="text-sm text-bolt-elements-textSecondary">
             <span className="font-medium text-bolt-elements-textPrimary">
               {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredHistory.length)}
-            </span>
-            {' '}of {filteredHistory.length}
+            </span>{' '}
+            of {filteredHistory.length}
           </span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}

@@ -1,9 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { useEditAppTitle } from '~/lib/hooks/useEditAppTitle';
 import { chatStore } from '~/lib/stores/chat';
-import { AppAccessKind, isAppAccessAllowed } from '~/lib/api/permissions';
-import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
-import { userStore } from '~/lib/stores/auth';
 import { Check } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -11,10 +8,6 @@ import WithTooltip from '~/components/ui/Tooltip';
 
 export function ProjectTitle() {
   const initialTitle = useStore(chatStore.appTitle);
-  const appId = useStore(chatStore.currentAppId);
-  const permissions = useStore(permissionsStore);
-  const isAppOwner = useStore(isAppOwnerStore);
-  const user = useStore(userStore);
 
   const { editing, handleChange, handleSubmit, handleKeyDown, currentTitle, toggleEditMode } = useEditAppTitle({
     initialTitle,
@@ -23,8 +16,6 @@ export function ProjectTitle() {
   if (!initialTitle) {
     return null;
   }
-
-  const canEdit = appId && isAppAccessAllowed(permissions, AppAccessKind.SetTitle, user?.email ?? '', isAppOwner);
 
   return (
     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -55,9 +46,9 @@ export function ProjectTitle() {
       ) : (
         <div className="flex items-center gap-2 min-w-0">
           <span
-           className="text-sm font-medium text-bolt-elements-textPrimary truncate max-w-[200px] cursor-pointer"
-           onClick={toggleEditMode}
-           >
+            className="text-sm font-medium text-bolt-elements-textPrimary truncate max-w-[200px] cursor-pointer"
+            onClick={toggleEditMode}
+          >
             {currentTitle}
           </span>
         </div>

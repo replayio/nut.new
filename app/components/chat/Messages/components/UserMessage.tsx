@@ -1,6 +1,6 @@
-import React, { Suspense, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { cn } from '~/lib/utils';
-import { Copy, Pencil, Check, User } from 'lucide-react';
+import { Copy, Pencil, Check } from 'lucide-react';
 import type { Message } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
@@ -13,13 +13,7 @@ interface UserMessageProps {
   sendMessage?: (params: ChatMessageParams) => void;
 }
 
-export function UserMessage({
-  message,
-  messages,
-  isFirst = false,
-  onCheckboxChange,
-  sendMessage,
-}: UserMessageProps) {
+export function UserMessage({ message, messages, isFirst = false, onCheckboxChange, sendMessage }: UserMessageProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -82,4 +76,3 @@ export function UserMessage({
     </div>
   );
 }
-

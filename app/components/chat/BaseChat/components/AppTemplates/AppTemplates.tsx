@@ -180,12 +180,13 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   }, []);
 
   return (
-    <div id="showcase-gallery" className={classNames("w-full mx-auto mt-24 mb-4",
-      {
+    <div
+      id="showcase-gallery"
+      className={classNames('w-full mx-auto mt-24 mb-4', {
         'md:pl-[260px]': isSidebarOpen,
         'md:pl-[60px]': !isSidebarOpen,
-      }
-    )}>
+      })}
+    >
       <div className="max-w-[1337px] mx-auto flex flex-col mb-12 animate-fade-in animation-delay-100">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
           <span className="text-bolt-elements-textHeading">Start with</span>

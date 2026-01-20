@@ -432,10 +432,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                 const isExpanded = expandedGroups.has(groupKey);
 
                 return (
-                  <div
-                    key={groupKey}
-                    className="rounded-md border border-bolt-elements-borderColor overflow-hidden"
-                  >
+                  <div key={groupKey} className="rounded-md border border-bolt-elements-borderColor overflow-hidden">
                     {/* Group Header */}
                     <button
                       onClick={() => toggleGroup(groupKey)}
@@ -498,11 +495,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                                         size="sm"
                                         className="h-8 w-8 p-0"
                                       >
-                                        {permission.allowed ? (
-                                          <ToggleRight size={14} />
-                                        ) : (
-                                          <ToggleLeft size={14} />
-                                        )}
+                                        {permission.allowed ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                                       </Button>
                                     </WithTooltip>
                                     <WithTooltip tooltip="Remove permission">
@@ -672,11 +665,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
           </div>
 
           {/* Add Button */}
-          <Button
-            onClick={handleAddPermission}
-            disabled={saving || !validationState.isValid}
-            className="w-full gap-2"
-          >
+          <Button onClick={handleAddPermission} disabled={saving || !validationState.isValid} className="w-full gap-2">
             {saving ? (
               <>
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -691,11 +680,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <Button
-          variant="outline"
-          onClick={() => setShowAddPermission(true)}
-          className="w-full gap-2"
-        >
+        <Button variant="outline" onClick={() => setShowAddPermission(true)} className="w-full gap-2">
           <PlusCircle size={16} />
           <span>Add Permission</span>
         </Button>

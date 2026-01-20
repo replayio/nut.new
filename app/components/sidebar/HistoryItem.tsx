@@ -53,7 +53,8 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       className={classNames(
         'group rounded-md text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 hover:border hover:border-bolt-elements-borderColor flex items-center px-3 py-2 transition-colors border border-transparent',
         {
-          'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor': isActiveChat,
+          'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor':
+            isActiveChat,
         },
       )}
     >

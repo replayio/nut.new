@@ -10,42 +10,42 @@ import type { ChatMessageParams } from '~/components/chat/ChatComponent/componen
 import WithTooltip from './Tooltip';
 // import { CheckCircle, Loader } from '~/components/icons';
 
-const infoCardVariants = cva('flex items-center gap-2 rounded-md border border-border bg-popover p-4 transition-colors', {
-  variants: {
-    variant: {
-      default: 'shadow-[0_4px_12px_-1px_rgba(0,0,0,0.10)]',
-      active: 'border-accent-foreground border-2',
-      warning: 'border-destructive border-2',
-    },
-    size: {
-      default: 'p-4',
-      sm: 'p-3',
-      lg: 'p-5',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-  },
-});
-
-const iconVariants = cva(
-  'flex-shrink-0 rounded-full p-1 w-10 h-10 flex items-center justify-center',
+const infoCardVariants = cva(
+  'flex items-center gap-2 rounded-md border border-border bg-popover p-4 transition-colors',
   {
     variants: {
-      type: {
-        success: 'text-popover-foreground',
-        info: 'text-popover-foreground',
-        warning: 'text-popover-foreground',
-        error: 'text-popover-foreground',
-        loading: 'text-popover-foreground',
+      variant: {
+        default: 'shadow-[0_4px_12px_-1px_rgba(0,0,0,0.10)]',
+        active: 'border-accent-foreground border-2',
+        warning: 'border-destructive border-2',
+      },
+      size: {
+        default: 'p-4',
+        sm: 'p-3',
+        lg: 'p-5',
       },
     },
     defaultVariants: {
-      type: 'success',
+      variant: 'default',
+      size: 'default',
     },
   },
 );
+
+const iconVariants = cva('flex-shrink-0 rounded-full p-1 w-10 h-10 flex items-center justify-center', {
+  variants: {
+    type: {
+      success: 'text-popover-foreground',
+      info: 'text-popover-foreground',
+      warning: 'text-popover-foreground',
+      error: 'text-popover-foreground',
+      loading: 'text-popover-foreground',
+    },
+  },
+  defaultVariants: {
+    type: 'success',
+  },
+});
 
 export interface InfoCardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof infoCardVariants> {
   title?: string;
@@ -94,7 +94,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-  
+
     const getIcon = () => {
       switch (iconType) {
         case 'success':

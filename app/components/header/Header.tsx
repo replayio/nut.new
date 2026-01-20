@@ -47,9 +47,7 @@ export function Header() {
         {appSummary && !isSmallViewport && <ChatDescription />}
       </div>
 
-      <div className="flex items-center gap-4">
-        {!chatStarted && <ClientAuth />}
-      </div>
+      <div className="flex items-center gap-4">{!chatStarted && <ClientAuth />}</div>
     </header>
   );
 }

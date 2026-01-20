@@ -55,7 +55,7 @@ export function MessageActions({
           'flex items-center justify-center w-6 h-6 rounded-md bg-transparent transition-all duration-200',
           thumbsState === 'up'
             ? 'text-green-500 hover:text-green-600'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted',
         )}
         title="Good response"
       >
@@ -69,7 +69,7 @@ export function MessageActions({
           'flex items-center justify-center w-6 h-6 rounded-md bg-transparent transition-all duration-200',
           thumbsState === 'down'
             ? 'text-red-500 hover:text-red-600'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted',
         )}
         title="Bad response"
       >
@@ -109,5 +109,3 @@ export function MessageActions({
     </div>
   );
 }
-
-

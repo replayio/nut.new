@@ -44,11 +44,7 @@ export function SideBar() {
       <div className="flex justify-center items-center py-3 w-full px-2">
         <ClientOnly>
           {() => (
-            <Suspense
-              fallback={
-                <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
-              }
-            >
+            <Suspense fallback={<div className="w-10 h-10 rounded-full bg-muted animate-pulse" />}>
               <ClientAuth />
             </Suspense>
           )}

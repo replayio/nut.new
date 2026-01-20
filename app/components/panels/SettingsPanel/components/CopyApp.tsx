@@ -32,9 +32,7 @@ const CopyApp = () => {
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-medium text-bolt-elements-textPrimary">Copy Application</h3>
-        <p className="text-xs text-bolt-elements-textSecondary mt-1">
-          Create an independent copy of this application
-        </p>
+        <p className="text-xs text-bolt-elements-textSecondary mt-1">Create an independent copy of this application</p>
       </div>
 
       <div className="p-4 border border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-2">
@@ -42,12 +40,7 @@ const CopyApp = () => {
           <p className="text-sm text-bolt-elements-textSecondary text-center">
             Your copy will be independent and you'll have full access to modify it without affecting the original.
           </p>
-          <Button
-            onClick={handleCopyApp}
-            disabled={isCopying}
-            variant="outline"
-            className="h-9"
-          >
+          <Button onClick={handleCopyApp} disabled={isCopying} variant="outline" className="h-9">
             {isCopying ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary border-t-transparent rounded-full animate-spin"></div>

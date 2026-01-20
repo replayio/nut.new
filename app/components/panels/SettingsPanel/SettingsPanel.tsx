@@ -11,7 +11,7 @@ import { isAppOwnerStore, permissionsStore, setIsAppOwner } from '~/lib/stores/p
 import { userStore } from '~/lib/stores/auth';
 import CopyApp from './components/CopyApp';
 import ClearAppHistory from './components/ClearAppHistory';
-import { Settings, Type } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Skeleton } from '~/components/ui/Skeleton';
 
 export const SettingsPanel = () => {
@@ -76,8 +76,7 @@ export const SettingsPanel = () => {
             )}
 
             {/* Permissions */}
-            {appId &&
-              isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isOwner) && (
+            {appId && isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isOwner) && (
               <>
                 <div className="border-t border-bolt-elements-borderColor" />
                 <PermissionsSelectionComponent />
@@ -121,4 +120,3 @@ export const SettingsPanel = () => {
     </div>
   );
 };
-

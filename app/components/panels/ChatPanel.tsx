@@ -46,11 +46,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             {infoCards && infoCards.length > 0 && (
               <div className="flex justify-center">
                 <div style={{ width: 'calc(min(100%, var(--chat-max-width, 37rem)))' }}>
-                  <StackedInfoCard
-                    cards={infoCards}
-                    className="w-full mb-2"
-                    handleSendMessage={handleSendMessage}
-                  />
+                  <StackedInfoCard cards={infoCards} className="w-full mb-2" handleSendMessage={handleSendMessage} />
                 </div>
               </div>
             )}
@@ -67,4 +63,3 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     </>
   );
 };
-

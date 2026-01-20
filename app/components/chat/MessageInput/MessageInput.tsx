@@ -30,7 +30,7 @@ import { toast } from 'react-toastify';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { getCurrentIFrame } from '~/components/workbench/Preview/Preview';
-import { 
+import {
   Crosshair,
   X,
   Plus,
@@ -548,7 +548,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 // Transform selectedElement to API format
                 const componentReference = selectedElement?.tree
                   ? {
-                      componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
+                      componentNames: selectedElement.tree.map(
+                        (comp: ReactComponent) => comp.displayName || 'Anonymous',
+                      ),
                     }
                   : undefined;
 
@@ -642,7 +644,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               if (input.length > 0 || uploadedFiles.length > 0) {
                 const componentReference = selectedElement?.tree
                   ? {
-                      componentNames: selectedElement.tree.map((comp: ReactComponent) => comp.displayName || 'Anonymous'),
+                      componentNames: selectedElement.tree.map(
+                        (comp: ReactComponent) => comp.displayName || 'Anonymous',
+                      ),
                     }
                   : undefined;
 

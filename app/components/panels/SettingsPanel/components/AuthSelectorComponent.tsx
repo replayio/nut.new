@@ -172,9 +172,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
     <div className="space-y-4">
       {/* Section Header */}
       <div>
-        <h3 className="text-base font-semibold text-bolt-elements-textPrimary">
-          Application Visibility & Permissions
-        </h3>
+        <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Application Visibility & Permissions</h3>
         <p className="text-sm text-bolt-elements-textSecondary mt-1">
           Control who can view or access your application.
         </p>
@@ -185,10 +183,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
         <label className="text-sm font-medium text-bolt-elements-textPrimary">Application Access</label>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-between h-10 text-sm font-normal"
-            >
+            <Button variant="outline" className="w-full justify-between h-10 text-sm font-normal">
               <span className="flex items-center gap-2">
                 <Lock size={16} className="text-bolt-elements-textSecondary" />
                 {accessType === 'private' ? 'Private' : 'Public'}
@@ -201,9 +196,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
               <Lock size={16} className="mr-2" />
               Private
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAccessTypeChange('public')}>
-              Public
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAccessTypeChange('public')}>Public</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <p className="text-sm text-bolt-elements-textSecondary">
@@ -213,11 +206,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
 
       {/* Require Logging in */}
       <div className="flex items-start gap-3">
-        <Switch
-          checked={authRequired}
-          onCheckedChange={!saving ? handleAuthToggle : undefined}
-          className="mt-0.5"
-        />
+        <Switch checked={authRequired} onCheckedChange={!saving ? handleAuthToggle : undefined} className="mt-0.5" />
         <div className="flex-1">
           <h4 className="text-sm font-medium text-bolt-elements-textPrimary">Require Logging in</h4>
           <p className="text-sm text-bolt-elements-textSecondary">
@@ -228,18 +217,18 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
 
       {/* Restricted Access */}
       <div className="flex items-start gap-3">
-        <Switch
-          checked={restrictedAccess}
-          onCheckedChange={handleRestrictedAccessToggle}
-          className="mt-0.5"
-        />
+        <Switch checked={restrictedAccess} onCheckedChange={handleRestrictedAccessToggle} className="mt-0.5" />
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4 className={`text-sm font-medium ${authRequired ? 'text-bolt-elements-textPrimary' : 'text-bolt-elements-textSecondary'}`}>
+              <h4
+                className={`text-sm font-medium ${authRequired ? 'text-bolt-elements-textPrimary' : 'text-bolt-elements-textSecondary'}`}
+              >
                 Restricted Access
               </h4>
-              <p className={`text-sm ${authRequired ? 'text-bolt-elements-textSecondary' : 'text-bolt-elements-textTertiary'}`}>
+              <p
+                className={`text-sm ${authRequired ? 'text-bolt-elements-textSecondary' : 'text-bolt-elements-textTertiary'}`}
+              >
                 Only whitelisted emails and domains will be able to access and sign up to this application.
               </p>
             </div>
@@ -288,7 +277,9 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                               : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus'
                         }`}
                       >
-                        <span className={`text-sm ${showInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-bolt-elements-textSecondary'}`}>
+                        <span
+                          className={`text-sm ${showInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-bolt-elements-textSecondary'}`}
+                        >
                           @
                         </span>
                         <input
@@ -320,12 +311,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                   <span>Enter domains like example.com or team.example.com</span>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={addRow}
-                  className="gap-1"
-                >
+                <Button variant="outline" size="sm" onClick={addRow} className="gap-1">
                   <Plus size={14} />
                   Add domain
                 </Button>
@@ -334,18 +320,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-bolt-elements-borderColor">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowRestrictedManage(false)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowRestrictedManage(false)}>
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveDomains}
-              disabled={loading || saving || !haveAny || !allValid}
-            >
+            <Button size="sm" onClick={handleSaveDomains} disabled={loading || saving || !haveAny || !allValid}>
               {saving ? 'Saving...' : 'Save Domains'}
             </Button>
           </div>
