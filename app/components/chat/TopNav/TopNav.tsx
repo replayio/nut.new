@@ -9,6 +9,7 @@ import { Button } from '~/components/ui/button';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import useViewport from '~/lib/hooks';
 import { ChatDescription } from '~/components/panels/SettingsPanel/components/ChatDescription.client';
+import { DebugAppButton } from '~/components/ui/DebugControls';
 
 export function TopNav() {
   const appId = useStore(chatStore.currentAppId);
@@ -39,6 +40,7 @@ export function TopNav() {
 
       {/* Right section: Action buttons */}
       <div className="flex items-center gap-1">
+        <DebugAppButton />
         {appId && <ShareButton />}
         {repositoryId && <TopNavDownloadButton />}
         {repositoryId && appId && <TopNavDeployButton />}
