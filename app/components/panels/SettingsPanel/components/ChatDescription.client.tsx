@@ -24,7 +24,7 @@ export function ChatDescription() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       {editing ? (
         <input
           type="text"
@@ -38,12 +38,12 @@ export function ChatDescription() {
         />
       ) : (
         <div
-          className={`w-full h-9 px-3 flex items-center text-sm font-semibold text-bolt-elements-textHeading transition-all ${
+          className={`w-full h-9 px-3 flex items-center text-sm font-semibold text-bolt-elements-textHeading transition-all min-w-0 ${
             canEdit ? 'cursor-text hover:bg-bolt-elements-background-depth-2' : ''
           }`}
           onClick={canEdit ? toggleEditMode : undefined}
         >
-          <span className="truncate">{currentTitle || 'Project Name'}</span>
+          <span className="truncate min-w-0">{currentTitle || 'Project Name'}</span>
         </div>
       )}
     </div>

@@ -93,7 +93,7 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
       <ReactModal
         isOpen={showUpgradeModal}
         onRequestClose={() => setShowUpgradeModal(false)}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 outline-none"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl shadow-2xl p-4 sm:p-6 max-w-md w-[calc(100%-2rem)] sm:w-full sm:mx-4 outline-none"
         overlayClassName="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]"
       >
         <div className="flex flex-col items-center text-center">
