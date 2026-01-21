@@ -538,16 +538,24 @@ export const DesignSystemPanel = () => {
   const renderOverview = () => (
     <div className="p-4 space-y-6">
       {/* Light/Dark Mode Toggle */}
-      <div className="flex rounded-lg border border-bolt-elements-borderColor p-1 bg-bolt-elements-background-depth-2">
+      <div className="relative flex rounded-lg border border-bolt-elements-borderColor p-1 bg-bolt-elements-background-depth-2">
+        {/* Sliding background */}
+        <div
+          className="absolute top-1 bottom-1 left-1 rounded-md bg-background shadow-sm border border-bolt-elements-borderColor transition-transform duration-300 ease-in-out"
+          style={{
+            width: 'calc(50% - 0.25rem)',
+            transform: themeMode === 'dark' ? 'translateX(calc(100% + 0.5rem))' : 'translateX(0)',
+          }}
+        />
         <button
           onClick={() => {
             setThemeMode('light');
             sendThemeModeToAllIframes('light');
           }}
           className={classNames(
-            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
+            'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
             themeMode === 'light'
-              ? 'bg-background text-bolt-elements-textPrimary shadow-sm border border-bolt-elements-borderColor'
+              ? 'text-bolt-elements-textPrimary'
               : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
           )}
         >
@@ -560,9 +568,9 @@ export const DesignSystemPanel = () => {
             sendThemeModeToAllIframes('dark');
           }}
           className={classNames(
-            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
+            'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
             themeMode === 'dark'
-              ? 'bg-background text-bolt-elements-textPrimary shadow-sm border border-bolt-elements-borderColor'
+              ? 'text-bolt-elements-textPrimary'
               : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
           )}
         >

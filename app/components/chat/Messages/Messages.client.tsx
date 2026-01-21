@@ -181,7 +181,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       }, 10);
     }, [isLoadingMore]);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (immediate = false) => {
       if (!containerRef.current) {
         return;
       }
@@ -293,6 +293,46 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         return () => clearTimeout(timer);
       }
     }, [startPlanningRating]);
+
+    // Scroll to bottom on initial mount and when messages first load
+    const hasInitializedRef = useRef(false);
+    const previousMessagesLengthForInitRef = useRef(messages.length);
+    
+    useEffect(() => {
+      if (messages.length === 0) {
+        return;
+      }
+
+      // Reset initialization flag when messages change significantly (e.g., new chat)
+      if (hasInitializedRef.current && messages.length < previousMessagesLengthForInitRef.current / 2) {
+        hasInitializedRef.current = false;
+      }
+
+      previousMessagesLengthForInitRef.current = messages.length;
+
+      if (hasInitializedRef.current) {
+        return;
+      }
+
+      // Wait for DOM to be ready using requestAnimationFrame for more reliable timing
+      let timeoutId: NodeJS.Timeout | null = null;
+      const rafId = requestAnimationFrame(() => {
+        timeoutId = setTimeout(() => {
+          if (containerRef.current) {
+            // Use immediate scroll on initial load to ensure it reaches the bottom
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+            hasInitializedRef.current = true;
+          }
+        }, 50);
+      });
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [messages.length]);
 
     // Helper function to filter, deduplicate, and sort messages
     const processMessageGroup = (messageGroup: Message[]): Message[] => {
@@ -531,7 +571,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     return (
       <div className="relative flex-1 min-h-0 flex flex-col">
         {/* Message Navigator */}
-        {userMessagesForNav.length > 0 && (
+        {userMessagesForNav.length > 0 && appSummary && (
           <div>
             <MessageNavigator
               userMessages={userMessagesForNav}

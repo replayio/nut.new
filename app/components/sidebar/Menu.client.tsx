@@ -31,7 +31,7 @@ export const Menu = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
@@ -197,12 +197,12 @@ export const Menu = () => {
               effectiveCollapsed ? 'justify-center' : 'justify-between',
             )}
           >
-            <div className={classNames('flex items-center w-full', effectiveCollapsed ? 'group relative' : 'gap-3')}>
+            <div className={classNames('flex items-center w-full', effectiveCollapsed ? 'group relative justify-center' : 'gap-3')}>
               {effectiveCollapsed ? (
-                <div className="relative w-8 h-8">
+                <div className="relative w-full flex items-center justify-center">
                   {/* Logo - shows by default when collapsed, hidden on hover */}
-                  <div className="w-8 h-8 flex items-center justify-center group-hover:opacity-0 group-hover:pointer-events-none transition-opacity">
-                    <div className="relative w-6 h-6">
+                  <div className="w-full flex items-center justify-center group-hover:opacity-0 group-hover:pointer-events-none transition-opacity">
+                    <div className="relative w-6 h-6 flex items-center justify-center">
                       <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
                     </div>
                   </div>
@@ -216,10 +216,10 @@ export const Menu = () => {
                         sidebarMenuStore.open();
                       }
                     }}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
+                    className="w-full flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
                     aria-label={isSmallViewport ? 'Close sidebar' : 'Expand sidebar'}
                   >
-                    <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
+                    <PanelLeft size={18} className="text-bolt-elements-textPrimary" />
                   </button>
                 </div>
               ) : (

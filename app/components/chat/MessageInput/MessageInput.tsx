@@ -8,14 +8,6 @@ import { useStore } from '@nanostores/react';
 import { getDiscoveryRating } from '~/lib/persistence/message';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbEllipsis,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '~/components/ui/breadcrumb';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -34,6 +26,7 @@ import {
   Crosshair,
   X,
   Plus,
+  ChevronRight,
   // Mic,
 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
@@ -352,149 +345,136 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className={classNames('relative transition-all duration-300')}>
-      {selectedElement && (
-        <div className="bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <Crosshair size={18} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
-                  {(() => {
-                    if (!selectedElement.tree || selectedElement.tree.length === 0) {
-                      return (
-                        <span className="flex items-center gap-1.5">
-                          <span className="text-bolt-elements-textPrimary">Selected:</span>
-                          <span className="text-blue-600 dark:text-blue-400">
-                            {selectedElement.component?.displayName || 'Component'}
-                          </span>
-                        </span>
-                      );
-                    }
-
-                    const originalTree = selectedElement.tree;
-                    const breadcrumbData = buildBreadcrumbData(originalTree, {
-                      getDisplayName: (comp) => comp.displayName || comp.name,
-                      getKind: (comp) => (comp.type === 'function' || comp.type === 'class' ? 'react' : 'html'),
-                    });
-
-                    if (!breadcrumbData) {
-                      return null;
-                    }
-
-                    const { htmlElements, firstReact, lastReact, lastHtml } = breadcrumbData;
-                    const lastReactComponent = lastReact?.item as ReactComponent | undefined;
-                    const firstReactComponent = firstReact?.item as ReactComponent | undefined;
-                    const lastHtmlComponent = lastHtml?.item as ReactComponent | undefined;
-                    const lastReactDisplayName = lastReact?.displayName;
-                    const firstReactDisplayName = firstReact?.displayName;
-
-                    return (
-                      <Breadcrumb>
-                        <BreadcrumbList>
-                          <BreadcrumbItem>
-                            <span className="text-bolt-elements-textPrimary">Selected:</span>
-                          </BreadcrumbItem>
-
-                          {/* Show currently selected React component (last React component) */}
-                          {lastReactComponent &&
-                            firstReactComponent &&
-                            lastReactDisplayName !== firstReactDisplayName && (
-                              <>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                  <BreadcrumbPage
-                                    className="text-blue-600 dark:text-blue-400 cursor-pointer"
-                                    onMouseEnter={() => highlightElement(lastReactComponent)}
-                                    onMouseLeave={clearHighlight}
-                                    onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
-                                  >
-                                    {lastReactDisplayName?.split('$')[0] ||
-                                      lastReactDisplayName ||
-                                      lastReactComponent.name ||
-                                      'Component'}
-                                  </BreadcrumbPage>
-                                </BreadcrumbItem>
-                              </>
-                            )}
-
-                          {/* Second ellipsis for HTML elements (if there are any) */}
-                          {htmlElements.length > 1 && (
-                            <>
-                              <BreadcrumbSeparator />
-                              <BreadcrumbItem>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger className="flex items-center gap-1 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor rounded-lg p-1">
-                                    <BreadcrumbEllipsis className="h-4 w-4" />
-                                    <span className="sr-only">More HTML elements</span>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="start">
-                                    {htmlElements.slice(1, -1).map((node, index: number) => {
-                                      const component = node.item as ReactComponent;
-
-                                      return (
-                                        <DropdownMenuItem
-                                          key={index}
-                                          className="text-purple-600 dark:text-purple-400 cursor-pointer"
-                                          onMouseEnter={() => highlightElement(component)}
-                                          onMouseLeave={clearHighlight}
-                                          onClick={() => updateTreeToComponent(component, originalTree)}
-                                        >
-                                          {node.displayName || component.name || 'unknown'}
-                                        </DropdownMenuItem>
-                                      );
-                                    })}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </BreadcrumbItem>
-                            </>
-                          )}
-
-                          {/* Show currently selected HTML element (last HTML element) */}
-                          {lastHtmlComponent && (
-                            <>
-                              <BreadcrumbSeparator />
-                              <BreadcrumbItem>
-                                <BreadcrumbPage
-                                  className="text-purple-600 dark:text-purple-400 cursor-pointer"
-                                  onMouseEnter={() => highlightElement(lastHtmlComponent)}
-                                  onMouseLeave={clearHighlight}
-                                  onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
-                                >
-                                  {lastHtml?.displayName || lastHtmlComponent.name || 'element'}
-                                </BreadcrumbPage>
-                              </BreadcrumbItem>
-                            </>
-                          )}
-                        </BreadcrumbList>
-                      </Breadcrumb>
-                    );
-                  })()}
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => workbenchStore.setSelectedElement(null)}
-              className="w-6 h-6 rounded-lg bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-4 hover:border-bolt-elements-focus/50 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary flex-shrink-0"
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main input container with white background */}
       <div className="bg-background rounded-md border border-bolt-elements-borderColor">
         {/* Textarea area */}
         <div className="relative">
+          {/* Breadcrumb pill at top left */}
+          {selectedElement && (
+            <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 px-2 py-1 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor text-sm font-medium">
+              <Crosshair size={12} className="text-bolt-elements-textSecondary flex-shrink-0" />
+              {(() => {
+                if (!selectedElement.tree || selectedElement.tree.length === 0) {
+                  return (
+                    <span className="text-bolt-elements-textPrimary font-medium">
+                      {selectedElement.component?.displayName || 'Component'}
+                    </span>
+                  );
+                }
+
+                const originalTree = selectedElement.tree;
+                const breadcrumbData = buildBreadcrumbData(originalTree, {
+                  getDisplayName: (comp) => comp.displayName || comp.name,
+                  getKind: (comp) => (comp.type === 'function' || comp.type === 'class' ? 'react' : 'html'),
+                });
+
+                if (!breadcrumbData) {
+                  return null;
+                }
+
+                const { htmlElements, firstReact, lastReact, lastHtml } = breadcrumbData;
+                const lastReactComponent = lastReact?.item as ReactComponent | undefined;
+                const firstReactComponent = firstReact?.item as ReactComponent | undefined;
+                const lastHtmlComponent = lastHtml?.item as ReactComponent | undefined;
+                const lastReactDisplayName = lastReact?.displayName;
+                const firstReactDisplayName = firstReact?.displayName;
+
+                const parts: React.ReactNode[] = [];
+
+                // Show currently selected React component (last React component)
+                if (
+                  lastReactComponent &&
+                  firstReactComponent &&
+                  lastReactDisplayName !== firstReactDisplayName
+                ) {
+                  parts.push(
+                    <button
+                      key="react"
+                      className="text-bolt-elements-textPrimary hover:text-bolt-elements-textHeading transition-colors cursor-pointer"
+                      onMouseEnter={() => highlightElement(lastReactComponent)}
+                      onMouseLeave={clearHighlight}
+                      onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
+                    >
+                      {lastReactDisplayName?.split('$')[0] ||
+                        lastReactDisplayName ||
+                        lastReactComponent.name ||
+                        'Component'}
+                    </button>,
+                  );
+                }
+
+                // Show ellipsis for HTML elements (if there are any)
+                if (htmlElements.length > 1) {
+                  parts.push(
+                    <DropdownMenu key="ellipsis">
+                      <DropdownMenuTrigger className="flex items-center gap-0.5 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors cursor-pointer">
+                        <span>...</span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        {htmlElements.slice(1, -1).map((node, index: number) => {
+                          const component = node.item as ReactComponent;
+
+                          return (
+                            <DropdownMenuItem
+                              key={index}
+                              className="cursor-pointer"
+                              onMouseEnter={() => highlightElement(component)}
+                              onMouseLeave={clearHighlight}
+                              onClick={() => updateTreeToComponent(component, originalTree)}
+                            >
+                              {node.displayName || component.name || 'unknown'}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>,
+                  );
+                }
+
+                // Show currently selected HTML element (last HTML element)
+                if (lastHtmlComponent) {
+                  parts.push(
+                    <button
+                      key="html"
+                      className="text-bolt-elements-textPrimary hover:text-bolt-elements-textHeading transition-colors cursor-pointer"
+                      onMouseEnter={() => highlightElement(lastHtmlComponent)}
+                      onMouseLeave={clearHighlight}
+                      onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
+                    >
+                      {lastHtml?.displayName || lastHtmlComponent.name || 'element'}
+                    </button>,
+                  );
+                }
+
+                return (
+                  <div className="flex items-center gap-1">
+                    {parts.map((part, index) => (
+                      <React.Fragment key={index}>
+                        {part}
+                        {index < parts.length - 1 && (
+                          <ChevronRight size={12} className="text-bolt-elements-textSecondary flex-shrink-0" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                );
+              })()}
+              <button
+                onClick={() => workbenchStore.setSelectedElement(null)}
+                className="ml-1 p-0.5 hover:bg-bolt-elements-background-depth-3 rounded transition-colors flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary flex-shrink-0"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             className={classNames(
-              'w-full p-3 border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base rounded-md',
+              'w-full border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base rounded-md',
               'focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-none active:border-none',
               { 'opacity-50 cursor-not-allowed': hasPendingMessage },
               'placeholder:text-bolt-elements-textSecondary',
+              selectedElement ? 'pt-10 px-3 pb-3' : 'p-3',
             )}
             onDragEnter={(e) => {
               e.preventDefault();
@@ -659,7 +639,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }
               }
             }}
-            disabled={hasPendingMessage && !input.length && !uploadedFiles.length}
+            disabled={hasPendingMessage || !input.length || !uploadedFiles.length}
             className="px-5 py-2.5 rounded-full font-medium bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 transition-all duration-200 flex items-center gap-2"
           >
             <span>Send</span>

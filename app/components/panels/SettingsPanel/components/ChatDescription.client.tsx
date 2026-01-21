@@ -38,8 +38,8 @@ export function ChatDescription() {
         />
       ) : (
         <div
-          className={`w-full h-9 px-3 py-1 flex items-center text-sm bg-background text-bolt-elements-textPrimary rounded-md border border-input shadow-sm transition-all ${
-            canEdit ? 'cursor-text hover:border-bolt-elements-focus/50' : ''
+          className={`w-full h-9 px-3 flex items-center text-sm font-semibold text-bolt-elements-textHeading transition-all ${
+            canEdit ? 'cursor-text hover:bg-bolt-elements-background-depth-2' : ''
           }`}
           onClick={canEdit ? toggleEditMode : undefined}
         >

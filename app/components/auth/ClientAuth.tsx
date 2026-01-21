@@ -96,7 +96,7 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
         <div className="relative">
           <button
             ref={buttonRef}
-            className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border"
+            className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border shadow-md"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {user.user_metadata?.avatar_url ? (

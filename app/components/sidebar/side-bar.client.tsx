@@ -5,19 +5,26 @@ import { ClientAuth } from '~/components/auth/ClientAuth';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Suspense } from 'react';
 import { SideNavButton } from './SideNavButton';
+import { workbenchStore } from '~/lib/stores/workbench';
+import { chatStore } from '~/lib/stores/chat';
 
 export function SideBar() {
   const activePanel = useStore(sidebarPanelStore.activePanel);
+  const previewURL = useStore(workbenchStore.previewURL);
+  const previewLoading = useStore(chatStore.previewLoading);
+  const isPreviewReady = previewURL && !previewLoading;
+  const appSummary = useStore(chatStore.appSummary);
+  const appId = useStore(chatStore.currentAppId);
 
   const handlePanelClick = (panel: SidebarPanel) => {
     sidebarPanelStore.setActivePanel(panel);
   };
 
-  const navItems: { icon: React.ReactNode; label: string; panel: SidebarPanel }[] = [
+  const navItems: { icon: React.ReactNode; label: string; panel: SidebarPanel; disabled?: boolean }[] = [
     { icon: <MessageCircleMore size={20} strokeWidth={1.5} />, label: 'Chat', panel: 'chat' },
-    { icon: <Palette size={20} strokeWidth={1.5} />, label: 'Design', panel: 'design' },
-    { icon: <SlidersHorizontal size={20} strokeWidth={1.5} />, label: 'Settings', panel: 'settings' },
-    { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history' },
+    { icon: <Palette size={20} strokeWidth={1.5} />, label: 'Design', panel: 'design', disabled: !isPreviewReady },
+    { icon: <SlidersHorizontal size={20} strokeWidth={1.5} />, label: 'Settings', panel: 'settings', disabled: !appSummary },
+    { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history', disabled: !appId },
   ];
 
   return (
@@ -36,6 +43,7 @@ export function SideBar() {
             label={item.label}
             isSelected={activePanel === item.panel}
             onClick={() => handlePanelClick(item.panel)}
+            disabled={item.disabled ?? false}
           />
         ))}
       </nav>

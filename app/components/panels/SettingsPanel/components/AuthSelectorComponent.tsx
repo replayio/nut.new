@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Switch } from '~/components/ui/Switch';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { chatStore } from '~/lib/stores/chat';
@@ -6,7 +6,7 @@ import { callNutAPI } from '~/lib/replay/NutAPI';
 import { toast } from 'react-toastify';
 import { assert } from '~/utils/nut';
 import { Skeleton } from '~/components/ui/Skeleton';
-import { Lock, Trash2, Plus, AlertCircle, Info, ChevronDown } from 'lucide-react';
+import { Lock, Trash2, Plus, AlertCircle, Info, ChevronDown, Globe } from 'lucide-react';
 import { AuthRequiredSecret } from '~/lib/persistence/messageAppSummary';
 import { getAppSetSecrets, setAppSecrets } from '~/lib/replay/Secrets';
 import { Button } from '~/components/ui/button';
@@ -49,6 +49,8 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
   const [domains, setDomains] = useState<string[]>(['']);
   const [touched, setTouched] = useState<boolean[]>([false]);
   const [loading, setLoading] = useState(false);
+  const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
+  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const fetchAuthRequired = async () => {
@@ -181,24 +183,40 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
       {/* Application Access Dropdown */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-bolt-elements-textPrimary">Application Access</label>
-        <DropdownMenu>
+        {/* <DropdownMenu
+          onOpenChange={(open) => {
+            if (open && dropdownTriggerRef.current) {
+              setDropdownWidth(dropdownTriggerRef.current.offsetWidth);
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between h-10 text-sm font-normal">
+            <Button
+              ref={dropdownTriggerRef}
+              variant="outline"
+              className="w-full justify-between h-10 text-sm font-normal"
+            >
               <span className="flex items-center gap-2">
-                <Lock size={16} className="text-bolt-elements-textSecondary" />
+                {accessType === 'private' ? <Lock size={16} className="text-bolt-elements-textSecondary" /> : <Globe size={16} className="text-bolt-elements-textSecondary" />}
                 {accessType === 'private' ? 'Private' : 'Public'}
               </span>
               <ChevronDown size={16} className="text-bolt-elements-textSecondary" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full min-w-[200px]">
+          <DropdownMenuContent
+            className="min-w-[200px]"
+            style={dropdownWidth ? { width: `${dropdownWidth}px` } : undefined}
+          >
             <DropdownMenuItem onClick={() => handleAccessTypeChange('private')}>
               <Lock size={16} className="mr-2" />
               Private
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAccessTypeChange('public')}>Public</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAccessTypeChange('public')}>
+              <Globe size={16} className="mr-2" />
+              Public
+            </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
         <p className="text-sm text-bolt-elements-textSecondary">
           Define whenever this application is public or has limited access
         </p>
@@ -258,8 +276,20 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
           <div className="space-y-2">
             {loading ? (
               <>
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-bolt-elements-borderColor px-3 py-2 bg-background">
+                    <span className="text-bolt-elements-textSecondary text-sm">@</span>
+                    <Skeleton className="h-5 flex-1" />
+                  </div>
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-bolt-elements-borderColor px-3 py-2 bg-background">
+                    <span className="text-bolt-elements-textSecondary text-sm">@</span>
+                    <Skeleton className="h-5 flex-1" />
+                  </div>
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                </div>
               </>
             ) : (
               <>
@@ -271,10 +301,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                       <div
                         className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 bg-background transition-all ${
                           showInvalid
-                            ? 'border-red-500/60 focus-within:border-red-500'
+                            ? 'border-red-500/60 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20'
                             : isValid
-                              ? 'border-green-500/40'
-                              : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus'
+                              ? 'border-green-500/40 focus-within:border-green-500/60'
+                              : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus focus-within:ring-2 focus-within:ring-bolt-elements-focus/20'
                         }`}
                       >
                         <span
@@ -288,9 +318,20 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                           onChange={(e) => setDomainAt(index, e.target.value)}
                           onBlur={() => setTouchedAt(index, true)}
                           placeholder="example.com"
-                          className="flex-1 bg-transparent outline-none text-sm text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary"
+                          className={`flex-1 bg-transparent outline-none text-sm transition-colors ${
+                            showInvalid
+                              ? 'text-red-600 placeholder-red-400/60'
+                              : isValid
+                                ? 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary/50'
+                                : 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary'
+                          }`}
                         />
-                        {showInvalid && <AlertCircle className="text-red-500" size={14} />}
+                        {isValid && (
+                          <div className="flex-shrink-0 w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                          </div>
+                        )}
+                        {showInvalid && <AlertCircle className="flex-shrink-0 text-red-500" size={14} />}
                       </div>
                       {domains.length > 1 && (
                         <Button
@@ -298,6 +339,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                           size="sm"
                           onClick={() => removeRow(index)}
                           className="h-9 w-9 p-0 text-bolt-elements-textSecondary hover:text-red-500"
+                          disabled={loading}
                         >
                           <Trash2 size={14} />
                         </Button>
@@ -306,25 +348,39 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                   );
                 })}
 
-                <div className="flex items-center gap-1 text-xs text-bolt-elements-textSecondary">
-                  <Info size={12} />
-                  <span>Enter domains like example.com or team.example.com</span>
+                <div className="flex items-start gap-2 pt-1">
+                  <Info className="text-bolt-elements-textSecondary flex-shrink-0 mt-0.5" size={12} />
+                  <p className="text-xs text-bolt-elements-textSecondary leading-relaxed">
+                    Enter domains like <span className="font-mono text-bolt-elements-textPrimary">example.com</span>{' '}
+                    or <span className="font-mono text-bolt-elements-textPrimary">team.example.com</span>
+                  </p>
                 </div>
 
-                <Button variant="outline" size="sm" onClick={addRow} className="gap-1">
-                  <Plus size={14} />
-                  Add domain
-                </Button>
+                {!loading && (
+                  <Button variant="outline" size="sm" onClick={addRow} className="gap-1" disabled={loading}>
+                    <Plus size={14} />
+                    Add domain
+                  </Button>
+                )}
               </>
             )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-bolt-elements-borderColor">
-            <Button variant="outline" size="sm" onClick={() => setShowRestrictedManage(false)}>
+            <Button variant="outline" size="sm" onClick={() => setShowRestrictedManage(false)} disabled={loading || saving}>
               Cancel
             </Button>
             <Button size="sm" onClick={handleSaveDomains} disabled={loading || saving || !haveAny || !allValid}>
-              {saving ? 'Saving...' : 'Save Domains'}
+              {saving ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  Saving...
+                </span>
+              ) : loading ? (
+                'Loading...'
+              ) : (
+                'Save Domains'
+              )}
             </Button>
           </div>
         </div>

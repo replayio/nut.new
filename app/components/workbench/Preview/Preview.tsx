@@ -27,6 +27,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import { chatStore } from '~/lib/stores/chat';
 
 interface ReactComponent {
   displayName?: string;
@@ -61,6 +62,8 @@ export const Preview = memo(() => {
   const [iframeUrl, setIframeUrl] = useState<string | undefined>();
 
   const previewURL = useStore(workbenchStore.previewURL);
+  const previewLoading = useStore(chatStore.previewLoading);
+  const isPreviewReady = previewURL && !previewLoading;
   const selectedElement = useStore(workbenchStore.selectedElement);
   const isElementPickerEnabled = useStore(elementPickerStore.isEnabled);
   const isElementPickerReady = useStore(elementPickerStore.isReady);
@@ -366,118 +369,120 @@ export const Preview = memo(() => {
         )}
 
         {/* Top Navigation Bar */}
-        <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center gap-2">
-          {/* Left: Preview/Editor Toggle */}
-          {!isMobile && (
-            <div className="flex items-center h-9 bg-muted rounded-lg p-1">
-              <button
-                onClick={() => {
-                  setActiveMode('preview');
-                  handleElementPickerToggle();
-                }}
-                className={classNames(
-                  'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
-                  activeMode === 'preview'
-                    ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                    : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
-                )}
-              >
-                <Eye size={16} />
-                Preview
-              </button>
-              <button
-                onClick={() => {
-                  setActiveMode('editor');
-                  handleElementPickerToggle();
-                }}
-                className={classNames(
-                  'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
-                  activeMode === 'editor'
-                    ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                    : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
-                )}
-                disabled={!isElementPickerReady || isMobile}
-              >
-                <Paintbrush size={16} />
-                Editor
-              </button>
-            </div>
-          )}
+        {isPreviewReady &&
+          <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center justify-between gap-2">
+            {/* Left: Preview/Editor Toggle */}
+            {!isMobile && (
+              <div className="flex items-center h-9 bg-muted rounded-lg p-1">
+                <button
+                  onClick={() => {
+                    setActiveMode('preview');
+                    handleElementPickerToggle();
+                  }}
+                  className={classNames(
+                    'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
+                    activeMode === 'preview'
+                      ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
+                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                  )}
+                >
+                  <Eye size={16} />
+                  Preview
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveMode('editor');
+                    handleElementPickerToggle();
+                  }}
+                  className={classNames(
+                    'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
+                    activeMode === 'editor'
+                      ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
+                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                  )}
+                  disabled={!isElementPickerReady || isMobile}
+                >
+                  <Paintbrush size={16} />
+                  Editor
+                </button>
+              </div>
+            )}
 
-          {/* Center: Device Selector + URL */}
-          <div className="flex-1 flex h-9 w-fit items-center justify-center gap-1 border border-border border-solid rounded-full px-1">
-            {/* Device Dropdown */}
-            <Button
-              variant="outline"
-              onClick={toggleDeviceMode}
-              className="flex items-center gap-1.5 h-7 px-3 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-full"
-            >
-              <Monitor size={16} />
-              {isDeviceModeOn ? 'Multi-Device' : 'Desktop'}
-            </Button>
-
-            {/* URL Input */}
-            <div className="flex items-center px-2 w-full">
-              <input
-                title="URL"
-                ref={inputRef}
-                className="w-full bg-transparent text-sm text-bolt-elements-textSecondary border-none outline-none focus:ring-0 p-0"
-                type="text"
-                value={url}
-                placeholder="https://"
-                onChange={(event) => {
-                  setUrl(event.target.value);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    if (url !== iframeUrl) {
-                      setIframeUrl(url);
-                    } else {
-                      reloadPreview();
-                    }
-
-                    if (inputRef.current) {
-                      inputRef.current.blur();
-                    }
-                  }
-                }}
-              />
-            </div>
-
-            <WithTooltip tooltip="Open in new tab">
+            {/* Center: Device Selector + URL */}
+            <div className="flex h-9 w-fit items-center justify-center gap-1 border border-border border-solid rounded-full px-1">
+              {/* Device Dropdown */}
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={openInNewTab}
-                className="h-7 w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                variant="outline"
+                onClick={toggleDeviceMode}
+                className="flex items-center gap-1.5 h-7 px-3 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-full"
               >
-                <ExternalLink size={16} />
+                <Monitor size={16} />
+                {isDeviceModeOn ? 'Multi-Device' : 'Desktop'}
               </Button>
-            </WithTooltip>
 
-            <WithTooltip tooltip="Reload">
+              {/* URL Input */}
+              <div className="flex items-center px-2 w-fit">
+                <input
+                  title="URL"
+                  ref={inputRef}
+                  className="w-[200px] bg-transparent text-sm text-bolt-elements-textSecondary border-none outline-none focus:ring-0 p-0 truncate"
+                  type="text"
+                  value={url}
+                  placeholder="https://"
+                  onChange={(event) => {
+                    setUrl(event.target.value);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      if (url !== iframeUrl) {
+                        setIframeUrl(url);
+                      } else {
+                        reloadPreview();
+                      }
+
+                      if (inputRef.current) {
+                        inputRef.current.blur();
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              <WithTooltip tooltip="Open in new tab">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={openInNewTab}
+                  className="h-7 w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                >
+                  <ExternalLink size={16} />
+                </Button>
+              </WithTooltip>
+
+              <WithTooltip tooltip="Reload">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => reloadPreview()}
+                  className="h-7 w-7 min-w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary border border-border rounded-full p-0"
+                >
+                  <RefreshCcw size={16} />
+                </Button>
+              </WithTooltip>
+            </div>
+
+            <WithTooltip tooltip="Toggle full screen">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => reloadPreview()}
-                className="h-7 w-7 min-w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary border border-border rounded-full p-0"
+                onClick={toggleFullscreen}
+                className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
               >
-                <RefreshCcw size={16} />
+                {isFullscreen ? <Shrink size={16} /> : <Fullscreen size={16} />}
               </Button>
             </WithTooltip>
           </div>
-
-          <WithTooltip tooltip="Toggle full screen">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleFullscreen}
-              className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
-            >
-              {isFullscreen ? <Shrink size={16} /> : <Fullscreen size={16} />}
-            </Button>
-          </WithTooltip>
-        </div>
+        }
 
         {/* Preview Area */}
         <div
@@ -500,7 +505,7 @@ export const Preview = memo(() => {
         </div>
 
         {/* Bottom: Breadcrumb Navigation */}
-        {!isMobile && (
+        {!isMobile && selectedElement && (selectedElement.tree?.length > 0 || selectedElement.component) && (
           <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
             {(() => {
               if (!selectedElement?.tree || selectedElement.tree.length === 0) {

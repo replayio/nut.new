@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { ProjectTitle } from './ProjectTitle';
 import { ShareButton } from './ShareButton';
 import { TopNavDownloadButton } from './TopNavDownloadButton';
 import { TopNavDeployButton } from './TopNavDeployButton';
@@ -9,6 +8,7 @@ import { ArrowLeft } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import useViewport from '~/lib/hooks';
+import { ChatDescription } from '~/components/panels/SettingsPanel/components/ChatDescription.client';
 
 export function TopNav() {
   const appId = useStore(chatStore.currentAppId);
@@ -34,7 +34,7 @@ export function TopNav() {
         {/* Separator */}
         <div className="w-px h-8 bg-bolt-elements-borderColor mx-1" />
 
-        <ProjectTitle />
+        <ChatDescription />
       </div>
 
       {/* Right section: Action buttons */}

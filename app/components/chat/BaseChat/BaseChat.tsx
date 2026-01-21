@@ -83,7 +83,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
     const isSmallViewport = useViewport(800);
     const user = useStore(userStore);
-    const isAuthLoading = useStore(isLoadingStore);
     const { chatWidth, chatPanelSize, setChatPanelSize, panelSizeKey } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
     const selectedElement = useStore(workbenchStore.selectedElement);
@@ -91,17 +90,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const activePanel = useStore(sidebarPanelStore.activePanel);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
-    const isSubscriptionStoreLoaded = useStore(subscriptionStore.isLoaded);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
-    const [isLoadingList, setIsLoadingList] = useState(true);
 
     const loadEntries = useCallback(() => {
-      setIsLoadingList(true);
       database
         .getAllAppEntries()
         .then(setList)
         .catch((error) => toast.error(error.message))
-        .finally(() => setIsLoadingList(false));
     }, []);
 
     useEffect(() => {
@@ -364,18 +359,22 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         case 'chat':
         default:
           return (
-            <ChatPanel
-              messageRef={messageRef}
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles!}
-              imageDataList={imageDataList}
-              setImageDataList={setImageDataList!}
-              messageInputProps={messageInputProps}
-              infoCards={infoCards}
-              handleSendMessage={handleSendMessage}
-              onLastMessageCheckboxChange={onLastMessageCheckboxChange}
-              list={list}
-            />
+            <div className={classNames("h-full flex flex-col", {
+              'px-2': isSmallViewport,
+            })}>
+              <ChatPanel
+                messageRef={messageRef}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles!}
+                imageDataList={imageDataList}
+                setImageDataList={setImageDataList!}
+                messageInputProps={messageInputProps}
+                infoCards={infoCards}
+                handleSendMessage={handleSendMessage}
+                onLastMessageCheckboxChange={onLastMessageCheckboxChange}
+                list={list}
+              />
+            </div>
           );
       }
     };
@@ -458,7 +457,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               })}
               style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
             >
-              {chatStarted && <TopNav />}
+              {chatStarted && appSummary && <TopNav />}
               {!chatStarted && (
                 <>
                   <IntroSection />
@@ -480,30 +479,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     return renderActivePanel();
                   }}
                 </ClientOnly>
-                {(() => {
-                  const isLoadingData = isAuthLoading || (user && !isSubscriptionStoreLoaded) || isLoadingList;
-
-                  if (isLoadingData && !chatStarted) {
-                    return (
-                      <div className="flex items-center justify-center min-h-[176.5px]">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary rounded-full animate-spin"></div>
-                          <p className="text-sm text-bolt-elements-textSecondary">Loading...</p>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <ChatPromptContainer
-                      uploadedFiles={uploadedFiles}
-                      setUploadedFiles={setUploadedFiles!}
-                      imageDataList={imageDataList}
-                      setImageDataList={setImageDataList!}
-                      messageInputProps={messageInputProps}
-                    />
-                  );
-                })()}
+                {!chatStarted && (
+                  <ChatPromptContainer
+                    uploadedFiles={uploadedFiles}
+                    setUploadedFiles={setUploadedFiles!}
+                    imageDataList={imageDataList}
+                    setImageDataList={setImageDataList!}
+                    messageInputProps={messageInputProps}
+                  />
+                )}
                 {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
               </div>
             </div>
