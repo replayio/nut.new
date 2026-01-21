@@ -256,7 +256,7 @@ export const Menu = () => {
           {/* Menu Items */}
           <div className="space-y-1">
             {/* Home */}
-            <a
+            {/* <a
               href="/"
               className={classNames(
                 'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
@@ -269,12 +269,12 @@ export const Menu = () => {
             >
               <Home size={18} className="text-bolt-elements-textPrimary" />
               {!effectiveCollapsed && <span className="text-sm font-medium">Home</span>}
-            </a>
+            </a> */}
 
             {/* New App */}
             {!effectiveCollapsed ? (
               <a
-                href="/"
+                href="/?focus=true"
                 className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group"
               >
                 <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export const Menu = () => {
               </a>
             ) : (
               <a
-                href="/"
+                href="/?focus=true"
                 className="w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors"
                 title="New App"
               >

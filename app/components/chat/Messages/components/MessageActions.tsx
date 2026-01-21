@@ -49,7 +49,7 @@ export function MessageActions({
   return (
     <div className={cn('flex items-center gap-0', className)}>
       {/* Thumbs Up */}
-      <button
+      {/* <button
         onClick={handleThumbsUp}
         className={cn(
           'flex items-center justify-center w-6 h-6 rounded-md bg-transparent transition-all duration-200',
@@ -60,10 +60,10 @@ export function MessageActions({
         title="Good response"
       >
         <ThumbsUp size={12} />
-      </button>
+      </button> */}
 
       {/* Thumbs Down */}
-      <button
+      {/* <button
         onClick={handleThumbsDown}
         className={cn(
           'flex items-center justify-center w-6 h-6 rounded-md bg-transparent transition-all duration-200',
@@ -74,10 +74,10 @@ export function MessageActions({
         title="Bad response"
       >
         <ThumbsDown size={12} />
-      </button>
+      </button> */}
 
       {/* Branch */}
-      {showBranch && (
+      {/* {showBranch && (
         <button
           onClick={onBranch}
           className="flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
@@ -85,10 +85,10 @@ export function MessageActions({
         >
           <GitBranchPlus size={12} />
         </button>
-      )}
+      )} */}
 
       {/* Retry */}
-      {showRetry && (
+      {/* {showRetry && (
         <button
           onClick={onRetry}
           className="flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
@@ -96,7 +96,7 @@ export function MessageActions({
         >
           <RotateCw size={12} />
         </button>
-      )}
+      )} */}
 
       {/* Copy */}
       <button

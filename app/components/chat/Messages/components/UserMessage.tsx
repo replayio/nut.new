@@ -65,12 +65,12 @@ export function UserMessage({ message, messages, isFirst = false, onCheckboxChan
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}
           </button>
-          <button
+          {/* <button
             className="flex items-center justify-center w-6 h-6 rounded-md bg-transparent hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200"
             title="Edit message"
           >
             <Pencil size={12} />
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
