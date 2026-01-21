@@ -369,7 +369,7 @@ export const Preview = memo(() => {
         )}
 
         {/* Top Navigation Bar */}
-        {isPreviewReady &&
+        {isPreviewReady && (
           <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center justify-between gap-2">
             {/* Left: Preview/Editor Toggle */}
             {!isMobile && (
@@ -482,7 +482,7 @@ export const Preview = memo(() => {
               </Button>
             </WithTooltip>
           </div>
-        }
+        )}
 
         {/* Preview Area */}
         <div

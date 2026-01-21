@@ -12,7 +12,7 @@ import Cookies from 'js-cookie';
 import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import useViewport from '~/lib/hooks';
-import { Plus, Search, Folder, FolderOpen, Home, PanelLeft } from '~/components/ui/Icon';
+import { Plus, Search, Folder, FolderOpen, PanelLeft } from '~/components/ui/Icon';
 import { classNames } from '~/utils/classNames';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 
@@ -197,7 +197,12 @@ export const Menu = () => {
               effectiveCollapsed ? 'justify-center' : 'justify-between',
             )}
           >
-            <div className={classNames('flex items-center w-full', effectiveCollapsed ? 'group relative justify-center' : 'gap-3')}>
+            <div
+              className={classNames(
+                'flex items-center w-full',
+                effectiveCollapsed ? 'group relative justify-center' : 'gap-3',
+              )}
+            >
               {effectiveCollapsed ? (
                 <div className="relative w-full flex items-center justify-center">
                   {/* Logo - shows by default when collapsed, hidden on hover */}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Switch } from '~/components/ui/Switch';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
 import { chatStore } from '~/lib/stores/chat';
@@ -6,16 +6,16 @@ import { callNutAPI } from '~/lib/replay/NutAPI';
 import { toast } from 'react-toastify';
 import { assert } from '~/utils/nut';
 import { Skeleton } from '~/components/ui/Skeleton';
-import { Lock, Trash2, Plus, AlertCircle, Info, ChevronDown, Globe } from 'lucide-react';
+import { Trash2, Plus, AlertCircle, Info } from 'lucide-react';
 import { AuthRequiredSecret } from '~/lib/persistence/messageAppSummary';
 import { getAppSetSecrets, setAppSecrets } from '~/lib/replay/Secrets';
 import { Button } from '~/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '~/components/ui/dropdown-menu';
 
 interface AuthSelectorComponentProps {
   appSummary: AppSummary;
@@ -33,7 +33,7 @@ function isValidDomain(domain: string): boolean {
   return domainRegex.test(value);
 }
 
-type AccessType = 'private' | 'public';
+// type AccessType = 'private' | 'public';
 
 export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ appSummary }) => {
   const appId = chatStore.currentAppId.get();
@@ -41,7 +41,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
 
   const [saving, setSaving] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
-  const [accessType, setAccessType] = useState<AccessType>('private');
+  // const [accessType, setAccessType] = useState<AccessType>('private');
   const [restrictedAccess, setRestrictedAccess] = useState(false);
   const [showRestrictedManage, setShowRestrictedManage] = useState(false);
 
@@ -49,8 +49,8 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
   const [domains, setDomains] = useState<string[]>(['']);
   const [touched, setTouched] = useState<boolean[]>([false]);
   const [loading, setLoading] = useState(false);
-  const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
-  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
+  // const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
+  // const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const fetchAuthRequired = async () => {
@@ -109,9 +109,9 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
     }
   };
 
-  const handleAccessTypeChange = (type: AccessType) => {
-    setAccessType(type);
-  };
+  // const handleAccessTypeChange = (type: AccessType) => {
+  //   setAccessType(type);
+  // };
 
   const handleRestrictedAccessToggle = () => {
     if (!authRequired) {
@@ -351,8 +351,8 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                 <div className="flex items-start gap-2 pt-1">
                   <Info className="text-bolt-elements-textSecondary flex-shrink-0 mt-0.5" size={12} />
                   <p className="text-xs text-bolt-elements-textSecondary leading-relaxed">
-                    Enter domains like <span className="font-mono text-bolt-elements-textPrimary">example.com</span>{' '}
-                    or <span className="font-mono text-bolt-elements-textPrimary">team.example.com</span>
+                    Enter domains like <span className="font-mono text-bolt-elements-textPrimary">example.com</span> or{' '}
+                    <span className="font-mono text-bolt-elements-textPrimary">team.example.com</span>
                   </p>
                 </div>
 
@@ -367,7 +367,12 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-bolt-elements-borderColor">
-            <Button variant="outline" size="sm" onClick={() => setShowRestrictedManage(false)} disabled={loading || saving}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRestrictedManage(false)}
+              disabled={loading || saving}
+            >
               Cancel
             </Button>
             <Button size="sm" onClick={handleSaveDomains} disabled={loading || saving || !haveAny || !allValid}>

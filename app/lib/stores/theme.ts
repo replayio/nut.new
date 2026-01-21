@@ -30,29 +30,29 @@ function initStore(): Theme {
   return 'light';
 }
 
-function getEffectiveTheme(theme: Theme): 'dark' | 'light' {
-  if (theme === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  return theme;
-}
+// function getEffectiveTheme(theme: Theme): 'dark' | 'light' {
+//   if (theme === 'system') {
+//     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+//   }
+//   return theme;
+// }
 
-let systemThemeListener: ((e: MediaQueryListEvent) => void) | null = null;
+// const systemThemeListener: ((e: MediaQueryListEvent) => void) | null = null;
 
-function setupSystemThemeListener() {
-  if (systemThemeListener) {
-    return;
-  }
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  systemThemeListener = (e: MediaQueryListEvent) => {
-    if (themeStore.get() === 'system') {
-      document.querySelector('html')?.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-    }
-  };
-  mediaQuery.addEventListener('change', systemThemeListener);
-}
+// function setupSystemThemeListener() {
+//   if (systemThemeListener) {
+//     return;
+//   }
+//   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+//   systemThemeListener = (e: MediaQueryListEvent) => {
+//     if (themeStore.get() === 'system') {
+//       document.querySelector('html')?.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+//     }
+//   };
+//   mediaQuery.addEventListener('change', systemThemeListener);
+// }
 
-export function setTheme(theme: Theme) {
+export function setTheme() {
   // themeStore.set(theme);
   // logStore.logSystem(`Theme changed to ${theme} mode`);
   // localStorage.setItem(kTheme, theme);
@@ -86,5 +86,5 @@ export function toggleTheme() {
   // const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   // setTheme(newTheme);
   // Theme is locked to light mode - do nothing
-  setTheme('light');
+  setTheme();
 }

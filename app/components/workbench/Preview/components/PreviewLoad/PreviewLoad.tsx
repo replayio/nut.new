@@ -41,7 +41,6 @@ const PreviewLoad = () => {
 
   return (
     <div className="w-full h-full relative bg-bolt-elements-background-depth-1">
-
       {/* Content container */}
       <div className="relative w-full h-full flex flex-col items-center justify-center p-6 overflow-hidden">
         {/* Icon Component - constrained to 30% of viewport width */}

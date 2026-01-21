@@ -19,7 +19,7 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { useStore } from '@nanostores/react';
 import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
-import { userStore, isLoadingStore } from '~/lib/stores/auth';
+import { userStore } from '~/lib/stores/auth';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { mobileNavStore } from '~/lib/stores/mobileNav';
 import { useLayoutWidths } from '~/lib/hooks/useLayoutWidths';
@@ -28,7 +28,6 @@ import { type InfoCardData } from '~/components/ui/InfoCard';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '~/components/ui/resizable';
 import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featureModal';
-import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import AppTemplates from './components/AppTemplates/AppTemplates';
@@ -96,7 +95,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       database
         .getAllAppEntries()
         .then(setList)
-        .catch((error) => toast.error(error.message))
+        .catch((error) => toast.error(error.message));
     }, []);
 
     useEffect(() => {
@@ -359,9 +358,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         case 'chat':
         default:
           return (
-            <div className={classNames("h-full flex flex-col", {
-              'px-2': isSmallViewport,
-            })}>
+            <div
+              className={classNames('h-full flex flex-col', {
+                'px-2': isSmallViewport,
+              })}
+            >
               <ChatPanel
                 messageRef={messageRef}
                 uploadedFiles={uploadedFiles}

@@ -23,7 +23,12 @@ export function SideBar() {
   const navItems: { icon: React.ReactNode; label: string; panel: SidebarPanel; disabled?: boolean }[] = [
     { icon: <MessageCircleMore size={20} strokeWidth={1.5} />, label: 'Chat', panel: 'chat' },
     { icon: <Palette size={20} strokeWidth={1.5} />, label: 'Design', panel: 'design', disabled: !isPreviewReady },
-    { icon: <SlidersHorizontal size={20} strokeWidth={1.5} />, label: 'Settings', panel: 'settings', disabled: !appSummary },
+    {
+      icon: <SlidersHorizontal size={20} strokeWidth={1.5} />,
+      label: 'Settings',
+      panel: 'settings',
+      disabled: !appSummary,
+    },
     { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history', disabled: !appId },
   ];
 

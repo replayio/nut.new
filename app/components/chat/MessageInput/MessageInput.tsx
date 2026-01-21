@@ -382,11 +382,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 const parts: React.ReactNode[] = [];
 
                 // Show currently selected React component (last React component)
-                if (
-                  lastReactComponent &&
-                  firstReactComponent &&
-                  lastReactDisplayName !== firstReactDisplayName
-                ) {
+                if (lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName) {
                   parts.push(
                     <button
                       key="react"
@@ -559,8 +555,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
           {/* Start Building Button - shown when discovery rating is high enough */}
           {(() => {
-            const showStartBuildingButton =
-              user && startPlanningRating > 0 && !hasAppSummary && !hasPendingMessage;
+            const showStartBuildingButton = user && startPlanningRating > 0 && !hasAppSummary && !hasPendingMessage;
 
             return showStartBuildingButton ? (
               <ClientOnly>

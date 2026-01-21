@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from '~/lib/utils';
-import { ThumbsUp, ThumbsDown, GitBranchPlus, RotateCw, Copy, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 interface MessageActionsProps {
   messageContent: string;
@@ -15,16 +15,16 @@ interface MessageActionsProps {
 
 export function MessageActions({
   messageContent,
-  onThumbsUp,
-  onThumbsDown,
-  onBranch,
-  onRetry,
+  // onThumbsUp,
+  // onThumbsDown,
+  // onBranch,
+  // onRetry,
   className,
-  showBranch = true,
-  showRetry = true,
+  // showBranch = true,
+  // showRetry = true,
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
-  const [thumbsState, setThumbsState] = useState<'up' | 'down' | null>(null);
+  // const [thumbsState, setThumbsState] = useState<'up' | 'down' | null>(null);
 
   const handleCopy = async () => {
     try {
@@ -36,15 +36,15 @@ export function MessageActions({
     }
   };
 
-  const handleThumbsUp = () => {
-    setThumbsState(thumbsState === 'up' ? null : 'up');
-    onThumbsUp?.();
-  };
+  // const handleThumbsUp = () => {
+  //   setThumbsState(thumbsState === 'up' ? null : 'up');
+  //   onThumbsUp?.();
+  // };
 
-  const handleThumbsDown = () => {
-    setThumbsState(thumbsState === 'down' ? null : 'down');
-    onThumbsDown?.();
-  };
+  // const handleThumbsDown = () => {
+  //   setThumbsState(thumbsState === 'down' ? null : 'down');
+  //   onThumbsDown?.();
+  // };
 
   return (
     <div className={cn('flex items-center gap-0', className)}>

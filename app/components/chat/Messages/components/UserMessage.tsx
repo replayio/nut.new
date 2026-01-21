@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react';
 import { cn } from '~/lib/utils';
-import { Copy, Pencil, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import type { Message } from '~/lib/persistence/message';
 import { MessageContents } from './MessageContents';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';

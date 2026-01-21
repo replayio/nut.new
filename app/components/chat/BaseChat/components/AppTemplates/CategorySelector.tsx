@@ -35,8 +35,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             <Button
               key={category.name}
               onClick={() => onCategorySelect?.(isSelected ? undefined : category.name)}
-              className={classNames('px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200', {
-              })}
+              className={classNames('px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200', {})}
               variant={isSelected ? 'default' : 'outline'}
             >
               <span>{category.name}</span>

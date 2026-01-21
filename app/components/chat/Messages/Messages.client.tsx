@@ -181,7 +181,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       }, 10);
     }, [isLoadingMore]);
 
-    const scrollToBottom = (immediate = false) => {
+    const scrollToBottom = () => {
       if (!containerRef.current) {
         return;
       }
@@ -297,7 +297,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
     // Scroll to bottom on initial mount and when messages first load
     const hasInitializedRef = useRef(false);
     const previousMessagesLengthForInitRef = useRef(messages.length);
-    
+
     useEffect(() => {
       if (messages.length === 0) {
         return;
