@@ -59,7 +59,7 @@ export const DesignToolbar = () => {
             Saving...
           </span>
         ) : (
-          'Update'
+          'Save Changes'
         )}
       </Button>
     </div>

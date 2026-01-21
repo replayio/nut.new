@@ -3,10 +3,13 @@ import { MessageCircleMore, Palette, SlidersHorizontal, History } from 'lucide-r
 import { sidebarPanelStore, type SidebarPanel } from '~/lib/stores/sidebarPanel';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { ClientOnly } from 'remix-utils/client-only';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { SideNavButton } from './SideNavButton';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
+import { includeHistorySummary } from '~/components/panels/HistoryPanel/AppHistory';
+import { database } from '~/lib/persistence/apps';
+import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 
 export function SideBar() {
   const activePanel = useStore(sidebarPanelStore.activePanel);
@@ -14,10 +17,24 @@ export function SideBar() {
   const previewLoading = useStore(chatStore.previewLoading);
   const isPreviewReady = previewURL && !previewLoading;
   const appSummary = useStore(chatStore.appSummary);
-  const appId = useStore(chatStore.currentAppId);
+  const appId = useStore(chatStore.currentAppId) as string;
+  const [history, setHistory] = useState<AppSummary[]>([]);
 
   const handlePanelClick = (panel: SidebarPanel) => {
     sidebarPanelStore.setActivePanel(panel);
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, [appId]);
+
+  const fetchHistory = async () => {
+    try {
+      const history = await database.getAppHistory(appId);
+      setHistory(history.filter(includeHistorySummary).reverse());
+    } catch (err) {
+      console.error('Failed to fetch app history:', err);
+    }
   };
 
   const navItems: { icon: React.ReactNode; label: string; panel: SidebarPanel; disabled?: boolean }[] = [
@@ -29,7 +46,7 @@ export function SideBar() {
       panel: 'settings',
       disabled: !appSummary,
     },
-    { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history', disabled: !appId },
+    { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history', disabled: !history.length },
   ];
 
   return (

@@ -341,6 +341,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       maxHeight: TEXTAREA_MAX_HEIGHT,
     };
 
+    const themeChanges = useStore(designPanelStore.themeChanges);
+    console.log('themeChanges', themeChanges);
+
     // Render the appropriate panel based on activePanel
     const renderActivePanel = () => {
       switch (activePanel) {
@@ -348,7 +351,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           return (
             <>
               <DesignSystemPanel />
-              <DesignToolbar />
+              {themeChanges.hasChanges && <DesignToolbar />}
             </>
           );
         case 'settings':
