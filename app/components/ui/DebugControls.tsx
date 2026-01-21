@@ -74,7 +74,7 @@ export const DebugAppButton = () => {
     return null;
   }
 
-  const url = makeHoneycombUrl([{ 'telemetry.data.nut.app': appId }], 24 * 60 * 60);
+  const url = makeHoneycombUrl([{ app: appId }], 24 * 60 * 60);
 
   const handleClick = () => {
     window.open(url, '_blank');
