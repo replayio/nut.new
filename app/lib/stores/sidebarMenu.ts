@@ -2,10 +2,12 @@ import { atom } from 'nanostores';
 
 export class SidebarMenuStore {
   isOpen = atom<boolean>(true);
+  isCollapsed = atom<boolean>(false);
 
   constructor() {
     if (import.meta.hot) {
       import.meta.hot.data.isOpen = this.isOpen;
+      import.meta.hot.data.isCollapsed = this.isCollapsed;
     }
   }
 
@@ -23,6 +25,14 @@ export class SidebarMenuStore {
 
   close() {
     this.isOpen.set(false);
+  }
+
+  setCollapsed(collapsed: boolean) {
+    this.isCollapsed.set(collapsed);
+  }
+
+  toggleCollapsed() {
+    this.isCollapsed.set(!this.isCollapsed.get());
   }
 }
 

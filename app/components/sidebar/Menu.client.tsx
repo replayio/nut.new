@@ -12,7 +12,7 @@ import Cookies from 'js-cookie';
 import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import useViewport from '~/lib/hooks';
-import { Plus, Search, Folder, FolderOpen, PanelLeft } from '~/components/ui/Icon';
+import { Plus, Search, Folder, FolderOpen, PanelLeft, Home } from '~/components/ui/Icon';
 import { classNames } from '~/utils/classNames';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 
@@ -31,7 +31,15 @@ export const Menu = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(sidebarMenuStore.isCollapsed.get());
+  
+  // Sync local state with store
+  useEffect(() => {
+    const unsubscribe = sidebarMenuStore.isCollapsed.subscribe((collapsed) => {
+      setIsCollapsed(collapsed);
+    });
+    return unsubscribe;
+  }, []);
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list ?? [],
     searchFields: ['title'],
@@ -217,7 +225,9 @@ export const Menu = () => {
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
-                        setIsCollapsed(!isCollapsed);
+                        const newCollapsed = !isCollapsed;
+                        setIsCollapsed(newCollapsed);
+                        sidebarMenuStore.setCollapsed(newCollapsed);
                         sidebarMenuStore.open();
                       }
                     }}
@@ -244,7 +254,9 @@ export const Menu = () => {
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
-                        setIsCollapsed(!isCollapsed);
+                        const newCollapsed = !isCollapsed;
+                        setIsCollapsed(newCollapsed);
+                        sidebarMenuStore.setCollapsed(newCollapsed);
                         sidebarMenuStore.close();
                       }
                     }}
@@ -261,7 +273,7 @@ export const Menu = () => {
           {/* Menu Items */}
           <div className="space-y-1">
             {/* Home */}
-            {/* <a
+            <a
               href="/"
               className={classNames(
                 'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
@@ -274,7 +286,7 @@ export const Menu = () => {
             >
               <Home size={18} className="text-bolt-elements-textPrimary" />
               {!effectiveCollapsed && <span className="text-sm font-medium">Home</span>}
-            </a> */}
+            </a>
 
             {/* New App */}
             {!effectiveCollapsed ? (
@@ -361,6 +373,7 @@ export const Menu = () => {
                     }, 0);
                   } else {
                     setIsCollapsed(false);
+                    sidebarMenuStore.setCollapsed(false);
                     setIsSearchFocused(true);
                     setTimeout(() => {
                       searchInputRef.current?.focus();
