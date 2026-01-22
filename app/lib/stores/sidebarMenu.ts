@@ -1,7 +1,10 @@
 import { atom } from 'nanostores';
 
+// Check if we're on mobile (viewport width < 800px) on initialization
+const isMobileOnInit = typeof window !== 'undefined' && window.innerWidth < 800;
+
 export class SidebarMenuStore {
-  isOpen = atom<boolean>(true);
+  isOpen = atom<boolean>(!isMobileOnInit);
   isCollapsed = atom<boolean>(false);
 
   constructor() {

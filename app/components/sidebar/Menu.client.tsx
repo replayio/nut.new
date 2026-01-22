@@ -32,7 +32,7 @@ export const Menu = () => {
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(sidebarMenuStore.isCollapsed.get());
-  
+
   // Sync local state with store
   useEffect(() => {
     const unsubscribe = sidebarMenuStore.isCollapsed.subscribe((collapsed) => {
