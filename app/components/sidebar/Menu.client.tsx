@@ -117,51 +117,6 @@ export const Menu = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    if (!isSmallViewport) {
-      return undefined;
-    }
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
-
-    const handleTouchStart = (event: TouchEvent) => {
-      touchStartX = event.changedTouches[0].screenX;
-      touchStartY = event.changedTouches[0].screenY;
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      touchEndX = event.changedTouches[0].screenX;
-      touchEndY = event.changedTouches[0].screenY;
-
-      const deltaX = touchEndX - touchStartX;
-      const deltaY = touchEndY - touchStartY;
-      const minSwipeDistance = 50;
-      const maxVerticalDistance = 50;
-
-      if (Math.abs(deltaY) > maxVerticalDistance) {
-        return;
-      }
-
-      if (deltaX > minSwipeDistance && !isOpen) {
-        sidebarMenuStore.open();
-      }
-
-      if (deltaX < -minSwipeDistance && isOpen) {
-        sidebarMenuStore.close();
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [isSmallViewport, isOpen]);
 
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();

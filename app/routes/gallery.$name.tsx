@@ -192,6 +192,8 @@ function GalleryPageContent() {
         } catch (err) {
           console.error('Failed to fetch landing page content:', err);
           // Continue with index data if content fetch fails
+        } finally {
+          setIsLoading(false);
         }
 
         // Create preview
@@ -679,7 +681,7 @@ function GalleryPageContent() {
                               {/* Actual Preview */}
                               <div
                                 className={`transition-opacity duration-300 ${isPreviewLoading ? 'opacity-0' : 'opacity-100'}`}
-                                style={{ height: '500px' }}
+                                style={{ height: isSmallViewport ? '300px' : '500px' }}
                               >
                                 {appPreviewURL && (
                                   <AppView
@@ -698,7 +700,7 @@ function GalleryPageContent() {
                                                 href={appPreviewURL}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-bolt-elements-textSecondary hover:bg-white/80 transition-colors shadow-md"
+                                                className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-bolt-elements-textSecondary hover:bg-white/80 transition-colors shadow-xl border border-bolt-elements-borderColor"
                                             >
                                                 <ExternalLink size={16} />
                                             </a>
@@ -821,7 +823,7 @@ function GalleryPageContent() {
                     </div>
                   </div>
                 )}
-                <div className="p-6">
+                <div className="p-6 space-y-8">
                   {/* App Name, Tags, and Description Section */}
                   <div>
                     <h2 className="text-3xl md:text-4xl font-bold text-bolt-elements-textPrimary mb-4">
