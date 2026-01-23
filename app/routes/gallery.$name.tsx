@@ -330,15 +330,28 @@ function GalleryPageContent() {
     }
   }, [carouselIndex, carouselItems.length, scrollToCarouselItem]);
 
-  // Scroll selected button into view when carousel index changes
+  // Scroll selected button into view when carousel index changes (only if out of view)
   useEffect(() => {
     const button = buttonRefs.current.get(carouselIndex);
     if (button) {
-      button.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
+      const container = button.parentElement;
+      if (container) {
+        const buttonRect = button.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        // Check if button is out of view
+        const isOutOfViewLeft = buttonRect.left < containerRect.left;
+        const isOutOfViewRight = buttonRect.right > containerRect.right;
+
+        // Only scroll if button is out of view
+        if (isOutOfViewLeft || isOutOfViewRight) {
+          button.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
+          });
+        }
+      }
     }
   }, [carouselIndex]);
 
@@ -778,10 +791,10 @@ function GalleryPageContent() {
                                 }}
                                 onClick={() => scrollToCarouselItem(idx)}
                                 className={classNames(
-                                  'flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all min-w-[150px] truncate',
+                                  'flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all min-w-[150px] truncate border-2',
                                   idx === carouselIndex
-                                    ? 'border-2 border-black bg-white text-bolt-elements-textPrimary shadow-sm'
-                                    : 'border-0 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2',
+                                    ? 'border-black bg-white text-bolt-elements-textPrimary shadow-sm'
+                                    : 'border-transparent bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2',
                                 )}
                               >
                                 {item.type === 'preview' ? (
