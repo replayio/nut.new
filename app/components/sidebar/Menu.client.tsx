@@ -117,7 +117,6 @@ export const Menu = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
 

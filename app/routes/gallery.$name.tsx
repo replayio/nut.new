@@ -694,48 +694,54 @@ function GalleryPageContent() {
                                   />
                                 )}
                                 {appPreviewURL && (
-                                    <TooltipProvider>
-                                        <WithTooltip tooltip="Open in new tab">
-                                            <a
-                                                href={appPreviewURL}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-bolt-elements-textSecondary hover:bg-white/80 transition-colors shadow-xl border border-bolt-elements-borderColor"
-                                            >
-                                                <ExternalLink size={16} />
-                                            </a>
-                                        </WithTooltip>
-                                    </TooltipProvider>
+                                  <TooltipProvider>
+                                    <WithTooltip tooltip="Open in new tab">
+                                      <a
+                                        href={appPreviewURL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-bolt-elements-textSecondary hover:bg-white/80 transition-colors shadow-xl border border-bolt-elements-borderColor"
+                                      >
+                                        <ExternalLink size={16} />
+                                      </a>
+                                    </WithTooltip>
+                                  </TooltipProvider>
                                 )}
                               </div>
                             </div>
                           </div>
                         )}
 
-                         {/* Feature Slides */}
-                         {pageFeatures.map((feature, idx) => (
-                           <div key={`feature-${idx}`} className="min-w-full flex items-center justify-center snap-center flex-shrink-0 w-full">
-                             <div className="relative flex items-center justify-center rounded-t-md overflow-hidden border border-bolt-elements-borderColor shadow-lg bg-white w-full">
-                               {feature.artifactURLs && feature.artifactURLs.length > 0 && (
-                                 <div className="relative flex items-center justify-center bg-bolt-elements-background-depth-1 w-full overflow-hidden" style={{ height: isSmallViewport ? '300px' : '500px' }}>
-                                   <img
-                                     src={feature.artifactURLs[0]}
-                                     alt={feature.name}
-                                     className="max-w-full max-h-full w-full h-full object-contain"
-                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                     onClick={() => setExpandedImageUrl(feature.artifactURLs![0])}
-                                   />
-                                   <button
-                                     onClick={() => setExpandedImageUrl(feature.artifactURLs![0])}
-                                     className="absolute top-4 right-4 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-lg z-10"
-                                   >
-                                     <ZoomIn size={16} className="text-slate-700" />
-                                   </button>
-                                 </div>
-                               )}
-                             </div>
-                           </div>
-                         ))}
+                        {/* Feature Slides */}
+                        {pageFeatures.map((feature, idx) => (
+                          <div
+                            key={`feature-${idx}`}
+                            className="min-w-full flex items-center justify-center snap-center flex-shrink-0 w-full"
+                          >
+                            <div className="relative flex items-center justify-center rounded-t-md overflow-hidden border border-bolt-elements-borderColor shadow-lg bg-white w-full">
+                              {feature.artifactURLs && feature.artifactURLs.length > 0 && (
+                                <div
+                                  className="relative flex items-center justify-center bg-bolt-elements-background-depth-1 w-full overflow-hidden"
+                                  style={{ height: isSmallViewport ? '300px' : '500px' }}
+                                >
+                                  <img
+                                    src={feature.artifactURLs[0]}
+                                    alt={feature.name}
+                                    className="max-w-full max-h-full w-full h-full object-contain"
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    onClick={() => setExpandedImageUrl(feature.artifactURLs![0])}
+                                  />
+                                  <button
+                                    onClick={() => setExpandedImageUrl(feature.artifactURLs![0])}
+                                    className="absolute top-4 right-4 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-lg z-10"
+                                  >
+                                    <ZoomIn size={16} className="text-slate-700" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
 
                       {/* Carousel Navigation Bar */}

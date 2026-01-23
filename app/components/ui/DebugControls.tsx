@@ -83,7 +83,7 @@ export const DebugAppButton = () => {
 
   return (
     <TooltipProvider>
-    <WithTooltip tooltip="Open app in Honeycomb">
+      <WithTooltip tooltip="Open app in Honeycomb">
         <Button
           variant="ghost"
           size="icon"
@@ -92,7 +92,7 @@ export const DebugAppButton = () => {
         >
           <Bug size={16} />
         </Button>
-    </WithTooltip>
+      </WithTooltip>
     </TooltipProvider>
   );
 };
@@ -118,17 +118,17 @@ const FeatureDebugControls = ({ featureName }: FeatureDebugControlsProps) => {
 
   return (
     <TooltipProvider>
-    <WithTooltip tooltip="Grab backend debug info">
+      <WithTooltip tooltip="Grab backend debug info">
         <Button
           variant="ghost"
           size="icon"
-        onClick={handleClick}
+          onClick={handleClick}
           className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
-        title="Grab backend debug info"
-      >
+          title="Grab backend debug info"
+        >
           <Bug size={16} />
         </Button>
-    </WithTooltip>
+      </WithTooltip>
     </TooltipProvider>
   );
 };

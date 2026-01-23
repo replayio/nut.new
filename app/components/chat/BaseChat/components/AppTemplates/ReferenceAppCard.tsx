@@ -130,16 +130,16 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
           Customize it
         </button>
         {/* View details button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
             handleViewDetails();
-            }}
-            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-white/90 backdrop-blur-sm text-slate-700 text-sm sm:text-base font-medium rounded-full hover:bg-white transition-all duration-200 whitespace-nowrap pointer-events-auto shadow-md flex items-center gap-1.5 sm:gap-2 border border-slate-200"
-          >
-            View details
-            <Expand size={14} className="sm:w-4 sm:h-4" strokeWidth={2} />
-          </button>
+          }}
+          className="px-4 sm:px-5 py-2 sm:py-2.5 bg-white/90 backdrop-blur-sm text-slate-700 text-sm sm:text-base font-medium rounded-full hover:bg-white transition-all duration-200 whitespace-nowrap pointer-events-auto shadow-md flex items-center gap-1.5 sm:gap-2 border border-slate-200"
+        >
+          View details
+          <Expand size={14} className="sm:w-4 sm:h-4" strokeWidth={2} />
+        </button>
 
         {/* Feature Tags */}
         {/* {bulletPoints.length > 0 && (
