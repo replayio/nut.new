@@ -3,7 +3,7 @@ import { useParams, Link } from '@remix-run/react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import type { ReferenceAppSummary, ReferenceAppContent } from '~/lib/replay/ReferenceApps';
-import { getReferenceAppSummaries, getReferenceAppContent } from '~/lib/replay/ReferenceApps';
+import { getReferenceAppSummaries, getReferenceAppContent, reportTrackerAppCopy } from '~/lib/replay/ReferenceApps';
 import { database } from '~/lib/persistence/apps';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 import { useStore } from '@nanostores/react';
@@ -238,6 +238,9 @@ function GalleryPageContent() {
     assert(appPath, 'App path is required');
 
     try {
+      // Report the customize action
+      reportTrackerAppCopy(appPath, 'customize', user?.email);
+
       // Create a new app with the reference app path
       const appId = await database.createApp(appPath);
 
@@ -260,12 +263,22 @@ function GalleryPageContent() {
   };
 
   const handleDownloadCode = async () => {
+    if (!app) {
+      return;
+    }
+
     if (!repositoryId) {
       toast.error('No repository ID found');
       return;
     }
 
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    assert(appPath, 'App path is required');
+
     try {
+      // Report the download action
+      reportTrackerAppCopy(appPath, 'download', user?.email);
+
       const repositoryContents = await downloadRepository(repositoryId);
 
       const byteCharacters = atob(repositoryContents);

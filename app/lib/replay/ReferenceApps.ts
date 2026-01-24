@@ -157,6 +157,16 @@ export async function getReferenceAppContent(referenceAppPath: string): Promise<
   };
 }
 
+export async function reportTrackerAppCopy(referenceAppPath: string, type: 'download' | 'customize', email: string | undefined) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookReportAppCopy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ path: referenceAppPath, type, user_email: email }),
+  });
+}
+
 // Abbreviated information about a collection page.
 export interface CollectionPageIndexEntry {
   collectionPath: string;
