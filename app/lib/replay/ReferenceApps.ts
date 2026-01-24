@@ -50,8 +50,7 @@ interface LandingPageFeature {
   artifactURLs?: string[];
 }
 
-// Data stored at the landingPageURL for a reference app.
-export interface LandingPageContent {
+interface LandingPageContent {
   // Path to the reference app relative to the referenceApps/ directory.
   referenceAppPath: string;
 
@@ -95,7 +94,7 @@ async function fetchTrackerAppPaths(): Promise<WebhookGetAppPathsResponse> {
 export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]> {
   const appPathsPromise = fetchTrackerAppPaths();
 
-  const { landingPages } = await callNutAPI('get-landing-page-index', {});
+  const { landingPages } = (await callNutAPI('get-landing-page-index', {})) as { landingPages: LandingPageIndexEntry[] };
   const appPaths = await appPathsPromise;
 
   return landingPages.map((landingPage: LandingPageIndexEntry) => {
@@ -108,9 +107,54 @@ export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]>
   });
 }
 
-export async function getLandingPageContent(referenceAppPath: string): Promise<LandingPageContent> {
-  const { landingPage } = await callNutAPI('get-landing-page', { referenceAppPath });
-  return landingPage;
+interface ReferenceAppFeature {
+  name: string;
+  status: "green" | "yellow" | "red";
+  note?: string;
+}
+
+interface ReferenceAppBug {
+  description: string;
+}
+
+export interface ReferenceAppContent extends LandingPageContent {
+  stage: ReferenceAppStage;
+  trackerFeatures: ReferenceAppFeature[];
+  trackerBugs: ReferenceAppBug[];
+  trackerCopyCount: number;
+};
+
+interface WebhookGetAppDataResponse {
+  stage: ReferenceAppStage;
+  features: ReferenceAppFeature[];
+  bugs: ReferenceAppBug[];
+  copyCount: number;
+}
+
+async function fetchTrackerAppData(referenceAppPath: string): Promise<WebhookGetAppDataResponse> {
+  const appData = await fetch(`${AppTrackerHost}/.netlify/functions/WebhookGetAppData`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ path: referenceAppPath }),
+  });
+  return appData.json();
+}
+
+export async function getReferenceAppContent(referenceAppPath: string): Promise<ReferenceAppContent> {
+  const appDataPromise = fetchTrackerAppData(referenceAppPath);
+
+  const { landingPage } = (await callNutAPI('get-landing-page', { referenceAppPath })) as { landingPage: LandingPageContent };
+
+  const appData = await appDataPromise;
+  return {
+    ...landingPage,
+    stage: appData.stage,
+    trackerFeatures: appData.features,
+    trackerBugs: appData.bugs,
+    trackerCopyCount: appData.copyCount,
+  };
 }
 
 // Abbreviated information about a collection page.

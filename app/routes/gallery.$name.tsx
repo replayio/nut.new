@@ -2,8 +2,8 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from '~/lib/remix-ty
 import { useParams, Link } from '@remix-run/react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
-import type { ReferenceAppSummary, LandingPageContent } from '~/lib/replay/ReferenceApps';
-import { getReferenceAppSummaries, getLandingPageContent } from '~/lib/replay/ReferenceApps';
+import type { ReferenceAppSummary, ReferenceAppContent } from '~/lib/replay/ReferenceApps';
+import { getReferenceAppSummaries, getReferenceAppContent } from '~/lib/replay/ReferenceApps';
 import { database } from '~/lib/persistence/apps';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 import { useStore } from '@nanostores/react';
@@ -140,7 +140,7 @@ function GalleryPageContent() {
   const params = useParams();
   const appName = params.name ? decodeURIComponent(params.name) : null;
   const [app, setApp] = useState<ReferenceAppSummary | null>(null);
-  const [landingPageContent, setLandingPageContent] = useState<LandingPageContent | null>(null);
+  const [appContent, setAppContent] = useState<ReferenceAppContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [appPreviewURL, setAppPreviewURL] = useState<string | null>(null);
@@ -187,8 +187,8 @@ function GalleryPageContent() {
 
         // Load landing page content
         try {
-          const content = await getLandingPageContent(foundApp.referenceAppPath);
-          setLandingPageContent(content);
+          const content = await getReferenceAppContent(foundApp.referenceAppPath);
+          setAppContent(content);
         } catch (err) {
           console.error('Failed to fetch landing page content:', err);
           // Continue with index data if content fetch fails
@@ -228,8 +228,8 @@ function GalleryPageContent() {
       return;
     }
 
-    const appPath = landingPageContent?.referenceAppPath || app.referenceAppPath;
-    const appName = landingPageContent?.name || app.name;
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    const appName = appContent?.name || app.name;
     assert(appPath, 'App path is required');
 
     try {
@@ -296,10 +296,10 @@ function GalleryPageContent() {
   };
 
   // Use landing page content if available, otherwise fall back to index entry
-  const displayData = landingPageContent || app;
+  const displayData = appContent || app;
 
   // Get page features for carousel (filter features with kind: 'Page')
-  const pageFeatures = landingPageContent?.features?.filter((f) => f.kind === 'Page') || [];
+  const pageFeatures = appContent?.features?.filter((f) => f.kind === 'Page') || [];
   const carouselItems = [
     { type: 'preview' as const, id: 'preview' },
     ...pageFeatures.map((f, idx) => ({ type: 'feature' as const, id: `feature-${idx}`, feature: f })),
@@ -393,7 +393,7 @@ function GalleryPageContent() {
   }
 
   // Error or fallback state
-  if (error || !landingPageContent) {
+  if (error || !appContent) {
     return (
       <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
         {/* Sidebar - Desktop only */}
@@ -872,9 +872,9 @@ function GalleryPageContent() {
                     )}
 
                     {/* Long Description */}
-                    {landingPageContent?.longDescription && (
+                    {appContent?.longDescription && (
                       <div className="space-y-4">
-                        {landingPageContent.longDescription
+                        {appContent.longDescription
                           .split(/\n\n+/)
                           .filter((p) => p.trim())
                           .map((paragraph, index) => (
@@ -887,11 +887,11 @@ function GalleryPageContent() {
                   </div>
 
                   {/* Features Section */}
-                  {landingPageContent?.features && landingPageContent.features.length > 0 && (
+                  {appContent?.features && appContent.features.length > 0 && (
                     <div>
                       <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Features</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {landingPageContent.features.map((feature, index) => (
+                        {appContent.features.map((feature, index) => (
                           <div key={index} className="bg-bolt-elements-background-depth-2 rounded-md p-4">
                             <h4 className="text-base font-bold text-bolt-elements-textPrimary mb-1.5">
                               {feature.name}
@@ -943,15 +943,15 @@ function GalleryPageContent() {
                   ) : null}
 
                   {/* FAQ Section */}
-                  {landingPageContent &&
-                  'faq' in landingPageContent &&
-                  landingPageContent.faq &&
-                  Array.isArray(landingPageContent.faq) &&
-                  landingPageContent.faq.length > 0 ? (
+                  {appContent &&
+                  'faq' in appContent &&
+                  appContent.faq &&
+                  Array.isArray(appContent.faq) &&
+                  appContent.faq.length > 0 ? (
                     <div>
                       <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">FAQ</h3>
                       <Accordion type="single" collapsible className="w-full">
-                        {landingPageContent.faq.map((faqItem: { question: string; answer: string }, index: number) => (
+                        {appContent.faq.map((faqItem: { question: string; answer: string }, index: number) => (
                           <AccordionItem
                             key={index}
                             value={`faq-${index}`}
