@@ -6,13 +6,6 @@ import { callNutAPI } from './NutAPI';
 // Placeholder image URL for reference apps without a screenshot
 export const REFERENCE_APP_PLACEHOLDER_PHOTO = 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Photo';
 
-// Release stage of a reference app.
-export enum ReferenceAppStage {
-  Alpha = 'Alpha',
-  Beta = 'Beta',
-  Release = 'Release',
-}
-
 // Tags for broadly categorizing reference apps.
 enum ReferenceAppTag {
   Business = 'Business',
@@ -21,9 +14,8 @@ enum ReferenceAppTag {
   Social = 'Social',
 }
 
-export interface LandingPageIndexEntry {
+interface LandingPageIndexEntry {
   referenceAppPath: string;
-  stage: ReferenceAppStage;
   tags: ReferenceAppTag[];
   name: string;
   shortDescription: string;
@@ -63,9 +55,6 @@ export interface LandingPageContent {
   // Path to the reference app relative to the referenceApps/ directory.
   referenceAppPath: string;
 
-  // Release stage of the reference app.
-  stage: ReferenceAppStage;
-
   // All tags on the reference app.
   tags: ReferenceAppTag[];
 
@@ -88,9 +77,35 @@ export interface LandingPageContent {
   mainArtifactName: string;
 }
 
-export async function getLandingPageIndex(): Promise<LandingPageIndexEntry[]> {
+export type ReferenceAppStage = 'not_tested' | 'broken' | 'alpha' | 'beta' | 'release';
+
+export interface ReferenceAppSummary extends LandingPageIndexEntry {
+  stage: ReferenceAppStage;
+}
+
+const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
+
+type WebhookGetAppPathsResponse = Array<{ path: string, stage: ReferenceAppStage }>;
+
+async function fetchTrackerAppPaths(): Promise<WebhookGetAppPathsResponse> {
+  const appPaths = await fetch(`${AppTrackerHost}/.netlify/functions/WebhookGetAppPaths`);
+  return appPaths.json();
+}
+
+export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]> {
+  const appPathsPromise = fetchTrackerAppPaths();
+
   const { landingPages } = await callNutAPI('get-landing-page-index', {});
-  return landingPages;
+  const appPaths = await appPathsPromise;
+
+  return landingPages.map((landingPage: LandingPageIndexEntry) => {
+    const pathEntry = appPaths.find((appPath) => appPath.path === landingPage.referenceAppPath);
+    const stage = pathEntry?.stage ?? 'not_tested';
+    return {
+      ...landingPage,
+      stage,
+    };
+  });
 }
 
 export async function getLandingPageContent(referenceAppPath: string): Promise<LandingPageContent> {

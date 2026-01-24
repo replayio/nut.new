@@ -2,8 +2,8 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from '~/lib/remix-ty
 import { useParams, Link } from '@remix-run/react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
-import type { LandingPageIndexEntry, LandingPageContent } from '~/lib/replay/ReferenceApps';
-import { getLandingPageIndex, getLandingPageContent } from '~/lib/replay/ReferenceApps';
+import type { ReferenceAppSummary, LandingPageContent } from '~/lib/replay/ReferenceApps';
+import { getReferenceAppSummaries, getLandingPageContent } from '~/lib/replay/ReferenceApps';
 import { database } from '~/lib/persistence/apps';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 import { useStore } from '@nanostores/react';
@@ -54,7 +54,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 
   try {
-    const apps = await getLandingPageIndex();
+    const apps = await getReferenceAppSummaries();
     const app = apps.find((a) => a.name === name);
 
     if (!app) {
@@ -139,7 +139,7 @@ const LoadingSkeleton: React.FC<{ isSmallViewport?: boolean; isSidebarCollapsed?
 function GalleryPageContent() {
   const params = useParams();
   const appName = params.name ? decodeURIComponent(params.name) : null;
-  const [app, setApp] = useState<LandingPageIndexEntry | null>(null);
+  const [app, setApp] = useState<ReferenceAppSummary | null>(null);
   const [landingPageContent, setLandingPageContent] = useState<LandingPageContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +174,7 @@ function GalleryPageContent() {
         setError(null);
 
         // Fetch app from index
-        const apps = await getLandingPageIndex();
+        const apps = await getReferenceAppSummaries();
         const foundApp = apps.find((a) => a.name === appName);
 
         if (!foundApp) {
