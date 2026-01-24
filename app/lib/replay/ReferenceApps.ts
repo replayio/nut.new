@@ -117,11 +117,18 @@ interface ReferenceAppBug {
   description: string;
 }
 
+interface ReferenceAppReview {
+  rating: number; // 1-5
+  user_name?: string;
+  comment?: string;
+}
+
 export interface ReferenceAppContent extends LandingPageContent {
   stage: ReferenceAppStage;
   trackerFeatures: ReferenceAppFeature[];
   trackerBugs: ReferenceAppBug[];
   trackerCopyCount: number;
+  trackerReviews: ReferenceAppReview[];
 };
 
 interface WebhookGetAppDataResponse {
@@ -129,6 +136,7 @@ interface WebhookGetAppDataResponse {
   features: ReferenceAppFeature[];
   bugs: ReferenceAppBug[];
   copyCount: number;
+  reviews: ReferenceAppReview[];
 }
 
 async function fetchTrackerAppData(referenceAppPath: string): Promise<WebhookGetAppDataResponse> {
@@ -154,6 +162,7 @@ export async function getReferenceAppContent(referenceAppPath: string): Promise<
     trackerFeatures: appData.features,
     trackerBugs: appData.bugs,
     trackerCopyCount: appData.copyCount,
+    trackerReviews: appData.reviews,
   };
 }
 
@@ -164,6 +173,22 @@ export async function reportTrackerAppCopy(referenceAppPath: string, type: 'down
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ path: referenceAppPath, type, user_email: email }),
+  });
+}
+
+interface WebhookAddAppReviewRequest {
+  path: string;
+  rating: number; // 1-5
+  user_name?: string;
+  user_email?: string;
+  comment?: string;
+}
+
+export async function addTrackerAppReview(request: WebhookAddAppReviewRequest) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookAddAppReview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
   });
 }
 

@@ -43,7 +43,7 @@ const getStageConfig = (stage: ReferenceAppStage) => {
       bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
       borderColor: 'border-indigo-200 dark:border-indigo-800',
       showWarning: false,
-      description: 'This app is in beta stage. It has most features implemented but may still have some bugs.',
+      description: 'This app is in beta stage. Features should work but need more testing and polish.',
     },
     release: {
       label: 'Release',
@@ -124,4 +124,3 @@ export const ReferenceAppStatusIndicator: React.FC<ReferenceAppStatusIndicatorPr
     </TooltipProvider>
   );
 };
-
