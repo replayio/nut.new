@@ -21,6 +21,10 @@ import {
   AppWindowMac,
   Download,
   ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Bug,
 } from 'lucide-react';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { toast } from 'react-toastify';
@@ -42,6 +46,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/ui/accordion';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { ReferenceAppStatusIndicator } from '~/components/chat/BaseChat/components/AppTemplates/ReferenceAppStatusIndicator';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Gallery | Replay Builder' }];
@@ -456,6 +461,7 @@ function GalleryPageContent() {
                 </Breadcrumb>
 
                 <div className="flex items-center gap-2">
+                  {app?.stage && <ReferenceAppStatusIndicator stage={app.stage} size="sm" />}
                   <Button
                     onClick={handleDownloadCode}
                     variant="outline"
@@ -604,6 +610,9 @@ function GalleryPageContent() {
               </Breadcrumb>
 
               <div className="flex items-center gap-2">
+                {(displayData?.stage || app?.stage) && (
+                  <ReferenceAppStatusIndicator stage={(displayData?.stage || app?.stage)!} size="sm" />
+                )}
                 <Button
                   onClick={handleDownloadCode}
                   variant="outline"
@@ -966,6 +975,100 @@ function GalleryPageContent() {
                           </AccordionItem>
                         ))}
                       </Accordion>
+                    </div>
+                  ) : null}
+
+                  {/* Status Section */}
+                  {appContent &&
+                  (appContent.trackerFeatures.length > 0 || appContent.trackerBugs.length > 0) ? (
+                    <div>
+                      <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Status</h3>
+                      
+                      {/* Features */}
+                      {appContent.trackerFeatures.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-3">Features</h4>
+                          <div className="space-y-2">
+                            {appContent.trackerFeatures.map((feature, index) => {
+                              const getStatusConfig = () => {
+                                switch (feature.status) {
+                                  case 'green':
+                                    return {
+                                      icon: CheckCircle2,
+                                      iconColor: 'text-green-600 dark:text-green-400',
+                                      bgColor: 'bg-green-50 dark:bg-green-950/30',
+                                      borderColor: 'border-green-200 dark:border-green-800',
+                                    };
+                                  case 'yellow':
+                                    return {
+                                      icon: AlertCircle,
+                                      iconColor: 'text-amber-600 dark:text-amber-400',
+                                      bgColor: 'bg-amber-50 dark:bg-amber-950/30',
+                                      borderColor: 'border-amber-200 dark:border-amber-800',
+                                    };
+                                  case 'red':
+                                    return {
+                                      icon: XCircle,
+                                      iconColor: 'text-red-600 dark:text-red-400',
+                                      bgColor: 'bg-red-50 dark:bg-red-950/30',
+                                      borderColor: 'border-red-200 dark:border-red-800',
+                                    };
+                                  default:
+                                    return {
+                                      icon: AlertCircle,
+                                      iconColor: 'text-gray-600 dark:text-gray-400',
+                                      bgColor: 'bg-gray-50 dark:bg-gray-950/30',
+                                      borderColor: 'border-gray-200 dark:border-gray-800',
+                                    };
+                                }
+                              };
+
+                              const statusConfig = getStatusConfig();
+                              const Icon = statusConfig.icon;
+
+                              return (
+                                <div
+                                  key={index}
+                                  className={classNames(
+                                    'flex items-start gap-3 p-3 rounded-lg border',
+                                    statusConfig.bgColor,
+                                    statusConfig.borderColor,
+                                  )}
+                                >
+                                  <Icon
+                                    size={20}
+                                    className={classNames('flex-shrink-0 mt-0.5', statusConfig.iconColor)}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-bolt-elements-textPrimary">{feature.name}</div>
+                                    {feature.note && (
+                                      <div className="text-sm text-bolt-elements-textSecondary mt-1">{feature.note}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bugs */}
+                      {appContent.trackerBugs.length > 0 && (
+                        <div>
+                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-3">Known Issues</h4>
+                          <div className="space-y-2">
+                            {appContent.trackerBugs.map((bug, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3 p-3 rounded-lg border bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800"
+                              >
+                                <Bug size={20} className="flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+                                <div className="flex-1 text-bolt-elements-textPrimary">{bug.description}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : null}
                 </div>

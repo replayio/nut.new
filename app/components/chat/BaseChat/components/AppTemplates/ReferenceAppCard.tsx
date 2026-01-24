@@ -1,10 +1,11 @@
 import React from 'react';
-import { Expand, AlertTriangle } from 'lucide-react';
+import { Expand } from 'lucide-react';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { REFERENCE_APP_PLACEHOLDER_PHOTO, type ReferenceAppStage } from '~/lib/replay/ReferenceApps';
 import { classNames } from '~/utils/classNames';
 import { assert } from '~/utils/nut';
+import { ReferenceAppStatusIndicator } from './ReferenceAppStatusIndicator';
 
 interface ReferenceAppCardProps {
   appName: string;
@@ -44,50 +45,6 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
     const encodedName = encodeURIComponent(appName);
     window.location.href = `/gallery/${encodedName}`;
   };
-
-  const getStageDisplay = () => {
-    const stageConfig = {
-      not_tested: {
-        label: 'Not Tested',
-        textColor: 'text-amber-700',
-        bgColor: 'bg-amber-50',
-        borderColor: 'border-amber-200',
-        showWarning: true,
-      },
-      broken: {
-        label: 'Broken',
-        textColor: 'text-red-700',
-        bgColor: 'bg-red-50',
-        borderColor: 'border-red-200',
-        showWarning: true,
-      },
-      alpha: {
-        label: 'Alpha',
-        textColor: 'text-blue-700',
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        showWarning: false,
-      },
-      beta: {
-        label: 'Beta',
-        textColor: 'text-indigo-700',
-        bgColor: 'bg-indigo-50',
-        borderColor: 'border-indigo-200',
-        showWarning: false,
-      },
-      release: {
-        label: 'Release',
-        textColor: 'text-green-700',
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        showWarning: false,
-      },
-    };
-
-    return stageConfig[stage] || stageConfig.not_tested;
-  };
-
-  const stageDisplay = getStageDisplay();
 
   return (
     <div
@@ -188,18 +145,8 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
         </button>
 
         {/* Stage display */}
-        <div
-          className={classNames(
-            'px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 pointer-events-auto shadow-sm',
-            stageDisplay.bgColor,
-            stageDisplay.textColor,
-            stageDisplay.borderColor,
-          )}
-        >
-          {stageDisplay.showWarning && (
-            <AlertTriangle size={14} className="sm:w-4 sm:h-4 flex-shrink-0" strokeWidth={2} />
-          )}
-          <span>{stageDisplay.label}</span>
+        <div className="pointer-events-auto">
+          <ReferenceAppStatusIndicator stage={stage} size="sm" />
         </div>
 
         {/* Feature Tags */}
