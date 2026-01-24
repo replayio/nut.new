@@ -1164,12 +1164,12 @@ function GalleryPageContent() {
                                     {review.rating}/5
                                   </span>
                                 </div>
-                                {review.user_name && (
+                                {review.name && (
                                   <span className="text-sm text-bolt-elements-textSecondary">
-                                    {review.user_name}
+                                    {review.name}
                                   </span>
                                 )}
-                                {!review.user_name && (
+                                {!review.name && (
                                   <span className="text-sm text-bolt-elements-textSecondary italic">
                                     Anonymous
                                   </span>

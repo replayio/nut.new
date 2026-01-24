@@ -119,7 +119,7 @@ interface ReferenceAppBug {
 
 interface ReferenceAppReview {
   rating: number; // 1-5
-  user_name?: string;
+  name?: string;
   comment?: string;
 }
 
