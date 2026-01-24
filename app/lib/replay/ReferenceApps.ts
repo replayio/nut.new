@@ -84,7 +84,7 @@ export interface ReferenceAppSummary extends LandingPageIndexEntry {
 
 const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
 
-type WebhookGetAppPathsResponse = Array<{ path: string, stage: ReferenceAppStage }>;
+type WebhookGetAppPathsResponse = Array<{ path: string; stage: ReferenceAppStage }>;
 
 async function fetchTrackerAppPaths(): Promise<WebhookGetAppPathsResponse> {
   const appPaths = await fetch(`${AppTrackerHost}/.netlify/functions/WebhookGetAppPaths`);
@@ -94,7 +94,9 @@ async function fetchTrackerAppPaths(): Promise<WebhookGetAppPathsResponse> {
 export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]> {
   const appPathsPromise = fetchTrackerAppPaths();
 
-  const { landingPages } = (await callNutAPI('get-landing-page-index', {})) as { landingPages: LandingPageIndexEntry[] };
+  const { landingPages } = (await callNutAPI('get-landing-page-index', {})) as {
+    landingPages: LandingPageIndexEntry[];
+  };
   const appPaths = await appPathsPromise;
 
   return landingPages.map((landingPage: LandingPageIndexEntry) => {
@@ -109,7 +111,7 @@ export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]>
 
 interface ReferenceAppFeature {
   name: string;
-  status: "green" | "yellow" | "red";
+  status: 'green' | 'yellow' | 'red';
   note?: string;
 }
 
@@ -129,7 +131,7 @@ export interface ReferenceAppContent extends LandingPageContent {
   trackerBugs: ReferenceAppBug[];
   trackerCopyCount: number;
   trackerReviews: ReferenceAppReview[];
-};
+}
 
 interface WebhookGetAppDataResponse {
   stage: ReferenceAppStage;
@@ -153,7 +155,9 @@ async function fetchTrackerAppData(referenceAppPath: string): Promise<WebhookGet
 export async function getReferenceAppContent(referenceAppPath: string): Promise<ReferenceAppContent> {
   const appDataPromise = fetchTrackerAppData(referenceAppPath);
 
-  const { landingPage } = (await callNutAPI('get-landing-page', { referenceAppPath })) as { landingPage: LandingPageContent };
+  const { landingPage } = (await callNutAPI('get-landing-page', { referenceAppPath })) as {
+    landingPage: LandingPageContent;
+  };
 
   const appData = await appDataPromise;
   return {
@@ -166,7 +170,11 @@ export async function getReferenceAppContent(referenceAppPath: string): Promise<
   };
 }
 
-export async function reportTrackerAppCopy(referenceAppPath: string, type: 'download' | 'customize', email: string | undefined) {
+export async function reportTrackerAppCopy(
+  referenceAppPath: string,
+  type: 'download' | 'customize',
+  email: string | undefined,
+) {
   await fetch(`${AppTrackerHost}/.netlify/functions/WebhookReportAppCopy`, {
     method: 'POST',
     headers: {

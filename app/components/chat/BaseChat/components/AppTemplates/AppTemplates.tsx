@@ -103,7 +103,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     if (showAll) {
       return referenceApps;
     }
-    return referenceApps.filter((app) => ["alpha", "beta", "release"].includes(app.stage));
+    return referenceApps.filter((app) => ['alpha', 'beta', 'release'].includes(app.stage));
   }, [referenceApps, showAll]);
 
   const categories = useMemo(() => {

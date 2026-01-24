@@ -3,7 +3,12 @@ import { useParams, Link } from '@remix-run/react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import type { ReferenceAppSummary, ReferenceAppContent } from '~/lib/replay/ReferenceApps';
-import { getReferenceAppSummaries, getReferenceAppContent, reportTrackerAppCopy, addTrackerAppReview } from '~/lib/replay/ReferenceApps';
+import {
+  getReferenceAppSummaries,
+  getReferenceAppContent,
+  reportTrackerAppCopy,
+  addTrackerAppReview,
+} from '~/lib/replay/ReferenceApps';
 import { database } from '~/lib/persistence/apps';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
 import { useStore } from '@nanostores/react';
@@ -1039,11 +1044,10 @@ function GalleryPageContent() {
                   ) : null}
 
                   {/* Status Section */}
-                  {appContent &&
-                  (appContent.trackerFeatures.length > 0 || appContent.trackerBugs.length > 0) ? (
+                  {appContent && (appContent.trackerFeatures.length > 0 || appContent.trackerBugs.length > 0) ? (
                     <div>
                       <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Status</h3>
-                      
+
                       {/* Features */}
                       {appContent.trackerFeatures.length > 0 && (
                         <div className="mb-6">
@@ -1102,7 +1106,9 @@ function GalleryPageContent() {
                                   <div className="flex-1 min-w-0">
                                     <div className="font-medium text-bolt-elements-textPrimary">{feature.name}</div>
                                     {feature.note && (
-                                      <div className="text-sm text-bolt-elements-textSecondary mt-1">{feature.note}</div>
+                                      <div className="text-sm text-bolt-elements-textSecondary mt-1">
+                                        {feature.note}
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -1136,7 +1142,7 @@ function GalleryPageContent() {
                   {appContent && (
                     <div>
                       <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Reviews</h3>
-                      
+
                       {/* Existing Reviews */}
                       {appContent.trackerReviews && appContent.trackerReviews.length > 0 ? (
                         <div className="space-y-4 mb-8">
@@ -1165,14 +1171,10 @@ function GalleryPageContent() {
                                   </span>
                                 </div>
                                 {review.name && (
-                                  <span className="text-sm text-bolt-elements-textSecondary">
-                                    {review.name}
-                                  </span>
+                                  <span className="text-sm text-bolt-elements-textSecondary">{review.name}</span>
                                 )}
                                 {!review.name && (
-                                  <span className="text-sm text-bolt-elements-textSecondary italic">
-                                    Anonymous
-                                  </span>
+                                  <span className="text-sm text-bolt-elements-textSecondary italic">Anonymous</span>
                                 )}
                               </div>
                               {review.comment && (
@@ -1188,7 +1190,7 @@ function GalleryPageContent() {
                       {/* Add Review Form */}
                       <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor">
                         <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-4">Add a Review</h4>
-                        
+
                         <div className="space-y-4">
                           {/* Rating */}
                           <div>
@@ -1214,9 +1216,7 @@ function GalleryPageContent() {
                                 </button>
                               ))}
                               {reviewRating > 0 && (
-                                <span className="text-sm text-bolt-elements-textSecondary ml-2">
-                                  {reviewRating}/5
-                                </span>
+                                <span className="text-sm text-bolt-elements-textSecondary ml-2">{reviewRating}/5</span>
                               )}
                             </div>
                           </div>
