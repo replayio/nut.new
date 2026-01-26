@@ -8,6 +8,10 @@ import {
   getReferenceAppContent,
   reportTrackerAppCopy,
   addTrackerAppReview,
+  reportBug,
+  requestFeature,
+  registerEarlyAdopter,
+  addLike,
 } from '~/lib/replay/ReferenceApps';
 import { database } from '~/lib/persistence/apps';
 import { getRepositoryURL } from '~/lib/replay/DevelopmentServer';
@@ -31,6 +35,8 @@ import {
   XCircle,
   Bug,
   Star,
+  Rocket,
+  Heart,
 } from 'lucide-react';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { toast } from 'react-toastify';
@@ -53,6 +59,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { ReferenceAppStatusIndicator } from '~/components/chat/BaseChat/components/AppTemplates/ReferenceAppStatusIndicator';
+import { Dialog, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Gallery | Replay Builder' }];
@@ -166,9 +173,15 @@ function GalleryPageContent() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const [reviewRating, setReviewRating] = useState<number>(0);
-  const [reviewName, setReviewName] = useState<string>('');
   const [reviewComment, setReviewComment] = useState<string>('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [featureDescription, setFeatureDescription] = useState<string>('');
+  const [isSubmittingFeature, setIsSubmittingFeature] = useState(false);
+  const [bugDescription, setBugDescription] = useState<string>('');
+  const [isSubmittingBug, setIsSubmittingBug] = useState(false);
+  const [isEarlyAdopterModalOpen, setIsEarlyAdopterModalOpen] = useState(false);
+  const [earlyAdopterUseCase, setEarlyAdopterUseCase] = useState<string>('');
+  const [isSubmittingEarlyAdopter, setIsSubmittingEarlyAdopter] = useState(false);
 
   // Handle iframe load event
   const handleIframeLoad = useCallback(() => {
@@ -202,7 +215,7 @@ function GalleryPageContent() {
 
         // Load landing page content
         try {
-          const content = await getReferenceAppContent(foundApp.referenceAppPath);
+          const content = await getReferenceAppContent(foundApp.referenceAppPath, user?.email);
           setAppContent(content);
         } catch (err) {
           console.error('Failed to fetch landing page content:', err);
@@ -238,15 +251,6 @@ function GalleryPageContent() {
     }
   }, [handleIframeLoad, appPreviewURL]);
 
-  // Set default review name from logged-in user (only when user becomes available)
-  useEffect(() => {
-    if (user && reviewName === '') {
-      const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email || '';
-      if (userName) {
-        setReviewName(userName);
-      }
-    }
-  }, [user]);
 
   const handleCustomize = async () => {
     if (!app) {
@@ -353,23 +357,23 @@ function GalleryPageContent() {
 
     try {
       setIsSubmittingReview(true);
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
       await addTrackerAppReview({
         path: appPath,
         rating: reviewRating,
-        user_name: reviewName.trim() || undefined,
+        user_name: userName,
         user_email: user?.email,
         comment: reviewComment.trim() || undefined,
       });
 
       // Reload app content to show the new review
       if (appPath) {
-        const content = await getReferenceAppContent(appPath);
+        const content = await getReferenceAppContent(appPath, user?.email);
         setAppContent(content);
       }
 
       // Reset form
       setReviewRating(0);
-      setReviewName('');
       setReviewComment('');
       toast.success('Review submitted successfully');
     } catch (error) {
@@ -377,6 +381,171 @@ function GalleryPageContent() {
       toast.error('Failed to submit review. Please try again.');
     } finally {
       setIsSubmittingReview(false);
+    }
+  };
+
+  const handleSubmitFeatureRequest = async () => {
+    if (!app) {
+      return;
+    }
+
+    if (!user) {
+      toast.error('Please log in to request a feature');
+      return;
+    }
+
+    if (!featureDescription.trim()) {
+      toast.error('Please provide a description');
+      return;
+    }
+
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    assert(appPath, 'App path is required');
+
+    try {
+      setIsSubmittingFeature(true);
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      await requestFeature({
+        path: appPath,
+        user_name: userName,
+        user_email: user?.email,
+        description: featureDescription.trim(),
+      });
+
+      // Reset form
+      setFeatureDescription('');
+      
+      // Reload app content to show the new feature request
+      if (appPath) {
+        const content = await getReferenceAppContent(appPath, user?.email);
+        setAppContent(content);
+      }
+      
+      toast.success('Feature request submitted successfully');
+    } catch (error) {
+      console.error('Error submitting feature request:', error);
+      toast.error('Failed to submit feature request. Please try again.');
+    } finally {
+      setIsSubmittingFeature(false);
+    }
+  };
+
+  const handleSubmitBugReport = async () => {
+    if (!app) {
+      return;
+    }
+
+    if (!user) {
+      toast.error('Please log in to report a bug');
+      return;
+    }
+
+    if (!bugDescription.trim()) {
+      toast.error('Please provide a description');
+      return;
+    }
+
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    assert(appPath, 'App path is required');
+
+    try {
+      setIsSubmittingBug(true);
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      await reportBug({
+        path: appPath,
+        user_name: userName,
+        user_email: user?.email,
+        description: bugDescription.trim(),
+      });
+
+      // Reset form
+      setBugDescription('');
+      
+      // Reload app content to show the new bug report
+      if (appPath) {
+        const content = await getReferenceAppContent(appPath, user?.email);
+        setAppContent(content);
+      }
+      
+      toast.success('Bug report submitted successfully');
+    } catch (error) {
+      console.error('Error submitting bug report:', error);
+      toast.error('Failed to submit bug report. Please try again.');
+    } finally {
+      setIsSubmittingBug(false);
+    }
+  };
+
+  const handleSubmitEarlyAdopter = async () => {
+    if (!app) {
+      return;
+    }
+
+    if (!user) {
+      toast.error('Please log in to become an early adopter');
+      return;
+    }
+
+    if (!earlyAdopterUseCase.trim()) {
+      toast.error('Please describe your use case');
+      return;
+    }
+
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    assert(appPath, 'App path is required');
+
+    try {
+      setIsSubmittingEarlyAdopter(true);
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      await registerEarlyAdopter({
+        path: appPath,
+        user_name: userName,
+        user_email: user?.email,
+        use_case_description: earlyAdopterUseCase.trim(),
+      });
+
+      // Reset form and close modal
+      setEarlyAdopterUseCase('');
+      setIsEarlyAdopterModalOpen(false);
+      toast.success('Thank you for your interest! We\'ll be in touch soon.');
+    } catch (error) {
+      console.error('Error submitting early adopter registration:', error);
+      toast.error('Failed to submit registration. Please try again.');
+    } finally {
+      setIsSubmittingEarlyAdopter(false);
+    }
+  };
+
+  const handleLike = async (
+    type: 'feature_request' | 'bug_report' | 'review',
+    id: string,
+  ) => {
+    if (!app || !user) {
+      toast.error('Please log in to like items');
+      return;
+    }
+
+    const appPath = appContent?.referenceAppPath || app.referenceAppPath;
+    assert(appPath, 'App path is required');
+
+    try {
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+      await addLike({
+        user_name: userName || '',
+        user_email: user?.email || '',
+        ...(type === 'feature_request' && { feature_request_id: id }),
+        ...(type === 'bug_report' && { bug_report_id: id }),
+        ...(type === 'review' && { review_id: id }),
+      });
+
+      // Reload app content to show updated likes
+      if (appPath) {
+        const content = await getReferenceAppContent(appPath, user?.email);
+        setAppContent(content);
+      }
+    } catch (error) {
+      console.error('Error adding like:', error);
+      toast.error('Failed to add like. Please try again.');
     }
   };
 
@@ -541,7 +710,19 @@ function GalleryPageContent() {
                 </Breadcrumb>
 
                 <div className="flex items-center gap-2">
-                  {app?.stage && <ReferenceAppStatusIndicator stage={app.stage} size="sm" />}
+                  {app?.stage && (
+                    <>
+                      <ReferenceAppStatusIndicator stage={app.stage} size="sm" />
+                      <Button
+                        onClick={() => setIsEarlyAdopterModalOpen(true)}
+                        variant="outline"
+                        className="rounded-full"
+                      >
+                        <Rocket size={18} className="mr-2" />
+                        Be an early adopter
+                      </Button>
+                    </>
+                  )}
                   <Button
                     onClick={handleDownloadCode}
                     variant="outline"
@@ -691,7 +872,17 @@ function GalleryPageContent() {
 
               <div className="flex items-center gap-2">
                 {(displayData?.stage || app?.stage) && (
-                  <ReferenceAppStatusIndicator stage={(displayData?.stage || app?.stage)!} size="sm" />
+                  <>
+                    <ReferenceAppStatusIndicator stage={(displayData?.stage || app?.stage)!} size="sm" />
+                    <Button
+                      onClick={() => setIsEarlyAdopterModalOpen(true)}
+                      variant="outline"
+                      className="rounded-full"
+                    >
+                      <Rocket size={18} className="mr-2" />
+                      Be an early adopter
+                    </Button>
+                  </>
                 )}
                 <Button
                   onClick={handleDownloadCode}
@@ -1126,6 +1317,24 @@ function GalleryPageContent() {
                                       </div>
                                     )}
                                   </div>
+                                  <button
+                                    onClick={() => handleLike('feature_request', feature.id)}
+                                    disabled={!user}
+                                    className={classNames(
+                                      'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors flex-shrink-0',
+                                      feature.liked
+                                        ? 'text-rose-500 hover:text-rose-600'
+                                        : 'text-bolt-elements-textSecondary hover:text-rose-500',
+                                      !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                    )}
+                                    title={!user ? 'Log in to like' : feature.liked ? 'Unlike' : 'Like'}
+                                  >
+                                    <Heart
+                                      size={16}
+                                      className={classNames(feature.liked ? 'fill-current' : '')}
+                                    />
+                                    <span className="text-xs font-medium">{feature.likeCount || 0}</span>
+                                  </button>
                                 </div>
                               );
                             })}
@@ -1145,6 +1354,24 @@ function GalleryPageContent() {
                               >
                                 <Bug size={20} className="flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                                 <div className="flex-1 text-bolt-elements-textPrimary">{bug.description}</div>
+                                <button
+                                  onClick={() => handleLike('bug_report', bug.id)}
+                                  disabled={!user}
+                                  className={classNames(
+                                    'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors flex-shrink-0',
+                                    bug.liked
+                                      ? 'text-rose-500 hover:text-rose-600'
+                                      : 'text-bolt-elements-textSecondary hover:text-rose-500',
+                                    !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                  )}
+                                  title={!user ? 'Log in to like' : bug.liked ? 'Unlike' : 'Like'}
+                                >
+                                  <Heart
+                                    size={16}
+                                    className={classNames(bug.liked ? 'fill-current' : '')}
+                                  />
+                                  <span className="text-xs font-medium">{bug.likeCount || 0}</span>
+                                </button>
                               </div>
                             ))}
                           </div>
@@ -1185,12 +1412,32 @@ function GalleryPageContent() {
                                     {review.rating}/5
                                   </span>
                                 </div>
-                                {review.name && (
-                                  <span className="text-sm text-bolt-elements-textSecondary">{review.name}</span>
-                                )}
-                                {!review.name && (
-                                  <span className="text-sm text-bolt-elements-textSecondary italic">Anonymous</span>
-                                )}
+                                <div className="flex items-center gap-3">
+                                  {review.name && (
+                                    <span className="text-sm text-bolt-elements-textSecondary">{review.name}</span>
+                                  )}
+                                  {!review.name && (
+                                    <span className="text-sm text-bolt-elements-textSecondary italic">Anonymous</span>
+                                  )}
+                                  <button
+                                    onClick={() => handleLike('review', review.id)}
+                                    disabled={!user}
+                                    className={classNames(
+                                      'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors',
+                                      review.liked
+                                        ? 'text-rose-500 hover:text-rose-600'
+                                        : 'text-bolt-elements-textSecondary hover:text-rose-500',
+                                      !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                    )}
+                                    title={!user ? 'Log in to like' : review.liked ? 'Unlike' : 'Like'}
+                                  >
+                                    <Heart
+                                      size={16}
+                                      className={classNames(review.liked ? 'fill-current' : '')}
+                                    />
+                                    <span className="text-xs font-medium">{review.likeCount || 0}</span>
+                                  </button>
+                                </div>
                               </div>
                               {review.comment && (
                                 <p className="text-bolt-elements-textPrimary mt-2">{review.comment}</p>
@@ -1201,6 +1448,120 @@ function GalleryPageContent() {
                       ) : (
                         <p className="text-bolt-elements-textSecondary mb-8">No reviews yet. Be the first to review!</p>
                       )}
+
+                      {/* Request Feature Form */}
+                      <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Sparkles size={20} className="text-rose-500" />
+                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary">Request a Feature</h4>
+                        </div>
+
+                        {!user && (
+                          <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <p className="text-sm text-amber-600 dark:text-amber-400">
+                              Please log in to request a feature.
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
+                              Description <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              value={featureDescription}
+                              onChange={(e) => setFeatureDescription(e.target.value)}
+                              placeholder="Describe the feature you'd like to see..."
+                              rows={4}
+                              disabled={!user || isSubmittingFeature}
+                              className={classNames(
+                                'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
+                                !user || isSubmittingFeature ? 'cursor-not-allowed opacity-50' : '',
+                              )}
+                            />
+                          </div>
+
+                          {user && (
+                            <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
+                              <p className="text-xs text-bolt-elements-textSecondary">
+                                Your request will be associated with{' '}
+                                <span className="font-medium text-bolt-elements-textPrimary">
+                                  {user.user_metadata?.full_name ||
+                                    user.user_metadata?.name ||
+                                    user.email ||
+                                    'your account'}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+
+                          <Button
+                            onClick={handleSubmitFeatureRequest}
+                            disabled={!user || !featureDescription.trim() || isSubmittingFeature}
+                            className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white"
+                          >
+                            {isSubmittingFeature ? 'Submitting...' : 'Submit Feature Request'}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Report Bug Form */}
+                      <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Bug size={20} className="text-red-500" />
+                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary">Report a Bug</h4>
+                        </div>
+
+                        {!user && (
+                          <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <p className="text-sm text-amber-600 dark:text-amber-400">
+                              Please log in to report a bug.
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
+                              Description <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              value={bugDescription}
+                              onChange={(e) => setBugDescription(e.target.value)}
+                              placeholder="Describe the bug you encountered..."
+                              rows={4}
+                              disabled={!user || isSubmittingBug}
+                              className={classNames(
+                                'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
+                                !user || isSubmittingBug ? 'cursor-not-allowed opacity-50' : '',
+                              )}
+                            />
+                          </div>
+
+                          {user && (
+                            <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
+                              <p className="text-xs text-bolt-elements-textSecondary">
+                                Your report will be associated with{' '}
+                                <span className="font-medium text-bolt-elements-textPrimary">
+                                  {user.user_metadata?.full_name ||
+                                    user.user_metadata?.name ||
+                                    user.email ||
+                                    'your account'}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+
+                          <Button
+                            onClick={handleSubmitBugReport}
+                            disabled={!user || !bugDescription.trim() || isSubmittingBug}
+                            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+                          >
+                            {isSubmittingBug ? 'Submitting...' : 'Submit Bug Report'}
+                          </Button>
+                        </div>
+                      </div>
 
                       {/* Add Review Form */}
                       <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor">
@@ -1248,28 +1609,20 @@ function GalleryPageContent() {
                             </div>
                           </div>
 
-                          {/* Name */}
-                          <div>
-                            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
-                              Display Name
-                            </label>
-                            <input
-                              type="text"
-                              value={reviewName}
-                              onChange={(e) => setReviewName(e.target.value)}
-                              placeholder="Your name (optional, leave blank for anonymous)"
-                              disabled={!user}
-                              className={classNames(
-                                'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500',
-                                !user ? 'cursor-not-allowed opacity-50' : '',
-                              )}
-                            />
-                            <p className="text-xs text-bolt-elements-textSecondary mt-1">
-                              {reviewName.trim()
-                                ? `Your review will be shown as "${reviewName.trim()}"`
-                                : 'Your review will be shown as "Anonymous"'}
-                            </p>
-                          </div>
+                          {/* Review Association Notification */}
+                          {user && (
+                            <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
+                              <p className="text-xs text-bolt-elements-textSecondary">
+                                Your review will be associated with{' '}
+                                <span className="font-medium text-bolt-elements-textPrimary">
+                                  {user.user_metadata?.full_name ||
+                                    user.user_metadata?.name ||
+                                    user.email ||
+                                    'your account'}
+                                </span>
+                              </p>
+                            </div>
+                          )}
 
                           {/* Comment */}
                           <div>
@@ -1310,6 +1663,70 @@ function GalleryPageContent() {
 
       {/* Image Lightbox */}
       <ImageLightbox imageUrl={expandedImageUrl} onClose={() => setExpandedImageUrl(null)} />
+
+      {/* Early Adopter Modal */}
+      <DialogRoot open={isEarlyAdopterModalOpen} onOpenChange={(open) => !open && setIsEarlyAdopterModalOpen(false)}>
+        <Dialog onClose={() => setIsEarlyAdopterModalOpen(false)}>
+          <DialogTitle>Be an Early Adopter</DialogTitle>
+          <div className="p-6 space-y-4">
+            {!user && (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Please log in to become an early adopter.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
+                What do you want to use this app for? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={earlyAdopterUseCase}
+                onChange={(e) => setEarlyAdopterUseCase(e.target.value)}
+                placeholder="Describe your use case and how you plan to use this app..."
+                rows={6}
+                disabled={!user || isSubmittingEarlyAdopter}
+                className={classNames(
+                  'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
+                  !user || isSubmittingEarlyAdopter ? 'cursor-not-allowed opacity-50' : '',
+                )}
+              />
+            </div>
+
+            {user && (
+              <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
+                <p className="text-xs text-bolt-elements-textSecondary">
+                  Your registration will be associated with{' '}
+                  <span className="font-medium text-bolt-elements-textPrimary">
+                    {user.user_metadata?.full_name ||
+                      user.user_metadata?.name ||
+                      user.email ||
+                      'your account'}
+                  </span>
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                onClick={() => setIsEarlyAdopterModalOpen(false)}
+                variant="outline"
+                disabled={isSubmittingEarlyAdopter}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitEarlyAdopter}
+                disabled={!user || !earlyAdopterUseCase.trim() || isSubmittingEarlyAdopter}
+                className="bg-rose-500 hover:bg-rose-600 text-white"
+              >
+                {isSubmittingEarlyAdopter ? 'Submitting...' : 'Submit'}
+              </Button>
+            </div>
+          </div>
+        </Dialog>
+      </DialogRoot>
     </div>
   );
 }
