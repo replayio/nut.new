@@ -110,19 +110,28 @@ export async function getReferenceAppSummaries(): Promise<ReferenceAppSummary[]>
 }
 
 interface ReferenceAppFeature {
+  id: string;
   name: string;
   status: 'green' | 'yellow' | 'red';
   note?: string;
+  likeCount: number;
+  liked: boolean;
 }
 
 interface ReferenceAppBug {
+  id: string;
   description: string;
+  likeCount: number;
+  liked: boolean;
 }
 
 interface ReferenceAppReview {
+  id: string;
   rating: number; // 1-5
   name?: string;
   comment?: string;
+  likeCount: number;
+  liked: boolean;
 }
 
 export interface ReferenceAppContent extends LandingPageContent {
@@ -141,19 +150,22 @@ interface WebhookGetAppDataResponse {
   reviews: ReferenceAppReview[];
 }
 
-async function fetchTrackerAppData(referenceAppPath: string): Promise<WebhookGetAppDataResponse> {
+async function fetchTrackerAppData(referenceAppPath: string, userEmail?: string): Promise<WebhookGetAppDataResponse> {
   const appData = await fetch(`${AppTrackerHost}/.netlify/functions/WebhookGetAppData`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ path: referenceAppPath }),
+    body: JSON.stringify({ path: referenceAppPath, user_email: userEmail }),
   });
   return appData.json();
 }
 
-export async function getReferenceAppContent(referenceAppPath: string): Promise<ReferenceAppContent> {
-  const appDataPromise = fetchTrackerAppData(referenceAppPath);
+export async function getReferenceAppContent(
+  referenceAppPath: string,
+  userEmail?: string,
+): Promise<ReferenceAppContent> {
+  const appDataPromise = fetchTrackerAppData(referenceAppPath, userEmail);
 
   const { landingPage } = (await callNutAPI('get-landing-page', { referenceAppPath })) as {
     landingPage: LandingPageContent;
@@ -194,6 +206,67 @@ interface WebhookAddAppReviewRequest {
 
 export async function addTrackerAppReview(request: WebhookAddAppReviewRequest) {
   await fetch(`${AppTrackerHost}/.netlify/functions/WebhookAddAppReview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+}
+
+interface ReportBugRequest {
+  path: string;
+  user_name?: string;
+  user_email?: string;
+  description: string;
+}
+
+export async function reportBug(request: ReportBugRequest) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookReportBug`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+}
+
+interface RequestFeatureRequest {
+  path: string;
+  user_name?: string;
+  user_email?: string;
+  description: string;
+}
+
+export async function requestFeature(request: RequestFeatureRequest) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookRequestFeature`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+}
+
+interface RegisterEarlyAdopterRequest {
+  path: string;
+  user_name?: string;
+  user_email?: string;
+  use_case_description: string;
+}
+
+export async function registerEarlyAdopter(request: RegisterEarlyAdopterRequest) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookRegisterEarlyAdopter`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+}
+
+interface AddLikeRequest {
+  user_name: string;
+  user_email: string;
+  feature_id?: string;
+  bug_id?: string;
+  review_id?: string;
+}
+
+export async function addLike(request: AddLikeRequest) {
+  await fetch(`${AppTrackerHost}/.netlify/functions/WebhookAddLike`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
