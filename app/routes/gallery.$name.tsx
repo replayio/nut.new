@@ -36,7 +36,7 @@ import {
   Bug,
   Star,
   Rocket,
-  Heart,
+  ThumbsUp,
 } from 'lucide-react';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { toast } from 'react-toastify';
@@ -520,7 +520,7 @@ function GalleryPageContent() {
     type: 'feature_request' | 'bug_report' | 'review',
     id: string,
   ) => {
-    if (!app || !user) {
+    if (!app || !user || !appContent) {
       toast.error('Please log in to like items');
       return;
     }
@@ -528,25 +528,115 @@ function GalleryPageContent() {
     const appPath = appContent?.referenceAppPath || app.referenceAppPath;
     assert(appPath, 'App path is required');
 
+    // Optimistically update the UI
+    const previousContent = appContent;
+    let updatedContent: ReferenceAppContent;
+
+    if (type === 'feature_request') {
+      updatedContent = {
+        ...appContent,
+        trackerFeatures: appContent.trackerFeatures.map((feature) =>
+          feature.id === id
+            ? {
+                ...feature,
+                liked: !feature.liked,
+                likeCount: feature.liked ? feature.likeCount - 1 : feature.likeCount + 1,
+              }
+            : feature,
+        ),
+      };
+    } else if (type === 'bug_report') {
+      updatedContent = {
+        ...appContent,
+        trackerBugs: appContent.trackerBugs.map((bug) =>
+          bug.id === id
+            ? {
+                ...bug,
+                liked: !bug.liked,
+                likeCount: bug.liked ? bug.likeCount - 1 : bug.likeCount + 1,
+              }
+            : bug,
+        ),
+      };
+    } else {
+      // review
+      updatedContent = {
+        ...appContent,
+        trackerReviews: appContent.trackerReviews.map((review) =>
+          review.id === id
+            ? {
+                ...review,
+                liked: !review.liked,
+                likeCount: review.liked ? review.likeCount - 1 : review.likeCount + 1,
+              }
+            : review,
+        ),
+      };
+    }
+
+    setAppContent(updatedContent);
+
     try {
       const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
       await addLike({
         user_name: userName || '',
         user_email: user?.email || '',
-        ...(type === 'feature_request' && { feature_request_id: id }),
-        ...(type === 'bug_report' && { bug_report_id: id }),
+        ...(type === 'feature_request' && { feature_id: id }),
+        ...(type === 'bug_report' && { bug_id: id }),
         ...(type === 'review' && { review_id: id }),
       });
 
-      // Reload app content to show updated likes
+      // Reload app content to get authoritative state from server
       if (appPath) {
         const content = await getReferenceAppContent(appPath, user?.email);
         setAppContent(content);
       }
     } catch (error) {
       console.error('Error adding like:', error);
+      // Revert optimistic update on error
+      setAppContent(previousContent);
       toast.error('Failed to add like. Please try again.');
     }
+  };
+
+  const renderLikeButton = (
+    type: 'feature_request' | 'bug_report' | 'review',
+    id: string,
+    liked: boolean,
+    likeCount: number,
+    className?: string,
+  ) => {
+    return (
+      <button
+        onClick={() => handleLike(type, id)}
+        disabled={!user}
+        className={classNames(
+          'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors',
+          liked
+            ? 'text-yellow-600 hover:text-yellow-700'
+            : 'text-bolt-elements-textSecondary hover:text-yellow-500',
+          !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          className,
+        )}
+        title={!user ? 'Log in to like' : liked ? 'Liked' : 'Like'}
+      >
+        <ThumbsUp
+          size={16}
+          className={classNames(liked ? '' : '')}
+          style={
+            liked
+              ? {
+                  fill: 'rgb(250 204 21)', // yellow-400
+                  stroke: 'rgb(202 138 4)', // yellow-600 for border
+                  strokeWidth: 1.5,
+                  paintOrder: 'fill stroke', // ensures fill is rendered first, then stroke on top
+                }
+              : {}
+          }
+        />
+        <span className="text-xs font-medium">{likeCount || 0}</span>
+      </button>
+    );
   };
 
   // Use landing page content if available, otherwise fall back to index entry
@@ -716,10 +806,10 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full"
+                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button"
                       >
-                        <Rocket size={18} className="mr-2" />
-                        Be an early adopter
+                        <Rocket size={18} className="mr-2 relative z-10" />
+                        <span className="relative z-10">Be an early adopter</span>
                       </Button>
                     </>
                   )}
@@ -810,9 +900,39 @@ function GalleryPageContent() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
-      {/* Sidebar */}
-      <Menu />
+    <>
+      <style>{`
+        .shiny-button {
+          position: relative;
+          overflow: hidden;
+        }
+        .shiny-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.5),
+            transparent
+          );
+          animation: shiny-sweep 2.5s ease-in-out infinite;
+        }
+        @keyframes shiny-sweep {
+          0% {
+            left: -100%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+      `}</style>
+      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+        {/* Sidebar */}
+        <Menu />
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -877,10 +997,10 @@ function GalleryPageContent() {
                     <Button
                       onClick={() => setIsEarlyAdopterModalOpen(true)}
                       variant="outline"
-                      className="rounded-full"
+                      className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button"
                     >
-                      <Rocket size={18} className="mr-2" />
-                      Be an early adopter
+                      <Rocket size={18} className="mr-2 relative z-10" />
+                      <span className="relative z-10">Be an early adopter</span>
                     </Button>
                   </>
                 )}
@@ -1317,27 +1437,52 @@ function GalleryPageContent() {
                                       </div>
                                     )}
                                   </div>
-                                  <button
-                                    onClick={() => handleLike('feature_request', feature.id)}
-                                    disabled={!user}
-                                    className={classNames(
-                                      'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors flex-shrink-0',
-                                      feature.liked
-                                        ? 'text-rose-500 hover:text-rose-600'
-                                        : 'text-bolt-elements-textSecondary hover:text-rose-500',
-                                      !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                                    )}
-                                    title={!user ? 'Log in to like' : feature.liked ? 'Unlike' : 'Like'}
-                                  >
-                                    <Heart
-                                      size={16}
-                                      className={classNames(feature.liked ? 'fill-current' : '')}
-                                    />
-                                    <span className="text-xs font-medium">{feature.likeCount || 0}</span>
-                                  </button>
+                                  {renderLikeButton(
+                                    'feature_request',
+                                    feature.id,
+                                    feature.liked,
+                                    feature.likeCount,
+                                    'flex-shrink-0',
+                                  )}
                                 </div>
                               );
                             })}
+                          </div>
+                          
+                          {/* Request Feature Form */}
+                          <div className="mt-3 flex items-center gap-2">
+                            {!user ? (
+                              <p className="text-sm text-amber-600 dark:text-amber-400">
+                                Please log in to request a feature.
+                              </p>
+                            ) : (
+                              <>
+                                <input
+                                  type="text"
+                                  value={featureDescription}
+                                  onChange={(e) => setFeatureDescription(e.target.value)}
+                                  placeholder="Request a feature..."
+                                  disabled={isSubmittingFeature}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && featureDescription.trim() && !isSubmittingFeature) {
+                                      handleSubmitFeatureRequest();
+                                    }
+                                  }}
+                                  className={classNames(
+                                    'flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500',
+                                    isSubmittingFeature ? 'cursor-not-allowed opacity-50' : '',
+                                  )}
+                                />
+                                <Button
+                                  onClick={handleSubmitFeatureRequest}
+                                  disabled={!featureDescription.trim() || isSubmittingFeature}
+                                  className="bg-rose-500 hover:bg-rose-600 text-white"
+                                  size="sm"
+                                >
+                                  {isSubmittingFeature ? '...' : 'Submit'}
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1354,26 +1499,51 @@ function GalleryPageContent() {
                               >
                                 <Bug size={20} className="flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                                 <div className="flex-1 text-bolt-elements-textPrimary">{bug.description}</div>
-                                <button
-                                  onClick={() => handleLike('bug_report', bug.id)}
-                                  disabled={!user}
-                                  className={classNames(
-                                    'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors flex-shrink-0',
-                                    bug.liked
-                                      ? 'text-rose-500 hover:text-rose-600'
-                                      : 'text-bolt-elements-textSecondary hover:text-rose-500',
-                                    !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                                  )}
-                                  title={!user ? 'Log in to like' : bug.liked ? 'Unlike' : 'Like'}
-                                >
-                                  <Heart
-                                    size={16}
-                                    className={classNames(bug.liked ? 'fill-current' : '')}
-                                  />
-                                  <span className="text-xs font-medium">{bug.likeCount || 0}</span>
-                                </button>
+                                {renderLikeButton(
+                                  'bug_report',
+                                  bug.id,
+                                  bug.liked,
+                                  bug.likeCount,
+                                  'flex-shrink-0',
+                                )}
                               </div>
                             ))}
+                          </div>
+                          
+                          {/* Report Bug Form */}
+                          <div className="mt-3 flex items-center gap-2">
+                            {!user ? (
+                              <p className="text-sm text-amber-600 dark:text-amber-400">
+                                Please log in to report a bug.
+                              </p>
+                            ) : (
+                              <>
+                                <input
+                                  type="text"
+                                  value={bugDescription}
+                                  onChange={(e) => setBugDescription(e.target.value)}
+                                  placeholder="Report a bug..."
+                                  disabled={isSubmittingBug}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && bugDescription.trim() && !isSubmittingBug) {
+                                      handleSubmitBugReport();
+                                    }
+                                  }}
+                                  className={classNames(
+                                    'flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500',
+                                    isSubmittingBug ? 'cursor-not-allowed opacity-50' : '',
+                                  )}
+                                />
+                                <Button
+                                  onClick={handleSubmitBugReport}
+                                  disabled={!bugDescription.trim() || isSubmittingBug}
+                                  className="bg-red-500 hover:bg-red-600 text-white"
+                                  size="sm"
+                                >
+                                  {isSubmittingBug ? '...' : 'Submit'}
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1419,24 +1589,7 @@ function GalleryPageContent() {
                                   {!review.name && (
                                     <span className="text-sm text-bolt-elements-textSecondary italic">Anonymous</span>
                                   )}
-                                  <button
-                                    onClick={() => handleLike('review', review.id)}
-                                    disabled={!user}
-                                    className={classNames(
-                                      'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors',
-                                      review.liked
-                                        ? 'text-rose-500 hover:text-rose-600'
-                                        : 'text-bolt-elements-textSecondary hover:text-rose-500',
-                                      !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                                    )}
-                                    title={!user ? 'Log in to like' : review.liked ? 'Unlike' : 'Like'}
-                                  >
-                                    <Heart
-                                      size={16}
-                                      className={classNames(review.liked ? 'fill-current' : '')}
-                                    />
-                                    <span className="text-xs font-medium">{review.likeCount || 0}</span>
-                                  </button>
+                                  {renderLikeButton('review', review.id, review.liked, review.likeCount)}
                                 </div>
                               </div>
                               {review.comment && (
@@ -1448,120 +1601,6 @@ function GalleryPageContent() {
                       ) : (
                         <p className="text-bolt-elements-textSecondary mb-8">No reviews yet. Be the first to review!</p>
                       )}
-
-                      {/* Request Feature Form */}
-                      <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Sparkles size={20} className="text-rose-500" />
-                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary">Request a Feature</h4>
-                        </div>
-
-                        {!user && (
-                          <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <p className="text-sm text-amber-600 dark:text-amber-400">
-                              Please log in to request a feature.
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
-                              Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                              value={featureDescription}
-                              onChange={(e) => setFeatureDescription(e.target.value)}
-                              placeholder="Describe the feature you'd like to see..."
-                              rows={4}
-                              disabled={!user || isSubmittingFeature}
-                              className={classNames(
-                                'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
-                                !user || isSubmittingFeature ? 'cursor-not-allowed opacity-50' : '',
-                              )}
-                            />
-                          </div>
-
-                          {user && (
-                            <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
-                              <p className="text-xs text-bolt-elements-textSecondary">
-                                Your request will be associated with{' '}
-                                <span className="font-medium text-bolt-elements-textPrimary">
-                                  {user.user_metadata?.full_name ||
-                                    user.user_metadata?.name ||
-                                    user.email ||
-                                    'your account'}
-                                </span>
-                              </p>
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={handleSubmitFeatureRequest}
-                            disabled={!user || !featureDescription.trim() || isSubmittingFeature}
-                            className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white"
-                          >
-                            {isSubmittingFeature ? 'Submitting...' : 'Submit Feature Request'}
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Report Bug Form */}
-                      <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Bug size={20} className="text-red-500" />
-                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary">Report a Bug</h4>
-                        </div>
-
-                        {!user && (
-                          <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <p className="text-sm text-amber-600 dark:text-amber-400">
-                              Please log in to report a bug.
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
-                              Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                              value={bugDescription}
-                              onChange={(e) => setBugDescription(e.target.value)}
-                              placeholder="Describe the bug you encountered..."
-                              rows={4}
-                              disabled={!user || isSubmittingBug}
-                              className={classNames(
-                                'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
-                                !user || isSubmittingBug ? 'cursor-not-allowed opacity-50' : '',
-                              )}
-                            />
-                          </div>
-
-                          {user && (
-                            <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
-                              <p className="text-xs text-bolt-elements-textSecondary">
-                                Your report will be associated with{' '}
-                                <span className="font-medium text-bolt-elements-textPrimary">
-                                  {user.user_metadata?.full_name ||
-                                    user.user_metadata?.name ||
-                                    user.email ||
-                                    'your account'}
-                                </span>
-                              </p>
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={handleSubmitBugReport}
-                            disabled={!user || !bugDescription.trim() || isSubmittingBug}
-                            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
-                          >
-                            {isSubmittingBug ? 'Submitting...' : 'Submit Bug Report'}
-                          </Button>
-                        </div>
-                      </div>
 
                       {/* Add Review Form */}
                       <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor">
@@ -1661,10 +1700,10 @@ function GalleryPageContent() {
         </div>
       </div>
 
-      {/* Image Lightbox */}
-      <ImageLightbox imageUrl={expandedImageUrl} onClose={() => setExpandedImageUrl(null)} />
+        {/* Image Lightbox */}
+        <ImageLightbox imageUrl={expandedImageUrl} onClose={() => setExpandedImageUrl(null)} />
 
-      {/* Early Adopter Modal */}
+        {/* Early Adopter Modal */}
       <DialogRoot open={isEarlyAdopterModalOpen} onOpenChange={(open) => !open && setIsEarlyAdopterModalOpen(false)}>
         <Dialog onClose={() => setIsEarlyAdopterModalOpen(false)}>
           <DialogTitle>Be an Early Adopter</DialogTitle>
@@ -1727,7 +1766,8 @@ function GalleryPageContent() {
           </div>
         </Dialog>
       </DialogRoot>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -82,7 +82,8 @@ export interface ReferenceAppSummary extends LandingPageIndexEntry {
   stage: ReferenceAppStage;
 }
 
-const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
+//const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
+const AppTrackerHost = 'https://d8a1dc91-37bd-47af-865c-42d4d865afe2.http.replay.io';
 
 type WebhookGetAppPathsResponse = Array<{ path: string; stage: ReferenceAppStage }>;
 
@@ -260,8 +261,8 @@ export async function registerEarlyAdopter(request: RegisterEarlyAdopterRequest)
 interface AddLikeRequest {
   user_name: string;
   user_email: string;
-  feature_request_id?: string;
-  bug_report_id?: string;
+  feature_id?: string;
+  bug_id?: string;
   review_id?: string;
 }
 
