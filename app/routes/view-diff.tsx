@@ -773,10 +773,12 @@ function RenderedMarkdownDiff({
   oldContent,
   newContent,
   diffType,
+  collapsed = true,
 }: {
   oldContent?: string;
   newContent?: string;
   diffType: 'added' | 'modified' | 'deleted';
+  collapsed?: boolean;
 }) {
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
 
@@ -849,6 +851,15 @@ function RenderedMarkdownDiff({
       return;
     }
 
+    // When not collapsed, show all sections without collapsing
+    if (!collapsed) {
+      unchangedBuffer.forEach((s) => {
+        displayItems.push({ kind: 'section', ...s });
+      });
+      unchangedBuffer = [];
+      return;
+    }
+
     if (unchangedBuffer.length > CONTEXT_BLOCKS * 2 + 1) {
       // Show leading context
       if (displayItems.length > 0) {
@@ -906,17 +917,63 @@ function RenderedMarkdownDiff({
     });
   };
 
+  // Group consecutive changed sections together
+  interface CollapsedGroup {
+    kind: 'collapsed';
+    id: number;
+    count: number;
+    sections: typeof sections;
+  }
+  interface UnchangedGroup {
+    kind: 'unchanged';
+    content: string;
+  }
+  interface ChangesGroup {
+    kind: 'changes';
+    items: { type: 'added' | 'removed'; content: string }[];
+  }
+  type RenderGroup = CollapsedGroup | UnchangedGroup | ChangesGroup;
+
+  const renderGroups: RenderGroup[] = [];
+  let currentChangesGroup: { type: 'added' | 'removed'; content: string }[] = [];
+
+  const flushChangesGroup = () => {
+    if (currentChangesGroup.length > 0) {
+      renderGroups.push({ kind: 'changes', items: [...currentChangesGroup] });
+      currentChangesGroup = [];
+    }
+  };
+
+  displayItems.forEach((item) => {
+    if (item.kind === 'collapsed') {
+      flushChangesGroup();
+      renderGroups.push({
+        kind: 'collapsed',
+        id: item.id,
+        count: item.count,
+        sections: item.sections,
+      });
+    } else if (item.type === 'unchanged') {
+      flushChangesGroup();
+      renderGroups.push({ kind: 'unchanged', content: item.content });
+    } else {
+      // added or removed - accumulate in changes group
+      currentChangesGroup.push({ type: item.type, content: item.content });
+    }
+  });
+  flushChangesGroup();
+
   return (
     <div className="p-4 space-y-3">
-      {displayItems.map((item, index) => {
-        if (item.kind === 'collapsed') {
-          const isExpanded = expandedSections.has(item.id);
+      {renderGroups.map((group, groupIndex) => {
+        if (group.kind === 'collapsed') {
+          const isExpanded = expandedSections.has(group.id);
           if (isExpanded) {
             // Render the expanded sections
             return (
-              <div key={`collapsed-${item.id}`} className="space-y-3">
-                {item.sections.map((section, sIndex) => (
-                  <div key={`expanded-${item.id}-${sIndex}`} className="p-4 opacity-60">
+              <div key={`collapsed-${group.id}`}>
+                {group.sections.map((section, sIndex) => (
+                  <div key={`expanded-${group.id}-${sIndex}`} className="p-4 opacity-60">
                     <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary">
                       <Markdown>{section.content}</Markdown>
                     </div>
@@ -928,48 +985,55 @@ function RenderedMarkdownDiff({
           // Render the expand button
           return (
             <button
-              key={`collapsed-${item.id}`}
-              onClick={() => toggleExpand(item.id)}
-              className="w-full flex items-center justify-center gap-2 py-2 bg-bolt-elements-background-depth-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 border border-bolt-elements-borderColor/50 rounded-lg text-bolt-elements-textSecondary hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-xs font-medium"
+              key={`collapsed-${group.id}`}
+              onClick={() => toggleExpand(group.id)}
+              className="w-full flex items-center justify-center gap-2 py-2 bg-bolt-elements-background-depth-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 border border-bolt-elements-borderColor/50 text-bolt-elements-textSecondary hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-xs font-medium"
             >
               <ChevronDown size={14} />
-              <span>Expand {item.count} hidden sections</span>
+              <span>Expand {group.count} hidden sections</span>
               <ChevronDown size={14} />
             </button>
           );
         }
 
-        // Regular section
-        if (item.type === 'removed') {
+        if (group.kind === 'unchanged') {
           return (
-            <div
-              key={index}
-              className="rounded-lg border-l-4 border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-950/40 p-4"
-            >
-              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-red-800 dark:prose-headings:text-red-300 prose-p:text-red-700 dark:prose-p:text-red-300 prose-code:text-red-700 dark:prose-code:text-red-300 line-through opacity-80">
-                <Markdown>{item.content}</Markdown>
+            <div key={`unchanged-${groupIndex}`} className="p-4 opacity-60">
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary">
+                <Markdown>{group.content}</Markdown>
               </div>
             </div>
           );
         }
-        if (item.type === 'added') {
-          return (
-            <div
-              key={index}
-              className="rounded-lg border-l-4 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950/40 p-4"
-            >
-              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-green-800 dark:prose-headings:text-green-300 prose-p:text-green-700 dark:prose-p:text-green-300 prose-code:text-green-700 dark:prose-code:text-green-300">
-                <Markdown>{item.content}</Markdown>
-              </div>
-            </div>
-          );
-        }
-        // Unchanged
+
+        // Render grouped changes (adjacent added/removed sections joined together)
         return (
-          <div key={index} className="p-4 opacity-60">
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary">
-              <Markdown>{item.content}</Markdown>
-            </div>
+          <div key={`changes-${groupIndex}`} className="overflow-hidden">
+            {group.items.map((item, itemIndex) => {
+              if (item.type === 'removed') {
+                return (
+                  <div
+                    key={`change-${groupIndex}-${itemIndex}`}
+                    className="border-l-4 border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-950/40 p-4"
+                  >
+                    <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-red-800 dark:prose-headings:text-red-300 prose-p:text-red-700 dark:prose-p:text-red-300 prose-code:text-red-700 dark:prose-code:text-red-300 line-through opacity-80">
+                      <Markdown>{item.content}</Markdown>
+                    </div>
+                  </div>
+                );
+              }
+              // added
+              return (
+                <div
+                  key={`change-${groupIndex}-${itemIndex}`}
+                  className="border-l-4 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950/40 p-4"
+                >
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-green-800 dark:prose-headings:text-green-300 prose-p:text-green-700 dark:prose-p:text-green-300 prose-code:text-green-700 dark:prose-code:text-green-300">
+                    <Markdown>{item.content}</Markdown>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         );
       })}
@@ -1101,8 +1165,8 @@ function FileDiffView({
       {/* Diff content */}
       {isExpanded && (
         <div>
-          {/* Secondary toggle (Collapsed/Full) - only shown for code view */}
-          {topViewMode === 'code' && (
+          {/* Secondary toggle (Collapsed/Full) - shown for both rendered and code views */}
+          {diff.type === 'modified' && (
             <div className="flex items-center justify-end gap-2 px-4 py-2 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50">
               <button
                 onClick={() => setCodeViewMode('collapsed')}
@@ -1114,24 +1178,27 @@ function FileDiffView({
               >
                 Collapsed
               </button>
-              {diff.type === 'modified' && (
-                <button
-                  onClick={() => setCodeViewMode('full')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                    codeViewMode === 'full'
-                      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-                      : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
-                  }`}
-                >
-                  Full File
-                </button>
-              )}
+              <button
+                onClick={() => setCodeViewMode('full')}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  codeViewMode === 'full'
+                    ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                    : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
+                }`}
+              >
+                Full File
+              </button>
             </div>
           )}
 
           {/* Render based on view mode */}
           {topViewMode === 'rendered' && isMarkdown ? (
-            <RenderedMarkdownDiff oldContent={diff.oldContent} newContent={diff.newContent} diffType={diff.type} />
+            <RenderedMarkdownDiff
+              oldContent={diff.oldContent}
+              newContent={diff.newContent}
+              diffType={diff.type}
+              collapsed={codeViewMode === 'collapsed'}
+            />
           ) : codeViewMode === 'full' && diff.type === 'modified' && diff.oldContent && diff.newContent ? (
             <div className="p-4">
               <CodeMirrorDiffView oldContent={diff.oldContent} newContent={diff.newContent} path={diff.path} />
