@@ -1708,6 +1708,12 @@ function GalleryPageContent() {
         <Dialog onClose={() => setIsEarlyAdopterModalOpen(false)}>
           <DialogTitle>Be an Early Adopter</DialogTitle>
           <div className="p-6 space-y-4">
+            <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+              <p className="text-sm text-purple-600 dark:text-purple-400">
+                We'll reach out and support you to make sure this app is working well
+              </p>
+            </div>
+            
             {!user && (
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <p className="text-sm text-amber-600 dark:text-amber-400">
@@ -1718,12 +1724,12 @@ function GalleryPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
-                What do you want to use this app for? <span className="text-red-500">*</span>
+                What do you want this app for? <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={earlyAdopterUseCase}
                 onChange={(e) => setEarlyAdopterUseCase(e.target.value)}
-                placeholder="Describe your use case and how you plan to use this app..."
+                placeholder="Describe how you want to use this app..."
                 rows={6}
                 disabled={!user || isSubmittingEarlyAdopter}
                 className={classNames(
@@ -1732,20 +1738,6 @@ function GalleryPageContent() {
                 )}
               />
             </div>
-
-            {user && (
-              <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
-                <p className="text-xs text-bolt-elements-textSecondary">
-                  Your registration will be associated with{' '}
-                  <span className="font-medium text-bolt-elements-textPrimary">
-                    {user.user_metadata?.full_name ||
-                      user.user_metadata?.name ||
-                      user.email ||
-                      'your account'}
-                  </span>
-                </p>
-              </div>
-            )}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button
