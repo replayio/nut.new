@@ -13,6 +13,7 @@ import { css } from '@codemirror/lang-css';
 import { json } from '@codemirror/lang-json';
 import { markdown } from '@codemirror/lang-markdown';
 import { python } from '@codemirror/lang-python';
+import { codeToTokens, bundledLanguages, type BundledLanguage, type ThemedToken } from 'shiki';
 import {
   PlusCircle,
   MinusCircle,
@@ -55,6 +56,148 @@ interface RepositoryFiles {
 }
 
 const CONTEXT_LINES = 3;
+
+// Get Shiki language from file extension
+function getShikiLanguage(filePath: string): BundledLanguage | null {
+  const ext = filePath.split('.').pop()?.toLowerCase();
+  const langMap: Record<string, BundledLanguage> = {
+    js: 'javascript',
+    jsx: 'jsx',
+    ts: 'typescript',
+    tsx: 'tsx',
+    html: 'html',
+    htm: 'html',
+    css: 'css',
+    scss: 'scss',
+    sass: 'sass',
+    json: 'json',
+    md: 'markdown',
+    markdown: 'markdown',
+    py: 'python',
+    rb: 'ruby',
+    go: 'go',
+    rs: 'rust',
+    java: 'java',
+    c: 'c',
+    cpp: 'cpp',
+    h: 'c',
+    hpp: 'cpp',
+    swift: 'swift',
+    kt: 'kotlin',
+    php: 'php',
+    sql: 'sql',
+    sh: 'bash',
+    bash: 'bash',
+    zsh: 'bash',
+    yaml: 'yaml',
+    yml: 'yaml',
+    xml: 'xml',
+    svg: 'xml',
+    vue: 'vue',
+    svelte: 'svelte',
+  };
+  return ext && ext in langMap ? langMap[ext] : null;
+}
+
+// Highlighted tokens per line for light and dark themes
+interface HighlightedLine {
+  light: ThemedToken[];
+  dark: ThemedToken[];
+}
+
+// Hook to highlight code with Shiki (both light and dark themes)
+function useHighlightedCode(
+  code: string | undefined,
+  filePath: string
+): Map<number, HighlightedLine> | null {
+  const [highlighted, setHighlighted] = useState<Map<number, HighlightedLine> | null>(null);
+  const language = getShikiLanguage(filePath);
+
+  useEffect(() => {
+    if (!code || !language) {
+      setHighlighted(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const highlight = async () => {
+      try {
+        // Get tokens for both themes
+        const [lightResult, darkResult] = await Promise.all([
+          codeToTokens(code, { lang: language, theme: 'github-light' }),
+          codeToTokens(code, { lang: language, theme: 'github-dark' }),
+        ]);
+
+        if (cancelled) return;
+
+        const lineMap = new Map<number, HighlightedLine>();
+        const maxLines = Math.max(lightResult.tokens.length, darkResult.tokens.length);
+
+        for (let i = 0; i < maxLines; i++) {
+          lineMap.set(i + 1, {
+            light: lightResult.tokens[i] || [],
+            dark: darkResult.tokens[i] || [],
+          });
+        }
+
+        setHighlighted(lineMap);
+      } catch (err) {
+        console.error('Failed to highlight code:', err);
+        setHighlighted(null);
+      }
+    };
+
+    highlight();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [code, language]);
+
+  return highlighted;
+}
+
+// Render highlighted tokens with both light and dark theme support
+function HighlightedContent({
+  lightTokens,
+  darkTokens,
+  fallback,
+}: {
+  lightTokens?: ThemedToken[];
+  darkTokens?: ThemedToken[];
+  fallback: string;
+}) {
+  if ((!lightTokens || lightTokens.length === 0) && (!darkTokens || darkTokens.length === 0)) {
+    return <>{fallback || ' '}</>;
+  }
+
+  // Use dark tokens as reference for structure, with both colors available
+  const tokens = darkTokens || lightTokens || [];
+  const lightList = lightTokens || [];
+
+  return (
+    <>
+      {tokens.map((token, i) => {
+        const lightToken = lightList[i];
+        return (
+          <span
+            key={i}
+            className="shiki-token"
+            style={
+              {
+                '--shiki-light': lightToken?.color || 'inherit',
+                '--shiki-dark': token.color || 'inherit',
+              } as React.CSSProperties
+            }
+          >
+            {token.content}
+          </span>
+        );
+      })}
+    </>
+  );
+}
 
 function computeHunks(oldContent: string, newContent: string): Hunk[] {
   const diffResult = diffLines(oldContent, newContent, {
@@ -265,7 +408,13 @@ function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFile
 }
 
 // GitHub-style diff line component
-function DiffLine({ line }: { line: HunkLine }) {
+function DiffLine({
+  line,
+  tokens,
+}: {
+  line: HunkLine;
+  tokens?: HighlightedLine;
+}) {
   const bgColor =
     line.type === 'added'
       ? 'bg-green-50 dark:bg-green-950/40'
@@ -280,13 +429,6 @@ function DiffLine({ line }: { line: HunkLine }) {
         ? 'border-l-red-400 dark:border-l-red-600'
         : 'border-l-transparent';
 
-  const textColor =
-    line.type === 'added'
-      ? 'text-green-800 dark:text-green-300'
-      : line.type === 'removed'
-        ? 'text-red-800 dark:text-red-300'
-        : 'text-bolt-elements-textPrimary';
-
   const lineNumColor =
     line.type === 'added'
       ? 'text-green-600 dark:text-green-500 bg-green-100 dark:bg-green-900/30'
@@ -295,6 +437,12 @@ function DiffLine({ line }: { line: HunkLine }) {
         : 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2';
 
   const sign = line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' ';
+  const signColor =
+    line.type === 'added'
+      ? 'text-green-600 dark:text-green-400'
+      : line.type === 'removed'
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-bolt-elements-textSecondary';
 
   return (
     <div className={`flex ${bgColor} border-l-4 ${borderColor} hover:brightness-95 dark:hover:brightness-110`}>
@@ -308,13 +456,11 @@ function DiffLine({ line }: { line: HunkLine }) {
       >
         {line.newLineNumber || ''}
       </div>
-      <div
-        className={`w-6 flex-shrink-0 text-center py-0.5 select-none font-mono text-xs font-bold ${textColor}`}
-      >
+      <div className={`w-6 flex-shrink-0 text-center py-0.5 select-none font-mono text-xs font-bold ${signColor}`}>
         {sign}
       </div>
-      <pre className={`flex-1 py-0.5 pr-4 font-mono text-xs ${textColor} whitespace-pre overflow-x-auto`}>
-        {line.content || ' '}
+      <pre className="flex-1 py-0.5 pr-4 font-mono text-xs whitespace-pre overflow-x-auto">
+        <HighlightedContent lightTokens={tokens?.light} darkTokens={tokens?.dark} fallback={line.content} />
       </pre>
     </div>
   );
@@ -345,16 +491,39 @@ function HunksView({
   hunks,
   oldContent,
   newContent,
+  filePath,
 }: {
   hunks: Hunk[];
   oldContent?: string;
   newContent?: string;
+  filePath: string;
 }) {
   const [expandedSections, setExpandedSections] = useState<Record<string, HunkLine[]>>({});
 
   const oldLines = useMemo(() => oldContent?.split('\n') || [], [oldContent]);
   const newLines = useMemo(() => newContent?.split('\n') || [], [newContent]);
-  const totalLines = Math.max(oldLines.length, newLines.length);
+
+  // Highlight old and new content
+  const oldHighlighted = useHighlightedCode(oldContent, filePath);
+  const newHighlighted = useHighlightedCode(newContent, filePath);
+
+  // Get tokens for a line based on its line number and type
+  const getTokensForLine = useCallback(
+    (line: HunkLine): HighlightedLine | undefined => {
+      if (line.type === 'removed' && line.oldLineNumber && oldHighlighted) {
+        return oldHighlighted.get(line.oldLineNumber);
+      }
+      if ((line.type === 'added' || line.type === 'context') && line.newLineNumber && newHighlighted) {
+        return newHighlighted.get(line.newLineNumber);
+      }
+      // Fallback to old content for context lines
+      if (line.type === 'context' && line.oldLineNumber && oldHighlighted) {
+        return oldHighlighted.get(line.oldLineNumber);
+      }
+      return undefined;
+    },
+    [oldHighlighted, newHighlighted]
+  );
 
   // Calculate hidden lines between hunks and at start/end
   const getHiddenLinesBefore = useCallback(
@@ -443,7 +612,7 @@ function HunksView({
             {isBeforeExpanded && expandedSections[beforeKey] && (
               <div className="font-mono">
                 {expandedSections[beforeKey].map((line, lineIndex) => (
-                  <DiffLine key={`expanded-${beforeKey}-${lineIndex}`} line={line} />
+                  <DiffLine key={`expanded-${beforeKey}-${lineIndex}`} line={line} tokens={getTokensForLine(line)} />
                 ))}
               </div>
             )}
@@ -458,7 +627,7 @@ function HunksView({
             {/* Hunk lines */}
             <div className="font-mono">
               {hunk.lines.map((line, lineIndex) => (
-                <DiffLine key={`${hunkIndex}-${lineIndex}`} line={line} />
+                <DiffLine key={`${hunkIndex}-${lineIndex}`} line={line} tokens={getTokensForLine(line)} />
               ))}
             </div>
           </div>
@@ -477,7 +646,7 @@ function HunksView({
       {expandedSections['after-last'] && (
         <div className="font-mono">
           {expandedSections['after-last'].map((line, lineIndex) => (
-            <DiffLine key={`expanded-after-${lineIndex}`} line={line} />
+            <DiffLine key={`expanded-after-${lineIndex}`} line={line} tokens={getTokensForLine(line)} />
           ))}
         </div>
       )}
@@ -706,6 +875,7 @@ function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; is
               hunks={diff.hunks}
               oldContent={diff.oldContent}
               newContent={diff.newContent}
+              filePath={diff.path}
             />
           )}
         </div>
@@ -713,6 +883,18 @@ function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; is
     </div>
   );
 }
+
+// CSS for Shiki syntax highlighting with light/dark mode support
+const ShikiStyles = () => (
+  <style>{`
+    .shiki-token {
+      color: var(--shiki-light);
+    }
+    .dark .shiki-token {
+      color: var(--shiki-dark);
+    }
+  `}</style>
+);
 
 function RepositoryDiff() {
   const [searchParams] = useSearchParams();
@@ -780,9 +962,11 @@ function RepositoryDiff() {
   }, [diffs]);
 
   return (
-    <div className="h-full bg-gradient-to-br from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1 to-bolt-elements-background-depth-2 p-6">
-      <div className="max-w-7xl mx-auto w-full h-full overflow-y-auto">
-        {/* Header */}
+    <>
+      <ShikiStyles />
+      <div className="h-full bg-gradient-to-br from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1 to-bolt-elements-background-depth-2 p-6">
+        <div className="max-w-7xl mx-auto w-full h-full overflow-y-auto">
+          {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-purple-500/20">
             <GitCompareArrows className="text-white" size={28} />
@@ -934,9 +1118,10 @@ function RepositoryDiff() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
