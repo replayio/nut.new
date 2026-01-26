@@ -755,9 +755,9 @@ function GalleryPageContent() {
                   : 'px-4 sm:px-6',
               )}
             >
-              <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
                 {/* Breadcrumbs */}
-                <Breadcrumb>
+                <Breadcrumb className="min-w-0 flex-shrink">
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
@@ -786,44 +786,46 @@ function GalleryPageContent() {
                       <span className="text-bolt-elements-textSecondary">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium">
+                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
                         {app?.name || 'App'}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto flex-shrink-0">
                   {app?.stage && (
-                    <>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <ReferenceAppStatusIndicator stage={app.stage} size="sm" />
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button"
+                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2 relative z-10" />
                         <span className="relative z-10">Be an early adopter</span>
                       </Button>
-                    </>
+                    </div>
                   )}
-                  <Button
-                    onClick={handleDownloadCode}
-                    variant="outline"
-                    className="rounded-full"
-                    disabled={!repositoryId}
-                  >
-                    <Download size={18} />
-                    Download code
-                  </Button>
-                  <Button
-                    onClick={handleCustomize}
-                    variant="default"
-                    className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90"
-                  >
-                    <Sparkles size={18} className="mr-2" />
-                    Customize It
-                  </Button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      onClick={handleDownloadCode}
+                      variant="outline"
+                      className="rounded-full whitespace-nowrap"
+                      disabled={!repositoryId}
+                    >
+                      <Download size={18} />
+                      Download code
+                    </Button>
+                    <Button
+                      onClick={handleCustomize}
+                      variant="default"
+                      className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 whitespace-nowrap"
+                    >
+                      <Sparkles size={18} className="mr-2" />
+                      Customize It
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -946,9 +948,9 @@ function GalleryPageContent() {
                   : 'px-4 sm:px-6',
               )}
             >
-              <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
                 {/* Breadcrumbs */}
-                <Breadcrumb>
+                <Breadcrumb className="min-w-0 flex-shrink">
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
@@ -977,44 +979,46 @@ function GalleryPageContent() {
                       <span className="text-bolt-elements-textSecondary">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium">
+                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
                         {displayData.name}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto flex-shrink-0">
                   {(displayData?.stage || app?.stage) && (
-                    <>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <ReferenceAppStatusIndicator stage={(displayData?.stage || app?.stage)!} size="sm" />
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button"
+                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2 relative z-10" />
                         <span className="relative z-10">Be an early adopter</span>
                       </Button>
-                    </>
+                    </div>
                   )}
-                  <Button
-                    onClick={handleDownloadCode}
-                    variant="outline"
-                    className="rounded-full"
-                    disabled={!repositoryId}
-                  >
-                    <Download size={18} />
-                    {isSmallViewport ? '' : 'Download code'}
-                  </Button>
-                  <Button
-                    onClick={handleCustomize}
-                    variant="default"
-                    className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90"
-                  >
-                    <Sparkles size={18} className="mr-2" />
-                    Customize It
-                  </Button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      onClick={handleDownloadCode}
+                      variant="outline"
+                      className="rounded-full whitespace-nowrap"
+                      disabled={!repositoryId}
+                    >
+                      <Download size={18} />
+                      {isSmallViewport ? '' : 'Download code'}
+                    </Button>
+                    <Button
+                      onClick={handleCustomize}
+                      variant="default"
+                      className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 whitespace-nowrap"
+                    >
+                      <Sparkles size={18} className="mr-2" />
+                      Customize It
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
