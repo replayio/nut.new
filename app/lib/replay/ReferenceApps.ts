@@ -82,8 +82,7 @@ export interface ReferenceAppSummary extends LandingPageIndexEntry {
   stage: ReferenceAppStage;
 }
 
-//const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
-const AppTrackerHost = 'https://d8a1dc91-37bd-47af-865c-42d4d865afe2.http.replay.io';
+const AppTrackerHost = 'https://builder-reference-app-tracker.netlify.app';
 
 type WebhookGetAppPathsResponse = Array<{ path: string; stage: ReferenceAppStage }>;
 
