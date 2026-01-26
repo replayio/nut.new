@@ -13,7 +13,7 @@ import { css } from '@codemirror/lang-css';
 import { json } from '@codemirror/lang-json';
 import { markdown } from '@codemirror/lang-markdown';
 import { python } from '@codemirror/lang-python';
-import { codeToTokens, bundledLanguages, type BundledLanguage, type ThemedToken } from 'shiki';
+import { codeToTokens, type BundledLanguage, type ThemedToken } from 'shiki';
 import {
   PlusCircle,
   MinusCircle,
@@ -25,7 +25,9 @@ import {
   Files,
   CheckCircle,
   ChevronDown,
+  FileText,
 } from '~/components/ui/Icon';
+import { Markdown } from '~/components/chat/Markdown';
 
 interface FileDiff {
   path: string;
@@ -106,10 +108,7 @@ interface HighlightedLine {
 }
 
 // Hook to highlight code with Shiki (both light and dark themes)
-function useHighlightedCode(
-  code: string | undefined,
-  filePath: string
-): Map<number, HighlightedLine> | null {
+function useHighlightedCode(code: string | undefined, filePath: string): Map<number, HighlightedLine> | null {
   const [highlighted, setHighlighted] = useState<Map<number, HighlightedLine> | null>(null);
   const language = getShikiLanguage(filePath);
 
@@ -129,7 +128,9 @@ function useHighlightedCode(
           codeToTokens(code, { lang: language, theme: 'github-dark' }),
         ]);
 
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const lineMap = new Map<number, HighlightedLine>();
         const maxLines = Math.max(lightResult.tokens.length, darkResult.tokens.length);
@@ -408,13 +409,7 @@ function compareRepositories(oldFiles: RepositoryFiles, newFiles: RepositoryFile
 }
 
 // GitHub-style diff line component
-function DiffLine({
-  line,
-  tokens,
-}: {
-  line: HunkLine;
-  tokens?: HighlightedLine;
-}) {
+function DiffLine({ line, tokens }: { line: HunkLine; tokens?: HighlightedLine }) {
   const bgColor =
     line.type === 'added'
       ? 'bg-green-50 dark:bg-green-950/40'
@@ -467,13 +462,7 @@ function DiffLine({
 }
 
 // Expand button component
-function ExpandButton({
-  hiddenLines,
-  onExpand,
-}: {
-  hiddenLines: number;
-  onExpand: () => void;
-}) {
+function ExpandButton({ hiddenLines, onExpand }: { hiddenLines: number; onExpand: () => void }) {
   return (
     <button
       onClick={onExpand}
@@ -522,7 +511,7 @@ function HunksView({
       }
       return undefined;
     },
-    [oldHighlighted, newHighlighted]
+    [oldHighlighted, newHighlighted],
   );
 
   // Calculate hidden lines between hunks and at start/end
@@ -546,11 +535,13 @@ function HunksView({
         return { count: hiddenCount, startOld: prevEndOld - 1, startNew: prevEndNew - 1 };
       }
     },
-    [hunks]
+    [hunks],
   );
 
   const getHiddenLinesAfter = useCallback((): { count: number; startOld: number; startNew: number } => {
-    if (hunks.length === 0) return { count: 0, startOld: 0, startNew: 0 };
+    if (hunks.length === 0) {
+      return { count: 0, startOld: 0, startNew: 0 };
+    }
     const lastHunk = hunks[hunks.length - 1];
     const endOld = (lastHunk.oldStart || 1) + lastHunk.oldLines - 1;
     const endNew = (lastHunk.newStart || 1) + lastHunk.newLines - 1;
@@ -584,7 +575,7 @@ function HunksView({
         setExpandedSections((prev) => ({ ...prev, [key]: lines }));
       }
     },
-    [expandedSections, oldLines, newLines]
+    [expandedSections, oldLines, newLines],
   );
 
   const hiddenAfter = getHiddenLinesAfter();
@@ -655,7 +646,15 @@ function HunksView({
 }
 
 // Full diff view for a file using CodeMirror merge view
-function CodeMirrorDiffView({ oldContent, newContent, path }: { oldContent: string; newContent: string; path: string }) {
+function CodeMirrorDiffView({
+  oldContent,
+  newContent,
+  path,
+}: {
+  oldContent: string;
+  newContent: string;
+  path: string;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -687,7 +686,9 @@ function CodeMirrorDiffView({ oldContent, newContent, path }: { oldContent: stri
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {
+      return;
+    }
 
     const lang = getLanguageExtension(path);
 
@@ -765,8 +766,74 @@ function CodeMirrorDiffView({ oldContent, newContent, path }: { oldContent: stri
 }
 
 // GitHub-style file diff component
-function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; isExpanded: boolean; onToggleExpand: () => void }) {
-  const [showFullDiff, setShowFullDiff] = useState(false);
+// Rendered markdown diff view
+function RenderedMarkdownDiff({
+  oldContent,
+  newContent,
+  diffType,
+}: {
+  oldContent?: string;
+  newContent?: string;
+  diffType: 'added' | 'modified' | 'deleted';
+}) {
+  if (diffType === 'added' && newContent) {
+    return (
+      <div className="p-6">
+        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
+          <Markdown>{newContent}</Markdown>
+        </div>
+      </div>
+    );
+  }
+
+  if (diffType === 'deleted' && oldContent) {
+    return (
+      <div className="p-6 bg-red-50/30 dark:bg-red-950/10">
+        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary opacity-60">
+          <Markdown>{oldContent}</Markdown>
+        </div>
+      </div>
+    );
+  }
+
+  // Side-by-side view for modified markdown
+  return (
+    <div className="grid grid-cols-2 divide-x divide-bolt-elements-borderColor">
+      <div className="p-4 bg-red-50/20 dark:bg-red-950/10">
+        <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-3 flex items-center gap-1.5">
+          <MinusCircle size={14} />
+          Old Version
+        </div>
+        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
+          <Markdown>{oldContent || ''}</Markdown>
+        </div>
+      </div>
+      <div className="p-4 bg-green-50/20 dark:bg-green-950/10">
+        <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-1.5">
+          <PlusCircle size={14} />
+          New Version
+        </div>
+        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
+          <Markdown>{newContent || ''}</Markdown>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type DiffViewMode = 'collapsed' | 'full' | 'rendered';
+
+function FileDiffView({
+  diff,
+  isExpanded,
+  onToggleExpand,
+}: {
+  diff: FileDiff;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}) {
+  const isMarkdown = diff.path.endsWith('.md') || diff.path.endsWith('.markdown');
+  const [viewMode, setViewMode] = useState<DiffViewMode>(isMarkdown ? 'rendered' : 'collapsed');
 
   const getDiffTypeColor = (type: string) => {
     switch (type) {
@@ -794,13 +861,10 @@ function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; is
     }
   };
 
-  const totalAdditions = diff.hunks.reduce(
-    (sum, hunk) => sum + hunk.lines.filter((l) => l.type === 'added').length,
-    0
-  );
+  const totalAdditions = diff.hunks.reduce((sum, hunk) => sum + hunk.lines.filter((l) => l.type === 'added').length, 0);
   const totalDeletions = diff.hunks.reduce(
     (sum, hunk) => sum + hunk.lines.filter((l) => l.type === 'removed').length,
-    0
+    0,
   );
 
   return (
@@ -816,16 +880,10 @@ function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; is
             {diff.type.toUpperCase()}
           </span>
         </div>
-        <span className="font-mono text-sm text-bolt-elements-textPrimary flex-1 text-left truncate">
-          {diff.path}
-        </span>
+        <span className="font-mono text-sm text-bolt-elements-textPrimary flex-1 text-left truncate">{diff.path}</span>
         <div className="flex items-center gap-3 text-xs font-medium">
-          {totalAdditions > 0 && (
-            <span className="text-green-600 dark:text-green-400">+{totalAdditions}</span>
-          )}
-          {totalDeletions > 0 && (
-            <span className="text-red-600 dark:text-red-400">-{totalDeletions}</span>
-          )}
+          {totalAdditions > 0 && <span className="text-green-600 dark:text-green-400">+{totalAdditions}</span>}
+          {totalDeletions > 0 && <span className="text-red-600 dark:text-red-400">-{totalDeletions}</span>}
           <ChevronDown
             size={16}
             className={`text-bolt-elements-textSecondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -836,39 +894,51 @@ function FileDiffView({ diff, isExpanded, onToggleExpand }: { diff: FileDiff; is
       {/* Diff content */}
       {isExpanded && (
         <div>
-          {/* Toggle between hunk view and full CodeMirror view */}
-          {diff.type === 'modified' && (
-            <div className="flex items-center justify-end gap-2 px-4 py-2 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50">
+          {/* Toggle between view modes */}
+          <div className="flex items-center justify-end gap-2 px-4 py-2 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor/50">
+            {isMarkdown && (
               <button
-                onClick={() => setShowFullDiff(false)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  !showFullDiff
+                onClick={() => setViewMode('rendered')}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                  viewMode === 'rendered'
                     ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
                     : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
                 }`}
               >
-                Collapsed
+                <FileText size={12} />
+                Rendered
               </button>
+            )}
+            <button
+              onClick={() => setViewMode('collapsed')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                viewMode === 'collapsed'
+                  ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                  : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
+              }`}
+            >
+              Collapsed
+            </button>
+            {diff.type === 'modified' && (
               <button
-                onClick={() => setShowFullDiff(true)}
+                onClick={() => setViewMode('full')}
                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  showFullDiff
+                  viewMode === 'full'
                     ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
                     : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
                 }`}
               >
                 Full File
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
-          {showFullDiff && diff.type === 'modified' && diff.oldContent && diff.newContent ? (
+          {/* Render based on view mode */}
+          {viewMode === 'rendered' && isMarkdown ? (
+            <RenderedMarkdownDiff oldContent={diff.oldContent} newContent={diff.newContent} diffType={diff.type} />
+          ) : viewMode === 'full' && diff.type === 'modified' && diff.oldContent && diff.newContent ? (
             <div className="p-4">
-              <CodeMirrorDiffView
-                oldContent={diff.oldContent}
-                newContent={diff.newContent}
-                path={diff.path}
-              />
+              <CodeMirrorDiffView oldContent={diff.oldContent} newContent={diff.newContent} path={diff.path} />
             </div>
           ) : (
             <HunksView
@@ -967,157 +1037,147 @@ function RepositoryDiff() {
       <div className="h-full bg-gradient-to-br from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1 to-bolt-elements-background-depth-2 p-6">
         <div className="max-w-7xl mx-auto w-full h-full overflow-y-auto">
           {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-purple-500/20">
-            <GitCompareArrows className="text-white" size={28} />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-bolt-elements-textHeading mb-1">Repository Diff</h1>
-            <p className="text-bolt-elements-textSecondary text-sm">
-              Compare changes between repository versions
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Repository IDs */}
-          <div className="bg-bolt-elements-background-depth-2 bg-opacity-80 backdrop-blur-sm rounded-2xl border border-bolt-elements-borderColor border-opacity-50 shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md ring-1 ring-blue-500/20">
-                <GitBranch className="text-white" size={18} />
-              </div>
-              <h2 className="text-xl font-semibold text-bolt-elements-textHeading">Repository Versions</h2>
+          <div className="flex items-center gap-4 mb-8">
+            <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-purple-500/20">
+              <GitCompareArrows className="text-white" size={28} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wide">
-                  Old Repository ID
-                </label>
-                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-inner">
-                  {oldRepositoryId || (
-                    <span className="text-bolt-elements-textSecondary italic">Not provided</span>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wide">
-                  New Repository ID
-                </label>
-                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-inner">
-                  {newRepositoryId || (
-                    <span className="text-bolt-elements-textSecondary italic">Not provided</span>
-                  )}
-                </div>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-bolt-elements-textHeading mb-1">Repository Diff</h1>
+              <p className="text-bolt-elements-textSecondary text-sm">Compare changes between repository versions</p>
             </div>
           </div>
 
-          {/* Loading */}
-          {loading && (
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
-              <div className="flex items-center justify-center">
-                <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-                <span className="ml-4 text-bolt-elements-textSecondary font-medium">
-                  Loading repositories...
-                </span>
+          <div className="space-y-6">
+            {/* Repository IDs */}
+            <div className="bg-bolt-elements-background-depth-2 bg-opacity-80 backdrop-blur-sm rounded-2xl border border-bolt-elements-borderColor border-opacity-50 shadow-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md ring-1 ring-blue-500/20">
+                  <GitBranch className="text-white" size={18} />
+                </div>
+                <h2 className="text-xl font-semibold text-bolt-elements-textHeading">Repository Versions</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wide">
+                    Old Repository ID
+                  </label>
+                  <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-inner">
+                    {oldRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wide">
+                    New Repository ID
+                  </label>
+                  <div className="p-4 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-50 font-mono text-sm break-all text-bolt-elements-textPrimary shadow-inner">
+                    {newRepositoryId || <span className="text-bolt-elements-textSecondary italic">Not provided</span>}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Error */}
-          {error && (
-            <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-sm">
-                  <AlertTriangle className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
-                    Error Loading Repositories
-                  </h3>
-                  <p className="text-red-700 dark:text-red-400 leading-relaxed">{error}</p>
+            {/* Loading */}
+            {loading && (
+              <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
+                <div className="flex items-center justify-center">
+                  <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                  <span className="ml-4 text-bolt-elements-textSecondary font-medium">Loading repositories...</span>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Diff results */}
-          {!loading && !error && diffs.length > 0 && (
-            <div className="space-y-4">
-              {/* Stats bar */}
-              <div className="flex items-center justify-between bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor p-4">
-                <div className="flex items-center gap-4">
+            {/* Error */}
+            {error && (
+              <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-sm">
+                    <AlertTriangle className="text-white" size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
+                      Error Loading Repositories
+                    </h3>
+                    <p className="text-red-700 dark:text-red-400 leading-relaxed">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Diff results */}
+            {!loading && !error && diffs.length > 0 && (
+              <div className="space-y-4">
+                {/* Stats bar */}
+                <div className="flex items-center justify-between bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Files className="text-bolt-elements-textSecondary" size={20} />
+                      <span className="font-semibold text-bolt-elements-textHeading">{diffs.length} files changed</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      {stats.added > 0 && (
+                        <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                          <PlusCircle size={14} />
+                          {stats.added} added
+                        </span>
+                      )}
+                      {stats.modified > 0 && (
+                        <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                          <PenSquare size={14} />
+                          {stats.modified} modified
+                        </span>
+                      )}
+                      {stats.deleted > 0 && (
+                        <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                          <MinusCircle size={14} />
+                          {stats.deleted} deleted
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
-                    <Files className="text-bolt-elements-textSecondary" size={20} />
-                    <span className="font-semibold text-bolt-elements-textHeading">
-                      {diffs.length} files changed
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    {stats.added > 0 && (
-                      <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                        <PlusCircle size={14} />
-                        {stats.added} added
-                      </span>
-                    )}
-                    {stats.modified > 0 && (
-                      <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-                        <PenSquare size={14} />
-                        {stats.modified} modified
-                      </span>
-                    )}
-                    {stats.deleted > 0 && (
-                      <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                        <MinusCircle size={14} />
-                        {stats.deleted} deleted
-                      </span>
-                    )}
+                    <button
+                      onClick={expandAll}
+                      className="px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 rounded-lg transition-colors"
+                    >
+                      Expand all
+                    </button>
+                    <button
+                      onClick={collapseAll}
+                      className="px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 rounded-lg transition-colors"
+                    >
+                      Collapse all
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={expandAll}
-                    className="px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 rounded-lg transition-colors"
-                  >
-                    Expand all
-                  </button>
-                  <button
-                    onClick={collapseAll}
-                    className="px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 rounded-lg transition-colors"
-                  >
-                    Collapse all
-                  </button>
+
+                {/* File diffs */}
+                <div className="space-y-3">
+                  {diffs.map((diff) => (
+                    <FileDiffView
+                      key={diff.path}
+                      diff={diff}
+                      isExpanded={expandedFiles.has(diff.path)}
+                      onToggleExpand={() => toggleFileExpand(diff.path)}
+                    />
+                  ))}
                 </div>
               </div>
+            )}
 
-              {/* File diffs */}
-              <div className="space-y-3">
-                {diffs.map((diff) => (
-                  <FileDiffView
-                    key={diff.path}
-                    diff={diff}
-                    isExpanded={expandedFiles.has(diff.path)}
-                    onToggleExpand={() => toggleFileExpand(diff.path)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* No changes */}
-          {!loading && !error && diffs.length === 0 && oldRepositoryId && newRepositoryId && (
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <CheckCircle className="text-white" size={24} />
+            {/* No changes */}
+            {!loading && !error && diffs.length === 0 && oldRepositoryId && newRepositoryId && (
+              <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm p-8 backdrop-blur-sm">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <CheckCircle className="text-white" size={24} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No Changes Found</h3>
+                  <p className="text-bolt-elements-textSecondary">
+                    The repositories are identical - no differences detected.
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No Changes Found</h3>
-                <p className="text-bolt-elements-textSecondary">
-                  The repositories are identical - no differences detected.
-                </p>
               </div>
-            </div>
-          )}
+            )}
           </div>
         </div>
       </div>
