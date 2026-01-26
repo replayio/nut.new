@@ -25,7 +25,7 @@ import {
   Files,
   CheckCircle,
   ChevronDown,
-  FileText,
+  Eye,
 } from '~/components/ui/Icon';
 import { Markdown } from '~/components/chat/Markdown';
 
@@ -905,7 +905,7 @@ function FileDiffView({
                     : 'text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
                 }`}
               >
-                <FileText size={12} />
+                <Eye size={12} />
                 Rendered
               </button>
             )}
