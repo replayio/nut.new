@@ -767,6 +767,7 @@ function CodeMirrorDiffView({
 
 // GitHub-style file diff component
 // Rendered markdown diff view
+// Diff markdown by paragraphs and return inline rendered diff
 function RenderedMarkdownDiff({
   oldContent,
   newContent,
@@ -776,47 +777,133 @@ function RenderedMarkdownDiff({
   newContent?: string;
   diffType: 'added' | 'modified' | 'deleted';
 }) {
+  // Split content by double newlines to get paragraphs/blocks
+  const splitIntoBlocks = (content: string): string[] => {
+    return content.split(/\n\n+/).filter((block) => block.trim());
+  };
+
+  // For added files, show all content with green background
   if (diffType === 'added' && newContent) {
     return (
-      <div className="p-6">
-        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
-          <Markdown>{newContent}</Markdown>
+      <div className="p-4">
+        <div className="rounded-lg overflow-hidden border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 p-4">
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-green-800 dark:prose-headings:text-green-300 prose-p:text-green-800 dark:prose-p:text-green-300">
+            <Markdown>{newContent}</Markdown>
+          </div>
         </div>
       </div>
     );
   }
 
+  // For deleted files, show all content with red background
   if (diffType === 'deleted' && oldContent) {
     return (
-      <div className="p-6 bg-red-50/30 dark:bg-red-950/10">
-        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary opacity-60">
-          <Markdown>{oldContent}</Markdown>
+      <div className="p-4">
+        <div className="rounded-lg overflow-hidden border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30 p-4 line-through opacity-70">
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-red-800 dark:prose-headings:text-red-300 prose-p:text-red-800 dark:prose-p:text-red-300">
+            <Markdown>{oldContent}</Markdown>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Side-by-side view for modified markdown
+  // For modified files, diff by blocks and show inline
+  const oldBlocks = splitIntoBlocks(oldContent || '');
+  const newBlocks = splitIntoBlocks(newContent || '');
+
+  // Use diffLines on the block-level content
+  const blockDiff = diffLines(oldBlocks.join('\n---BLOCK---\n'), newBlocks.join('\n---BLOCK---\n'));
+
+  // Process the diff result into renderable sections
+  const sections: { type: 'added' | 'removed' | 'unchanged'; content: string }[] = [];
+
+  blockDiff.forEach((part) => {
+    const blocks = part.value.split('\n---BLOCK---\n').filter((b) => b.trim());
+    blocks.forEach((block) => {
+      if (part.added) {
+        sections.push({ type: 'added', content: block });
+      } else if (part.removed) {
+        sections.push({ type: 'removed', content: block });
+      } else {
+        sections.push({ type: 'unchanged', content: block });
+      }
+    });
+  });
+
+  // Collapse consecutive unchanged sections if there are many
+  const CONTEXT_BLOCKS = 1; // Show 1 unchanged block before/after changes
+  const collapsedSections: typeof sections = [];
+  let unchangedBuffer: typeof sections = [];
+
+  sections.forEach((section) => {
+    if (section.type === 'unchanged') {
+      unchangedBuffer.push(section);
+    } else {
+      // Before adding a changed section, add context from unchanged buffer
+      if (unchangedBuffer.length > 0) {
+        if (unchangedBuffer.length > CONTEXT_BLOCKS * 2) {
+          // Add leading context
+          if (collapsedSections.length > 0) {
+            collapsedSections.push(...unchangedBuffer.slice(0, CONTEXT_BLOCKS));
+          }
+          // Add collapsed indicator (we'll skip the middle)
+          // Add trailing context
+          collapsedSections.push(...unchangedBuffer.slice(-CONTEXT_BLOCKS));
+        } else {
+          collapsedSections.push(...unchangedBuffer);
+        }
+        unchangedBuffer = [];
+      }
+      collapsedSections.push(section);
+    }
+  });
+
+  // Add remaining unchanged at the end (only show context)
+  if (unchangedBuffer.length > 0) {
+    if (unchangedBuffer.length > CONTEXT_BLOCKS && collapsedSections.length > 0) {
+      collapsedSections.push(...unchangedBuffer.slice(0, CONTEXT_BLOCKS));
+    } else {
+      collapsedSections.push(...unchangedBuffer);
+    }
+  }
+
   return (
-    <div className="grid grid-cols-2 divide-x divide-bolt-elements-borderColor">
-      <div className="p-4 bg-red-50/20 dark:bg-red-950/10">
-        <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-3 flex items-center gap-1.5">
-          <MinusCircle size={14} />
-          Old Version
-        </div>
-        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
-          <Markdown>{oldContent || ''}</Markdown>
-        </div>
-      </div>
-      <div className="p-4 bg-green-50/20 dark:bg-green-950/10">
-        <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-1.5">
-          <PlusCircle size={14} />
-          New Version
-        </div>
-        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary prose-pre:bg-bolt-elements-background-depth-2 prose-pre:border prose-pre:border-bolt-elements-borderColor">
-          <Markdown>{newContent || ''}</Markdown>
-        </div>
-      </div>
+    <div className="p-4 space-y-3">
+      {collapsedSections.map((section, index) => {
+        if (section.type === 'removed') {
+          return (
+            <div
+              key={index}
+              className="rounded-lg border-l-4 border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-950/40 p-4"
+            >
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-red-800 dark:prose-headings:text-red-300 prose-p:text-red-700 dark:prose-p:text-red-300 prose-code:text-red-700 dark:prose-code:text-red-300 line-through opacity-80">
+                <Markdown>{section.content}</Markdown>
+              </div>
+            </div>
+          );
+        }
+        if (section.type === 'added') {
+          return (
+            <div
+              key={index}
+              className="rounded-lg border-l-4 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950/40 p-4"
+            >
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-green-800 dark:prose-headings:text-green-300 prose-p:text-green-700 dark:prose-p:text-green-300 prose-code:text-green-700 dark:prose-code:text-green-300">
+                <Markdown>{section.content}</Markdown>
+              </div>
+            </div>
+          );
+        }
+        // Unchanged
+        return (
+          <div key={index} className="p-4 opacity-60">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary">
+              <Markdown>{section.content}</Markdown>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
