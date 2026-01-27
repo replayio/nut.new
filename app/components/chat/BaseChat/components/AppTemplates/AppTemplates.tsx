@@ -12,8 +12,6 @@ import {
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { ChatMode } from '~/lib/replay/SendChatMessage';
 import { classNames } from '~/utils/classNames';
-import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
-import { useStore } from '@nanostores/react';
 
 interface AppTemplatesProps {
   sendMessage: (params: ChatMessageParams) => void;
@@ -32,7 +30,6 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [collections, setCollections] = useState<CollectionPageIndexEntry[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(true);
-  const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
 
   // Fetch reference apps on mount
   useEffect(() => {
@@ -201,13 +198,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   }, []);
 
   return (
-    <div
-      id="showcase-gallery"
-      className={classNames('w-full mx-auto mt-24 mb-4', {
-        'md:pl-[260px]': isSidebarOpen,
-        'md:pl-[60px]': !isSidebarOpen,
-      })}
-    >
+    <div id="showcase-gallery" className={classNames('w-full mx-auto mt-24 mb-4')}>
       <div className="max-w-[1337px] mx-auto flex flex-col mb-12 animate-fade-in animation-delay-100">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
           <span className="text-bolt-elements-textHeading">Start with</span>

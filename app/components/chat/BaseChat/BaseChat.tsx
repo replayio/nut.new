@@ -40,6 +40,7 @@ import SideBar from '~/components/sidebar/side-bar.client';
 import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { TopNav } from '~/components/chat/TopNav';
+import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -88,6 +89,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const repositoryId = useStore(workbenchStore.repositoryId);
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const activePanel = useStore(sidebarPanelStore.activePanel);
+    const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
 
@@ -457,6 +459,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 'flex-shrink-0': !isSmallViewport,
                 'pb-2': isSmallViewport,
                 'landing-page-layout': !chatStarted,
+                // Add padding to prevent content from being hidden behind sidebar on desktop
+                'md:pl-[260px]': !chatStarted && !isSmallViewport && isSidebarOpen,
+                'md:pl-[60px]': !chatStarted && !isSmallViewport && !isSidebarOpen,
               })}
               style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
             >
