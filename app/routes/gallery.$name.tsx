@@ -82,6 +82,7 @@ export const meta: MetaFunction = (args) => {
     { name: 'description', content: appDescription },
     { name: 'keywords', content: keywords },
     // OpenGraph tags
+    { property: 'og:site_name', content: 'Replay Builder' },
     { property: 'og:title', content: appName },
     { property: 'og:type', content: 'website' },
     { property: 'og:description', content: appDescription },
