@@ -83,7 +83,7 @@ export const meta: MetaFunction = (args) => {
     { name: 'keywords', content: keywords },
     // OpenGraph tags - using both property and name for compatibility
     { property: 'og:site_name', content: 'Replay Builder' },
-    { property: 'og:title', content: `Replay Builder - ${appName}` },
+    { property: 'og:title', content: `${appName} by Replay Builder` },
     { property: 'og:type', content: 'website' },
     { property: 'og:description', content: appDescription },
     { property: 'og:url', content: canonicalUrl },
@@ -91,7 +91,7 @@ export const meta: MetaFunction = (args) => {
     // Twitter Card tags
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:site', content: 'Replay Builder' },
-    { name: 'twitter:title', content: `Replay Builder - ${appName}` },
+    { name: 'twitter:title', content: `${appName} by Replay Builder` },
     { name: 'twitter:description', content: appDescription },
     ...(appImage ? [{ name: 'twitter:image', content: appImage }] : []),
   ];
