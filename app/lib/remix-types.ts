@@ -14,10 +14,16 @@ export type LoaderFunction = (args: LoaderFunctionArgs) => Promise<Response> | R
 export type ActionFunction = (args: ActionFunctionArgs) => Promise<Response> | Response;
 export type AppLoadContext = VercelAppLoadContext;
 export type EntryContext = VercelEntryContext;
-export type MetaFunction = () => Array<{
+export type MetaFunction = (args?: {
+  data?: any;
+  location?: { origin: string; pathname: string };
+  params?: Record<string, string | undefined>;
+  matches?: any[];
+}) => Array<{
   title?: string;
   name?: string;
   content?: string;
+  property?: string;
   [key: string]: string | undefined;
 }>;
 export type LinksFunction = () => Array<{ rel: string; href: string }>;

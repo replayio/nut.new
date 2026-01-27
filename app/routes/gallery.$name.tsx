@@ -61,8 +61,38 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { ReferenceAppStatusIndicator } from '~/components/chat/BaseChat/components/AppTemplates/ReferenceAppStatusIndicator';
 import { Dialog, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 
-export const meta: MetaFunction = () => {
-  return [{ title: 'Gallery | Replay Builder' }];
+export const meta: MetaFunction = (args) => {
+  if (!args || !args.data || !args.data.app || !args.location) {
+    return [{ title: 'Gallery | Replay Builder' }];
+  }
+
+  const { data, location } = args;
+  const app = data.app;
+  const appName = app.name;
+  const appDescription = app.shortDescription || 'A fully working web app template ready to use out-of-the-box.';
+  const appImage = app.screenshotURL || '';
+  const keywords = app.tags?.join(', ') || '';
+  
+  // Build the canonical URL
+  const encodedName = encodeURIComponent(appName);
+  const canonicalUrl = `${location.origin}/gallery/${encodedName}`;
+
+  return [
+    { title: `${appName} | Replay Builder Gallery` },
+    { name: 'description', content: appDescription },
+    { name: 'keywords', content: keywords },
+    // OpenGraph tags
+    { property: 'og:title', content: appName },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:description', content: appDescription },
+    { property: 'og:url', content: canonicalUrl },
+    ...(appImage ? [{ property: 'og:image', content: appImage }] : []),
+    // Twitter Card tags
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: appName },
+    { name: 'twitter:description', content: appDescription },
+    ...(appImage ? [{ name: 'twitter:image', content: appImage }] : []),
+  ];
 };
 
 export async function loader({ params }: LoaderFunctionArgs) {
