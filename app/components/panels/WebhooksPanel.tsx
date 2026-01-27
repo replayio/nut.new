@@ -27,7 +27,9 @@ interface WebhookDocumentation {
   functions?: Record<string, string>;
 }
 
-async function getWebhookConfig(appId: string): Promise<{ config: WebhookConfig; documentation: WebhookDocumentation }> {
+async function getWebhookConfig(
+  appId: string,
+): Promise<{ config: WebhookConfig; documentation: WebhookDocumentation }> {
   if (!appId) {
     return { config: {}, documentation: {} };
   }
@@ -66,12 +68,10 @@ function getWebhookSetting(functionName: string, config: WebhookConfig): Webhook
 
 export const WebhooksPanel = () => {
   const appId = useStore(chatStore.currentAppId);
-  const appSummary = useStore(chatStore.appSummary);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<WebhookConfig>({});
   const [documentation, setDocumentation] = useState<WebhookDocumentation>({});
-  const [copied, setCopied] = useState(false);
 
   const accessKey = useMemo(() => {
     if (config.accessKey) {
@@ -117,9 +117,7 @@ export const WebhooksPanel = () => {
   const handleCopyAccessKey = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(accessKey);
-      setCopied(true);
       toast.success('Access key copied to clipboard!');
-      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy access key:', err);
       toast.error('Failed to copy access key');
@@ -127,7 +125,9 @@ export const WebhooksPanel = () => {
   }, [accessKey]);
 
   const handleGenerateNewKey = useCallback(async () => {
-    if (!appId) return;
+    if (!appId) {
+      return;
+    }
     const newKey = generateRandomAccessKey();
     const updatedConfig = { ...config, accessKey: newKey };
     setConfig(updatedConfig);
@@ -147,7 +147,9 @@ export const WebhooksPanel = () => {
 
   const handleWebhookSettingChange = useCallback(
     async (functionName: string, setting: WebhookSetting) => {
-      if (!appId) return;
+      if (!appId) {
+        return;
+      }
 
       const updatedConfig: WebhookConfig = {
         ...config,
