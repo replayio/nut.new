@@ -78,19 +78,20 @@ export const meta: MetaFunction = (args) => {
   const canonicalUrl = `${location.origin}/gallery/${encodedName}`;
 
   return [
-    { title: `${appName} | Replay Builder Gallery` },
+    { title: `Replay Builder - ${appName}` },
     { name: 'description', content: appDescription },
     { name: 'keywords', content: keywords },
-    // OpenGraph tags
+    // OpenGraph tags - using both property and name for compatibility
     { property: 'og:site_name', content: 'Replay Builder' },
-    { property: 'og:title', content: appName },
+    { property: 'og:title', content: `Replay Builder - ${appName}` },
     { property: 'og:type', content: 'website' },
     { property: 'og:description', content: appDescription },
     { property: 'og:url', content: canonicalUrl },
     ...(appImage ? [{ property: 'og:image', content: appImage }] : []),
     // Twitter Card tags
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: appName },
+    { name: 'twitter:site', content: 'Replay Builder' },
+    { name: 'twitter:title', content: `Replay Builder - ${appName}` },
     { name: 'twitter:description', content: appDescription },
     ...(appImage ? [{ name: 'twitter:image', content: appImage }] : []),
   ];
