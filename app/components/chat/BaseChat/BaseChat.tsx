@@ -90,7 +90,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const showMobileNav = useStore(mobileNavStore.showMobileNav);
     const activePanel = useStore(sidebarPanelStore.activePanel);
     const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
-    const isSidebarCollapsed = useStore(sidebarMenuStore.isCollapsed);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
 
@@ -461,8 +460,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 'pb-2': isSmallViewport,
                 'landing-page-layout': !chatStarted,
                 // Add padding to prevent content from being hidden behind sidebar on desktop
-                'md:pl-[260px]': !chatStarted && !isSmallViewport && isSidebarOpen && !isSidebarCollapsed,
-                'md:pl-[60px]': !chatStarted && !isSmallViewport && isSidebarOpen && isSidebarCollapsed,
+                'md:pl-[260px]': !chatStarted && !isSmallViewport && isSidebarOpen,
+                'md:pl-[60px]': !chatStarted && !isSmallViewport && !isSidebarOpen,
               })}
               style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
             >
