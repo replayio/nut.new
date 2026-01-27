@@ -3,7 +3,6 @@ import { useSearchParams } from '@remix-run/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { CategorySelector, type IntroSectionCategory } from './CategorySelector';
 import { ReferenceAppCard } from './ReferenceAppCard';
-import { CollectionModal } from './CollectionModal';
 import {
   getReferenceAppSummaries,
   type ReferenceAppSummary,
@@ -34,7 +33,6 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [collections, setCollections] = useState<CollectionPageIndexEntry[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(true);
   const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
-  const [selectedCollection, setSelectedCollection] = useState<CollectionPageIndexEntry | null>(null);
 
   // Fetch reference apps on mount
   useEffect(() => {
@@ -321,7 +319,11 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                   {collections.map((collection) => (
                     <button
                       key={collection.collectionPath}
-                      onClick={() => setSelectedCollection(collection)}
+                      onClick={() => {
+                        // Navigate to collection page
+                        const encodedName = encodeURIComponent(collection.name);
+                        window.location.href = `/collection/${encodedName}`;
+                      }}
                       className="group text-left bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-1 rounded-xl p-6 border border-bolt-elements-borderColor hover:border-rose-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/5"
                     >
                       <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-2 group-hover:text-rose-500 transition-colors">
@@ -348,19 +350,6 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
               )}
             </div>
           )}
-
-          {/* Collection Modal */}
-          <CollectionModal
-            collection={selectedCollection}
-            referenceApps={referenceApps}
-            onClose={() => setSelectedCollection(null)}
-            onAppClick={(app) => {
-              setSelectedCollection(null);
-              // Navigate directly to gallery page
-              const encodedName = encodeURIComponent(app.name);
-              window.location.href = `/gallery/${encodedName}`;
-            }}
-          />
         </>
       )}
     </div>
