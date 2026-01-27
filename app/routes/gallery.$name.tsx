@@ -72,7 +72,7 @@ export const meta: MetaFunction = (args) => {
   const appDescription = app.shortDescription || 'A fully working web app template ready to use out-of-the-box.';
   const appImage = app.screenshotURL || '';
   const keywords = app.tags?.join(', ') || '';
-  
+
   // Build the canonical URL
   const encodedName = encodeURIComponent(appName);
   const canonicalUrl = `${location.origin}/gallery/${encodedName}`;
