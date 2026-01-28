@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { MessageCircleMore, Palette, SlidersHorizontal, History } from 'lucide-react';
+import { MessageCircleMore, Palette, SlidersHorizontal, History, Webhook } from 'lucide-react';
 import { sidebarPanelStore, type SidebarPanel } from '~/lib/stores/sidebarPanel';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -44,6 +44,12 @@ export function SideBar() {
       icon: <SlidersHorizontal size={20} strokeWidth={1.5} />,
       label: 'Settings',
       panel: 'settings',
+      disabled: !appSummary,
+    },
+    {
+      icon: <Webhook size={20} strokeWidth={1.5} />,
+      label: 'Webhooks',
+      panel: 'webhooks',
       disabled: !appSummary,
     },
     { icon: <History size={20} strokeWidth={1.5} />, label: 'History', panel: 'history', disabled: !history.length },

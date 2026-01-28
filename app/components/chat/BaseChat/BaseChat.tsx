@@ -34,6 +34,7 @@ import AppTemplates from './components/AppTemplates/AppTemplates';
 import { DesignSystemPanel } from '~/components/panels/DesignPanel/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignPanel/DesignToolbar';
 import { SettingsPanel } from '~/components/panels/SettingsPanel/SettingsPanel';
+import { WebhooksPanel } from '~/components/panels/WebhooksPanel';
 import { HistoryPanel } from '~/components/panels/HistoryPanel/HistoryPanel';
 import { ChatPanel } from '~/components/panels/ChatPanel';
 import SideBar from '~/components/sidebar/side-bar.client';
@@ -357,6 +358,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           );
         case 'settings':
           return <SettingsPanel />;
+        case 'webhooks':
+          return <WebhooksPanel />;
         case 'history':
           return <HistoryPanel />;
         case 'chat':
