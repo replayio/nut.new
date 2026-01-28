@@ -4,12 +4,13 @@ import { callNutAPI } from '~/lib/replay/NutAPI';
 import { chatStore, onChatResponse } from '~/lib/stores/chat';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/ui/accordion';
 import { Markdown } from '~/components/chat/Markdown';
-import { Copy, Key, RefreshCw } from 'lucide-react';
+import { Copy, Key, RefreshCw, Save } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import WithTooltip from '~/components/ui/Tooltip';
 import { classNames } from '~/utils/classNames';
+import { Button } from '~/components/ui/button';
 
 interface WebhookConfig {
   // Functions that can be called without any access keys.
@@ -71,24 +72,18 @@ export const WebhooksPanel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<WebhookConfig>({});
+  const [savedConfig, setSavedConfig] = useState<WebhookConfig>({});
   const [documentation, setDocumentation] = useState<WebhookDocumentation>({});
 
   const accessKey = useMemo(() => {
-    if (config.accessKey) {
-      return config.accessKey;
+    return config.accessKey || generateRandomAccessKey();
+  }, [config.accessKey]);
+
+  // Ensure access key is set in config if not present
+  useEffect(() => {
+    if (!config.accessKey && appId) {
+      setConfig((prev) => ({ ...prev, accessKey: generateRandomAccessKey() }));
     }
-    // Generate a random key if not present
-    const newKey = generateRandomAccessKey();
-    // Update config with the new key
-    if (appId) {
-      const updatedConfig = { ...config, accessKey: newKey };
-      setConfig(updatedConfig);
-      // Save it asynchronously
-      setWebhookConfig(appId, updatedConfig).catch((err) => {
-        console.error('Failed to save generated access key:', err);
-      });
-    }
-    return newKey;
   }, [config.accessKey, appId]);
 
   useEffect(() => {
@@ -101,7 +96,9 @@ export const WebhooksPanel = () => {
       try {
         setLoading(true);
         const result = await getWebhookConfig(appId);
-        setConfig(result.config || {});
+        const initialConfig = result.config || {};
+        setConfig(initialConfig);
+        setSavedConfig(initialConfig);
         setDocumentation(result.documentation || {});
       } catch (error) {
         console.error('Failed to fetch webhook config:', error);
@@ -124,33 +121,14 @@ export const WebhooksPanel = () => {
     }
   }, [accessKey]);
 
-  const handleGenerateNewKey = useCallback(async () => {
-    if (!appId) {
-      return;
-    }
+  const handleGenerateNewKey = useCallback(() => {
     const newKey = generateRandomAccessKey();
     const updatedConfig = { ...config, accessKey: newKey };
     setConfig(updatedConfig);
-    setSaving(true);
-    try {
-      await setWebhookConfig(appId, updatedConfig);
-      toast.success('New access key generated');
-    } catch (error) {
-      console.error('Failed to generate new access key:', error);
-      toast.error('Failed to generate new access key');
-      // Revert on error
-      setConfig(config);
-    } finally {
-      setSaving(false);
-    }
-  }, [appId, config]);
+  }, [config]);
 
   const handleWebhookSettingChange = useCallback(
-    async (functionName: string, setting: WebhookSetting) => {
-      if (!appId) {
-        return;
-      }
-
+    (functionName: string, setting: WebhookSetting) => {
       const updatedConfig: WebhookConfig = {
         ...config,
         publicFunctions: config.publicFunctions?.filter((f) => f !== functionName) || [],
@@ -163,26 +141,36 @@ export const WebhooksPanel = () => {
         updatedConfig.accessKeyFunctions = [...(updatedConfig.accessKeyFunctions || []), functionName];
         // Ensure access key exists
         if (!updatedConfig.accessKey) {
-          updatedConfig.accessKey = generateRandomAccessKey();
+          updatedConfig.accessKey = accessKey;
         }
       }
 
       setConfig(updatedConfig);
-      setSaving(true);
-      try {
-        await setWebhookConfig(appId, updatedConfig);
-        toast.success('Webhook setting updated');
-      } catch (error) {
-        console.error('Failed to update webhook setting:', error);
-        toast.error('Failed to update webhook setting');
-        // Revert on error
-        setConfig(config);
-      } finally {
-        setSaving(false);
-      }
     },
-    [appId, config],
+    [config, accessKey],
   );
+
+  const hasUnsavedChanges = useMemo(() => {
+    return JSON.stringify(config) !== JSON.stringify(savedConfig);
+  }, [config, savedConfig]);
+
+  const handleSaveChanges = useCallback(async () => {
+    if (!appId) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await setWebhookConfig(appId, config);
+      setSavedConfig(config);
+      toast.success('Webhook settings saved');
+    } catch (error) {
+      console.error('Failed to save webhook settings:', error);
+      toast.error('Failed to save webhook settings');
+    } finally {
+      setSaving(false);
+    }
+  }, [appId, config]);
 
   const functionNames = useMemo(() => {
     const funcs = documentation.functions ? Object.keys(documentation.functions) : [];
@@ -218,11 +206,30 @@ export const WebhooksPanel = () => {
         ) : (
           <div className="p-4 space-y-6">
             {/* Header */}
-            <div>
-              <h2 className="text-xl font-bold text-bolt-elements-textHeading mb-1">Webhooks</h2>
-              <p className="text-sm text-bolt-elements-textSecondary">
-                Configure which functions can be called via webhooks and their access requirements.
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-bolt-elements-textHeading mb-1">Webhooks</h2>
+                <p className="text-sm text-bolt-elements-textSecondary">
+                  Configure which functions can be called via webhooks and their access requirements.
+                </p>
+              </div>
+              <Button
+                onClick={handleSaveChanges}
+                disabled={!hasUnsavedChanges || saving}
+                className="shrink-0"
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Saving...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Save size={16} />
+                    Save Changes
+                  </span>
+                )}
+              </Button>
             </div>
 
             {/* Access Key Section */}
@@ -294,13 +301,11 @@ export const WebhooksPanel = () => {
                                 e.stopPropagation();
                                 handleWebhookSettingChange(functionName, 'disabled');
                               }}
-                              disabled={saving}
                               className={classNames(
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'disabled'
                                   ? 'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColorActive text-bolt-elements-textPrimary'
                                   : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
-                                saving ? 'opacity-50 cursor-not-allowed' : '',
                               )}
                             >
                               Disabled
@@ -310,13 +315,11 @@ export const WebhooksPanel = () => {
                                 e.stopPropagation();
                                 handleWebhookSettingChange(functionName, 'public');
                               }}
-                              disabled={saving}
                               className={classNames(
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'public'
                                   ? 'bg-blue-500/20 border-blue-500/50 text-blue-500'
                                   : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
-                                saving ? 'opacity-50 cursor-not-allowed' : '',
                               )}
                             >
                               Public
@@ -326,13 +329,11 @@ export const WebhooksPanel = () => {
                                 e.stopPropagation();
                                 handleWebhookSettingChange(functionName, 'accessKey');
                               }}
-                              disabled={saving}
                               className={classNames(
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'accessKey'
                                   ? 'bg-purple-500/20 border-purple-500/50 text-purple-500'
                                   : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
-                                saving ? 'opacity-50 cursor-not-allowed' : '',
                               )}
                             >
                               Access Key
