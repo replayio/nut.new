@@ -213,11 +213,7 @@ export const WebhooksPanel = () => {
                   Configure which functions can be called via webhooks and their access requirements.
                 </p>
               </div>
-              <Button
-                onClick={handleSaveChanges}
-                disabled={!hasUnsavedChanges || saving}
-                className="shrink-0"
-              >
+              <Button onClick={handleSaveChanges} disabled={!hasUnsavedChanges || saving} className="shrink-0">
                 {saving ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -262,7 +258,11 @@ export const WebhooksPanel = () => {
                 </TooltipProvider>
               </div>
               <p className="text-xs text-bolt-elements-textSecondary">
-                Use this key in the <pre className="inline-block bg-bolt-elements-background-depth-2 rounded-md px-1 py-0.5 text-xs font-mono">X-Access-Key</pre> header to authenticate webhook requests for functions that require access key authentication.
+                Use this key in the{' '}
+                <pre className="inline-block bg-bolt-elements-background-depth-2 rounded-md px-1 py-0.5 text-xs font-mono">
+                  X-Access-Key
+                </pre>{' '}
+                header to authenticate webhook requests for functions that require access key authentication.
               </p>
             </div>
 
