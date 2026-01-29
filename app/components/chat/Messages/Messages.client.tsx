@@ -535,7 +535,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       }
 
       let onCheckboxChange = undefined;
-      if (isActiveDiscoveryResponse(messages, message) && !hasInteracted(message)) {
+      const isDiscovery = isActiveDiscoveryResponse(messages, message);
+      const hasInteractedFlag = hasInteracted(message);
+
+      if (isDiscovery && !hasInteractedFlag) {
         onCheckboxChange = onLastMessageCheckboxChange;
       }
 
@@ -654,15 +657,26 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
 );
 
 function isActiveDiscoveryResponse(messages: Message[], message: Message) {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].category === DISCOVERY_RESPONSE_CATEGORY) {
-      return message.id === messages[i].id;
-    }
-    if (messages[i].category != DISCOVERY_RATING_CATEGORY) {
+  // Only discovery/user-response messages can ever be "active"
+  if (message.category !== DISCOVERY_RESPONSE_CATEGORY && message.category !== USER_RESPONSE_CATEGORY) {
+    return false;
+  }
+
+  // Find this message in the array
+  const index = messages.findIndex((m) => m.id === message.id);
+  if (index === -1) {
+    return false;
+  }
+
+  // Once the user has sent any message *after* this discovery/user-response,
+  // the checklist should no longer be interactive.
+  for (let i = index + 1; i < messages.length; i++) {
+    if (messages[i].role === 'user') {
       return false;
     }
   }
-  return false;
+
+  return true;
 }
 
 function hasInteracted(message: Message): boolean {
