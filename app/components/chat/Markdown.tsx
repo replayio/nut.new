@@ -389,6 +389,8 @@ export const Markdown = memo((props: MarkdownProps) => {
                     descriptionText = descriptionText.replace(/^[–—\\-\\(]+\s*/, '').trim();
 
                     if (descriptionText) {
+                      descriptionText = descriptionText.charAt(0).toUpperCase() + descriptionText.slice(1);
+
                       // Ensure original text is stored (should already be set above, but double-check)
                       if (!liRef.current.hasAttribute('data-original-text')) {
                         liRef.current.setAttribute('data-original-text', fullText.trim());
