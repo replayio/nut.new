@@ -143,7 +143,7 @@ export const Markdown = memo((props: MarkdownProps) => {
       };
 
       const currentOptionText = getOptionText();
-      
+
       // Normalize the text for comparison (remove extra whitespace, handle variations, strip markdown formatting)
       const normalizeText = (text: string) => {
         // Remove markdown formatting (**, __, etc.) and normalize whitespace
@@ -155,7 +155,7 @@ export const Markdown = memo((props: MarkdownProps) => {
           .replace(/\s+/g, ' ') // Normalize whitespace
           .trim();
       };
-      
+
       const normalizedCurrentText = normalizeText(currentOptionText);
       const isCheckedFromUser = normalizedCurrentText
         ? Array.from(checkedItems).some((item) => normalizeText(item) === normalizedCurrentText)
@@ -167,7 +167,9 @@ export const Markdown = memo((props: MarkdownProps) => {
 
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const listItem = event.target.closest('li');
-        if (!listItem) return;
+        if (!listItem) {
+          return;
+        }
 
         // Use original text from data attribute if available (for split text), otherwise use textContent
         const text = (listItem as HTMLElement).dataset.originalText || listItem.textContent?.trim() || '';
@@ -288,22 +290,18 @@ export const Markdown = memo((props: MarkdownProps) => {
 
               // Find all content nodes except the checkbox
               const contentNodes: Node[] = [];
-              const walker = document.createTreeWalker(
-                liRef.current,
-                NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
-                {
-                  acceptNode: (node) => {
-                    // Skip checkbox and its container
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                      const el = node as Element;
-                      if (el.closest('.checkbox-container') || el.tagName === 'INPUT') {
-                        return NodeFilter.FILTER_REJECT;
-                      }
+              const walker = document.createTreeWalker(liRef.current, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+                acceptNode: (node) => {
+                  // Skip checkbox and its container
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node as Element;
+                    if (el.closest('.checkbox-container') || el.tagName === 'INPUT') {
+                      return NodeFilter.FILTER_REJECT;
                     }
-                    return NodeFilter.FILTER_ACCEPT;
-                  },
+                  }
+                  return NodeFilter.FILTER_ACCEPT;
                 },
-              );
+              });
 
               let node;
               while ((node = walker.nextNode())) {
@@ -371,19 +369,22 @@ export const Markdown = memo((props: MarkdownProps) => {
                     // Remove the title text from the description if it appears
                     // This handles cases where the title might be duplicated in the description
                     const escapedTitle = titleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    
+
                     // First, remove leading/trailing parentheses if present
-                    descriptionText = descriptionText.replace(/^\(\s*/, '').replace(/\s*\)$/, '').trim();
-                    
+                    descriptionText = descriptionText
+                      .replace(/^\(\s*/, '')
+                      .replace(/\s*\)$/, '')
+                      .trim();
+
                     // Remove title at the start (case-insensitive) with optional whitespace and optional dash/paren
                     let titlePattern = new RegExp(`^${escapedTitle}\\s*[–—\\-\\(]?\\s*`, 'i');
                     descriptionText = descriptionText.replace(titlePattern, '').trim();
-                    
+
                     // Remove any remaining title text that might appear (in case of duplicates)
                     // Match title as a whole word at the start
                     titlePattern = new RegExp(`^${escapedTitle}(\\s+|$)`, 'i');
                     descriptionText = descriptionText.replace(titlePattern, '').trim();
-                    
+
                     // Final cleanup - remove any remaining leading parentheses or dashes
                     descriptionText = descriptionText.replace(/^[–—\\-\\(]+\s*/, '').trim();
 
@@ -395,7 +396,7 @@ export const Markdown = memo((props: MarkdownProps) => {
 
                       // Clear and rebuild with proper structure
                       contentWrapper.innerHTML = '';
-                      
+
                       // Add title in a div
                       const titleDiv = document.createElement('div');
                       const titleEl = document.createElement('strong');
