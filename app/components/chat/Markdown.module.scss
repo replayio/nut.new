@@ -259,6 +259,7 @@ $code-font-size: 13px;
         display: flex !important;
         justify-content: flex-start !important; // Align checkbox to the left
         align-items: center !important; // Center vertically
+        margin: 0 !important; // Remove any default margins
       }
 
       // Style the text content wrapper

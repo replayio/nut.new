@@ -342,33 +342,76 @@ export const Markdown = memo((props: MarkdownProps) => {
                 const fullText = contentWrapper.textContent || '';
                 const strongTag = contentWrapper.querySelector('strong');
 
-                if (strongTag && fullText.includes(' - ')) {
+                if (strongTag) {
                   const titleText = strongTag.textContent || '';
-                  // Extract description: everything after the dash, removing title text
-                  const descriptionMatch = fullText.match(/-\s*(.+)$/);
-                  const descriptionText = descriptionMatch ? descriptionMatch[1].trim() : '';
+                  let descriptionText = '';
+
+                  // Check for parentheses format first: "Title (description)"
+                  const parenMatch = fullText.match(/\s*\(/);
+                  if (parenMatch && parenMatch.index !== undefined) {
+                    // Extract text inside parentheses
+                    const parenStart = parenMatch.index;
+                    const parenContent = fullText.substring(parenStart + 1); // Skip the opening paren
+                    const parenEnd = parenContent.indexOf(')');
+                    if (parenEnd !== -1) {
+                      descriptionText = parenContent.substring(0, parenEnd).trim();
+                    }
+                  } else {
+                    // Check for dash format: "Title – description" or "Title - description"
+                    // Match dash with optional whitespace before and required whitespace after
+                    const dashPattern = /\s*[–—\-]\s+/;
+                    const dashMatch = fullText.match(dashPattern);
+                    if (dashMatch && dashMatch.index !== undefined) {
+                      const dashIndex = dashMatch.index + dashMatch[0].length;
+                      descriptionText = fullText.substring(dashIndex).trim();
+                    }
+                  }
 
                   if (descriptionText) {
-                    // Ensure original text is stored (should already be set above, but double-check)
-                    if (!liRef.current.hasAttribute('data-original-text')) {
-                      liRef.current.setAttribute('data-original-text', fullText.trim());
-                    }
-
-                    // Clear and rebuild with proper structure
-                    contentWrapper.innerHTML = '';
+                    // Remove the title text from the description if it appears
+                    // This handles cases where the title might be duplicated in the description
+                    const escapedTitle = titleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     
-                    // Add title in a div
-                    const titleDiv = document.createElement('div');
-                    const titleEl = document.createElement('strong');
-                    titleEl.textContent = titleText;
-                    titleDiv.appendChild(titleEl);
-                    contentWrapper.appendChild(titleDiv);
+                    // First, remove leading/trailing parentheses if present
+                    descriptionText = descriptionText.replace(/^\(\s*/, '').replace(/\s*\)$/, '').trim();
+                    
+                    // Remove title at the start (case-insensitive) with optional whitespace and optional dash/paren
+                    let titlePattern = new RegExp(`^${escapedTitle}\\s*[–—\\-\\(]?\\s*`, 'i');
+                    descriptionText = descriptionText.replace(titlePattern, '').trim();
+                    
+                    // Remove any remaining title text that might appear (in case of duplicates)
+                    // Match title as a whole word at the start
+                    titlePattern = new RegExp(`^${escapedTitle}(\\s+|$)`, 'i');
+                    descriptionText = descriptionText.replace(titlePattern, '').trim();
+                    
+                    // Final cleanup - remove any remaining leading parentheses or dashes
+                    descriptionText = descriptionText.replace(/^[–—\\-\\(]+\s*/, '').trim();
 
-                    // Add description in a div
-                    const descDiv = document.createElement('div');
-                    descDiv.textContent = descriptionText;
-                    contentWrapper.appendChild(descDiv);
+                    if (descriptionText) {
+                      // Ensure original text is stored (should already be set above, but double-check)
+                      if (!liRef.current.hasAttribute('data-original-text')) {
+                        liRef.current.setAttribute('data-original-text', fullText.trim());
+                      }
+
+                      // Clear and rebuild with proper structure
+                      contentWrapper.innerHTML = '';
+                      
+                      // Add title in a div
+                      const titleDiv = document.createElement('div');
+                      const titleEl = document.createElement('strong');
+                      titleEl.textContent = titleText;
+                      titleDiv.appendChild(titleEl);
+                      contentWrapper.appendChild(titleDiv);
+
+                      // Add description in a div
+                      const descDiv = document.createElement('div');
+                      descDiv.textContent = descriptionText;
+                      contentWrapper.appendChild(descDiv);
+                    }
                   }
+                } else {
+                  // No strong tag - mark the list item so CSS knows not to add margin-bottom
+                  liRef.current.setAttribute('data-no-title', 'true');
                 }
               }
             }
