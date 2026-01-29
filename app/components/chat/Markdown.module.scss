@@ -222,7 +222,7 @@ $code-font-size: 13px;
   li {
     &:has(input[type='checkbox']) {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
       padding: 12px 16px;
       margin: 6px 0;
@@ -251,7 +251,6 @@ $code-font-size: 13px;
       // Style the checkbox container
       > .checkbox-container,
       > div:has(input[type='checkbox']) {
-        margin-top: 2px; // Align with text baseline
         flex-shrink: 0 !important; // Don't shrink the checkbox container
         flex-grow: 0 !important; // Don't grow the checkbox container
         width: 20px !important; // Fixed width to prevent stretching
@@ -260,17 +259,52 @@ $code-font-size: 13px;
         display: flex !important;
         justify-content: flex-start !important; // Align checkbox to the left
         align-items: center !important; // Center vertically
+        margin: 0 !important; // Remove any default margins
       }
 
-      // Style the text content (everything except the checkbox container)
-      > *:not(.checkbox-container):not(div:has(input[type='checkbox'])) {
+      // Style the text content wrapper
+      > .checkboxContentWrapper {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
         line-height: 1.5;
         margin: 0;
         color: var(--bolt-elements-textPrimary);
-        text-align: left !important; // Ensure text content is left-aligned
-        align-self: flex-start; // Align to the start of the flex container
-        justify-self: flex-start; // Also align in the cross-axis
+        text-align: left !important;
+        align-self: center; // Center vertically with checkbox
+
+        // Style the title div (contains strong tag)
+        > div:first-child {
+          strong {
+            display: block;
+            font-weight: 600;
+            color: var(--bolt-elements-textHeading);
+          }
+        }
+
+        // Style the description div (second div)
+        > div:last-child {
+          color: var(--bolt-elements-textPrimary);
+          font-weight: normal;
+        }
+      }
+
+      // Fallback: Style the text content (everything except the checkbox container)
+      > *:not(.checkbox-container):not(div:has(input[type='checkbox'])):not(.checkboxContentWrapper) {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        line-height: 1.5;
+        margin: 0;
+        color: var(--bolt-elements-textPrimary);
+        text-align: left !important;
+        align-self: center;
+
+        strong {
+          display: block;
+        }
       }
     }
   }

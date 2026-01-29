@@ -61,6 +61,8 @@ export const Markdown = memo((props: MarkdownProps) => {
 
   const handleChecklistSubmit = useCallback(() => {
     if (onChecklistSubmit) {
+      // The checkedItems should already contain original text from data-original-text
+      // Just use them directly
       onChecklistSubmit({
         chatMode: ChatMode.UserMessage,
         messageInput: Array.from(checkedItems).join('\n'),
@@ -75,19 +77,54 @@ export const Markdown = memo((props: MarkdownProps) => {
     }) => {
       const checkboxRef = React.useRef<HTMLInputElement>(null);
       const [optionText, setOptionText] = React.useState<string>('');
+      const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
 
       useEffect(() => {
         registerCheckbox();
 
         // Extract option text from parent list item after mount
+        // Use a small delay to ensure DOM manipulation in li component has completed
+        const timeoutId = setTimeout(() => {
+          if (checkboxRef.current) {
+            const listItem = checkboxRef.current.closest('li') as HTMLElement | null;
+            if (listItem) {
+              // Use original text from data attribute if available (for split text), otherwise use textContent
+              const text = listItem.dataset.originalText || listItem.textContent?.trim() || '';
+              if (text) {
+                setOptionText(text);
+                // Force re-render to update checked state
+                forceUpdate();
+              }
+            }
+          }
+        }, 50); // Slightly longer delay to ensure DOM manipulation completes
+
+        // Also set up a MutationObserver to watch for data-original-text changes
+        const observer = new MutationObserver(() => {
+          if (checkboxRef.current) {
+            const listItem = checkboxRef.current.closest('li') as HTMLElement | null;
+            if (listItem && listItem.dataset.originalText && !optionText) {
+              setOptionText(listItem.dataset.originalText);
+              forceUpdate();
+            }
+          }
+        });
+
         if (checkboxRef.current) {
           const listItem = checkboxRef.current.closest('li');
           if (listItem) {
-            const text = listItem.textContent?.trim() || '';
-            setOptionText(text);
+            observer.observe(listItem, {
+              attributes: true,
+              attributeFilter: ['data-original-text'],
+            });
           }
         }
-      }, [registerCheckbox]);
+
+        return () => {
+          clearTimeout(timeoutId);
+          observer.disconnect();
+        };
+      }, [registerCheckbox, optionText]);
 
       // Determine if this checkbox should be checked
       // Priority: 1) User's current selections (checkedItems), 2) Previously checked from future messages, 3) default checked prop
@@ -96,30 +133,50 @@ export const Markdown = memo((props: MarkdownProps) => {
           return optionText;
         }
         if (checkboxRef.current) {
-          const listItem = checkboxRef.current.closest('li');
+          const listItem = checkboxRef.current.closest('li') as HTMLElement | null;
           if (listItem) {
-            return listItem.textContent?.trim() || '';
+            // Use original text from data attribute if available (for split text), otherwise use textContent
+            return listItem.dataset.originalText || listItem.textContent?.trim() || '';
           }
         }
         return '';
       };
 
       const currentOptionText = getOptionText();
-      const isCheckedFromUser = currentOptionText ? checkedItems.has(currentOptionText) : false;
-      const isCheckedFromPrevious = currentOptionText ? previouslyCheckedOptions.has(currentOptionText) : false;
+
+      // Normalize the text for comparison (remove extra whitespace, handle variations, strip markdown formatting)
+      const normalizeText = (text: string) => {
+        // Remove markdown formatting (**, __, etc.) and normalize whitespace
+        return text
+          .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold markdown
+          .replace(/\*([^*]+)\*/g, '$1') // Remove italic markdown
+          .replace(/__([^_]+)__/g, '$1') // Remove bold markdown (underscores)
+          .replace(/_([^_]+)_/g, '$1') // Remove italic markdown (underscores)
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+      };
+
+      const normalizedCurrentText = normalizeText(currentOptionText);
+      const isCheckedFromUser = normalizedCurrentText
+        ? Array.from(checkedItems).some((item) => normalizeText(item) === normalizedCurrentText)
+        : false;
+      const isCheckedFromPrevious = normalizedCurrentText
+        ? Array.from(previouslyCheckedOptions).some((item) => normalizeText(item) === normalizedCurrentText)
+        : false;
       const isChecked = isCheckedFromUser || isCheckedFromPrevious || (checked ?? false);
 
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (onCheckboxChange) {
-          const listItem = event.target.closest('li');
-          if (listItem) {
-            const text = listItem.textContent?.trim() || '';
-            onCheckboxChange(text, event.target.checked);
-          }
+        const listItem = event.target.closest('li');
+        if (!listItem) {
+          return;
         }
 
-        const listItem = event.target.closest('li');
-        const text = listItem ? listItem.textContent?.trim() || '' : '';
+        // Use original text from data attribute if available (for split text), otherwise use textContent
+        const text = (listItem as HTMLElement).dataset.originalText || listItem.textContent?.trim() || '';
+
+        if (onCheckboxChange) {
+          onCheckboxChange(text, event.target.checked);
+        }
 
         // Update local state for user selections (this takes precedence over previous selections)
         setCheckedItems((prev) => {
@@ -207,6 +264,160 @@ export const Markdown = memo((props: MarkdownProps) => {
           if (liRef.current) {
             const checkbox = liRef.current.querySelector('input[type="checkbox"]');
             setHasCheckbox(!!checkbox);
+
+            // Process content to split title and description for checkbox items
+            if (checkbox) {
+              // IMPORTANT: Capture original text BEFORE any DOM manipulation
+              // This ensures checkbox matching works correctly
+              // We need to get the text content excluding the checkbox itself
+              if (!liRef.current.hasAttribute('data-original-text')) {
+                // Clone the list item to get text without checkbox
+                const clone = liRef.current.cloneNode(true) as HTMLElement;
+                const checkboxClone = clone.querySelector('input[type="checkbox"]');
+                if (checkboxClone) {
+                  checkboxClone.remove();
+                }
+                // Also remove the checkbox container if it exists
+                const containerClone = clone.querySelector('.checkbox-container');
+                if (containerClone) {
+                  containerClone.remove();
+                }
+                const originalText = clone.textContent?.trim() || '';
+                if (originalText) {
+                  liRef.current.setAttribute('data-original-text', originalText);
+                }
+              }
+
+              // Find all content nodes except the checkbox
+              const contentNodes: Node[] = [];
+              const walker = document.createTreeWalker(liRef.current, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+                acceptNode: (node) => {
+                  // Skip checkbox and its container
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node as Element;
+                    if (el.closest('.checkbox-container') || el.tagName === 'INPUT') {
+                      return NodeFilter.FILTER_REJECT;
+                    }
+                  }
+                  return NodeFilter.FILTER_ACCEPT;
+                },
+              });
+
+              let node;
+              while ((node = walker.nextNode())) {
+                contentNodes.push(node);
+              }
+
+              // Find the content wrapper or create one
+              let contentWrapper = liRef.current.querySelector(`.${styles.checkboxContentWrapper}`);
+              if (!contentWrapper) {
+                // Create wrapper div
+                contentWrapper = document.createElement('div');
+                contentWrapper.className = styles.checkboxContentWrapper;
+
+                // Move all content nodes into wrapper
+                contentNodes.forEach((node) => {
+                  if (node.parentNode) {
+                    const parentEl = node.parentNode as Element;
+                    if (!parentEl.closest || !parentEl.closest('.checkbox-container')) {
+                      contentWrapper!.appendChild(node.cloneNode(true));
+                      node.parentNode.removeChild(node);
+                    }
+                  }
+                });
+
+                // Insert wrapper after checkbox
+                const checkboxContainer = checkbox.closest('.checkbox-container') || checkbox.parentElement;
+                if (checkboxContainer && checkboxContainer.nextSibling) {
+                  liRef.current.insertBefore(contentWrapper, checkboxContainer.nextSibling);
+                } else {
+                  liRef.current.appendChild(contentWrapper);
+                }
+              }
+
+              // Process the wrapper content to split title and description
+              if (contentWrapper) {
+                const fullText = contentWrapper.textContent || '';
+                const strongTag = contentWrapper.querySelector('strong');
+
+                if (strongTag) {
+                  const titleText = strongTag.textContent || '';
+                  let descriptionText = '';
+
+                  // Check for parentheses format first: "Title (description)"
+                  const parenMatch = fullText.match(/\s*\(/);
+                  if (parenMatch && parenMatch.index !== undefined) {
+                    // Extract text inside parentheses
+                    const parenStart = parenMatch.index;
+                    const parenContent = fullText.substring(parenStart + 1); // Skip the opening paren
+                    const parenEnd = parenContent.indexOf(')');
+                    if (parenEnd !== -1) {
+                      descriptionText = parenContent.substring(0, parenEnd).trim();
+                    }
+                  } else {
+                    // Check for dash format: "Title – description" or "Title - description"
+                    // Match dash with optional whitespace before and required whitespace after
+                    const dashPattern = /\s*[–—\-]\s+/;
+                    const dashMatch = fullText.match(dashPattern);
+                    if (dashMatch && dashMatch.index !== undefined) {
+                      const dashIndex = dashMatch.index + dashMatch[0].length;
+                      descriptionText = fullText.substring(dashIndex).trim();
+                    }
+                  }
+
+                  if (descriptionText) {
+                    // Remove the title text from the description if it appears
+                    // This handles cases where the title might be duplicated in the description
+                    const escapedTitle = titleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                    // First, remove leading/trailing parentheses if present
+                    descriptionText = descriptionText
+                      .replace(/^\(\s*/, '')
+                      .replace(/\s*\)$/, '')
+                      .trim();
+
+                    // Remove title at the start (case-insensitive) with optional whitespace and optional dash/paren
+                    let titlePattern = new RegExp(`^${escapedTitle}\\s*[–—\\-\\(]?\\s*`, 'i');
+                    descriptionText = descriptionText.replace(titlePattern, '').trim();
+
+                    // Remove any remaining title text that might appear (in case of duplicates)
+                    // Match title as a whole word at the start
+                    titlePattern = new RegExp(`^${escapedTitle}(\\s+|$)`, 'i');
+                    descriptionText = descriptionText.replace(titlePattern, '').trim();
+
+                    // Final cleanup - remove any remaining leading parentheses or dashes
+                    descriptionText = descriptionText.replace(/^[–—\\-\\(]+\s*/, '').trim();
+
+                    if (descriptionText) {
+                      descriptionText = descriptionText.charAt(0).toUpperCase() + descriptionText.slice(1);
+
+                      // Ensure original text is stored (should already be set above, but double-check)
+                      if (!liRef.current.hasAttribute('data-original-text')) {
+                        liRef.current.setAttribute('data-original-text', fullText.trim());
+                      }
+
+                      // Clear and rebuild with proper structure
+                      contentWrapper.innerHTML = '';
+
+                      // Add title in a div
+                      const titleDiv = document.createElement('div');
+                      const titleEl = document.createElement('strong');
+                      titleEl.textContent = titleText;
+                      titleDiv.appendChild(titleEl);
+                      contentWrapper.appendChild(titleDiv);
+
+                      // Add description in a div
+                      const descDiv = document.createElement('div');
+                      descDiv.textContent = descriptionText;
+                      contentWrapper.appendChild(descDiv);
+                    }
+                  }
+                } else {
+                  // No strong tag - mark the list item so CSS knows not to add margin-bottom
+                  liRef.current.setAttribute('data-no-title', 'true');
+                }
+              }
+            }
           }
         }, [children]);
 
@@ -237,6 +448,9 @@ export const Markdown = memo((props: MarkdownProps) => {
   }, [onCheckboxChange, registerCheckbox, checkedItems, previouslyCheckedOptions]);
 
   const hasCheckboxes = totalCheckboxes > 0;
+
+  console.log('message', message);
+  console.log('messages', messages);
 
   return (
     <div>
