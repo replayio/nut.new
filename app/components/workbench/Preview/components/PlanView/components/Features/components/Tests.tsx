@@ -26,9 +26,9 @@ const Tests = ({ featureTests, status }: TestsProps) => {
   };
 
   return (
-    <div className="border-t border-bolt-elements-borderColor border-opacity-50">
+    <div className="border-t border-border">
       <div className="p-4">
-        <div className="text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-4 bg-bolt-elements-background-depth-2 bg-opacity-30 px-2 py-1 rounded-md inline-block">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 bg-muted px-2 py-1 rounded-md inline-block">
           Feature Tests ({featureTests.length})
         </div>
         <div className="space-y-3">
@@ -38,30 +38,28 @@ const Tests = ({ featureTests, status }: TestsProps) => {
             return (
               <div
                 key={testIdx}
-                className="flex items-center gap-3 p-3 bg-bolt-elements-background-depth-2 rounded-xl border border-bolt-elements-borderColor shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] group"
+                className="flex items-center gap-3 p-3 bg-card rounded-md border border-border hover:bg-accent/50 transition-colors duration-200"
               >
                 {displayStatus === 'InProgress' ? (
-                  <div className="w-3 h-3 flex-shrink-0 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                  <div className="w-3 h-3 flex-shrink-0 rounded-full border-2 border-foreground border-t-transparent animate-spin" />
                 ) : (
                   <div
                     className={classNames('w-3 h-3 rounded-full border-2 flex-shrink-0', {
-                      'bg-green-500 border-green-500': displayStatus === 'Pass',
-                      'bg-red-500 border-red-500': displayStatus === 'Fail',
-                      'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor':
-                        displayStatus === 'NotRun',
+                      'bg-foreground border-foreground': displayStatus === 'Pass',
+                      'bg-destructive border-destructive': displayStatus === 'Fail',
+                      'bg-muted border-border': displayStatus === 'NotRun',
                     })}
                   />
                 )}
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-bolt-elements-textPrimary block truncate">{test.title}</span>
+                  <span className="text-sm text-foreground block truncate">{test.title}</span>
                 </div>
                 <div
-                  className={classNames('text-xs font-medium px-2 py-1 rounded-lg flex-shrink-0 shadow-sm border', {
-                    'text-green-700 bg-green-50 border-green-200': displayStatus === 'Pass',
-                    'text-red-700 bg-red-50 border-red-200': displayStatus === 'Fail',
-                    'text-blue-700 bg-blue-50 border-blue-200': displayStatus === 'InProgress',
-                    'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor':
-                      displayStatus === 'NotRun',
+                  className={classNames('text-xs font-medium px-2 py-1 rounded-md flex-shrink-0 border', {
+                    'text-foreground bg-accent border-border': displayStatus === 'Pass',
+                    'text-destructive bg-destructive/10 border-destructive/30': displayStatus === 'Fail',
+                    'text-foreground bg-accent border-border': displayStatus === 'InProgress',
+                    'text-muted-foreground bg-muted border-border': displayStatus === 'NotRun',
                   })}
                 >
                   {displayStatus === 'Pass' && 'PASS'}

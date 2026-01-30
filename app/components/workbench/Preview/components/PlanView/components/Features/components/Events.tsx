@@ -98,7 +98,7 @@ const Events = ({ featureName }: EventsProps) => {
               A test failed:
               <a
                 href={`https://app.replay.io/recording/${event.recordingId}`}
-                className="pl-1 text-blue-500"
+                className="pl-1 text-foreground underline hover:text-muted-foreground"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -123,7 +123,7 @@ const Events = ({ featureName }: EventsProps) => {
             Landing changes
             <a
               href={`/view-diff?old=${oldRepositoryId}&new=${newRepositoryId}`}
-              className="pl-1 text-blue-500"
+              className="pl-1 text-foreground underline hover:text-muted-foreground"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -139,11 +139,11 @@ const Events = ({ featureName }: EventsProps) => {
     const time = renderTime(event.time);
     return (
       <div key={index} className="flex items-center gap-3 pl-4 pb-2">
-        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-sm" />
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor border-opacity-30">
+        <div className="w-1.5 h-1.5 bg-foreground rounded-full" />
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-muted text-muted-foreground rounded-md border border-border">
           {time}
         </span>
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary rounded-lg border border-bolt-elements-borderColor shadow-sm">
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-card text-foreground rounded-md border border-border">
           {renderEventContents(event)}
         </span>
       </div>
@@ -177,8 +177,8 @@ const Events = ({ featureName }: EventsProps) => {
     const visibleEvents = shouldShowExpander && !isExpanded ? events.slice(0, 3) : events;
 
     return (
-      <div key={index} className="border-t border-bolt-elements-borderColor border-opacity-50 mb-2 pt-4">
-        <div className="p-4 pt-3 text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider mb-2 bg-bolt-elements-background-depth-2 bg-opacity-30 px-2 py-1 rounded-md inline-block ml-2">
+      <div key={index} className="border-t border-border mb-2 pt-4">
+        <div className="p-4 pt-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 bg-muted px-2 py-1 rounded-md inline-block ml-2">
           <TooltipProvider>
             <WithTooltip tooltip={tooltip}>
               <span>Worker {index + 1}</span>
@@ -193,13 +193,13 @@ const Events = ({ featureName }: EventsProps) => {
             <div className="flex justify-center mt-2">
               <button
                 onClick={() => toggleWorkerExpansion(index)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor border-opacity-50 rounded-lg transition-all duration-200 hover:shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-card hover:bg-accent border border-border rounded-md transition-colors duration-200"
               >
                 <span>{isExpanded ? `Hide ${events.length - 3} events` : `Show ${events.length - 3} more events`}</span>
                 {isExpanded ? (
-                  <ChevronUp className="text-sm transition-transform duration-200" size={14} strokeWidth={2.5} />
+                  <ChevronUp className="text-sm" size={14} strokeWidth={2.5} />
                 ) : (
-                  <ChevronDown className="text-sm transition-transform duration-200" size={14} strokeWidth={2.5} />
+                  <ChevronDown className="text-sm" size={14} strokeWidth={2.5} />
                 )}
               </button>
             </div>

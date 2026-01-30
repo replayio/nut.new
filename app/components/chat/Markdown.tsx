@@ -449,9 +449,6 @@ export const Markdown = memo((props: MarkdownProps) => {
 
   const hasCheckboxes = totalCheckboxes > 0;
 
-  console.log('message', message);
-  console.log('messages', messages);
-
   return (
     <div>
       <ReactMarkdown

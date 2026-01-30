@@ -20,10 +20,9 @@ export const StartBuildingButton = ({
   tooltip,
 }: StartBuildingButtonProps) => {
   const hasText = !!buttonText;
-  const gradientColors = 'from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600';
   const className = hasText
-    ? `relative flex justify-center items-center gap-2 px-4 py-2 bg-gradient-to-r ${gradientColors} text-white rounded-xl min-h-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`
-    : `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 bg-gradient-to-r ${gradientColors} text-white rounded-xl h-[40px] w-[40px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group`;
+    ? `relative flex justify-center items-center gap-2 px-4 py-2 bg-foreground hover:bg-foreground/90 text-background rounded-md min-h-[40px] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group`
+    : `absolute flex justify-center items-center bottom-[22px] right-[22px] p-2 bg-foreground hover:bg-foreground/90 text-background rounded-md h-[40px] w-[40px] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group`;
   const tooltipText = tooltip || 'Start Building Now!';
   const shouldBlink = startPlanningRating === 10;
   const shouldShowTooltipPersistently = startPlanningRating === 10 && !hasText;
@@ -64,13 +63,13 @@ export const StartBuildingButton = ({
           >
             {hasText ? (
               <>
-                <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap transition-transform duration-200 group-hover:scale-105">
-                  <Rocket className="transition-transform duration-200 group-hover:scale-110" size={18} />
+                <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
+                  <Rocket size={18} />
                   {buttonText}
                 </div>
               </>
             ) : (
-              <Rocket className="transition-transform duration-200 group-hover:scale-110" size={20} />
+              <Rocket size={20} />
             )}
           </motion.button>
         </WithTooltip>
