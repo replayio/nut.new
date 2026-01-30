@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { Key } from '~/components/ui/Icon';
+import { Button } from '~/components/ui/button';
 
 interface PasswordResetFormProps {
   onBack: () => void;
@@ -53,8 +54,8 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
   return (
     <>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-orange-500/20 shadow-lg">
-          <Key className="text-orange-500" size={24} />
+        <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
+          <Key className="text-bolt-elements-textPrimary" size={24} />
         </div>
         <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Reset Your Password</h2>
         <p className="text-bolt-elements-textSecondary mt-2 leading-relaxed">
@@ -72,37 +73,28 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            className="w-full p-4 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
             placeholder="Enter your email address"
             required
           />
           {email !== '' && !isEmailValid && (
-            <div className="mt-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            <div className="mt-2 text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md border border-destructive/20">
               Please enter a valid email address
             </div>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isProcessing || disabled}
-          className="w-full py-4 !bg-gradient-to-r !from-orange-500 !to-amber-500 hover:!from-orange-600 hover:!to-amber-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
-        >
-          <span className="transition-transform duration-200 group-hover:scale-105">
-            {isProcessing ? 'Sending Reset Link...' : 'Send Reset Link'}
-          </span>
-        </button>
+        <Button type="submit" disabled={isProcessing || disabled} className="w-full h-12" size="lg">
+          {isProcessing ? 'Sending Reset Link...' : 'Send Reset Link'}
+        </Button>
       </form>
 
-      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
-        <p className="text-bolt-elements-textSecondary">
+      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
+        <p className="text-bolt-elements-textSecondary text-sm">
           Remember your password?{' '}
-          <button
-            onClick={onBack}
-            className="text-orange-500 hover:text-orange-600 font-semibold bg-transparent transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-orange-500/10"
-          >
+          <Button onClick={onBack} variant="link" className="p-0 h-auto font-semibold">
             Sign In
-          </button>
+          </Button>
         </p>
       </div>
     </>

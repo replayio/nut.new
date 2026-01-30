@@ -4,8 +4,8 @@ import { AccountModal } from './AccountModal';
 import { userStore } from '~/lib/stores/auth';
 import { SubscriptionModal } from '~/components/subscription/SubscriptionModal';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
-import { IconButton } from '~/components/ui/IconButton';
 import { User as UserIcon, CreditCard, ArrowLeft, X } from '~/components/ui/Icon';
+import { Button } from '~/components/ui/button';
 
 export function GlobalAccountModal() {
   const isOpen = useStore(accountModalStore.isOpen);
@@ -21,10 +21,10 @@ export function GlobalAccountModal() {
   if (!user) {
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-[1001]"
+        className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1001]"
         onClick={() => accountModalStore.close()}
       >
-        <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6">
+        <div className="bg-bolt-elements-background-depth-1 rounded-md p-6 border border-bolt-elements-borderColor">
           <div className="text-bolt-elements-textPrimary">Loading...</div>
         </div>
       </div>
@@ -37,38 +37,40 @@ export function GlobalAccountModal() {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-[1001]"
+      className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1001]"
       onClick={() => accountModalStore.close()}
     >
       <div
-        className="bg-bolt-elements-background-depth-1  rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] flex overflow-hidden"
+        className="bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor max-w-6xl w-full mx-4 max-h-[90vh] flex overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Sidebar with Tabs - Hidden on mobile when content is shown */}
         {showTabSelection && (
           <div
-            className={`bg-bolt-elements-background-depth-1 rounded-l-2xl border border-bolt-elements-borderColor flex flex-col ${isMobile ? 'w-full' : 'w-64'}`}
+            className={`bg-bolt-elements-background-depth-1 rounded-l-md border-r border-bolt-elements-borderColor flex flex-col ${isMobile ? 'w-full' : 'w-64'}`}
           >
             {/* Header with close/back button */}
             <div className="p-4 border-b border-bolt-elements-borderColor flex justify-between items-center">
               <h2 className="text-lg font-semibold text-bolt-elements-textHeading">Settings</h2>
-              <IconButton
+              <Button
                 onClick={() => accountModalStore.close()}
-                className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
                 aria-label="Close modal"
-                icon={<X size={30} />}
-                size="xxl"
-              />
+              >
+                <X size={18} />
+              </Button>
             </div>
 
             {/* Navigation Tabs */}
             <nav className="flex-1 p-3 space-y-1">
               <button
                 onClick={() => accountModalStore.activeTab.set('account')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-colors ${
                   activeTab === 'account'
-                    ? 'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary border border-bolt-elements-borderColor shadow-sm'
-                    : 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-1 hover:border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-1 hover:text-bolt-elements-textPrimary'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
                 <UserIcon size={18} />
@@ -77,10 +79,10 @@ export function GlobalAccountModal() {
 
               <button
                 onClick={() => accountModalStore.activeTab.set('billing')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-colors ${
                   activeTab === 'billing'
-                    ? 'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary border border-bolt-elements-borderColor shadow-sm'
-                    : 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-1 hover:border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-1 hover:text-bolt-elements-textPrimary'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
                 <CreditCard size={18} />
@@ -96,20 +98,19 @@ export function GlobalAccountModal() {
             {/* Mobile: Back to Settings button */}
             {isMobile && (
               <div className="p-4 border-b border-bolt-elements-borderColor flex items-center gap-3 justify-between">
-                <button
-                  onClick={() => accountModalStore.activeTab.set(null)}
-                  className="flex items-center gap-2  bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary hover:text-bolt-elements-textSecondary transition-colors"
-                >
+                <Button onClick={() => accountModalStore.activeTab.set(null)} variant="ghost" className="gap-2">
                   <ArrowLeft size={18} />
                   <span className="font-medium">Settings</span>
-                </button>
-                <IconButton
+                </Button>
+                <Button
                   onClick={() => accountModalStore.close()}
-                  className="flex items-center justify-center w-8 h-8 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 rounded-lg transition-all duration-200 hover:scale-105"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
                   aria-label="Close modal"
-                  icon={<X size={30} />}
-                  size="xxl"
-                />
+                >
+                  <X size={18} />
+                </Button>
               </div>
             )}
 

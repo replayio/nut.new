@@ -11,6 +11,7 @@ import { userStore } from '~/lib/stores/auth';
 import { X, Rocket, CheckCircle, AlertTriangle } from '~/components/ui/Icon';
 import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
 import { isAppAccessAllowed, AppAccessKind } from '~/lib/api/permissions';
+import { Button } from '~/components/ui/button';
 
 const MAX_SITE_NAME_LENGTH = 63;
 
@@ -138,29 +139,26 @@ export function GlobalDeployChatModal() {
         animate="visible"
         exit="hidden"
       >
-        <motion.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
+        <motion.div className="absolute inset-0 bg-black/50" onClick={handleCloseModal} />
 
         <motion.div
-          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor border-opacity-50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
+          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
           <div className="absolute top-3 right-3 z-10">
-            <button
-              onClick={handleCloseModal}
-              className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
-            >
-              <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
-            </button>
+            <Button onClick={handleCloseModal} variant="ghost" size="icon" className="h-8 w-8">
+              <X size={18} />
+            </Button>
           </div>
 
           <div className="p-6 overflow-y-auto flex-1 min-h-0">
             {loadingData ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
-                  <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin" />
+                <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor border-opacity-50">
+                  <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-primary rounded-full animate-spin" />
                 </div>
                 <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
                 <p className="text-bolt-elements-textSecondary">
@@ -172,8 +170,8 @@ export function GlobalDeployChatModal() {
             ) : (
               <>
                 <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
-                    <Rocket className="text-blue-500" size={24} />
+                  <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
+                    <Rocket className="text-bolt-elements-textPrimary" size={24} />
                   </div>
                   <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Deploy Your Application</h2>
                   <p className="text-bolt-elements-textSecondary mt-2">
@@ -182,7 +180,7 @@ export function GlobalDeployChatModal() {
                 </div>
 
                 {/* Easy Deploy Section */}
-                <div className="mb-8 p-6 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="mb-8 p-6 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor">
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <span className="text-2xl">⚡</span>
@@ -196,10 +194,10 @@ export function GlobalDeployChatModal() {
 
                   {/* Show existing site in easy deploy */}
                   {lastDeployResult(deploySettings)?.siteURL && (
-                    <div className="mb-6 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 shadow-sm">
+                    <div className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
                       <div className="flex flex-col items-center justify-between gap-2">
-                        <div className="text-sm text-green-700 font-semibold flex items-center gap-2">
-                          <CheckCircle className="text-green-500" size={18} />
+                        <div className="text-sm text-bolt-elements-textPrimary font-semibold flex items-center gap-2">
+                          <CheckCircle className="text-bolt-elements-textPrimary" size={18} />
                           Your App's URL:
                         </div>
                         <a
@@ -207,7 +205,7 @@ export function GlobalDeployChatModal() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title={lastDeployResult(deploySettings)?.siteURL}
-                          className="w-full text-sm text-green-600 hover:text-green-700 transition-colors underline truncate font-medium padding-x-2 ellipsis"
+                          className="w-full text-sm text-primary hover:text-primary/80 transition-colors underline truncate font-medium padding-x-2 ellipsis"
                         >
                           {lastDeployResult(deploySettings)?.siteURL}
                         </a>
@@ -220,28 +218,23 @@ export function GlobalDeployChatModal() {
                       isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) && (
                     <div className="flex justify-center">
                       {status === DeployStatus.Started ? (
-                        <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-1 bg-opacity-50 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
-                          <div className="w-6 h-6 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-blue-500 rounded-full animate-spin mr-3" />
+                        <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
+                          <div className="w-6 h-6 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-primary rounded-full animate-spin mr-3" />
                           <span className="text-lg font-medium">
                             {lastDeployResult(deploySettings)?.siteURL ? 'Redeploying' : 'Deploying'} your app...
                           </span>
                         </div>
                       ) : (
-                        <button
-                          onClick={handleDeploy}
-                          className="flex items-center gap-3 px-8 py-4 !bg-gradient-to-r !from-blue-500 !to-indigo-500 hover:!from-blue-600 hover:!to-indigo-600 text-white text-lg font-semibold rounded-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 border border-white/20 hover:border-white/30 group"
-                        >
-                          <Rocket className="transition-transform duration-200 group-hover:scale-110" size={20} />
-                          <span className="transition-transform duration-200 group-hover:scale-105">
-                            {lastDeployResult(deploySettings)?.siteURL ? 'Redeploy' : 'Deploy Now'}
-                          </span>
-                        </button>
+                        <Button onClick={handleDeploy} size="lg" className="gap-2">
+                          <Rocket size={18} />
+                          {lastDeployResult(deploySettings)?.siteURL ? 'Redeploy' : 'Deploy Now'}
+                        </Button>
                       )}
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30 space-y-4">
+                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor space-y-4">
                   <div>
                     <label
                       htmlFor="siteName"
@@ -257,7 +250,7 @@ export function GlobalDeployChatModal() {
                         id="siteName"
                         name="siteName"
                         type="text"
-                        className="w-full p-4 pr-32 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+                        className="w-full p-4 pr-32 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
                         value={deploySettings.siteName || ''}
                         placeholder="my-chat-app..."
                         disabled={
@@ -276,13 +269,13 @@ export function GlobalDeployChatModal() {
                       />
                     </div>
                     {deploySettings.siteName && (
-                      <div className="mt-2 p-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-500/20">
+                      <div className="mt-2 p-3 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
                         <p className="text-sm text-bolt-elements-textSecondary">
                           <span className="font-medium text-bolt-elements-textPrimary">
                             Your site will be available at:
                           </span>
                           <br />
-                          <span className="font-mono text-blue-600 text-sm">
+                          <span className="font-mono text-primary text-sm">
                             https://{deploySettings.siteName}.netlify.app
                           </span>
                         </p>
@@ -292,19 +285,15 @@ export function GlobalDeployChatModal() {
                 </div>
 
                 <div className="flex justify-center mt-8">
-                  <button
-                    onClick={handleCloseModal}
-                    disabled={status === DeployStatus.Started}
-                    className="px-6 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor rounded-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-[1.02] group"
-                  >
-                    <span className="transition-transform duration-200 group-hover:scale-105">Cancel</span>
-                  </button>
+                  <Button onClick={handleCloseModal} disabled={status === DeployStatus.Started} variant="outline">
+                    Cancel
+                  </Button>
                 </div>
 
                 {error && (
-                  <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl shadow-sm">
+                  <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
                     <div className="flex items-start gap-3">
-                      <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+                      <AlertTriangle className="text-destructive flex-shrink-0 mt-0.5" size={18} />
                       <div>
                         <p className="font-semibold mb-1">Deployment Error</p>
                         <p className="text-sm leading-relaxed">{error}</p>

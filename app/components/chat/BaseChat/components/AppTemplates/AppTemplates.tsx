@@ -301,7 +301,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
               {isLoadingCollections ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-4 border-bolt-elements-borderColor border-t-rose-500 rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-4 border-bolt-elements-borderColor border-t-primary rounded-full animate-spin" />
                     <p className="text-bolt-elements-textSecondary text-sm">Loading collections...</p>
                   </div>
                 </div>
@@ -315,15 +315,15 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                         const encodedName = encodeURIComponent(collection.name);
                         window.location.href = `/collection/${encodedName}`;
                       }}
-                      className="group text-left bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-1 rounded-xl p-6 border border-bolt-elements-borderColor hover:border-rose-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/5"
+                      className="group text-left bg-bolt-elements-background-depth-1 rounded-md p-4 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 transition-colors"
                     >
-                      <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-2 group-hover:text-rose-500 transition-colors">
+                      <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-2 group-hover:text-bolt-elements-textHeading transition-colors">
                         {collection.name}
                       </h3>
                       <p className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                         {collection.shortDescription}
                       </p>
-                      <div className="mt-4 flex items-center text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="mt-4 flex items-center text-bolt-elements-textSecondary opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm font-medium">View collection</span>
                         <svg
                           className="w-4 h-4 ml-2"

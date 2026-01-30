@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getSupabase } from '~/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
 import { Lock } from '~/components/ui/Icon';
+import { Button } from '~/components/ui/button';
 
 interface PasswordUpdateFormProps {
   onSuccess: (message: string) => void;
@@ -54,13 +55,11 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
   return (
     <>
       <div className="text-center mb-8">
-        <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center shadow-lg mb-6 border border-green-500/20">
-          <Lock className="text-green-500" size={30} />
+        <div className="mx-auto w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mb-4 border border-bolt-elements-borderColor border-opacity-50">
+          <Lock className="text-bolt-elements-textPrimary" size={24} />
         </div>
-        <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Set New Password</h2>
-        <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30">
-          Please enter your new password below.
-        </p>
+        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Set New Password</h2>
+        <p className="text-bolt-elements-textSecondary mt-2">Please enter your new password below.</p>
       </div>
 
       <form onSubmit={handlePasswordUpdate} className="space-y-6">
@@ -73,7 +72,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            className="w-full p-4 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
             placeholder="Enter your new password"
             required
           />
@@ -91,33 +90,27 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            className="w-full p-4 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
             placeholder="Confirm your new password"
             required
           />
         </div>
 
         {password !== '' && confirmPassword !== '' && password !== confirmPassword && (
-          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+          <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md border border-destructive/20">
             Passwords do not match
           </div>
         )}
 
         {password !== '' && password.length < 6 && (
-          <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+          <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md border border-destructive/20">
             Password must be at least 6 characters long
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isProcessing || disabled}
-          className="w-full py-4 !bg-gradient-to-r !from-green-500 !to-emerald-500 hover:!from-green-600 hover:!to-emerald-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
-        >
-          <span className="transition-transform duration-200 group-hover:scale-105">
-            {isProcessing ? 'Updating Password...' : 'Update Password'}
-          </span>
-        </button>
+        <Button type="submit" disabled={isProcessing || disabled} className="w-full h-12" size="lg">
+          {isProcessing ? 'Updating Password...' : 'Update Password'}
+        </Button>
       </form>
     </>
   );
