@@ -46,15 +46,15 @@ export const StartBuildingCard: React.FC<StartBuildingCardProps> = ({ startPlann
 
   return (
     <div className="w-full mt-5">
-      <div className="bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-purple-500/5 border border-blue-500/20 rounded-2xl p-6 transition-all duration-300 hover:border-blue-500/30 hover:shadow-lg">
+      <div className="bg-card border border-border rounded-md p-6 transition-colors duration-200 hover:bg-accent/50">
         <div className="flex flex-col items-center text-center space-y-4">
-          <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-full shadow-lg">
-            <Rocket className="text-white" size={24} />
+          <div className="flex items-center justify-center w-12 h-12 bg-foreground text-background rounded-md">
+            <Rocket size={24} />
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Ready to Create Your App?</h3>
-            <p className="text-bolt-elements-textSecondary text-sm max-w-md">
+            <h3 className="text-lg font-semibold text-foreground">Ready to Create Your App?</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
               I have all the information I need to start generating your app.
             </p>
           </div>

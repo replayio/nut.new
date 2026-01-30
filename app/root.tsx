@@ -19,7 +19,6 @@ import AppHistoryModal from './components/workbench/VesionHistory/AppHistoryModa
 import { GlobalStripeStatusModal } from './components/stripe/GlobalStripeStatusModal';
 import { GlobalStatusModal } from './components/status-modal/GlobalStatusModal';
 import { GlobalDeployChatModal } from './components/header/components/DeployChat/components/GlobalDeployChatModal';
-import { GlobalAppSettingsModal } from './components/header/components/AppSettings/GlobalAppSettingsModal';
 import GlobalFeatureModal from './components/feature-modal/GlobalFeatureModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -246,7 +245,6 @@ export default function App() {
         <GlobalStripeStatusModal />
         <GlobalStatusModal />
         <GlobalDeployChatModal />
-        <GlobalAppSettingsModal />
         <GlobalFeatureModal />
       </ClientOnly>
       <ScrollRestoration />

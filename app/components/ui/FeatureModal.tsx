@@ -58,37 +58,37 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
           return {
             icon: CreditCard,
             label: 'Payment Required',
-            className: 'text-bolt-elements-textPrimary border-amber-200',
-            iconClassName: 'text-bolt-elements-textPrimary',
+            className: 'text-foreground border-border',
+            iconClassName: 'text-foreground',
           };
         case AppFeatureStatus.NotStarted:
           return {
             icon: Hourglass,
             label: 'Pending',
-            className: 'text-bolt-elements-textPrimary border-gray-200',
-            iconClassName: 'text-bolt-elements-textPrimary',
+            className: 'text-muted-foreground border-border',
+            iconClassName: 'text-muted-foreground',
           };
         case AppFeatureStatus.ImplementationInProgress:
           return {
             icon: Loader2,
             label: 'In Progress',
-            className: 'text-blue-600 bg-blue-50 border-blue-200',
-            iconClassName: 'text-blue-500',
+            className: 'text-foreground bg-accent border-border',
+            iconClassName: 'text-foreground',
             showSpinner: true,
           };
         case AppFeatureStatus.Implemented:
           return {
             icon: CheckCircle,
             label: 'Complete',
-            className: 'text-green-600 bg-green-50 border-green-200',
-            iconClassName: 'text-green-500',
+            className: 'text-foreground bg-accent border-border',
+            iconClassName: 'text-foreground',
           };
         case AppFeatureStatus.Failed:
           return {
             icon: XCircle,
             label: 'Failed',
-            className: 'text-red-600 border-red-200',
-            iconClassName: 'text-red-500',
+            className: 'text-destructive border-destructive/30',
+            iconClassName: 'text-destructive',
           };
         default:
           return null;
@@ -102,7 +102,7 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
 
     return (
       <div
-        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all duration-200 bg-bolt-elements-background-depth-2 ${config.className}`}
+        className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border font-medium text-sm transition-colors duration-200 bg-card ${config.className}`}
       >
         {config.showSpinner ? (
           <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
         onClick={handleBackdropClick}
       >
         <motion.div
@@ -134,14 +134,14 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-2xl overflow-hidden"
+          className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-card rounded-md border border-border overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2">
+          <div className="flex items-center justify-between p-6 border-b border-border bg-muted">
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-bolt-elements-textHeading">Integration Tests</h2>
-                <p className="text-bolt-elements-textSecondary mt-1">
+                <h2 className="text-xl font-bold text-foreground">Integration Tests</h2>
+                <p className="text-muted-foreground mt-1">
                   {integrationTests.length} test{integrationTests.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -150,7 +150,7 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
             {/* Close Button */}
             <button
               onClick={closeFeatureModal}
-              className="p-2 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center"
+              className="p-2 rounded-md bg-card text-foreground border border-border hover:bg-accent transition-colors duration-200 flex items-center justify-center"
             >
               <X size={20} strokeWidth={2.5} />
             </button>
@@ -164,28 +164,23 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
                 const testName = formatPascalCaseName(test.name);
 
                 return (
-                  <div
-                    key={test.name}
-                    className="border border-bolt-elements-borderColor rounded-lg bg-bolt-elements-background-depth-2 overflow-hidden"
-                  >
+                  <div key={test.name} className="border border-border rounded-md bg-card overflow-hidden">
                     {/* Test Header - Collapsible */}
                     <button
                       onClick={() => toggleTest(test.name)}
-                      className="w-full flex items-center justify-between p-4 hover:bg-bolt-elements-background-depth-3 transition-colors duration-200"
+                      className="w-full flex items-center justify-between p-4 hover:bg-accent transition-colors duration-200"
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <div className="flex-shrink-0">
                           {isExpanded ? (
-                            <ChevronDown size={20} className="text-bolt-elements-textSecondary" />
+                            <ChevronDown size={20} className="text-muted-foreground" />
                           ) : (
-                            <ChevronRight size={20} className="text-bolt-elements-textSecondary" />
+                            <ChevronRight size={20} className="text-muted-foreground" />
                           )}
                         </div>
                         <div className="flex-1 text-left">
-                          <h3 className="font-semibold text-bolt-elements-textHeading">{testName}</h3>
-                          {test.description && (
-                            <p className="text-sm text-bolt-elements-textSecondary mt-1">{test.description}</p>
-                          )}
+                          <h3 className="font-semibold text-foreground">{testName}</h3>
+                          {test.description && <p className="text-sm text-muted-foreground mt-1">{test.description}</p>}
                         </div>
                         <div className="flex-shrink-0">{renderFeatureStatus(test.status)}</div>
                       </div>
@@ -193,7 +188,7 @@ const IntegrationTestsModalContent: React.FC<IntegrationTestsModalContentProps> 
 
                     {/* Test Details - Expandable */}
                     {isExpanded && (
-                      <div className="p-4 pt-0 border-t border-bolt-elements-borderColor bg-bolt-elements-background-depth-1">
+                      <div className="p-4 pt-0 border-t border-border bg-background">
                         <div className="space-y-6 mt-4">
                           {test.databaseChange &&
                             test.databaseChange.tables &&
@@ -298,37 +293,37 @@ const FeatureModal: React.FC = () => {
           return {
             icon: CreditCard,
             label: 'Payment Required',
-            className: 'text-bolt-elements-textPrimary border-amber-200',
-            iconClassName: 'text-bolt-elements-textPrimary',
+            className: 'text-foreground border-border',
+            iconClassName: 'text-foreground',
           };
         case AppFeatureStatus.NotStarted:
           return {
             icon: Hourglass,
             label: 'Pending',
-            className: 'text-bolt-elements-textPrimary border-gray-200',
-            iconClassName: 'text-bolt-elements-textPrimary',
+            className: 'text-muted-foreground border-border',
+            iconClassName: 'text-muted-foreground',
           };
         case AppFeatureStatus.ImplementationInProgress:
           return {
             icon: Loader2,
             label: 'In Progress',
-            className: 'text-blue-600 bg-blue-50 border-blue-200',
-            iconClassName: 'text-blue-500',
+            className: 'text-foreground bg-accent border-border',
+            iconClassName: 'text-foreground',
             showSpinner: true,
           };
         case AppFeatureStatus.Implemented:
           return {
             icon: CheckCircle,
             label: 'Complete',
-            className: 'text-green-600 bg-green-50 border-green-200',
-            iconClassName: 'text-green-500',
+            className: 'text-foreground bg-accent border-border',
+            iconClassName: 'text-foreground',
           };
         case AppFeatureStatus.Failed:
           return {
             icon: XCircle,
             label: 'Failed',
-            className: 'text-red-600 border-red-200',
-            iconClassName: 'text-red-500',
+            className: 'text-destructive border-destructive/30',
+            iconClassName: 'text-destructive',
           };
         default:
           return null;
@@ -342,7 +337,7 @@ const FeatureModal: React.FC = () => {
 
     return (
       <div
-        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border font-medium text-sm transition-all duration-200 bg-bolt-elements-background-depth-2 ${config.className}`}
+        className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border font-medium text-sm transition-colors duration-200 bg-card ${config.className}`}
       >
         {config.showSpinner ? (
           <div className="flex items-center gap-2">
@@ -382,7 +377,7 @@ const FeatureModal: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
             onClick={handleBackdropClick}
           >
             <motion.div
@@ -390,14 +385,14 @@ const FeatureModal: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor shadow-2xl overflow-hidden"
+              className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-card rounded-md border border-border overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-2">
+              <div className="flex items-center justify-between p-6 border-b border-border bg-muted">
                 <div className="flex items-center gap-4 flex-1">
                   {/* Feature Info */}
                   <div className="flex-1 pr-4">
-                    <h2 className="flex items-center gap-4 text-xl font-bold text-bolt-elements-textHeading">
+                    <h2 className="flex items-center gap-4 text-xl font-bold text-foreground">
                       {name}
                       <div className="flex-shrink-0">{renderFeatureStatus(status)}</div>
 
@@ -405,7 +400,7 @@ const FeatureModal: React.FC = () => {
                     </h2>
                     {description && (
                       <WithTooltip tooltip={description} maxWidth={400}>
-                        <p className="text-bolt-elements-textSecondary mt-1 line-clamp-2">{description}</p>
+                        <p className="text-muted-foreground mt-1 line-clamp-2">{description}</p>
                       </WithTooltip>
                     )}
                   </div>
@@ -414,7 +409,7 @@ const FeatureModal: React.FC = () => {
                 {/* Close Button */}
                 <button
                   onClick={closeFeatureModal}
-                  className="p-2 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center"
+                  className="p-2 rounded-md bg-card text-foreground border border-border hover:bg-accent transition-colors duration-200 flex items-center justify-center"
                 >
                   <X size={20} strokeWidth={2.5} />
                 </button>

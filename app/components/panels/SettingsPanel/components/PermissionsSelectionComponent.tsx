@@ -398,7 +398,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
               </p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-9 px-3 flex items-center bg-background rounded-md border border-bolt-elements-borderColor text-sm text-bolt-elements-textPrimary truncate">
-                  nut.new/app/{appId}
+                  builder.replay.io/app/{appId}
                 </div>
                 <TooltipProvider>
                   <WithTooltip tooltip="Copy URL">

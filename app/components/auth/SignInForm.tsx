@@ -4,6 +4,7 @@ import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
 import { LogIn } from '~/components/ui/Icon';
 import { authModalStore } from '~/lib/stores/authModal';
+import { Button } from '~/components/ui/button';
 
 interface SignInFormProps {
   onToggleForm: () => void;
@@ -99,31 +100,30 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
   return (
     <>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-lg">
-          <LogIn className="text-blue-500" size={24} />
+        <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
+          <LogIn className="text-bolt-elements-textPrimary" size={24} />
         </div>
         <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Welcome Back</h2>
         <p className="text-bolt-elements-textSecondary mt-2">Sign in to continue building amazing apps</p>
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isProcessing}
-        className="w-full mb-6 p-4 flex items-center justify-center gap-3 bg-white text-gray-800 rounded-xl hover:bg-gray-50 disabled:opacity-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] group font-medium"
+        variant="outline"
+        className="w-full mb-6 h-12 flex items-center justify-center gap-3"
       >
         <GoogleIcon />
-        <span className="transition-transform duration-200 group-hover:scale-105">
-          {isProcessing ? 'Processing...' : 'Continue with Google'}
-        </span>
-      </button>
+        <span>{isProcessing ? 'Processing...' : 'Continue with Google'}</span>
+      </Button>
 
       <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-bolt-elements-borderColor border-opacity-50"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor border-opacity-30 shadow-sm">
+          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor border-opacity-30">
             Or continue with email
           </span>
         </div>
@@ -139,12 +139,12 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            className="w-full p-4 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
             placeholder="Enter your email"
             required
           />
           {email !== '' && !isEmailValid && (
-            <div className="mt-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            <div className="mt-2 text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md border border-destructive/20">
               Please enter a valid email address
             </div>
           )}
@@ -159,43 +159,31 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 shadow-sm focus:shadow-md"
+            className="w-full p-4 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
             placeholder="Enter your password"
             required
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={isProcessing || disabled}
-          className="w-full py-4 !bg-gradient-to-r !from-blue-500 !to-indigo-500 hover:!from-blue-600 hover:!to-indigo-600 text-white rounded-xl disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:hover:shadow-lg disabled:hover:scale-100 border border-white/20 hover:border-white/30 disabled:opacity-60 group"
-        >
-          <span className="transition-transform duration-200 group-hover:scale-105">
-            {isProcessing ? 'Signing In...' : 'Sign In'}
-          </span>
-        </button>
+        <Button type="submit" disabled={isProcessing || disabled} className="w-full h-12" size="lg">
+          {isProcessing ? 'Signing In...' : 'Sign In'}
+        </Button>
       </form>
 
       {onForgotPassword && (
         <div className="mt-6 text-center">
-          <button
-            onClick={onForgotPassword}
-            className="text-blue-500 hover:text-blue-600 font-medium bg-transparent text-sm transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-blue-500/10"
-          >
+          <Button onClick={onForgotPassword} variant="link" className="text-sm">
             Forgot password?
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
-        <p className="text-bolt-elements-textSecondary">
+      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
+        <p className="text-bolt-elements-textSecondary text-sm">
           Don't have an account?{' '}
-          <button
-            onClick={onToggleForm}
-            className="text-blue-500 hover:text-blue-600 font-semibold bg-transparent transition-all duration-200 hover:scale-105 px-2 py-1 rounded-lg hover:bg-blue-500/10"
-          >
+          <Button onClick={onToggleForm} variant="link" className="p-0 h-auto font-semibold">
             Sign Up
-          </button>
+          </Button>
         </p>
       </div>
     </>

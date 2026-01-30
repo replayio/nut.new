@@ -174,7 +174,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
     <div className="space-y-4">
       {/* Section Header */}
       <div>
-        <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Application Visibility & Permissions</h3>
+        <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Application Visibility</h3>
         <p className="text-sm text-bolt-elements-textSecondary mt-1">
           Control who can view or access your application.
         </p>

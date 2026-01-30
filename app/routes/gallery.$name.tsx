@@ -832,10 +832,10 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button whitespace-nowrap"
+                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
                       >
-                        <Rocket size={18} className="mr-2 relative z-10" />
-                        <span className="relative z-10">Be an early adopter</span>
+                        <Rocket size={18} className="mr-2" />
+                        <span>Be an early adopter</span>
                       </Button>
                     </div>
                   )}
@@ -1025,10 +1025,10 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full bg-purple-500 hover:bg-purple-600 text-white border-purple-500 hover:border-purple-600 relative overflow-hidden shiny-button whitespace-nowrap"
+                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
                       >
-                        <Rocket size={18} className="mr-2 relative z-10" />
-                        <span className="relative z-10">Be an early adopter</span>
+                        <Rocket size={18} className="mr-2" />
+                        <span>Be an early adopter</span>
                       </Button>
                     </div>
                   )}

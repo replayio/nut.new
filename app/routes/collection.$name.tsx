@@ -60,15 +60,11 @@ const LoadingSkeleton: React.FC<{ isSmallViewport?: boolean; isSidebarCollapsed?
     )}
   >
     <div className="w-full max-w-7xl mx-auto">
-      <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl overflow-hidden shadow-xl animate-fade-in">
+      <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
         <div className="p-8">
           <div className="flex flex-col items-center justify-center gap-6 py-16">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-bolt-elements-borderColor border-t-rose-500 animate-spin" />
-              <div
-                className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-pink-500/30 animate-spin"
-                style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}
-              />
+              <div className="w-16 h-16 rounded-full border-4 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary animate-spin" />
             </div>
             <div className="text-center">
               <p className="text-bolt-elements-textPrimary font-medium mb-1">Loading collection...</p>
@@ -204,17 +200,17 @@ function CollectionPageContent() {
             {/* Content */}
             <div
               className={classNames(
-                'max-w-7xl mx-auto py-6 sm:py-8 transition-all duration-300',
+                'max-w-7xl mx-auto sm:py-8 transition-all duration-300',
                 !isSmallViewport
                   ? isSidebarCollapsed
                     ? 'md:pl-[calc(60px+1.5rem)] md:pr-6'
                     : 'md:pl-[calc(260px+1.5rem)] md:pr-6'
-                  : 'px-4 sm:px-6',
+                  : 'sm:px-6',
               )}
             >
-              <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl overflow-hidden shadow-xl animate-fade-in">
+              <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
                 {/* Header */}
-                <div className="relative bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent p-6 border-b border-bolt-elements-borderColor">
+                <div className="relative p-6 border-b border-bolt-elements-borderColor">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
                       <h2 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">
@@ -228,7 +224,7 @@ function CollectionPageContent() {
                 {/* Content */}
                 <div className="p-6">
                   {error && (
-                    <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm">
+                    <div className="mb-6 p-4 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                       {error}. Showing basic information instead.
                     </div>
                   )}
@@ -319,9 +315,9 @@ function CollectionPageContent() {
                 : 'sm:px-6',
             )}
           >
-            <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden shadow-xl animate-fade-in">
+            <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
               {/* Header */}
-              <div className="relative bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent p-6 border-b border-bolt-elements-borderColor">
+              <div className="relative p-6 border-b border-bolt-elements-borderColor">
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
                     <h2 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">{displayData.name}</h2>
@@ -365,11 +361,11 @@ function CollectionPageContent() {
                           <button
                             key={index}
                             onClick={() => handleAppClick(matchingApp)}
-                            className="w-full text-left group bg-gradient-to-br from-bolt-elements-background-depth-2 to-bolt-elements-background-depth-1 rounded-xl p-5 border border-bolt-elements-borderColor hover:border-rose-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/5"
+                            className="w-full text-left group bg-bolt-elements-background-depth-1 rounded-md p-5 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 transition-colors"
                           >
                             <div className="flex items-start gap-4">
                               {matchingApp.screenshotURL && (
-                                <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-bolt-elements-borderColor">
+                                <div className="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden border border-bolt-elements-borderColor">
                                   <img
                                     src={matchingApp.screenshotURL}
                                     alt={matchingApp.name}
@@ -378,14 +374,14 @@ function CollectionPageContent() {
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-base font-semibold text-bolt-elements-textPrimary mb-1.5 group-hover:text-rose-500 transition-colors">
+                                <h4 className="text-base font-semibold text-bolt-elements-textPrimary mb-1.5 group-hover:text-bolt-elements-textHeading transition-colors">
                                   {matchingApp.name}
                                 </h4>
                                 <p className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                                   {collectionApp.description || matchingApp.shortDescription}
                                 </p>
                               </div>
-                              <div className="flex-shrink-0 text-bolt-elements-textSecondary group-hover:text-rose-500 transition-colors">
+                              <div className="flex-shrink-0 text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors">
                                 <svg
                                   className="w-5 h-5"
                                   fill="none"

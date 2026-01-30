@@ -12,6 +12,7 @@ import { classNames } from '~/utils/classNames';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
 import { useIsMobile } from '~/lib/hooks/useIsMobile';
 import { Info, Gift, Rocket, Check, Sparkles } from '~/components/ui/Icon';
+import { Button } from '~/components/ui/button';
 
 export function SubscriptionModal() {
   const { isMobile } = useIsMobile();
@@ -48,18 +49,18 @@ export function SubscriptionModal() {
   };
 
   return (
-    <div className="bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <div
         className={classNames(
-          'bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor shadow-2xl max-w-6xl w-full h-full overflow-y-auto',
+          'bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor max-w-6xl w-full h-full overflow-y-auto',
           {
-            'rounded-b-2xl': isMobile,
-            'rounded-r-2xl': !isMobile,
+            'rounded-b-md': isMobile,
+            'rounded-r-md': !isMobile,
           },
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor border-opacity-50">
+        <div className="flex items-center justify-between p-6 border-b border-bolt-elements-borderColor">
           <div>
             <h2 className="text-2xl font-bold text-bolt-elements-textHeading">Choose Your Plan</h2>
             <p className="text-sm text-bolt-elements-textSecondary mt-1">
@@ -81,51 +82,35 @@ export function SubscriptionModal() {
                 <div
                   key={tier}
                   className={classNames(
-                    'relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-105 group min-h-[400px] flex flex-col',
+                    'relative p-6 rounded-md border transition-colors min-h-[400px] flex flex-col',
                     {
-                      'border-rose-400/60 bg-gradient-to-br from-rose-50/80 to-pink-50/60 shadow-xl ring-2 ring-rose-200/40 dark:from-rose-900/10 dark:to-pink-900/5 dark:ring-rose-500/20':
-                        isCurrentTier,
-                      'border-bolt-elements-borderColor border-opacity-50 bg-gradient-to-br from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 shadow-sm':
+                      'border-primary bg-accent': isCurrentTier,
+                      'border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2':
                         !isCurrentTier,
-                      'hover:border-bolt-elements-borderColor border-opacity-70 hover:shadow-lg': !isCurrentTier,
                     },
                   )}
                 >
                   {isCurrentTier && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border border-rose-400/50 whitespace-nowrap">
+                      <span className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">
                         ✓ Current Subscription
                       </span>
                     </div>
                   )}
 
                   <div className="text-center mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-bolt-elements-background-depth-3/50 to-bolt-elements-background-depth-2/30 border border-bolt-elements-borderColor border-opacity-30 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+                    <div className="w-12 h-12 mx-auto mb-4 rounded-md bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor flex items-center justify-center">
                       {isFree ? (
-                        <Gift
-                          className="text-rose-500 transition-transform duration-300 group-hover:scale-110"
-                          size={24}
-                        />
+                        <Gift className="text-bolt-elements-textPrimary" size={20} />
                       ) : (
-                        <Rocket
-                          className="text-blue-500 transition-transform duration-300 group-hover:scale-110"
-                          size={24}
-                        />
+                        <Rocket className="text-bolt-elements-textPrimary" size={20} />
                       )}
                     </div>
-                    <h3
-                      className={classNames(
-                        'text-xl font-bold mb-3 transition-transform duration-300 group-hover:scale-105',
-                        {
-                          'text-rose-700 dark:text-rose-400': isCurrentTier,
-                          'text-bolt-elements-textHeading': !isCurrentTier,
-                        },
-                      )}
-                    >
+                    <h3 className="text-xl font-bold mb-3 text-bolt-elements-textHeading">
                       {details.name}
-                      {isCurrentTier && <span className="ml-2 text-rose-500">✓</span>}
+                      {isCurrentTier && <span className="ml-2">✓</span>}
                     </h3>
-                    <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2 transition-transform duration-300 group-hover:scale-105">
+                    <div className="text-4xl font-bold text-bolt-elements-textHeading mb-2">
                       ${details.price}
                       <span className="text-lg font-normal text-bolt-elements-textSecondary">/month</span>
                     </div>
@@ -136,87 +121,71 @@ export function SubscriptionModal() {
 
                   <div className="space-y-3 mb-8 flex-grow">
                     {details.features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-3 group/feature">
-                        <div className="w-6 h-6 rounded-lg bg-rose-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-rose-500/30 transition-all duration-200 group-hover/feature:scale-110 group-hover/feature:bg-rose-500/30">
-                          <Check
-                            className="text-rose-500 transition-transform duration-200 group-hover/feature:scale-110"
-                            size={14}
-                          />
+                      <div key={index} className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center mt-0.5 flex-shrink-0 border border-bolt-elements-borderColor">
+                          <Check className="text-bolt-elements-textPrimary" size={12} />
                         </div>
-                        <span className="text-sm text-bolt-elements-textSecondary leading-relaxed transition-colors duration-200 group-hover/feature:text-bolt-elements-textPrimary">
-                          {feature}
-                        </span>
+                        <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">{feature}</span>
                       </div>
                     ))}
                   </div>
 
                   <div className="mt-auto">
-                    <button
+                    <Button
                       onClick={!stripeSubscription ? () => handleSubscribe(tier) : () => handleManageSubscription()}
                       disabled={isCurrentTier || isLoading}
-                      className={classNames(
-                        'w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl group/btn min-h-[56px]',
-                        {
-                          'bg-gradient-to-r from-rose-500/20 to-pink-500/20 text-rose-600 border border-rose-500/30 cursor-not-allowed':
-                            isCurrentTier,
-                          'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border border-rose-500/50 hover:border-rose-400 hover:scale-105':
-                            !isCurrentTier && !isLoading,
-                          'opacity-50 cursor-not-allowed hover:scale-100': isLoading,
-                        },
-                      )}
+                      variant={isCurrentTier ? 'outline' : 'default'}
+                      className="w-full h-12"
                     >
                       {isLoading && (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin mr-2"></div>
                       )}
-                      <span className="transition-transform duration-300 group-hover/btn:scale-105">
-                        {isCurrentTier
-                          ? '✓ Current Plan'
-                          : isLoading
-                            ? 'Processing...'
-                            : tier === 'free'
-                              ? 'Downgrade Subscription'
-                              : 'Upgrade Subscription'}
-                      </span>
-                    </button>
+                      {isCurrentTier
+                        ? '✓ Current Plan'
+                        : isLoading
+                          ? 'Processing...'
+                          : tier === 'free'
+                            ? 'Downgrade Subscription'
+                            : 'Upgrade Subscription'}
+                    </Button>
                   </div>
                 </div>
               );
             })}
 
-            <div className="relative overflow-hidden min-h-[400px]">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
-              <div className="relative h-full p-6 rounded-2xl bg-gradient-to-r from-bolt-elements-background-depth-2/80 to-bolt-elements-background-depth-3/80 border border-indigo-500/20 shadow-lg backdrop-blur-sm flex flex-col">
+            <div className="relative min-h-[400px]">
+              <div className="h-full p-6 rounded-md bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor flex flex-col">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 shadow-lg">
-                    <Sparkles className="text-indigo-500" size={24} />
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center border border-bolt-elements-borderColor">
+                    <Sparkles className="text-bolt-elements-textPrimary" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">Pro</h3>
-                  <div className="text-2xl font-bold text-indigo-500 mb-2">Coming Soon</div>
+                  <div className="text-2xl font-bold text-muted-foreground mb-2">Coming Soon</div>
                   <p className="text-sm text-bolt-elements-textSecondary leading-relaxed px-2">
                     Build apps effortlessly
                   </p>
                 </div>
 
                 <div className="space-y-3 mb-8 flex-grow">
-                  <div className="flex items-start gap-3 group/feature">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-indigo-500/30">
-                      <Sparkles className="text-indigo-500" size={14} />
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center mt-0.5 flex-shrink-0 border border-bolt-elements-borderColor">
+                      <Sparkles className="text-bolt-elements-textPrimary" size={12} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                       Guaranteed Reliability
                     </span>
                   </div>
-                  <div className="flex items-start gap-3 group/feature">
-                    <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-pink-500/30">
-                      <Sparkles className="text-pink-500" size={14} />
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center mt-0.5 flex-shrink-0 border border-bolt-elements-borderColor">
+                      <Sparkles className="text-bolt-elements-textPrimary" size={12} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">
                       Up Front App Prices
                     </span>
                   </div>
-                  <div className="flex items-start gap-3 group/feature">
-                    <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center mt-0.5 flex-shrink-0 border border-purple-500/30">
-                      <Sparkles className="text-purple-500" size={14} />
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center mt-0.5 flex-shrink-0 border border-bolt-elements-borderColor">
+                      <Sparkles className="text-bolt-elements-textPrimary" size={12} />
                     </div>
                     <span className="text-sm text-bolt-elements-textSecondary leading-relaxed">Priority Support</span>
                   </div>
@@ -227,10 +196,10 @@ export function SubscriptionModal() {
         </div>
 
         <div className="px-6 sm:px-8 pt-2 pb-6">
-          <div className="p-4 sm:p-6 bg-gradient-to-r from-bolt-elements-background-depth-2/30 to-bolt-elements-background-depth-3/20 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm">
+          <div className="p-4 sm:p-6 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor">
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center mt-1 flex-shrink-0 border border-blue-500/30 shadow-sm">
-                <Info className="text-blue-500" size={18} />
+              <div className="w-8 h-8 rounded-md bg-bolt-elements-background-depth-2 flex items-center justify-center mt-1 flex-shrink-0 border border-bolt-elements-borderColor">
+                <Info className="text-bolt-elements-textPrimary" size={16} />
               </div>
               <div className="text-sm text-bolt-elements-textSecondary">
                 <p className="font-semibold text-bolt-elements-textHeading mb-3 text-base">Important Notes:</p>
