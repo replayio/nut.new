@@ -7,7 +7,6 @@ import { formatPascalCaseName } from '~/utils/names';
 import { BugReportComponent } from '~/components/chat/BugReportComponent';
 import type { BugReport } from '~/lib/persistence/messageAppSummary';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
-import WithTooltip from './Tooltip';
 // import { CheckCircle, Loader } from '~/components/icons';
 
 const infoCardVariants = cva(
@@ -139,11 +138,7 @@ const InfoCard = React.forwardRef<HTMLDivElement, InfoCardProps>(
               <h3 className="font-semibold text-sm leading-tight text-popover-foreground">
                 {title ? formatPascalCaseName(title) : ''}
               </h3>
-              {description && (
-                <WithTooltip tooltip={description} maxWidth={400}>
-                  <p className="text-sm mt-1 truncate text-muted-foreground">{description}</p>
-                </WithTooltip>
-              )}
+              {description && <p className="text-sm mt-1 truncate text-muted-foreground">{description}</p>}
             </div>
 
             {/* Action Button */}
