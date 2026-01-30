@@ -661,7 +661,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 function getPlaceholderText(chatStarted: boolean, hasAppSummary: boolean) {
   if (!chatStarted) {
     // There is no app and no messages have been sent yet.
-    return 'What would you like Replay Builder to build? Click here';
+    return 'What would you like Replay Builder to build?';
   }
 
   if (!hasAppSummary) {
