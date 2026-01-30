@@ -56,9 +56,9 @@ const Tests = ({ featureTests, status }: TestsProps) => {
                 </div>
                 <div
                   className={classNames('text-xs font-medium px-2 py-1 rounded-md flex-shrink-0 border', {
-                    'text-foreground bg-accent border-border': displayStatus === 'Pass',
+                    'text-foreground bg-accent border-border':
+                      displayStatus === 'Pass' || displayStatus === 'InProgress',
                     'text-destructive bg-destructive/10 border-destructive/30': displayStatus === 'Fail',
-                    'text-foreground bg-accent border-border': displayStatus === 'InProgress',
                     'text-muted-foreground bg-muted border-border': displayStatus === 'NotRun',
                   })}
                 >
