@@ -94,7 +94,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
 
-    console.log('appsummary', appSummary);
     const loadEntries = useCallback(() => {
       database
         .getAllAppEntries()
