@@ -9,6 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
+import WithTooltip from '~/components/ui/Tooltip';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 export function includeHistorySummary(summary: AppSummary): boolean {
   if (!summary.reason) {
@@ -231,35 +233,43 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
             </div>
 
             {/* Table Rows */}
-            {paginatedHistory.map((summary, index) => {
-              const isCurrentVersion = currentVersion && summary.iteration === currentVersion.iteration;
-              return (
-                <div
-                  key={summary.iteration || index}
-                  className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 border-b border-bolt-elements-borderColor last:border-b-0 hover:bg-bolt-elements-background-depth-2 transition-colors"
-                >
-                  <span className="text-sm font-medium text-bolt-elements-textPrimary">
-                    {summary.version || '0.0.0'}
-                  </span>
-                  <span className="text-sm text-bolt-elements-textSecondary truncate">
-                    {getFormattedDateTime(summary.time)}
-                  </span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-3 transition-colors">
-                      <MoreHorizontal size={16} className="text-bolt-elements-textSecondary" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleOpenPreview(summary)}>Open preview</DropdownMenuItem>
-                      {!isCurrentVersion && (
-                        <DropdownMenuItem onClick={() => handleRevertToVersion(summary)}>
-                          Revert to this version
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              );
-            })}
+            <TooltipProvider>
+              {paginatedHistory.map((summary, index) => {
+                const isCurrentVersion = currentVersion && summary.iteration === currentVersion.iteration;
+                const featureName = getReasonText(summary.reason, history);
+                return (
+                  <div
+                    key={summary.iteration || index}
+                    className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 border-b border-bolt-elements-borderColor last:border-b-0 hover:bg-bolt-elements-background-depth-2 transition-colors"
+                  >
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-medium text-bolt-elements-textPrimary">
+                        {summary.version || '0.0.0'}
+                      </span>
+                      <WithTooltip tooltip={featureName}>
+                        <span className="text-xs text-bolt-elements-textSecondary truncate">{featureName}</span>
+                      </WithTooltip>
+                    </div>
+                    <span className="text-sm text-bolt-elements-textSecondary truncate self-center">
+                      {getFormattedDateTime(summary.time)}
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-3 transition-colors self-center">
+                        <MoreHorizontal size={16} className="text-bolt-elements-textSecondary" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleOpenPreview(summary)}>Open preview</DropdownMenuItem>
+                        {!isCurrentVersion && (
+                          <DropdownMenuItem onClick={() => handleRevertToVersion(summary)}>
+                            Revert to this version
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                );
+              })}
+            </TooltipProvider>
           </div>
         )}
       </div>
