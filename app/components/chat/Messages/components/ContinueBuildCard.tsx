@@ -36,15 +36,15 @@ export const ContinueBuildCard: React.FC<ContinueBuildCardProps> = ({
 
   return (
     <div className="w-full mt-5">
-      <div className="bg-gradient-to-br from-green-500/5 via-emerald-500/5 to-teal-500/5 border border-green-500/20 rounded-2xl p-6 transition-all duration-300 hover:border-green-500/30 hover:shadow-lg">
+      <div className="bg-card border border-border rounded-md p-6 transition-colors hover:bg-accent/50">
         <div className="flex flex-col items-center text-center space-y-4">
-          <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-full shadow-lg">
-            <Rocket className="text-white" size={24} />
+          <div className="flex items-center justify-center w-12 h-12 bg-foreground text-background rounded-md">
+            <Rocket className="text-background" size={24} />
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Continue Building Your App!</h3>
-            <p className="text-bolt-elements-textSecondary text-sm max-w-md">
+            <h3 className="text-lg font-semibold text-foreground">Continue Building Your App!</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
               Ready to continue building your app? Click the button below to pick up where you left off.
             </p>
           </div>
