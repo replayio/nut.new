@@ -42,6 +42,7 @@ import { sidebarPanelStore } from '~/lib/stores/sidebarPanel';
 import { designPanelStore } from '~/lib/stores/designSystemStore';
 import { TopNav } from '~/components/chat/TopNav';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
+import { useSearchParams } from '@remix-run/react';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -93,6 +94,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
+    const urlSearchParams = useSearchParams();
+    const prompt = urlSearchParams[0]?.get('prompt');
+    const appPath = urlSearchParams[0]?.get('appPath');
 
     const loadEntries = useCallback(() => {
       database
@@ -122,6 +126,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     });
 
     const hasShownWorkbench = useRef(false);
+
+    useEffect(() => {
+      if (prompt && appPath) {
+        sendMessage?.({
+          messageInput: prompt,
+          chatMode: ChatMode.UserMessage,
+          referenceAppPath: appPath,
+        });
+      }
+    }, [appSummary]);
 
     useEffect(() => {
       if (appSummary && !showWorkbench && !hasShownWorkbench.current) {
