@@ -296,20 +296,16 @@ function GalleryPageContent() {
       // Report the customize action
       reportTrackerAppCopy(appPath, 'customize', user?.email);
 
-      // Create a new app with the reference app path
-      const appId = await database.createApp(appPath);
-
       window.analytics?.track('Customized Reference App', {
         userId: user?.id,
         email: user?.email,
         referenceAppPath: app?.referenceAppPath,
-        appId,
       });
 
       // Navigate to the app with a prompt parameter
       const url = new URL(window.location.origin);
-      url.pathname = `/app/${appId}`;
       url.searchParams.set('prompt', `Build me a new app based on '${appName}'`);
+      url.searchParams.set('appPath', appPath);
       window.location.href = url.toString();
     } catch (error) {
       console.error('Failed to create app:', error);
