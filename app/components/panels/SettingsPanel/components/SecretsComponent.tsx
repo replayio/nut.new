@@ -17,6 +17,7 @@ const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }) => {
   const allSecrets = appSummary?.secrets ?? [];
   const [setSecrets, setSetSecrets] = useState<string[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
   const pendingSecrets = requiredSecrets.filter((secret) => !setSecrets.includes(secret.name));
@@ -26,15 +27,34 @@ export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }
 
   useEffect(() => {
     const fetchSetSecrets = async () => {
+      setIsLoaded(false);
       const appSetSecrets = await getAppSetSecrets(appId);
       setSetSecrets(appSetSecrets);
+      setIsLoaded(true);
     };
     fetchSetSecrets();
-  }, [appSummary]);
+  }, [appSummary, appId]);
 
   // Only show component if there are required secrets
   if (requiredSecrets.length === 0) {
     return null;
+  }
+
+  // Show loading state while fetching configured secrets
+  if (!isLoaded) {
+    return (
+      <div className="p-4 border border-border rounded-md bg-card">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Secrets Configuration</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const allConfigured = pendingSecrets.length === 0;

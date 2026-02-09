@@ -100,6 +100,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
     const [configuredSecrets, setConfiguredSecrets] = useState<string[]>([]);
+    const [isSecretsLoaded, setIsSecretsLoaded] = useState(false);
     const urlSearchParams = useSearchParams();
     const prompt = urlSearchParams[0]?.get('prompt');
     const appPath = urlSearchParams[0]?.get('appPath');
@@ -162,20 +163,24 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       const fetchConfiguredSecrets = async () => {
         const appId = chatStore.currentAppId.get();
 
+        // Reset loaded state when appSummary changes
+        setIsSecretsLoaded(false);
+
         if (appId && appSummary?.secrets?.length) {
           const secrets = await getAppSetSecrets(appId);
           setConfiguredSecrets(secrets);
         } else {
           setConfiguredSecrets([]);
         }
+
+        // Mark secrets as loaded after fetch completes
+        setIsSecretsLoaded(true);
       };
       fetchConfiguredSecrets();
     }, [appSummary]);
 
     useEffect(() => {
       const newCards: InfoCardData[] = [];
-
-
 
       // Add feature cards
       if (appSummary?.features) {
@@ -270,14 +275,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
       newCards.push(...bugReportCards);
 
-      // Add secrets card if there are unconfigured secrets
-      if (appSummary?.secrets?.length) {
+      // Add secrets card if there are unconfigured secrets (only after secrets have been loaded)
+      if (isSecretsLoaded && appSummary?.secrets?.length) {
         const allSecrets = appSummary.secrets;
         const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
         const pendingSecrets = requiredSecrets.filter((secret) => !configuredSecrets.includes(secret.name));
 
         if (pendingSecrets.length > 0) {
-          newCards.push({
+          // Insert secrets card at the beginning so it shows first
+          newCards.unshift({
             id: 'secrets-configuration',
             title: 'Secrets Configuration Required',
             description: `${pendingSecrets.length} of ${requiredSecrets.length} secret${requiredSecrets.length === 1 ? '' : 's'} need${pendingSecrets.length === 1 ? 's' : ''} configuration`,
@@ -292,7 +298,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
 
       setInfoCards(newCards);
-    }, [appSummary, configuredSecrets]);
+    }, [appSummary, configuredSecrets, isSecretsLoaded]);
 
     const getComponentReference = useCallback(() => {
       if (!selectedElement?.tree?.length) {
