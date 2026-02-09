@@ -3,7 +3,7 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import * as React from 'react';
-import { Markdown } from '~/components/chat/Markdown';
+import { MarkdownWithCheckboxes } from '~/components/chat/MarkdownWithCheckboxes';
 import { AttachmentDisplay } from './AttachmentDisplay';
 import type { Message } from '~/lib/persistence/message';
 import {
@@ -23,6 +23,7 @@ import {
 import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
 import { autoFenceCodeBlocks } from '~/utils/markdown-preprocessor';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
+import { parseCheckboxContent } from '~/components/chat/CheckboxForm';
 
 interface MessageContentsProps {
   message: Message;
@@ -31,7 +32,7 @@ interface MessageContentsProps {
   sendMessage?: (params: ChatMessageParams) => void;
 }
 
-export function MessageContents({ message, messages = [], onCheckboxChange, sendMessage }: MessageContentsProps) {
+export function MessageContents({ message, messages = [], sendMessage }: MessageContentsProps) {
   const componentNames = message.componentReference?.componentNames || [];
 
   const isReactComponent = (name: string) => name && name[0] === name[0].toUpperCase();
@@ -55,6 +56,65 @@ export function MessageContents({ message, messages = [], onCheckboxChange, send
     }
     return message.content;
   }, [message.content, message.role]);
+
+  // Check if this message has checkboxes
+  const hasCheckboxes = React.useMemo(() => {
+    const parsed = parseCheckboxContent(processedContent);
+    return parsed.hasCheckboxes;
+  }, [processedContent]);
+
+  // Find the index of this message in the messages array
+  const messageIndex = React.useMemo(() => {
+    return messages.findIndex((m) => m.id === message.id);
+  }, [messages, message.id]);
+
+  // Get the next user message after this checkbox message (if any)
+  // This user message contains the checkbox selections
+  // Note: There may be other assistant messages (like DiscoveryRating) between the checkbox message and user response
+  const nextUserMessage = React.useMemo(() => {
+    if (!hasCheckboxes || messageIndex === -1) {
+      return null;
+    }
+
+    // Search for the first user message after this checkbox message
+    for (let i = messageIndex + 1; i < messages.length; i++) {
+      const msg = messages[i];
+      if (msg.role === 'user') {
+        return msg;
+      }
+    }
+
+    return null;
+  }, [hasCheckboxes, messageIndex, messages]);
+
+  // Parse the user message content to extract selections
+  // Each selection is on a separate line in the format: "displayText - description"
+  const existingSelections = React.useMemo(() => {
+    if (!nextUserMessage) {
+      return undefined;
+    }
+
+    // Split by newlines and filter empty lines
+    const selections = nextUserMessage.content
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    return selections.length > 0 ? selections : undefined;
+  }, [nextUserMessage]);
+
+  // Checkbox form is read-only if there's a user message after it (indicating submission)
+  const isReadOnly = !!nextUserMessage;
+
+  // Handle checkbox form submission - just send the message, no Supabase needed
+  const handleCheckboxSubmit = React.useCallback(
+    (params: ChatMessageParams) => {
+      if (sendMessage) {
+        sendMessage(params);
+      }
+    },
+    [sendMessage],
+  );
 
   return (
     <div data-testid="message-content" className="overflow-hidden">
@@ -119,15 +179,15 @@ export function MessageContents({ message, messages = [], onCheckboxChange, send
         </div>
       )}
       <div className="prose prose-sm max-w-none text-bolt-elements-textPrimary">
-        <Markdown
+        <MarkdownWithCheckboxes
           html
           message={message}
-          messages={messages}
-          onCheckboxChange={onCheckboxChange}
-          onChecklistSubmit={sendMessage}
+          existingSelections={existingSelections}
+          isReadOnly={isReadOnly}
+          onChecklistSubmit={hasCheckboxes ? handleCheckboxSubmit : undefined}
         >
           {processedContent}
-        </Markdown>
+        </MarkdownWithCheckboxes>
       </div>
       {message.attachments && message.attachments.length > 0 && (
         <div className="mt-3 space-y-2">
