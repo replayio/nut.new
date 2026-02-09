@@ -28,30 +28,24 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
         className={cn(
           // Base styles - 56x56, flex column, centered
           'group relative flex flex-col items-center justify-center',
-          'w-14 h-14 gap-2 rounded-lg',
+          'w-14 h-14 gap-2 rounded-md',
           'text-sm font-medium transition-all duration-200',
 
-          // Typography
-          'text-foreground',
-
-          // Default shadow (xs shadow from Figma)
-          'shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]',
-
-          // Focus styles - 3px ring
+          // Focus styles
           'focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30',
 
           // Disabled state
           'disabled:pointer-events-none disabled:opacity-50',
 
           // Unselected state
-          !isSelected && ['bg-transparent', 'hover:bg-muted/50', 'active:bg-muted/70'],
+          !isSelected && 'bg-transparent text-muted-foreground hover:text-foreground',
 
-          // Selected state
+          // Selected state - matches MobileNav active styling
           isSelected && [
             'bg-background',
-            'border border-input',
-            'shadow-sm',
-            'hover:bg-gradient-to-t hover:from-primary/5 hover:to-transparent',
+            'border border-border',
+            'shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]',
+            'text-rose-500',
           ],
 
           className,
@@ -63,8 +57,7 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
           className={cn(
             'flex items-center justify-center w-5 h-5',
             'transition-colors duration-200',
-            !isSelected && 'text-muted-foreground group-hover:text-foreground',
-            isSelected && 'text-foreground',
+            isSelected && 'text-rose-500',
           )}
         >
           {icon}
@@ -75,8 +68,7 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
           className={cn(
             'text-[11px] leading-none font-medium',
             'transition-colors duration-200',
-            !isSelected && 'text-muted-foreground group-hover:text-foreground',
-            isSelected && 'text-foreground',
+            isSelected && 'text-rose-500',
           )}
         >
           {label}
