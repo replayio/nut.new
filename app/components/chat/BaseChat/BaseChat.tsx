@@ -175,26 +175,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     useEffect(() => {
       const newCards: InfoCardData[] = [];
 
-      // Add secrets card if there are unconfigured secrets
-      if (appSummary?.secrets?.length) {
-        const allSecrets = appSummary.secrets;
-        const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
-        const pendingSecrets = requiredSecrets.filter((secret) => !configuredSecrets.includes(secret.name));
 
-        if (pendingSecrets.length > 0) {
-          newCards.push({
-            id: 'secrets-configuration',
-            title: 'Secrets Configuration Required',
-            description: `${pendingSecrets.length} of ${requiredSecrets.length} secret${requiredSecrets.length === 1 ? '' : 's'} need${pendingSecrets.length === 1 ? 's' : ''} configuration`,
-            iconType: 'warning',
-            variant: 'warning',
-            handleSendMessage,
-            onCardClick: () => {
-              secretsModalStore.open();
-            },
-          });
-        }
-      }
 
       // Add feature cards
       if (appSummary?.features) {
@@ -288,6 +269,27 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       });
 
       newCards.push(...bugReportCards);
+
+      // Add secrets card if there are unconfigured secrets
+      if (appSummary?.secrets?.length) {
+        const allSecrets = appSummary.secrets;
+        const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
+        const pendingSecrets = requiredSecrets.filter((secret) => !configuredSecrets.includes(secret.name));
+
+        if (pendingSecrets.length > 0) {
+          newCards.push({
+            id: 'secrets-configuration',
+            title: 'Secrets Configuration Required',
+            description: `${pendingSecrets.length} of ${requiredSecrets.length} secret${requiredSecrets.length === 1 ? '' : 's'} need${pendingSecrets.length === 1 ? 's' : ''} configuration`,
+            iconType: 'warning',
+            variant: 'warning',
+            handleSendMessage,
+            onCardClick: () => {
+              secretsModalStore.open();
+            },
+          });
+        }
+      }
 
       setInfoCards(newCards);
     }, [appSummary, configuredSecrets]);
