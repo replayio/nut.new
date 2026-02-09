@@ -59,9 +59,7 @@ const Pages = () => {
                 className="bg-card rounded-md border border-border p-5 hover:bg-accent/50 transition-colors group"
               >
                 <div className="gap-2 min-w-0 flex-1">
-                  <div className="text-foreground text-base font-bold">
-                    {formatPascalCaseName(page.name ?? '')}
-                  </div>
+                  <div className="text-foreground text-base font-bold">{formatPascalCaseName(page.name ?? '')}</div>
                   <div className="flex items-center group text-muted-foreground min-w-0">
                     <span>{page.description ?? ''}</span>
                   </div>
