@@ -17,6 +17,37 @@ interface AppTemplatesProps {
   sendMessage: (params: ChatMessageParams) => void;
 }
 
+// Stage priority order (higher index = higher priority)
+const STAGE_PRIORITY: Record<string, number> = {
+  release: 3,
+  beta: 2,
+  alpha: 1,
+};
+
+// Sort apps: Sales CRM first, then by stage (release > beta > alpha), then alphabetically
+const sortApps = (apps: ReferenceAppSummary[]): ReferenceAppSummary[] => {
+  return [...apps].sort((a, b) => {
+    // Sales CRM always comes first
+    if (a.name === 'Sales CRM') {
+      return -1;
+    }
+    if (b.name === 'Sales CRM') {
+      return 1;
+    }
+
+    // Sort by stage priority (release > beta > alpha)
+    const aPriority = STAGE_PRIORITY[a.stage] ?? 0;
+    const bPriority = STAGE_PRIORITY[b.stage] ?? 0;
+
+    if (aPriority !== bPriority) {
+      return bPriority - aPriority; // Higher priority first
+    }
+
+    // Same stage - sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
+};
+
 const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>('All');
   const [showAll, setShowAll] = useState(false);
@@ -93,12 +124,18 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     });
   }, [searchParams, sendMessage, referenceApps]);
 
-  // Filter apps by stage first (before calculating categories)
+  // Filter apps by stage first (before calculating categories), then sort with priority apps first
   const stageFilteredApps = useMemo(() => {
-    if (showAll) {
-      return referenceApps;
+    let apps = referenceApps;
+
+    // Filter out apps without a screenshot
+    apps = apps.filter((app) => app.screenshotURL);
+
+    if (!showAll) {
+      apps = apps.filter((app) => ['alpha', 'beta', 'release'].includes(app.stage));
     }
-    return referenceApps.filter((app) => ['alpha', 'beta', 'release'].includes(app.stage));
+
+    return sortApps(apps);
   }, [referenceApps, showAll]);
 
   const categories = useMemo(() => {
