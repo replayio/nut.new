@@ -11,6 +11,14 @@ interface AppEventStartFeature {
   why: 'implement' | 'validate';
 }
 
+interface AppEventStartMockup {
+  name: 'start-mockup';
+}
+
+interface AppEventWriteMockupTests {
+  name: 'write-mockup-tests';
+}
+
 interface AppEventRunTests {
   name: 'run-tests';
 }
@@ -44,12 +52,29 @@ interface AppEventLandChanges {
   newRepositoryId: string;
 }
 
+interface AppEventPlanLayout {
+  name: 'plan-layout';
+}
+
+interface AppEventDesignDatabase {
+  name: 'design-database';
+}
+
+interface AppEventWriteComponents {
+  name: 'write-components';
+}
+
 export type AppEvent =
   | AppEventStartFeature
+  | AppEventStartMockup
+  | AppEventWriteMockupTests
   | AppEventRunTests
   | AppEventsTestFailure
   | AppEventAnalyzeTestFailure
   | AppEventFixTestFailure
   | AppEventMergeChanges
   | AppEventResolveMergeConflict
-  | AppEventLandChanges;
+  | AppEventLandChanges
+  | AppEventPlanLayout
+  | AppEventDesignDatabase
+  | AppEventWriteComponents;

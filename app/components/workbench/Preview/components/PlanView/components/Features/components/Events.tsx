@@ -52,6 +52,8 @@ const Events = ({ featureName }: EventsProps) => {
   const workerEvents = getFeatureResponses(eventResponses, featureName);
   const [expandedWorkers, setExpandedWorkers] = useState<Set<number>>(new Set());
 
+  console.log('DEBUG: workerEvents', workerEvents);
+
   const toggleWorkerExpansion = (workerIndex: number) => {
     const newExpanded = new Set(expandedWorkers);
     if (newExpanded.has(workerIndex)) {
@@ -88,7 +90,11 @@ const Events = ({ featureName }: EventsProps) => {
     const { event } = response;
     switch (event.name) {
       case 'start-feature':
-        return event.why === 'implement' ? 'Writing the feature' : 'Writing tests';
+        return event.featureName?.includes('Test') ? 'Writing tests' : 'Writing the feature';
+      case 'start-mockup':
+        return 'Starting mockup';
+      case 'write-mockup-tests':
+        return 'Writing mockup tests';
       case 'run-tests':
         return 'Running tests';
       case 'test-failure':
@@ -132,7 +138,15 @@ const Events = ({ featureName }: EventsProps) => {
           </div>
         );
       }
+      case 'plan-layout':
+        return 'Planning layout';
+      case 'design-database':
+        return 'Designing database';
+      case 'write-components':
+        return 'Writing components';
     }
+    // Return event name for unhandled event types
+    return (event as any).name || 'Unknown event';
   };
 
   const renderEvent = (event: ChatResponse, index: number) => {
