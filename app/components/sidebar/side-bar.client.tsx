@@ -1,11 +1,11 @@
 import { useStore } from '@nanostores/react';
-import { MessageCircleMore, Palette, SlidersHorizontal, History } from 'lucide-react';
+import { MessageCircleMore, SlidersHorizontal, History } from 'lucide-react';
 import { sidebarPanelStore, type SidebarPanel } from '~/lib/stores/sidebarPanel';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Suspense, useEffect, useState } from 'react';
 import { SideNavButton } from './SideNavButton';
-import { workbenchStore } from '~/lib/stores/workbench';
+// import { workbenchStore } from '~/lib/stores/workbench';
 import { chatStore } from '~/lib/stores/chat';
 import { includeHistorySummary } from '~/components/panels/HistoryPanel/AppHistory';
 import { database } from '~/lib/persistence/apps';
@@ -13,9 +13,9 @@ import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 
 export function SideBar() {
   const activePanel = useStore(sidebarPanelStore.activePanel);
-  const previewURL = useStore(workbenchStore.previewURL);
-  const previewLoading = useStore(chatStore.previewLoading);
-  const isPreviewReady = previewURL && !previewLoading;
+  // const previewURL = useStore(workbenchStore.previewURL);
+  // const previewLoading = useStore(chatStore.previewLoading);
+  // const isPreviewReady = previewURL && !previewLoading;
   const appSummary = useStore(chatStore.appSummary);
   const appId = useStore(chatStore.currentAppId) as string;
   const [history, setHistory] = useState<AppSummary[]>([]);
@@ -39,7 +39,7 @@ export function SideBar() {
 
   const navItems: { icon: React.ReactNode; label: string; panel: SidebarPanel; disabled?: boolean }[] = [
     { icon: <MessageCircleMore size={20} strokeWidth={1.5} />, label: 'Chat', panel: 'chat' },
-    { icon: <Palette size={20} strokeWidth={1.5} />, label: 'Design', panel: 'design', disabled: !isPreviewReady },
+    // { icon: <Palette size={20} strokeWidth={1.5} />, label: 'Design', panel: 'design', disabled: !isPreviewReady },
     {
       icon: <SlidersHorizontal size={20} strokeWidth={1.5} />,
       label: 'Settings',
