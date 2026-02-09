@@ -14,7 +14,7 @@ interface SecretsCardProps {
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDetails }) => {
-  const allSecrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+  const allSecrets = appSummary?.secrets ?? [];
   const [setSecrets, setSetSecrets] = useState<string[]>([]);
 
   const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));

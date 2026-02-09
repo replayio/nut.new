@@ -41,7 +41,7 @@ const getVisibleCardTypes = (appSummary: AppSummary): string[] => {
   }
 
   // 4. Secrets Card - show when features card is visible AND there are secrets
-  const hasSecrets = appSummary.features?.some((f) => f.secrets?.length);
+  const hasSecrets = appSummary.secrets && appSummary.secrets.length > 0;
   if (hasSecrets && visibleCards.includes('features')) {
     visibleCards.push('secrets');
   }

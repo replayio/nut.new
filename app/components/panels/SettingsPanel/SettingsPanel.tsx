@@ -16,11 +16,14 @@ import { Skeleton } from '~/components/ui/Skeleton';
 
 export const SettingsPanel = () => {
   const appSummary = useStore(chatStore.appSummary);
-  const allSecrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+  const allSecrets = appSummary?.secrets ?? [];
   const appId = useStore(chatStore.currentAppId);
   const permissions = useStore(permissionsStore);
   const isOwner = useStore(isAppOwnerStore);
   const user = useStore(userStore);
+
+  console.log('DEBUG: appSummary', appSummary);
+  console.log('DEBUG: allSecrets', allSecrets);
 
   useEffect(() => {
     const loadIsOwner = async () => {
