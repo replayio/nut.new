@@ -404,7 +404,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                   <WithTooltip tooltip="Copy URL">
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://nut.new/app/${appId}`);
+                        navigator.clipboard.writeText(`https://builder.replay.io/app/${appId}`);
                         toast.success('URL copied to clipboard!');
                       }}
                       className="h-9 w-9 flex items-center justify-center rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-colors"
