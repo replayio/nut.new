@@ -20,6 +20,7 @@ import { GlobalStripeStatusModal } from './components/stripe/GlobalStripeStatusM
 import { GlobalStatusModal } from './components/status-modal/GlobalStatusModal';
 import { GlobalDeployChatModal } from './components/header/components/DeployChat/components/GlobalDeployChatModal';
 import GlobalFeatureModal from './components/feature-modal/GlobalFeatureModal';
+import { GlobalSecretsModal } from './components/secrets/GlobalSecretsModal';
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
@@ -246,6 +247,7 @@ export default function App() {
         <GlobalStatusModal />
         <GlobalDeployChatModal />
         <GlobalFeatureModal />
+        <GlobalSecretsModal />
       </ClientOnly>
       <ScrollRestoration />
       <Scripts />

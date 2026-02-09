@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { AppCard } from '~/components/chat/Messages/components/AppCard';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
-import Secrets from '~/components/workbench/Preview/components/PlanView/components/Secrets';
-import { Key } from '~/components/ui/Icon';
+import { Key, AlertTriangle, CheckCircle } from 'lucide-react';
 import { getAppSetSecrets } from '~/lib/replay/Secrets';
 import { chatStore } from '~/lib/stores/chat';
+import { secretsModalStore } from '~/lib/stores/secretsModal';
 import { assert } from '~/utils/nut';
+import { Button } from '~/components/ui/button';
+import { classNames } from '~/utils/classNames';
 
 interface SecretsComponentProps {
   appSummary: AppSummary;
@@ -14,11 +15,11 @@ interface SecretsComponentProps {
 const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }) => {
-  const allSecrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+  const allSecrets = appSummary?.secrets ?? [];
   const [setSecrets, setSetSecrets] = useState<string[]>([]);
 
   const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
-  const setRequiredSecrets = requiredSecrets.filter((secret) => setSecrets.includes(secret.name));
+  const pendingSecrets = requiredSecrets.filter((secret) => !setSecrets.includes(secret.name));
 
   const appId = chatStore.currentAppId.get();
   assert(appId, 'App ID is required');
@@ -31,70 +32,53 @@ export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }
     fetchSetSecrets();
   }, [appSummary]);
 
-  const getStatusInfo = () => {
-    if (requiredSecrets.length === 0) {
-      return {
-        status: 'completed' as const,
-        progressText: 'No configuration needed',
-      };
-    }
-
-    if (setRequiredSecrets.length === requiredSecrets.length) {
-      return {
-        status: 'completed' as const,
-        progressText: 'All secrets configured',
-      };
-    }
-
-    if (setRequiredSecrets.length > 0) {
-      return {
-        status: 'in-progress' as const,
-        progressText: `${setRequiredSecrets.length}/${requiredSecrets.length} configured`,
-      };
-    }
-
-    return {
-      status: 'pending' as const,
-      progressText: 'Configuration required',
-    };
-  };
-
-  const statusInfo = getStatusInfo();
-
-  const getDescription = () => {
-    if (allSecrets.length === 0) {
-      return 'No secrets required for this application';
-    }
-
-    const builtinCount = allSecrets.filter((s) => BUILTIN_SECRET_NAMES.includes(s.name)).length;
-    const requiredCount = requiredSecrets.length;
-
-    if (requiredCount === 0 && builtinCount > 0) {
-      return `Uses ${builtinCount} built-in secret${builtinCount === 1 ? '' : 's'}`;
-    }
-
-    if (requiredCount > 0 && builtinCount > 0) {
-      return `${requiredCount} secret${requiredCount === 1 ? '' : 's'} to configure, ${builtinCount} built-in`;
-    }
-
-    return `${requiredCount} secret${requiredCount === 1 ? '' : 's'} need${requiredCount === 1 ? 's' : ''} configuration`;
-  };
-
-  // Only show card if there are secrets
-  if (allSecrets.length === 0) {
+  // Only show component if there are required secrets
+  if (requiredSecrets.length === 0) {
     return null;
   }
 
+  const allConfigured = pendingSecrets.length === 0;
+
   return (
-    <AppCard
-      title="Secrets Configuration"
-      description={getDescription()}
-      icon={<Key className="text-white" size={18} />}
-      iconColor="purple"
-      status={statusInfo.status}
-      progressText={statusInfo.progressText}
-    >
-      <Secrets />
-    </AppCard>
+    <div className="p-4 border border-border rounded-md bg-card">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className={classNames(
+              'w-10 h-10 rounded-md flex items-center justify-center',
+              allConfigured ? 'bg-muted' : 'bg-foreground',
+            )}
+          >
+            <Key className={allConfigured ? 'text-muted-foreground' : 'text-background'} size={20} />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Secrets Configuration</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {allConfigured ? (
+                <span className="flex items-center gap-1">
+                  <CheckCircle size={12} className="text-muted-foreground" />
+                  All {requiredSecrets.length} secret{requiredSecrets.length === 1 ? '' : 's'} configured
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <AlertTriangle size={12} className="text-muted-foreground" />
+                  {pendingSecrets.length} of {requiredSecrets.length} secret
+                  {requiredSecrets.length === 1 ? '' : 's'} need{pendingSecrets.length === 1 ? 's' : ''} configuration
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => secretsModalStore.open()}
+          variant={allConfigured ? 'outline' : 'default'}
+          size="sm"
+          className={`rounded-full ${!allConfigured ? 'bg-foreground text-background hover:bg-foreground/90' : ''}`}
+        >
+          {allConfigured ? 'Manage Keys' : 'Configure Keys'}
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -20,7 +20,7 @@ interface SecretInfo {
 }
 
 function buildSecretInfo(appSummary: AppSummary, setSecrets: string[]): SecretInfo[] {
-  const secrets = appSummary?.features?.flatMap((f) => f.secrets ?? []) ?? [];
+  const secrets = appSummary?.secrets ?? [];
 
   return secrets.map((s) => ({
     name: s.name,
@@ -102,22 +102,20 @@ const Secrets = () => {
       <div
         key={index}
         className={classNames(
-          'p-4 border rounded-xl shadow-sm hover:shadow-md transition-all duration-200',
-          isSet && !currentValue.length
-            ? 'border-gray-300 bg-gray-50 hover:border-gray-400'
-            : 'border-bolt-elements-borderColor border-opacity-30 bg-bolt-elements-background-depth-2 hover:border-bolt-elements-borderColor border-opacity-50',
+          'p-4 border rounded-md transition-colors',
+          isSet && !currentValue.length ? 'border-border bg-muted' : 'border-border bg-card hover:bg-accent/50',
         )}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-bolt-elements-textHeading">{secret.name}</span>
+          <span className="text-sm font-semibold text-foreground">{secret.name}</span>
           <span
             className={classNames(
-              'px-3 py-1.5 text-xs font-medium rounded-full shadow-sm border transition-all duration-200',
+              'px-3 py-1.5 text-xs font-medium rounded-full border',
               isSet
-                ? 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-gray-200 hover:shadow-md'
+                ? 'bg-muted text-muted-foreground border-border'
                 : isBuiltin
-                  ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200 hover:shadow-md'
-                  : 'bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-yellow-200 hover:shadow-md',
+                  ? 'bg-accent text-foreground border-border'
+                  : 'bg-accent text-foreground border-border',
             )}
           >
             {isSet ? 'Set' : isBuiltin ? 'Built-in' : 'Required'}
@@ -125,16 +123,13 @@ const Secrets = () => {
         </div>
 
         {secret.description && (
-          <p className="text-sm text-bolt-elements-textSecondary mb-4 leading-relaxed">{secret.description}</p>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{secret.description}</p>
         )}
 
         {!isBuiltin && (
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor={`secret-${secret.name}`}
-                className="block text-xs font-medium text-bolt-elements-textSecondary mb-2"
-              >
+              <label htmlFor={`secret-${secret.name}`} className="block text-xs font-medium text-muted-foreground mb-2">
                 Secret Value
               </label>
               <input
@@ -144,10 +139,10 @@ const Secrets = () => {
                 onChange={(e) => handleSecretValueChange(secret.name, e.target.value)}
                 placeholder={isSet ? 'Click to change secret value...' : 'Enter secret value...'}
                 className={classNames(
-                  'w-full px-4 py-3 text-sm border rounded-xl transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400',
+                  'w-full px-4 py-3 text-sm border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
                   isSet && !currentValue.length
-                    ? 'border-gray-300 bg-gray-100 text-gray-700 placeholder-gray-500 hover:bg-gray-200'
-                    : 'border-bolt-elements-borderColor border-opacity-60 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary',
+                    ? 'border-border bg-muted text-muted-foreground placeholder-muted-foreground'
+                    : 'border-border bg-background text-foreground placeholder-muted-foreground',
                 )}
               />
             </div>
@@ -156,11 +151,11 @@ const Secrets = () => {
               <button
                 onClick={() => handleSaveSecret(secret.name)}
                 disabled={isSaving || (!isSet && !currentValue.trim())}
-                className="px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 text-sm font-medium rounded-full bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSaving ? (
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
                     Saving...
                   </span>
                 ) : isSet ? (
@@ -180,20 +175,18 @@ const Secrets = () => {
         {!currentValue && !isSet && (
           <div
             className={classNames(
-              'text-xs p-3 rounded-xl mt-4 border shadow-sm',
-              isBuiltin
-                ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200/50'
-                : 'bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-yellow-200/50',
+              'text-xs p-3 rounded-md mt-4 border',
+              isBuiltin ? 'bg-muted text-muted-foreground border-border' : 'bg-accent text-foreground border-border',
             )}
           >
             {isBuiltin ? (
               <span className="flex items-center gap-2">
-                <CheckCircle className="text-green-600" size={14} />
+                <CheckCircle className="text-muted-foreground" size={14} />
                 This secret will use a builtin value
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <AlertTriangle className="text-yellow-600" size={14} />
+                <AlertTriangle className="text-muted-foreground" size={14} />
                 This secret must be added before using the app
               </span>
             )}
@@ -201,9 +194,9 @@ const Secrets = () => {
         )}
 
         {isSet && (
-          <div className="text-xs p-3 rounded-xl mt-4 border shadow-sm bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border-gray-200/50">
+          <div className="text-xs p-3 rounded-md mt-4 border bg-muted text-muted-foreground border-border">
             <span className="flex items-center gap-2">
-              <CheckCircle className="text-gray-600" size={14} />
+              <CheckCircle className="text-muted-foreground" size={14} />
               This secret is configured and ready to use
             </span>
           </div>

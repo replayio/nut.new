@@ -28,6 +28,8 @@ import { type InfoCardData } from '~/components/ui/InfoCard';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '~/components/ui/resizable';
 import { AppFeatureKind, AppFeatureStatus, BugReportStatus } from '~/lib/persistence/messageAppSummary';
 import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featureModal';
+import { secretsModalStore } from '~/lib/stores/secretsModal';
+import { getAppSetSecrets } from '~/lib/replay/Secrets';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
 import AppTemplates from './components/AppTemplates/AppTemplates';
@@ -45,6 +47,9 @@ import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { useSearchParams } from '@remix-run/react';
 
 export const TEXTAREA_MIN_HEIGHT = 76;
+
+// Secrets which values do not need to be provided for.
+const BUILTIN_SECRET_NAMES = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -94,6 +99,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const isSidebarOpen = useStore(sidebarMenuStore.isOpen);
     const [infoCards, setInfoCards] = useState<InfoCardData[]>([]);
     const [list, setList] = useState<AppLibraryEntry[] | undefined>(undefined);
+    const [configuredSecrets, setConfiguredSecrets] = useState<string[]>([]);
     const urlSearchParams = useSearchParams();
     const prompt = urlSearchParams[0]?.get('prompt');
     const appPath = urlSearchParams[0]?.get('appPath');
@@ -151,8 +157,44 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       designPanelStore.isVisible.set(shouldShowDesignPanel);
     }, [activePanel]);
 
+    // Fetch configured secrets when appSummary changes
+    useEffect(() => {
+      const fetchConfiguredSecrets = async () => {
+        const appId = chatStore.currentAppId.get();
+
+        if (appId && appSummary?.secrets?.length) {
+          const secrets = await getAppSetSecrets(appId);
+          setConfiguredSecrets(secrets);
+        } else {
+          setConfiguredSecrets([]);
+        }
+      };
+      fetchConfiguredSecrets();
+    }, [appSummary]);
+
     useEffect(() => {
       const newCards: InfoCardData[] = [];
+
+      // Add secrets card if there are unconfigured secrets
+      if (appSummary?.secrets?.length) {
+        const allSecrets = appSummary.secrets;
+        const requiredSecrets = allSecrets.filter((secret) => !BUILTIN_SECRET_NAMES.includes(secret.name));
+        const pendingSecrets = requiredSecrets.filter((secret) => !configuredSecrets.includes(secret.name));
+
+        if (pendingSecrets.length > 0) {
+          newCards.push({
+            id: 'secrets-configuration',
+            title: 'Secrets Configuration Required',
+            description: `${pendingSecrets.length} of ${requiredSecrets.length} secret${requiredSecrets.length === 1 ? '' : 's'} need${pendingSecrets.length === 1 ? 's' : ''} configuration`,
+            iconType: 'warning',
+            variant: 'warning',
+            handleSendMessage,
+            onCardClick: () => {
+              secretsModalStore.open();
+            },
+          });
+        }
+      }
 
       // Add feature cards
       if (appSummary?.features) {
@@ -248,7 +290,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       newCards.push(...bugReportCards);
 
       setInfoCards(newCards);
-    }, [appSummary]);
+    }, [appSummary, configuredSecrets]);
 
     const getComponentReference = useCallback(() => {
       if (!selectedElement?.tree?.length) {
