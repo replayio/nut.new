@@ -670,5 +670,5 @@ function getPlaceholderText(chatStarted: boolean, hasAppSummary: boolean) {
   }
 
   // We have an app that is being iterated on.
-  return 'How can we help you?';
+  return 'What would you like to do now?';
 }
