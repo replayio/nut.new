@@ -385,13 +385,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
         appSummary.features
           .filter((f) => f.status === AppFeatureStatus.Implemented || f.status === AppFeatureStatus.Failed)
           .forEach((feature) => {
-            if (feature.time) {
+            if (feature.implementTime) {
               // Group IntegrationTests features
               if (feature.kind === AppFeatureKind.IntegrationTests) {
                 // Only add if it has valid test results
                 if (hasValidTestResults(feature)) {
                   integrationTests.push(feature);
-                  const featureTime = new Date(feature.time);
+                  const featureTime = new Date(feature.implementTime);
                   if (!earliestIntegrationTestTime || featureTime < earliestIntegrationTestTime) {
                     earliestIntegrationTestTime = featureTime;
                   }
@@ -401,7 +401,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
                 timelineItems.push({
                   type: 'feature',
                   data: feature,
-                  timestamp: new Date(feature.time),
+                  timestamp: new Date(feature.implementTime),
                   id: feature.name,
                 });
               }
@@ -420,8 +420,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
               (f.status === AppFeatureStatus.Implemented || f.status === AppFeatureStatus.Failed),
           );
 
-          if (buildInitialAppFeature?.time) {
-            const buildInitialAppTime = new Date(buildInitialAppFeature.time);
+          if (buildInitialAppFeature?.implementTime) {
+            const buildInitialAppTime = new Date(buildInitialAppFeature.implementTime);
 
             // Find the first assistant UserResponse message at or after BuildInitialApp completion
             const completionMessage = displayableMessages.find(
