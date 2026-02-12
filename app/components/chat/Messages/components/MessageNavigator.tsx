@@ -38,7 +38,7 @@ export function MessageNavigator({
   };
 
   return (
-    <div className="flex items-center gap-1 p-4 bg-background border border-bolt-elements-borderColor rounded-md shadow-md">
+    <div className="flex items-center gap-1 p-4 bg-background border border-bolt-elements-borderColor rounded-md shadow-md relative z-20">
       {/* Message text */}
       <div className="flex-1 min-w-0 text-sm text-bolt-elements-textPrimary truncate pr-2">
         {currentMessage.content}

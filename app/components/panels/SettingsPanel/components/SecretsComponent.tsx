@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { type AppSummary } from '~/lib/persistence/messageAppSummary';
-import { Key, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { getAppSetSecrets } from '~/lib/replay/Secrets';
 import { chatStore } from '~/lib/stores/chat';
 import { secretsModalStore } from '~/lib/stores/secretsModal';
 import { assert } from '~/utils/nut';
 import { Button } from '~/components/ui/button';
-import { classNames } from '~/utils/classNames';
 
 interface SecretsComponentProps {
   appSummary: AppSummary;
@@ -60,20 +59,12 @@ export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }
   const allConfigured = pendingSecrets.length === 0;
 
   return (
-    <div className="p-4 border border-border rounded-md bg-card">
+    <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div
-            className={classNames(
-              'w-10 h-10 rounded-md flex items-center justify-center',
-              allConfigured ? 'bg-muted' : 'bg-foreground',
-            )}
-          >
-            <Key className={allConfigured ? 'text-muted-foreground' : 'text-background'} size={20} />
-          </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Secrets Configuration</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <h3 className="text-base font-semibold text-foreground">Secrets Configuration</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {allConfigured ? (
                 <span className="flex items-center gap-1">
                   <CheckCircle size={12} className="text-muted-foreground" />

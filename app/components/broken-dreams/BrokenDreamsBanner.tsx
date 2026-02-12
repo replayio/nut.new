@@ -2,7 +2,7 @@ import useViewport from '~/lib/hooks/useViewport';
 import { motion } from 'framer-motion';
 
 const BrokenDreamsBanner = () => {
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
 
   return (
     <motion.div

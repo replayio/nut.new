@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { FlaskConical, MessageCircle, Sparkles } from '~/components/ui/Icon';
 import { AppMessagesSecret, DisableAppBlockChangesSecret } from '~/lib/persistence/messageAppSummary';
 import type { AppSummary } from '~/lib/persistence/messageAppSummary';
 import { toast } from 'react-toastify';
@@ -80,7 +79,6 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
     <div className="space-y-4">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <FlaskConical className="text-bolt-elements-textSecondary" size={16} />
         <div className="flex-1">
           <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Experimental Features</h3>
           <p className="text-sm text-bolt-elements-textSecondary mt-1">
@@ -100,7 +98,6 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <MessageCircle className="text-bolt-elements-textSecondary" size={14} />
               <h4 className="text-sm font-medium text-bolt-elements-textPrimary">In-App Feedback</h4>
             </div>
             <p className="text-sm text-bolt-elements-textSecondary mt-0.5">
@@ -120,7 +117,6 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <Sparkles className="text-bolt-elements-textSecondary" size={14} />
               <h4 className="text-sm font-medium text-bolt-elements-textPrimary">Builder Improvements</h4>
             </div>
             <p className="text-sm text-bolt-elements-textSecondary mt-0.5">

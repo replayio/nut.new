@@ -83,7 +83,7 @@ function CollectionPageContent() {
   const [referenceApps, setReferenceApps] = useState<ReferenceAppSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const isSidebarCollapsed = useStore(sidebarMenuStore.isCollapsed);
 
   // Load collection content and reference apps

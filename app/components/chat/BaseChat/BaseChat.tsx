@@ -88,7 +88,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   ) => {
     const appSummary = useStore(chatStore.appSummary);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 300 : 200;
-    const isSmallViewport = useViewport(800);
+    const isSmallViewport = useViewport(1024);
     const user = useStore(userStore);
     const { chatWidth, chatPanelSize, setChatPanelSize, panelSizeKey } = useLayoutWidths(!!user);
     const showWorkbench = useStore(workbenchStore.showWorkbench);
@@ -429,11 +429,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         case 'chat':
         default:
           return (
-            <div
-              className={classNames('h-full flex flex-col', {
-                'px-2': isSmallViewport,
-              })}
-            >
+            <div className="h-full flex flex-col">
               <ChatPanel
                 messageRef={messageRef}
                 uploadedFiles={uploadedFiles}
@@ -460,7 +456,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         {!chatStarted && <ClientOnly>{() => <Menu />}</ClientOnly>}
         {user && !isSmallViewport && chatStarted && <ClientOnly>{() => <SideBar />}</ClientOnly>}
         {chatStarted && !isSmallViewport && showWorkbench ? (
-          <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <div className="flex-1 flex flex-col h-full overflow-hidden bg-accent">
             <TopNav />
             <div className="flex-1 flex flex-col h-full overflow-hidden pr-2 pb-2">
               <ResizablePanelGroup
@@ -493,7 +489,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           /* Mobile view when chat started */
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <TopNav />
-            <div ref={scrollRef} className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto pb-20">
+            <div
+              ref={scrollRef}
+              className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto pb-[64px] px-1 bg-accent"
+            >
               <ClientOnly>
                 {() => {
                   // On mobile, show workbench when canvas tab is active

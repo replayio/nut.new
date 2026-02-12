@@ -40,7 +40,7 @@ export const ChatPromptContainer: React.FC<ChatPromptContainerProps> = ({
     <div
       className={classNames(
         'relative w-full max-w-chat mx-auto z-prompt mt-0 rounded-md',
-        'shadow-md hover:shadow-lg transition-shadow duration-200',
+        'shadow-sm hover:shadow-md transition-shadow duration-200',
       )}
     >
       <FilePreview

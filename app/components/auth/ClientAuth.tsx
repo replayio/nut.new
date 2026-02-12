@@ -5,9 +5,11 @@ import { authModalStore } from '~/lib/stores/authModal';
 import { signOut, userStore } from '~/lib/stores/auth';
 import { useStore } from '@nanostores/react';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { User, Settings, LogOut, Wand2, CreditCard, Bell, ArrowLeft, LogIn } from 'lucide-react';
+import { User, Settings, LogOut, Wand2, CreditCard, Bell, ArrowLeft, LogIn, UserPlus } from 'lucide-react';
 import useViewport from '~/lib/hooks';
 import { classNames } from '~/utils/classNames';
+import { Button } from '~/components/ui/button';
+import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 
 interface ClientAuthProps {
   isSidebarCollapsed?: boolean;
@@ -18,7 +20,8 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const stripeSubscription = useStore(subscriptionStore.subscription);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
+  const isSideBarOpen = useStore(sidebarMenuStore.isOpen);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -96,7 +99,12 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
         <div className="relative">
           <button
             ref={buttonRef}
-            className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border shadow-md"
+            className={classNames(
+              'flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border shadow-md',
+              {
+                'w-8 h-8': isSmallViewport,
+              },
+            )}
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {user.user_metadata?.avatar_url ? (
@@ -277,17 +285,36 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
           )}
         </div>
       ) : (
-        <button
-          onClick={() => authModalStore.open(false)}
-          className={classNames(
-            'h-10 bg-rose-500 text-white rounded-full hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/30 group',
-            isSidebarCollapsed ? 'w-full flex items-center justify-center' : 'w-full px-4 py-1.5',
-          )}
+        <div
+          className={classNames('w-full h-full flex gap-2 items-center justify-center', {
+            'flex-col': !isSmallViewport || isSideBarOpen,
+          })}
         >
-          <span className="transition-transform duration-200 flex items-center justify-center">
-            {isSidebarCollapsed && !isSmallViewport ? <LogIn size={20} /> : 'Log In'}
-          </span>
-        </button>
+          <Button
+            onClick={() => authModalStore.open(false)}
+            className={classNames(
+              'h-10 bg-rose-500 text-white rounded-full hover:from-rose-600 hover:to-pink-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/30 group',
+              isSidebarCollapsed ? 'w-full flex items-center justify-center' : 'w-full px-4 py-1.5',
+              { 'px-3': isSmallViewport },
+            )}
+          >
+            <span className="transition-transform duration-200 flex items-center justify-center">
+              {isSidebarCollapsed || (isSmallViewport && !isSideBarOpen) ? <LogIn size={20} /> : 'Log In'}
+            </span>
+          </Button>
+          <Button
+            onClick={() => authModalStore.open(true)}
+            className={classNames(
+              'h-10 text-white rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl',
+              isSidebarCollapsed ? 'w-full flex items-center justify-center' : 'w-full px-4 py-1.5',
+              { 'px-3': isSmallViewport },
+            )}
+          >
+            <span className="transition-transform duration-200 flex items-center justify-center">
+              {isSidebarCollapsed || (isSmallViewport && !isSideBarOpen) ? <UserPlus size={20} /> : 'Sign Up'}
+            </span>
+          </Button>
+        </div>
       )}
     </>
   );

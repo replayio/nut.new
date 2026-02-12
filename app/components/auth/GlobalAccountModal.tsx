@@ -3,7 +3,7 @@ import { accountModalStore } from '~/lib/stores/accountModal';
 import { AccountModal } from './AccountModal';
 import { userStore } from '~/lib/stores/auth';
 import { SubscriptionModal } from '~/components/subscription/SubscriptionModal';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import useViewport from '~/lib/hooks';
 import { User as UserIcon, CreditCard, ArrowLeft, X } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 
@@ -11,7 +11,7 @@ export function GlobalAccountModal() {
   const isOpen = useStore(accountModalStore.isOpen);
   const user = useStore(userStore);
   const activeTab = useStore(accountModalStore.activeTab);
-  const { isMobile } = useIsMobile();
+  const isSmallViewport = useViewport(1024);
 
   if (!isOpen) {
     return null;
@@ -32,8 +32,8 @@ export function GlobalAccountModal() {
   }
 
   // Mobile: Show tab selection when activeTab is null, otherwise show content
-  const showTabSelection = isMobile ? activeTab === null : true;
-  const showContent = isMobile ? activeTab !== null : true;
+  const showTabSelection = isSmallViewport ? activeTab === null : true;
+  const showContent = isSmallViewport ? activeTab !== null : true;
 
   return (
     <div
@@ -47,7 +47,7 @@ export function GlobalAccountModal() {
         {/* Left Sidebar with Tabs - Hidden on mobile when content is shown */}
         {showTabSelection && (
           <div
-            className={`bg-bolt-elements-background-depth-1 rounded-l-md border-r border-bolt-elements-borderColor flex flex-col ${isMobile ? 'w-full' : 'w-64'}`}
+            className={`bg-bolt-elements-background-depth-1 rounded-l-md border-r border-bolt-elements-borderColor flex flex-col ${isSmallViewport ? 'w-full' : 'w-64'}`}
           >
             {/* Header with close/back button */}
             <div className="p-4 border-b border-bolt-elements-borderColor flex justify-between items-center">
@@ -94,9 +94,9 @@ export function GlobalAccountModal() {
 
         {/* Right Content Area - Full width on mobile when shown */}
         {showContent && activeTab !== null && (
-          <div className={`flex flex-col overflow-hidden ${isMobile ? 'w-full' : 'flex-1'}`}>
+          <div className={`flex flex-col overflow-hidden ${isSmallViewport ? 'w-full' : 'flex-1'}`}>
             {/* Mobile: Back to Settings button */}
-            {isMobile && (
+            {isSmallViewport && (
               <div className="p-4 border-b border-bolt-elements-borderColor flex items-center gap-3 justify-between">
                 <Button onClick={() => accountModalStore.activeTab.set(null)} variant="ghost" className="gap-2">
                   <ArrowLeft size={18} />

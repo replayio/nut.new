@@ -199,7 +199,7 @@ function GalleryPageContent() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const user = useStore(userStore);
   const [repositoryId, setRepositoryId] = useState<string | null>(null);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const isSidebarCollapsed = useStore(sidebarMenuStore.isCollapsed);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);

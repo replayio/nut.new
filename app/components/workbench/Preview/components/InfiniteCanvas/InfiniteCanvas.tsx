@@ -29,8 +29,42 @@ export default function InfiniteCanvas({
   });
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+  const [zoomInputValue, setZoomInputValue] = useState(String(Math.round(initialZoom * 100)));
 
   const mode = useStore(themeStore);
+
+  // Keep zoom input in sync with transform.scale
+  useEffect(() => {
+    setZoomInputValue(String(Math.round(transform.scale * 100)));
+  }, [transform.scale]);
+
+  const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow numbers
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setZoomInputValue(value);
+  };
+
+  const applyZoomFromInput = () => {
+    const numValue = parseInt(zoomInputValue, 10);
+    if (!isNaN(numValue) && numValue > 0) {
+      const newScale = Math.min(maxZoom, Math.max(minZoom, numValue / 100));
+      setTransform((prev) => ({ ...prev, scale: newScale }));
+      setZoomInputValue(String(Math.round(newScale * 100)));
+    } else {
+      // Reset to current zoom if invalid
+      setZoomInputValue(String(Math.round(transform.scale * 100)));
+    }
+  };
+
+  const handleZoomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      applyZoomFromInput();
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === 'Escape') {
+      setZoomInputValue(String(Math.round(transform.scale * 100)));
+      (e.target as HTMLInputElement).blur();
+    }
+  };
 
   // Center the canvas on mount and when container resizes
   useEffect(() => {
@@ -250,39 +284,47 @@ export default function InfiniteCanvas({
       data-canvas-background="true"
     >
       {/* Zoom controls - horizontal at bottom center */}
-      <div
-        className={`absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-row items-center gap-2 rounded-lg px-3 py-2 shadow-md ${mode === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-700'}`}
-      >
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-row items-center gap-2 rounded-md px-3 py-2 shadow-md bg-card border border-border">
         {/* Zoom controls */}
         <button
           type="button"
-          className={`flex h-8 w-8 items-center justify-center rounded ${mode === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
           onClick={() => setTransform((prev) => ({ ...prev, scale: Math.max(minZoom, prev.scale * 0.8) }))}
           title="Zoom out"
         >
-          -
+          <span className="text-sm font-medium">−</span>
         </button>
-        <div className={`text-center text-xs min-w-[40px] ${mode === 'dark' ? 'text-gray-400' : 'text-slate-500'}`}>
-          {Math.round(transform.scale * 100)}%
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={zoomInputValue}
+            onChange={handleZoomInputChange}
+            onBlur={applyZoomFromInput}
+            onKeyDown={handleZoomInputKeyDown}
+            className="w-12 text-center text-xs font-medium bg-transparent text-muted-foreground focus:text-foreground focus:outline-none rounded-md"
+            title="Enter zoom percentage"
+          />
+          <span className="text-xs text-muted-foreground ml-1">%</span>
         </div>
         <button
           type="button"
-          className={`flex h-8 w-8 items-center justify-center rounded ${mode === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
           onClick={() => setTransform((prev) => ({ ...prev, scale: Math.min(maxZoom, prev.scale * 1.2) }))}
           title="Zoom in"
         >
-          +
+          <span className="text-sm font-medium">+</span>
         </button>
 
-        <div className={`mx-1 h-6 border-l ${mode === 'dark' ? 'border-gray-600' : 'border-slate-200'}`} />
+        <div className="mx-1 h-6 border-l border-border" />
 
         <button
           type="button"
-          className={`flex h-8 w-8 items-center justify-center rounded text-xs ${mode === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
           onClick={fitToView}
           title="Fit to view"
         >
-          ⊡
+          <span className="text-xs">⊡</span>
         </button>
       </div>
 

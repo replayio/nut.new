@@ -6,21 +6,21 @@ import { classNames } from '~/utils/classNames';
 import { stripeStatusModalActions } from '~/lib/stores/stripeStatusModal';
 import { ConfirmCancelModal } from '~/components/subscription/ConfirmCancelModal';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
 import { User as UserIcon, Crown, Settings } from '~/components/ui/Icon';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { Button } from '~/components/ui/button';
+import useViewport from '~/lib/hooks';
 
 interface AccountModalProps {
   user: User | undefined;
 }
 
 export const AccountModal = ({ user }: AccountModalProps) => {
-  const { isMobile } = useIsMobile();
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const [loading, setLoading] = useState(true);
   const [loadingBilling, setLoadingBilling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const isSmallViewport = useViewport(1024);
 
   const reloadAccountData = async () => {
     setLoading(true);
@@ -118,8 +118,8 @@ export const AccountModal = ({ user }: AccountModalProps) => {
         className={classNames(
           'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto max-h-[95vh] transition-all duration-300 relative',
           {
-            'rounded-b-2xl': isMobile,
-            'rounded-r-2xl': !isMobile,
+            'rounded-b-2xl': isSmallViewport,
+            'rounded-r-2xl': !isSmallViewport,
           },
         )}
       >
@@ -139,8 +139,8 @@ export const AccountModal = ({ user }: AccountModalProps) => {
       className={classNames(
         'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto h-full transition-all duration-300 relative',
         {
-          'rounded-b-md': isMobile,
-          'rounded-r-md': !isMobile,
+          'rounded-b-md': isSmallViewport,
+          'rounded-r-md': !isSmallViewport,
         },
       )}
       onClick={(e) => e.stopPropagation()}

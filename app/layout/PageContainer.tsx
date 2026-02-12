@@ -4,16 +4,14 @@ import { Footer } from '~/components/footer/Footer';
 import useViewport from '~/lib/hooks/useViewport';
 import { chatStore } from '~/lib/stores/chat';
 import { useStore } from '@nanostores/react';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
 
 interface PageContainerProps {
   children: React.ReactNode;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const chatStarted = useStore(chatStore.started);
-  const { isMobile } = useIsMobile();
 
   useEffect(() => {
     const setAppHeight = () => {
@@ -32,7 +30,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
 
   return (
     <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black app-height">
-      {isMobile && !chatStarted && <Header />}
+      {isSmallViewport && !chatStarted && <Header />}
       <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
       {!chatStarted && !isSmallViewport && <Footer />}
     </div>

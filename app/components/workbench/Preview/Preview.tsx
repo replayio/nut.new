@@ -15,6 +15,7 @@ import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
@@ -26,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { buildBreadcrumbData } from '~/utils/componentBreadcrumb';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import useViewport from '~/lib/hooks';
 import { chatStore } from '~/lib/stores/chat';
 
 interface ReactComponent {
@@ -52,7 +53,7 @@ export const Preview = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMouseOverPreviewRef = useRef(false);
-  const { isMobile } = useIsMobile();
+  const isSmallViewport = useViewport(1024);
 
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -372,7 +373,7 @@ export const Preview = memo(() => {
         {isPreviewReady && (
           <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center justify-between gap-2">
             {/* Left: Preview/Editor Toggle */}
-            {!isMobile && (
+            {!isSmallViewport && (
               <div className="flex items-center h-9 bg-muted rounded-lg p-1">
                 <button
                   onClick={() => {
@@ -400,7 +401,7 @@ export const Preview = memo(() => {
                       ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
                       : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
                   )}
-                  disabled={!isElementPickerReady || isMobile}
+                  disabled={!isElementPickerReady || isSmallViewport}
                 >
                   <Paintbrush size={16} />
                   Editor
@@ -425,7 +426,7 @@ export const Preview = memo(() => {
                 <input
                   title="URL"
                   ref={inputRef}
-                  className="w-[200px] bg-transparent text-sm text-bolt-elements-textSecondary border-none outline-none focus:ring-0 p-0 truncate"
+                  className="w-[100px] sm:w-[200px] md:w-[200px] lg:w-[200px] xl:w-[200px] bg-transparent text-sm text-bolt-elements-textSecondary border-none outline-none focus:ring-0 p-0 truncate"
                   type="text"
                   value={url}
                   placeholder="https://"
@@ -505,17 +506,15 @@ export const Preview = memo(() => {
         </div>
 
         {/* Bottom: Breadcrumb Navigation */}
-        {!isMobile && selectedElement && (selectedElement.tree?.length > 0 || selectedElement.component) && (
-          <div className="bg-bolt-elements-background-depth-1 border-t border-bolt-elements-borderColor px-4 py-2">
+        {!isSmallViewport && selectedElement && (selectedElement.tree?.length > 0 || selectedElement.component) && (
+          <div className="bg-card border-t border-border px-4 py-2">
             {(() => {
               if (!selectedElement?.tree || selectedElement.tree.length === 0) {
                 return (
                   <Breadcrumb>
-                    <BreadcrumbList className="text-sm">
+                    <BreadcrumbList>
                       <BreadcrumbItem>
-                        <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium">
-                          {selectedElement?.component?.displayName || 'Selection'}
-                        </BreadcrumbPage>
+                        <BreadcrumbPage>{selectedElement?.component?.displayName || 'Selection'}</BreadcrumbPage>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
@@ -541,12 +540,12 @@ export const Preview = memo(() => {
 
               return (
                 <Breadcrumb>
-                  <BreadcrumbList className="text-sm">
+                  <BreadcrumbList>
                     {/* Show last React component (if different from first) */}
                     {lastReactComponent && firstReactComponent && lastReactDisplayName !== firstReactDisplayName && (
                       <BreadcrumbItem>
-                        <BreadcrumbPage
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary cursor-pointer transition-colors"
+                        <BreadcrumbLink
+                          className="cursor-pointer"
                           onMouseEnter={() => highlightElement(lastReactComponent)}
                           onMouseLeave={clearHighlight}
                           onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
@@ -555,7 +554,7 @@ export const Preview = memo(() => {
                             lastReactDisplayName ||
                             lastReactComponent.name ||
                             'Component'}
-                        </BreadcrumbPage>
+                        </BreadcrumbLink>
                       </BreadcrumbItem>
                     )}
 
@@ -564,13 +563,11 @@ export const Preview = memo(() => {
                       <>
                         {lastReactComponent &&
                           firstReactComponent &&
-                          lastReactDisplayName !== firstReactDisplayName && (
-                            <BreadcrumbSeparator>/</BreadcrumbSeparator>
-                          )}
+                          lastReactDisplayName !== firstReactDisplayName && <BreadcrumbSeparator />}
                         <BreadcrumbItem>
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="flex items-center gap-1 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors">
-                              <BreadcrumbEllipsis className="h-4 w-4" />
+                            <DropdownMenuTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+                              <BreadcrumbEllipsis />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
                               {htmlElements.slice(1, -1).map((node, index: number) => {
@@ -599,12 +596,10 @@ export const Preview = memo(() => {
                         {(htmlElements.length > 1 ||
                           (lastReactComponent &&
                             firstReactComponent &&
-                            lastReactDisplayName !== firstReactDisplayName)) && (
-                          <BreadcrumbSeparator>/</BreadcrumbSeparator>
-                        )}
+                            lastReactDisplayName !== firstReactDisplayName)) && <BreadcrumbSeparator />}
                         <BreadcrumbItem>
                           <BreadcrumbPage
-                            className="text-bolt-elements-textPrimary font-medium hover:text-bolt-elements-textSecondary cursor-pointer transition-colors"
+                            className="cursor-pointer hover:text-muted-foreground"
                             onMouseEnter={() => highlightElement(lastHtmlComponent)}
                             onMouseLeave={clearHighlight}
                             onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
