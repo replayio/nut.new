@@ -294,8 +294,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
           ) : (
             <div
               ref={scrollContainerRef}
-              className={cn('space-y-2 flex flex-col gap-1 max-h-[50vh] overflow-y-auto', {
-              })}
+              className={cn('space-y-2 flex flex-col gap-1 max-h-[50vh] overflow-y-auto', {})}
             >
               <div className=""></div>
               {cards.map((card) => (
