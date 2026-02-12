@@ -20,8 +20,8 @@ const ResizableHandle = ({
 }) => (
   <ResizablePrimitive.PanelResizeHandle
     className={cn(
-      'group relative flex w-1 items-center justify-center bg-transparent focus-visible:outline-none',
-      'data-[panel-group-direction=vertical]:h-1 data-[panel-group-direction=vertical]:w-full',
+      'group relative flex w-0 items-center justify-center bg-transparent focus-visible:outline-none z-10',
+      'data-[panel-group-direction=vertical]:h-0 data-[panel-group-direction=vertical]:w-full',
       className,
     )}
     {...props}
@@ -29,7 +29,7 @@ const ResizableHandle = ({
     {withHandle && (
       <div
         className={cn(
-          'absolute inset-y-6 w-[2px] rounded-full',
+          'absolute inset-y-6 w-[2px] rounded-full z-10 -mx-2 px-2',
           'bg-transparent transition-all duration-200 ease-out',
           'group-hover:bg-bolt-elements-textTertiary/50',
           'group-active:bg-bolt-elements-textSecondary/60 group-active:w-[3px]',

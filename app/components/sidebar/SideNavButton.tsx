@@ -38,7 +38,7 @@ export const SideNavButton = React.forwardRef<HTMLButtonElement, SideNavButtonPr
           'disabled:pointer-events-none disabled:opacity-50',
 
           // Unselected state
-          !isSelected && 'bg-transparent text-muted-foreground hover:text-foreground',
+          !isSelected && 'bg-transparent text-foreground hover:shadow-md',
 
           // Selected state - matches MobileNav active styling
           isSelected && [

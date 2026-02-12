@@ -30,7 +30,7 @@ export const Menu = () => {
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [skipConfirmDeleteChecked, setSkipConfirmDeleteChecked] = useState(false);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -100,8 +100,8 @@ export const Menu = () => {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Ctrl+K or Cmd+K for search
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      // Ctrl+Shift+K or Cmd+Shift+K for search
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'K') {
         event.preventDefault();
         setIsSearchFocused(true);
         // Focus the input after state update
@@ -109,16 +109,23 @@ export const Menu = () => {
           searchInputRef.current?.focus();
         }, 0);
       }
-      // Ctrl+N or Cmd+N for new app
-      if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+      // Ctrl+Shift+N for new app (Shift modifier bypasses browser's Ctrl+N)
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'N') {
         event.preventDefault();
-        window.location.href = '/';
+        if (isSmallViewport) {
+          sidebarMenuStore.close();
+        } else {
+          sidebarMenuStore.setCollapsed(true);
+          sidebarMenuStore.close();
+        }
+        // Trigger focus on message input
+        messageInputFocusStore.triggerFocus();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isSmallViewport]);
 
   const handleDeleteClick = (event: React.UIEvent, item: AppLibraryEntry) => {
     event.preventDefault();
@@ -140,19 +147,29 @@ export const Menu = () => {
     return null;
   }
 
+  // Handle click on collapsed sidebar to expand it
+  const handleSidebarClick = () => {
+    // Only expand if collapsed and not on small viewport
+    if (effectiveCollapsed && !isSmallViewport) {
+      setIsCollapsed(false);
+      sidebarMenuStore.setCollapsed(false);
+    }
+  };
+
   return (
     <div
       ref={menuRef}
+      onClick={handleSidebarClick}
       className={classNames(
-        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300',
-        effectiveCollapsed ? 'md:w-[60px]' : 'md:w-[260px]',
+        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300 ease-out',
+        effectiveCollapsed ? 'lg:w-[60px] cursor-pointer' : 'lg:w-[260px]',
       )}
     >
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         {/* Header */}
         <div
           className={classNames(
-            'py-4 border-b border-bolt-elements-borderColor border-opacity-50',
+            'py-4 border-b border-bolt-elements-borderColor border-opacity-50 transition-all duration-300',
             effectiveCollapsed ? 'px-2' : 'px-6',
           )}
         >
@@ -178,7 +195,8 @@ export const Menu = () => {
                   </div>
                   {/* PanelLeft button - hidden by default when collapsed, shows on hover in same position */}
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
@@ -198,12 +216,14 @@ export const Menu = () => {
                 <div className="w-full flex justify-between items-center">
                   {/* Logo - always visible when expanded */}
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center">
+                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
                       <div className="relative w-6 h-6">
                         <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
                       </div>
                     </div>
-                    <h1 className="text-bolt-elements-textHeading font-bold text-xl">Replay</h1>
+                    <h1 className="text-bolt-elements-textHeading font-bold text-xl whitespace-nowrap overflow-hidden transition-all duration-300">
+                      Replay
+                    </h1>
                   </div>
                   {/* PanelLeft button - always visible when expanded */}
                   <button
@@ -243,13 +263,16 @@ export const Menu = () => {
                   )}
                   title={effectiveCollapsed ? 'Home' : undefined}
                 >
-                  <Home size={18} className="text-bolt-elements-textPrimary" />
-                  <span className="text-sm font-medium">Home</span>
+                  <Home size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
+                    Home
+                  </span>
                 </a>
               ) : (
                 <WithTooltip tooltip="Home">
                   <a
                     href="/"
+                    onClick={(e) => e.stopPropagation()}
                     className={classNames(
                       'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
                       effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
@@ -281,15 +304,18 @@ export const Menu = () => {
                   className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <Plus size={18} className="text-bolt-elements-textPrimary" />
-                    <span className="text-sm font-medium">New App</span>
+                    <Plus size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                    <span className="text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
+                      New App
+                    </span>
                   </div>
-                  <span className="text-xs text-bolt-elements-textSecondary">Ctrl+N</span>
+                  {!isSmallViewport && <span className="text-xs text-bolt-elements-textSecondary">Ctrl+Shift+N</span>}
                 </div>
               ) : (
                 <WithTooltip tooltip="New App">
                   <div
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
@@ -322,10 +348,12 @@ export const Menu = () => {
                     className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <Search size={18} className="text-bolt-elements-textPrimary" />
-                      <span className="text-sm font-medium">Search</span>
+                      <Search size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                      <span className="text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
+                        Search
+                      </span>
                     </div>
-                    <span className="text-xs text-bolt-elements-textSecondary">Ctrl+K</span>
+                    {!isSmallViewport && <span className="text-xs text-bolt-elements-textSecondary">Ctrl+Shift+K</span>}
                   </button>
                 ) : (
                   <div className="relative w-full">
@@ -363,7 +391,8 @@ export const Menu = () => {
               {effectiveCollapsed && (
                 <WithTooltip tooltip="Search">
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                         setIsSearchFocused(true);
@@ -390,28 +419,45 @@ export const Menu = () => {
           </div>
         </div>
 
-        {!effectiveCollapsed && (
-          <div className="px-6 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
-            <div className="flex items-center gap-3">
-              <Folder className="text-bolt-elements-textSecondary" size={18} />
-              <h3 className="text-bolt-elements-textHeading font-semibold">Your Projects</h3>
-              {list && list.length > 0 && (
-                <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-30 font-medium shadow-sm">
-                  {list.length}
-                </span>
+        <div
+          className={classNames(
+            'py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50 transition-all duration-300',
+            effectiveCollapsed ? 'px-2' : 'px-6',
+          )}
+        >
+          <div
+            className={classNames(
+              'flex items-center transition-all duration-300',
+              effectiveCollapsed ? 'justify-center cursor-pointer' : 'gap-3',
+            )}
+            onClick={
+              effectiveCollapsed
+                ? (e) => {
+                    e.stopPropagation();
+                    setIsCollapsed(false);
+                    sidebarMenuStore.setCollapsed(false);
+                  }
+                : undefined
+            }
+          >
+            <Folder className="text-bolt-elements-textSecondary shrink-0" size={18} />
+            <h3
+              className={classNames(
+                'text-bolt-elements-textHeading font-semibold whitespace-nowrap overflow-hidden transition-all duration-300',
+                effectiveCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
               )}
-            </div>
+            >
+              Your Projects
+            </h3>
+            {list && list.length > 0 && !effectiveCollapsed && (
+              <span className="ml-auto text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 px-2.5 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-30 font-medium shadow-sm transition-opacity duration-300">
+                {list.length}
+              </span>
+            )}
           </div>
-        )}
-        {effectiveCollapsed && (
-          <div className="px-2 py-4 border-b border-bolt-elements-borderColor border-opacity-50 bg-bolt-elements-background-depth-1 bg-opacity-50">
-            <div className="flex items-center justify-center">
-              <Folder className="text-bolt-elements-textSecondary" size={18} />
-            </div>
-          </div>
-        )}
+        </div>
         {!effectiveCollapsed && (
-          <div className="flex-1 overflow-auto px-2 pb-4">
+          <div className="flex-1 overflow-auto px-2 pb-4 animate-in fade-in duration-300">
             {filteredList.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center bg-bolt-elements-background-depth-1 bg-opacity-30 rounded-md border border-bolt-elements-borderColor border-opacity-30 mt-2">
                 {list === undefined ? (
@@ -501,7 +547,7 @@ export const Menu = () => {
           </div>
         )}
 
-        <div className={classNames('py-4 mt-auto px-2 relative overflow-visible')}>
+        <div className={classNames('py-4 mt-auto px-2 relative overflow-visible')} onClick={(e) => e.stopPropagation()}>
           <ClientAuth isSidebarCollapsed={isCollapsed} />
         </div>
       </div>

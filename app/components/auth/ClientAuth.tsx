@@ -20,7 +20,7 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const stripeSubscription = useStore(subscriptionStore.subscription);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const isSideBarOpen = useStore(sidebarMenuStore.isOpen);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -99,7 +99,12 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
         <div className="relative">
           <button
             ref={buttonRef}
-            className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border shadow-md"
+            className={classNames(
+              'flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-border shadow-md',
+              {
+                'w-8 h-8': isSmallViewport,
+              },
+            )}
             onClick={() => setShowDropdown(!showDropdown)}
           >
             {user.user_metadata?.avatar_url ? (

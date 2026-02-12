@@ -181,7 +181,7 @@ export const WebhooksPanel = () => {
   const hasNoApp = !appId;
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-lg overflow-hidden">
+    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (

@@ -235,14 +235,7 @@ const StackedInfoCard = React.forwardRef<HTMLDivElement, StackedInfoCardProps>(
     }, [isExpanded]);
 
     return (
-      <div
-        ref={ref}
-        className={cn('relative mt-4', className, {
-          'mt-8': hasMoreCards && cards.length > 1,
-          'mt-10': hasMoreCards && cards.length > 2,
-        })}
-        style={{ height: `${wrapperHeight}px` }}
-      >
+      <div ref={ref} className={cn('relative', className)} style={{ height: `${wrapperHeight}px` }}>
         <div
           className={cn(
             'relative transition-all duration-200',

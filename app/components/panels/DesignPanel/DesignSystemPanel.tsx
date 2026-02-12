@@ -677,7 +677,7 @@ export const DesignSystemPanel = () => {
   }
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-lg overflow-hidden">
+    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor overflow-hidden">
       <div className="flex-1 overflow-y-auto flex flex-col">
         {isLoading || !selectedTheme ? (
           <div className="flex-1 p-4 space-y-6">

@@ -46,7 +46,7 @@ export function UserMessage({ message, messages, isFirst = false, onCheckboxChan
             </div>
           }
         >
-          <div className="flex-1 px-4 rounded-md bg-card border border-border">
+          <div className="flex-1 px-4 rounded-md bg-accent border border-border">
             <MessageContents
               message={message}
               messages={messages}

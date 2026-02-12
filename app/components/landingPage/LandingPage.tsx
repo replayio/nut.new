@@ -19,7 +19,7 @@ export const TEXTAREA_MIN_HEIGHT = 76;
 export const TEXTAREA_MAX_HEIGHT = 200;
 
 const LandingPage = () => {
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const user = useStore(userStore);
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const { chatWidth } = useLayoutWidths(!!user);

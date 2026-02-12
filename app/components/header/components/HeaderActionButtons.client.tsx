@@ -13,7 +13,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
   const showWorkbench = useStore(workbenchStore.showWorkbench);
   const showChat = useStore(chatStore.showChat);
 
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
 
   const canHideChat = showWorkbench || !showChat;
 

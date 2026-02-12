@@ -56,7 +56,7 @@ export const MobileNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-muted border-t border-border safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-accent safe-area-bottom">
       <div className="flex w-full p-1 gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;

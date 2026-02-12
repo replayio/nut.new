@@ -10,12 +10,12 @@ import {
 } from '~/lib/stripe/client';
 import { classNames } from '~/utils/classNames';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { useIsMobile } from '~/lib/hooks/useIsMobile';
+import useViewport from '~/lib/hooks';
 import { Info, Gift, Rocket, Check, Sparkles } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 
 export function SubscriptionModal() {
-  const { isMobile } = useIsMobile();
+  const isSmallViewport = useViewport(1024);
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
   const stripeSubscription = useStore(subscriptionStore.subscription);
   const user = useStore(userStore);
@@ -54,8 +54,8 @@ export function SubscriptionModal() {
         className={classNames(
           'bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor max-w-6xl w-full h-full overflow-y-auto',
           {
-            'rounded-b-md': isMobile,
-            'rounded-r-md': !isMobile,
+            'rounded-b-md': isSmallViewport,
+            'rounded-r-md': !isSmallViewport,
           },
         )}
         onClick={(e) => e.stopPropagation()}

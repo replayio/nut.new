@@ -22,7 +22,7 @@ import { userStore } from '~/lib/stores/auth';
 export function TopNav() {
   const appId = useStore(chatStore.currentAppId);
   const repositoryId = useStore(workbenchStore.pendingRepositoryId);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const user = useStore(userStore);
   const handleBack = () => {
     window.location.href = '/';
@@ -31,7 +31,7 @@ export function TopNav() {
   const showDebugButton = isAdmin(user) && appId;
 
   return (
-    <nav className="flex items-center justify-between h-[60px] px-2 bg-bolt-elements-background-depth-2 gap-2">
+    <nav className="flex items-center justify-between h-[60px] px-2 gap-2 bg-accent">
       {/* Left section: Back button + Project title */}
       <div className="flex items-center gap-1 flex-1 min-w-0">
         <Button

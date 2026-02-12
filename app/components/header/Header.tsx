@@ -11,7 +11,7 @@ import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 export function Header() {
   const chatStarted = useStore(chatStore.started);
   const appSummary = useStore(chatStore.appSummary);
-  const isSmallViewport = useViewport(800);
+  const isSmallViewport = useViewport(1024);
   const location = useLocation();
 
   return (
