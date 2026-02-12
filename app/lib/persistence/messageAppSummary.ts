@@ -100,6 +100,9 @@ export interface AppFeature {
   // Time when this feature was created. 2025/8/30: Always present in newer apps.
   time?: string;
 
+  // Time when this feature was implemented. 2026/2/12: Always present in newer apps.
+  implementTime?: string;
+
   // One sentence description of the feature.
   description: string;
 
