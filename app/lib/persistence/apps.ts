@@ -14,6 +14,7 @@ export interface AppLibraryEntry {
   createdAt: string;
   updatedAt: string;
   title: string;
+  summary: AppSummary | undefined;
 }
 
 const localStorageKey = 'nut-apps';
