@@ -106,8 +106,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const prompt = urlSearchParams[0]?.get('prompt');
     const appPath = urlSearchParams[0]?.get('appPath');
 
-    console.log('appSummary', appSummary);
-
     const loadEntries = useCallback(() => {
       database
         .getAllAppEntries()
@@ -565,7 +563,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     messageInputProps={messageInputProps}
                   />
                 )}
-                {!chatStarted && <AppGallery className="mt-24" />}
+                {!chatStarted && user && <AppGallery className="mt-24" />}
                 {!chatStarted && <ReferenceGallery className="mt-24" />}
               </div>
             </div>
