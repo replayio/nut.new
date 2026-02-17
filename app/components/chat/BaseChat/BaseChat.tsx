@@ -32,7 +32,8 @@ import { secretsModalStore } from '~/lib/stores/secretsModal';
 import { getAppSetSecrets } from '~/lib/replay/Secrets';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
-import AppTemplates from './components/AppTemplates/AppTemplates';
+import { ReferenceGallery } from '~/components/gallery';
+import { AppGallery } from '~/components/gallery';
 import { DesignSystemPanel } from '~/components/panels/DesignPanel/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignPanel/DesignToolbar';
 import { SettingsPanel } from '~/components/panels/SettingsPanel/SettingsPanel';
@@ -104,6 +105,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const urlSearchParams = useSearchParams();
     const prompt = urlSearchParams[0]?.get('prompt');
     const appPath = urlSearchParams[0]?.get('appPath');
+
+    console.log('appSummary', appSummary);
 
     const loadEntries = useCallback(() => {
       database
@@ -562,7 +565,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     messageInputProps={messageInputProps}
                   />
                 )}
-                {!chatStarted && <AppTemplates sendMessage={handleSendMessage} />}
+                {!chatStarted && <AppGallery className="mt-24" />}
+                {!chatStarted && <ReferenceGallery className="mt-24" />}
               </div>
             </div>
             <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
