@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreHorizontal, Globe, PenLine, Trash2, Check } from 'lucide-react';
+import { MoreHorizontal, PenLine, Trash2, Check } from 'lucide-react';
 import type { AppLibraryEntry } from '~/lib/persistence/apps';
 import { Button } from '~/components/ui/button';
 import { classNames } from '~/utils/classNames';
@@ -90,9 +90,9 @@ export const AppCard = ({ app, onClick, onDelete, className }: AppCardProps) => 
         </div>
 
         {/* Privacy icon - bottom right of image */}
-        <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full border border-input bg-card flex items-center justify-center">
+        {/* <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full border border-input bg-card flex items-center justify-center">
           <Globe className="w-4 h-4 text-muted-foreground" />
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom section */}

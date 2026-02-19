@@ -6,11 +6,11 @@ import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import useViewport from '~/lib/hooks/useViewport';
 import { classNames } from '~/utils/classNames';
-import { MobileNav } from '~/components/mobile-nav/MobileNav.client';
 import { useEffect } from 'react';
 import { useUser } from '~/hooks/useUser';
 import { checkSubscriptionStatus } from '~/lib/stripe/client';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
+import { Header } from '~/components/header/Header';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'My Projects - Replay Builder' }];
@@ -59,18 +59,16 @@ export default function ProjectsPage() {
 
       {/* Main content */}
       <main
-        className={classNames('flex-1 overflow-auto transition-all duration-300', {
+        className={classNames('flex-1 flex flex-col overflow-hidden transition-all duration-300', {
           'lg:ml-[60px]': !isSmallViewport && isSidebarCollapsed,
           'lg:ml-[260px]': !isSmallViewport && !isSidebarCollapsed,
         })}
       >
-        <div className="p-6 lg:p-8">
+        {isSmallViewport && <Header />}
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           <AppGallery variant="all" onNewApp={handleNewApp} onAppClick={handleAppClick} />
         </div>
       </main>
-
-      {/* Mobile nav */}
-      {isSmallViewport && <ClientOnly>{() => <MobileNav />}</ClientOnly>}
     </div>
   );
 }

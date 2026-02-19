@@ -1,7 +1,5 @@
-import { Globe, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import type { ReferenceAppSummary } from '~/lib/replay/ReferenceApps';
-import { Button } from '~/components/ui/button';
 import { classNames } from '~/utils/classNames';
 
 interface ReferenceAppCardProps {
@@ -23,6 +21,7 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
         'w-80 p-1 rounded-md border border-border bg-card flex flex-col gap-0.5 cursor-pointer transition-colors hover:bg-accent/50 group',
         className,
       )}
+      onClick={handleViewDetails}
     >
       {/* Screenshot image */}
       <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted">
@@ -40,21 +39,21 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
         )}
 
         {/* Privacy icon - top right of image */}
-        <div className="absolute top-2 right-2 w-6 h-6 rounded-full border border-input bg-card flex items-center justify-center">
+        {/* <div className="absolute top-2 right-2 w-6 h-6 rounded-full border border-input bg-card flex items-center justify-center">
           <Globe className="w-4 h-4 text-muted-foreground" />
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom section */}
       <div className="flex items-center gap-2 p-1">
         {/* Avatar */}
-        <div className="w-5 h-5 rounded-full bg-muted shrink-0 overflow-hidden">
+        {/* <div className="w-5 h-5 rounded-full bg-muted shrink-0 overflow-hidden">
           {app.screenshotURL && !imageError ? (
             <img src={app.screenshotURL} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-muted" />
           )}
-        </div>
+        </div> */}
 
         {/* Text content */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -65,7 +64,7 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
         </div>
 
         {/* View button */}
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           className="shrink-0 gap-2 rounded-full px-4"
@@ -76,7 +75,7 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
         >
           View
           <ArrowRight className="w-4 h-4" />
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
