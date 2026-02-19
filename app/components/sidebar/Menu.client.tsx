@@ -315,10 +315,10 @@ export const Menu = () => {
               {/* Reference Applications */}
               {!effectiveCollapsed ? (
                 <a
-                  href="/reference-apps"
+                  href="/gallery"
                   className={classNames(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
-                    window.location.pathname === '/reference-apps'
+                    window.location.pathname === '/gallery'
                       ? 'bg-bolt-elements-background-depth-1'
                       : 'hover:bg-bolt-elements-background-depth-1',
                   )}
@@ -329,11 +329,11 @@ export const Menu = () => {
               ) : (
                 <WithTooltip tooltip="Reference applications">
                   <a
-                    href="/reference-apps"
+                    href="/gallery"
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
                       'w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
-                      window.location.pathname === '/reference-apps'
+                      window.location.pathname === '/gallery'
                         ? 'bg-bolt-elements-background-depth-1'
                         : 'hover:bg-bolt-elements-background-depth-1',
                     )}
