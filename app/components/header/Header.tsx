@@ -38,7 +38,7 @@ export function Header() {
           <a href="/">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
-              <h1 className="text-bolt-elements-textHeading font-bold text-xl">REPLAY</h1>
+              <h1 className="text-bolt-elements-textHeading font-bold text-xl">Replay</h1>
             </div>
           </a>
         )}
