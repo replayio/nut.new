@@ -10,6 +10,7 @@ import useViewport from '~/lib/hooks';
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/button';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
+import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 interface ClientAuthProps {
   isSidebarCollapsed?: boolean;
@@ -158,6 +159,10 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
 
                 {/* Menu Items */}
                 <div className="flex-1 py-2">
+                  <div className="px-5 py-3 border-b border-border">
+                    <ThemeSwitch variant="menu" />
+                  </div>
+
                   {stripeSubscription?.tier !== 'builder' && (
                     <button
                       onClick={handleSubscriptionToggle}
