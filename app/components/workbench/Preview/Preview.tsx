@@ -364,14 +364,14 @@ export const Preview = memo(() => {
 
   return (
     <TooltipProvider>
-      <div ref={containerRef} className="w-full h-full flex flex-col relative bg-bolt-elements-background-depth-1">
+      <div ref={containerRef} className="w-full h-full flex flex-col relative bg-card">
         {isPortDropdownOpen && (
           <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
         )}
 
         {/* Top Navigation Bar */}
         {isPreviewReady && (
-          <div className="bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor p-2 flex items-center justify-between gap-2">
+          <div className="bg-card border-b border-border p-2 flex items-center justify-between gap-2">
             {/* Left: Preview/Editor Toggle */}
             {!isSmallViewport && (
               <div className="flex items-center h-9 bg-muted rounded-lg p-1">
@@ -383,8 +383,8 @@ export const Preview = memo(() => {
                   className={classNames(
                     'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
                     activeMode === 'preview'
-                      ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                      ? 'bg-background text-foreground border border-input shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   <Eye size={16} />
@@ -398,8 +398,8 @@ export const Preview = memo(() => {
                   className={classNames(
                     'flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium rounded-md transition-all',
                     activeMode === 'editor'
-                      ? 'bg-background text-bolt-elements-textPrimary border border-input shadow-sm'
-                      : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+                      ? 'bg-background text-foreground border border-input shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                   disabled={!isElementPickerReady || isSmallViewport}
                 >
@@ -415,7 +415,7 @@ export const Preview = memo(() => {
               <Button
                 variant="outline"
                 onClick={toggleDeviceMode}
-                className="flex items-center gap-1.5 h-7 px-3 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-full"
+                className="flex items-center gap-1.5 h-7 px-3 text-sm text-muted-foreground hover:text-foreground rounded-full"
               >
                 <Monitor size={16} />
                 {isDeviceModeOn ? 'Multi-Device' : 'Desktop'}
@@ -426,7 +426,7 @@ export const Preview = memo(() => {
                 <input
                   title="URL"
                   ref={inputRef}
-                  className="w-[100px] sm:w-[200px] md:w-[200px] lg:w-[200px] xl:w-[200px] bg-transparent text-sm text-bolt-elements-textSecondary border-none outline-none focus:ring-0 p-0 truncate"
+                  className="w-[100px] sm:w-[200px] md:w-[200px] lg:w-[200px] xl:w-[200px] bg-transparent text-sm text-muted-foreground border-none outline-none focus:ring-0 p-0 truncate"
                   type="text"
                   value={url}
                   placeholder="https://"
@@ -454,7 +454,7 @@ export const Preview = memo(() => {
                   variant="ghost"
                   size="icon"
                   onClick={openInNewTab}
-                  className="h-7 w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
                 >
                   <ExternalLink size={16} />
                 </Button>
@@ -465,7 +465,7 @@ export const Preview = memo(() => {
                   variant="ghost"
                   size="icon"
                   onClick={() => reloadPreview()}
-                  className="h-7 w-7 min-w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary border border-border rounded-full p-0"
+                  className="h-7 w-7 min-w-7 text-muted-foreground hover:text-foreground border border-border rounded-full p-0"
                 >
                   <RefreshCcw size={16} />
                 </Button>
@@ -477,7 +477,7 @@ export const Preview = memo(() => {
                 variant="ghost"
                 size="icon"
                 onClick={toggleFullscreen}
-                className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground"
               >
                 {isFullscreen ? <Shrink size={16} /> : <Fullscreen size={16} />}
               </Button>
@@ -487,7 +487,7 @@ export const Preview = memo(() => {
 
         {/* Preview Area */}
         <div
-          className={`flex-1 bg-bolt-elements-background-depth-2 bg-opacity-30 ${isDeviceModeOn ? 'overflow-hidden' : 'flex justify-center items-center overflow-auto'}`}
+          className={`flex-1 bg-muted/30 ${isDeviceModeOn ? 'overflow-hidden' : 'flex justify-center items-center overflow-auto'}`}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >

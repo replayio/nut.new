@@ -93,12 +93,12 @@ export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDeta
             {setSecrets.includes(secret.name) ? (
               <CheckCircle className="text-green-500 flex-shrink-0" size={14} />
             ) : (
-              <Circle className="text-bolt-elements-textSecondary flex-shrink-0" size={14} />
+              <Circle className="text-muted-foreground flex-shrink-0" size={14} />
             )}
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">{secret.name}</div>
+              <div className="text-sm font-medium text-foreground truncate">{secret.name}</div>
               {secret.description && (
-                <div className="text-xs text-bolt-elements-textSecondary truncate">{secret.description}</div>
+                <div className="text-xs text-muted-foreground truncate">{secret.description}</div>
               )}
             </div>
           </div>
@@ -106,7 +106,7 @@ export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDeta
 
         {/* Show remaining count if more than 5 */}
         {requiredSecrets.length > 5 && (
-          <div className="flex items-center gap-2 py-1 text-xs text-bolt-elements-textSecondary">
+          <div className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
             <MoreHorizontal className="flex-shrink-0" size={14} />
             <span>
               and {requiredSecrets.length - 5} more secret{requiredSecrets.length - 5 === 1 ? '' : 's'}
@@ -116,9 +116,9 @@ export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDeta
 
         {/* Built-in secrets info */}
         {allSecrets.filter((s) => BUILTIN_SECRET_NAMES.includes(s.name)).length > 0 && (
-          <div className="flex items-center gap-2 py-1 mt-2 pt-2 border-t border-bolt-elements-borderColor border-opacity-30">
+          <div className="flex items-center gap-2 py-1 mt-2 pt-2 border-t border-border/30">
             <CheckCircle className="text-green-500 flex-shrink-0" size={14} />
-            <span className="text-xs text-bolt-elements-textSecondary">Built-in API keys configured automatically</span>
+            <span className="text-xs text-muted-foreground">Built-in API keys configured automatically</span>
           </div>
         )}
       </div>

@@ -100,11 +100,11 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
   return (
     <>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
-          <LogIn className="text-bolt-elements-textPrimary" size={24} />
+        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
+          <LogIn className="text-foreground" size={24} />
         </div>
-        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Welcome Back</h2>
-        <p className="text-bolt-elements-textSecondary mt-2">Sign in to continue building amazing apps</p>
+        <h2 className="text-3xl font-bold text-foreground">Welcome Back</h2>
+        <p className="text-muted-foreground mt-2">Sign in to continue building amazing apps</p>
       </div>
 
       <Button
@@ -120,10 +120,10 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
 
       <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-bolt-elements-borderColor border-opacity-50"></div>
+          <div className="w-full border-t border-border/50"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor border-opacity-30">
+          <span className="px-4 py-2 bg-card text-muted-foreground rounded-lg border border-border/30">
             Or continue with email
           </span>
         </div>
@@ -131,7 +131,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
 
       <form onSubmit={handleSignIn} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-foreground">
             Email Address
           </label>
           <input
@@ -151,7 +151,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         </div>
 
         <div>
-          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-foreground">
             Password
           </label>
           <input
@@ -178,8 +178,8 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         </div>
       )}
 
-      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
-        <p className="text-bolt-elements-textSecondary text-sm">
+      <div className="mt-8 text-center p-4 bg-card rounded-md border border-border/30">
+        <p className="text-muted-foreground text-sm">
           Don't have an account?{' '}
           <Button onClick={onToggleForm} variant="link" className="p-0 h-auto font-semibold">
             Sign Up

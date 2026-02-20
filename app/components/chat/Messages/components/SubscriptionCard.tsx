@@ -48,8 +48,8 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ onMount }) =
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-bolt-elements-textHeading">Upgrade to Builder Plan</h3>
-            <p className="text-bolt-elements-textSecondary text-sm max-w-md">
+            <h3 className="text-lg font-semibold text-foreground">Upgrade to Builder Plan</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
               Upgrade to our builder plan to continue building unlimited apps.
             </p>
           </div>

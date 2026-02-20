@@ -17,20 +17,20 @@ export function PlanUpgradeBlock() {
     <div className="flex items-center justify-center">
       <div className="max-w-2xl w-full">
         {/* Main Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
           {/* Gradient Background Effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5 pointer-events-none" />
 
           <div className="relative p-4 sm:p-6">
             {/* Heading */}
-            <h2 className="text-xl sm:text-2xl font-bold text-center text-bolt-elements-textHeading mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-foreground mb-4">
               App Limit Reached
             </h2>
 
             {/* Description */}
-            <p className="text-center text-bolt-elements-textSecondary text-sm mb-4 max-w-md mx-auto leading-relaxed">
+            <p className="text-center text-muted-foreground text-sm mb-4 max-w-md mx-auto leading-relaxed">
               You've reached your maximum number of apps for the{' '}
-              <span className="text-bolt-elements-textPrimary font-semibold">Free Plan</span>. Upgrade to continue
+              <span className="text-foreground font-semibold">Free Plan</span>. Upgrade to continue
               building amazing applications!
             </p>
 
@@ -46,7 +46,7 @@ export function PlanUpgradeBlock() {
             </div>
 
             {/* Small text */}
-            <p className="text-center text-bolt-elements-textTertiary text-sm mt-6">
+            <p className="text-center text-muted-foreground/70 text-sm mt-6">
               Choose the plan that works best for you
             </p>
           </div>

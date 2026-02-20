@@ -65,7 +65,7 @@ export const Workbench = memo(({ chatStarted, isResizable }: WorkspaceProps) => 
         className="z-[15] h-full"
       >
         <div
-          className={classNames('fixed z-0 transition-[left,width,transform] duration-200 bolt-ease-cubic-bezier', {
+          className={classNames('fixed z-0 transition-[left,width,transform] duration-200 ease-cubic-bezier', {
             'top-[calc(54px+0.5rem)] bottom-[calc(3.5rem+0.5rem)] left-1 right-1': isSmallViewport,
             'top-[calc(54px+1.5rem)] bottom-6 mr-4 p-6': !isSmallViewport,
             'translate-x-0': showWorkbench && isSmallViewport,

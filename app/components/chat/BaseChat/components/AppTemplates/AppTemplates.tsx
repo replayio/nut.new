@@ -238,11 +238,11 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
     <div id="showcase-gallery" className={classNames('w-full mx-auto mt-24 mb-4')}>
       <div className="max-w-[1337px] mx-auto flex flex-col mb-12 animate-fade-in animation-delay-100">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-          <span className="text-bolt-elements-textHeading">Start with</span>
+          <span className="text-foreground">Start with</span>
           <br />
           <span className="text-rose-500 dark:text-rose-400">a fully working app</span>
         </h1>
-        <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
           Ready to use out-of-the-box (but can be aligned to your needs)
         </p>
       </div>
@@ -250,8 +250,8 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-bolt-elements-borderColor border-t-rose-500 rounded-full animate-spin" />
-            <p className="text-bolt-elements-textSecondary">Loading apps...</p>
+            <div className="w-12 h-12 border-4 border-border border-t-rose-500 rounded-full animate-spin" />
+            <p className="text-muted-foreground">Loading apps...</p>
           </div>
         </div>
       ) : (
@@ -331,15 +331,15 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
           {collections.length > 0 && (
             <div className="max-w-[1337px] mx-auto px-4 sm:px-6 animate-fade-in animation-delay-600">
               <div className="mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-bolt-elements-textHeading mb-2">Collections</h2>
-                <p className="text-bolt-elements-textSecondary">Apps for different use cases</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Collections</h2>
+                <p className="text-muted-foreground">Apps for different use cases</p>
               </div>
 
               {isLoadingCollections ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-4 border-bolt-elements-borderColor border-t-primary rounded-full animate-spin" />
-                    <p className="text-bolt-elements-textSecondary text-sm">Loading collections...</p>
+                    <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
+                    <p className="text-muted-foreground text-sm">Loading collections...</p>
                   </div>
                 </div>
               ) : (
@@ -352,15 +352,15 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                         const encodedName = encodeURIComponent(collection.name);
                         window.location.href = `/collection/${encodedName}`;
                       }}
-                      className="group text-left bg-bolt-elements-background-depth-1 rounded-md p-4 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 transition-colors"
+                      className="group text-left bg-card rounded-md p-4 border border-border hover:bg-muted transition-colors"
                     >
-                      <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-2 group-hover:text-bolt-elements-textHeading transition-colors">
+                      <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-foreground transition-colors">
                         {collection.name}
                       </h3>
-                      <p className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
                         {collection.shortDescription}
                       </p>
-                      <div className="mt-4 flex items-center text-bolt-elements-textSecondary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="mt-4 flex items-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm font-medium">View collection</span>
                         <svg
                           className="w-4 h-4 ml-2"

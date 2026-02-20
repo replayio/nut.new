@@ -29,7 +29,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 }) => {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-bolt-elements-textPrimary">{title}</h3>
+      <h3 className="text-sm font-medium text-foreground">{title}</h3>
       <div className={classNames('grid gap-2', columns === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
         {presets.map((preset) => (
           <button
@@ -38,8 +38,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             className={classNames(
               'flex flex-col items-center justify-center p-3 rounded-md border transition-all',
               currentValue === preset.value
-                ? 'border-bolt-elements-textPrimary bg-background'
-                : 'border-bolt-elements-borderColor bg-background hover:border-bolt-elements-borderColorActive',
+                ? 'border-foreground bg-background'
+                : 'border-border bg-background hover:border-ring',
             )}
           >
             {renderPreview ? (
@@ -47,12 +47,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             ) : (
               <div className="w-12 h-12 mb-2 flex items-center justify-center">
                 <div
-                  className="w-10 h-10 border border-bolt-elements-textPrimary"
+                  className="w-10 h-10 border border-foreground"
                   style={{ borderRadius: preset.previewRadius || '0' }}
                 />
               </div>
             )}
-            <span className="text-xs font-medium text-bolt-elements-textPrimary">{preset.label}</span>
+            <span className="text-xs font-medium text-foreground">{preset.label}</span>
           </button>
         ))}
       </div>
@@ -88,7 +88,7 @@ export const RadiusSelector: React.FC<RadiusSelectorProps> = ({ title = 'Roundne
       renderPreview={(preset) => (
         <div className="w-12 h-12 mb-2 flex items-center justify-center">
           <div
-            className="w-10 h-10 border border-bolt-elements-textPrimary"
+            className="w-10 h-10 border border-foreground"
             style={{ borderRadius: preset.previewRadius || '0' }}
           />
         </div>
@@ -121,11 +121,11 @@ export const SpacingSelector: React.FC<SpacingSelectorProps> = ({ title = 'Space
         <div className="w-12 h-12 mb-2 flex items-center justify-center">
           {/* Spacing visual: horizontal lines with gaps */}
           <div className="flex items-center justify-center gap-0.5">
-            <div className="w-0.5 h-6 border-l border-dashed border-bolt-elements-textSecondary" />
+            <div className="w-0.5 h-6 border-l border-dashed border-muted-foreground" />
             <div className="flex items-center justify-center" style={{ width: `${preset.value * 3}px` }}>
-              <div className="w-full border-t border-dashed border-bolt-elements-textSecondary" />
+              <div className="w-full border-t border-dashed border-muted-foreground" />
             </div>
-            <div className="w-0.5 h-6 border-r border-dashed border-bolt-elements-textSecondary" />
+            <div className="w-0.5 h-6 border-r border-dashed border-muted-foreground" />
           </div>
         </div>
       )}
@@ -160,7 +160,7 @@ export const BorderWidthSelector: React.FC<BorderWidthSelectorProps> = ({
       renderPreview={(preset) => (
         <div className="w-12 h-12 mb-2 flex items-center justify-center">
           <div
-            className="w-8 h-10 rounded-sm border-bolt-elements-textPrimary"
+            className="w-8 h-10 rounded-sm border-foreground"
             style={{ borderWidth: `${preset.value}px`, borderStyle: 'solid' }}
           />
         </div>

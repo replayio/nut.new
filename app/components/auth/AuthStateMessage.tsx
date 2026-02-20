@@ -37,9 +37,9 @@ export function AuthStateMessage({
           )}
         </div>
 
-        <h2 className="text-3xl font-bold mb-6 text-bolt-elements-textHeading">{title}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-foreground">{title}</h2>
 
-        <div className="text-lg text-bolt-elements-textSecondary mb-8 leading-relaxed max-w-sm mx-auto bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-3 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
+        <div className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-sm mx-auto bg-muted/30 px-4 py-3 rounded-xl border border-border/30">
           {message}
         </div>
 
@@ -58,7 +58,7 @@ export function AuthStateMessage({
               onClick={onClose}
               className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] border group ${
                 onRetry
-                  ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border-bolt-elements-borderColor'
+                  ? 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground border-border'
                   : isSuccess
                     ? 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl'
                     : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl'

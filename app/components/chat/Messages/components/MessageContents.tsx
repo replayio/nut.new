@@ -125,7 +125,7 @@ export function MessageContents({ message, messages = [], sendMessage }: Message
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <span className="text-bolt-elements-textPrimary">Selected:</span>
+                  <span className="text-foreground">Selected:</span>
                 </BreadcrumbItem>
 
                 {/* Show currently selected React component (last React component) */}
@@ -146,7 +146,7 @@ export function MessageContents({ message, messages = [], sendMessage }: Message
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="flex items-center gap-1 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor rounded-lg p-1">
+                        <DropdownMenuTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors bg-accent border border-border rounded-lg p-1">
                           <BreadcrumbEllipsis className="h-4 w-4" />
                           <span className="sr-only">More HTML elements</span>
                         </DropdownMenuTrigger>
@@ -178,7 +178,7 @@ export function MessageContents({ message, messages = [], sendMessage }: Message
           </div>
         </div>
       )}
-      <div className="prose prose-sm max-w-none text-bolt-elements-textPrimary">
+      <div className="prose prose-sm max-w-none text-foreground">
         <MarkdownWithCheckboxes
           html
           message={message}

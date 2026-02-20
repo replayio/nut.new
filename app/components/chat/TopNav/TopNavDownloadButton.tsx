@@ -93,13 +93,13 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
       <ReactModal
         isOpen={showUpgradeModal}
         onRequestClose={() => setShowUpgradeModal(false)}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl shadow-2xl p-4 sm:p-6 max-w-md w-[calc(100%-2rem)] sm:w-full sm:mx-4 outline-none"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl shadow-2xl p-4 sm:p-6 max-w-md w-[calc(100%-2rem)] sm:w-full sm:mx-4 outline-none"
         overlayClassName="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]"
       >
         <div className="flex flex-col items-center text-center">
           <button
             onClick={() => setShowUpgradeModal(false)}
-            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X size={20} />
           </button>
@@ -108,9 +108,9 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
             <Crown className="text-purple-500" size={32} />
           </div>
 
-          <h2 className="text-xl font-bold text-bolt-elements-textHeading mb-2">Premium Feature</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">Premium Feature</h2>
 
-          <p className="text-bolt-elements-textSecondary mb-6">
+          <p className="text-muted-foreground mb-6">
             Downloading code is a premium feature available exclusively to Builder plan subscribers. Upgrade now to
             download your projects and access all premium features.
           </p>
@@ -125,7 +125,7 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
 
           <button
             onClick={() => setShowUpgradeModal(false)}
-            className="mt-3 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+            className="mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Maybe later
           </button>
@@ -139,7 +139,7 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
           <button
             ref={ref}
             onClick={handleDownload}
-            className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground"
             {...props}
           >
             <Download size={16} />
@@ -159,7 +159,7 @@ export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownload
               variant="ghost"
               size="icon"
               onClick={handleDownload}
-              className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
               {...props}
             >
               <Download size={16} />

@@ -181,7 +181,7 @@ export const WebhooksPanel = () => {
   const hasNoApp = !appId;
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor overflow-hidden">
+    <div className="@container flex flex-col h-full w-full bg-card rounded-md border border-border overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
@@ -195,11 +195,11 @@ export const WebhooksPanel = () => {
           </div>
         ) : hasNoApp ? (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mb-4 border border-bolt-elements-borderColor">
-              <Key className="text-bolt-elements-textSecondary" size={24} />
+            <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4 border border-border">
+              <Key className="text-muted-foreground" size={24} />
             </div>
-            <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No App Selected</h3>
-            <p className="text-bolt-elements-textSecondary text-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-2">No App Selected</h3>
+            <p className="text-muted-foreground text-sm">
               Start a conversation to create an app and configure webhooks.
             </p>
           </div>
@@ -208,8 +208,8 @@ export const WebhooksPanel = () => {
             {/* Header */}
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-bolt-elements-textHeading mb-1">Webhooks</h2>
-                <p className="text-sm text-bolt-elements-textSecondary">
+                <h2 className="text-xl font-bold text-foreground mb-1">Webhooks</h2>
+                <p className="text-sm text-muted-foreground">
                   Configure which functions can be called via webhooks and their access requirements.
                 </p>
               </div>
@@ -230,16 +230,16 @@ export const WebhooksPanel = () => {
 
             {/* Access Key Section */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-bolt-elements-textPrimary">Access Key</label>
+              <label className="text-sm font-medium text-foreground">Access Key</label>
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-9 px-3 flex items-center bg-background rounded-md border border-bolt-elements-borderColor text-sm text-bolt-elements-textPrimary font-mono truncate">
+                <div className="flex-1 h-9 px-3 flex items-center bg-background rounded-md border border-border text-sm text-foreground font-mono truncate">
                   {accessKey}
                 </div>
                 <TooltipProvider>
                   <WithTooltip tooltip="Copy access key">
                     <button
                       onClick={handleCopyAccessKey}
-                      className="h-9 w-9 flex items-center justify-center rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-colors"
+                      className="h-9 w-9 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       <Copy size={14} />
                     </button>
@@ -250,16 +250,16 @@ export const WebhooksPanel = () => {
                     <button
                       onClick={handleGenerateNewKey}
                       disabled={saving}
-                      className="h-9 w-9 flex items-center justify-center rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-9 w-9 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RefreshCw size={14} className={saving ? 'animate-spin' : ''} />
                     </button>
                   </WithTooltip>
                 </TooltipProvider>
               </div>
-              <p className="text-xs text-bolt-elements-textSecondary">
+              <p className="text-xs text-muted-foreground">
                 Use this key in the{' '}
-                <pre className="inline-block bg-bolt-elements-background-depth-2 rounded-md px-1 py-0.5 text-xs font-mono">
+                <pre className="inline-block bg-muted rounded-md px-1 py-0.5 text-xs font-mono">
                   X-Access-Key
                 </pre>{' '}
                 header to authenticate webhook requests for functions that require access key authentication.
@@ -268,14 +268,14 @@ export const WebhooksPanel = () => {
 
             {/* Webhooks List */}
             {functionNames.length === 0 ? (
-              <div className="p-6 text-center border border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-2">
-                <p className="text-sm text-bolt-elements-textSecondary">
+              <div className="p-6 text-center border border-border rounded-md bg-muted">
+                <p className="text-sm text-muted-foreground">
                   No webhook functions available. Functions will appear here once they are documented.
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-bolt-elements-textPrimary">Webhook Functions</label>
+                <label className="text-sm font-medium text-foreground">Webhook Functions</label>
                 <Accordion type="single" collapsible className="w-full space-y-2">
                   {functionNames.map((functionName) => {
                     const currentSetting = getWebhookSetting(functionName, config);
@@ -285,12 +285,12 @@ export const WebhooksPanel = () => {
                       <AccordionItem
                         key={functionName}
                         value={functionName}
-                        className="border border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-2 px-4"
+                        className="border border-border rounded-md bg-muted px-4"
                       >
                         <div className="flex items-center justify-between">
                           <AccordionTrigger className="flex-1 text-left hover:no-underline py-4">
                             <div className="flex items-center gap-3">
-                              <span className="font-mono text-sm font-medium text-bolt-elements-textPrimary">
+                              <span className="font-mono text-sm font-medium text-foreground">
                                 {functionName}
                               </span>
                             </div>
@@ -304,8 +304,8 @@ export const WebhooksPanel = () => {
                               className={classNames(
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'disabled'
-                                  ? 'bg-bolt-elements-background-depth-3 border-bolt-elements-borderColorActive text-bolt-elements-textPrimary'
-                                  : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
+                                  ? 'bg-accent border-borderActive text-foreground'
+                                  : 'bg-transparent border-border text-muted-foreground hover:text-foreground hover:border-borderActive',
                               )}
                             >
                               Disabled
@@ -319,7 +319,7 @@ export const WebhooksPanel = () => {
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'public'
                                   ? 'bg-blue-500/20 border-blue-500/50 text-blue-500'
-                                  : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
+                                  : 'bg-transparent border-border text-muted-foreground hover:text-foreground hover:border-borderActive',
                               )}
                             >
                               Public
@@ -333,7 +333,7 @@ export const WebhooksPanel = () => {
                                 'px-3 py-1.5 text-xs font-medium rounded-md border transition-colors',
                                 currentSetting === 'accessKey'
                                   ? 'bg-purple-500/20 border-purple-500/50 text-purple-500'
-                                  : 'bg-transparent border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:border-bolt-elements-borderColorActive',
+                                  : 'bg-transparent border-border text-muted-foreground hover:text-foreground hover:border-borderActive',
                               )}
                             >
                               Access Key
@@ -341,7 +341,7 @@ export const WebhooksPanel = () => {
                           </div>
                         </div>
                         <AccordionContent className="pb-4 pt-2">
-                          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-bolt-elements-textHeading prose-p:text-bolt-elements-textPrimary prose-code:text-bolt-elements-textPrimary">
+                          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-code:text-foreground">
                             <Markdown>{funcDoc}</Markdown>
                           </div>
                         </AccordionContent>

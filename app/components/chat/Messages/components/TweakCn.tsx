@@ -364,8 +364,8 @@ export const TweakCn: React.FC<TweakCnProps> = ({
       <Collapsible defaultOpen>
         <div className="space-y-3">
           <CollapsibleTrigger className="flex w-full items-center justify-between">
-            <h3 className="text-sm font-semibold text-bolt-elements-textPrimary">{title}</h3>
-            <ChevronDown className="h-4 w-4 text-bolt-elements-textSecondary transition-transform duration-200 data-[state=open]:rotate-180" />
+            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3">
             {colorKeys.map((key) => {
@@ -400,7 +400,7 @@ export const TweakCn: React.FC<TweakCnProps> = ({
     <div className="flex flex-col h-full" onClick={(e) => e.stopPropagation()}>
       {/* Tabs */}
       {activeTabOverride === undefined && (
-        <div className="flex gap-1 p-1 bg-bolt-elements-background-depth-2 rounded-none">
+        <div className="flex gap-1 p-1 bg-muted rounded-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -410,8 +410,8 @@ export const TweakCn: React.FC<TweakCnProps> = ({
                 className={classNames(
                   'flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   activeTab === tab.id
-                    ? 'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary'
-                    : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3/50',
+                    ? 'bg-accent text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}
               >
                 <Icon size={16} />
@@ -459,12 +459,12 @@ export const TweakCn: React.FC<TweakCnProps> = ({
             <Collapsible defaultOpen>
               <div className="space-y-3">
                 <CollapsibleTrigger className="flex w-full items-center justify-between">
-                  <h3 className="text-sm font-semibold text-bolt-elements-textPrimary">Font Family</h3>
-                  <ChevronDown className="h-4 w-4 text-bolt-elements-textSecondary transition-transform duration-200 data-[state=open]:rotate-180" />
+                  <h3 className="text-sm font-semibold text-foreground">Font Family</h3>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-3">
                   <div className="space-y-2">
-                    <label className="text-xs text-bolt-elements-textSecondary">Sans-serif Font</label>
+                    <label className="text-xs text-muted-foreground">Sans-serif Font</label>
                     <MultiSelect
                       defaultValue={sansSerifFont}
                       onValueChange={(value) => handleFontSelect('sans', value)}
@@ -477,7 +477,7 @@ export const TweakCn: React.FC<TweakCnProps> = ({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs text-bolt-elements-textSecondary">Serif Font</label>
+                    <label className="text-xs text-muted-foreground">Serif Font</label>
                     <MultiSelect
                       defaultValue={serifFont}
                       onValueChange={(value) => handleFontSelect('serif', value)}
@@ -490,7 +490,7 @@ export const TweakCn: React.FC<TweakCnProps> = ({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs text-bolt-elements-textSecondary">Monospace Font</label>
+                    <label className="text-xs text-muted-foreground">Monospace Font</label>
                     <MultiSelect
                       defaultValue={monoFont}
                       onValueChange={(value) => handleFontSelect('mono', value)}

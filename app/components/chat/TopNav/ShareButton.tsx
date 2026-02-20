@@ -53,7 +53,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ as
         ref={ref}
         onClick={handleShare}
         disabled={copying}
-        className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+        className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground"
         {...props}
       >
         <Share2 size={16} />
@@ -71,7 +71,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(({ as
           size="icon"
           onClick={handleShare}
           disabled={copying}
-          className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
           {...props}
         >
           <Share2 size={16} />

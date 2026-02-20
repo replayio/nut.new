@@ -225,10 +225,10 @@ export default function App() {
           icon={({ type }) => {
             switch (type) {
               case 'success': {
-                return <Check className="text-bolt-elements-icon-success text-2xl" />;
+                return <Check className="text-green-500 text-2xl" />;
               }
               case 'error': {
-                return <div className="text-bolt-elements-icon-error text-2xl">⚠️</div>;
+                return <div className="text-red-500 text-2xl">⚠️</div>;
               }
             }
 

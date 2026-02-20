@@ -63,13 +63,13 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-bolt-elements-background-depth-1 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-card flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-bolt-elements-background-depth-1 p-8 rounded-lg border border-bolt-elements-borderColor">
+        <div className="bg-card p-8 rounded-lg border border-border">
           {authState === 'loading' && (
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-              <p className="text-bolt-elements-textSecondary">Verifying reset link...</p>
+              <p className="text-muted-foreground">Verifying reset link...</p>
             </div>
           )}
 

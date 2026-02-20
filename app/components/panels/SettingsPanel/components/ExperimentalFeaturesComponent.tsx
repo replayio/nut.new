@@ -80,8 +80,8 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
       {/* Section Header */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Experimental Features</h3>
-          <p className="text-sm text-bolt-elements-textSecondary mt-1">
+          <h3 className="text-base font-semibold text-foreground">Experimental Features</h3>
+          <p className="text-sm text-muted-foreground mt-1">
             Enable experimental features to enhance your app
           </p>
         </div>
@@ -98,9 +98,9 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium text-bolt-elements-textPrimary">In-App Feedback</h4>
+              <h4 className="text-sm font-medium text-foreground">In-App Feedback</h4>
             </div>
-            <p className="text-sm text-bolt-elements-textSecondary mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {appMessagesEnabled
                 ? 'Users can report issues or request updates directly in the app'
                 : 'Enable updating and reporting bugs directly from the app'}
@@ -117,9 +117,9 @@ export const ExperimentalFeaturesComponent: React.FC<ExperimentalFeaturesCompone
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium text-bolt-elements-textPrimary">Builder Improvements</h4>
+              <h4 className="text-sm font-medium text-foreground">Builder Improvements</h4>
             </div>
-            <p className="text-sm text-bolt-elements-textSecondary mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {!disableAppBlockChanges
                 ? 'Use developed changes to improve future apps for everyone'
                 : 'Developed changes will not be used to improve future apps'}

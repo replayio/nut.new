@@ -72,7 +72,7 @@ export const Menu = () => {
       ref={menuRef}
       onClick={handleSidebarClick}
       className={classNames(
-        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-bolt-elements-background-depth-2 border-r border-bolt-elements-borderColor border-opacity-50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300 ease-out',
+        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-muted border-r border-border/50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300 ease-out',
         effectiveCollapsed ? 'lg:w-[60px] cursor-pointer' : 'lg:w-[260px]',
       )}
     >
@@ -80,7 +80,7 @@ export const Menu = () => {
         {/* Header */}
         <div
           className={classNames(
-            'py-4 border-b border-bolt-elements-borderColor border-opacity-50 transition-all duration-300',
+            'py-4 border-b border-border/50 transition-all duration-300',
             effectiveCollapsed ? 'px-2' : 'px-6',
           )}
         >
@@ -117,10 +117,10 @@ export const Menu = () => {
                         sidebarMenuStore.open();
                       }
                     }}
-                    className="w-full flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
+                    className="w-full flex items-center justify-center rounded-md hover:bg-card transition-all opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto absolute inset-0"
                     aria-label={isSmallViewport ? 'Close sidebar' : 'Expand sidebar'}
                   >
-                    <PanelLeft size={18} className="text-bolt-elements-textPrimary" />
+                    <PanelLeft size={18} className="text-foreground" />
                   </button>
                 </div>
               ) : (
@@ -132,7 +132,7 @@ export const Menu = () => {
                         <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
                       </div>
                     </div>
-                    <h1 className="text-bolt-elements-textHeading font-bold text-xl whitespace-nowrap overflow-hidden transition-all duration-300">
+                    <h1 className="text-foreground font-bold text-xl whitespace-nowrap overflow-hidden transition-all duration-300">
                       Replay
                     </h1>
                   </div>
@@ -148,10 +148,10 @@ export const Menu = () => {
                         sidebarMenuStore.close();
                       }
                     }}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-card transition-colors"
                     aria-label={isSmallViewport ? 'Close sidebar' : 'Collapse sidebar'}
                   >
-                    <PanelLeft size={20} className="text-bolt-elements-textPrimary" />
+                    <PanelLeft size={20} className="text-foreground" />
                   </button>
                 </div>
               )}
@@ -166,15 +166,15 @@ export const Menu = () => {
                 <a
                   href="/"
                   className={classNames(
-                    'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
+                    'w-full flex items-center rounded-md text-foreground transition-colors',
                     effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
                     window.location.pathname === '/' || window.location.pathname === ''
-                      ? 'bg-bolt-elements-background-depth-1'
-                      : 'hover:bg-bolt-elements-background-depth-1',
+                      ? 'bg-card'
+                      : 'hover:bg-card',
                   )}
                   title={effectiveCollapsed ? 'Home' : undefined}
                 >
-                  <Home size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <Home size={18} className="text-foreground shrink-0" />
                   <span className="text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
                     Home
                   </span>
@@ -185,15 +185,15 @@ export const Menu = () => {
                     href="/"
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
-                      'w-full flex items-center rounded-md text-bolt-elements-textPrimary transition-colors',
+                      'w-full flex items-center rounded-md text-foreground transition-colors',
                       effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
                       window.location.pathname === '/' || window.location.pathname === ''
-                        ? 'bg-bolt-elements-background-depth-1'
-                        : 'hover:bg-bolt-elements-background-depth-1',
+                        ? 'bg-card'
+                        : 'hover:bg-card',
                     )}
                     title={effectiveCollapsed ? 'Home' : undefined}
                   >
-                    <Home size={18} className="text-bolt-elements-textPrimary" />
+                    <Home size={18} className="text-foreground" />
                   </a>
                 </WithTooltip>
               )}
@@ -212,15 +212,15 @@ export const Menu = () => {
                     // Trigger focus on message input
                     messageInputFocusStore.triggerFocus();
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors group cursor-pointer"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-md text-foreground hover:bg-card transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <Plus size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                    <Plus size={18} className="text-foreground shrink-0" />
                     <span className="text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
                       New App
                     </span>
                   </div>
-                  {!isSmallViewport && <span className="text-xs text-bolt-elements-textSecondary">Ctrl+Shift+N</span>}
+                  {!isSmallViewport && <span className="text-xs text-muted-foreground">Ctrl+Shift+N</span>}
                 </div>
               ) : (
                 <WithTooltip tooltip="New App">
@@ -237,10 +237,10 @@ export const Menu = () => {
                       // Trigger focus on message input
                       messageInputFocusStore.triggerFocus();
                     }}
-                    className="w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1 transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground hover:bg-card transition-colors cursor-pointer"
                     title="New App"
                   >
-                    <Plus size={18} className="text-bolt-elements-textPrimary" />
+                    <Plus size={18} className="text-foreground" />
                   </div>
                 </WithTooltip>
               )}
@@ -251,7 +251,7 @@ export const Menu = () => {
         {/* Projects Section */}
         <div
           className={classNames(
-            'py-4 border-b border-bolt-elements-borderColor border-opacity-50 transition-all duration-300',
+            'py-4 border-b border-border/50 transition-all duration-300',
             effectiveCollapsed ? 'px-2' : 'px-6',
           )}
         >
@@ -272,7 +272,7 @@ export const Menu = () => {
             }
           >
             {!effectiveCollapsed && (
-              <span className="text-xs font-semibold text-bolt-elements-textSecondary uppercase tracking-wider">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Projects
               </span>
             )}
@@ -286,13 +286,13 @@ export const Menu = () => {
                 <a
                   href="/projects"
                   className={classNames(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
                     window.location.pathname === '/projects'
-                      ? 'bg-bolt-elements-background-depth-1'
-                      : 'hover:bg-bolt-elements-background-depth-1',
+                      ? 'bg-card'
+                      : 'hover:bg-card',
                   )}
                 >
-                  <File size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <File size={18} className="text-foreground shrink-0" />
                   <span className="text-sm font-medium">My Projects</span>
                 </a>
               ) : (
@@ -301,13 +301,13 @@ export const Menu = () => {
                     href="/projects"
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
-                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
                       window.location.pathname === '/projects'
-                        ? 'bg-bolt-elements-background-depth-1'
-                        : 'hover:bg-bolt-elements-background-depth-1',
+                        ? 'bg-card'
+                        : 'hover:bg-card',
                     )}
                   >
-                    <File size={18} className="text-bolt-elements-textPrimary" />
+                    <File size={18} className="text-foreground" />
                   </a>
                 </WithTooltip>
               )}
@@ -317,13 +317,13 @@ export const Menu = () => {
                 <a
                   href="/gallery"
                   className={classNames(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
                     window.location.pathname === '/gallery'
-                      ? 'bg-bolt-elements-background-depth-1'
-                      : 'hover:bg-bolt-elements-background-depth-1',
+                      ? 'bg-card'
+                      : 'hover:bg-card',
                   )}
                 >
-                  <Sparkles size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <Sparkles size={18} className="text-foreground shrink-0" />
                   <span className="text-sm font-medium">Reference applications</span>
                 </a>
               ) : (
@@ -332,13 +332,13 @@ export const Menu = () => {
                     href="/gallery"
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
-                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
                       window.location.pathname === '/gallery'
-                        ? 'bg-bolt-elements-background-depth-1'
-                        : 'hover:bg-bolt-elements-background-depth-1',
+                        ? 'bg-card'
+                        : 'hover:bg-card',
                     )}
                   >
-                    <Sparkles size={18} className="text-bolt-elements-textPrimary" />
+                    <Sparkles size={18} className="text-foreground" />
                   </a>
                 </WithTooltip>
               )}

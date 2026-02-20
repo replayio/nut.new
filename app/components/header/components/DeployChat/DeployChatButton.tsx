@@ -133,14 +133,14 @@ export function DeployChatButton() {
       <ReactModal
         isOpen={showUpgradeModal}
         onRequestClose={() => setShowUpgradeModal(false)}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 outline-none"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 outline-none"
         overlayClassName="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]"
       >
         <div className="flex flex-col items-center text-center">
           {/* Close button */}
           <button
             onClick={() => setShowUpgradeModal(false)}
-            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X size={20} />
           </button>
@@ -151,10 +151,10 @@ export function DeployChatButton() {
           </div>
 
           {/* Title */}
-          <h2 className="text-xl font-bold text-bolt-elements-textHeading mb-2">Premium Feature</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">Premium Feature</h2>
 
           {/* Description */}
-          <p className="text-bolt-elements-textSecondary mb-6">
+          <p className="text-muted-foreground mb-6">
             Deploying apps is a premium feature available exclusively to Builder plan subscribers. Upgrade now to deploy
             your projects and access all premium features.
           </p>
@@ -171,7 +171,7 @@ export function DeployChatButton() {
           {/* Secondary action */}
           <button
             onClick={() => setShowUpgradeModal(false)}
-            className="mt-3 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+            className="mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Maybe later
           </button>

@@ -120,7 +120,7 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
             /* Mobile: Full screen overlay below TopNav */
             <div
               ref={dropdownRef}
-              className="fixed top-[55px] left-0 right-0 bottom-0 z-[200] flex flex-col p-1 bg-bolt-elements-background-depth-2"
+              className="fixed top-[55px] left-0 right-0 bottom-0 z-[200] flex flex-col p-1 bg-muted"
             >
               <div className="w-full h-full border border-border rounded-md">
                 {/* Header with back button */}

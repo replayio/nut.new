@@ -229,7 +229,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
                 </div>
               </div>
             </DialogDescription>
-            <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
+            <div className="px-5 pb-4 bg-muted flex gap-2 justify-end">
               <DialogButton type="secondary" onClick={closeDialog}>
                 Cancel
               </DialogButton>

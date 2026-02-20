@@ -116,19 +116,19 @@ export const AccountModal = ({ user }: AccountModalProps) => {
     return (
       <div
         className={classNames(
-          'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto max-h-[95vh] transition-all duration-300 relative',
+          'bg-card p-6 sm:p-8 max-w-4xl w-full border border-border/50 overflow-y-auto max-h-[95vh] transition-all duration-300 relative',
           {
             'rounded-b-2xl': isSmallViewport,
             'rounded-r-2xl': !isSmallViewport,
           },
         )}
       >
-        <div className="text-center py-16 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor border-opacity-30">
-          <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor border-opacity-50">
-            <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-primary rounded-full animate-spin" />
+        <div className="text-center py-16 bg-muted rounded-md border border-border/30">
+          <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6 border border-border/50">
+            <div className="w-8 h-8 border-2 border-border/30 border-t-primary rounded-full animate-spin" />
           </div>
-          <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">Loading Account Data</h3>
-          <p className="text-bolt-elements-textSecondary">Fetching your subscription details...</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">Loading Account Data</h3>
+          <p className="text-muted-foreground">Fetching your subscription details...</p>
         </div>
       </div>
     );
@@ -137,7 +137,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
   return (
     <div
       className={classNames(
-        'bg-bolt-elements-background-depth-1 p-6 sm:p-8 max-w-4xl w-full border border-bolt-elements-borderColor border-opacity-50 overflow-y-auto h-full transition-all duration-300 relative',
+        'bg-card p-6 sm:p-8 max-w-4xl w-full border border-border/50 overflow-y-auto h-full transition-all duration-300 relative',
         {
           'rounded-b-md': isSmallViewport,
           'rounded-r-md': !isSmallViewport,
@@ -147,31 +147,31 @@ export const AccountModal = ({ user }: AccountModalProps) => {
     >
       <div className="text-center mb-8">
         <div className="mb-8">
-          <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
-            <UserIcon className="text-bolt-elements-textPrimary" size={24} />
+          <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
+            <UserIcon className="text-foreground" size={24} />
           </div>
-          <h1 className="text-3xl font-bold text-bolt-elements-textHeading mb-2">Account</h1>
-          <p className="text-bolt-elements-textSecondary text-sm">{user?.email ?? 'unknown'}</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Account</h1>
+          <p className="text-muted-foreground text-sm">{user?.email ?? 'unknown'}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
-          <div className="flex flex-col items-center bg-bolt-elements-background-depth-1 rounded-md p-6 border border-bolt-elements-borderColor border-opacity-50">
+          <div className="flex flex-col items-center bg-card rounded-md p-6 border border-border/50">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-bolt-elements-background-depth-2 rounded-md flex items-center justify-center border border-bolt-elements-borderColor border-opacity-50">
-                <Crown className="text-bolt-elements-textPrimary" size={20} />
+              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center border border-border/50">
+                <Crown className="text-foreground" size={20} />
               </div>
             </div>
             <div className="flex flex-col items-center">
               {stripeSubscription ? (
                 <>
-                  <div className="text-3xl font-bold text-bolt-elements-textHeading mb-2">
+                  <div className="text-3xl font-bold text-foreground mb-2">
                     {stripeSubscription.tier === 'builder' ? '$20' : '$0'}
                   </div>
-                  <div className="text-sm text-bolt-elements-textSecondary mb-2 font-medium">per month</div>
-                  <div className="w-full text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 px-3 py-1.5 rounded-md border border-bolt-elements-borderColor border-opacity-30">
+                  <div className="text-sm text-muted-foreground mb-2 font-medium">per month</div>
+                  <div className="w-full text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-md border border-border/30">
                     {stripeSubscription.tier.charAt(0).toUpperCase() + stripeSubscription.tier.slice(1)} Plan
                   </div>
-                  <div className="text-xs text-bolt-elements-textSecondary mt-2">
+                  <div className="text-xs text-muted-foreground mt-2">
                     Next billing:{' '}
                     {stripeSubscription.currentPeriodEnd
                       ? new Date(stripeSubscription.currentPeriodEnd).toLocaleDateString()
@@ -194,10 +194,10 @@ export const AccountModal = ({ user }: AccountModalProps) => {
                 </>
               ) : (
                 <>
-                  <div className="text-lg font-semibold text-bolt-elements-textSecondary mb-2">
+                  <div className="text-lg font-semibold text-muted-foreground mb-2">
                     You are on the Free Plan
                   </div>
-                  <div className="text-sm text-bolt-elements-textSecondary mb-4">
+                  <div className="text-sm text-muted-foreground mb-4">
                     Upgrade to builder plan to build unlimited apps
                   </div>
                   <Button onClick={handleViewPlans} className="gap-2">
@@ -211,7 +211,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
         </div>
 
         {stripeSubscription && !loading && (
-          <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 p-6 bg-card rounded-md border border-border/30">
             {stripeSubscription && !loading && (
               <Button onClick={handleManageBilling} disabled={loadingBilling} className="gap-2">
                 <Settings size={16} />

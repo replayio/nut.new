@@ -7,7 +7,7 @@ interface SearchInputProps {
 export const SearchInput: React.FC<SearchInputProps> = ({ onSearch }) => {
   return (
     <div
-      className="placeholder-bolt-elements-textTertiary"
+      className="placeholder-muted-foreground/70"
       style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}
     >
       <input

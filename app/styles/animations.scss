@@ -137,11 +137,11 @@ html[data-theme='dark'] .animate-shimmer::before,
 .animate-focus-text {
   background: linear-gradient(
     90deg,
-    var(--bolt-elements-focus, #3b82f6),
+    hsl(var(--ring)),
     #06b6d4,
     #8b5cf6,
     #3b82f6,
-    var(--bolt-elements-focus, #3b82f6)
+    hsl(var(--ring))
   );
   background-size: 200% 200%;
   background-clip: text;
@@ -187,11 +187,11 @@ html[data-theme='dark'] .animate-shimmer::before,
 .animate-focus-border {
   background: linear-gradient(
     90deg,
-    var(--bolt-elements-focus, #3b82f6),
+    hsl(var(--ring)),
     #06b6d4,
     #8b5cf6,
     #3b82f6,
-    var(--bolt-elements-focus, #3b82f6)
+    hsl(var(--ring))
   );
   background-size: 200% 200%;
   animation: focus-border 3s ease-in-out infinite;
@@ -201,11 +201,11 @@ html[data-theme='dark'] .animate-shimmer::before,
 .app-progress-border {
   background: linear-gradient(
     90deg,
-    var(--bolt-elements-focus, #f63ba8),
+    hsl(var(--ring)),
     #8506d4,
     #8b5cf6,
     #f63ba8,
-    var(--bolt-elements-focus, #f63ba8)
+    hsl(var(--ring))
   );
   background-size: 200% 200%;
   animation: focus-border 3s ease-in-out infinite;

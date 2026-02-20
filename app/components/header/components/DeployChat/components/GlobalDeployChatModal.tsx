@@ -142,7 +142,7 @@ export function GlobalDeployChatModal() {
         <motion.div className="absolute inset-0 bg-black/50" onClick={handleCloseModal} />
 
         <motion.div
-          className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col"
+          className="relative bg-card border border-border rounded-md max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -157,11 +157,11 @@ export function GlobalDeployChatModal() {
           <div className="p-6 overflow-y-auto flex-1 min-h-0">
             {loadingData ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-bolt-elements-borderColor border-opacity-50">
-                  <div className="w-8 h-8 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-primary rounded-full animate-spin" />
+                <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6 border border-border/50">
+                  <div className="w-8 h-8 border-2 border-border border-opacity-30 border-t-primary rounded-full animate-spin" />
                 </div>
-                <h3 className="text-2xl font-bold text-bolt-elements-textHeading mb-3">Loading data...</h3>
-                <p className="text-bolt-elements-textSecondary">
+                <h3 className="text-2xl font-bold text-foreground mb-3">Loading data...</h3>
+                <p className="text-muted-foreground">
                   Please wait while we prepare your deployment settings
                 </p>
               </div>
@@ -170,23 +170,23 @@ export function GlobalDeployChatModal() {
             ) : (
               <>
                 <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
-                    <Rocket className="text-bolt-elements-textPrimary" size={24} />
+                  <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
+                    <Rocket className="text-foreground" size={24} />
                   </div>
-                  <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Deploy Your Application</h2>
-                  <p className="text-bolt-elements-textSecondary mt-2">
+                  <h2 className="text-3xl font-bold text-foreground">Deploy Your Application</h2>
+                  <p className="text-muted-foreground mt-2">
                     Get your app live on the web in just a few clicks
                   </p>
                 </div>
 
                 {/* Easy Deploy Section */}
-                <div className="mb-8 p-6 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor">
+                <div className="mb-8 p-6 bg-card rounded-md border border-border">
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <span className="text-2xl">⚡</span>
-                      <h3 className="text-xl font-bold text-bolt-elements-textHeading">Quick Deploy</h3>
+                      <h3 className="text-xl font-bold text-foreground">Quick Deploy</h3>
                     </div>
-                    <p className="text-bolt-elements-textSecondary leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       Deploy instantly with smart defaults. No configuration needed - we'll handle everything for you
                       {databaseFound ? ', including database setup' : ''}.
                     </p>
@@ -194,10 +194,10 @@ export function GlobalDeployChatModal() {
 
                   {/* Show existing site in easy deploy */}
                   {lastDeployResult(deploySettings)?.siteURL && (
-                    <div className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
+                    <div className="mb-6 p-4 bg-muted rounded-md border border-border">
                       <div className="flex flex-col items-center justify-between gap-2">
-                        <div className="text-sm text-bolt-elements-textPrimary font-semibold flex items-center gap-2">
-                          <CheckCircle className="text-bolt-elements-textPrimary" size={18} />
+                        <div className="text-sm text-foreground font-semibold flex items-center gap-2">
+                          <CheckCircle className="text-foreground" size={18} />
                           Your App's URL:
                         </div>
                         <a
@@ -218,8 +218,8 @@ export function GlobalDeployChatModal() {
                       isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) && (
                     <div className="flex justify-center">
                       {status === DeployStatus.Started ? (
-                        <div className="w-full text-bolt-elements-textSecondary flex items-center justify-center py-4 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
-                          <div className="w-6 h-6 border-2 border-bolt-elements-borderColor border-opacity-30 border-t-primary rounded-full animate-spin mr-3" />
+                        <div className="w-full text-muted-foreground flex items-center justify-center py-4 bg-muted rounded-md border border-border">
+                          <div className="w-6 h-6 border-2 border-border border-opacity-30 border-t-primary rounded-full animate-spin mr-3" />
                           <span className="text-lg font-medium">
                             {lastDeployResult(deploySettings)?.siteURL ? 'Redeploying' : 'Deploying'} your app...
                           </span>
@@ -234,15 +234,15 @@ export function GlobalDeployChatModal() {
                   )}
                 </div>
 
-                <div className="p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor space-y-4">
+                <div className="p-4 bg-card rounded-md border border-border space-y-4">
                   <div>
                     <label
                       htmlFor="siteName"
-                      className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary"
+                      className="block mb-2 text-sm font-semibold text-foreground"
                     >
                       Site Name (optional)
                     </label>
-                    <p className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                       Choose a custom prefix for your site's URL.
                     </p>
                     <div className="relative">
@@ -269,9 +269,9 @@ export function GlobalDeployChatModal() {
                       />
                     </div>
                     {deploySettings.siteName && (
-                      <div className="mt-2 p-3 bg-bolt-elements-background-depth-2 rounded-md border border-bolt-elements-borderColor">
-                        <p className="text-sm text-bolt-elements-textSecondary">
-                          <span className="font-medium text-bolt-elements-textPrimary">
+                      <div className="mt-2 p-3 bg-muted rounded-md border border-border">
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium text-foreground">
                             Your site will be available at:
                           </span>
                           <br />

@@ -93,15 +93,15 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-bolt-elements-textHeading mb-1.5">
+          <h3 className="text-sm font-semibold text-foreground mb-1.5">
             {formatPascalCaseName(report.name)}
           </h3>
           <p className="text-sm text-muted-foreground truncate">{report.description}</p>
         </div>
 
         {processing ? (
-          <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor">
-            <Loader2 className="text-bolt-elements-textSecondary animate-spin" size={18} />
+          <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-muted border border-border">
+            <Loader2 className="text-muted-foreground animate-spin" size={18} />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-2 flex-shrink-0">
@@ -144,11 +144,11 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
 
             {status === BugReportStatus.Open && (
               <WithTooltip tooltip={escalateTime ? 'Escalated to developer support' : 'Fixing in progress'}>
-                <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor">
+                <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-muted border border-border">
                   {escalateTime ? (
-                    <Hourglass className="text-bolt-elements-textSecondary" size={18} />
+                    <Hourglass className="text-muted-foreground" size={18} />
                   ) : (
-                    <Loader2 className="text-bolt-elements-textSecondary animate-spin" size={18} />
+                    <Loader2 className="text-muted-foreground animate-spin" size={18} />
                   )}
                 </div>
               </WithTooltip>

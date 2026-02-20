@@ -43,11 +43,11 @@ export default function Explanation() {
         {/* Header */}
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="text-bolt-elements-textHeading">With you,</span>
+            <span className="text-foreground">With you,</span>
             <br />
             <span className="text-rose-500 dark:text-rose-400">every step of the way.</span>
           </h1>
-          <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
             Its like having a team of designers and engineers that never sleep.
           </p>
         </div>
@@ -59,15 +59,15 @@ export default function Explanation() {
             return (
               <div key={index} className="flex flex-col items-start">
                 {/* Icon */}
-                <div className="mb-4 p-3 rounded-lg border-2 border-rose-500/50 bg-bolt-elements-background-depth-2">
+                <div className="mb-4 p-3 rounded-lg border-2 border-rose-500/50 bg-muted">
                   <IconComponent className="text-rose-500 dark:text-rose-400" size={32} />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-bolt-elements-textHeading mb-3">{feature.title}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
 
                 {/* Description */}
-                <p className="text-bolt-elements-textSecondary leading-relaxed">{feature.description}</p>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             );
           })}

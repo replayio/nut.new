@@ -88,7 +88,7 @@ export const DebugAppButton = () => {
           variant="ghost"
           size="icon"
           onClick={handleClick}
-          className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
         >
           <Bug size={16} />
         </Button>
@@ -123,7 +123,7 @@ const FeatureDebugControls = ({ featureName }: FeatureDebugControlsProps) => {
           variant="ghost"
           size="icon"
           onClick={handleClick}
-          className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
           title="Grab backend debug info"
         >
           <Bug size={16} />

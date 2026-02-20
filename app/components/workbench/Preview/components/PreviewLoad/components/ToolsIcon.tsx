@@ -21,7 +21,7 @@ export function ToolsIcon() {
           repeatType: 'reverse',
         }}
       >
-        <Wrench size={24} className="h-16 w-16 text-bolt-elements-textPrimary mb-8" />
+        <Wrench size={24} className="h-16 w-16 text-foreground mb-8" />
       </motion.div>
 
       {/* Sparks effect */}

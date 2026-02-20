@@ -90,11 +90,11 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
   return (
     <>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
-          <UserPlus className="text-bolt-elements-textPrimary" size={24} />
+        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
+          <UserPlus className="text-foreground" size={24} />
         </div>
-        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Create Account</h2>
-        <p className="text-bolt-elements-textSecondary mt-2">
+        <h2 className="text-3xl font-bold text-foreground">Create Account</h2>
+        <p className="text-muted-foreground mt-2">
           Join us and start building. After signing up, you will be able to build one app on our free plan or unlimited
           apps if you upgrade to our builder plan.
         </p>
@@ -113,10 +113,10 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
 
       <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-bolt-elements-borderColor border-opacity-50"></div>
+          <div className="w-full border-t border-border/50"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 py-2 bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary rounded-lg border border-bolt-elements-borderColor border-opacity-30">
+          <span className="px-4 py-2 bg-card text-muted-foreground rounded-lg border border-border/30">
             Or continue with email
           </span>
         </div>
@@ -124,7 +124,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
 
       <form onSubmit={handleSignUp} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="name" className="block mb-2 text-sm font-semibold text-foreground">
             Name
           </label>
           <input
@@ -139,7 +139,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         </div>
 
         <div>
-          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="email" className="block mb-2 text-sm font-semibold text-foreground">
             Email Address
           </label>
           <input
@@ -159,7 +159,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         </div>
 
         <div>
-          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="password" className="block mb-2 text-sm font-semibold text-foreground">
             Password
           </label>
           <input
@@ -174,7 +174,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-semibold text-foreground">
             Confirm Password
           </label>
           <input
@@ -200,7 +200,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
           </div>
         )}
 
-        <div className="p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
+        <div className="p-4 bg-card rounded-md border border-border/30">
           <div className="flex items-start gap-3">
             <div className="relative flex items-center mt-0.5">
               <input
@@ -223,7 +223,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <label className="text-bolt-elements-textSecondary cursor-pointer text-sm leading-relaxed" htmlFor="terms">
+            <label className="text-muted-foreground cursor-pointer text-sm leading-relaxed" htmlFor="terms">
               I agree to receive update emails from Replay and understand the terms of service.
             </label>
           </div>
@@ -234,8 +234,8 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         </Button>
       </form>
 
-      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
-        <p className="text-bolt-elements-textSecondary text-sm">
+      <div className="mt-8 text-center p-4 bg-card rounded-md border border-border/30">
+        <p className="text-muted-foreground text-sm">
           Already have an account?{' '}
           <Button onClick={onToggleForm} variant="link" className="p-0 h-auto font-semibold">
             Sign In

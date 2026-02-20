@@ -29,7 +29,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="w-full flex flex-col bg-bolt-elements-background-depth-1 dark:bg-black app-height">
+    <div className="w-full flex flex-col bg-card dark:bg-black app-height">
       {isSmallViewport && !chatStarted && <Header />}
       <div className="flex-1 w-full page-content overflow-hidden">{children}</div>
       {!chatStarted && !isSmallViewport && <Footer />}
