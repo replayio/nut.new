@@ -32,7 +32,7 @@ import { secretsModalStore } from '~/lib/stores/secretsModal';
 import { getAppSetSecrets } from '~/lib/replay/Secrets';
 import { toast } from 'react-toastify';
 import { database, type AppLibraryEntry } from '~/lib/persistence/apps';
-import { ReferenceGallery } from '~/components/gallery';
+import { CollectionGallery, ReferenceGallery } from '~/components/gallery';
 import { AppGallery } from '~/components/gallery';
 import { DesignSystemPanel } from '~/components/panels/DesignPanel/DesignSystemPanel';
 import { DesignToolbar } from '~/components/panels/DesignPanel/DesignToolbar';
@@ -565,6 +565,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 )}
                 {!chatStarted && user && <AppGallery className="mt-24" />}
                 {!chatStarted && <ReferenceGallery className="mt-24" />}
+                {!chatStarted && <CollectionGallery className="mt-24" />}
               </div>
             </div>
             <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>

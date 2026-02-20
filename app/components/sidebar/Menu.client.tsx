@@ -4,7 +4,7 @@ import { useStore } from '@nanostores/react';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
 import { messageInputFocusStore } from '~/lib/stores/messageInputFocus';
 import useViewport from '~/lib/hooks';
-import { Plus, PanelLeft, Home, File, Sparkles } from '~/components/ui/Icon';
+import { Plus, PanelLeft, Home, File, Layers, Sparkles } from '~/components/ui/Icon';
 import { classNames } from '~/utils/classNames';
 import { ClientAuth } from '~/components/auth/ClientAuth';
 import WithTooltip from '~/components/ui/Tooltip';
@@ -339,6 +339,37 @@ export const Menu = () => {
                     )}
                   >
                     <Sparkles size={18} className="text-foreground" />
+                  </a>
+                </WithTooltip>
+              )}
+
+              {/* Collections */}
+              {!effectiveCollapsed ? (
+                <a
+                  href="/collection"
+                  className={classNames(
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                    window.location.pathname === '/gallery'
+                      ? 'bg-bolt-elements-background-depth-1'
+                      : 'hover:bg-bolt-elements-background-depth-1',
+                  )}
+                >
+                  <Layers size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <span className="text-sm font-medium">Collections</span>
+                </a>
+              ) : (
+                <WithTooltip tooltip="Collections">
+                  <a
+                    href="/collection"
+                    onClick={(e) => e.stopPropagation()}
+                    className={classNames(
+                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                      window.location.pathname === '/collection'
+                        ? 'bg-bolt-elements-background-depth-1'
+                        : 'hover:bg-bolt-elements-background-depth-1',
+                    )}
+                  >
+                    <Layers size={18} className="text-bolt-elements-textPrimary" />
                   </a>
                 </WithTooltip>
               )}
