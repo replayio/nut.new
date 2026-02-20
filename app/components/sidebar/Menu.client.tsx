@@ -348,13 +348,13 @@ export const Menu = () => {
                 <a
                   href="/collection"
                   className={classNames(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
                     window.location.pathname === '/gallery'
-                      ? 'bg-bolt-elements-background-depth-1'
-                      : 'hover:bg-bolt-elements-background-depth-1',
+                      ? 'bg-card'
+                      : 'hover:bg-card',
                   )}
                 >
-                  <Layers size={18} className="text-bolt-elements-textPrimary shrink-0" />
+                  <Layers size={18} className="text-foreground shrink-0" />
                   <span className="text-sm font-medium">Collections</span>
                 </a>
               ) : (
@@ -363,13 +363,13 @@ export const Menu = () => {
                     href="/collection"
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
-                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-bolt-elements-textPrimary transition-colors',
-                      window.location.pathname === '/collection'
-                        ? 'bg-bolt-elements-background-depth-1'
-                        : 'hover:bg-bolt-elements-background-depth-1',
+                      'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
+                      window.location.pathname === '/gallery'
+                        ? 'bg-card'
+                        : 'hover:bg-card',
                     )}
                   >
-                    <Layers size={18} className="text-bolt-elements-textPrimary" />
+                    <Layers size={18} className="text-foreground" />
                   </a>
                 </WithTooltip>
               )}
