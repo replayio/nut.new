@@ -24,9 +24,7 @@ export const CollectionCard = ({ collection, className }: CollectionCardProps) =
       <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-foreground transition-colors">
         {collection.name}
       </h3>
-      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-        {collection.shortDescription}
-      </p>
+      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{collection.shortDescription}</p>
       <div className="mt-4 flex items-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
         <span className="text-sm font-medium">View collection</span>
         <ChevronRight className="w-4 h-4 ml-1" />

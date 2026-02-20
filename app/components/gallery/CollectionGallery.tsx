@@ -44,9 +44,7 @@ export const CollectionGallery = ({ className }: CollectionGalleryProps) => {
   }, []);
 
   const filteredCollections = searchTerm.trim()
-    ? collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchTerm.toLowerCase().trim()),
-      )
+    ? collections.filter((collection) => collection.name.toLowerCase().includes(searchTerm.toLowerCase().trim()))
     : collections;
 
   useEffect(() => {
