@@ -848,7 +848,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleCustomize}
                       variant="default"
-                      className="rounded-full bg-foreground text-background hover:bg-foreground/90 whitespace-nowrap"
+                      className="rounded-full !bg-foreground !text-background hover:!bg-foreground/90 whitespace-nowrap"
                     >
                       <Sparkles size={18} className="mr-2" />
                       Customize It
@@ -1041,7 +1041,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleCustomize}
                       variant="default"
-                      className="rounded-full bg-foreground text-background hover:bg-foreground/90 whitespace-nowrap"
+                      className="rounded-full !bg-foreground !text-background hover:!bg-foreground/90 whitespace-nowrap"
                     >
                       <Sparkles size={18} className="mr-2" />
                       Customize It
@@ -1502,7 +1502,7 @@ function GalleryPageContent() {
                                   <Button
                                     onClick={handleSubmitFeatureRequest}
                                     disabled={!featureDescription.trim() || isSubmittingFeature}
-                                    className="bg-rose-500 hover:bg-rose-600 text-white"
+                                    className="!bg-rose-500 hover:!bg-rose-600 text-white"
                                     size="sm"
                                   >
                                     {isSubmittingFeature ? '...' : 'Submit'}
@@ -1709,7 +1709,7 @@ function GalleryPageContent() {
                             <Button
                               onClick={handleSubmitReview}
                               disabled={!user || reviewRating === 0 || isSubmittingReview}
-                              className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white"
+                              className="w-full sm:w-auto !bg-rose-500 hover:!bg-rose-600 text-white"
                             >
                               {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
                             </Button>
@@ -1774,7 +1774,7 @@ function GalleryPageContent() {
                 <Button
                   onClick={handleSubmitEarlyAdopter}
                   disabled={!user || !earlyAdopterUseCase.trim() || isSubmittingEarlyAdopter}
-                  className="bg-rose-500 hover:bg-rose-600 text-white"
+                  className="!bg-rose-500 hover:!bg-rose-600 text-white"
                 >
                   {isSubmittingEarlyAdopter ? 'Submitting...' : 'Submit'}
                 </Button>

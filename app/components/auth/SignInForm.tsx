@@ -115,7 +115,7 @@ export function SignInForm({ onToggleForm, onError, onForgotPassword }: SignInFo
         className="w-full mb-6 h-12 flex items-center justify-center gap-3"
       >
         <GoogleIcon />
-        <span>{isProcessing ? 'Processing...' : 'Continue with Google'}</span>
+        <span className="text-foreground">{isProcessing ? 'Processing...' : 'Continue with Google'}</span>
       </Button>
 
       <div className="relative my-8">
