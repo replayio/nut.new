@@ -10,6 +10,7 @@ import { User as UserIcon, Crown, Settings } from '~/components/ui/Icon';
 import { accountModalStore } from '~/lib/stores/accountModal';
 import { Button } from '~/components/ui/button';
 import useViewport from '~/lib/hooks';
+import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 interface AccountModalProps {
   user: User | undefined;
@@ -220,6 +221,8 @@ export const AccountModal = ({ user }: AccountModalProps) => {
             )}
           </div>
         )}
+
+        <ThemeSwitch variant="menu" />
       </div>
 
       <ConfirmCancelModal

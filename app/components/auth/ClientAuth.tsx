@@ -159,10 +159,6 @@ export function ClientAuth({ isSidebarCollapsed }: ClientAuthProps) {
 
                 {/* Menu Items */}
                 <div className="flex-1 py-2">
-                  <div className="px-5 py-3 border-b border-border">
-                    <ThemeSwitch variant="menu" />
-                  </div>
-
                   {stripeSubscription?.tier !== 'builder' && (
                     <button
                       onClick={handleSubscriptionToggle}
