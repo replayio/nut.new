@@ -40,9 +40,7 @@ export function MessageNavigator({
   return (
     <div className="flex items-center gap-1 p-4 bg-background border border-border rounded-md shadow-md relative z-20">
       {/* Message text */}
-      <div className="flex-1 min-w-0 text-sm text-foreground truncate pr-2">
-        {currentMessage.content}
-      </div>
+      <div className="flex-1 min-w-0 text-sm text-foreground truncate pr-2">{currentMessage.content}</div>
 
       {/* Navigation arrows */}
       <div className="flex items-center gap-0.5">
@@ -51,10 +49,7 @@ export function MessageNavigator({
           size="icon"
           onClick={handlePrevious}
           disabled={!canGoBack}
-          className={cn(
-            'h-7 w-7 text-muted-foreground',
-            canGoBack && 'hover:text-foreground hover:bg-muted',
-          )}
+          className={cn('h-7 w-7 text-muted-foreground', canGoBack && 'hover:text-foreground hover:bg-muted')}
         >
           <ChevronLeft size={16} />
         </Button>
@@ -63,10 +58,7 @@ export function MessageNavigator({
           size="icon"
           onClick={handleNext}
           disabled={!canGoForward}
-          className={cn(
-            'h-7 w-7 text-muted-foreground',
-            canGoForward && 'hover:text-foreground hover:bg-muted',
-          )}
+          className={cn('h-7 w-7 text-muted-foreground', canGoForward && 'hover:text-foreground hover:bg-muted')}
         >
           <ChevronRight size={16} />
         </Button>

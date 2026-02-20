@@ -107,10 +107,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
               )}
             </div>
             <ChevronDown
-              className={cn(
-                'h-4 w-4 text-muted-foreground transition-transform flex-shrink-0',
-                isOpen && 'rotate-180',
-              )}
+              className={cn('h-4 w-4 text-muted-foreground transition-transform flex-shrink-0', isOpen && 'rotate-180')}
             />
           </button>
         </PopoverTrigger>
@@ -127,10 +124,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
               <CommandEmpty>No themes found.</CommandEmpty>
               <CommandGroup>
                 {showCustomOption && (
-                  <CommandItem
-                    onSelect={() => {}}
-                    className={cn('cursor-default', isCustom && 'bg-muted')}
-                  >
+                  <CommandItem onSelect={() => {}} className={cn('cursor-default', isCustom && 'bg-muted')}>
                     <div className="flex flex-col gap-2 w-full">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium text-sm text-foreground">Custom</span>
@@ -161,9 +155,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
                     >
                       <div className="flex flex-col gap-2 w-full">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium text-sm text-foreground truncate">
-                            {theme.title}
-                          </span>
+                          <span className="font-medium text-sm text-foreground truncate">{theme.title}</span>
                           {isSelected && <Check className="h-4 w-4" />}
                         </div>
                         {theme.colors && theme.colors.length > 0 && (

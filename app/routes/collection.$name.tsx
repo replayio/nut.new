@@ -176,10 +176,7 @@ function CollectionPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
@@ -213,9 +210,7 @@ function CollectionPageContent() {
                 <div className="relative p-6 border-b border-border">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-foreground mb-2">
-                        {loaderCollection.name}
-                      </h2>
+                      <h2 className="text-2xl font-bold text-foreground mb-2">{loaderCollection.name}</h2>
                       <p className="text-muted-foreground">{loaderCollection.shortDescription}</p>
                     </div>
                   </div>
@@ -270,10 +265,7 @@ function CollectionPageContent() {
                 <BreadcrumbList className="text-sm">
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link
-                        to="/"
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
+                      <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                         Home
                       </Link>
                     </BreadcrumbLink>
@@ -283,10 +275,7 @@ function CollectionPageContent() {
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link
-                        to="/"
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
+                      <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                         Collection
                       </Link>
                     </BreadcrumbLink>
@@ -295,9 +284,7 @@ function CollectionPageContent() {
                     <span className="text-muted-foreground">/</span>
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
-                    <BreadcrumbPage className="text-foreground font-medium truncate">
-                      {displayData.name}
-                    </BreadcrumbPage>
+                    <BreadcrumbPage className="text-foreground font-medium truncate">{displayData.name}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -321,9 +308,7 @@ function CollectionPageContent() {
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
                     <h2 className="text-2xl font-bold text-foreground mb-2">{displayData.name}</h2>
-                    <p className="text-muted-foreground text-lg leading-relaxed">
-                      {displayData.shortDescription}
-                    </p>
+                    <p className="text-muted-foreground text-lg leading-relaxed">{displayData.shortDescription}</p>
                   </div>
                 </div>
               </div>

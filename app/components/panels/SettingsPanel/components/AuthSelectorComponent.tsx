@@ -175,9 +175,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
       {/* Section Header */}
       <div>
         <h3 className="text-base font-semibold text-foreground">Application Visibility</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Control who can view or access your application.
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">Control who can view or access your application.</p>
       </div>
 
       {/* Application Access Dropdown */}
@@ -239,14 +237,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4
-                className={`text-sm font-medium ${authRequired ? 'text-foreground' : 'text-muted-foreground'}`}
-              >
+              <h4 className={`text-sm font-medium ${authRequired ? 'text-foreground' : 'text-muted-foreground'}`}>
                 Restricted Access
               </h4>
-              <p
-                className={`text-sm ${authRequired ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}
-              >
+              <p className={`text-sm ${authRequired ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}>
                 Only whitelisted emails and domains will be able to access and sign up to this application.
               </p>
             </div>

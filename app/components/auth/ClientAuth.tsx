@@ -10,7 +10,6 @@ import useViewport from '~/lib/hooks';
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/button';
 import { sidebarMenuStore } from '~/lib/stores/sidebarMenu';
-import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 interface ClientAuthProps {
   isSidebarCollapsed?: boolean;

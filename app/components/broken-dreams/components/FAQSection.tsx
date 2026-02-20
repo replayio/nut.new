@@ -70,9 +70,7 @@ export const FaqSection = () => {
 
             {expandedItem === index && (
               <div className="px-6 pb-4 border-t border-border/30 bg-muted">
-                <div className="pt-4 text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {item.answer}
-                </div>
+                <div className="pt-4 text-muted-foreground leading-relaxed whitespace-pre-line">{item.answer}</div>
               </div>
             )}
           </div>

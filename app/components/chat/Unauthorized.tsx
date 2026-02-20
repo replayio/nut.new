@@ -55,8 +55,7 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
                       {
                         'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-md hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/20':
                           !isCopying,
-                        'bg-card text-muted-foreground border border-border/30 cursor-not-allowed':
-                          isCopying,
+                        'bg-card text-muted-foreground border border-border/30 cursor-not-allowed': isCopying,
                       },
                     )}
                   >

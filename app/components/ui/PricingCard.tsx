@@ -83,12 +83,7 @@ export function PricingCard({
               </div>
               <div className="flex-1 flex items-center gap-2">
                 <span
-                  className={cn(
-                    'text-sm',
-                    feature.included
-                      ? 'text-foreground'
-                      : 'text-muted-foreground line-through',
-                  )}
+                  className={cn('text-sm', feature.included ? 'text-foreground' : 'text-muted-foreground line-through')}
                 >
                   {feature.name}
                 </span>

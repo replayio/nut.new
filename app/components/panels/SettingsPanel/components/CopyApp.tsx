@@ -40,7 +40,7 @@ const CopyApp = () => {
           <p className="text-sm text-muted-foreground text-center">
             Your copy will be independent and you'll have full access to modify it without affecting the original.
           </p>
-          <Button onClick={handleCopyApp} disabled={isCopying} variant="outline" className="h-9">
+          <Button onClick={handleCopyApp} disabled={isCopying} variant="outline" className="h-9 text-foreground">
             {isCopying ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>

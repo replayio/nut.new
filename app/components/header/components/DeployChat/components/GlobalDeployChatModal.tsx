@@ -149,7 +149,12 @@ export function GlobalDeployChatModal() {
           exit="exit"
         >
           <div className="absolute top-3 right-3 z-10">
-            <Button onClick={handleCloseModal} variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+              onClick={handleCloseModal}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-foreground hover:text-foreground/80"
+            >
               <X size={18} />
             </Button>
           </div>
@@ -161,9 +166,7 @@ export function GlobalDeployChatModal() {
                   <div className="w-8 h-8 border-2 border-border border-opacity-30 border-t-primary rounded-full animate-spin" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-3">Loading data...</h3>
-                <p className="text-muted-foreground">
-                  Please wait while we prepare your deployment settings
-                </p>
+                <p className="text-muted-foreground">Please wait while we prepare your deployment settings</p>
               </div>
             ) : status === DeployStatus.Succeeded ? (
               <DeploymentSuccessful result={lastDeployResult(deploySettings)} setIsModalOpen={handleCloseModal} />
@@ -174,9 +177,7 @@ export function GlobalDeployChatModal() {
                     <Rocket className="text-foreground" size={24} />
                   </div>
                   <h2 className="text-3xl font-bold text-foreground">Deploy Your Application</h2>
-                  <p className="text-muted-foreground mt-2">
-                    Get your app live on the web in just a few clicks
-                  </p>
+                  <p className="text-muted-foreground mt-2">Get your app live on the web in just a few clicks</p>
                 </div>
 
                 {/* Easy Deploy Section */}
@@ -236,10 +237,7 @@ export function GlobalDeployChatModal() {
 
                 <div className="p-4 bg-card rounded-md border border-border space-y-4">
                   <div>
-                    <label
-                      htmlFor="siteName"
-                      className="block mb-2 text-sm font-semibold text-foreground"
-                    >
+                    <label htmlFor="siteName" className="block mb-2 text-sm font-semibold text-foreground">
                       Site Name (optional)
                     </label>
                     <p className="text-sm text-muted-foreground leading-relaxed mb-3">
@@ -271,9 +269,7 @@ export function GlobalDeployChatModal() {
                     {deploySettings.siteName && (
                       <div className="mt-2 p-3 bg-muted rounded-md border border-border">
                         <p className="text-sm text-muted-foreground">
-                          <span className="font-medium text-foreground">
-                            Your site will be available at:
-                          </span>
+                          <span className="font-medium text-foreground">Your site will be available at:</span>
                           <br />
                           <span className="font-mono text-primary text-sm">
                             https://{deploySettings.siteName}.netlify.app

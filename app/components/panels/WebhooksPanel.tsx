@@ -259,9 +259,7 @@ export const WebhooksPanel = () => {
               </div>
               <p className="text-xs text-muted-foreground">
                 Use this key in the{' '}
-                <pre className="inline-block bg-muted rounded-md px-1 py-0.5 text-xs font-mono">
-                  X-Access-Key
-                </pre>{' '}
+                <pre className="inline-block bg-muted rounded-md px-1 py-0.5 text-xs font-mono">X-Access-Key</pre>{' '}
                 header to authenticate webhook requests for functions that require access key authentication.
               </p>
             </div>
@@ -290,9 +288,7 @@ export const WebhooksPanel = () => {
                         <div className="flex items-center justify-between">
                           <AccordionTrigger className="flex-1 text-left hover:no-underline py-4">
                             <div className="flex items-center gap-3">
-                              <span className="font-mono text-sm font-medium text-foreground">
-                                {functionName}
-                              </span>
+                              <span className="font-mono text-sm font-medium text-foreground">{functionName}</span>
                             </div>
                           </AccordionTrigger>
                           <div className="flex items-center gap-2 ml-4">

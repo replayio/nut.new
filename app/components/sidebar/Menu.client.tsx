@@ -168,9 +168,7 @@ export const Menu = () => {
                   className={classNames(
                     'w-full flex items-center rounded-md text-foreground transition-colors',
                     effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
-                    window.location.pathname === '/' || window.location.pathname === ''
-                      ? 'bg-card'
-                      : 'hover:bg-card',
+                    window.location.pathname === '/' || window.location.pathname === '' ? 'bg-card' : 'hover:bg-card',
                   )}
                   title={effectiveCollapsed ? 'Home' : undefined}
                 >
@@ -187,9 +185,7 @@ export const Menu = () => {
                     className={classNames(
                       'w-full flex items-center rounded-md text-foreground transition-colors',
                       effectiveCollapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-2',
-                      window.location.pathname === '/' || window.location.pathname === ''
-                        ? 'bg-card'
-                        : 'hover:bg-card',
+                      window.location.pathname === '/' || window.location.pathname === '' ? 'bg-card' : 'hover:bg-card',
                     )}
                     title={effectiveCollapsed ? 'Home' : undefined}
                   >
@@ -272,9 +268,7 @@ export const Menu = () => {
             }
           >
             {!effectiveCollapsed && (
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Projects
-              </span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Projects</span>
             )}
           </div>
 
@@ -287,9 +281,7 @@ export const Menu = () => {
                   href="/projects"
                   className={classNames(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
-                    window.location.pathname === '/projects'
-                      ? 'bg-card'
-                      : 'hover:bg-card',
+                    window.location.pathname === '/projects' ? 'bg-card' : 'hover:bg-card',
                   )}
                 >
                   <File size={18} className="text-foreground shrink-0" />
@@ -302,9 +294,7 @@ export const Menu = () => {
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
                       'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
-                      window.location.pathname === '/projects'
-                        ? 'bg-card'
-                        : 'hover:bg-card',
+                      window.location.pathname === '/projects' ? 'bg-card' : 'hover:bg-card',
                     )}
                   >
                     <File size={18} className="text-foreground" />
@@ -318,9 +308,7 @@ export const Menu = () => {
                   href="/gallery"
                   className={classNames(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
-                    window.location.pathname === '/gallery'
-                      ? 'bg-card'
-                      : 'hover:bg-card',
+                    window.location.pathname === '/gallery' ? 'bg-card' : 'hover:bg-card',
                   )}
                 >
                   <Sparkles size={18} className="text-foreground shrink-0" />
@@ -333,9 +321,7 @@ export const Menu = () => {
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
                       'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
-                      window.location.pathname === '/gallery'
-                        ? 'bg-card'
-                        : 'hover:bg-card',
+                      window.location.pathname === '/gallery' ? 'bg-card' : 'hover:bg-card',
                     )}
                   >
                     <Sparkles size={18} className="text-foreground" />
@@ -349,9 +335,7 @@ export const Menu = () => {
                   href="/collection"
                   className={classNames(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-md text-foreground transition-colors',
-                    window.location.pathname === '/gallery'
-                      ? 'bg-card'
-                      : 'hover:bg-card',
+                    window.location.pathname === '/gallery' ? 'bg-card' : 'hover:bg-card',
                   )}
                 >
                   <Layers size={18} className="text-foreground shrink-0" />
@@ -364,9 +348,7 @@ export const Menu = () => {
                     onClick={(e) => e.stopPropagation()}
                     className={classNames(
                       'w-full flex items-center justify-center px-2 py-2 rounded-md text-foreground transition-colors',
-                      window.location.pathname === '/gallery'
-                        ? 'bg-card'
-                        : 'hover:bg-card',
+                      window.location.pathname === '/gallery' ? 'bg-card' : 'hover:bg-card',
                     )}
                   >
                     <Layers size={18} className="text-foreground" />

@@ -33,10 +33,7 @@ export function MobileMenu({ handleScrollToSection }: MobileMenuProps) {
           <MenuIcon size={20} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-56 bg-card border-border z-[100]"
-      >
+      <DropdownMenuContent align="end" className="w-56 bg-card border-border z-[100]">
         <DropdownMenuItem asChild>
           <a href="/" className="cursor-pointer w-full">
             Home

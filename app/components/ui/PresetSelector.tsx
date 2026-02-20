@@ -87,10 +87,7 @@ export const RadiusSelector: React.FC<RadiusSelectorProps> = ({ title = 'Roundne
       columns={3}
       renderPreview={(preset) => (
         <div className="w-12 h-12 mb-2 flex items-center justify-center">
-          <div
-            className="w-10 h-10 border border-foreground"
-            style={{ borderRadius: preset.previewRadius || '0' }}
-          />
+          <div className="w-10 h-10 border border-foreground" style={{ borderRadius: preset.previewRadius || '0' }} />
         </div>
       )}
     />

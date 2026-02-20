@@ -49,9 +49,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           indicator: (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full border-2 border-border border-t-blue-500 animate-spin shadow-sm" />
-              {progressText && (
-                <span className="text-sm font-medium text-foreground">{progressText}</span>
-              )}
+              {progressText && <span className="text-sm font-medium text-foreground">{progressText}</span>}
             </div>
           ),
         };
@@ -70,9 +68,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           badge: 'text-foreground bg-accent border-border',
           indicator: (
             <div className="flex items-center gap-2">
-              {progressText && (
-                <span className="text-sm font-medium text-foreground">{progressText}</span>
-              )}
+              {progressText && <span className="text-sm font-medium text-foreground">{progressText}</span>}
             </div>
           ),
         };
@@ -87,8 +83,7 @@ export const AppCard: React.FC<AppCardProps> = ({
         };
       default:
         return {
-          badge:
-            'text-muted-foreground bg-accent border-border',
+          badge: 'text-muted-foreground bg-accent border-border',
           indicator: progressText ? (
             <span className="text-sm font-medium text-muted-foreground">{progressText}</span>
           ) : null,
@@ -101,8 +96,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   return (
     <div
       className={classNames('relative rounded-xl transition-all duration-300 shadow-sm group', {
-        'cursor-pointer hover:shadow-xl hover:shadow-ring/10 hover:scale-[1.03] hover:-translate-y-2':
-          !!onClick,
+        'cursor-pointer hover:shadow-xl hover:shadow-ring/10 hover:scale-[1.03] hover:-translate-y-2': !!onClick,
       })}
       onClick={onClick}
     >
@@ -112,17 +106,12 @@ export const AppCard: React.FC<AppCardProps> = ({
         </div>
       )}
       <div
-        className={classNames(
-          'bg-muted rounded-xl transition-all duration-300 relative overflow-hidden',
-          {
-            'border border-border hover:border-ring/60':
-              !!onClick && status !== 'in-progress',
-            'border-transparent': status === 'in-progress',
-            'bg-gradient-to-br from-muted via-muted to-blue-500/15':
-              status === 'in-progress',
-            'border border-border': !onClick,
-          },
-        )}
+        className={classNames('bg-muted rounded-xl transition-all duration-300 relative overflow-hidden', {
+          'border border-border hover:border-ring/60': !!onClick && status !== 'in-progress',
+          'border-transparent': status === 'in-progress',
+          'bg-gradient-to-br from-muted via-muted to-blue-500/15': status === 'in-progress',
+          'border border-border': !onClick,
+        })}
       >
         {onClick && (
           <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-ring/8 via-ring/3 to-ring/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

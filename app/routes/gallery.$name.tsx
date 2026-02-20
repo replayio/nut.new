@@ -789,10 +789,7 @@ function GalleryPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
@@ -802,10 +799,7 @@ function GalleryPageContent() {
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Gallery
                         </Link>
                       </BreadcrumbLink>
@@ -982,10 +976,7 @@ function GalleryPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
@@ -995,10 +986,7 @@ function GalleryPageContent() {
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Gallery
                         </Link>
                       </BreadcrumbLink>
@@ -1098,12 +1086,8 @@ function GalleryPageContent() {
                                         />
                                       </div>
                                       <div className="text-center">
-                                        <p className="text-sm font-medium text-foreground mb-1">
-                                          Loading preview...
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                          Starting development server
-                                        </p>
+                                        <p className="text-sm font-medium text-foreground mb-1">Loading preview...</p>
+                                        <p className="text-xs text-muted-foreground">Starting development server</p>
                                       </div>
                                       <div className="w-48 h-1.5 bg-accent rounded-full overflow-hidden">
                                         <div
@@ -1235,11 +1219,7 @@ function GalleryPageContent() {
                                     <>
                                       <SquareMousePointer
                                         size={18}
-                                        className={
-                                          idx === carouselIndex
-                                            ? 'text-foreground'
-                                            : 'text-muted-foreground'
-                                        }
+                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">Live App</span>
                                     </>
@@ -1247,11 +1227,7 @@ function GalleryPageContent() {
                                     <>
                                       <AppWindowMac
                                         size={18}
-                                        className={
-                                          idx === carouselIndex
-                                            ? 'text-foreground'
-                                            : 'text-muted-foreground'
-                                        }
+                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">{item.feature.name}</span>
                                     </>
@@ -1279,9 +1255,7 @@ function GalleryPageContent() {
                   <div className="p-6 space-y-8">
                     {/* App Name, Tags, and Description Section */}
                     <div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                        {displayData.name}
-                      </h2>
+                      <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{displayData.name}</h2>
 
                       {/* Tags */}
                       {displayData.tags && displayData.tags.length > 0 && (
@@ -1319,12 +1293,8 @@ function GalleryPageContent() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                           {appContent.features.map((feature, index) => (
                             <div key={index} className="bg-muted rounded-md p-4">
-                              <h4 className="text-base font-bold text-foreground mb-1.5">
-                                {feature.name}
-                              </h4>
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {feature.description}
-                              </p>
+                              <h4 className="text-base font-bold text-foreground mb-1.5">{feature.name}</h4>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                             </div>
                           ))}
                         </div>
@@ -1355,9 +1325,7 @@ function GalleryPageContent() {
                     Array.isArray(displayData.useCases) &&
                     displayData.useCases.length > 0 ? (
                       <div>
-                        <h3 className="text-2xl font-bold text-foreground mb-3">
-                          Get real-time reporting insights.
-                        </h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-3">Get real-time reporting insights.</h3>
                         <ul className="space-y-2 list-disc list-outside ml-5">
                           {(displayData.useCases as string[]).map((useCase: string, index: number) => (
                             <li key={index} className="text-foreground text-base pl-1">
@@ -1378,11 +1346,7 @@ function GalleryPageContent() {
                         <h3 className="text-2xl font-bold text-foreground mb-4">FAQ</h3>
                         <Accordion type="single" collapsible className="w-full">
                           {appContent.faq.map((faqItem: { question: string; answer: string }, index: number) => (
-                            <AccordionItem
-                              key={index}
-                              value={`faq-${index}`}
-                              className="border-b border-border"
-                            >
+                            <AccordionItem key={index} value={`faq-${index}`} className="border-b border-border">
                               <AccordionTrigger className="text-left text-foreground hover:no-underline py-4">
                                 {faqItem.question}
                               </AccordionTrigger>
@@ -1458,9 +1422,7 @@ function GalleryPageContent() {
                                     <div className="flex-1 min-w-0">
                                       <div className="font-medium text-foreground">{feature.name}</div>
                                       {feature.note && (
-                                        <div className="text-sm text-muted-foreground mt-1">
-                                          {feature.note}
-                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-1">{feature.note}</div>
                                       )}
                                     </div>
                                     {renderLikeButton(
@@ -1579,10 +1541,7 @@ function GalleryPageContent() {
                         {appContent.trackerReviews && appContent.trackerReviews.length > 0 ? (
                           <div className="space-y-4 mb-8">
                             {appContent.trackerReviews.map((review, index) => (
-                              <div
-                                key={index}
-                                className="bg-muted rounded-lg p-4 border border-border"
-                              >
+                              <div key={index} className="bg-muted rounded-lg p-4 border border-border">
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                   <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1">
@@ -1598,9 +1557,7 @@ function GalleryPageContent() {
                                         />
                                       ))}
                                     </div>
-                                    <span className="text-sm font-medium text-foreground">
-                                      {review.rating}/5
-                                    </span>
+                                    <span className="text-sm font-medium text-foreground">{review.rating}/5</span>
                                   </div>
                                   <div className="flex items-center gap-3">
                                     {review.name && (
@@ -1612,16 +1569,12 @@ function GalleryPageContent() {
                                     {renderLikeButton('review', review.id, review.liked, review.likeCount)}
                                   </div>
                                 </div>
-                                {review.comment && (
-                                  <p className="text-foreground mt-2">{review.comment}</p>
-                                )}
+                                {review.comment && <p className="text-foreground mt-2">{review.comment}</p>}
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-muted-foreground mb-8">
-                            No reviews yet. Be the first to review!
-                          </p>
+                          <p className="text-muted-foreground mb-8">No reviews yet. Be the first to review!</p>
                         )}
 
                         {/* Add Review Form */}
@@ -1665,9 +1618,7 @@ function GalleryPageContent() {
                                   </button>
                                 ))}
                                 {reviewRating > 0 && (
-                                  <span className="text-sm text-muted-foreground ml-2">
-                                    {reviewRating}/5
-                                  </span>
+                                  <span className="text-sm text-muted-foreground ml-2">{reviewRating}/5</span>
                                 )}
                               </div>
                             </div>
@@ -1689,9 +1640,7 @@ function GalleryPageContent() {
 
                             {/* Comment */}
                             <div>
-                              <label className="block text-sm font-medium text-foreground mb-2">
-                                Comment
-                              </label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Comment</label>
                               <textarea
                                 value={reviewComment}
                                 onChange={(e) => setReviewComment(e.target.value)}

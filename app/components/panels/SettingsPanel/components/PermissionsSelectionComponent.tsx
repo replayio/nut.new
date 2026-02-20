@@ -443,9 +443,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
                       {/* Label */}
                       <div className="flex-1 text-left min-w-0">
-                        <div className="text-sm font-medium text-foreground truncate">
-                          {getGroupLabel(group)}
-                        </div>
+                        <div className="text-sm font-medium text-foreground truncate">{getGroupLabel(group)}</div>
                         <div className="text-xs text-muted-foreground">
                           {group.permissions.length} permission{group.permissions.length !== 1 ? 's' : ''}
                         </div>
@@ -466,19 +464,14 @@ export const PermissionsSelectionComponent: React.FC = () => {
                       <div className="border-t border-border">
                         <div className="p-2 space-y-1">
                           {group.permissions.map((permission) => (
-                            <div
-                              key={permission.index}
-                              className="px-3 py-2 rounded-md border border-border"
-                            >
+                            <div key={permission.index} className="px-3 py-2 rounded-md border border-border">
                               <div className="flex items-center gap-2">
                                 {/* Access Icon */}
                                 {getAccessIcon(permission.access)}
 
                                 {/* Permission Label */}
                                 <div className="flex-1 min-w-0">
-                                  <span className="text-sm text-foreground">
-                                    {getAccessLabel(permission.access)}
-                                  </span>
+                                  <span className="text-sm text-foreground">{getAccessLabel(permission.access)}</span>
                                 </div>
 
                                 {/* Actions */}
@@ -622,9 +615,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                     onChange={(e) => setNewPermission({ ...newPermission, accessorName: e.target.value })}
                     placeholder={newPermission.accessor === AppAccessorKind.User ? 'user@example.com' : 'example.com'}
                     className={`w-full h-10 px-3 text-sm rounded-md border bg-background text-foreground placeholder-muted-foreground focus:outline-none transition-colors ${
-                      showError
-                        ? 'border-red-500 focus:border-red-500'
-                        : 'border-border focus:border-ring'
+                      showError ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-ring'
                     }`}
                   />
                   {showError && validationState.errorMessage && (

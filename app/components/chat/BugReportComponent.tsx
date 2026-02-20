@@ -93,9 +93,7 @@ export const BugReportComponent = ({ report, handleSendMessage }: BugReportCompo
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-foreground mb-1.5">
-            {formatPascalCaseName(report.name)}
-          </h3>
+          <h3 className="text-sm font-semibold text-foreground mb-1.5">{formatPascalCaseName(report.name)}</h3>
           <p className="text-sm text-muted-foreground truncate">{report.description}</p>
         </div>
 

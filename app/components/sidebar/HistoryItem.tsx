@@ -53,8 +53,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       className={classNames(
         'group rounded-md text-muted-foreground hover:text-foreground hover:bg-muted hover:border hover:border-border flex items-center px-3 py-2 transition-colors border border-transparent',
         {
-          'text-foreground bg-card border border-border':
-            isActiveChat,
+          'text-foreground bg-card border border-border': isActiveChat,
         },
       )}
     >

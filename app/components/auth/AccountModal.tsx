@@ -195,9 +195,7 @@ export const AccountModal = ({ user }: AccountModalProps) => {
                 </>
               ) : (
                 <>
-                  <div className="text-lg font-semibold text-muted-foreground mb-2">
-                    You are on the Free Plan
-                  </div>
+                  <div className="text-lg font-semibold text-muted-foreground mb-2">You are on the Free Plan</div>
                   <div className="text-sm text-muted-foreground mb-4">
                     Upgrade to builder plan to build unlimited apps
                   </div>

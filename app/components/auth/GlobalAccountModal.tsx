@@ -56,7 +56,7 @@ export function GlobalAccountModal() {
                 onClick={() => accountModalStore.close()}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 text-foreground hover:text-foreground/80"
                 aria-label="Close modal"
               >
                 <X size={18} />
@@ -106,7 +106,7 @@ export function GlobalAccountModal() {
                   onClick={() => accountModalStore.close()}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 text-foreground hover:text-foreground/80"
                   aria-label="Close modal"
                 >
                   <X size={18} />

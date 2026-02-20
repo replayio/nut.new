@@ -23,15 +23,13 @@ export function PlanUpgradeBlock() {
 
           <div className="relative p-4 sm:p-6">
             {/* Heading */}
-            <h2 className="text-xl sm:text-2xl font-bold text-center text-foreground mb-4">
-              App Limit Reached
-            </h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-foreground mb-4">App Limit Reached</h2>
 
             {/* Description */}
             <p className="text-center text-muted-foreground text-sm mb-4 max-w-md mx-auto leading-relaxed">
               You've reached your maximum number of apps for the{' '}
-              <span className="text-foreground font-semibold">Free Plan</span>. Upgrade to continue
-              building amazing applications!
+              <span className="text-foreground font-semibold">Free Plan</span>. Upgrade to continue building amazing
+              applications!
             </p>
 
             {/* CTA Button */}
@@ -46,9 +44,7 @@ export function PlanUpgradeBlock() {
             </div>
 
             {/* Small text */}
-            <p className="text-center text-muted-foreground/70 text-sm mt-6">
-              Choose the plan that works best for you
-            </p>
+            <p className="text-center text-muted-foreground/70 text-sm mt-6">Choose the plan that works best for you</p>
           </div>
         </div>
       </div>

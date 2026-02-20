@@ -357,9 +357,7 @@ const AppTemplates = ({ sendMessage }: AppTemplatesProps) => {
                       <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-foreground transition-colors">
                         {collection.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {collection.shortDescription}
-                      </p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{collection.shortDescription}</p>
                       <div className="mt-4 flex items-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm font-medium">View collection</span>
                         <svg

@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
 import { json } from '~/lib/remix-types';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
-import { themeStore, initializeTheme, themeIsDark } from './lib/stores/theme';
+import { themeStore, initializeTheme } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect, useState } from 'react';

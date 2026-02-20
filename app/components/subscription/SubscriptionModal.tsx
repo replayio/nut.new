@@ -51,21 +51,16 @@ export function SubscriptionModal() {
   return (
     <div className="flex items-center justify-center">
       <div
-        className={classNames(
-          'bg-card border border-border max-w-6xl w-full h-full overflow-y-auto',
-          {
-            'rounded-b-md': isSmallViewport,
-            'rounded-r-md': !isSmallViewport,
-          },
-        )}
+        className={classNames('bg-card border border-border max-w-6xl w-full h-full overflow-y-auto', {
+          'rounded-b-md': isSmallViewport,
+          'rounded-r-md': !isSmallViewport,
+        })}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Choose Your Plan</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Select a subscription tier that fits your needs
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Select a subscription tier that fits your needs</p>
           </div>
         </div>
 
@@ -85,8 +80,7 @@ export function SubscriptionModal() {
                     'relative p-6 rounded-md border transition-colors min-h-[400px] flex flex-col',
                     {
                       'border-primary bg-accent': isCurrentTier,
-                      'border-border bg-card hover:bg-muted':
-                        !isCurrentTier,
+                      'border-border bg-card hover:bg-muted': !isCurrentTier,
                     },
                   )}
                 >
@@ -114,9 +108,7 @@ export function SubscriptionModal() {
                       ${details.price}
                       <span className="text-lg font-normal text-muted-foreground">/month</span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed px-2">
-                      {details.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground leading-relaxed px-2">{details.description}</p>
                   </div>
 
                   <div className="space-y-3 mb-8 flex-grow">
@@ -135,7 +127,7 @@ export function SubscriptionModal() {
                       onClick={!stripeSubscription ? () => handleSubscribe(tier) : () => handleManageSubscription()}
                       disabled={isCurrentTier || isLoading}
                       variant={isCurrentTier ? 'outline' : 'default'}
-                      className="w-full h-12"
+                      className={classNames('w-full h-12', { 'text-foreground': isCurrentTier })}
                     >
                       {isLoading && (
                         <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin mr-2"></div>
@@ -161,9 +153,7 @@ export function SubscriptionModal() {
                   </div>
                   <h3 className="text-xl font-bold text-foreground mb-3">Pro</h3>
                   <div className="text-2xl font-bold text-muted-foreground mb-2">Coming Soon</div>
-                  <p className="text-sm text-muted-foreground leading-relaxed px-2">
-                    Build apps effortlessly
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed px-2">Build apps effortlessly</p>
                 </div>
 
                 <div className="space-y-3 mb-8 flex-grow">
@@ -171,17 +161,13 @@ export function SubscriptionModal() {
                     <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center mt-0.5 flex-shrink-0 border border-border">
                       <Sparkles className="text-foreground" size={12} />
                     </div>
-                    <span className="text-sm text-muted-foreground leading-relaxed">
-                      Guaranteed Reliability
-                    </span>
+                    <span className="text-sm text-muted-foreground leading-relaxed">Guaranteed Reliability</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center mt-0.5 flex-shrink-0 border border-border">
                       <Sparkles className="text-foreground" size={12} />
                     </div>
-                    <span className="text-sm text-muted-foreground leading-relaxed">
-                      Up Front App Prices
-                    </span>
+                    <span className="text-sm text-muted-foreground leading-relaxed">Up Front App Prices</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center mt-0.5 flex-shrink-0 border border-border">

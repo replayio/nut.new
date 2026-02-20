@@ -97,9 +97,7 @@ export const SecretsCard: React.FC<SecretsCardProps> = ({ appSummary, onViewDeta
             )}
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-foreground truncate">{secret.name}</div>
-              {secret.description && (
-                <div className="text-xs text-muted-foreground truncate">{secret.description}</div>
-              )}
+              {secret.description && <div className="text-xs text-muted-foreground truncate">{secret.description}</div>}
             </div>
           </div>
         ))}

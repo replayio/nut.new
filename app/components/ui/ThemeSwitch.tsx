@@ -30,7 +30,9 @@ export const ThemeSwitch = memo(({ className, variant = 'menu' }: ThemeSwitchPro
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     setIsDark(themeIsDark());
 
     if (theme === 'system') {

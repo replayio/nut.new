@@ -77,10 +77,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {authRequired ? (
-                  <Lock
-                    className="transition-transform duration-200 group-hover:scale-110 text-green-500"
-                    size={18}
-                  />
+                  <Lock className="transition-transform duration-200 group-hover:scale-110 text-green-500" size={18} />
                 ) : (
                   <Globe
                     className="transition-transform duration-200 group-hover:scale-110 text-foreground"
@@ -122,9 +119,7 @@ export const AuthSelectorCard: React.FC<AuthSelectorCardProps> = ({ appSummary }
               <ShieldCheck className="text-white" size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-base font-semibold text-foreground truncate">
-                Authentication Settings
-              </h3>
+              <h3 className="text-base font-semibold text-foreground truncate">Authentication Settings</h3>
               <div className="mt-1.5 flex items-center">
                 <div className="flex items-center gap-2 text-green-500">
                   <Check size={14} strokeWidth={2.5} />

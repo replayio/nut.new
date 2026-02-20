@@ -554,9 +554,7 @@ export const DesignSystemPanel = () => {
           }}
           className={classNames(
             'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
-            themeMode === 'light'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground',
+            themeMode === 'light' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Sun size={16} />
@@ -569,9 +567,7 @@ export const DesignSystemPanel = () => {
           }}
           className={classNames(
             'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
-            themeMode === 'dark'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground',
+            themeMode === 'dark' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Moon size={16} />

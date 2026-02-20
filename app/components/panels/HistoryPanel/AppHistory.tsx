@@ -177,13 +177,9 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
               <span className="text-xs font-medium border border-border rounded px-2 py-0.5 text-muted-foreground">
                 Current Version
               </span>
-              <span className="text-sm font-medium text-foreground">
-                {currentVersion.version || '0.0.0'}
-              </span>
+              <span className="text-sm font-medium text-foreground">{currentVersion.version || '0.0.0'}</span>
             </div>
-            <p className="text-sm text-muted-foreground pl-6">
-              {getReasonText(currentVersion.reason, history)}
-            </p>
+            <p className="text-sm text-muted-foreground pl-6">{getReasonText(currentVersion.reason, history)}</p>
           </div>
         )}
 
@@ -243,9 +239,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
                     className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted transition-colors"
                   >
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium text-foreground">
-                        {summary.version || '0.0.0'}
-                      </span>
+                      <span className="text-sm font-medium text-foreground">{summary.version || '0.0.0'}</span>
                       <WithTooltip tooltip={featureName}>
                         <span className="text-xs text-muted-foreground truncate">{featureName}</span>
                       </WithTooltip>

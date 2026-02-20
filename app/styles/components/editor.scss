@@ -48,49 +48,28 @@
     hsl(var(--accent))
   );
 
-  --cm-search-closeButton-textColor: var(
-    --editor-search-closeButton-textColor,
-    hsl(var(--muted-foreground))
-  );
+  --cm-search-closeButton-textColor: var(--editor-search-closeButton-textColor, hsl(var(--muted-foreground)));
 
-  --cm-search-closeButton-textColorHover: var(
-    --editor-search-closeButton-textColorHover,
-    hsl(var(--foreground))
-  );
+  --cm-search-closeButton-textColorHover: var(--editor-search-closeButton-textColorHover, hsl(var(--foreground)));
 
-  --cm-search-button-backgroundColor: var(
-    --editor-search-button-backgroundColor,
-    hsl(var(--muted))
-  );
+  --cm-search-button-backgroundColor: var(--editor-search-button-backgroundColor, hsl(var(--muted)));
 
-  --cm-search-button-backgroundColorHover: var(
-    --editor-search-button-backgroundColorHover,
-    hsl(var(--accent))
-  );
+  --cm-search-button-backgroundColorHover: var(--editor-search-button-backgroundColorHover, hsl(var(--accent)));
 
   --cm-search-button-textColor: var(--editor-search-button-textColor, hsl(var(--muted-foreground)));
 
-  --cm-search-button-textColorHover: var(
-    --editor-search-button-textColorHover,
-    hsl(var(--foreground))
-  );
+  --cm-search-button-textColorHover: var(--editor-search-button-textColorHover, hsl(var(--foreground)));
 
   --cm-search-button-borderColor: var(--editor-search-button-borderColor, transparent);
   --cm-search-button-borderColorHover: var(--editor-search-button-borderColorHover, transparent);
 
-  --cm-search-button-borderColorFocused: var(
-    --editor-search-button-borderColorFocused,
-    hsl(var(--ring))
-  );
+  --cm-search-button-borderColorFocused: var(--editor-search-button-borderColorFocused, hsl(var(--ring)));
 
   --cm-search-input-backgroundColor: var(--editor-search-input-backgroundColor, transparent);
   --cm-search-input-textColor: var(--editor-search-input-textColor, hsl(var(--foreground)));
   --cm-search-input-borderColor: var(--editor-search-input-borderColor, hsl(var(--border)));
 
-  --cm-search-input-borderColorFocused: var(
-    --editor-search-input-borderColorFocused,
-    hsl(var(--ring))
-  );
+  --cm-search-input-borderColorFocused: var(--editor-search-input-borderColorFocused, hsl(var(--ring)));
 
   /* Tooltip */
 
@@ -102,10 +81,7 @@
     theme('colors.alpha.customAccent.30')
   );
 
-  --cm-tooltip-textColorSelected: var(
-    --editor-tooltip-textColorSelected,
-    hsl(var(--foreground))
-  );
+  --cm-tooltip-textColorSelected: var(--editor-tooltip-textColorSelected, hsl(var(--foreground)));
 
   --cm-tooltip-borderColor: var(--editor-tooltip-borderColor, hsl(var(--border)));
 

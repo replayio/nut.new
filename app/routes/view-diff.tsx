@@ -1105,9 +1105,7 @@ function FileDiffView({
               {diff.type.toUpperCase()}
             </span>
           </div>
-          <span className="font-mono text-sm text-foreground flex-1 text-left truncate">
-            {diff.path}
-          </span>
+          <span className="font-mono text-sm text-foreground flex-1 text-left truncate">{diff.path}</span>
         </button>
 
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -1150,10 +1148,7 @@ function FileDiffView({
             {totalDeletions > 0 && <span className="text-red-600 dark:text-red-400">-{totalDeletions}</span>}
           </div>
 
-          <button
-            onClick={onToggleExpand}
-            className="p-1 hover:bg-muted rounded transition-colors"
-          >
+          <button onClick={onToggleExpand} className="p-1 hover:bg-muted rounded transition-colors">
             <ChevronDown
               size={16}
               className={`text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -1435,9 +1430,7 @@ function RepositoryDiff() {
                     <CheckCircle className="text-white" size={24} />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">No Changes Found</h3>
-                  <p className="text-muted-foreground">
-                    The repositories are identical - no differences detected.
-                  </p>
+                  <p className="text-muted-foreground">The repositories are identical - no differences detected.</p>
                 </div>
               </div>
             )}

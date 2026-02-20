@@ -99,11 +99,7 @@ export default function Faqs() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent
-                  className={cn(
-                    'px-6 pb-6 pt-2',
-                    'text-muted-foreground',
-                    'bg-accent/30 dark:bg-accent/30',
-                  )}
+                  className={cn('px-6 pb-6 pt-2', 'text-muted-foreground', 'bg-accent/30 dark:bg-accent/30')}
                 >
                   {faq.answer}
                 </AccordionContent>

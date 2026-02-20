@@ -54,12 +54,9 @@ export const DialogButton = memo(({ type, children, onClick, disabled = false }:
       className={classNames(
         'inline-flex h-[35px] items-center justify-center rounded-lg px-4 text-sm leading-none focus:outline-none',
         {
-          'bg-primary text-primary-foreground hover:bg-primary/90':
-            type === 'primary',
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80':
-            type === 'secondary',
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90':
-            type === 'danger',
+          'bg-primary text-primary-foreground hover:bg-primary/90': type === 'primary',
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80': type === 'secondary',
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90': type === 'danger',
         },
         {
           'opacity-50 cursor-not-allowed': disabled,
@@ -89,10 +86,7 @@ export const DialogTitle = memo(({ className, children, ...props }: RadixDialog.
 
 export const DialogDescription = memo(({ className, children, ...props }: RadixDialog.DialogDescriptionProps) => {
   return (
-    <RadixDialog.Description
-      className={classNames('px-5 py-4 text-foreground text-md', className)}
-      {...props}
-    >
+    <RadixDialog.Description className={classNames('px-5 py-4 text-foreground text-md', className)} {...props}>
       {children}
     </RadixDialog.Description>
   );

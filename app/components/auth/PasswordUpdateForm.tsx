@@ -79,10 +79,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
         </div>
 
         <div>
-          <label
-            htmlFor="confirm-new-password"
-            className="block mb-2 text-sm font-semibold text-foreground"
-          >
+          <label htmlFor="confirm-new-password" className="block mb-2 text-sm font-semibold text-foreground">
             Confirm New Password
           </label>
           <input
