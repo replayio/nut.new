@@ -54,6 +54,7 @@ export {
   Key,
   KeyRound,
   KeySquare,
+  Layers,
   Layout,
   Link,
   List,
