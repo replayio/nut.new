@@ -54,7 +54,7 @@ const ClearAppHistory = () => {
               <p className="text-sm text-muted-foreground text-center">
                 This action cannot be undone. All chat messages will be permanently removed.
               </p>
-              <Button onClick={handleClearClick} variant="outline" className="h-9">
+              <Button onClick={handleClearClick} variant="outline" className="h-9 text-foreground">
                 <span className="flex items-center gap-2">
                   <Trash2 size={16} className="text-muted-foreground" />
                   Clear Chat History

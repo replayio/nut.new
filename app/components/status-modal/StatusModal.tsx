@@ -99,7 +99,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
           <motion.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
 
           <motion.div
-            className="relative bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor border-opacity-50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-md w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
+            className="relative bg-card border border-border/50 rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 max-w-md w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col backdrop-blur-sm"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -108,7 +108,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
             <div className="absolute top-3 right-3 z-10">
               <button
                 onClick={handleClose}
-                className="w-10 h-10 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
+                className="w-10 h-10 rounded-xl bg-muted border border-border hover:bg-accent transition-all duration-200 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-sm hover:shadow-md hover:scale-105 group"
               >
                 <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
               </button>
@@ -125,7 +125,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.div>
 
               <motion.h2
-                className="text-3xl font-bold text-bolt-elements-textHeading mb-3"
+                className="text-3xl font-bold text-foreground mb-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
@@ -134,7 +134,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.h2>
 
               <motion.p
-                className="text-bolt-elements-textSecondary mb-8 text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30"
+                className="text-muted-foreground mb-8 text-lg bg-muted bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-border/30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.5 }}
@@ -145,19 +145,19 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
               </motion.p>
 
               <motion.div
-                className="mb-8 p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-2xl border border-bolt-elements-borderColor border-opacity-30"
+                className="mb-8 p-4 bg-muted bg-opacity-30 rounded-2xl border border-border/30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.5 }}
               >
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm font-semibold text-bolt-elements-textPrimary">Features Complete</span>
-                  <span className="text-sm font-bold text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 px-3 py-1 rounded-lg border border-bolt-elements-borderColor border-opacity-50 shadow-sm">
+                  <span className="text-sm font-semibold text-foreground">Features Complete</span>
+                  <span className="text-sm font-bold text-foreground bg-muted px-3 py-1 rounded-lg border border-border/50 shadow-sm">
                     {completedFeatures}/{totalFeatures}
                   </span>
                 </div>
 
-                <div className="w-full bg-bolt-elements-background-depth-3 rounded-xl h-4 overflow-hidden shadow-inner border border-bolt-elements-borderColor border-opacity-30">
+                <div className="w-full bg-accent rounded-xl h-4 overflow-hidden shadow-inner border border-border/30">
                   <motion.div
                     className={classNames(
                       'h-full rounded-xl shadow-sm',
@@ -176,9 +176,9 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between text-sm p-3 bg-bolt-elements-background-depth-1 rounded-xl border border-bolt-elements-borderColor border-opacity-30 shadow-sm hover:shadow-md transition-all duration-200"
+                        className="flex items-center justify-between text-sm p-3 bg-card rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-all duration-200"
                       >
-                        <span className="text-bolt-elements-textPrimary truncate font-medium">{feature.name}</span>
+                        <span className="text-foreground truncate font-medium">{feature.name}</span>
                         <div
                           className={classNames(
                             'flex items-center gap-2 px-2 py-1 rounded-lg text-xs font-medium border shadow-sm',
@@ -186,7 +186,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                               ? 'text-green-700 bg-green-50 border-green-200'
                               : feature.status === AppFeatureStatus.Failed
                                 ? 'text-yellow-700 bg-yellow-50 border-yellow-200'
-                                : 'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor',
+                                : 'text-muted-foreground bg-muted border-border',
                           )}
                         >
                           {feature.status === AppFeatureStatus.Implemented && (
@@ -205,7 +205,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({ appSummary, onContinue
                           )}
                           {feature.status === AppFeatureStatus.NotStarted && (
                             <Circle
-                              className="text-bolt-elements-textSecondary transition-transform duration-200 hover:scale-110"
+                              className="text-muted-foreground transition-transform duration-200 hover:scale-110"
                               size={14}
                             />
                           )}

@@ -27,16 +27,13 @@ export function MobileMenu({ handleScrollToSection }: MobileMenuProps) {
       <DropdownMenuTrigger asChild>
         <button
           ref={buttonRef}
-          className="flex items-center justify-center text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 hover:text-bolt-elements-textPrimary rounded-xl p-2 hover:bg-bolt-elements-background-depth-3 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          className="flex items-center justify-center text-muted-foreground bg-muted hover:text-foreground rounded-xl p-2 hover:bg-accent transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 border border-border focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
           title="Menu"
         >
           <MenuIcon size={20} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-56 bg-bolt-elements-background-depth-1 border-bolt-elements-borderColor z-[100]"
-      >
+      <DropdownMenuContent align="end" className="w-56 bg-card border-border z-[100]">
         <DropdownMenuItem asChild>
           <a href="/" className="cursor-pointer w-full">
             Home

@@ -131,8 +131,8 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
         <Dialog onClose={handleClose}>
           <div className="p-5 space-y-4">
             <div>
-              <div className="text-lg font-semibold text-bolt-elements-textHeading">Set Allowed Domains</div>
-              <div className="text-xs text-bolt-elements-textSecondary">
+              <div className="text-lg font-semibold text-foreground">Set Allowed Domains</div>
+              <div className="text-xs text-muted-foreground">
                 Users can sign in only with emails belonging to these domains.
               </div>
             </div>
@@ -141,15 +141,15 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
               {loading ? (
                 <>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 rounded-md border border-bolt-elements-borderColor px-3 py-2 bg-bolt-elements-background-depth-2">
-                      <span className="text-bolt-elements-textSecondary select-none">@</span>
+                    <div className="flex-1 flex items-center gap-2 rounded-md border border-border px-3 py-2 bg-muted">
+                      <span className="text-muted-foreground select-none">@</span>
                       <Skeleton className="h-6 w-full" />
                     </div>
                     <Skeleton className="h-6 w-8" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 rounded-md border border-bolt-elements-borderColor px-3 py-2 bg-bolt-elements-background-depth-2">
-                      <span className="text-bolt-elements-textSecondary select-none">@</span>
+                    <div className="flex-1 flex items-center gap-2 rounded-md border border-border px-3 py-2 bg-muted">
+                      <span className="text-muted-foreground select-none">@</span>
                       <Skeleton className="h-6 w-full" />
                     </div>
                     <Skeleton className="h-6 w-8" />
@@ -165,13 +165,13 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
                     <div key={index} className="flex items-center gap-2">
                       <div
                         className={
-                          'flex-1 flex items-center gap-2 rounded-2xl border px-3 py-2 bg-bolt-elements-background-depth-2 ' +
+                          'flex-1 flex items-center gap-2 rounded-2xl border px-3 py-2 bg-muted ' +
                           (showInvalid
                             ? 'border-red-500 focus-within:border-red-500'
-                            : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus')
+                            : 'border-border focus-within:border-ring')
                         }
                       >
-                        <span className="text-bolt-elements-textSecondary select-none">@</span>
+                        <span className="text-muted-foreground select-none">@</span>
                         <input
                           type="text"
                           value={domain}
@@ -182,7 +182,7 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
                             'w-full bg-transparent outline-none text-sm ' +
                             (showInvalid
                               ? 'text-red-600 placeholder-red-400'
-                              : 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary')
+                              : 'text-foreground placeholder-muted-foreground')
                           }
                         />
                       </div>
@@ -201,14 +201,14 @@ export const AllowedDomainsDialog: React.FC<AllowedDomainsDialogProps> = ({ open
                   );
                 })
               )}
-              <div className="ml-4 text-xs text-bolt-elements-textSecondary">
+              <div className="ml-4 text-xs text-muted-foreground">
                 Enter domains like <span className="font-mono">example.com</span> or{' '}
                 <span className="font-mono">team.example.com</span>
               </div>
               {!loading && (
                 <div>
                   <button
-                    className="mt-1 inline-flex items-center gap-2 px-3 h-9 rounded-xl border border-bolt-elements-borderColor text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 hover:scale-105"
+                    className="mt-1 inline-flex items-center gap-2 px-3 h-9 rounded-xl border border-border text-muted-foreground bg-muted hover:bg-accent hover:scale-105"
                     onClick={addRow}
                     type="button"
                     disabled={loading}

@@ -50,7 +50,7 @@ export function GlobalSecretsModal() {
             onClick={() => secretsModalStore.close()}
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 text-foreground hover:text-foreground/80"
             aria-label="Close modal"
           >
             <X size={18} />

@@ -11,7 +11,7 @@ export const HeroSection = () => {
         </span>
       </h1>
 
-      <p className="text-xl text-bolt-elements-textSecondary mb-8 max-w-3xl mx-auto leading-relaxed">
+      <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
         Tell us what you’ve been struggling to build, and get three months of our Builder Plan for free ($60 value)
       </p>
 
@@ -24,7 +24,7 @@ export const HeroSection = () => {
         <span className="text-base sm:text-xl">Submit Your App</span>
       </a>
 
-      <p className="text-sm text-bolt-elements-textSecondary mt-6 max-w-2xl mx-auto">
+      <p className="text-sm text-muted-foreground mt-6 max-w-2xl mx-auto">
         Replay Builder is focused on building web apps. So if you are looking to build native iOS/Android apps, desktop
         apps or Chrome extensions, we're not ready for you...yet.
       </p>

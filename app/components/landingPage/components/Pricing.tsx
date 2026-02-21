@@ -81,12 +81,12 @@ export default function Pricing() {
         {/* Header */}
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="text-bolt-elements-textHeading">Simple,</span>
+            <span className="text-foreground">Simple,</span>
             <br />
             <span className="text-rose-500 dark:text-rose-400">transparent</span>{' '}
-            <span className="text-bolt-elements-textHeading">pricing</span>
+            <span className="text-foreground">pricing</span>
           </h1>
-          <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
             Building software shouldn't feel like a trip to Las Vegas
           </p>
         </div>

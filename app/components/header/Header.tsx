@@ -17,17 +17,17 @@ export function Header() {
   return (
     <header
       className={classNames(
-        'flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-bolt-elements-background-depth-1 bg-opacity-80 transition-all duration-300 z-20',
+        'flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-card bg-opacity-80 transition-all duration-300 z-20',
         {
           'border-transparent shadow-none': !chatStarted,
-          'border-bolt-elements-borderColor border-opacity-50 shadow-sm backdrop-blur-md': chatStarted,
+          'border-border/50 shadow-sm backdrop-blur-md': chatStarted,
         },
       )}
     >
-      <div className="flex items-center gap-4 text-bolt-elements-textPrimary">
+      <div className="flex items-center gap-4 text-foreground">
         <PanelLeft
           size={20}
-          className="text-bolt-elements-textPrimary hover:text-bolt-elements-textSecondary cursor-pointer"
+          className="text-foreground hover:text-muted-foreground cursor-pointer"
           onClick={() => {
             if (isSmallViewport) {
               sidebarMenuStore.open();
@@ -38,7 +38,7 @@ export function Header() {
           <a href="/">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
-              <h1 className="text-bolt-elements-textHeading font-bold text-xl">Replay</h1>
+              <h1 className="text-foreground font-bold text-xl">Replay</h1>
             </div>
           </a>
         )}

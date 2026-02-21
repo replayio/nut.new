@@ -96,7 +96,7 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
     >
       <div
         className={classNames(
-          'bg-bolt-elements-background-depth-1 rounded-3xl border shadow-3xl max-w-lg w-full mx-4 transition-all duration-300 transform overflow-hidden',
+          'bg-card rounded-3xl border shadow-3xl max-w-lg w-full mx-4 transition-all duration-300 transform overflow-hidden',
           colors.border,
           {
             'scale-100 opacity-100': isVisible,
@@ -124,10 +124,10 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
           </div>
 
           {/* Centered title */}
-          <h2 className="text-3xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">{title}</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-3 leading-tight">{title}</h2>
 
           {/* Subtitle */}
-          <p className="text-bolt-elements-textSecondary font-medium">
+          <p className="text-muted-foreground font-medium">
             {type === 'success'
               ? '✨ Transaction completed successfully'
               : type === 'error'
@@ -140,7 +140,7 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
         <div className="px-8 pb-8">
           {/* Main message */}
           <div className="text-center mb-6">
-            <p className="text-lg text-bolt-elements-textPrimary leading-relaxed font-medium">{message}</p>
+            <p className="text-lg text-foreground leading-relaxed font-medium">{message}</p>
           </div>
 
           {/* Details card */}
@@ -149,11 +149,11 @@ export function StripeStatusModal({ isOpen, onClose, type, title, message, detai
               <div
                 className={classNames(
                   'p-6 rounded-2xl border shadow-sm bg-gradient-to-br',
-                  'from-bolt-elements-background-depth-2/40 to-bolt-elements-background-depth-3/20',
-                  'border-bolt-elements-borderColor border-opacity-30',
+                  'from-muted/40 to-accent/20',
+                  'border-border/30',
                 )}
               >
-                <p className="text-bolt-elements-textSecondary leading-relaxed text-center">{details}</p>
+                <p className="text-muted-foreground leading-relaxed text-center">{details}</p>
               </div>
             </div>
           )}

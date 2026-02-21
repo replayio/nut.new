@@ -67,13 +67,13 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs text-bolt-elements-textSecondary">{label}</label>
+      <label className="text-xs text-muted-foreground">{label}</label>
       <div className="grid grid-cols-1 @[500px]:grid-cols-2 gap-2">
         {/* Light Mode */}
         <div className="flex items-center gap-2">
           <div className="relative w-10 h-10 flex-shrink-0">
             <div
-              className="w-full h-full rounded border border-bolt-elements-borderColor cursor-pointer"
+              className="w-full h-full rounded border border-border cursor-pointer"
               style={{ backgroundColor: `hsl(${lightHslValue})` }}
             />
             <input
@@ -87,7 +87,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             />
           </div>
           <div className="flex-1 flex flex-col min-w-0">
-            <span className="text-xs text-bolt-elements-textSecondary mb-1">Light</span>
+            <span className="text-xs text-muted-foreground mb-1">Light</span>
             <input
               type="text"
               value={lightHslValue}
@@ -102,7 +102,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                 onHoverEnd?.();
                 onLightBlur?.();
               }}
-              className="px-2 py-1.5 text-xs bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor rounded-md focus:outline-none focus:border-bolt-elements-borderColorActive focus:ring-1 focus:ring-bolt-elements-borderColorActive text-bolt-elements-textPrimary w-full"
+              className="px-2 py-1.5 text-xs bg-accent border border-border rounded-md focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-foreground w-full"
               placeholder="0 0% 0%"
             />
           </div>
@@ -111,7 +111,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         <div className="flex items-center gap-2">
           <div className="relative w-10 h-10 flex-shrink-0">
             <div
-              className="w-full h-full rounded border border-bolt-elements-borderColor cursor-pointer"
+              className="w-full h-full rounded border border-border cursor-pointer"
               style={{ backgroundColor: `hsl(${darkHslValue})` }}
             />
             <input
@@ -125,7 +125,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             />
           </div>
           <div className="flex-1 flex flex-col min-w-0">
-            <span className="text-xs text-bolt-elements-textSecondary mb-1">Dark</span>
+            <span className="text-xs text-muted-foreground mb-1">Dark</span>
             <input
               type="text"
               value={darkHslValue}
@@ -140,7 +140,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                 onHoverEnd?.();
                 onDarkBlur?.();
               }}
-              className="px-2 py-1.5 text-xs bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor rounded-md focus:outline-none focus:border-bolt-elements-borderColorActive focus:ring-1 focus:ring-bolt-elements-borderColorActive text-bolt-elements-textPrimary w-full"
+              className="px-2 py-1.5 text-xs bg-accent border border-border rounded-md focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-foreground w-full"
               placeholder="0 0% 0%"
             />
           </div>

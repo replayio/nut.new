@@ -538,10 +538,10 @@ export const DesignSystemPanel = () => {
   const renderOverview = () => (
     <div className="p-4 space-y-6">
       {/* Light/Dark Mode Toggle */}
-      <div className="relative flex rounded-lg border border-bolt-elements-borderColor p-1 bg-bolt-elements-background-depth-2">
+      <div className="relative flex rounded-lg border border-border p-1 bg-muted">
         {/* Sliding background */}
         <div
-          className="absolute top-1 bottom-1 left-1 rounded-md bg-background shadow-sm border border-bolt-elements-borderColor transition-transform duration-300 ease-in-out"
+          className="absolute top-1 bottom-1 left-1 rounded-md bg-background shadow-sm border border-border transition-transform duration-300 ease-in-out"
           style={{
             width: 'calc(50% - 0.25rem)',
             transform: themeMode === 'dark' ? 'translateX(calc(100% + 0.5rem))' : 'translateX(0)',
@@ -554,9 +554,7 @@ export const DesignSystemPanel = () => {
           }}
           className={classNames(
             'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
-            themeMode === 'light'
-              ? 'text-bolt-elements-textPrimary'
-              : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+            themeMode === 'light' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Sun size={16} />
@@ -569,9 +567,7 @@ export const DesignSystemPanel = () => {
           }}
           className={classNames(
             'relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors',
-            themeMode === 'dark'
-              ? 'text-bolt-elements-textPrimary'
-              : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary',
+            themeMode === 'dark' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Moon size={16} />
@@ -580,15 +576,15 @@ export const DesignSystemPanel = () => {
       </div>
 
       {/* Separator */}
-      <div className="border-t border-bolt-elements-borderColor" />
+      <div className="border-t border-border" />
 
       {/* Colors Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-bolt-elements-textPrimary">Colours</h3>
+          <h3 className="text-sm font-medium text-foreground">Colours</h3>
           <button
             onClick={() => setCurrentView('colors')}
-            className="p-1.5 rounded-md text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-all"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
             title="Advanced color settings"
           >
             <SlidersHorizontal size={16} />
@@ -615,7 +611,7 @@ export const DesignSystemPanel = () => {
 
       {/* Typography Section */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-bolt-elements-textPrimary">Typography</h3>
+        <h3 className="text-sm font-medium text-foreground">Typography</h3>
         <MultiSelect
           defaultValue={currentFont}
           onValueChange={handleFontChange}
@@ -629,7 +625,7 @@ export const DesignSystemPanel = () => {
       </div>
 
       {/* Separator */}
-      <div className="border-t border-bolt-elements-borderColor" />
+      <div className="border-t border-border" />
 
       {/* Roundness Section */}
       <RadiusSelector currentValue={radius} onChange={handleRadiusChange} />
@@ -652,7 +648,7 @@ export const DesignSystemPanel = () => {
       <div className="p-6">
         <button
           onClick={() => setCurrentView('overview')}
-          className="flex items-center gap-2 mb-4 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+          className="flex items-center gap-2 mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={16} />
           <span>Back to Overview</span>
@@ -677,12 +673,12 @@ export const DesignSystemPanel = () => {
   }
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor overflow-hidden">
+    <div className="@container flex flex-col h-full w-full bg-card rounded-md border border-border overflow-hidden">
       <div className="flex-1 overflow-y-auto flex flex-col">
         {isLoading || !selectedTheme ? (
           <div className="flex-1 p-4 space-y-6">
             <Skeleton className="h-10 w-full rounded-full" />
-            <div className="border-t border-bolt-elements-borderColor" />
+            <div className="border-t border-border" />
             <div className="space-y-4">
               <Skeleton className="h-6 w-20" />
               <Skeleton className="h-10 w-full" />
@@ -691,7 +687,7 @@ export const DesignSystemPanel = () => {
               <Skeleton className="h-6 w-24" />
               <Skeleton className="h-10 w-full" />
             </div>
-            <div className="border-t border-bolt-elements-borderColor" />
+            <div className="border-t border-border" />
             <div className="space-y-4">
               <Skeleton className="h-6 w-20" />
               <div className="grid grid-cols-3 gap-2">

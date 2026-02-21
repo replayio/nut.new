@@ -13,7 +13,7 @@ export const SettingsButton = memo(({ onClick }: SettingsButtonProps) => {
       icon={<Settings size={30} />}
       size="xl"
       title="Settings"
-      className="text-[#666] hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-item-backgroundActive/10 transition-colors"
+      className="text-[#666] hover:text-foreground hover:bg-accent/10 transition-colors"
     />
   );
 });

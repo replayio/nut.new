@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import type { LinksFunction, LoaderFunction } from '~/lib/remix-types';
 import { json } from '~/lib/remix-types';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError, useLoaderData } from '@remix-run/react';
-import { themeStore } from './lib/stores/theme';
+import { themeStore, initializeTheme } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect, useState } from 'react';
@@ -86,13 +86,15 @@ const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
 
   function setTutorialKitTheme() {
-    let theme = localStorage.getItem('bolt_theme');
+    let theme = localStorage.getItem('bolt_theme') || 'system';
+    let effectiveTheme = theme;
 
-    if (!theme) {
-      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (theme === 'system') {
+      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
-    document.querySelector('html')?.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
+    document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
   }
 `;
 
@@ -143,7 +145,20 @@ function ThemeProvider() {
   const theme = useStore(themeStore);
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
+    initializeTheme();
+  }, []);
+
+  useEffect(() => {
+    const getEffectiveTheme = () => {
+      if (theme === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return theme;
+    };
+
+    const effectiveTheme = getEffectiveTheme();
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
+    document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
   }, [theme]);
 
   return null;
@@ -225,10 +240,10 @@ export default function App() {
           icon={({ type }) => {
             switch (type) {
               case 'success': {
-                return <Check className="text-bolt-elements-icon-success text-2xl" />;
+                return <Check className="text-green-500 text-2xl" />;
               }
               case 'error': {
-                return <div className="text-bolt-elements-icon-error text-2xl">⚠️</div>;
+                return <div className="text-red-500 text-2xl">⚠️</div>;
               }
             }
 

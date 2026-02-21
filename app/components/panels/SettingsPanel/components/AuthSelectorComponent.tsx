@@ -174,15 +174,13 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
     <div className="space-y-4">
       {/* Section Header */}
       <div>
-        <h3 className="text-base font-semibold text-bolt-elements-textPrimary">Application Visibility</h3>
-        <p className="text-sm text-bolt-elements-textSecondary mt-1">
-          Control who can view or access your application.
-        </p>
+        <h3 className="text-base font-semibold text-foreground">Application Visibility</h3>
+        <p className="text-sm text-muted-foreground mt-1">Control who can view or access your application.</p>
       </div>
 
       {/* Application Access Dropdown */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-bolt-elements-textPrimary">Application Access</label>
+        <label className="text-sm font-medium text-foreground">Application Access</label>
         {/* <DropdownMenu
           onOpenChange={(open) => {
             if (open && dropdownTriggerRef.current) {
@@ -197,10 +195,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
               className="w-full justify-between h-10 text-sm font-normal"
             >
               <span className="flex items-center gap-2">
-                {accessType === 'private' ? <Lock size={16} className="text-bolt-elements-textSecondary" /> : <Globe size={16} className="text-bolt-elements-textSecondary" />}
+                {accessType === 'private' ? <Lock size={16} className="text-muted-foreground" /> : <Globe size={16} className="text-muted-foreground" />}
                 {accessType === 'private' ? 'Private' : 'Public'}
               </span>
-              <ChevronDown size={16} className="text-bolt-elements-textSecondary" />
+              <ChevronDown size={16} className="text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -217,7 +215,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu> */}
-        <p className="text-sm text-bolt-elements-textSecondary">
+        <p className="text-sm text-muted-foreground">
           Define whenever this application is public or has limited access
         </p>
       </div>
@@ -226,8 +224,8 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
       <div className="flex items-start gap-3">
         <Switch checked={authRequired} onCheckedChange={!saving ? handleAuthToggle : undefined} className="mt-0.5" />
         <div className="flex-1">
-          <h4 className="text-sm font-medium text-bolt-elements-textPrimary">Require Logging in</h4>
-          <p className="text-sm text-bolt-elements-textSecondary">
+          <h4 className="text-sm font-medium text-foreground">Require Logging in</h4>
+          <p className="text-sm text-muted-foreground">
             Visitors are required sign up and login in order to access this application
           </p>
         </div>
@@ -239,14 +237,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4
-                className={`text-sm font-medium ${authRequired ? 'text-bolt-elements-textPrimary' : 'text-bolt-elements-textSecondary'}`}
-              >
+              <h4 className={`text-sm font-medium ${authRequired ? 'text-foreground' : 'text-muted-foreground'}`}>
                 Restricted Access
               </h4>
-              <p
-                className={`text-sm ${authRequired ? 'text-bolt-elements-textSecondary' : 'text-bolt-elements-textTertiary'}`}
-              >
+              <p className={`text-sm ${authRequired ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}>
                 Only whitelisted emails and domains will be able to access and sign up to this application.
               </p>
             </div>
@@ -265,10 +259,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
 
       {/* Domain Management Panel */}
       {showRestrictedManage && authRequired && restrictedAccess && (
-        <div className="mt-4 p-4 bg-bolt-elements-background-depth-1 rounded-lg border border-bolt-elements-borderColor space-y-4">
+        <div className="mt-4 p-4 bg-card rounded-lg border border-border space-y-4">
           <div>
-            <h4 className="text-sm font-medium text-bolt-elements-textPrimary mb-1">Allowed Domains</h4>
-            <p className="text-xs text-bolt-elements-textSecondary">
+            <h4 className="text-sm font-medium text-foreground mb-1">Allowed Domains</h4>
+            <p className="text-xs text-muted-foreground">
               Users can sign in only with emails belonging to these domains.
             </p>
           </div>
@@ -277,15 +271,15 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
             {loading ? (
               <>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-bolt-elements-borderColor px-3 py-2 bg-background">
-                    <span className="text-bolt-elements-textSecondary text-sm">@</span>
+                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-border px-3 py-2 bg-background">
+                    <span className="text-muted-foreground text-sm">@</span>
                     <Skeleton className="h-5 flex-1" />
                   </div>
                   <Skeleton className="h-9 w-9 rounded-lg" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-bolt-elements-borderColor px-3 py-2 bg-background">
-                    <span className="text-bolt-elements-textSecondary text-sm">@</span>
+                  <div className="flex-1 flex items-center gap-2 rounded-lg border border-border px-3 py-2 bg-background">
+                    <span className="text-muted-foreground text-sm">@</span>
                     <Skeleton className="h-5 flex-1" />
                   </div>
                   <Skeleton className="h-9 w-9 rounded-lg" />
@@ -304,11 +298,11 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                             ? 'border-red-500/60 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20'
                             : isValid
                               ? 'border-green-500/40 focus-within:border-green-500/60'
-                              : 'border-bolt-elements-borderColor focus-within:border-bolt-elements-focus focus-within:ring-2 focus-within:ring-bolt-elements-focus/20'
+                              : 'border-border focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20'
                         }`}
                       >
                         <span
-                          className={`text-sm ${showInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-bolt-elements-textSecondary'}`}
+                          className={`text-sm ${showInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-muted-foreground'}`}
                         >
                           @
                         </span>
@@ -322,8 +316,8 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                             showInvalid
                               ? 'text-red-600 placeholder-red-400/60'
                               : isValid
-                                ? 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary/50'
-                                : 'text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary'
+                                ? 'text-foreground placeholder-muted-foreground/50'
+                                : 'text-foreground placeholder-muted-foreground'
                           }`}
                         />
                         {isValid && (
@@ -338,7 +332,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                           variant="ghost"
                           size="sm"
                           onClick={() => removeRow(index)}
-                          className="h-9 w-9 p-0 text-bolt-elements-textSecondary hover:text-red-500"
+                          className="h-9 w-9 p-0 text-muted-foreground hover:text-red-500"
                           disabled={loading}
                         >
                           <Trash2 size={14} />
@@ -349,10 +343,10 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
                 })}
 
                 <div className="flex items-start gap-2 pt-1">
-                  <Info className="text-bolt-elements-textSecondary flex-shrink-0 mt-0.5" size={12} />
-                  <p className="text-xs text-bolt-elements-textSecondary leading-relaxed">
-                    Enter domains like <span className="font-mono text-bolt-elements-textPrimary">example.com</span> or{' '}
-                    <span className="font-mono text-bolt-elements-textPrimary">team.example.com</span>
+                  <Info className="text-muted-foreground flex-shrink-0 mt-0.5" size={12} />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Enter domains like <span className="font-mono text-foreground">example.com</span> or{' '}
+                    <span className="font-mono text-foreground">team.example.com</span>
                   </p>
                 </div>
 
@@ -366,7 +360,7 @@ export const AuthSelectorComponent: React.FC<AuthSelectorComponentProps> = ({ ap
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-bolt-elements-borderColor">
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button
               variant="outline"
               size="sm"

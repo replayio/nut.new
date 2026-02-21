@@ -52,7 +52,7 @@ export const IconButton = memo(
         <button
           ref={ref}
           className={classNames(
-            'flex items-center justify-center text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 enabled:hover:text-bolt-elements-textPrimary rounded-xl p-2 enabled:hover:bg-bolt-elements-background-depth-3 disabled:cursor-not-allowed transition-all duration-200 shadow-sm enabled:hover:shadow-md enabled:hover:scale-105 border border-bolt-elements-borderColor group',
+            'flex items-center justify-center text-muted-foreground bg-muted enabled:hover:text-foreground rounded-xl p-2 enabled:hover:bg-accent disabled:cursor-not-allowed transition-all duration-200 shadow-sm enabled:hover:shadow-md enabled:hover:scale-105 border border-border group',
             {
               [classNames('opacity-50', disabledClassName)]: disabled,
             },

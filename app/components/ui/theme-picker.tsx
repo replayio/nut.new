@@ -85,21 +85,21 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
             disabled={disabled}
             className={cn(
               'flex min-h-[40px] w-full items-center justify-between rounded-lg border px-3 py-2',
-              'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor',
-              'hover:border-bolt-elements-borderColorActive',
-              'focus:outline-none focus:ring-1 focus:ring-bolt-elements-borderColorActive',
+              'bg-muted border-border',
+              'hover:border-ring',
+              'focus:outline-none focus:ring-1 focus:ring-ring',
               disabled && 'opacity-50 cursor-not-allowed',
               className,
             )}
           >
             <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-              <span className="text-sm text-bolt-elements-textPrimary truncate text-left">{displayTitle}</span>
+              <span className="text-sm text-foreground truncate text-left">{displayTitle}</span>
               {displayColors.length > 0 && (
                 <div className="flex gap-1.5">
                   {displayColors.slice(0, 4).map((color, idx) => (
                     <div
                       key={idx}
-                      className="w-5 h-5 rounded border border-bolt-elements-borderColor"
+                      className="w-5 h-5 rounded border border-border"
                       style={{ backgroundColor: color }}
                     />
                   ))}
@@ -107,10 +107,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
               )}
             </div>
             <ChevronDown
-              className={cn(
-                'h-4 w-4 text-bolt-elements-textSecondary transition-transform flex-shrink-0',
-                isOpen && 'rotate-180',
-              )}
+              className={cn('h-4 w-4 text-muted-foreground transition-transform flex-shrink-0', isOpen && 'rotate-180')}
             />
           </button>
         </PopoverTrigger>
@@ -127,13 +124,10 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
               <CommandEmpty>No themes found.</CommandEmpty>
               <CommandGroup>
                 {showCustomOption && (
-                  <CommandItem
-                    onSelect={() => {}}
-                    className={cn('cursor-default', isCustom && 'bg-bolt-elements-background-depth-2')}
-                  >
+                  <CommandItem onSelect={() => {}} className={cn('cursor-default', isCustom && 'bg-muted')}>
                     <div className="flex flex-col gap-2 w-full">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-medium text-sm text-bolt-elements-textPrimary">Custom</span>
+                        <span className="font-medium text-sm text-foreground">Custom</span>
                         {isCustom && <Check className="h-4 w-4" />}
                       </div>
                       {customColors.length > 0 && (
@@ -141,7 +135,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
                           {customColors.slice(0, 4).map((color, idx) => (
                             <div
                               key={idx}
-                              className="w-5 h-5 rounded border border-bolt-elements-borderColor"
+                              className="w-5 h-5 rounded border border-border"
                               style={{ backgroundColor: color }}
                             />
                           ))}
@@ -161,9 +155,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
                     >
                       <div className="flex flex-col gap-2 w-full">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium text-sm text-bolt-elements-textPrimary truncate">
-                            {theme.title}
-                          </span>
+                          <span className="font-medium text-sm text-foreground truncate">{theme.title}</span>
                           {isSelected && <Check className="h-4 w-4" />}
                         </div>
                         {theme.colors && theme.colors.length > 0 && (
@@ -171,7 +163,7 @@ export const ThemePicker = React.forwardRef<HTMLButtonElement, ThemePickerProps>
                             {theme.colors.slice(0, 4).map((color, idx) => (
                               <div
                                 key={idx}
-                                className="w-5 h-5 rounded border border-bolt-elements-borderColor"
+                                className="w-5 h-5 rounded border border-border"
                                 style={{ backgroundColor: color }}
                               />
                             ))}

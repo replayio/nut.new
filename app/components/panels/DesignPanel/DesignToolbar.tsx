@@ -23,7 +23,7 @@ export const DesignToolbar = () => {
   };
 
   return (
-    <div className="bg-bolt-elements-background-depth-1 px-4 py-3 flex items-center justify-between">
+    <div className="bg-card px-4 py-3 flex items-center justify-between">
       <Button
         onClick={
           hasChanges
@@ -35,9 +35,9 @@ export const DesignToolbar = () => {
         }
         className={classNames(
           'flex-1 h-10 text-sm font-medium rounded-full transition-all duration-200',
-          'border border-bolt-elements-borderColor',
-          'bg-background text-bolt-elements-textPrimary',
-          'hover:bg-bolt-elements-background-depth-2',
+          'border border-border',
+          'bg-background text-foreground',
+          'hover:bg-muted',
         )}
         variant="outline"
       >

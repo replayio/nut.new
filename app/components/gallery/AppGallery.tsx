@@ -229,7 +229,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
                 </div>
               </div>
             </DialogDescription>
-            <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
+            <div className="px-5 pb-4 bg-muted flex gap-2 justify-end">
               <DialogButton type="secondary" onClick={closeDialog}>
                 Cancel
               </DialogButton>
@@ -259,7 +259,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-foreground">My Recent Projects</h2>
-          <Button variant="outline" size="sm" className="gap-2 rounded-full" onClick={handleViewAll}>
+          <Button variant="outline" size="sm" className="gap-2 rounded-full text-foreground" onClick={handleViewAll}>
             View All
             <ArrowRight className="w-4 h-4" />
           </Button>

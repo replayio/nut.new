@@ -28,7 +28,7 @@ export function ChatDescription() {
       {editing ? (
         <input
           type="text"
-          className="w-full h-9 px-3 py-1 text-sm bg-background text-bolt-elements-textPrimary rounded-md border border-input shadow-sm focus:border-bolt-elements-focus focus:outline-none focus:ring-1 focus:ring-bolt-elements-focus/20 transition-all"
+          className="w-full h-9 px-3 py-1 text-sm bg-background text-foreground rounded-md border border-input shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring/20 transition-all"
           autoFocus
           value={currentTitle}
           onChange={handleChange}
@@ -38,8 +38,8 @@ export function ChatDescription() {
         />
       ) : (
         <div
-          className={`w-full h-9 px-3 flex items-center text-sm font-semibold text-bolt-elements-textHeading transition-all min-w-0 ${
-            canEdit ? 'cursor-text hover:bg-bolt-elements-background-depth-2' : ''
+          className={`w-full h-9 px-3 flex items-center text-sm font-semibold text-foreground transition-all min-w-0 ${
+            canEdit ? 'cursor-text hover:bg-muted' : ''
           }`}
           onClick={canEdit ? toggleEditMode : undefined}
         >

@@ -39,8 +39,8 @@ export const JumpToBottom: React.FC<JumpToBottomProps> = ({ onClick, position, v
         className={classNames(
           'group flex items-center justify-center',
           'w-10 h-10 rounded-full',
-          'bg-bolt-elements-background-depth-2 border border-gray-500',
-          'text-bolt-elements-textPrimary hover:text-white',
+          'bg-muted border border-gray-500',
+          'text-foreground hover:text-white',
           'hover:border-white hover:border-1',
           'transition-all duration-200 shadow-lg',
           'focus:outline-none focus:ring-2 focus:ring-gray-700',

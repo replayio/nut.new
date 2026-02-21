@@ -52,27 +52,25 @@ export const FaqSection = () => {
         {faqItems.map((item, index) => (
           <div
             key={index}
-            className="rounded-xl border border-bolt-elements-borderColor overflow-hidden transition-all duration-200 hover:border-bolt-elements-borderColor border-opacity-100 shadow-sm"
+            className="rounded-xl border border-border overflow-hidden transition-all duration-200 hover:border-border shadow-sm"
           >
             <button
               onClick={() => toggleExpanded(index)}
-              className="w-full px-6 py-4 text-left flex items-center justify-between bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 transition-colors duration-200"
+              className="w-full px-6 py-4 text-left flex items-center justify-between bg-card hover:bg-muted transition-colors duration-200"
             >
-              <span className="text-bolt-elements-textHeading font-medium pr-4">{item.question}</span>
+              <span className="text-foreground font-medium pr-4">{item.question}</span>
               <div
                 className={classNames('flex-shrink-0 transition-transform duration-200', {
                   'rotate-180': expandedItem === index,
                 })}
               >
-                <ChevronDown className="text-bolt-elements-textSecondary" size={16} />
+                <ChevronDown className="text-muted-foreground" size={16} />
               </div>
             </button>
 
             {expandedItem === index && (
-              <div className="px-6 pb-4 border-t border-bolt-elements-borderColor border-opacity-30 bg-bolt-elements-background-depth-2">
-                <div className="pt-4 text-bolt-elements-textSecondary leading-relaxed whitespace-pre-line">
-                  {item.answer}
-                </div>
+              <div className="px-6 pb-4 border-t border-border/30 bg-muted">
+                <div className="pt-4 text-muted-foreground leading-relaxed whitespace-pre-line">{item.answer}</div>
               </div>
             )}
           </div>

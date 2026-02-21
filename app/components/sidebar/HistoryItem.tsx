@@ -31,7 +31,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
     <form onSubmit={handleSubmit} className="flex-1 flex items-center gap-2 min-w-0">
       <input
         type="text"
-        className="flex-1 bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary rounded-md py-2 text-sm border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+        className="flex-1 bg-card text-foreground rounded-md py-2 text-sm border border-border focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
         autoFocus
         value={currentTitle}
         onChange={handleChange}
@@ -40,7 +40,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       />
       <button
         type="submit"
-        className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors p-1.5 rounded-md hover:bg-bolt-elements-background-depth-1 flex-shrink-0"
+        className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-card flex-shrink-0"
         onMouseDown={handleSubmit}
       >
         <Check size={16} />
@@ -51,10 +51,9 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
   return (
     <div
       className={classNames(
-        'group rounded-md text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 hover:border hover:border-bolt-elements-borderColor flex items-center px-3 py-2 transition-colors border border-transparent',
+        'group rounded-md text-muted-foreground hover:text-foreground hover:bg-muted hover:border hover:border-border flex items-center px-3 py-2 transition-colors border border-transparent',
         {
-          'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor':
-            isActiveChat,
+          'text-foreground bg-card border border-border': isActiveChat,
         },
       )}
     >
@@ -63,7 +62,7 @@ export function HistoryItem({ item, onDelete, onDuplicate }: HistoryItemProps) {
       ) : (
         <a href={`/app/${item.id}`} className="flex items-center gap-2 w-full min-w-0">
           <span className="font-medium text-sm truncate flex-1 min-w-0">{item.title}</span>
-          <div className="flex items-center gap-1 text-bolt-elements-textSecondary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <div className="flex items-center gap-1 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
             {onDuplicate && (
               <ChatActionButton toolTipContent="Duplicate chat" icon={Copy} onClick={() => onDuplicate?.(item.id)} />
             )}
@@ -118,7 +117,7 @@ const ChatActionButton = forwardRef(
           <button
             ref={ref}
             type="button"
-            className={`p-1.5 rounded-md text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors ${className ? className : ''}`}
+            className={`p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors ${className ? className : ''}`}
             onClick={onClick}
           >
             <IconComponent size={16} />

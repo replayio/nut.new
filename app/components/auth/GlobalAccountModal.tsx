@@ -24,8 +24,8 @@ export function GlobalAccountModal() {
         className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1001]"
         onClick={() => accountModalStore.close()}
       >
-        <div className="bg-bolt-elements-background-depth-1 rounded-md p-6 border border-bolt-elements-borderColor">
-          <div className="text-bolt-elements-textPrimary">Loading...</div>
+        <div className="bg-card rounded-md p-6 border border-border">
+          <div className="text-foreground">Loading...</div>
         </div>
       </div>
     );
@@ -41,22 +41,22 @@ export function GlobalAccountModal() {
       onClick={() => accountModalStore.close()}
     >
       <div
-        className="bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor max-w-6xl w-full mx-4 max-h-[90vh] flex overflow-hidden"
+        className="bg-card rounded-md border border-border max-w-6xl w-full mx-4 max-h-[90vh] flex overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Sidebar with Tabs - Hidden on mobile when content is shown */}
         {showTabSelection && (
           <div
-            className={`bg-bolt-elements-background-depth-1 rounded-l-md border-r border-bolt-elements-borderColor flex flex-col ${isSmallViewport ? 'w-full' : 'w-64'}`}
+            className={`bg-card rounded-l-md border-r border-border flex flex-col ${isSmallViewport ? 'w-full' : 'w-64'}`}
           >
             {/* Header with close/back button */}
-            <div className="p-4 border-b border-bolt-elements-borderColor flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-bolt-elements-textHeading">Settings</h2>
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-foreground">Settings</h2>
               <Button
                 onClick={() => accountModalStore.close()}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 text-foreground hover:text-foreground/80"
                 aria-label="Close modal"
               >
                 <X size={18} />
@@ -97,7 +97,7 @@ export function GlobalAccountModal() {
           <div className={`flex flex-col overflow-hidden ${isSmallViewport ? 'w-full' : 'flex-1'}`}>
             {/* Mobile: Back to Settings button */}
             {isSmallViewport && (
-              <div className="p-4 border-b border-bolt-elements-borderColor flex items-center gap-3 justify-between">
+              <div className="p-4 border-b border-border flex items-center gap-3 justify-between">
                 <Button onClick={() => accountModalStore.activeTab.set(null)} variant="ghost" className="gap-2">
                   <ArrowLeft size={18} />
                   <span className="font-medium">Settings</span>
@@ -106,7 +106,7 @@ export function GlobalAccountModal() {
                   onClick={() => accountModalStore.close()}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 text-foreground hover:text-foreground/80"
                   aria-label="Close modal"
                 >
                   <X size={18} />

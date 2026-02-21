@@ -84,7 +84,7 @@ const ProgressStatus = () => {
             {Array.from({ length: 3 }).map((_, index) => (
               <motion.div
                 key={index}
-                className="w-1.5 h-1.5 rounded-full bg-bolt-elements-textSecondary/60"
+                className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60"
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.4, 1, 0.4],

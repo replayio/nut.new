@@ -82,7 +82,7 @@ const SortableBadge = ({ id, label, onRemove, disabled }: SortableBadgeProps) =>
     >
       <button
         type="button"
-        className="cursor-grab active:cursor-grabbing text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
         {...attributes}
         {...listeners}
         onClick={(e) => e.stopPropagation()}
@@ -98,7 +98,7 @@ const SortableBadge = ({ id, label, onRemove, disabled }: SortableBadgeProps) =>
             e.preventDefault();
             onRemove();
           }}
-          className="ml-1 rounded-full hover:bg-bolt-elements-background-depth-4 p-0.5"
+          className="ml-1 rounded-full hover:bg-accent/80 p-0.5"
         >
           <X className="h-3 w-3" />
         </button>
@@ -234,9 +234,9 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
             disabled={disabled}
             className={cn(
               'flex min-h-[40px] w-full items-center justify-between rounded-lg border px-3 py-2',
-              'bg-bolt-elements-background-depth-2 border-bolt-elements-borderColor',
-              'hover:border-bolt-elements-borderColorActive',
-              'focus:outline-none focus:ring-1 focus:ring-bolt-elements-borderColorActive',
+              'bg-muted border-border',
+              'hover:border-ring',
+              'focus:outline-none focus:ring-1 focus:ring-ring',
               disabled && 'opacity-50 cursor-not-allowed',
               className,
             )}
@@ -262,7 +262,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                   </SortableContext>
                 </DndContext>
               ) : (
-                <span className="text-sm text-bolt-elements-textSecondary">{placeholder}</span>
+                <span className="text-sm text-muted-foreground">{placeholder}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                       e.stopPropagation();
                       handleClear();
                     }}
-                    className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -282,7 +282,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 </>
               )}
               <ChevronDown
-                className={cn('h-4 w-4 text-bolt-elements-textSecondary transition-transform', isOpen && 'rotate-180')}
+                className={cn('h-4 w-4 text-muted-foreground transition-transform', isOpen && 'rotate-180')}
               />
             </div>
           </button>
@@ -301,7 +301,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                   <CommandItem onSelect={toggleAll} className="cursor-pointer">
                     <div
                       className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-bolt-elements-borderColor',
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-border',
                         selectedValues.length === options.filter((o) => !o.disabled).length
                           ? 'bg-blue-500 text-white border-blue-500'
                           : 'opacity-50',
@@ -329,13 +329,13 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                     >
                       <div
                         className={cn(
-                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-bolt-elements-borderColor',
+                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-border',
                           isSelected ? 'bg-blue-500 text-white border-blue-500' : 'opacity-50',
                         )}
                       >
                         {isSelected && <Check className="h-3 w-3" />}
                       </div>
-                      {option.icon && <option.icon className="mr-2 h-4 w-4 text-bolt-elements-textSecondary" />}
+                      {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                       <span style={{ fontFamily: option.value }}>{option.label}</span>
                     </CommandItem>
                   );

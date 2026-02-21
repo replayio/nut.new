@@ -50,9 +50,9 @@ export function AttachmentDisplay({ attachment }: AttachmentDisplayProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 p-3 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor">
-        <Loader2 className="animate-spin text-bolt-elements-textSecondary" size={16} />
-        <span className="text-sm text-bolt-elements-textSecondary">Loading image...</span>
+      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-border">
+        <Loader2 className="animate-spin text-muted-foreground" size={16} />
+        <span className="text-sm text-muted-foreground">Loading image...</span>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export function AttachmentDisplay({ attachment }: AttachmentDisplayProps) {
       <div className="relative group">
         <img
           src={dataURL}
-          className="max-w-full h-auto rounded-xl border border-bolt-elements-borderColor shadow-lg transition-all duration-200 group-hover:shadow-xl"
+          className="max-w-full h-auto rounded-xl border border-border shadow-lg transition-all duration-200 group-hover:shadow-xl"
           style={{ maxHeight: '512px', objectFit: 'contain' }}
           alt={attachment.fileName}
         />

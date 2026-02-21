@@ -122,7 +122,7 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
       case AppFeatureStatus.Failed:
         return <AlertCircle className="text-red-500 flex-shrink-0" size={14} />;
       default:
-        return <Circle className="text-bolt-elements-textSecondary flex-shrink-0" size={14} />;
+        return <Circle className="text-muted-foreground flex-shrink-0" size={14} />;
     }
   };
 
@@ -139,13 +139,13 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
       <div className="space-y-3">
         {/* Overall Progress Bar */}
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-bolt-elements-textSecondary">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>Progress</span>
             <span>
               {statusCounts.completed} / {totalFeatures} complete
             </span>
           </div>
-          <div className="w-full h-1.5 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-accent rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000 rounded-full"
               style={{
@@ -162,8 +162,8 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
               <div key={index} className="flex items-center gap-2 py-1">
                 {getFeatureStatusIcon(feature.status)}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">{feature.name}</div>
-                  <div className="flex items-center gap-2 text-xs text-bolt-elements-textSecondary">
+                  <div className="text-sm font-medium text-foreground truncate">{feature.name}</div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {feature.componentNames && feature.componentNames.length > 0 && (
                       <span>{feature.componentNames.length} components</span>
                     )}
@@ -178,8 +178,8 @@ export const FeaturesCard: React.FC<FeaturesCardProps> = ({ appSummary, onViewDe
           </div>
           {hasMore && (
             <div className="relative mt-2">
-              <div className="absolute inset-x-0 -top-3 h-6 bg-gradient-to-t from-bolt-elements-background-depth-1 via-bolt-elements-background-depth-1/80 to-transparent pointer-events-none" />
-              <div className="flex items-center justify-center gap-2 py-2 text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-1">
+              <div className="absolute inset-x-0 -top-3 h-6 bg-gradient-to-t from-card via-card/80 to-transparent pointer-events-none" />
+              <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground bg-card">
                 <MoreHorizontal className="flex-shrink-0" size={14} />
                 <span>View all {totalFeatures} features</span>
               </div>

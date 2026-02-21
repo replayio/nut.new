@@ -38,13 +38,13 @@ export function TopNav() {
           variant="ghost"
           size="icon"
           onClick={handleBack}
-          className="h-9 w-9 shrink-0 text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+          className="h-9 w-9 shrink-0 text-foreground hover:bg-accent"
         >
           <ArrowLeft size={16} />
         </Button>
 
         {/* Separator */}
-        <div className="w-px h-8 bg-bolt-elements-borderColor shrink-0" />
+        <div className="w-px h-8 bg-border shrink-0" />
         <div className="flex-1 min-w-0 py-1">
           <ChatDescription />
         </div>
@@ -59,7 +59,7 @@ export function TopNav() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 <MoreHorizontal size={16} />
               </Button>

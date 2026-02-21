@@ -463,7 +463,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ResizablePanelGroup
                 key={panelSizeKey}
                 direction="horizontal"
-                className="w-full flex-1 border rounded-md border-bolt-elements-borderColor bg-background"
+                className="w-full flex-1 border rounded-md border-border bg-background"
                 onLayout={(sizes) => {
                   if (sizes[0] !== undefined) {
                     setChatPanelSize(sizes[0]);

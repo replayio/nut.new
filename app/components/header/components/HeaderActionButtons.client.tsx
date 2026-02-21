@@ -21,7 +21,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
     <TooltipProvider>
       <div className="flex">
         {!isSmallViewport && (
-          <div className="flex bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl overflow-hidden transition-all duration-200 hover:border-bolt-elements-focus/30">
+          <div className="flex bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-ring/30">
             <Button
               active={showChat}
               disabled={!canHideChat || isSmallViewport}
@@ -35,7 +35,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
                 <div className="i-bolt:chat text-xl" />
               </WithTooltip>
             </Button>
-            <div className="w-[1px] bg-bolt-elements-borderColor/50" />
+            <div className="w-[1px] bg-border/50" />
             <Button
               active={showWorkbench}
               onClick={() => {
@@ -68,10 +68,10 @@ function Button({ active = false, disabled = false, children, onClick }: ButtonP
   return (
     <button
       className={classNames('flex items-center px-4 py-2 relative group transition-all duration-200', {
-        'bg-transparent hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:scale-105':
+        'bg-transparent hover:bg-muted text-muted-foreground hover:text-foreground hover:scale-105':
           !active && !disabled,
         'bg-blue-500/10 text-blue-500 shadow-inner': active && !disabled,
-        'bg-transparent text-bolt-elements-textTertiary cursor-not-allowed opacity-50': disabled,
+        'bg-transparent text-muted-foreground cursor-not-allowed opacity-50': disabled,
       })}
       onClick={onClick}
       disabled={disabled}

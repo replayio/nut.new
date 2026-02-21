@@ -85,7 +85,7 @@ export const SecretsComponent: React.FC<SecretsComponentProps> = ({ appSummary }
           onClick={() => secretsModalStore.open()}
           variant={allConfigured ? 'outline' : 'default'}
           size="sm"
-          className={`rounded-full ${!allConfigured ? 'bg-foreground text-background hover:bg-foreground/90' : ''}`}
+          className={`rounded-full ${!allConfigured ? '!bg-foreground !text-background hover:!bg-foreground/90' : ''}`}
         >
           {allConfigured ? 'Manage Keys' : 'Configure Keys'}
         </Button>

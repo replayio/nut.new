@@ -23,7 +23,7 @@ export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCance
       onClick={handleOverlayClick}
     >
       <div
-        className="bg-bolt-elements-background-depth-1 rounded-3xl border border-red-500/20 shadow-3xl max-w-md w-full mx-4 overflow-hidden"
+        className="bg-card rounded-3xl border border-red-500/20 shadow-3xl max-w-md w-full mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -36,17 +36,17 @@ export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCance
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-3 leading-tight">Cancel Subscription?</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-3 leading-tight">Cancel Subscription?</h2>
 
           {/* Subtitle */}
-          <p className="text-bolt-elements-textSecondary font-medium">⚠️ Please confirm this action</p>
+          <p className="text-muted-foreground font-medium">⚠️ Please confirm this action</p>
         </div>
 
         {/* Content */}
         <div className="px-8 pb-8">
           {/* Message */}
           <div className="text-center mb-8">
-            <p className="text-bolt-elements-textPrimary leading-relaxed">
+            <p className="text-foreground leading-relaxed">
               Your subscription will remain active until the end of your current billing period.
             </p>
           </div>
@@ -55,7 +55,7 @@ export function ConfirmCancelModal({ isOpen, onConfirm, onCancel }: ConfirmCance
           <div className="flex gap-4">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 px-6 rounded-2xl font-semibold text-bolt-elements-textPrimary bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 hover:scale-105"
+              className="flex-1 py-3 px-6 rounded-2xl font-semibold text-foreground bg-muted border border-border hover:bg-accent transition-all duration-200 hover:scale-105"
             >
               Keep Subscription
             </button>

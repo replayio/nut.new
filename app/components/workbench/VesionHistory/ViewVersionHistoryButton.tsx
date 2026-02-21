@@ -23,7 +23,7 @@ const ViewVersionHistoryButton = () => {
       <WithTooltip tooltip="View version history">
         <button
           onClick={handleClick}
-          className="flex items-center justify-center p-2.5 rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
+          className="flex items-center justify-center p-2.5 rounded-xl bg-muted text-muted-foreground hover:bg-accent hover:text-foreground border border-border transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           title="View version history"
         >
           <List className="transition-transform duration-200 group-hover:scale-110" size={20} strokeWidth={2.5} />

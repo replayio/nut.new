@@ -54,18 +54,18 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
   return (
     <>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-bolt-elements-borderColor border-opacity-50">
-          <Key className="text-bolt-elements-textPrimary" size={24} />
+        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
+          <Key className="text-foreground" size={24} />
         </div>
-        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Reset Your Password</h2>
-        <p className="text-bolt-elements-textSecondary mt-2 leading-relaxed">
+        <h2 className="text-3xl font-bold text-foreground">Reset Your Password</h2>
+        <p className="text-muted-foreground mt-2 leading-relaxed">
           Enter your email address and we'll send you a secure link to reset your password.
         </p>
       </div>
 
       <form onSubmit={handlePasswordReset} className="space-y-6">
         <div>
-          <label htmlFor="reset-email" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="reset-email" className="block mb-2 text-sm font-semibold text-foreground">
             Email Address
           </label>
           <input
@@ -89,8 +89,8 @@ export function PasswordResetForm({ onBack, onSuccess, onError }: PasswordResetF
         </Button>
       </form>
 
-      <div className="mt-8 text-center p-4 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor border-opacity-30">
-        <p className="text-bolt-elements-textSecondary text-sm">
+      <div className="mt-8 text-center p-4 bg-card rounded-md border border-border/30">
+        <p className="text-muted-foreground text-sm">
           Remember your password?{' '}
           <Button onClick={onBack} variant="link" className="p-0 h-auto font-semibold">
             Sign In

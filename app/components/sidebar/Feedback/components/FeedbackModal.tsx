@@ -61,10 +61,10 @@ const GlobalFeedbackModal = () => {
       className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 outline-none max-w-2xl w-full mx-4"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[1001]"
     >
-      <div className="bg-bolt-elements-background-depth-1 rounded-2xl p-6 sm:p-8 border border-bolt-elements-borderColor border-opacity-50 shadow-2xl hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative">
+      <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border/50 shadow-2xl hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative">
         <button
           onClick={feedbackModalStore.close}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-muted border border-border hover:bg-accent transition-all duration-200 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-sm hover:shadow-md hover:scale-105 group"
           title="Close"
         >
           <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
@@ -76,15 +76,15 @@ const GlobalFeedbackModal = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-rose-500/10 to-pink-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-500/20 shadow-lg">
                 <CheckCircle className="text-rose-500" size={32} />
               </div>
-              <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Feedback Submitted</h2>
-              <p className="text-bolt-elements-textSecondary text-lg bg-bolt-elements-background-depth-2 bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-bolt-elements-borderColor border-opacity-30">
+              <h2 className="text-3xl font-bold mb-4 text-foreground">Feedback Submitted</h2>
+              <p className="text-muted-foreground text-lg bg-muted bg-opacity-30 px-4 py-2 rounded-xl inline-block border border-border border-opacity-30">
                 Thank you for your feedback! We appreciate your input.
               </p>
             </div>
             <div className="flex justify-center">
               <button
                 onClick={feedbackModalStore.close}
-                className="px-6 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor group"
+                className="px-6 py-3 bg-muted text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-border group"
               >
                 <span className="transition-transform duration-200 group-hover:scale-105">Close</span>
               </button>
@@ -96,17 +96,17 @@ const GlobalFeedbackModal = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-lg">
                 <MessageCircle className="text-blue-500" size={32} />
               </div>
-              <h2 className="text-3xl font-bold mb-4 text-bolt-elements-textHeading">Share Your Feedback</h2>
-              <p className="text-bolt-elements-textSecondary text-lg">
+              <h2 className="text-3xl font-bold mb-4 text-foreground">Share Your Feedback</h2>
+              <p className="text-muted-foreground text-lg">
                 Let us know how Replay Builder is doing or report any issues you've encountered.
               </p>
             </div>
 
             <div className="mb-6">
-              <label className="block mb-3 text-sm font-semibold text-bolt-elements-textPrimary">Your Feedback:</label>
+              <label className="block mb-3 text-sm font-semibold text-foreground">Your Feedback:</label>
               <textarea
                 name="description"
-                className="w-full p-4 border rounded-xl bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary border-bolt-elements-borderColor border-opacity-50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 min-h-[140px] transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full p-4 border rounded-xl bg-muted text-foreground border-border/50 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 min-h-[140px] transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 value={formData.description}
                 placeholder="Tell us what you think or describe any issues..."
                 onChange={(e) => {
@@ -118,12 +118,12 @@ const GlobalFeedbackModal = () => {
               />
             </div>
 
-            <div className="flex items-center gap-3 mb-8 p-4 bg-bolt-elements-background-depth-2 bg-opacity-30 rounded-xl border border-bolt-elements-borderColor border-opacity-30">
+            <div className="flex items-center gap-3 mb-8 p-4 bg-muted bg-opacity-30 rounded-xl border border-border border-opacity-30">
               <input
                 type="checkbox"
                 id="share-project"
                 name="share"
-                className="w-4 h-4 bg-bolt-elements-background-depth-2 text-blue-500 rounded border-bolt-elements-borderColor focus:ring-2 focus:ring-blue-500/50 transition-colors"
+                className="w-4 h-4 bg-muted text-blue-500 rounded border-border focus:ring-2 focus:ring-blue-500/50 transition-colors"
                 checked={formData.share}
                 onChange={(e) => {
                   feedbackModalStore.setFormData({
@@ -132,7 +132,7 @@ const GlobalFeedbackModal = () => {
                   });
                 }}
               />
-              <label htmlFor="share-project" className="text-sm text-bolt-elements-textSecondary font-medium">
+              <label htmlFor="share-project" className="text-sm text-muted-foreground font-medium">
                 Share project with the Replay team (helps us diagnose issues)
               </label>
             </div>
@@ -147,17 +147,17 @@ const GlobalFeedbackModal = () => {
               </button>
               <button
                 onClick={feedbackModalStore.close}
-                className="px-6 py-3 bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-3 hover:text-bolt-elements-textPrimary rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-bolt-elements-borderColor group"
+                className="px-6 py-3 bg-muted text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 border border-border group"
               >
                 <span className="transition-transform duration-200 group-hover:scale-105">Cancel</span>
               </button>
             </div>
 
-            <div className="text-center border-t border-bolt-elements-borderColor border-opacity-50 pt-8">
+            <div className="text-center border-t border-border/50 pt-8">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="flex-1 h-px bg-bolt-elements-borderColor/30"></div>
-                <span className="text-bolt-elements-textSecondary font-medium">Or</span>
-                <div className="flex-1 h-px bg-bolt-elements-borderColor/30"></div>
+                <div className="flex-1 h-px bg-border/30"></div>
+                <span className="text-muted-foreground font-medium">Or</span>
+                <div className="flex-1 h-px bg-border/30"></div>
               </div>
               <a
                 className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-all duration-200 cursor-pointer font-semibold bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-xl border border-blue-500/20 hover:border-blue-500/30 shadow-sm hover:shadow-md hover:scale-105 group"

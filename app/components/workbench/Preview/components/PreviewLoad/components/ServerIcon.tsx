@@ -21,7 +21,7 @@ export function ServerIcon() {
           repeatType: 'reverse',
         }}
       >
-        <Server size={24} className="h-16 w-16 text-bolt-elements-textPrimary mb-8" />
+        <Server size={24} className="h-16 w-16 text-foreground mb-8" />
       </motion.div>
 
       {/* Magical sparks effect */}
