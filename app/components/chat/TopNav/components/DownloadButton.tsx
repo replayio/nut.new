@@ -12,11 +12,11 @@ import { accountModalStore } from '~/lib/stores/accountModal';
 import { Download, Crown, X } from '~/components/ui/Icon';
 import ReactModal from 'react-modal';
 
-interface TopNavDownloadButtonProps {
+interface DownloadButtonProps {
   asMenuItem?: boolean;
 }
 
-export const TopNavDownloadButton = forwardRef<HTMLButtonElement, TopNavDownloadButtonProps>(
+export const DownloadButton = forwardRef<HTMLButtonElement, DownloadButtonProps>(
   ({ asMenuItem, ...props }, ref) => {
     const user = useStore(userStore);
     const stripeSubscription = useStore(subscriptionStore.subscription);

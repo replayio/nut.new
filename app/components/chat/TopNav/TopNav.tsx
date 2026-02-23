@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { chatStore } from '~/lib/stores/chat';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { ShareButton } from './ShareButton';
-import { TopNavDownloadButton } from './TopNavDownloadButton';
-import { TopNavDeployButton } from './TopNavDeployButton';
+import { ShareButton } from './components/ShareButton';
+import { DownloadButton } from './components/DownloadButton';
+import { DeployButton } from './components/DeployChat/DeployButton';
 import { ArrowLeft, MoreHorizontal, Bug } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
 import { ClientAuth } from '~/components/auth/ClientAuth';
@@ -97,7 +97,7 @@ export function TopNav() {
                 </DropdownMenuItem>
               )}
               {appId && <ShareButton asMenuItem />}
-              {repositoryId && <TopNavDownloadButton asMenuItem />}
+              {repositoryId && <DownloadButton asMenuItem />}
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
@@ -105,10 +105,10 @@ export function TopNav() {
           <>
             <DebugAppButton />
             {appId && <ShareButton />}
-            {repositoryId && <TopNavDownloadButton />}
+            {repositoryId && <DownloadButton />}
           </>
         )}
-        {repositoryId && appId && <TopNavDeployButton />}
+        {repositoryId && appId && <DeployButton />}
         {isSmallViewport && <ClientAuth />}
       </div>
     </nav>

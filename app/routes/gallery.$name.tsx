@@ -58,7 +58,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/ui/accordion';
 import WithTooltip from '~/components/ui/Tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { ReferenceAppStatusIndicator } from '~/components/chat/BaseChat/components/AppTemplates/ReferenceAppStatusIndicator';
+import { ReferenceAppStatusIndicator } from '~/components/gallery/components/ReferenceAppStatusIndicator';
 import { Dialog, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 
 export const meta: MetaFunction = (args) => {
@@ -1211,7 +1211,7 @@ function GalleryPageContent() {
                                   className={classNames(
                                     'flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all min-w-[150px] truncate border-2',
                                     idx === carouselIndex
-                                      ? 'border-black bg-white text-foreground shadow-sm'
+                                      ? 'border-black bg-white text-black shadow-sm'
                                       : 'border-transparent bg-card text-muted-foreground hover:bg-muted',
                                   )}
                                 >
@@ -1219,7 +1219,7 @@ function GalleryPageContent() {
                                     <>
                                       <SquareMousePointer
                                         size={18}
-                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
+                                        className={idx === carouselIndex ? 'text-black' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">Live App</span>
                                     </>
@@ -1227,7 +1227,7 @@ function GalleryPageContent() {
                                     <>
                                       <AppWindowMac
                                         size={18}
-                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
+                                        className={idx === carouselIndex ? 'text-black' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">{item.feature.name}</span>
                                     </>

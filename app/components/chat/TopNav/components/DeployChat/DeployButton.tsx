@@ -9,9 +9,14 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { database } from '~/lib/persistence/apps';
 import { downloadRepository } from '~/lib/replay/Deploy';
 import { ChevronDown, Check, Loader2 } from '~/components/ui/Icon';
-import { DeployStatus } from '~/components/header/components/DeployChat/DeployChatButton';
 
-export function TopNavDeployButton() {
+export enum DeployStatus {
+  NotStarted,
+  Started,
+  Succeeded,
+}
+
+export function DeployButton() {
   const status = useStore(deployModalStore.status);
   const appId = useStore(chatStore.currentAppId);
 
