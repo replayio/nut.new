@@ -822,7 +822,7 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
+                        className="rounded-full !text-foreground border-accent hover:bg-accent shadow-sm whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2" />
                         <span>Be an early adopter</span>
@@ -833,7 +833,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleDownloadCode}
                       variant="outline"
-                      className="rounded-full whitespace-nowrap"
+                      className="rounded-full whitespace-nowrap !text-foreground border-accent shadow-sm hover:bg-accent"
                       disabled={!repositoryId}
                     >
                       <Download size={18} />
@@ -1009,7 +1009,7 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
+                        className="rounded-full !text-foreground border-accent hover:bg-accent shadow-sm whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2" />
                         <span>Be an early adopter</span>
@@ -1020,7 +1020,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleDownloadCode}
                       variant="outline"
-                      className="rounded-full whitespace-nowrap"
+                      className="rounded-full whitespace-nowrap !text-foreground border-accent shadow-sm hover:bg-accent"
                       disabled={!repositoryId}
                     >
                       <Download size={18} />
