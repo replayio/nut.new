@@ -158,13 +158,13 @@ export const PermissionsSelectionComponent: React.FC = () => {
   const getGroupIcon = (group: PermissionGroup): JSX.Element => {
     switch (group.accessor) {
       case AppAccessorKind.User:
-        return <User className="text-bolt-elements-textSecondary" size={16} />;
+        return <User className="text-muted-foreground" size={16} />;
       case AppAccessorKind.Domain:
-        return <Users className="text-bolt-elements-textSecondary" size={16} />;
+        return <Users className="text-muted-foreground" size={16} />;
       case AppAccessorKind.Everyone:
-        return <Globe className="text-bolt-elements-textSecondary" size={16} />;
+        return <Globe className="text-muted-foreground" size={16} />;
       default:
-        return <Info className="text-bolt-elements-textSecondary" size={16} />;
+        return <Info className="text-muted-foreground" size={16} />;
     }
   };
 
@@ -366,38 +366,38 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
   const getAccessIcon = (access: AppAccessKind): JSX.Element => {
     const icons: Record<AppAccessKind, JSX.Element> = {
-      [AppAccessKind.AllPermissions]: <KeyRound className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.Copy]: <Copy className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.View]: <Eye className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.SendMessage]: <Send className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.SetTitle]: <Pencil className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.Delete]: <Trash2 className="text-bolt-elements-textSecondary" size={14} />,
-      [AppAccessKind.SetPermissions]: <KeyRound className="text-bolt-elements-textSecondary" size={14} />,
+      [AppAccessKind.AllPermissions]: <KeyRound className="text-muted-foreground" size={14} />,
+      [AppAccessKind.Copy]: <Copy className="text-muted-foreground" size={14} />,
+      [AppAccessKind.View]: <Eye className="text-muted-foreground" size={14} />,
+      [AppAccessKind.SendMessage]: <Send className="text-muted-foreground" size={14} />,
+      [AppAccessKind.SetTitle]: <Pencil className="text-muted-foreground" size={14} />,
+      [AppAccessKind.Delete]: <Trash2 className="text-muted-foreground" size={14} />,
+      [AppAccessKind.SetPermissions]: <KeyRound className="text-muted-foreground" size={14} />,
     };
-    return icons[access] || <Info className="text-bolt-elements-textSecondary" size={14} />;
+    return icons[access] || <Info className="text-muted-foreground" size={14} />;
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-bolt-elements-textPrimary">App Permissions</h3>
-          <p className="text-sm text-bolt-elements-textSecondary mt-1">Control who can access and modify your app</p>
+          <h3 className="text-base font-semibold text-foreground">App Permissions</h3>
+          <p className="text-sm text-muted-foreground mt-1">Control who can access and modify your app</p>
         </div>
       </div>
 
       {/* Share URL Info */}
       {appId && (
-        <div className="p-4 border border-bolt-elements-borderColor rounded-md">
+        <div className="p-4 border border-border rounded-md">
           <div className="flex items-start gap-3">
-            <Info className="text-bolt-elements-textSecondary flex-shrink-0 mt-0.5" size={16} />
+            <Info className="text-muted-foreground flex-shrink-0 mt-0.5" size={16} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-bolt-elements-textPrimary font-medium mb-1">Share this app</p>
-              <p className="text-sm text-bolt-elements-textSecondary mb-3">
+              <p className="text-sm text-foreground font-medium mb-1">Share this app</p>
+              <p className="text-sm text-muted-foreground mb-3">
                 After setting permissions, share this URL with the people you want to give access to:
               </p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-9 px-3 flex items-center bg-background rounded-md border border-bolt-elements-borderColor text-sm text-bolt-elements-textPrimary truncate">
+                <div className="flex-1 h-9 px-3 flex items-center bg-background rounded-md border border-border text-sm text-foreground truncate">
                   builder.replay.io/app/{appId}
                 </div>
                 <TooltipProvider>
@@ -407,7 +407,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                         navigator.clipboard.writeText(`https://builder.replay.io/app/${appId}`);
                         toast.success('URL copied to clipboard!');
                       }}
-                      className="h-9 w-9 flex items-center justify-center rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2 transition-colors"
+                      className="h-9 w-9 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       <Copy size={14} />
                     </button>
@@ -432,28 +432,26 @@ export const PermissionsSelectionComponent: React.FC = () => {
                 const isExpanded = expandedGroups.has(groupKey);
 
                 return (
-                  <div key={groupKey} className="rounded-md border border-bolt-elements-borderColor overflow-hidden">
+                  <div key={groupKey} className="rounded-md border border-border overflow-hidden">
                     {/* Group Header */}
                     <button
                       onClick={() => toggleGroup(groupKey)}
-                      className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-bolt-elements-background-depth-2 transition-colors"
+                      className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors"
                     >
                       {/* Icon */}
                       {getGroupIcon(group)}
 
                       {/* Label */}
                       <div className="flex-1 text-left min-w-0">
-                        <div className="text-sm font-medium text-bolt-elements-textPrimary truncate">
-                          {getGroupLabel(group)}
-                        </div>
-                        <div className="text-xs text-bolt-elements-textSecondary">
+                        <div className="text-sm font-medium text-foreground truncate">{getGroupLabel(group)}</div>
+                        <div className="text-xs text-muted-foreground">
                           {group.permissions.length} permission{group.permissions.length !== 1 ? 's' : ''}
                         </div>
                       </div>
 
                       {/* Expand Icon */}
                       <div
-                        className={`text-bolt-elements-textSecondary transition-transform duration-200 ${
+                        className={`text-muted-foreground transition-transform duration-200 ${
                           isExpanded ? 'rotate-180' : ''
                         }`}
                       >
@@ -463,27 +461,22 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
                     {/* Group Content */}
                     {isExpanded && (
-                      <div className="border-t border-bolt-elements-borderColor">
+                      <div className="border-t border-border">
                         <div className="p-2 space-y-1">
                           {group.permissions.map((permission) => (
-                            <div
-                              key={permission.index}
-                              className="px-3 py-2 rounded-md border border-bolt-elements-borderColor"
-                            >
+                            <div key={permission.index} className="px-3 py-2 rounded-md border border-border">
                               <div className="flex items-center gap-2">
                                 {/* Access Icon */}
                                 {getAccessIcon(permission.access)}
 
                                 {/* Permission Label */}
                                 <div className="flex-1 min-w-0">
-                                  <span className="text-sm text-bolt-elements-textPrimary">
-                                    {getAccessLabel(permission.access)}
-                                  </span>
+                                  <span className="text-sm text-foreground">{getAccessLabel(permission.access)}</span>
                                 </div>
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-1">
-                                  <span className="text-sm px-2 py-1 rounded-md border border-bolt-elements-borderColor text-bolt-elements-textSecondary">
+                                  <span className="text-sm px-2 py-1 rounded-md border border-border text-muted-foreground">
                                     {permission.allowed ? 'Allowed' : 'Denied'}
                                   </span>
                                   <TooltipProvider>
@@ -533,7 +526,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                 <div className="flex justify-center">
                   <button
                     onClick={() => setShowAllGroups(!showAllGroups)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <span>
                       {showAllGroups
@@ -550,20 +543,20 @@ export const PermissionsSelectionComponent: React.FC = () => {
         </>
       ) : (
         <div className="text-center py-8">
-          <Lock className="mx-auto text-bolt-elements-textSecondary opacity-50 mb-3" size={32} />
-          <p className="text-sm text-bolt-elements-textSecondary">No permissions set</p>
-          <p className="text-sm text-bolt-elements-textSecondary mt-1">Add permissions to control access to your app</p>
+          <Lock className="mx-auto text-muted-foreground opacity-50 mb-3" size={32} />
+          <p className="text-sm text-muted-foreground">No permissions set</p>
+          <p className="text-sm text-muted-foreground mt-1">Add permissions to control access to your app</p>
         </div>
       )}
 
       {/* Add Permission Section */}
       {showAddPermission ? (
-        <div className="p-4 rounded-md border border-bolt-elements-borderColor space-y-4">
+        <div className="p-4 rounded-md border border-border space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-bolt-elements-textPrimary">Add Permission</h4>
+            <h4 className="text-sm font-semibold text-foreground">Add Permission</h4>
             <IconButton
               onClick={() => setShowAddPermission(false)}
-              className="h-7 w-7 p-0 rounded-md hover:bg-bolt-elements-background-depth-2 transition-colors"
+              className="h-7 w-7 p-0 rounded-md hover:bg-muted transition-colors"
               icon={<X size={16} />}
               size="sm"
             />
@@ -571,11 +564,11 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
           {/* Access Type */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-bolt-elements-textPrimary">Access Type</label>
+            <label className="text-sm font-medium text-foreground">Access Type</label>
             <select
               value={newPermission.access}
               onChange={(e) => setNewPermission({ ...newPermission, access: e.target.value as AppAccessKind })}
-              className="w-full h-10 px-3 text-sm rounded-md border border-bolt-elements-borderColor bg-background text-bolt-elements-textPrimary focus:border-bolt-elements-focus focus:outline-none transition-colors"
+              className="w-full h-10 px-3 text-sm rounded-md border border-border bg-background text-foreground focus:border-ring focus:outline-none transition-colors"
             >
               {Object.values(AppAccessKind).map((access) => (
                 <option key={access} value={access}>
@@ -587,7 +580,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
           {/* Accessor Type */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-bolt-elements-textPrimary">Who Can Access</label>
+            <label className="text-sm font-medium text-foreground">Who Can Access</label>
             <select
               value={newPermission.accessor}
               onChange={(e) =>
@@ -597,7 +590,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
                   accessorName: e.target.value === AppAccessorKind.Everyone ? undefined : '',
                 })
               }
-              className="w-full h-10 px-3 text-sm rounded-md border border-bolt-elements-borderColor bg-background text-bolt-elements-textPrimary focus:border-bolt-elements-focus focus:outline-none transition-colors"
+              className="w-full h-10 px-3 text-sm rounded-md border border-border bg-background text-foreground focus:border-ring focus:outline-none transition-colors"
             >
               <option value={AppAccessorKind.User}>Specific User (Email)</option>
               <option value={AppAccessorKind.Domain}>Anyone with Domain</option>
@@ -613,7 +606,7 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
               return (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-bolt-elements-textPrimary">
+                  <label className="text-sm font-medium text-foreground">
                     {newPermission.accessor === AppAccessorKind.User ? 'Email Address' : 'Domain'}
                   </label>
                   <input
@@ -621,10 +614,8 @@ export const PermissionsSelectionComponent: React.FC = () => {
                     value={newPermission.accessorName || ''}
                     onChange={(e) => setNewPermission({ ...newPermission, accessorName: e.target.value })}
                     placeholder={newPermission.accessor === AppAccessorKind.User ? 'user@example.com' : 'example.com'}
-                    className={`w-full h-10 px-3 text-sm rounded-md border bg-background text-bolt-elements-textPrimary placeholder-bolt-elements-textSecondary focus:outline-none transition-colors ${
-                      showError
-                        ? 'border-red-500 focus:border-red-500'
-                        : 'border-bolt-elements-borderColor focus:border-bolt-elements-focus'
+                    className={`w-full h-10 px-3 text-sm rounded-md border bg-background text-foreground placeholder-muted-foreground focus:outline-none transition-colors ${
+                      showError ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-ring'
                     }`}
                   />
                   {showError && validationState.errorMessage && (
@@ -639,14 +630,14 @@ export const PermissionsSelectionComponent: React.FC = () => {
 
           {/* Allow/Deny */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-bolt-elements-textPrimary">Permission</label>
+            <label className="text-sm font-medium text-foreground">Permission</label>
             <div className="flex gap-2">
               <button
                 onClick={() => setNewPermission({ ...newPermission, allowed: true })}
                 className={`flex-1 h-10 text-sm rounded-md border transition-colors ${
                   newPermission.allowed
-                    ? 'border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary font-medium'
-                    : 'border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
+                    ? 'border-border bg-muted text-foreground font-medium'
+                    : 'border-border text-muted-foreground hover:bg-muted'
                 }`}
               >
                 Allow
@@ -655,8 +646,8 @@ export const PermissionsSelectionComponent: React.FC = () => {
                 onClick={() => setNewPermission({ ...newPermission, allowed: false })}
                 className={`flex-1 h-10 text-sm rounded-md border transition-colors ${
                   !newPermission.allowed
-                    ? 'border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary font-medium'
-                    : 'border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2'
+                    ? 'border-border bg-muted text-foreground font-medium'
+                    : 'border-border text-muted-foreground hover:bg-muted'
                 }`}
               >
                 Deny

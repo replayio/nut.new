@@ -58,7 +58,7 @@ export function DownloadButton() {
     <TooltipProvider>
       <WithTooltip tooltip="Download Code">
         <button
-          className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white text-bolt-elements-textHeading border border-bolt-elements-borderColor transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
+          className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white text-foreground border border-border transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 group"
           onClick={handleDownload}
         >
           <Download className="transition-transform duration-200 group-hover:scale-110" size={20} />

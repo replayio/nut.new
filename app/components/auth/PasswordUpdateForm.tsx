@@ -55,16 +55,16 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
   return (
     <>
       <div className="text-center mb-8">
-        <div className="mx-auto w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mb-4 border border-bolt-elements-borderColor border-opacity-50">
-          <Lock className="text-bolt-elements-textPrimary" size={24} />
+        <div className="mx-auto w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4 border border-border/50">
+          <Lock className="text-foreground" size={24} />
         </div>
-        <h2 className="text-3xl font-bold text-bolt-elements-textHeading">Set New Password</h2>
-        <p className="text-bolt-elements-textSecondary mt-2">Please enter your new password below.</p>
+        <h2 className="text-3xl font-bold text-foreground">Set New Password</h2>
+        <p className="text-muted-foreground mt-2">Please enter your new password below.</p>
       </div>
 
       <form onSubmit={handlePasswordUpdate} className="space-y-6">
         <div>
-          <label htmlFor="new-password" className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary">
+          <label htmlFor="new-password" className="block mb-2 text-sm font-semibold text-foreground">
             New Password
           </label>
           <input
@@ -79,10 +79,7 @@ export function PasswordUpdateForm({ onSuccess, onError }: PasswordUpdateFormPro
         </div>
 
         <div>
-          <label
-            htmlFor="confirm-new-password"
-            className="block mb-2 text-sm font-semibold text-bolt-elements-textPrimary"
-          >
+          <label htmlFor="confirm-new-password" className="block mb-2 text-sm font-semibold text-foreground">
             Confirm New Password
           </label>
           <input

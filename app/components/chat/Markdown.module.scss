@@ -9,7 +9,7 @@ $code-font-size: 13px;
 
 .MarkdownContent {
   line-height: 1.6;
-  color: var(--bolt-elements-textPrimary);
+  color: hsl(var(--foreground));
 
   > *:not(:last-child) {
     margin-block-end: 16px;
@@ -25,19 +25,19 @@ $code-font-size: 13px;
       margin-block-end: 16px;
       font-weight: 600;
       line-height: 1.25;
-      color: var(--bolt-elements-textPrimary);
+      color: hsl(var(--foreground));
     }
   }
 
   h1 {
     font-size: 2em;
-    border-bottom: 1px solid var(--bolt-elements-borderColor);
+    border-bottom: 1px solid hsl(var(--border));
     padding-bottom: 0.3em;
   }
 
   h2 {
     font-size: 1.5em;
-    border-bottom: 1px solid var(--bolt-elements-borderColor);
+    border-bottom: 1px solid hsl(var(--border));
     padding-bottom: 0.3em;
   }
 
@@ -55,14 +55,14 @@ $code-font-size: 13px;
 
   h6 {
     font-size: 0.85em;
-    color: var(--bolt-elements-textSecondary);
+    color: hsl(var(--muted-foreground));
   }
 
   // Bold/strong text styling
   strong,
   b {
     font-weight: 600;
-    color: var(--bolt-elements-textHeading);
+    color: hsl(var(--foreground));
   }
 
   p {
@@ -75,7 +75,7 @@ $code-font-size: 13px;
   }
 
   a {
-    color: var(--bolt-elements-messages-linkColor);
+    color: hsl(var(--primary));
     text-decoration: none;
     cursor: pointer;
 
@@ -91,8 +91,8 @@ $code-font-size: 13px;
     @include not-inside-actions {
       border-radius: 6px;
       padding: 0.2em 0.4em;
-      background-color: var(--bolt-elements-messages-inlineCode-background);
-      color: var(--bolt-elements-messages-inlineCode-text);
+      background-color: hsl(var(--code));
+      color: hsl(var(--code-foreground));
     }
   }
 
@@ -112,8 +112,8 @@ $code-font-size: 13px;
   blockquote {
     margin: 0;
     padding: 0 1em;
-    color: var(--bolt-elements-textTertiary);
-    border-left: 0.25em solid var(--bolt-elements-borderColor);
+    color: hsl(var(--muted-foreground) / 0.7);
+    border-left: 0.25em solid hsl(var(--border));
   }
 
   :is(ul, ol) {
@@ -165,7 +165,7 @@ $code-font-size: 13px;
     height: 0.25em;
     padding: 0;
     margin: 24px 0;
-    background-color: var(--bolt-elements-borderColor);
+    background-color: hsl(var(--border));
     border: 0;
   }
 
@@ -176,11 +176,11 @@ $code-font-size: 13px;
 
     :is(th, td) {
       padding: 6px 13px;
-      border: 1px solid var(--bolt-elements-borderColor);
+      border: 1px solid hsl(var(--border));
     }
 
     tr:nth-child(2n) {
-      background-color: var(--bolt-elements-background-depth-2);
+      background-color: hsl(var(--muted));
     }
   }
 
@@ -191,25 +191,25 @@ $code-font-size: 13px;
     height: 20px;
     width: 20px;
     border-radius: 6px;
-    border: 2px solid var(--bolt-elements-borderColor);
-    background: var(--bolt-elements-background-depth-2);
+    border: 2px solid hsl(var(--border));
+    background: hsl(var(--muted));
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
 
     &:hover {
-      border-color: var(--bolt-elements-textPrimary);
-      background: var(--bolt-elements-background-depth-3);
+      border-color: hsl(var(--foreground));
+      background: hsl(var(--accent));
     }
 
     &:focus {
       outline: none;
-      box-shadow: 0 0 0 2px var(--bolt-elements-focus);
+      box-shadow: 0 0 0 2px hsl(var(--ring));
     }
 
     &:checked {
-      background: var(--bolt-elements-textPrimary);
-      border-color: var(--bolt-elements-textPrimary);
+      background: hsl(var(--foreground));
+      border-color: hsl(var(--foreground));
     }
 
     &:disabled {
@@ -227,8 +227,8 @@ $code-font-size: 13px;
       padding: 12px 16px;
       margin: 6px 0;
       border-radius: 8px;
-      border: 1px solid var(--bolt-elements-borderColor);
-      background: var(--bolt-elements-background-depth-1);
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--card));
       transition: all 0.2s ease;
       cursor: pointer;
       text-align: left; // Force left alignment for checkbox list items
@@ -239,13 +239,13 @@ $code-font-size: 13px;
       }
 
       &:hover:not(:has(input[type='checkbox']:disabled)) {
-        background: var(--bolt-elements-background-depth-2);
-        border-color: var(--bolt-elements-textPrimary);
+        background: hsl(var(--muted));
+        border-color: hsl(var(--foreground));
       }
 
       // Style when checkbox is checked - same as hover state
       &:has(input[type='checkbox']:checked) {
-        border-color: var(--bolt-elements-textPrimary);
+        border-color: hsl(var(--foreground));
       }
 
       // Style the checkbox container
@@ -270,7 +270,7 @@ $code-font-size: 13px;
         gap: 4px;
         line-height: 1.5;
         margin: 0;
-        color: var(--bolt-elements-textPrimary);
+        color: hsl(var(--foreground));
         text-align: left !important;
         align-self: center; // Center vertically with checkbox
 
@@ -279,13 +279,13 @@ $code-font-size: 13px;
           strong {
             display: block;
             font-weight: 600;
-            color: var(--bolt-elements-textHeading);
+            color: hsl(var(--foreground));
           }
         }
 
         // Style the description div (second div)
         > div:last-child {
-          color: var(--bolt-elements-textPrimary);
+          color: hsl(var(--foreground));
           font-weight: normal;
         }
       }
@@ -298,7 +298,7 @@ $code-font-size: 13px;
         gap: 4px;
         line-height: 1.5;
         margin: 0;
-        color: var(--bolt-elements-textPrimary);
+        color: hsl(var(--foreground));
         text-align: left !important;
         align-self: center;
 

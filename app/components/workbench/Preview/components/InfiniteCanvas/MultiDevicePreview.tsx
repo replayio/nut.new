@@ -110,7 +110,7 @@ const MultiDevicePreview = forwardRef<MultiDevicePreviewRef, MultiDevicePreviewP
     if (!iframeUrl) {
       return (
         <div className={`w-full h-full flex items-center justify-center ${className}`}>
-          <div className="text-bolt-elements-textSecondary">No preview URL available</div>
+          <div className="text-muted-foreground">No preview URL available</div>
         </div>
       );
     }

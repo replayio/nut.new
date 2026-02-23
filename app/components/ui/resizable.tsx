@@ -31,8 +31,8 @@ const ResizableHandle = ({
         className={cn(
           'absolute inset-y-6 w-[2px] rounded-full z-10 -mx-2 px-2',
           'bg-transparent transition-all duration-200 ease-out',
-          'group-hover:bg-bolt-elements-textTertiary/50',
-          'group-active:bg-bolt-elements-textSecondary/60 group-active:w-[3px]',
+          'group-hover:bg-muted-foreground/35',
+          'group-active:bg-muted-foreground/60 group-active:w-[3px]',
           'data-[panel-group-direction=vertical]:inset-y-0 data-[panel-group-direction=vertical]:inset-x-6',
           'data-[panel-group-direction=vertical]:h-[2px] data-[panel-group-direction=vertical]:w-auto',
         )}

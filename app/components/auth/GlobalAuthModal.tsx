@@ -56,12 +56,12 @@ export function GlobalAuthModal() {
       onClick={() => authModalStore.close()}
     >
       <div
-        className="bg-bolt-elements-background-depth-1 p-6 sm:p-8 rounded-md w-full max-w-md mx-auto border border-bolt-elements-borderColor border-opacity-50 shadow-2xl hover:shadow-3xl transition-shadow duration-300 backdrop-blur-sm relative max-h-[calc(100vh-4rem)] overflow-y-auto"
+        className="bg-card p-6 sm:p-8 rounded-md w-full max-w-md mx-auto border border-border/50 shadow-2xl hover:shadow-3xl transition-shadow duration-300 backdrop-blur-sm relative max-h-[calc(100vh-4rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => authModalStore.close()}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary shadow-sm hover:shadow-md hover:scale-105 group z-10"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 rounded-xl bg-muted border border-border hover:bg-accent transition-all duration-200 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-sm hover:shadow-md hover:scale-105 group z-10"
         >
           <X className="transition-transform duration-200 group-hover:scale-110" size={18} />
         </button>

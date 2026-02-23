@@ -23,22 +23,22 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-lg w-full">
-            <div className="bg-bolt-elements-background-depth-2 rounded-2xl border border-bolt-elements-borderColor border-opacity-30 shadow-lg p-8 text-center backdrop-blur-sm">
+            <div className="bg-muted rounded-2xl border border-border/30 shadow-lg p-8 text-center backdrop-blur-sm">
               <div className="mb-8">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
                     <KeySquare className="text-white" size={24} />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-bolt-elements-textHeading mb-4">App Access Restricted</h2>
-                <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-xl p-5 mb-6 shadow-sm">
+                <h2 className="text-2xl font-bold text-foreground mb-4">App Access Restricted</h2>
+                <div className="bg-card border border-border rounded-xl p-5 mb-6 shadow-sm">
                   {authorizedCopy ? (
-                    <p className="text-bolt-elements-textPrimary leading-relaxed font-medium">
+                    <p className="text-foreground leading-relaxed font-medium">
                       This app is owned by another user. You can create a copy to work with it and make your own
                       modifications.
                     </p>
                   ) : (
-                    <p className="text-bolt-elements-textPrimary leading-relaxed font-medium">
+                    <p className="text-foreground leading-relaxed font-medium">
                       This app is owned by another user and is not available for copying.
                     </p>
                   )}
@@ -55,14 +55,13 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
                       {
                         'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-md hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/20':
                           !isCopying,
-                        'bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary border border-bolt-elements-borderColor border-opacity-30 cursor-not-allowed':
-                          isCopying,
+                        'bg-card text-muted-foreground border border-border/30 cursor-not-allowed': isCopying,
                       },
                     )}
                   >
                     {isCopying ? (
                       <span className="flex items-center gap-3">
-                        <div className="w-4 h-4 border-2 border-bolt-elements-textSecondary border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
                         Creating Copy...
                       </span>
                     ) : (
@@ -73,13 +72,13 @@ export const Unauthorized = ({ handleCopyApp, isCopying, authorizedCopy }: Unaut
                     )}
                   </button>
 
-                  <p className="text-xs text-bolt-elements-textSecondary">
+                  <p className="text-xs text-muted-foreground">
                     Your copy will be independent and you'll have full access to modify it
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-sm text-bolt-elements-textSecondary">
+                  <p className="text-sm text-muted-foreground">
                     Contact the app owner if you need access or wish to collaborate on this project.
                   </p>
                 </div>

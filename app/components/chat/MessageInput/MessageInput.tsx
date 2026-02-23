@@ -358,17 +358,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div className={classNames('relative transition-all duration-300')}>
       {/* Main input container with white background */}
-      <div className="bg-background rounded-md border border-bolt-elements-borderColor">
+      <div className="bg-background rounded-md border border-border">
         {/* Textarea area */}
         <div className="relative">
           {/* Breadcrumb pill at top left */}
           {selectedElement && (
-            <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 px-2 py-1 bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor text-sm font-medium">
-              <Crosshair size={12} className="text-bolt-elements-textSecondary flex-shrink-0" />
+            <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 px-2 py-1 bg-card rounded-md border border-border text-sm font-medium">
+              <Crosshair size={12} className="text-muted-foreground flex-shrink-0" />
               {(() => {
                 if (!selectedElement.tree || selectedElement.tree.length === 0) {
                   return (
-                    <span className="text-bolt-elements-textPrimary font-medium">
+                    <span className="text-foreground font-medium">
                       {selectedElement.component?.displayName || 'Component'}
                     </span>
                   );
@@ -398,7 +398,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   parts.push(
                     <button
                       key="react"
-                      className="text-bolt-elements-textPrimary hover:text-bolt-elements-textHeading transition-colors cursor-pointer"
+                      className="text-foreground hover:text-foreground transition-colors cursor-pointer"
                       onMouseEnter={() => highlightElement(lastReactComponent)}
                       onMouseLeave={clearHighlight}
                       onClick={() => updateTreeToComponent(lastReactComponent, originalTree)}
@@ -415,7 +415,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 if (htmlElements.length > 1) {
                   parts.push(
                     <DropdownMenu key="ellipsis">
-                      <DropdownMenuTrigger className="flex items-center gap-0.5 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors cursor-pointer">
+                      <DropdownMenuTrigger className="flex items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                         <span>...</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -444,7 +444,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   parts.push(
                     <button
                       key="html"
-                      className="text-bolt-elements-textPrimary hover:text-bolt-elements-textHeading transition-colors cursor-pointer"
+                      className="text-foreground hover:text-foreground transition-colors cursor-pointer"
                       onMouseEnter={() => highlightElement(lastHtmlComponent)}
                       onMouseLeave={clearHighlight}
                       onClick={() => updateTreeToComponent(lastHtmlComponent, originalTree)}
@@ -460,7 +460,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                       <React.Fragment key={index}>
                         {part}
                         {index < parts.length - 1 && (
-                          <ChevronRight size={12} className="text-bolt-elements-textSecondary flex-shrink-0" />
+                          <ChevronRight size={12} className="text-muted-foreground flex-shrink-0" />
                         )}
                       </React.Fragment>
                     ))}
@@ -469,7 +469,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               })()}
               <button
                 onClick={() => workbenchStore.setSelectedElement(null)}
-                className="ml-1 p-0.5 hover:bg-bolt-elements-background-depth-3 rounded transition-colors flex items-center justify-center text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary flex-shrink-0"
+                className="ml-1 p-0.5 hover:bg-accent rounded transition-colors flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0"
               >
                 <X size={12} />
               </button>
@@ -478,10 +478,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <textarea
             ref={textareaRef}
             className={classNames(
-              'w-full border-none resize-none text-bolt-elements-textPrimary bg-transparent text-base rounded-md',
+              'w-full border-none resize-none text-foreground bg-transparent text-base rounded-md',
               'focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-none active:border-none',
               { 'opacity-50 cursor-not-allowed': hasPendingMessage },
-              'placeholder:text-bolt-elements-textSecondary',
+              'placeholder:text-muted-foreground',
               selectedElement ? 'pt-10 px-3 pb-3' : 'p-3',
             )}
             onDragEnter={(e) => {
@@ -586,11 +586,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="w-8 h-8 rounded-full bg-background border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 p-2 aspect-square"
+                  className="w-8 h-8 rounded-full bg-background border border-border hover:bg-muted p-2 aspect-square"
                   disabled={hasPendingMessage}
                   onClick={isListening ? onStopListening : onStartListening}
                 >
-                  <Mic size={16} className="text-bolt-elements-textPrimary" />
+                  <Mic size={16} className="text-foreground" />
                 </Button>
               </WithTooltip>
             </TooltipProvider> */}
@@ -600,7 +600,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               <WithTooltip
                 tooltip={
                   <div className="text-xs">
-                    <div className="font-medium mb-1 text-bolt-elements-textHeading">Upload Image</div>
+                    <div className="font-medium mb-1 text-foreground">Upload Image</div>
                     <div>✅ Supports: JPEG, PNG, GIF, WebP</div>
                     <div>🔄 Converts: SVG, BMP, TIFF → JPEG</div>
                     <div>📐 Auto-resizes large images (&gt;500KB)</div>
@@ -610,10 +610,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="w-8 h-8 rounded-full bg-background border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 p-2 aspect-square"
+                  className="w-8 h-8 rounded-full bg-background border border-border hover:bg-muted p-2 aspect-square"
                   onClick={handleFileUpload}
                 >
-                  <Plus size={16} className="text-bolt-elements-textPrimary" />
+                  <Plus size={16} className="text-foreground" />
                 </Button>
               </WithTooltip>
             </TooltipProvider>
@@ -647,10 +647,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               }
             }}
             disabled={hasPendingMessage || (!input.length && !uploadedFiles.length)}
-            className="px-5 py-2.5 rounded-full font-medium bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 transition-all duration-200 flex items-center gap-2"
+            className="px-5 py-2.5 rounded-full font-medium !bg-foreground !text-background hover:!bg-foreground/90 transition-all duration-200 flex items-center gap-2"
           >
             <span>Send</span>
-            <span className="text-white/70 text-sm">⌘Enter</span>
+            <span className="text-background/70 text-sm">⌘Enter</span>
           </Button>
         </div>
       </div>

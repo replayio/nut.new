@@ -52,7 +52,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
       className={classNames(
         // Full-width, responsive card that keeps a 16:9 aspect ratio.
         // The height is driven by aspect-video so it scales with viewport on mobile.
-        'group relative overflow-hidden rounded-md flex flex-col justify-end items-start gap-4 p-3 sm:p-4 border w-full aspect-video border-bolt-elements-borderColor transition-all duration-300',
+        'group relative overflow-hidden rounded-md flex flex-col justify-end items-start gap-4 p-3 sm:p-4 border w-full aspect-video border-border transition-all duration-300',
         className,
       )}
     >
@@ -99,7 +99,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
         {/* Title */}
         <div className="flex flex-col gap-1 sm:gap-2">
           <h3
-            className="text-base sm:text-lg font-bold leading-none text-bolt-elements-textHeading"
+            className="text-base sm:text-lg font-bold leading-none text-foreground"
             style={{
               textShadow: '0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.10)',
             }}
@@ -109,7 +109,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
 
           {/* Description */}
           <p
-            className="text-[11px] sm:text-xs font-normal leading-4 text-bolt-elements-textSecondary truncate"
+            className="text-[11px] sm:text-xs font-normal leading-4 text-muted-foreground truncate"
             style={{
               textShadow: '0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.10)',
             }}
@@ -153,7 +153,7 @@ export const ReferenceAppCard: React.FC<ReferenceAppCardProps> = ({
         {/* {bulletPoints.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {bulletPoints.map((badge, index) => (
-              <span key={index} className="px-3 py-1.5 text-sm font-medium bg-white text-bolt-elements-textPrimary rounded-full">
+              <span key={index} className="px-3 py-1.5 text-sm font-medium bg-white text-foreground rounded-full">
                 {badge}
               </span>
             ))}

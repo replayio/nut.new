@@ -72,18 +72,18 @@ export function NavigationMenuComponent() {
             Getting Started with Replay Builder
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="w-[400px] p-4 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-lg shadow-lg">
+            <div className="w-[400px] p-4 bg-card border border-border rounded-lg shadow-lg">
               <div className="grid gap-3">
                 {gettingStartedItems.map((item) => (
                   <Link
                     key={item.href}
                     to={item.href}
-                    className="block p-3 rounded-md hover:bg-bolt-elements-background-depth-2 transition-colors"
+                    className="block p-3 rounded-md hover:bg-muted transition-colors"
                   >
-                    <div className="font-medium text-bolt-elements-textHeading text-sm mb-1">
+                    <div className="font-medium text-foreground text-sm mb-1">
                       {item.title}
                     </div>
-                    <div className="text-xs text-bolt-elements-textSecondary">
+                    <div className="text-xs text-muted-foreground">
                       {item.description}
                     </div>
                   </Link>

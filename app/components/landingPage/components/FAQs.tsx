@@ -68,12 +68,12 @@ export default function Faqs() {
         {/* Header */}
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            <span className="text-bolt-elements-textHeading">Frequently</span>
+            <span className="text-foreground">Frequently</span>
             <br />
-            <span className="text-bolt-elements-textHeading">asked </span>
+            <span className="text-foreground">asked </span>
             <span className="text-rose-500 dark:text-rose-400">questions</span>
           </h1>
-          <p className="text-lg md:text-xl text-bolt-elements-textSecondary max-w-3xl">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
             Everything you need to know about Replay Builder
           </p>
         </div>
@@ -93,17 +93,13 @@ export default function Faqs() {
                     'text-lg font-semibold text-rose-500 dark:text-rose-400',
                     'hover:text-rose-600 dark:hover:text-rose-300',
                     'transition-colors duration-200',
-                    '[&[data-state=open]]:bg-bolt-elements-background-depth-3/50',
+                    '[&[data-state=open]]:bg-accent/50',
                   )}
                 >
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent
-                  className={cn(
-                    'px-6 pb-6 pt-2',
-                    'text-bolt-elements-textSecondary',
-                    'bg-bolt-elements-background-depth-3/30 dark:bg-bolt-elements-background-depth-3/30',
-                  )}
+                  className={cn('px-6 pb-6 pt-2', 'text-muted-foreground', 'bg-accent/30 dark:bg-accent/30')}
                 >
                   {faq.answer}
                 </AccordionContent>

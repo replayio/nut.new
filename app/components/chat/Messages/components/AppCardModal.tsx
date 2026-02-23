@@ -83,13 +83,13 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
         return (
           <>
             <div className="space-y-6 mb-6">
-              <div className="p-6 bg-bolt-elements-background-depth-2 bg-opacity-50 rounded-xl border border-bolt-elements-borderColor border-opacity-50">
-                <div className="text-lg font-semibold mb-3 text-bolt-elements-textHeading">Project Description</div>
-                <div className="text-bolt-elements-textSecondary leading-relaxed">{appSummary.description}</div>
+              <div className="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <div className="text-lg font-semibold mb-3 text-foreground">Project Description</div>
+                <div className="text-muted-foreground leading-relaxed">{appSummary.description}</div>
 
                 {appSummary.features && appSummary.features.length > 0 && (
                   <div className="mt-6">
-                    <div className="flex justify-between text-sm text-bolt-elements-textSecondary mb-2">
+                    <div className="flex justify-between text-sm text-muted-foreground mb-2">
                       <span>
                         <b>PROGRESS:</b>
                       </span>
@@ -97,7 +97,7 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
                         {completedFeatures} / {totalFeatures} features complete
                       </span>
                     </div>
-                    <div className="w-full h-3 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-accent rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
                         style={{
@@ -128,7 +128,7 @@ export const AppCardModal: React.FC<AppCardModalProps> = ({ isOpen, onClose, typ
         return <AuthSelector />;
 
       default:
-        return <div className="p-6 text-center text-bolt-elements-textSecondary">No details available</div>;
+        return <div className="p-6 text-center text-muted-foreground">No details available</div>;
     }
   };
 

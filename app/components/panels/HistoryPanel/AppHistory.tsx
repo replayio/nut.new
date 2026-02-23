@@ -159,8 +159,8 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary"></div>
-          <div className="text-bolt-elements-textSecondary text-sm">Loading history...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-border border-t-foreground"></div>
+          <div className="text-muted-foreground text-sm">Loading history...</div>
         </div>
       </div>
     );
@@ -171,44 +171,40 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Current Version Section */}
         {currentVersion && (
-          <div className="p-4 border border-bolt-elements-borderColor rounded-md bg-background">
+          <div className="p-4 border border-border rounded-md bg-background">
             <div className="flex items-center gap-2 mb-1">
-              <CheckCircle size={18} className="text-bolt-elements-textSecondary" />
-              <span className="text-xs font-medium border border-bolt-elements-borderColor rounded px-2 py-0.5 text-bolt-elements-textSecondary">
+              <CheckCircle size={18} className="text-muted-foreground" />
+              <span className="text-xs font-medium border border-border rounded px-2 py-0.5 text-muted-foreground">
                 Current Version
               </span>
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">
-                {currentVersion.version || '0.0.0'}
-              </span>
+              <span className="text-sm font-medium text-foreground">{currentVersion.version || '0.0.0'}</span>
             </div>
-            <p className="text-sm text-bolt-elements-textSecondary pl-6">
-              {getReasonText(currentVersion.reason, history)}
-            </p>
+            <p className="text-sm text-muted-foreground pl-6">{getReasonText(currentVersion.reason, history)}</p>
           </div>
         )}
 
         {/* Search */}
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-bolt-elements-textSecondary" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-9 pr-3 text-sm border border-bolt-elements-borderColor rounded-md bg-background text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-1 focus:ring-bolt-elements-borderColor"
+            className="w-full h-10 pl-9 pr-3 text-sm border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-border"
           />
         </div>
 
         {/* Filter Dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-full h-10 px-3 text-sm border border-bolt-elements-borderColor rounded-md bg-background text-bolt-elements-textPrimary flex items-center justify-between">
+          <DropdownMenuTrigger className="w-full h-10 px-3 text-sm border border-border rounded-md bg-background text-foreground flex items-center justify-between">
             <span>
               {filterType === 'all' && 'All versions'}
               {filterType === 'feature' && 'Features only'}
               {filterType === 'revert' && 'Reverts only'}
               {filterType === 'initial' && 'Initial builds only'}
             </span>
-            <ChevronDown size={16} className="text-bolt-elements-textSecondary" />
+            <ChevronDown size={16} className="text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
             <DropdownMenuItem onClick={() => setFilterType('all')}>All versions</DropdownMenuItem>
@@ -221,14 +217,14 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
         {/* Version Table */}
         {filteredHistory.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-bolt-elements-textSecondary text-sm">No versions found</p>
+            <p className="text-muted-foreground text-sm">No versions found</p>
           </div>
         ) : (
-          <div className="border border-bolt-elements-borderColor rounded-md overflow-hidden">
+          <div className="border border-border rounded-md overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 bg-bolt-elements-background-depth-2 border-b border-bolt-elements-borderColor">
-              <span className="text-sm font-medium text-bolt-elements-textSecondary">Version</span>
-              <span className="text-sm font-medium text-bolt-elements-textSecondary">Date</span>
+            <div className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 bg-muted border-b border-border">
+              <span className="text-sm font-medium text-muted-foreground">Version</span>
+              <span className="text-sm font-medium text-muted-foreground">Date</span>
               <span className="w-8"></span>
             </div>
 
@@ -240,22 +236,20 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
                 return (
                   <div
                     key={summary.iteration || index}
-                    className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 border-b border-bolt-elements-borderColor last:border-b-0 hover:bg-bolt-elements-background-depth-2 transition-colors"
+                    className="grid grid-cols-[1fr_1.5fr_auto] gap-4 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted transition-colors"
                   >
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium text-bolt-elements-textPrimary">
-                        {summary.version || '0.0.0'}
-                      </span>
+                      <span className="text-sm font-medium text-foreground">{summary.version || '0.0.0'}</span>
                       <WithTooltip tooltip={featureName}>
-                        <span className="text-xs text-bolt-elements-textSecondary truncate">{featureName}</span>
+                        <span className="text-xs text-muted-foreground truncate">{featureName}</span>
                       </WithTooltip>
                     </div>
-                    <span className="text-sm text-bolt-elements-textSecondary truncate self-center">
+                    <span className="text-sm text-muted-foreground truncate self-center">
                       {getFormattedDateTime(summary.time)}
                     </span>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bolt-elements-background-depth-3 transition-colors self-center">
-                        <MoreHorizontal size={16} className="text-bolt-elements-textSecondary" />
+                      <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors self-center">
+                        <MoreHorizontal size={16} className="text-muted-foreground" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleOpenPreview(summary)}>Open preview</DropdownMenuItem>
@@ -276,16 +270,16 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
 
       {/* Pagination Footer */}
       {filteredHistory.length > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-bolt-elements-borderColor">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft size={18} />
           </button>
-          <span className="text-sm text-bolt-elements-textSecondary">
-            <span className="font-medium text-bolt-elements-textPrimary">
+          <span className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">
               {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredHistory.length)}
             </span>{' '}
             of {filteredHistory.length}
@@ -293,7 +287,7 @@ const AppHistory = ({ appId }: AppHistoryProps) => {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-bolt-elements-borderColor text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight size={18} />
           </button>

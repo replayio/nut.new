@@ -165,19 +165,19 @@ const LoadingSkeleton: React.FC<{ isSmallViewport?: boolean; isSidebarCollapsed?
     )}
   >
     <div className="w-full max-w-7xl mx-auto">
-      <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl overflow-hidden shadow-xl animate-fade-in">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl animate-fade-in">
         <div className="p-8">
           <div className="flex flex-col items-center justify-center gap-6 py-16">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-bolt-elements-borderColor border-t-rose-500 animate-spin" />
+              <div className="w-16 h-16 rounded-full border-4 border-border border-t-rose-500 animate-spin" />
               <div
                 className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-pink-500/30 animate-spin"
                 style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}
               />
             </div>
             <div className="text-center">
-              <p className="text-bolt-elements-textPrimary font-medium mb-1">Loading template...</p>
-              <p className="text-sm text-bolt-elements-textSecondary">Preparing your preview</p>
+              <p className="text-foreground font-medium mb-1">Loading template...</p>
+              <p className="text-sm text-muted-foreground">Preparing your preview</p>
             </div>
           </div>
         </div>
@@ -636,7 +636,7 @@ function GalleryPageContent() {
         disabled={!user}
         className={classNames(
           'flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors',
-          liked ? 'text-yellow-600 hover:text-yellow-700' : 'text-bolt-elements-textSecondary hover:text-yellow-500',
+          liked ? 'text-yellow-600 hover:text-yellow-700' : 'text-muted-foreground hover:text-yellow-500',
           !user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           className,
         )}
@@ -731,7 +731,7 @@ function GalleryPageContent() {
 
   if (isLoading || !app) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         <Menu />
         <div className="flex-1 flex flex-col overflow-hidden">
           {isSmallViewport && <Header />}
@@ -746,7 +746,7 @@ function GalleryPageContent() {
   // Ensure displayData is available
   if (!displayData) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         <Menu />
         <div className="flex-1 flex flex-col overflow-hidden">
           {isSmallViewport && <Header />}
@@ -761,7 +761,7 @@ function GalleryPageContent() {
   // Error or fallback state
   if (error || !appContent) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         {/* Sidebar - Desktop only */}
         {!isSmallViewport && <Menu />}
 
@@ -775,7 +775,7 @@ function GalleryPageContent() {
             {/* Top bar with breadcrumbs and customize button */}
             <div
               className={classNames(
-                'sticky top-0 z-10 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor py-3 sm:py-4 transition-all duration-300',
+                'sticky top-0 z-10 bg-card border-b border-border py-3 sm:py-4 transition-all duration-300',
                 !isSmallViewport
                   ? isSidebarCollapsed
                     ? 'md:pl-[calc(60px+1.5rem)] md:pr-6'
@@ -789,32 +789,26 @@ function GalleryPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator>
-                      <span className="text-bolt-elements-textSecondary">/</span>
+                      <span className="text-muted-foreground">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Gallery
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator>
-                      <span className="text-bolt-elements-textSecondary">/</span>
+                      <span className="text-muted-foreground">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
+                      <BreadcrumbPage className="text-foreground font-medium truncate">
                         {app?.name || 'App'}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
@@ -828,7 +822,7 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
+                        className="rounded-full !text-foreground border-accent hover:bg-accent shadow-sm whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2" />
                         <span>Be an early adopter</span>
@@ -839,7 +833,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleDownloadCode}
                       variant="outline"
-                      className="rounded-full whitespace-nowrap"
+                      className="rounded-full whitespace-nowrap !text-foreground border-accent shadow-sm hover:bg-accent"
                       disabled={!repositoryId}
                     >
                       <Download size={18} />
@@ -848,7 +842,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleCustomize}
                       variant="default"
-                      className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 whitespace-nowrap"
+                      className="rounded-full !bg-foreground !text-background hover:!bg-foreground/90 whitespace-nowrap"
                     >
                       <Sparkles size={18} className="mr-2" />
                       Customize It
@@ -869,13 +863,13 @@ function GalleryPageContent() {
                   : 'px-4 sm:px-6',
               )}
             >
-              <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-2xl overflow-hidden shadow-xl animate-fade-in">
+              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl animate-fade-in">
                 {/* Header */}
-                <div className="relative bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent p-6 border-b border-bolt-elements-borderColor">
+                <div className="relative bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent p-6 border-b border-border">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">{app.name}</h2>
-                      <p className="text-bolt-elements-textSecondary">{app.shortDescription}</p>
+                      <h2 className="text-2xl font-bold text-foreground mb-2">{app.name}</h2>
+                      <p className="text-muted-foreground">{app.shortDescription}</p>
                     </div>
                   </div>
                 </div>
@@ -890,14 +884,14 @@ function GalleryPageContent() {
 
                   {app.bulletPoints && app.bulletPoints.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-4">Features</h3>
+                      <h3 className="text-lg font-semibold text-foreground mb-4">Features</h3>
                       <ul className="space-y-3">
                         {app.bulletPoints.map((point, index) => (
                           <li key={index} className="flex items-start gap-3">
                             <div className="flex-shrink-0 w-5 h-5 rounded-full bg-rose-500/10 flex items-center justify-center mt-0.5">
                               <Check size={12} className="text-rose-500" />
                             </div>
-                            <span className="text-bolt-elements-textSecondary">{point}</span>
+                            <span className="text-muted-foreground">{point}</span>
                           </li>
                         ))}
                       </ul>
@@ -905,7 +899,7 @@ function GalleryPageContent() {
                   )}
 
                   {/* CTA */}
-                  <div className="pt-6 border-t border-bolt-elements-borderColor">
+                  <div className="pt-6 border-t border-border">
                     <button
                       onClick={handleCustomize}
                       className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 hover:scale-[1.02]"
@@ -954,7 +948,7 @@ function GalleryPageContent() {
           }
         }
       `}</style>
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         {/* Sidebar */}
         <Menu />
 
@@ -968,7 +962,7 @@ function GalleryPageContent() {
             {/* Top bar with breadcrumbs and customize button */}
             <div
               className={classNames(
-                'sticky top-0 z-10 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor py-3 sm:py-4 transition-all duration-300',
+                'sticky top-0 z-10 bg-card border-b border-border py-3 sm:py-4 transition-all duration-300',
                 !isSmallViewport
                   ? isSidebarCollapsed
                     ? 'md:pl-[calc(60px+1.5rem)] md:pr-6'
@@ -982,32 +976,26 @@ function GalleryPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator>
-                      <span className="text-bolt-elements-textSecondary">/</span>
+                      <span className="text-muted-foreground">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Gallery
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator>
-                      <span className="text-bolt-elements-textSecondary">/</span>
+                      <span className="text-muted-foreground">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
+                      <BreadcrumbPage className="text-foreground font-medium truncate">
                         {displayData.name}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
@@ -1021,7 +1009,7 @@ function GalleryPageContent() {
                       <Button
                         onClick={() => setIsEarlyAdopterModalOpen(true)}
                         variant="outline"
-                        className="rounded-full border-border hover:bg-accent whitespace-nowrap"
+                        className="rounded-full !text-foreground border-accent hover:bg-accent shadow-sm whitespace-nowrap"
                       >
                         <Rocket size={18} className="mr-2" />
                         <span>Be an early adopter</span>
@@ -1032,7 +1020,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleDownloadCode}
                       variant="outline"
-                      className="rounded-full whitespace-nowrap"
+                      className="rounded-full whitespace-nowrap !text-foreground border-accent shadow-sm hover:bg-accent"
                       disabled={!repositoryId}
                     >
                       <Download size={18} />
@@ -1041,7 +1029,7 @@ function GalleryPageContent() {
                     <Button
                       onClick={handleCustomize}
                       variant="default"
-                      className="rounded-full bg-bolt-elements-textPrimary text-background hover:bg-bolt-elements-textPrimary/90 whitespace-nowrap"
+                      className="rounded-full !bg-foreground !text-background hover:!bg-foreground/90 whitespace-nowrap"
                     >
                       <Sparkles size={18} className="mr-2" />
                       Customize It
@@ -1062,7 +1050,7 @@ function GalleryPageContent() {
                   : 'sm:px-6',
               )}
             >
-              <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden shadow-xl animate-fade-in">
+              <div className="bg-card border border-border rounded-md overflow-hidden shadow-xl animate-fade-in">
                 {/* Content */}
                 <div className="space-y-8">
                   {/* Carousel - Preview and Page Features */}
@@ -1083,10 +1071,10 @@ function GalleryPageContent() {
                           {/* Live Preview Slide */}
                           {(appPreviewURL || isPreviewLoading) && (
                             <div className="min-w-full snap-center flex-shrink-0">
-                              <div className="relative rounded-t-md overflow-hidden border border-bolt-elements-borderColor shadow-lg bg-white">
+                              <div className="relative rounded-t-md overflow-hidden border border-border shadow-lg bg-white">
                                 {/* Preview Loading State */}
                                 {isPreviewLoading && (
-                                  <div className="absolute inset-0 pt-8 bg-bolt-elements-background-depth-1 flex flex-col items-center justify-center z-[5]">
+                                  <div className="absolute inset-0 pt-8 bg-card flex flex-col items-center justify-center z-[5]">
                                     <div className="flex flex-col items-center gap-4">
                                       <div className="relative">
                                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/10 to-pink-500/10 border border-rose-500/20 flex items-center justify-center">
@@ -1098,14 +1086,10 @@ function GalleryPageContent() {
                                         />
                                       </div>
                                       <div className="text-center">
-                                        <p className="text-sm font-medium text-bolt-elements-textPrimary mb-1">
-                                          Loading preview...
-                                        </p>
-                                        <p className="text-xs text-bolt-elements-textSecondary">
-                                          Starting development server
-                                        </p>
+                                        <p className="text-sm font-medium text-foreground mb-1">Loading preview...</p>
+                                        <p className="text-xs text-muted-foreground">Starting development server</p>
                                       </div>
-                                      <div className="w-48 h-1.5 bg-bolt-elements-background-depth-3 rounded-full overflow-hidden">
+                                      <div className="w-48 h-1.5 bg-accent rounded-full overflow-hidden">
                                         <div
                                           className="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full animate-pulse"
                                           style={{
@@ -1147,7 +1131,7 @@ function GalleryPageContent() {
                                           href={appPreviewURL}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-bolt-elements-textSecondary hover:bg-white/80 transition-colors shadow-xl border border-bolt-elements-borderColor"
+                                          className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full p-2 text-sm text-muted-foreground hover:bg-white/80 transition-colors shadow-xl border border-border"
                                         >
                                           <ExternalLink size={16} />
                                         </a>
@@ -1165,10 +1149,10 @@ function GalleryPageContent() {
                               key={`feature-${idx}`}
                               className="min-w-full flex items-center justify-center snap-center flex-shrink-0 w-full"
                             >
-                              <div className="relative flex items-center justify-center rounded-t-md overflow-hidden border border-bolt-elements-borderColor shadow-lg bg-white w-full">
+                              <div className="relative flex items-center justify-center rounded-t-md overflow-hidden border border-border shadow-lg bg-white w-full">
                                 {feature.artifactURLs && feature.artifactURLs.length > 0 && (
                                   <div
-                                    className="relative flex items-center justify-center bg-bolt-elements-background-depth-1 w-full overflow-hidden"
+                                    className="relative flex items-center justify-center bg-card w-full overflow-hidden"
                                     style={{ height: isSmallViewport ? '300px' : '500px' }}
                                   >
                                     <img
@@ -1193,18 +1177,18 @@ function GalleryPageContent() {
 
                         {/* Carousel Navigation Bar */}
                         {carouselItems.length > 1 && (
-                          <div className="flex items-center justify-center gap-2 border-t border-bolt-elements-borderColor pt-4 px-2">
+                          <div className="flex items-center justify-center gap-2 border-t border-border pt-4 px-2">
                             <button
                               onClick={scrollPrev}
                               disabled={carouselIndex === 0}
                               className={classNames(
                                 'w-8 h-8 rounded-full flex items-center justify-center transition-colors aspect-square',
                                 carouselIndex === 0
-                                  ? 'opacity-50 cursor-not-allowed bg-bolt-elements-background-depth-2'
-                                  : 'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor',
+                                  ? 'opacity-50 cursor-not-allowed bg-muted'
+                                  : 'bg-muted hover:bg-accent border border-border',
                               )}
                             >
-                              <ChevronLeft size={16} className="text-bolt-elements-textSecondary" />
+                              <ChevronLeft size={16} className="text-muted-foreground" />
                             </button>
                             <div
                               className="flex items-center gap-2 overflow-x-auto"
@@ -1227,19 +1211,15 @@ function GalleryPageContent() {
                                   className={classNames(
                                     'flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all min-w-[150px] truncate border-2',
                                     idx === carouselIndex
-                                      ? 'border-black bg-white text-bolt-elements-textPrimary shadow-sm'
-                                      : 'border-transparent bg-bolt-elements-background-depth-1 text-bolt-elements-textSecondary hover:bg-bolt-elements-background-depth-2',
+                                      ? 'border-black bg-white text-foreground shadow-sm'
+                                      : 'border-transparent bg-card text-muted-foreground hover:bg-muted',
                                   )}
                                 >
                                   {item.type === 'preview' ? (
                                     <>
                                       <SquareMousePointer
                                         size={18}
-                                        className={
-                                          idx === carouselIndex
-                                            ? 'text-bolt-elements-textPrimary'
-                                            : 'text-bolt-elements-textSecondary'
-                                        }
+                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">Live App</span>
                                     </>
@@ -1247,11 +1227,7 @@ function GalleryPageContent() {
                                     <>
                                       <AppWindowMac
                                         size={18}
-                                        className={
-                                          idx === carouselIndex
-                                            ? 'text-bolt-elements-textPrimary'
-                                            : 'text-bolt-elements-textSecondary'
-                                        }
+                                        className={idx === carouselIndex ? 'text-foreground' : 'text-muted-foreground'}
                                       />
                                       <span className="text-xs font-medium">{item.feature.name}</span>
                                     </>
@@ -1265,11 +1241,11 @@ function GalleryPageContent() {
                               className={classNames(
                                 'w-8 h-8 rounded-full flex items-center justify-center transition-colors aspect-square',
                                 carouselIndex === carouselItems.length - 1
-                                  ? 'opacity-50 cursor-not-allowed bg-bolt-elements-background-depth-2'
-                                  : 'bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor',
+                                  ? 'opacity-50 cursor-not-allowed bg-muted'
+                                  : 'bg-muted hover:bg-accent border border-border',
                               )}
                             >
-                              <ChevronRight size={16} className="text-bolt-elements-textSecondary" />
+                              <ChevronRight size={16} className="text-muted-foreground" />
                             </button>
                           </div>
                         )}
@@ -1279,9 +1255,7 @@ function GalleryPageContent() {
                   <div className="p-6 space-y-8">
                     {/* App Name, Tags, and Description Section */}
                     <div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-bolt-elements-textPrimary mb-4">
-                        {displayData.name}
-                      </h2>
+                      <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{displayData.name}</h2>
 
                       {/* Tags */}
                       {displayData.tags && displayData.tags.length > 0 && (
@@ -1289,7 +1263,7 @@ function GalleryPageContent() {
                           {displayData.tags.map((tag, index) => (
                             <span
                               key={index}
-                              className="px-3 py-1 text-sm font-medium bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary rounded-full border border-bolt-elements-borderColor"
+                              className="px-3 py-1 text-sm font-medium bg-muted text-muted-foreground rounded-full border border-border"
                             >
                               {tag}
                             </span>
@@ -1304,7 +1278,7 @@ function GalleryPageContent() {
                             .split(/\n\n+/)
                             .filter((p) => p.trim())
                             .map((paragraph, index) => (
-                              <p key={index} className="text-bolt-elements-textPrimary text-base leading-relaxed">
+                              <p key={index} className="text-foreground text-base leading-relaxed">
                                 {paragraph.trim()}
                               </p>
                             ))}
@@ -1315,16 +1289,12 @@ function GalleryPageContent() {
                     {/* Features Section */}
                     {appContent?.features && appContent.features.length > 0 && (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Features</h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-4">Features</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                           {appContent.features.map((feature, index) => (
-                            <div key={index} className="bg-bolt-elements-background-depth-2 rounded-md p-4">
-                              <h4 className="text-base font-bold text-bolt-elements-textPrimary mb-1.5">
-                                {feature.name}
-                              </h4>
-                              <p className="text-sm text-bolt-elements-textSecondary leading-relaxed">
-                                {feature.description}
-                              </p>
+                            <div key={index} className="bg-muted rounded-md p-4">
+                              <h4 className="text-base font-bold text-foreground mb-1.5">{feature.name}</h4>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                             </div>
                           ))}
                         </div>
@@ -1334,14 +1304,14 @@ function GalleryPageContent() {
                     {/* About this app Section */}
                     {displayData.bulletPoints && displayData.bulletPoints.length > 0 ? (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-3">About this app</h3>
-                        <p className="text-bolt-elements-textPrimary text-base mb-4">
+                        <h3 className="text-2xl font-bold text-foreground mb-3">About this app</h3>
+                        <p className="text-foreground text-base mb-4">
                           {displayData.shortDescription ||
                             'Organize and automate your inventory at the touch of a button.'}
                         </p>
                         <ul className="space-y-2 list-disc list-outside ml-5">
                           {displayData.bulletPoints.map((point, index) => (
-                            <li key={index} className="text-bolt-elements-textPrimary text-base pl-1">
+                            <li key={index} className="text-foreground text-base pl-1">
                               {point}
                             </li>
                           ))}
@@ -1355,12 +1325,10 @@ function GalleryPageContent() {
                     Array.isArray(displayData.useCases) &&
                     displayData.useCases.length > 0 ? (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-3">
-                          Get real-time reporting insights.
-                        </h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-3">Get real-time reporting insights.</h3>
                         <ul className="space-y-2 list-disc list-outside ml-5">
                           {(displayData.useCases as string[]).map((useCase: string, index: number) => (
-                            <li key={index} className="text-bolt-elements-textPrimary text-base pl-1">
+                            <li key={index} className="text-foreground text-base pl-1">
                               {useCase}
                             </li>
                           ))}
@@ -1375,18 +1343,14 @@ function GalleryPageContent() {
                     Array.isArray(appContent.faq) &&
                     appContent.faq.length > 0 ? (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">FAQ</h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-4">FAQ</h3>
                         <Accordion type="single" collapsible className="w-full">
                           {appContent.faq.map((faqItem: { question: string; answer: string }, index: number) => (
-                            <AccordionItem
-                              key={index}
-                              value={`faq-${index}`}
-                              className="border-b border-bolt-elements-borderColor"
-                            >
-                              <AccordionTrigger className="text-left text-bolt-elements-textPrimary hover:no-underline py-4">
+                            <AccordionItem key={index} value={`faq-${index}`} className="border-b border-border">
+                              <AccordionTrigger className="text-left text-foreground hover:no-underline py-4">
                                 {faqItem.question}
                               </AccordionTrigger>
-                              <AccordionContent className="text-bolt-elements-textSecondary pb-4">
+                              <AccordionContent className="text-muted-foreground pb-4">
                                 {faqItem.answer}
                               </AccordionContent>
                             </AccordionItem>
@@ -1398,12 +1362,12 @@ function GalleryPageContent() {
                     {/* Status Section */}
                     {appContent && (appContent.trackerFeatures.length > 0 || appContent.trackerBugs.length > 0) ? (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Status</h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-4">Status</h3>
 
                         {/* Features */}
                         {appContent.trackerFeatures.length > 0 && (
                           <div className="mb-6">
-                            <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-3">Features</h4>
+                            <h4 className="text-lg font-semibold text-foreground mb-3">Features</h4>
                             <div className="space-y-2">
                               {appContent.trackerFeatures.map((feature, index) => {
                                 const getStatusConfig = () => {
@@ -1456,11 +1420,9 @@ function GalleryPageContent() {
                                       className={classNames('flex-shrink-0 mt-0.5', statusConfig.iconColor)}
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-bolt-elements-textPrimary">{feature.name}</div>
+                                      <div className="font-medium text-foreground">{feature.name}</div>
                                       {feature.note && (
-                                        <div className="text-sm text-bolt-elements-textSecondary mt-1">
-                                          {feature.note}
-                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-1">{feature.note}</div>
                                       )}
                                     </div>
                                     {renderLikeButton(
@@ -1495,14 +1457,14 @@ function GalleryPageContent() {
                                       }
                                     }}
                                     className={classNames(
-                                      'flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500',
+                                      'flex-1 px-3 py-2 bg-card border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500',
                                       isSubmittingFeature ? 'cursor-not-allowed opacity-50' : '',
                                     )}
                                   />
                                   <Button
                                     onClick={handleSubmitFeatureRequest}
                                     disabled={!featureDescription.trim() || isSubmittingFeature}
-                                    className="bg-rose-500 hover:bg-rose-600 text-white"
+                                    className="!bg-rose-500 hover:!bg-rose-600 text-white"
                                     size="sm"
                                   >
                                     {isSubmittingFeature ? '...' : 'Submit'}
@@ -1516,7 +1478,7 @@ function GalleryPageContent() {
                         {/* Bugs */}
                         {appContent.trackerBugs.length > 0 && (
                           <div>
-                            <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-3">Known Issues</h4>
+                            <h4 className="text-lg font-semibold text-foreground mb-3">Known Issues</h4>
                             <div className="space-y-2">
                               {appContent.trackerBugs.map((bug, index) => (
                                 <div
@@ -1524,7 +1486,7 @@ function GalleryPageContent() {
                                   className="flex items-start gap-3 p-3 rounded-lg border bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800"
                                 >
                                   <Bug size={20} className="flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
-                                  <div className="flex-1 text-bolt-elements-textPrimary">{bug.description}</div>
+                                  <div className="flex-1 text-foreground">{bug.description}</div>
                                   {renderLikeButton('bug_report', bug.id, bug.liked, bug.likeCount, 'flex-shrink-0')}
                                 </div>
                               ))}
@@ -1550,7 +1512,7 @@ function GalleryPageContent() {
                                       }
                                     }}
                                     className={classNames(
-                                      'flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500',
+                                      'flex-1 px-3 py-2 bg-card border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500',
                                       isSubmittingBug ? 'cursor-not-allowed opacity-50' : '',
                                     )}
                                   />
@@ -1573,16 +1535,13 @@ function GalleryPageContent() {
                     {/* Reviews Section */}
                     {appContent && (
                       <div>
-                        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-4">Reviews</h3>
+                        <h3 className="text-2xl font-bold text-foreground mb-4">Reviews</h3>
 
                         {/* Existing Reviews */}
                         {appContent.trackerReviews && appContent.trackerReviews.length > 0 ? (
                           <div className="space-y-4 mb-8">
                             {appContent.trackerReviews.map((review, index) => (
-                              <div
-                                key={index}
-                                className="bg-bolt-elements-background-depth-2 rounded-lg p-4 border border-bolt-elements-borderColor"
-                              >
+                              <div key={index} className="bg-muted rounded-lg p-4 border border-border">
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                   <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1">
@@ -1593,40 +1552,34 @@ function GalleryPageContent() {
                                           className={classNames(
                                             star <= review.rating
                                               ? 'fill-yellow-400 text-yellow-400'
-                                              : 'text-bolt-elements-textSecondary',
+                                              : 'text-muted-foreground',
                                           )}
                                         />
                                       ))}
                                     </div>
-                                    <span className="text-sm font-medium text-bolt-elements-textPrimary">
-                                      {review.rating}/5
-                                    </span>
+                                    <span className="text-sm font-medium text-foreground">{review.rating}/5</span>
                                   </div>
                                   <div className="flex items-center gap-3">
                                     {review.name && (
-                                      <span className="text-sm text-bolt-elements-textSecondary">{review.name}</span>
+                                      <span className="text-sm text-muted-foreground">{review.name}</span>
                                     )}
                                     {!review.name && (
-                                      <span className="text-sm text-bolt-elements-textSecondary italic">Anonymous</span>
+                                      <span className="text-sm text-muted-foreground italic">Anonymous</span>
                                     )}
                                     {renderLikeButton('review', review.id, review.liked, review.likeCount)}
                                   </div>
                                 </div>
-                                {review.comment && (
-                                  <p className="text-bolt-elements-textPrimary mt-2">{review.comment}</p>
-                                )}
+                                {review.comment && <p className="text-foreground mt-2">{review.comment}</p>}
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-bolt-elements-textSecondary mb-8">
-                            No reviews yet. Be the first to review!
-                          </p>
+                          <p className="text-muted-foreground mb-8">No reviews yet. Be the first to review!</p>
                         )}
 
                         {/* Add Review Form */}
-                        <div className="bg-bolt-elements-background-depth-2 rounded-lg p-6 border border-bolt-elements-borderColor">
-                          <h4 className="text-lg font-semibold text-bolt-elements-textPrimary mb-4">Add a Review</h4>
+                        <div className="bg-muted rounded-lg p-6 border border-border">
+                          <h4 className="text-lg font-semibold text-foreground mb-4">Add a Review</h4>
 
                           {!user && (
                             <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
@@ -1639,7 +1592,7 @@ function GalleryPageContent() {
                           <div className="space-y-4">
                             {/* Rating */}
                             <div>
-                              <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
+                              <label className="block text-sm font-medium text-foreground mb-2">
                                 Rating <span className="text-red-500">*</span>
                               </label>
                               <div className="flex items-center gap-2">
@@ -1659,25 +1612,23 @@ function GalleryPageContent() {
                                       className={classNames(
                                         star <= reviewRating
                                           ? 'fill-yellow-400 text-yellow-400'
-                                          : 'text-bolt-elements-textSecondary hover:text-yellow-400/50',
+                                          : 'text-muted-foreground hover:text-yellow-400/50',
                                       )}
                                     />
                                   </button>
                                 ))}
                                 {reviewRating > 0 && (
-                                  <span className="text-sm text-bolt-elements-textSecondary ml-2">
-                                    {reviewRating}/5
-                                  </span>
+                                  <span className="text-sm text-muted-foreground ml-2">{reviewRating}/5</span>
                                 )}
                               </div>
                             </div>
 
                             {/* Review Association Notification */}
                             {user && (
-                              <div className="p-3 rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor">
-                                <p className="text-xs text-bolt-elements-textSecondary">
+                              <div className="p-3 rounded-lg bg-card border border-border">
+                                <p className="text-xs text-muted-foreground">
                                   Your review will be associated with{' '}
-                                  <span className="font-medium text-bolt-elements-textPrimary">
+                                  <span className="font-medium text-foreground">
                                     {user.user_metadata?.full_name ||
                                       user.user_metadata?.name ||
                                       user.email ||
@@ -1689,9 +1640,7 @@ function GalleryPageContent() {
 
                             {/* Comment */}
                             <div>
-                              <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
-                                Comment
-                              </label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Comment</label>
                               <textarea
                                 value={reviewComment}
                                 onChange={(e) => setReviewComment(e.target.value)}
@@ -1699,7 +1648,7 @@ function GalleryPageContent() {
                                 rows={4}
                                 disabled={!user}
                                 className={classNames(
-                                  'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
+                                  'w-full px-3 py-2 bg-card border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
                                   !user ? 'cursor-not-allowed opacity-50' : '',
                                 )}
                               />
@@ -1709,7 +1658,7 @@ function GalleryPageContent() {
                             <Button
                               onClick={handleSubmitReview}
                               disabled={!user || reviewRating === 0 || isSubmittingReview}
-                              className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white"
+                              className="w-full sm:w-auto !bg-rose-500 hover:!bg-rose-600 text-white"
                             >
                               {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
                             </Button>
@@ -1747,7 +1696,7 @@ function GalleryPageContent() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   What do you want this app for? <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -1757,7 +1706,7 @@ function GalleryPageContent() {
                   rows={6}
                   disabled={!user || isSubmittingEarlyAdopter}
                   className={classNames(
-                    'w-full px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary placeholder:text-bolt-elements-textSecondary focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
+                    'w-full px-3 py-2 bg-card border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 resize-none',
                     !user || isSubmittingEarlyAdopter ? 'cursor-not-allowed opacity-50' : '',
                   )}
                 />
@@ -1774,7 +1723,7 @@ function GalleryPageContent() {
                 <Button
                   onClick={handleSubmitEarlyAdopter}
                   disabled={!user || !earlyAdopterUseCase.trim() || isSubmittingEarlyAdopter}
-                  className="bg-rose-500 hover:bg-rose-600 text-white"
+                  className="!bg-rose-500 hover:!bg-rose-600 text-white"
                 >
                   {isSubmittingEarlyAdopter ? 'Submitting...' : 'Submit'}
                 </Button>
@@ -1791,7 +1740,7 @@ export default function GalleryRoute() {
   return (
     <ClientOnly
       fallback={
-        <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+        <div className="flex h-screen w-full overflow-hidden bg-card">
           <Menu />
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto">

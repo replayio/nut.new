@@ -38,11 +38,9 @@ export function MessageNavigator({
   };
 
   return (
-    <div className="flex items-center gap-1 p-4 bg-background border border-bolt-elements-borderColor rounded-md shadow-md relative z-20">
+    <div className="flex items-center gap-1 p-4 bg-background border border-border rounded-md shadow-md relative z-20">
       {/* Message text */}
-      <div className="flex-1 min-w-0 text-sm text-bolt-elements-textPrimary truncate pr-2">
-        {currentMessage.content}
-      </div>
+      <div className="flex-1 min-w-0 text-sm text-foreground truncate pr-2">{currentMessage.content}</div>
 
       {/* Navigation arrows */}
       <div className="flex items-center gap-0.5">
@@ -51,10 +49,7 @@ export function MessageNavigator({
           size="icon"
           onClick={handlePrevious}
           disabled={!canGoBack}
-          className={cn(
-            'h-7 w-7 text-bolt-elements-textSecondary',
-            canGoBack && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2',
-          )}
+          className={cn('h-7 w-7 text-muted-foreground', canGoBack && 'hover:text-foreground hover:bg-muted')}
         >
           <ChevronLeft size={16} />
         </Button>
@@ -63,24 +58,21 @@ export function MessageNavigator({
           size="icon"
           onClick={handleNext}
           disabled={!canGoForward}
-          className={cn(
-            'h-7 w-7 text-bolt-elements-textSecondary',
-            canGoForward && 'hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2',
-          )}
+          className={cn('h-7 w-7 text-muted-foreground', canGoForward && 'hover:text-foreground hover:bg-muted')}
         >
           <ChevronRight size={16} />
         </Button>
       </div>
 
       {/* Separator */}
-      <div className="w-px h-5 bg-bolt-elements-borderColor mx-1" />
+      <div className="w-px h-5 bg-border mx-1" />
 
       {/* Scroll to bottom */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onScrollToBottom}
-        className="h-7 w-7 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-2"
+        className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted"
         disabled={!showJumpToBottom}
       >
         <ArrowDownWideNarrow size={16} />

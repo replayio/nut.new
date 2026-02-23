@@ -37,7 +37,7 @@ export function PricingCard({
         'relative p-6 rounded-2xl transition-all duration-300',
         'flex flex-col w-full max-w-[340px] md:w-[340px]',
         // Base card styling - same dark background for all cards
-        'bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-2',
+        'bg-muted dark:bg-muted',
         {
           // Emphasized style (for featured plan) - green border and glow
           'border-2 border-green-500/50 shadow-[0_0_30px_-5px_rgba(34,197,94,0.3)]': emphasized,
@@ -56,21 +56,21 @@ export function PricingCard({
         <h3
           className={cn(
             'text-2xl font-bold mb-2',
-            titleColor || (emphasized ? 'text-green-500 dark:text-green-400' : 'text-bolt-elements-textHeading'),
+            titleColor || (emphasized ? 'text-green-500 dark:text-green-400' : 'text-foreground'),
           )}
         >
           {title}
         </h3>
-        <p className="text-sm text-bolt-elements-textSecondary mb-4">{description}</p>
+        <p className="text-sm text-muted-foreground mb-4">{description}</p>
         <div className="mb-4">
-          <span className="text-4xl font-bold text-bolt-elements-textHeading">{price}</span>
-          {pricePeriod && <span className="text-sm text-bolt-elements-textSecondary ml-1">{pricePeriod}</span>}
+          <span className="text-4xl font-bold text-foreground">{price}</span>
+          {pricePeriod && <span className="text-sm text-muted-foreground ml-1">{pricePeriod}</span>}
         </div>
       </div>
 
       {/* Features */}
       <div className="">
-        <h4 className="text-sm font-semibold text-bolt-elements-textHeading mb-3">What's included:</h4>
+        <h4 className="text-sm font-semibold text-foreground mb-3">What's included:</h4>
         <div className="space-y-3">
           {features.map((feature, index) => (
             <div key={index} className="flex items-start gap-2">
@@ -83,17 +83,12 @@ export function PricingCard({
               </div>
               <div className="flex-1 flex items-center gap-2">
                 <span
-                  className={cn(
-                    'text-sm',
-                    feature.included
-                      ? 'text-bolt-elements-textHeading'
-                      : 'text-bolt-elements-textSecondary line-through',
-                  )}
+                  className={cn('text-sm', feature.included ? 'text-foreground' : 'text-muted-foreground line-through')}
                 >
                   {feature.name}
                 </span>
                 <button
-                  className="flex-shrink-0 text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary transition-colors"
+                  className="flex-shrink-0 text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                   title={feature.tooltip || 'More information'}
                   aria-label={feature.tooltip || 'More information'}
                 >

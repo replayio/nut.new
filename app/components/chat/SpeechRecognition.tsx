@@ -17,7 +17,7 @@ export const SpeechRecognitionButton = ({
     <IconButton
       disabled={disabled}
       className={classNames('transition-all', {
-        'text-bolt-elements-item-contentAccent': isListening,
+        'text-primary': isListening,
       })}
       onClick={isListening ? onStop : onStart}
     >

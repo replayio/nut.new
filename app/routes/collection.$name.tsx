@@ -60,15 +60,15 @@ const LoadingSkeleton: React.FC<{ isSmallViewport?: boolean; isSidebarCollapsed?
     )}
   >
     <div className="w-full max-w-7xl mx-auto">
-      <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
+      <div className="bg-card border border-border rounded-md overflow-hidden animate-fade-in">
         <div className="p-8">
           <div className="flex flex-col items-center justify-center gap-6 py-16">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-bolt-elements-borderColor border-t-bolt-elements-textPrimary animate-spin" />
+              <div className="w-16 h-16 rounded-full border-4 border-border border-t-foreground animate-spin" />
             </div>
             <div className="text-center">
-              <p className="text-bolt-elements-textPrimary font-medium mb-1">Loading collection...</p>
-              <p className="text-sm text-bolt-elements-textSecondary">Preparing collection details</p>
+              <p className="text-foreground font-medium mb-1">Loading collection...</p>
+              <p className="text-sm text-muted-foreground">Preparing collection details</p>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ function CollectionPageContent() {
 
   if (isLoading || !loaderCollection) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         <Menu />
         <div className="flex-1 flex flex-col overflow-hidden">
           {isSmallViewport && <Header />}
@@ -148,7 +148,7 @@ function CollectionPageContent() {
   // Error or fallback state
   if (error || !collectionContent) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+      <div className="flex h-screen w-full overflow-hidden bg-card">
         {/* Sidebar - Desktop only */}
         {!isSmallViewport && <Menu />}
 
@@ -162,7 +162,7 @@ function CollectionPageContent() {
             {/* Top bar with breadcrumbs */}
             <div
               className={classNames(
-                'sticky top-0 z-10 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor py-3 sm:py-4 transition-all duration-300',
+                'sticky top-0 z-10 bg-card border-b border-border py-3 sm:py-4 transition-all duration-300',
                 !isSmallViewport
                   ? isSidebarCollapsed
                     ? 'md:pl-[calc(60px+1.5rem)] md:pr-6'
@@ -176,19 +176,16 @@ function CollectionPageContent() {
                   <BreadcrumbList className="text-sm">
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link
-                          to="/"
-                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                        >
+                        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                           Home
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator>
-                      <span className="text-bolt-elements-textSecondary">/</span>
+                      <span className="text-muted-foreground">/</span>
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
+                      <BreadcrumbPage className="text-foreground font-medium truncate">
                         {loaderCollection.name}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
@@ -208,15 +205,13 @@ function CollectionPageContent() {
                   : 'sm:px-6',
               )}
             >
-              <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
+              <div className="bg-card border border-border rounded-md overflow-hidden animate-fade-in">
                 {/* Header */}
-                <div className="relative p-6 border-b border-bolt-elements-borderColor">
+                <div className="relative p-6 border-b border-border">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">
-                        {loaderCollection.name}
-                      </h2>
-                      <p className="text-bolt-elements-textSecondary">{loaderCollection.shortDescription}</p>
+                      <h2 className="text-2xl font-bold text-foreground mb-2">{loaderCollection.name}</h2>
+                      <p className="text-muted-foreground">{loaderCollection.shortDescription}</p>
                     </div>
                   </div>
                 </div>
@@ -229,7 +224,7 @@ function CollectionPageContent() {
                     </div>
                   )}
 
-                  <div className="text-center py-12 text-bolt-elements-textSecondary">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>Unable to load collection details.</p>
                   </div>
                 </div>
@@ -242,7 +237,7 @@ function CollectionPageContent() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-bolt-elements-background-depth-1">
+    <div className="flex h-screen w-full overflow-hidden bg-card">
       {/* Sidebar */}
       <Menu />
 
@@ -256,7 +251,7 @@ function CollectionPageContent() {
           {/* Top bar with breadcrumbs */}
           <div
             className={classNames(
-              'sticky top-0 z-10 bg-bolt-elements-background-depth-1 border-b border-bolt-elements-borderColor py-3 sm:py-4 transition-all duration-300',
+              'sticky top-0 z-10 bg-card border-b border-border py-3 sm:py-4 transition-all duration-300',
               !isSmallViewport
                 ? isSidebarCollapsed
                   ? 'md:pl-[calc(60px+1.5rem)] md:pr-6'
@@ -270,34 +265,26 @@ function CollectionPageContent() {
                 <BreadcrumbList className="text-sm">
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link
-                        to="/"
-                        className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                      >
+                      <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                         Home
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator>
-                    <span className="text-bolt-elements-textSecondary">/</span>
+                    <span className="text-muted-foreground">/</span>
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link
-                        to="/"
-                        className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
-                      >
+                      <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                         Collection
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator>
-                    <span className="text-bolt-elements-textSecondary">/</span>
+                    <span className="text-muted-foreground">/</span>
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
-                    <BreadcrumbPage className="text-bolt-elements-textPrimary font-medium truncate">
-                      {displayData.name}
-                    </BreadcrumbPage>
+                    <BreadcrumbPage className="text-foreground font-medium truncate">{displayData.name}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -315,15 +302,13 @@ function CollectionPageContent() {
                 : 'sm:px-6',
             )}
           >
-            <div className="bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md overflow-hidden animate-fade-in">
+            <div className="bg-card border border-border rounded-md overflow-hidden animate-fade-in">
               {/* Header */}
-              <div className="relative p-6 border-b border-bolt-elements-borderColor">
+              <div className="relative p-6 border-b border-border">
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-bolt-elements-textPrimary mb-2">{displayData.name}</h2>
-                    <p className="text-bolt-elements-textSecondary text-lg leading-relaxed">
-                      {displayData.shortDescription}
-                    </p>
+                    <h2 className="text-2xl font-bold text-foreground mb-2">{displayData.name}</h2>
+                    <p className="text-muted-foreground text-lg leading-relaxed">{displayData.shortDescription}</p>
                   </div>
                 </div>
               </div>
@@ -333,8 +318,8 @@ function CollectionPageContent() {
                 {/* Long Description */}
                 {collectionContent?.longDescription && (
                   <div>
-                    <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-3">About this collection</h3>
-                    <p className="text-bolt-elements-textSecondary leading-relaxed whitespace-pre-line">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">About this collection</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                       {collectionContent.longDescription}
                     </p>
                   </div>
@@ -343,7 +328,7 @@ function CollectionPageContent() {
                 {/* Apps in Collection */}
                 {collectionContent?.apps && collectionContent.apps.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       Apps in this collection ({collectionContent.apps.length})
                     </h3>
                     <div className="space-y-4">
@@ -361,11 +346,11 @@ function CollectionPageContent() {
                           <button
                             key={index}
                             onClick={() => handleAppClick(matchingApp)}
-                            className="w-full text-left group bg-bolt-elements-background-depth-1 rounded-md p-5 border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-2 transition-colors"
+                            className="w-full text-left group bg-card rounded-md p-5 border border-border hover:bg-muted transition-colors"
                           >
                             <div className="flex items-start gap-4">
                               {matchingApp.screenshotURL && (
-                                <div className="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden border border-bolt-elements-borderColor">
+                                <div className="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden border border-border">
                                   <img
                                     src={matchingApp.screenshotURL}
                                     alt={matchingApp.name}
@@ -374,14 +359,14 @@ function CollectionPageContent() {
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-base font-semibold text-bolt-elements-textPrimary mb-1.5 group-hover:text-bolt-elements-textHeading transition-colors">
+                                <h4 className="text-base font-semibold text-foreground mb-1.5 group-hover:text-foreground transition-colors">
                                   {matchingApp.name}
                                 </h4>
-                                <p className="text-sm text-bolt-elements-textSecondary leading-relaxed">
+                                <p className="text-sm text-muted-foreground leading-relaxed">
                                   {collectionApp.description || matchingApp.shortDescription}
                                 </p>
                               </div>
-                              <div className="flex-shrink-0 text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors">
+                              <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
                                 <svg
                                   className="w-5 h-5"
                                   fill="none"
@@ -401,7 +386,7 @@ function CollectionPageContent() {
                 )}
 
                 {(!collectionContent?.apps || collectionContent.apps.length === 0) && (
-                  <div className="text-center py-12 text-bolt-elements-textSecondary">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>No apps found in this collection.</p>
                   </div>
                 )}

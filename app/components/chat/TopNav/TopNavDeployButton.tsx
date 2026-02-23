@@ -71,7 +71,7 @@ export function TopNavDeployButton() {
           variant="outline"
           onClick={handleOpenModal}
           disabled={isDeploying}
-          className="h-9 px-4 gap-2 rounded-full border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary shadow-xs disabled:opacity-60"
+          className="h-9 px-4 gap-2 rounded-full border-border bg-card hover:bg-muted text-foreground shadow-xs disabled:opacity-60"
         >
           {isDeploying ? (
             <Loader2 className="animate-spin" size={16} />
@@ -79,7 +79,7 @@ export function TopNavDeployButton() {
             <Check className="text-green-500" size={16} />
           ) : null}
           <span className="text-sm font-medium">Deploy</span>
-          <ChevronDown size={16} className="text-bolt-elements-textSecondary" />
+          <ChevronDown size={16} className="text-muted-foreground" />
         </Button>
       </WithTooltip>
     </TooltipProvider>

@@ -39,7 +39,7 @@ export const SettingsPanel = () => {
   const isLoading = !appSummary && appId;
 
   return (
-    <div className="@container flex flex-col h-full w-full bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor overflow-hidden">
+    <div className="@container flex flex-col h-full w-full bg-card rounded-md border border-border overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
@@ -53,27 +53,25 @@ export const SettingsPanel = () => {
           </div>
         ) : !appId ? (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <div className="w-16 h-16 bg-bolt-elements-background-depth-2 rounded-2xl flex items-center justify-center mb-4 border border-bolt-elements-borderColor">
-              <Settings className="text-bolt-elements-textSecondary" size={24} />
+            <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4 border border-border">
+              <Settings className="text-muted-foreground" size={24} />
             </div>
-            <h3 className="text-lg font-semibold text-bolt-elements-textHeading mb-2">No App Selected</h3>
-            <p className="text-bolt-elements-textSecondary text-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-2">No App Selected</h3>
+            <p className="text-muted-foreground text-sm">
               Start a conversation to create an app and configure its settings.
             </p>
           </div>
         ) : (
           <div className="p-4 space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-bolt-elements-textHeading mb-3 flex items-center gap-2">
-                Application Name
-              </h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">Application Name</h3>
               <ChatDescription />
             </div>
 
             {/* Authentication Settings */}
             {appSummary && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <AuthSelectorComponent appSummary={appSummary} />
               </>
             )}
@@ -81,7 +79,7 @@ export const SettingsPanel = () => {
             {/* Permissions */}
             {appId && isAppAccessAllowed(permissions, AppAccessKind.SetPermissions, user?.email ?? '', isOwner) && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <PermissionsSelectionComponent />
               </>
             )}
@@ -89,7 +87,7 @@ export const SettingsPanel = () => {
             {/* API Integrations */}
             {appSummary && allSecrets.length > 0 && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <SecretsComponent appSummary={appSummary} />
               </>
             )}
@@ -97,7 +95,7 @@ export const SettingsPanel = () => {
             {/* Experimental Features */}
             {appSummary && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <ExperimentalFeaturesComponent appSummary={appSummary} />
               </>
             )}
@@ -105,7 +103,7 @@ export const SettingsPanel = () => {
             {/* Copy App */}
             {appId && isAppAccessAllowed(permissions, AppAccessKind.Copy, user?.email ?? '', isOwner) && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <CopyApp />
               </>
             )}
@@ -113,7 +111,7 @@ export const SettingsPanel = () => {
             {/* Clear App History */}
             {appId && isAppAccessAllowed(permissions, AppAccessKind.Delete, user?.email ?? '', isOwner) && (
               <>
-                <div className="border-t border-bolt-elements-borderColor" />
+                <div className="border-t border-border" />
                 <ClearAppHistory />
               </>
             )}

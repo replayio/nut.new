@@ -45,21 +45,19 @@ export const AppCard: React.FC<AppCardProps> = ({
     switch (status) {
       case 'in-progress':
         return {
-          badge: 'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor',
+          badge: 'text-foreground bg-accent border-border',
           indicator: (
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin shadow-sm" />
-              {progressText && (
-                <span className="text-sm font-medium text-bolt-elements-textPrimary">{progressText}</span>
-              )}
+              <div className="w-4 h-4 rounded-full border-2 border-border border-t-blue-500 animate-spin shadow-sm" />
+              {progressText && <span className="text-sm font-medium text-foreground">{progressText}</span>}
             </div>
           ),
         };
       case 'completed':
         return {
-          badge: 'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor',
+          badge: 'text-foreground bg-accent border-border',
           indicator: (
-            <div className="flex items-center gap-2 text-bolt-elements-icon-success">
+            <div className="flex items-center gap-2 text-green-500">
               <Check size={14} strokeWidth={2.5} />
               <span className="text-sm font-medium text-green-600">Completed</span>
             </div>
@@ -67,30 +65,27 @@ export const AppCard: React.FC<AppCardProps> = ({
         };
       case 'failed':
         return {
-          badge: 'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor',
+          badge: 'text-foreground bg-accent border-border',
           indicator: (
             <div className="flex items-center gap-2">
-              {progressText && (
-                <span className="text-sm font-medium text-bolt-elements-textPrimary">{progressText}</span>
-              )}
+              {progressText && <span className="text-sm font-medium text-foreground">{progressText}</span>}
             </div>
           ),
         };
       case 'canceled':
         return {
-          badge: 'text-bolt-elements-textPrimary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor',
+          badge: 'text-foreground bg-accent border-border',
           indicator: (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-bolt-elements-textPrimary">Canceled</span>
+              <span className="text-sm font-medium text-foreground">Canceled</span>
             </div>
           ),
         };
       default:
         return {
-          badge:
-            'text-bolt-elements-textSecondary bg-bolt-elements-background-depth-3 border-bolt-elements-borderColor',
+          badge: 'text-muted-foreground bg-accent border-border',
           indicator: progressText ? (
-            <span className="text-sm font-medium text-bolt-elements-textSecondary">{progressText}</span>
+            <span className="text-sm font-medium text-muted-foreground">{progressText}</span>
           ) : null,
         };
     }
@@ -101,31 +96,25 @@ export const AppCard: React.FC<AppCardProps> = ({
   return (
     <div
       className={classNames('relative rounded-xl transition-all duration-300 shadow-sm group', {
-        'cursor-pointer hover:shadow-xl hover:shadow-bolt-elements-focus/10 hover:scale-[1.03] hover:-translate-y-2':
-          !!onClick,
+        'cursor-pointer hover:shadow-xl hover:shadow-ring/10 hover:scale-[1.03] hover:-translate-y-2': !!onClick,
       })}
       onClick={onClick}
     >
       {status === 'in-progress' && (
         <div className="absolute inset-0 p-[2px] rounded-xl animate-focus-border pointer-events-none">
-          <div className="w-full h-full bg-bolt-elements-background-depth-2 rounded-[8px]" />
+          <div className="w-full h-full bg-muted rounded-[8px]" />
         </div>
       )}
       <div
-        className={classNames(
-          'bg-bolt-elements-background-depth-2 rounded-xl transition-all duration-300 relative overflow-hidden',
-          {
-            'border border-bolt-elements-borderColor hover:border-bolt-elements-focus/60':
-              !!onClick && status !== 'in-progress',
-            'border-transparent': status === 'in-progress',
-            'bg-gradient-to-br from-bolt-elements-background-depth-2 via-bolt-elements-background-depth-2 to-blue-500/15':
-              status === 'in-progress',
-            'border border-bolt-elements-borderColor': !onClick,
-          },
-        )}
+        className={classNames('bg-muted rounded-xl transition-all duration-300 relative overflow-hidden', {
+          'border border-border hover:border-ring/60': !!onClick && status !== 'in-progress',
+          'border-transparent': status === 'in-progress',
+          'bg-gradient-to-br from-muted via-muted to-blue-500/15': status === 'in-progress',
+          'border border-border': !onClick,
+        })}
       >
         {onClick && (
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-bolt-elements-focus/8 via-bolt-elements-focus/3 to-bolt-elements-focus/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-ring/8 via-ring/3 to-ring/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
 
         {status === 'in-progress' && (
@@ -144,21 +133,21 @@ export const AppCard: React.FC<AppCardProps> = ({
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h3 className="text-base font-semibold text-bolt-elements-textHeading truncate">{title}</h3>
+              <h3 className="text-base font-semibold text-foreground truncate">{title}</h3>
               {statusStyles.indicator && <div className="mt-1.5 flex items-center">{statusStyles.indicator}</div>}
             </div>
           </div>
 
-          <div className="text-sm text-bolt-elements-textSecondary leading-relaxed mb-3">{description}</div>
+          <div className="text-sm text-muted-foreground leading-relaxed mb-3">{description}</div>
 
           {children && <div className="mt-3">{children}</div>}
 
           {onClick && (
-            <div className="mt-3 pt-3 border-t border-bolt-elements-borderColor border-opacity-30">
+            <div className="mt-3 pt-3 border-t border-border/30">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-bolt-elements-textSecondary">View details</span>
+                <span className="text-muted-foreground">View details</span>
                 <ChevronRight
-                  className="text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary transition-colors duration-200"
+                  className="text-muted-foreground group-hover:text-foreground transition-colors duration-200"
                   size={12}
                 />
               </div>

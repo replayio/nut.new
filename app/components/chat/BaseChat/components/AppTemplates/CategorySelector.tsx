@@ -43,7 +43,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             </Button>
           );
         })}
-        <label className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-bolt-elements-textHeading cursor-pointer transition-all duration-200 border border-bolt-elements-borderColor">
+        <label className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-foreground cursor-pointer transition-all duration-200 border border-border">
           <input
             type="checkbox"
             checked={showAll}
@@ -59,7 +59,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           placeholder="Search apps by name..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full max-w-md px-4 py-2.5 rounded-lg text-sm text-bolt-elements-textHeading bg-bolt-elements-background border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:border-transparent placeholder:text-bolt-elements-textSecondary"
+          className="w-full max-w-md px-4 py-2.5 rounded-lg text-sm text-foreground bg-background border border-border focus:outline-none focus:ring-2 focus:border-transparent placeholder:text-muted-foreground"
         />
       </div>
     </div>

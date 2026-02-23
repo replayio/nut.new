@@ -46,7 +46,7 @@ const Features = () => {
           <div className="flex items-center pl-2">
             <div
               className={classNames(
-                'w-4 h-4 rounded-full border-2 border-bolt-elements-borderColor border-t-blue-500 animate-spin shadow-sm',
+                'w-4 h-4 rounded-full border-2 border-border border-t-blue-500 animate-spin shadow-sm',
               )}
             />
           </div>
@@ -79,23 +79,23 @@ const Features = () => {
     return (
       <div
         key={index}
-        className="rounded-xl bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor overflow-hidden mb-4 mt-1 shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-[1.01] group"
+        className="rounded-xl bg-card border border-border overflow-hidden mb-4 mt-1 shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-[1.01] group"
       >
         <div
           onClick={() => toggleFeatureCollapse(index)}
-          className="flex justify-between items-center p-4 border-b border-bolt-elements-borderColor border-opacity-50 cursor-pointer hover:bg-bolt-elements-background-depth-2 bg-opacity-30 transition-all duration-200"
+          className="flex justify-between items-center p-4 border-b border-border/50 cursor-pointer hover:bg-muted/30 transition-all duration-200"
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:scale-105">
+            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 bg-muted rounded-lg border border-border shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:scale-105">
               {isCollapsed ? (
                 <ChevronDown
-                  className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+                  className="text-foreground transition-transform duration-200 group-hover:scale-110"
                   size={16}
                   strokeWidth={2.5}
                 />
               ) : (
                 <ChevronUp
-                  className="text-bolt-elements-textPrimary transition-transform duration-200 group-hover:scale-110"
+                  className="text-foreground transition-transform duration-200 group-hover:scale-110"
                   size={16}
                   strokeWidth={2.5}
                 />
@@ -103,8 +103,8 @@ const Features = () => {
             </div>
 
             <div className="gap-2 min-w-0 flex-1">
-              <div className="text-bolt-elements-textHeading text-base font-bold">{formatPascalCaseName(name)}</div>
-              <div className="flex items-center group text-bolt-elements-textSecondary min-w-0">
+              <div className="text-foreground text-base font-bold">{formatPascalCaseName(name)}</div>
+              <div className="flex items-center group text-muted-foreground min-w-0">
                 <span>{description}</span>
               </div>
             </div>

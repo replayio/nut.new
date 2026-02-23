@@ -11,15 +11,15 @@ const LandingPage = () => {
 
   return (
     <TooltipProvider>
-      <div className="w-full h-full overflow-y-auto bg-bolt-elements-background-depth-1 relative">
+      <div className="w-full h-full overflow-y-auto bg-card relative">
         {!isLoggedIn && (
           <div className="fixed top-2 left-3 z-[1000] cursor-pointer">
             <a
               href="/"
-              className="block p-2 bg-bolt-elements-background-depth-2 rounded-lg border border-bolt-elements-borderColor hover:bg-bolt-elements-background-depth-3 transition-all duration-200 cursor-pointer"
+              className="block p-2 bg-muted rounded-lg border border-border hover:bg-accent transition-all duration-200 cursor-pointer"
             >
               <Home
-                className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-all duration-200 hover:scale-105 cursor-pointer"
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-105 cursor-pointer"
                 size={20}
               />
             </a>
