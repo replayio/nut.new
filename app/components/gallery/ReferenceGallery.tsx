@@ -4,6 +4,7 @@ import { ReferenceAppCard } from './components/ReferenceAppCard';
 import { getReferenceAppSummaries, type ReferenceAppSummary } from '~/lib/replay/ReferenceApps';
 import { classNames } from '~/utils/classNames';
 import useViewport from '~/lib/hooks';
+import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs';
 
 // Category icons mapping
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -188,7 +189,7 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-3 text-sm bg-transparent border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-9 pr-4 py-3 text-sm bg-transparent border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
             />
           </div>
 
@@ -247,36 +248,44 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
 
           {/* Category tabs */}
           <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-            {categories.map((category) => {
-              const isSelected = selectedCategory === category.name;
-              const icon = CATEGORY_ICONS[category.name];
+            <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v)}>
+              <TabsList className="flex items-center gap-2 p-0 h-auto bg-transparent border-0 rounded-none">
+                {categories.map((category) => {
+                  const icon = CATEGORY_ICONS[category.name];
 
-              return (
-                <button
-                  key={category.name}
-                  onClick={() => setSelectedCategory(category.name)}
-                  className={classNames(
-                    'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
-                    isSelected
-                      ? 'bg-foreground text-background'
-                      : 'bg-transparent border border-border text-foreground hover:bg-accent',
-                  )}
-                >
-                  {icon}
-                  <span>{category.name}</span>
-                </button>
-              );
-            })}
+                  return (
+                    <TabsTrigger
+                      key={category.name}
+                      value={category.name}
+                      className={classNames(
+                        'w-[142px] inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 border border-transparent',
+                        'data-[state=inactive]:bg-transparent data-[state=inactive]:text-foreground data-[state=inactive]:hover:bg-accent/50',
+                        'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border-border',
+                      )}
+                    >
+                      {icon}
+                      <span>{category.name}</span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
 
             {/* Show All toggle */}
-            <label className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-foreground cursor-pointer border border-border hover:bg-accent transition-colors whitespace-nowrap">
+            <label className={classNames(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer hover:bg-accent transition-colors whitespace-nowrap flex-shrink-0",
+              {
+                "bg-background text-foreground shadow-sm border border-border": showAll,
+                "bg-transparent text-foreground hover:bg-accent/50": !showAll,
+              }
+              )}>
               <input
                 type="checkbox"
                 checked={showAll}
                 onChange={(e) => setShowAll(e.target.checked)}
                 className="w-4 h-4 rounded border-border"
               />
-              <span>Show All</span>
+              <span>Show Hidden</span>
             </label>
           </div>
         </>
@@ -324,28 +333,28 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
                 className={classNames(
-                  'flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
+                  'flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
                   canScrollPrev
                     ? 'text-foreground active:scale-95 hover:bg-accent cursor-pointer'
                     : 'text-muted-foreground/40 cursor-not-allowed opacity-50',
                 )}
                 aria-label="Previous app"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={16} />
               </button>
               <button
                 type="button"
                 onClick={scrollNext}
                 disabled={!canScrollNext}
                 className={classNames(
-                  'flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
+                  'flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
                   canScrollNext
                     ? 'text-foreground active:scale-95 hover:bg-accent cursor-pointer'
                     : 'text-muted-foreground/40 cursor-not-allowed opacity-50',
                 )}
                 aria-label="Next app"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={16} />
               </button>
             </div>
           )}

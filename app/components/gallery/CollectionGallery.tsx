@@ -163,28 +163,28 @@ export const CollectionGallery = ({ className }: CollectionGalleryProps) => {
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
                 className={classNames(
-                  'flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
+                  'flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
                   canScrollPrev
                     ? 'text-foreground active:scale-95 hover:bg-accent cursor-pointer'
                     : 'text-muted-foreground/40 cursor-not-allowed opacity-50',
                 )}
                 aria-label="Previous collection"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={16} />
               </button>
               <button
                 type="button"
                 onClick={scrollNext}
                 disabled={!canScrollNext}
                 className={classNames(
-                  'flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
+                  'flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md border border-border transition-all',
                   canScrollNext
                     ? 'text-foreground active:scale-95 hover:bg-accent cursor-pointer'
                     : 'text-muted-foreground/40 cursor-not-allowed opacity-50',
                 )}
                 aria-label="Next collection"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={16} />
               </button>
             </div>
           )}

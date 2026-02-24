@@ -50,13 +50,9 @@ export const Menu = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSmallViewport]);
 
-  // On mobile, only show menu when isOpen is true, and always show expanded (not collapsed)
-  const shouldShowMenu = !isSmallViewport || isOpen;
+  // On mobile, always render but use transform to slide in/out
+  // On desktop, always show
   const effectiveCollapsed = isSmallViewport ? false : isCollapsed;
-
-  if (!shouldShowMenu) {
-    return null;
-  }
 
   // Handle click on collapsed sidebar to expand it
   const handleSidebarClick = () => {
@@ -67,15 +63,35 @@ export const Menu = () => {
     }
   };
 
+  // Handle backdrop click to close menu on mobile
+  const handleBackdropClick = () => {
+    if (isSmallViewport && isOpen) {
+      sidebarMenuStore.close();
+    }
+  };
+
   return (
-    <div
-      ref={menuRef}
-      onClick={handleSidebarClick}
-      className={classNames(
-        'flex selection-accent flex-col side-menu fixed top-0 w-full h-full bg-muted border-r border-border/50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300 ease-out',
-        effectiveCollapsed ? 'lg:w-[60px] cursor-pointer' : 'lg:w-[260px]',
+    <>
+      {/* Mobile backdrop overlay */}
+      {isSmallViewport && (
+        <div
+          className={classNames(
+            'fixed inset-0 bg-black/50 z-[39] transition-opacity duration-300 ease-out lg:hidden',
+            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+          )}
+          onClick={handleBackdropClick}
+        />
       )}
-    >
+      <div
+        ref={menuRef}
+        onClick={handleSidebarClick}
+        className={classNames(
+          'flex selection-accent flex-col side-menu fixed top-0 left-0 h-full bg-muted border-r border-border/50 z-sidebar shadow-2xl hover:shadow-3xl text-sm backdrop-blur-sm transition-all duration-300 ease-out',
+          effectiveCollapsed ? 'lg:w-[60px] cursor-pointer' : 'lg:w-[260px]',
+          isSmallViewport ? 'w-[280px]' : 'w-full',
+          isSmallViewport && !isOpen ? '-translate-x-full' : 'translate-x-0',
+        )}
+      >
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         {/* Header */}
         <div
@@ -365,5 +381,6 @@ export const Menu = () => {
       </div>
       <SettingsWindow open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
+    </>
   );
 };
