@@ -12,6 +12,8 @@ import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from
 import { chatStore } from '~/lib/stores/chat';
 import { logger } from '~/utils/logger';
 import useViewport from '~/lib/hooks';
+import { Checkbox } from '~/components/ui/Checkbox';
+import { Spinner } from '~/components/ui/Spinner';
 
 type SortOption = 'createdAt' | 'updatedAt' | 'title';
 type DialogContent = { type: 'delete'; item: AppLibraryEntry } | null;
@@ -214,18 +216,14 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
                   You are about to delete <strong>{dialogContent.item.title}</strong>.
                 </p>
                 <p className="mt-1">Are you sure you want to delete this app?</p>
-                <div className="mt-4 flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                <div className="mt-4">
+                  <Checkbox
                     id="skipConfirmDeleteGallery"
                     checked={skipConfirmDeleteChecked}
-                    onChange={(e) => {
-                      setSkipConfirmDeleteChecked(e.target.checked);
-                    }}
+                    onCheckedChange={(checked) => setSkipConfirmDeleteChecked(checked === true)}
+                    label="Don't ask me again"
+                    size="sm"
                   />
-                  <label htmlFor="skipConfirmDeleteGallery" className="text-sm">
-                    Don't ask me again
-                  </label>
                 </div>
               </div>
             </DialogDescription>
@@ -268,7 +266,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
         {/* Loading state */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-border border-t-foreground rounded-full animate-spin" />
+            <Spinner size="md" />
           </div>
         ) : isSmallViewport ? (
           // Mobile carousel
@@ -478,10 +476,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
       {/* Loading state */}
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-border border-t-foreground rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading projects...</p>
-          </div>
+          <Spinner size="lg" text="Loading projects..." />
         </div>
       ) : displayApps.length === 0 && !searchValue ? (
         // Empty state (no apps at all)

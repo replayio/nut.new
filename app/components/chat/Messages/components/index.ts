@@ -1,6 +1,8 @@
 export { AssistantMessage } from './AssistantMessage';
 export { AuthSelectorCard } from './AuthSelectorCard';
 export { ContinueBuildCard } from './ContinueBuildCard';
+export { FeatureCard } from './FeatureCard';
+export { IntegrationTestsCard } from './IntegrationTestsCard';
 export { JumpToBottom } from './JumpToBottom';
 export { MessageActions } from './MessageActions';
 export { MessageContents } from './MessageContents';

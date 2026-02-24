@@ -56,6 +56,8 @@ body {
 }
 
 :root {
+  --header-height: 54px;
+  --chat-max-width: 600px;
   --gradient-opacity: 0.8;
   --primary-color: rgba(244, 63, 94, var(--gradient-opacity));
   --secondary-color: rgba(225, 29, 72, var(--gradient-opacity));

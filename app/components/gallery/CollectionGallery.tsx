@@ -4,6 +4,7 @@ import { CollectionCard } from './components/CollectionCard';
 import { getCollections, type CollectionPageIndexEntry } from '~/lib/replay/ReferenceApps';
 import { classNames } from '~/utils/classNames';
 import useViewport from '~/lib/hooks';
+import { Spinner } from '~/components/ui/Spinner';
 
 interface CollectionGalleryProps {
   className?: string;
@@ -122,10 +123,7 @@ export const CollectionGallery = ({ className }: CollectionGalleryProps) => {
       {/* Loading state */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-8 h-8 border-4 border-border border-t-foreground rounded-full animate-spin" />
-            <p className="text-muted-foreground text-sm">Loading collections...</p>
-          </div>
+          <Spinner size="md" text="Loading collections..." />
         </div>
       ) : filteredCollections.length === 0 ? (
         <div className="flex items-center justify-center py-12">
