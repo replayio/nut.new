@@ -15,6 +15,8 @@ import {
   AssistantMessage,
   PendingIndicator,
   MessageNavigator,
+  FeatureCard,
+  IntegrationTestsCard,
 } from './components';
 import {
   APP_SUMMARY_CATEGORY,
@@ -31,8 +33,6 @@ import { userStore } from '~/lib/stores/auth';
 import { shouldDisplayMessage } from '~/lib/replay/SendChatMessage';
 import type { ChatMessageParams } from '~/components/chat/ChatComponent/components/ChatImplementer/ChatImplementer';
 import { subscriptionStore } from '~/lib/stores/subscriptionStatus';
-import { openFeatureModal, openIntegrationTestsModal } from '~/lib/stores/featureModal';
-import { InfoCard } from '~/components/ui/InfoCard';
 import type { AppLibraryEntry } from '~/lib/persistence/apps';
 
 interface MessagesProps {
@@ -451,71 +451,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
       return timelineItems.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
     };
 
-    const renderFeature = (feature: any) => {
-      const iconType =
-        feature.status === AppFeatureStatus.ImplementationInProgress
-          ? 'loading'
-          : feature.status === AppFeatureStatus.Failed
-            ? 'error'
-            : 'success';
-
-      const variant = feature.status === AppFeatureStatus.ImplementationInProgress ? 'active' : 'default';
-
-      // Find the index of this feature in the filtered array for modal
-      const filteredFeatures = appSummary?.features?.filter((f) => f.kind !== AppFeatureKind.DesignAPIs) || [];
-      const modalIndex = filteredFeatures.findIndex((f) => f === feature);
-
-      return (
-        <div className="mt-5">
-          <InfoCard
-            title={feature.name}
-            description={feature.description}
-            iconType={iconType}
-            variant={variant}
-            onCardClick={
-              modalIndex !== -1
-                ? () => {
-                    openFeatureModal(modalIndex, filteredFeatures.length);
-                  }
-                : undefined
-            }
-            className="shadow-sm"
-            handleSendMessage={sendMessage}
-          />
-        </div>
-      );
-    };
-
-    const renderIntegrationTestsGroup = (tests: AppFeature[]) => {
-      // Determine the overall status based on the tests
-      const hasFailedTests = tests.some((t) => t.status === AppFeatureStatus.Failed);
-      const allImplemented = tests.every((t) => t.status === AppFeatureStatus.Implemented);
-
-      const iconType = hasFailedTests ? 'error' : allImplemented ? 'success' : 'loading';
-      const variant = 'default';
-
-      // Create a summary description
-      const passedCount = tests.filter((t) => t.status === AppFeatureStatus.Implemented).length;
-      const failedCount = tests.filter((t) => t.status === AppFeatureStatus.Failed).length;
-      const description = `${tests.length} integration test${tests.length !== 1 ? 's' : ''} • ${passedCount} passed${failedCount > 0 ? ` • ${failedCount} failed` : ''}`;
-
-      return (
-        <div className="mt-5">
-          <InfoCard
-            title="Integration Tests"
-            description={description}
-            iconType={iconType}
-            variant={variant}
-            onCardClick={() => {
-              openIntegrationTestsModal('completed');
-            }}
-            className="shadow-sm"
-            handleSendMessage={sendMessage}
-          />
-        </div>
-      );
-    };
-
     const renderMessage = (message: Message, index: number) => {
       const { role } = message;
       const isUserMessage = role === 'user';
@@ -615,9 +550,23 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
                   if (item.type === 'message') {
                     return renderMessage(item.data as Message, index);
                   } else if (item.type === 'feature') {
-                    return renderFeature(item.data as AppFeature);
+                    const feature = item.data as AppFeature;
+                    return (
+                      <FeatureCard
+                        key={feature.name}
+                        feature={feature}
+                        allFeatures={appSummary?.features || []}
+                        sendMessage={sendMessage}
+                      />
+                    );
                   } else if (item.type === 'integrationTestsGroup') {
-                    return renderIntegrationTestsGroup(item.data as AppFeature[]);
+                    return (
+                      <IntegrationTestsCard
+                        key="integration-tests-group"
+                        tests={item.data as AppFeature[]}
+                        sendMessage={sendMessage}
+                      />
+                    );
                   }
                   return null;
                 })}

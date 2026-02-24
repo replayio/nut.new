@@ -4,6 +4,7 @@ import type { AuthError } from '@supabase/supabase-js';
 import { GoogleIcon } from '~/components/icons/google-icon';
 import { UserPlus } from '~/components/ui/Icon';
 import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/Checkbox';
 
 interface SignUpFormProps {
   onToggleForm: () => void;
@@ -201,32 +202,12 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
         )}
 
         <div className="p-4 bg-card rounded-md border border-border/30">
-          <div className="flex items-start gap-3">
-            <div className="relative flex items-center mt-0.5">
-              <input
-                type="checkbox"
-                id="terms"
-                checked={isChecked}
-                onChange={() => setIsChecked(!isChecked)}
-                className="peer appearance-none h-5 w-5 rounded-md border-2 border-input bg-background cursor-pointer checked:bg-primary checked:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200"
-              />
-              <svg
-                className="absolute left-0 w-5 h-5 pointer-events-none opacity-0 peer-checked:opacity-100 text-primary-foreground transition-opacity duration-200"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <label className="text-muted-foreground cursor-pointer text-sm leading-relaxed" htmlFor="terms">
-              I agree to receive update emails from Replay and understand the terms of service.
-            </label>
-          </div>
+          <Checkbox
+            id="terms"
+            checked={isChecked}
+            onCheckedChange={(checked) => setIsChecked(checked === true)}
+            label="I agree to receive update emails from Replay and understand the terms of service."
+          />
         </div>
 
         <Button type="submit" disabled={isProcessing || disabled} className="w-full h-12" size="lg">

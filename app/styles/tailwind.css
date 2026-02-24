@@ -141,6 +141,83 @@
   .max-w-chat {
     max-width: var(--chat-max-width);
   }
+
+  /* Common flex utilities */
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+
+  .flex-start {
+    @apply flex items-center justify-start;
+  }
+
+  .flex-end {
+    @apply flex items-center justify-end;
+  }
+
+  /* Card utilities */
+  .card-base {
+    @apply rounded-xl bg-card border border-border shadow-sm;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md transition-all duration-200 hover:scale-[1.01];
+  }
+
+  .card-interactive {
+    @apply card-base card-hover cursor-pointer;
+  }
+
+  /* Gradient button utilities */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white;
+  }
+
+  .gradient-danger {
+    @apply bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white;
+  }
+
+  /* Focus ring utility */
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Icon container utility */
+  .icon-container {
+    @apply flex items-center justify-center rounded-md bg-muted text-muted-foreground;
+  }
+
+  /* Truncate utilities */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Animation utilities */
+  .animate-in {
+    animation: fade-in 0.2s ease-out;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  .hover-scale-sm {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
 }
 
 /* Hide scrollbars on all devices */

@@ -4,6 +4,7 @@ import { ReferenceAppCard } from './components/ReferenceAppCard';
 import { getReferenceAppSummaries, type ReferenceAppSummary } from '~/lib/replay/ReferenceApps';
 import { classNames } from '~/utils/classNames';
 import useViewport from '~/lib/hooks';
+import { Spinner } from '~/components/ui/Spinner';
 
 // Category icons mapping
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -286,8 +287,7 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-border border-t-foreground rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading apps...</p>
+            <Spinner size="lg" text="Loading apps..." />
           </div>
         </div>
       ) : filteredApps.length === 0 ? (
