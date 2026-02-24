@@ -9,7 +9,6 @@ import { chatStore, doListenAppResponses, onChatResponse } from '~/lib/stores/ch
 import { database } from '~/lib/persistence/apps';
 import { Unauthorized } from '~/components/chat/Unauthorized';
 import { useStore } from '@nanostores/react';
-import { statusModalStore } from '~/lib/stores/statusModal';
 import { AppLoadingScreen } from '~/components/ui/AppLoadingScreen';
 import {
   isAppOwnerLoadingStore,
@@ -85,8 +84,6 @@ export function Chat() {
   const ready = useStore(readyStore);
   const isCopying = useStore(isCopyingStore);
   const appTitle = useStore(chatStore.appTitle);
-  const isOpen = useStore(statusModalStore.isOpen);
-  const appSummary = useStore(chatStore.appSummary);
   const isAppOwner = useStore(isAppOwnerStore);
   const unauthorized = useStore(unauthorizedStore);
   const authorizedCopy = useStore(authorizedCopyStore);
@@ -117,10 +114,8 @@ export function Chat() {
         if (visible) {
           const appId = chatStore.currentAppId.get();
           if (appId && !chatStore.listenResponses.get()) {
-            const wasStatusModalOpen = isOpen;
-            statusModalStore.close();
             await updateAppState(appId);
-            doListenAppResponses(wasStatusModalOpen, (appSummary?.features?.length ?? 0) > 0);
+            doListenAppResponses();
           }
         }
       }
@@ -149,7 +144,7 @@ export function Chat() {
       await updateAppState(appId);
 
       // Always check for ongoing work when we first start the chat.
-      doListenAppResponses(false, (appSummary?.features?.length ?? 0) > 0);
+      doListenAppResponses();
 
       setReady(true);
     } catch (error) {

@@ -1,6 +1,6 @@
 import { atom } from 'nanostores';
 import type { DeploySettings } from '~/lib/replay/Deploy';
-import { DeployStatus } from '~/components/header/components/DeployChat/DeployChatButton';
+import { DeployStatus } from '~/components/chat/TopNav/components/DeployChat/DeployButton';
 
 export class DeployModalStore {
   isOpen = atom<boolean>(false);

@@ -14,7 +14,6 @@ import {
 import { updateDevelopmentServer } from '~/lib/replay/DevelopmentServer';
 import { toast } from 'react-toastify';
 import { callNutAPI, NutAPIError } from '~/lib/replay/NutAPI';
-import { statusModalStore } from './statusModal';
 import { addAppResponse } from '~/lib/replay/ResponseFilter';
 
 export class ChatStore {
@@ -201,7 +200,7 @@ export async function doSendMessage(request: NutChatRequest) {
   doListenAppResponses();
 }
 
-export async function doListenAppResponses(wasStatusModalOpen = false, hasFeatures = false) {
+export async function doListenAppResponses() {
   if (!chatStore.currentAppId.get()) {
     return;
   }
@@ -209,9 +208,6 @@ export async function doListenAppResponses(wasStatusModalOpen = false, hasFeatur
   const { active } = await callNutAPI('app-chat-active', { appId: chatStore.currentAppId.get() });
   if (!active) {
     console.log('ListenAppResponsesNotActive');
-    if (wasStatusModalOpen && hasFeatures) {
-      statusModalStore.open();
-    }
     return;
   }
 
@@ -238,10 +234,6 @@ export async function doListenAppResponses(wasStatusModalOpen = false, hasFeatur
   }
 
   chatStore.listenResponses.set(false);
-
-  if (hasFeatures) {
-    statusModalStore.open();
-  }
 }
 
 export function continueBuilding() {

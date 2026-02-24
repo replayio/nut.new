@@ -13,17 +13,9 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 export const Menu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const isOpen = useStore(sidebarMenuStore.isOpen);
+  const isCollapsed = useStore(sidebarMenuStore.isCollapsed);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const isSmallViewport = useViewport(1024);
-  const [isCollapsed, setIsCollapsed] = useState(sidebarMenuStore.isCollapsed.get());
-
-  // Sync local state with store
-  useEffect(() => {
-    const unsubscribe = sidebarMenuStore.isCollapsed.subscribe((collapsed) => {
-      setIsCollapsed(collapsed);
-    });
-    return unsubscribe;
-  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -58,7 +50,6 @@ export const Menu = () => {
   const handleSidebarClick = () => {
     // Only expand if collapsed and not on small viewport
     if (effectiveCollapsed && !isSmallViewport) {
-      setIsCollapsed(false);
       sidebarMenuStore.setCollapsed(false);
     }
   };
@@ -127,9 +118,7 @@ export const Menu = () => {
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
-                        const newCollapsed = !isCollapsed;
-                        setIsCollapsed(newCollapsed);
-                        sidebarMenuStore.setCollapsed(newCollapsed);
+                        sidebarMenuStore.setCollapsed(!isCollapsed);
                         sidebarMenuStore.open();
                       }
                     }}
@@ -158,9 +147,7 @@ export const Menu = () => {
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
-                        const newCollapsed = !isCollapsed;
-                        setIsCollapsed(newCollapsed);
-                        sidebarMenuStore.setCollapsed(newCollapsed);
+                        sidebarMenuStore.setCollapsed(!isCollapsed);
                         sidebarMenuStore.close();
                       }
                     }}
@@ -217,7 +204,6 @@ export const Menu = () => {
                     if (isSmallViewport) {
                       sidebarMenuStore.close();
                     } else {
-                      setIsCollapsed(true);
                       sidebarMenuStore.setCollapsed(true);
                       sidebarMenuStore.close();
                     }
@@ -242,7 +228,6 @@ export const Menu = () => {
                       if (isSmallViewport) {
                         sidebarMenuStore.close();
                       } else {
-                        setIsCollapsed(true);
                         sidebarMenuStore.setCollapsed(true);
                         sidebarMenuStore.close();
                       }
@@ -277,7 +262,6 @@ export const Menu = () => {
               effectiveCollapsed
                 ? (e) => {
                     e.stopPropagation();
-                    setIsCollapsed(false);
                     sidebarMenuStore.setCollapsed(false);
                   }
                 : undefined

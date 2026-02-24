@@ -7,6 +7,7 @@ import { getLastChatMessages } from '~/utils/chat/messageUtils';
 import { getAllAppResponses } from '~/lib/replay/ResponseFilter';
 import { userStore } from '~/lib/stores/auth';
 import { X, CheckCircle, MessageCircle, Send, Calendar } from '~/components/ui/Icon';
+import { Checkbox } from '~/components/ui/Checkbox';
 
 const GlobalFeedbackModal = () => {
   const { isOpen, formData, submitted } = useStore(feedbackModalState);
@@ -118,23 +119,19 @@ const GlobalFeedbackModal = () => {
               />
             </div>
 
-            <div className="flex items-center gap-3 mb-8 p-4 bg-muted bg-opacity-30 rounded-xl border border-border border-opacity-30">
-              <input
-                type="checkbox"
+            <div className="mb-8 p-4 bg-muted bg-opacity-30 rounded-xl border border-border border-opacity-30">
+              <Checkbox
                 id="share-project"
-                name="share"
-                className="w-4 h-4 bg-muted text-blue-500 rounded border-border focus:ring-2 focus:ring-blue-500/50 transition-colors"
                 checked={formData.share}
-                onChange={(e) => {
+                onCheckedChange={(checked: boolean) => {
                   feedbackModalStore.setFormData({
                     ...formData,
-                    share: e.target.checked,
+                    share: checked === true,
                   });
                 }}
+                label="Share project with the Replay team (helps us diagnose issues)"
+                size="sm"
               />
-              <label htmlFor="share-project" className="text-sm text-muted-foreground font-medium">
-                Share project with the Replay team (helps us diagnose issues)
-              </label>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">

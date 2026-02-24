@@ -4,6 +4,7 @@ import React, { memo, type ReactNode } from 'react';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
 import { IconButton } from './IconButton';
+import { Button } from './button';
 import { X } from './Icon';
 
 export { Close as DialogClose, Root as DialogRoot } from '@radix-ui/react-dialog';
@@ -48,25 +49,17 @@ interface DialogButtonProps {
   disabled?: boolean;
 }
 
+const variantMap = {
+  primary: 'default',
+  secondary: 'secondary',
+  danger: 'destructive',
+} as const;
+
 export const DialogButton = memo(({ type, children, onClick, disabled = false }: DialogButtonProps) => {
   return (
-    <button
-      className={classNames(
-        'inline-flex h-[35px] items-center justify-center rounded-lg px-4 text-sm leading-none focus:outline-none',
-        {
-          'bg-primary text-primary-foreground hover:bg-primary/90': type === 'primary',
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80': type === 'secondary',
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90': type === 'danger',
-        },
-        {
-          'opacity-50 cursor-not-allowed': disabled,
-        },
-      )}
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <Button variant={variantMap[type]} size="sm" className="h-[35px] rounded-lg" onClick={onClick} disabled={disabled}>
       {children}
-    </button>
+    </Button>
   );
 });
 
@@ -92,42 +85,59 @@ export const DialogDescription = memo(({ className, children, ...props }: RadixD
   );
 });
 
+export type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+const dialogSizeClasses: Record<DialogSize, string> = {
+  sm: 'max-w-[350px]',
+  md: 'max-w-[450px]',
+  lg: 'max-w-[600px]',
+  xl: 'max-w-[900px]',
+  full: 'max-w-[95vw]',
+};
+
 interface DialogProps {
   children: ReactNode | ReactNode[];
   className?: string;
+  size?: DialogSize;
+  showCloseButton?: boolean;
   onBackdrop?: (event: React.UIEvent) => void;
   onClose?: (event: React.UIEvent) => void;
 }
 
-export const Dialog = memo(({ className, children, onBackdrop, onClose }: DialogProps) => {
-  return (
-    <RadixDialog.Portal>
-      <RadixDialog.Overlay onClick={onBackdrop} asChild>
-        <motion.div
-          className="bg-black/50 fixed inset-0 z-max"
-          initial="closed"
-          animate="open"
-          exit="closed"
-          variants={dialogBackdropVariants}
-        />
-      </RadixDialog.Overlay>
-      <RadixDialog.Content asChild>
-        <motion.div
-          className={classNames(
-            'fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] border border-border rounded-lg bg-muted shadow-lg focus:outline-none overflow-hidden',
-            className,
-          )}
-          initial="closed"
-          animate="open"
-          exit="closed"
-          variants={dialogVariants}
-        >
-          {children}
-          <RadixDialog.Close asChild onClick={onClose}>
-            <IconButton testId="dialog-close" icon={<X size={20} />} className="absolute top-[10px] right-[10px]" />
-          </RadixDialog.Close>
-        </motion.div>
-      </RadixDialog.Content>
-    </RadixDialog.Portal>
-  );
-});
+export const Dialog = memo(
+  ({ className, children, size = 'md', showCloseButton = true, onBackdrop, onClose }: DialogProps) => {
+    return (
+      <RadixDialog.Portal>
+        <RadixDialog.Overlay onClick={onBackdrop} asChild>
+          <motion.div
+            className="bg-black/50 fixed inset-0 z-max"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={dialogBackdropVariants}
+          />
+        </RadixDialog.Overlay>
+        <RadixDialog.Content asChild>
+          <motion.div
+            className={classNames(
+              'fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[90vw] translate-x-[-50%] translate-y-[-50%] border border-border rounded-lg bg-muted shadow-lg focus:outline-none overflow-hidden',
+              dialogSizeClasses[size],
+              className,
+            )}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={dialogVariants}
+          >
+            {children}
+            {showCloseButton && (
+              <RadixDialog.Close asChild onClick={onClose}>
+                <IconButton testId="dialog-close" icon={<X size={20} />} className="absolute top-[10px] right-[10px]" />
+              </RadixDialog.Close>
+            )}
+          </motion.div>
+        </RadixDialog.Content>
+      </RadixDialog.Portal>
+    );
+  },
+);

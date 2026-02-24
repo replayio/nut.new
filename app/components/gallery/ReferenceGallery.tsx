@@ -5,6 +5,8 @@ import { getReferenceAppSummaries, type ReferenceAppSummary } from '~/lib/replay
 import { classNames } from '~/utils/classNames';
 import useViewport from '~/lib/hooks';
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Spinner } from '~/components/ui/Spinner';
+import { Checkbox } from '../ui/Checkbox';
 
 // Category icons mapping
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -272,21 +274,20 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
             </Tabs>
 
             {/* Show All toggle */}
-            <label className={classNames(
+            <div className={classNames(
               "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer hover:bg-accent transition-colors whitespace-nowrap flex-shrink-0",
               {
                 "bg-background text-foreground shadow-sm border border-border": showAll,
                 "bg-transparent text-foreground hover:bg-accent/50": !showAll,
               }
               )}>
-              <input
-                type="checkbox"
-                checked={showAll}
-                onChange={(e) => setShowAll(e.target.checked)}
-                className="w-4 h-4 rounded border-border"
-              />
-              <span>Show Hidden</span>
-            </label>
+                <Checkbox
+                  checked={showAll}
+                  onCheckedChange={(checked: boolean) => setShowAll(checked === true)}
+                  label="Show Hidden"
+                  size="sm"
+                />
+            </div>
           </div>
         </>
       )}
@@ -295,8 +296,7 @@ export const ReferenceGallery = ({ className }: ReferenceGalleryProps) => {
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-border border-t-foreground rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading apps...</p>
+            <Spinner size="lg" text="Loading apps..." />
           </div>
         </div>
       ) : filteredApps.length === 0 ? (
