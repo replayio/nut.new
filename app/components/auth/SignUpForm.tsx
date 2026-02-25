@@ -205,7 +205,7 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
           <Checkbox
             id="terms"
             checked={isChecked}
-            onCheckedChange={(checked) => setIsChecked(checked === true)}
+            onCheckedChange={(checked: boolean) => setIsChecked(checked === true)}
             label="I agree to receive update emails from Replay and understand the terms of service."
           />
         </div>

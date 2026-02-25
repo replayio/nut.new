@@ -509,13 +509,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           /* Landing page or desktop without workbench */
           <div
             ref={scrollRef}
-            className={classNames('w-full h-full flex flex-col lg:flex-row overflow-x-hidden', {
+            className={classNames('w-full h-full flex bg-muted flex-col lg:flex-row overflow-x-hidden', {
               'overflow-y-auto': !chatStarted,
               'overflow-y-hidden': chatStarted,
               'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
               'pt-2 pb-16 px-4': isSmallViewport && (!!appSummary || showMobileNav),
               'p-6': !isSmallViewport && chatStarted,
               'pt-12 px-2 pb-16': !isSmallViewport && !chatStarted,
+              'bg-muted': chatStarted,
             })}
           >
             <div
@@ -527,8 +528,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 'pb-2': isSmallViewport,
                 'landing-page-layout': !chatStarted,
                 // Add padding to prevent content from being hidden behind sidebar on desktop
-                'md:pl-[260px]': !chatStarted && !isSmallViewport && isSidebarOpen,
-                'md:pl-[60px]': !chatStarted && !isSmallViewport && !isSidebarOpen,
+                'md:pl-[265px]': !chatStarted && !isSmallViewport && isSidebarOpen,
+                'md:pl-[65px]': !chatStarted && !isSmallViewport && !isSidebarOpen,
               })}
               style={!isSmallViewport && showWorkbench ? { width: `${chatWidth}px` } : { width: '100%' }}
             >
@@ -563,9 +564,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     messageInputProps={messageInputProps}
                   />
                 )}
-                {!chatStarted && user && <AppGallery className="mt-24" />}
-                {!chatStarted && <ReferenceGallery className="mt-24" />}
-                {!chatStarted && <CollectionGallery className="mt-24" />}
+                {!chatStarted && user && (
+                  <AppGallery className={classNames({ 'mt-32': isSmallViewport, 'mt-52': !isSmallViewport })} />
+                )}
+                {!chatStarted && <ReferenceGallery className="mt-14 max-w-[1337px]" />}
+                {!chatStarted && <CollectionGallery className="mt-14" />}
               </div>
             </div>
             <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>

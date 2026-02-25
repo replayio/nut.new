@@ -123,7 +123,7 @@ const GlobalFeedbackModal = () => {
               <Checkbox
                 id="share-project"
                 checked={formData.share}
-                onCheckedChange={(checked) => {
+                onCheckedChange={(checked: boolean) => {
                   feedbackModalStore.setFormData({
                     ...formData,
                     share: checked === true,

@@ -45,7 +45,7 @@ export default function ReferenceAppsPage() {
   }, [user]);
 
   return (
-    <div className="flex h-screen w-full bg-muted overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-muted">
       {/* Sidebar */}
       <ClientOnly>{() => <Menu />}</ClientOnly>
 

@@ -9,6 +9,8 @@ export interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof Che
   description?: string;
   id?: string;
   className?: string;
+  onCheckedChange?: (checked: boolean) => void;
+  checked?: boolean;
 }
 
 const sizeClasses = {
@@ -18,7 +20,7 @@ const sizeClasses = {
 };
 
 const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
-  ({ className, size = 'default', label, description, id, ...props }: CheckboxProps, ref) => {
+  ({ className, size = 'default', label, description, id, onCheckedChange, checked, ...props }: CheckboxProps, ref) => {
     const sizeConfig = sizeClasses[size];
     const checkboxId = id || React.useId();
 
@@ -36,6 +38,8 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
           sizeConfig.box,
           className,
         )}
+        checked={checked}
+        onCheckedChange={(e: boolean) => onCheckedChange?.(e)}
         {...props}
       >
         <CheckboxPrimitive.Indicator className="flex items-center justify-center">
@@ -46,7 +50,7 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
 
     if (label || description) {
       return (
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           {checkbox}
           <div className="flex flex-col gap-0.5">
             {label && (
