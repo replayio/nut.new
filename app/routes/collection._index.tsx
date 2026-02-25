@@ -45,12 +45,7 @@ export default function CollectionsPage() {
   }, [user]);
 
   return (
-    <div
-      className="flex h-screen w-full overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, rgba(245, 245, 245, 0.00) 0%, var(--base-muted, #F5F5F5) 100%), #FFF',
-      }}
-    >
+    <div className="flex h-screen w-full overflow-hidden bg-muted">
       {/* Sidebar */}
       <ClientOnly>{() => <Menu />}</ClientOnly>
 

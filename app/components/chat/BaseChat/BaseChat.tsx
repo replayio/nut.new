@@ -509,7 +509,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           /* Landing page or desktop without workbench */
           <div
             ref={scrollRef}
-            className={classNames('w-full h-full flex flex-col lg:flex-row overflow-x-hidden', {
+            className={classNames('w-full h-full flex bg-muted flex-col lg:flex-row overflow-x-hidden', {
               'overflow-y-auto': !chatStarted,
               'overflow-y-hidden': chatStarted,
               'pt-2 pb-2 px-4': isSmallViewport && !appSummary && !showMobileNav,
@@ -518,14 +518,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               'pt-12 px-2 pb-16': !isSmallViewport && !chatStarted,
               'bg-muted': chatStarted,
             })}
-            style={
-              !chatStarted
-                ? {
-                    background:
-                      'linear-gradient(180deg, rgba(245, 245, 245, 0.00) 0%, var(--base-muted, #F5F5F5) 100%), #FFF',
-                  }
-                : undefined
-            }
           >
             <div
               className={classNames(styles.Chat, 'flex flex-col', {
