@@ -85,8 +85,8 @@ export const AppCard = ({ app, onClick, onDelete, className }: AppCardProps) => 
       )}
     >
       {/* Screenshot image */}
-      <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted">
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50 transition-all duration-200 ease-out origin-center group-hover:scale-[0.8] group-hover:shadow-[0_0_16px_rgba(0,0,0,0.1)]">
+      <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted transition-colors duration-200 group-hover:bg-foreground/[0.04]">
+        <div className="w-full h-full flex items-center rounded-md justify-center bg-gradient-to-br from-muted to-muted/50 transition-all duration-200 ease-out origin-center group-hover:scale-[0.8] group-hover:ring-1 group-hover:ring-border group-hover:shadow-[0_0_16px_rgba(0,0,0,0.1)] dark:group-hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]">
           <span className="text-4xl font-bold text-muted-foreground/30">{avatarLetter}</span>
         </div>
 
