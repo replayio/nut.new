@@ -16,10 +16,18 @@ export const NewAppCard = ({ onClick, className }: NewAppCardProps) => {
       )}
     >
       {/* Image placeholder - same aspect ratio as AppCard */}
-      <div className="relative w-full aspect-[295/217] rounded-md overflow-hidden flex items-center justify-center">
-        <button className="w-12 h-12 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center transition-colors shadow-lg">
+      <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center transition-colors shadow-lg">
           <Plus className="w-6 h-6 text-white" />
-        </button>
+        </div>
+      </div>
+
+      {/* Bottom section - matches AppCard layout */}
+      <div className="flex items-start justify-start gap-2 p-1">
+        <div className="flex-1 flex flex-col min-w-0">
+          <h3 className="font-bold text-foreground text-start">New app</h3>
+          <p className="text-sm text-muted-foreground text-start">Create a new application</p>
+        </div>
       </div>
     </div>
   );

@@ -18,13 +18,14 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
   return (
     <div
       className={classNames(
-        'w-80 p-1 rounded-md border border-border bg-card flex flex-col gap-0.5 cursor-pointer transition-colors hover:bg-accent/50 group',
+        'w-80 p-1 rounded-md border border-border bg-card flex flex-col gap-0.5 cursor-pointer transition-all duration-200',
+        'hover:border-foreground/20 hover:bg-accent/50 hover:shadow-md group',
         className,
       )}
       onClick={handleViewDetails}
     >
-      {/* Screenshot image */}
-      <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted">
+      {/* Screenshot image - shrinks with soft glow on hover */}
+      <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted shadow-sm transition-all duration-200 ease-out origin-center group-hover:scale-[0.8] group-hover:shadow-[0_0_16px_rgba(0,0,0,0.1)]">
         {app.screenshotURL && !imageError ? (
           <img
             src={app.screenshotURL}
@@ -58,7 +59,7 @@ export const ReferenceAppCard = ({ app, className }: ReferenceAppCardProps) => {
         {/* Text content */}
         <div className="flex-1 flex flex-col min-w-0">
           <span className="text-sm font-semibold text-foreground leading-normal line-clamp-1">{app.name}</span>
-          <span className="text-xs font-normal text-muted-foreground leading-normal line-clamp-2">
+          <span className="text-xs font-normal text-muted-foreground leading-normal line-clamp-1">
             {app.shortDescription}
           </span>
         </div>

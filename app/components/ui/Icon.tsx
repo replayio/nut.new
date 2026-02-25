@@ -56,6 +56,7 @@ export {
   KeySquare,
   Layers,
   Layout,
+  LayoutGrid,
   Link,
   List,
   Loader2,

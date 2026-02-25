@@ -88,8 +88,6 @@ export function SignUpForm({ addIntercomUser, onToggleForm, onSuccess, onError }
     );
   }, [password, confirmPassword, email]);
 
-  console.log('isChecked', isChecked);
-
   return (
     <>
       <div className="text-center mb-8">

@@ -78,14 +78,15 @@ export const AppCard = ({ app, onClick, onDelete, className }: AppCardProps) => 
     <div
       onClick={editing ? undefined : onClick}
       className={classNames(
-        'w-80 p-1 rounded-md border border-border bg-card flex flex-col gap-0.5 transition-colors hover:bg-accent/50 group',
+        'w-80 p-1 rounded-md border border-border bg-card flex flex-col gap-0.5 cursor-pointer transition-all duration-200',
+        'hover:border-foreground/20 hover:bg-accent/50 hover:shadow-md group',
         { 'cursor-pointer': !editing },
         className,
       )}
     >
       {/* Screenshot image */}
       <div className="relative w-full aspect-[312/175.5] rounded-md overflow-hidden bg-muted">
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50 transition-all duration-200 ease-out origin-center group-hover:scale-[0.8] group-hover:shadow-[0_0_16px_rgba(0,0,0,0.1)]">
           <span className="text-4xl font-bold text-muted-foreground/30">{avatarLetter}</span>
         </div>
 
@@ -135,7 +136,9 @@ export const AppCard = ({ app, onClick, onDelete, className }: AppCardProps) => 
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-8 h-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className={classNames('w-8 h-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity', {
+                  'opacity-100': isDropdownOpen,
+                })}
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal className="w-4 h-4 text-muted-foreground" />

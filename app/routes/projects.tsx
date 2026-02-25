@@ -53,7 +53,12 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-muted overflow-hidden">
+    <div
+      className="flex h-screen w-full overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(245, 245, 245, 0.00) 0%, var(--base-muted, #F5F5F5) 100%), #FFF',
+      }}
+    >
       {/* Sidebar */}
       <ClientOnly>{() => <Menu />}</ClientOnly>
 

@@ -17,7 +17,7 @@ export function Header() {
   return (
     <header
       className={classNames(
-        'flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-card bg-opacity-80 transition-all duration-300 z-20',
+        'flex items-center justify-between px-4 py-4 border-b h-[var(--header-height)] bg-muted bg-opacity-80 transition-all duration-300 z-20',
         {
           'border-transparent shadow-none': !chatStarted,
           'border-border/50 shadow-sm backdrop-blur-md': chatStarted,

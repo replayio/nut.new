@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Search, ArrowRight, ChevronDown, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
+import { Search, ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { AppCard } from './components/AppCard';
@@ -203,8 +203,6 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
 
   const currentSortLabel = sortOptions.find((opt) => opt.value === sortBy)?.label ?? 'Last Updated';
 
-  console.log('skipConfirmDeleteChecked', skipConfirmDeleteChecked);
-
   // Delete confirmation dialog component (shared between variants)
   const deleteConfirmationDialog = (
     <DialogRoot open={dialogContent !== null}>
@@ -258,7 +256,11 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
       <div className={classNames('w-full max-w-[1337px] mx-auto', className)}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-foreground">My Recent Projects</h2>
+          <div>
+            <h2 className="text-xl font-bold text-foreground">My Recent Projects</h2>
+            <p className="text-muted-foreground mt-1">Manage and create your projects</p>
+          </div>
+
           <Button variant="outline" size="sm" className="gap-2 rounded-full text-foreground" onClick={handleViewAll}>
             View All
             <ArrowRight className="w-4 h-4" />
@@ -275,7 +277,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
           <>
             <div
               ref={scrollContainerRef}
-              className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
+              className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -296,7 +298,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
 
             {/* Navigation arrows - only show if more than 1 card */}
             {displayApps.length > 1 && (
-              <div className="flex items-center justify-between px-4 mt-4 mb-4">
+              <div className="flex items-center justify-between mt-1 mb-4">
                 <button
                   type="button"
                   onClick={scrollPrev}
@@ -330,7 +332,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
           </>
         ) : (
           /* Desktop horizontal scrolling cards */
-          <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {displayApps.map((app) => (
               <AppCard
                 key={app.id}
@@ -349,7 +351,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
 
   // Full "all" variant
   return (
-    <div className={classNames('w-full max-w-[1337px] mx-auto', className)}>
+    <div className={classNames('w-full mx-auto', className)}>
       {/* Header - responsive layout */}
       {isSmallViewport ? (
         // Mobile header
@@ -484,12 +486,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
         // Empty state (no apps at all)
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-4 text-center">
-            <FolderOpen className="w-12 h-12 text-muted-foreground" />
-            <p className="text-foreground font-medium">No projects yet</p>
-            <p className="text-muted-foreground">Create your first project to get started</p>
-            <Button onClick={handleNewApp} className="mt-2">
-              Create New Project
-            </Button>
+            <NewAppCard onClick={handleNewApp} className="w-80" />
           </div>
         </div>
       ) : displayApps.length === 0 ? (
@@ -505,7 +502,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
         <>
           <div
             ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
+            className="flex gap-2 overflow-x-auto pb-4 snap-x snap-mandatory"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -564,7 +561,7 @@ export const AppGallery = ({ variant = 'recent', maxItems = 4, onNewApp, onAppCl
         </>
       ) : (
         /* Desktop grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           <NewAppCard onClick={handleNewApp} className="w-full" />
           {displayApps.map((app) => (
             <AppCard
