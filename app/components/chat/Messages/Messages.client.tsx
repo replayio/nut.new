@@ -9,7 +9,6 @@ import {
 import {
   StartBuildingCard,
   SignInCard,
-  StopBuildCard,
   ContinueBuildCard,
   UserMessage,
   AssistantMessage,
@@ -575,12 +574,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>(
           })()}
 
           {!user && startPlanningRating === 10 && <SignInCard onMount={scrollToBottom} />}
-
-          {!showContinueBuildCard &&
-            listenResponses &&
-            !hasPendingMessage &&
-            appSummary?.features?.length &&
-            !isFullyComplete && <StopBuildCard onMount={scrollToBottom} />}
 
           {showContinueBuildCard && (
             <ContinueBuildCard
