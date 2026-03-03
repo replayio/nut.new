@@ -325,7 +325,7 @@ export function GlobalDeployChatModal({ variant = 'modal' }: GlobalDeployChatMod
                 variant="ghost"
                 onClick={handleCloseModal}
                 disabled={status === DeployStatus.Started}
-                className={classNames('text-foreground hover:bg-muted', { 'order-last': isSmallViewport })}
+                className={classNames('text-foreground hover:bg-muted rounded-full', { 'order-last': isSmallViewport })}
               >
                 Cancel
               </Button>
