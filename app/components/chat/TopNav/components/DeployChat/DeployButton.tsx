@@ -93,7 +93,9 @@ export function DeployButton() {
 
   const handleOpenChange = (open: boolean) => {
     setDropdownOpen(open);
-    if (!open) setShowModalContent(false);
+    if (!open) {
+      setShowModalContent(false);
+    }
   };
 
   return (
@@ -111,7 +113,9 @@ export function DeployButton() {
               ) : isDeployed ? (
                 <Check className="text-foreground" size={16} />
               ) : null}
-              <span className="text-sm font-medium">{isDeploying ? 'Deploying...' : isDeployed ? 'Deployed' : 'Deploy'}</span>
+              <span className="text-sm font-medium">
+                {isDeploying ? 'Deploying...' : isDeployed ? 'Deployed' : 'Deploy'}
+              </span>
               <ChevronDown size={16} className="text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
