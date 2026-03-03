@@ -1,6 +1,8 @@
 import { atom } from 'nanostores';
 import type { DeploySettings } from '~/lib/replay/Deploy';
-import { DeployStatus } from '~/components/chat/TopNav/components/DeployChat/DeployButton';
+import { DeployStatus } from '~/lib/stores/deployTypes';
+
+export type DeployModalTab = 'default' | 'custom';
 
 export class DeployModalStore {
   isOpen = atom<boolean>(false);
@@ -9,6 +11,7 @@ export class DeployModalStore {
   error = atom<string | undefined>(undefined);
   databaseFound = atom<boolean>(false);
   loadingData = atom<boolean>(false);
+  activeTab = atom<DeployModalTab>('default');
 
   constructor() {
     if (import.meta.hot) {
@@ -42,6 +45,15 @@ export class DeployModalStore {
 
   setLoadingData(loading: boolean) {
     this.loadingData.set(loading);
+  }
+
+  setActiveTab(tab: DeployModalTab) {
+    this.activeTab.set(tab);
+  }
+
+  openWithTab(tab: DeployModalTab = 'default') {
+    this.activeTab.set(tab);
+    this.open();
   }
 
   reset() {
