@@ -30,6 +30,7 @@ export {
   ChevronUp,
   Circle,
   Clipboard,
+  CloudUpload,
   Code,
   Copy,
   CreditCard,

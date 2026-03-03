@@ -1,32 +1,48 @@
+import { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
+import useViewport from '~/lib/hooks/useViewport';
 import { deployModalStore } from '~/lib/stores/deployModal';
 import { chatStore } from '~/lib/stores/chat';
 import { database } from '~/lib/persistence/apps';
 import { lastDeployResult, deployApp } from '~/lib/replay/Deploy';
 import { generateRandomId } from '~/utils/nut';
-import { DeployStatus } from '~/components/chat/TopNav/components/DeployChat/DeployButton';
+import { DeployStatus } from '~/lib/stores/deployTypes';
 import { motion, AnimatePresence } from 'framer-motion';
 import DeploymentSuccessful from './DeploymentSuccessful';
 import { userStore } from '~/lib/stores/auth';
-import { X, Rocket, CheckCircle, AlertTriangle } from '~/components/ui/Icon';
+import { X, CloudUpload, AlertTriangle, ExternalLink, Copy, Check } from '~/components/ui/Icon';
 import { isAppOwnerStore, permissionsStore } from '~/lib/stores/permissions';
 import { isAppAccessAllowed, AppAccessKind } from '~/lib/api/permissions';
 import { Button } from '~/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs';
+import { classNames } from '~/utils/classNames';
 
 const MAX_SITE_NAME_LENGTH = 63;
 
-export function GlobalDeployChatModal() {
-  const isOpen = useStore(deployModalStore.isOpen);
+interface GlobalDeployChatModalProps {
+  variant?: 'modal' | 'popover';
+}
+
+export function GlobalDeployChatModal({ variant = 'modal' }: GlobalDeployChatModalProps) {
+  const isSmallViewport = useViewport(1024);
   const status = useStore(deployModalStore.status);
   const deploySettings = useStore(deployModalStore.deploySettings);
   const error = useStore(deployModalStore.error);
-  const databaseFound = useStore(deployModalStore.databaseFound);
   const loadingData = useStore(deployModalStore.loadingData);
   const user = useStore(userStore);
   const permissions = useStore(permissionsStore);
   const isAppOwner = useStore(isAppOwnerStore);
 
   const appId = useStore(chatStore.currentAppId);
+  const activeTab = useStore(deployModalStore.activeTab);
+  const [copied, setCopied] = useState(false);
+
+  const siteURL = lastDeployResult(deploySettings)?.siteURL;
+  const hasExistingDeploy = !!siteURL;
+  const canDeploy =
+    permissions.length === 0 ||
+    (permissions.length > 0 &&
+      isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner));
 
   const handleCloseModal = () => {
     deployModalStore.close();
@@ -96,6 +112,30 @@ export function GlobalDeployChatModal() {
     deployModalStore.setDeploySettings(settings);
   };
 
+  const previewURL = useMemo(() => {
+    if (siteURL) return siteURL;
+    const appTitle = chatStore.appTitle.get();
+    const slug = appTitle
+      ? appTitle
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '') || 'nut-app'
+      : 'nut-app';
+    return `https://${slug}-${generateRandomId()}.netlify.app/`;
+  }, [siteURL]);
+
+  const handleCopyURL = async () => {
+    try {
+      await navigator.clipboard.writeText(previewURL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -126,28 +166,9 @@ export function GlobalDeployChatModal() {
     },
   };
 
-  if (!isOpen) {
-    return null;
-  }
 
-  return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[1001] flex items-center justify-center p-2 sm:p-4"
-        variants={overlayVariants}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-      >
-        <motion.div className="absolute inset-0 bg-black/50" onClick={handleCloseModal} />
-
-        <motion.div
-          className="relative bg-card border border-border rounded-md max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col"
-          variants={modalVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
+  const modalBody = (
+    <>
           <div className="absolute top-3 right-3 z-10">
             <Button
               onClick={handleCloseModal}
@@ -159,131 +180,200 @@ export function GlobalDeployChatModal() {
             </Button>
           </div>
 
-          <div className="p-6 overflow-y-auto flex-1 min-h-0">
+          <div
+            className={classNames(
+              'mt-6 overflow-y-auto flex-1 min-h-0',
+              isSmallViewport ? 'p-4' : 'p-6',
+            )}
+          >
             {loadingData ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6 border border-border/50">
+                <div
+                  className={classNames(
+                    'bg-muted rounded-2xl flex items-center justify-center mx-auto border border-border/50',
+                    isSmallViewport ? 'w-12 h-12 mb-4' : 'w-16 h-16 mb-6',
+                  )}
+                >
                   <div className="w-8 h-8 border-2 border-border border-opacity-30 border-t-primary rounded-full animate-spin" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">Loading data...</h3>
-                <p className="text-muted-foreground">Please wait while we prepare your deployment settings</p>
+                <h3
+                  className={classNames(
+                    'font-bold text-foreground',
+                    isSmallViewport ? 'text-xl mb-2' : 'text-2xl mb-3',
+                  )}
+                >
+                  Loading data...
+                </h3>
+                <p className="text-sm text-muted-foreground">Please wait while we prepare your deployment settings</p>
               </div>
             ) : status === DeployStatus.Succeeded ? (
               <DeploymentSuccessful result={lastDeployResult(deploySettings)} setIsModalOpen={handleCloseModal} />
             ) : (
               <>
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border/50">
-                    <Rocket className="text-foreground" size={24} />
-                  </div>
-                  <h2 className="text-3xl font-bold text-foreground">Deploy Your Application</h2>
-                  <p className="text-muted-foreground mt-2">Get your app live on the web in just a few clicks</p>
-                </div>
-
-                {/* Easy Deploy Section */}
-                <div className="mb-8 p-6 bg-card rounded-md border border-border">
-                  <div className="text-center mb-6">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <span className="text-2xl">⚡</span>
-                      <h3 className="text-xl font-bold text-foreground">Quick Deploy</h3>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Deploy instantly with smart defaults. No configuration needed - we'll handle everything for you
-                      {databaseFound ? ', including database setup' : ''}.
-                    </p>
-                  </div>
-
-                  {/* Show existing site in easy deploy */}
-                  {lastDeployResult(deploySettings)?.siteURL && (
-                    <div className="mb-6 p-4 bg-muted rounded-md border border-border">
-                      <div className="flex flex-col items-center justify-between gap-2">
-                        <div className="text-sm text-foreground font-semibold flex items-center gap-2">
-                          <CheckCircle className="text-foreground" size={18} />
-                          Your App's URL:
-                        </div>
-                        <a
-                          href={lastDeployResult(deploySettings)?.siteURL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={lastDeployResult(deploySettings)?.siteURL}
-                          className="w-full text-sm text-primary hover:text-primary/80 transition-colors underline truncate font-medium padding-x-2 ellipsis"
-                        >
-                          {lastDeployResult(deploySettings)?.siteURL}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {(permissions.length === 0 ||
-                    (permissions.length > 0 &&
-                      isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))) && (
-                    <div className="flex justify-center">
-                      {status === DeployStatus.Started ? (
-                        <div className="w-full text-muted-foreground flex items-center justify-center py-4 bg-muted rounded-md border border-border">
-                          <div className="w-6 h-6 border-2 border-border border-opacity-30 border-t-primary rounded-full animate-spin mr-3" />
-                          <span className="text-lg font-medium">
-                            {lastDeployResult(deploySettings)?.siteURL ? 'Redeploying' : 'Deploying'} your app...
-                          </span>
-                        </div>
-                      ) : (
-                        <Button onClick={handleDeploy} size="lg" className="gap-2">
-                          <Rocket size={18} />
-                          {lastDeployResult(deploySettings)?.siteURL ? 'Redeploy' : 'Deploy Now'}
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 bg-card rounded-md border border-border space-y-4">
-                  <div>
-                    <label htmlFor="siteName" className="block mb-2 text-sm font-semibold text-foreground">
-                      Site Name (optional)
-                    </label>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                      Choose a custom prefix for your site's URL.
-                    </p>
-                    <div className="relative">
-                      <input
-                        id="siteName"
-                        name="siteName"
-                        type="text"
-                        className="w-full p-4 pr-32 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
-                        value={deploySettings.siteName || ''}
-                        placeholder="my-chat-app..."
-                        disabled={
-                          !(
-                            permissions.length === 0 ||
-                            (permissions.length > 0 &&
-                              isAppAccessAllowed(permissions, AppAccessKind.SendMessage, user?.email ?? '', isAppOwner))
-                          )
-                        }
-                        onChange={(e) => {
-                          handleSetDeploySettings({
-                            ...deploySettings,
-                            siteName: e.target.value,
-                          });
-                        }}
-                      />
-                    </div>
-                    {deploySettings.siteName && (
-                      <div className="mt-2 p-3 bg-muted rounded-md border border-border">
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium text-foreground">Your site will be available at:</span>
-                          <br />
-                          <span className="font-mono text-primary text-sm">
-                            https://{deploySettings.siteName}.netlify.app
-                          </span>
-                        </p>
-                      </div>
+                <div className={classNames('text-center', isSmallViewport ? 'mb-4' : 'mb-6')}>
+                  <h2
+                    className={classNames(
+                      'font-bold text-foreground',
+                      isSmallViewport ? 'text-xl' : 'text-2xl',
                     )}
-                  </div>
+                  >
+                    Ready to deploy your application?
+                  </h2>
+                  <p className="text-muted-foreground mt-1 text-sm">Get your app live in just a few clicks</p>
                 </div>
 
-                <div className="flex justify-center mt-8">
-                  <Button onClick={handleCloseModal} disabled={status === DeployStatus.Started} variant="outline">
+                <Tabs value={activeTab} onValueChange={(v) => deployModalStore.setActiveTab(v as 'default' | 'custom')} className="w-full">
+                  <TabsList
+                    className={classNames(
+                      'w-full grid grid-cols-2 p-1 bg-muted rounded-lg',
+                      isSmallViewport ? 'h-9 mb-4' : 'h-10 mb-6',
+                    )}
+                  >
+                    <TabsTrigger
+                      value="default"
+                      className="rounded-md text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border truncate"
+                    >
+                      Default
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="custom"
+                      className="rounded-md text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border truncate"
+                    >
+                      Custom domain
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="default" className="mt-0">
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-base font-semibold text-foreground mb-1">Deploy your app to Netlify domain</h3>
+                        <p className="text-sm text-muted-foreground mb-4">Choose your applications name and deploy it for free</p>
+                        <label className="block text-sm font-semibold text-foreground mt-4 mb-2">Your application's URL</label>
+                        <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30">
+                          <code
+                            className={classNames(
+                              'flex-1 text-sm text-muted-foreground font-mono min-w-0 truncate',
+                            )}
+                          >
+                            {previewURL}
+                          </code>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleCopyURL}
+                            className="h-8 w-8 shrink-0 rounded-lg border-border"
+                          >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="custom" className="mt-0">
+                    <div
+                      className={classNames(
+                        'bg-card rounded-md border border-border space-y-4',
+                        isSmallViewport ? 'p-3' : 'p-4',
+                      )}
+                    >
+                      <div>
+                        <h3 className="text-base font-semibold text-foreground mb-1">Deploy your app to a custom domain</h3>
+                        <p className="text-sm text-muted-foreground mb-4">Deploy this application to a domain of your choosing</p>
+                        <label htmlFor="siteName" className="block mb-2 text-sm font-semibold text-foreground">
+                          Site Name (optional)
+                        </label>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                          Choose a custom prefix for your site's URL.
+                        </p>
+                        <div className="relative">
+                          <input
+                            id="siteName"
+                            name="siteName"
+                            type="text"
+                            className="w-full p-4 pr-32 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 placeholder:text-muted-foreground"
+                            value={deploySettings.siteName || ''}
+                            placeholder="my-chat-app..."
+                            disabled={!canDeploy}
+                            onChange={(e) => {
+                              handleSetDeploySettings({
+                                ...deploySettings,
+                                siteName: e.target.value,
+                              });
+                            }}
+                          />
+                        </div>
+                        {deploySettings.siteName && (
+                          <div className="mt-2 p-3 bg-muted rounded-md border border-border">
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-medium text-foreground">Your site will be available at:</span>
+                              <br />
+                              <span
+                              className={classNames(
+                                'font-mono text-primary text-sm block truncate',
+                                { 'break-all': isSmallViewport },
+                              )}
+                              >
+                                https://{deploySettings.siteName}.netlify.app
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <div
+                  className={classNames(
+                    'border-t border-border',
+                    isSmallViewport ? 'flex flex-col gap-3 mt-6 pt-4' : 'flex items-center justify-between gap-4 mt-8 pt-6',
+                  )}
+                >
+                  <Button
+                    variant="ghost"
+                    onClick={handleCloseModal}
+                    disabled={status === DeployStatus.Started}
+                    className={classNames(
+                      'text-foreground hover:bg-muted',
+                      { 'order-last': isSmallViewport },
+                    )}
+                  >
                     Cancel
                   </Button>
+                  <div className={classNames('flex gap-3', isSmallViewport ? 'flex-col' : 'items-center')}>
+                    {hasExistingDeploy && (
+                      <a
+                        href={siteURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center h-10 gap-2 px-4 py-2 rounded-full border border-border bg-card hover:bg-muted text-foreground text-sm font-medium transition-colors"
+                      >
+                        <ExternalLink size={16} />
+                        Go to App
+                      </a>
+                    )}
+                    <Button
+                      onClick={handleDeploy}
+                      disabled={status === DeployStatus.Started || !canDeploy}
+                      className={classNames(
+                        'gap-2 bg-foreground rounded-full text-background hover:bg-foreground/90 disabled:opacity-50 disabled:bg-muted disabled:text-muted-foreground disabled:border disabled:border-dashed',
+                        { 'w-full': isSmallViewport },
+                      )}
+                    >
+                      {status === DeployStatus.Started ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                          Deploying...
+                        </>
+                      ) : (
+                        <>
+                          <CloudUpload size={16} />
+                          Deploy App
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 {error && (
@@ -300,6 +390,35 @@ export function GlobalDeployChatModal() {
               </>
             )}
           </div>
+    </>
+  );
+
+  if (variant === 'popover') {
+    return (
+      <div className="relative flex flex-col max-h-[85vh] overflow-hidden">
+        {modalBody}
+      </div>
+    );
+  }
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-[1001] flex items-center justify-center p-2 sm:p-4"
+        variants={overlayVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+      >
+        <motion.div className="absolute inset-0 bg-black/50" onClick={handleCloseModal} />
+        <motion.div
+          className="relative bg-card border border-border rounded-md max-w-2xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col"
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          {modalBody}
         </motion.div>
       </motion.div>
     </AnimatePresence>
