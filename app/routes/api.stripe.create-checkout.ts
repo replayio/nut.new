@@ -1,11 +1,6 @@
 // import type { ActionFunctionArgs } from '@remix-run/node';
-import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-
-// Initialize Stripe with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-});
+import { getStripeClient } from '~/lib/.server/stripeClient';
 
 // Product and Price mappings from environment variables
 const SUBSCRIPTION_PRICES = {
@@ -63,6 +58,13 @@ export async function action({ request }: { request: Request }) {
     });
   }
 
+  if (!getStripeClient()) {
+    return new Response(JSON.stringify({ error: 'Checkout is not configured.' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const userId = user.id;
   const userEmail = user.email;
 
@@ -83,7 +85,7 @@ export async function action({ request }: { request: Request }) {
     let customerId: string | undefined;
     try {
       // First try to find customer by email
-      const existingCustomers = await stripe.customers.list({
+      const existingCustomers = await getStripeClient()!.customers.list({
         email: userEmail,
         limit: 10, // Get more results to check metadata
       });
@@ -99,7 +101,7 @@ export async function action({ request }: { request: Request }) {
 
         // Always update customer metadata with userId to ensure webhooks work
         // This makes Stripe the authoritative source for user identification
-        await stripe.customers.update(customerId, {
+        await getStripeClient()!.customers.update(customerId, {
           metadata: {
             userId,
             userEmail,
@@ -107,7 +109,7 @@ export async function action({ request }: { request: Request }) {
         });
       } else {
         // Create customer explicitly with metadata
-        const newCustomer = await stripe.customers.create({
+        const newCustomer = await getStripeClient()!.customers.create({
           email: userEmail,
           metadata: {
             userId,
@@ -165,7 +167,7 @@ export async function action({ request }: { request: Request }) {
     }
 
     // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient()!.checkout.sessions.create({
       payment_method_types: ['card'],
       mode,
       line_items: [
