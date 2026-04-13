@@ -223,6 +223,7 @@ jobs:
         run: pnpm test:e2e
         env:
           CI: true
+          REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
 
       - name: Upload Playwright report
         if: always()

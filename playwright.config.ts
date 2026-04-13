@@ -10,10 +10,16 @@ const port = Number(process.env.PLAYWRIGHT_WEB_SERVER_PORT ?? 5175);
 const usePreviewUrl = !!process.env.PLAYWRIGHT_TEST_BASE_URL;
 const baseURL = usePreviewUrl ? (process.env.PLAYWRIGHT_TEST_BASE_URL as string) : `http://localhost:${port}`;
 
-const replay = replayReporter({
-  apiKey: process.env.REPLAY_API_KEY,
-  upload: true,
-});
+/** Replay upload requires a key; GitHub secrets are not env vars until the workflow maps them. */
+const replayApiKey = process.env.REPLAY_API_KEY?.trim();
+const replayReporters = replayApiKey
+  ? [
+      replayReporter({
+        apiKey: replayApiKey,
+        upload: true,
+      }),
+    ]
+  : [];
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -26,8 +32,8 @@ export default defineConfig({
     timeout: 15_000,
   },
   reporter: process.env.CI
-    ? [replay, ['line'], ['github'], ['html', { open: 'never' }]]
-    : [replay, ['line'], ['html', { open: 'never' }]],
+    ? [...replayReporters, ['line'], ['github'], ['html', { open: 'never' }]]
+    : [...replayReporters, ['line'], ['html', { open: 'never' }]],
   use: {
     baseURL,
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
@@ -41,10 +47,14 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'replay-chromium',
-      use: { ...replayDevices['Replay Chromium'] },
-    },
+    ...(replayApiKey
+      ? [
+          {
+            name: 'replay-chromium',
+            use: { ...replayDevices['Replay Chromium'] },
+          },
+        ]
+      : []),
   ],
   webServer: usePreviewUrl
     ? undefined
