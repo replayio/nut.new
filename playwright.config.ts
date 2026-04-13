@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { devices as replayDevices, replayReporter } from '@replayio/playwright';
 import dotenv from 'dotenv';
 
 // Load env for tests that hit real backends (e.g. feedback → Supabase)
@@ -8,6 +9,11 @@ dotenv.config({ path: '.env' });
 const port = Number(process.env.PLAYWRIGHT_WEB_SERVER_PORT ?? 5175);
 const usePreviewUrl = !!process.env.PLAYWRIGHT_TEST_BASE_URL;
 const baseURL = usePreviewUrl ? (process.env.PLAYWRIGHT_TEST_BASE_URL as string) : `http://localhost:${port}`;
+
+const replay = replayReporter({
+  apiKey: process.env.REPLAY_API_KEY,
+  upload: true,
+});
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -19,7 +25,9 @@ export default defineConfig({
   expect: {
     timeout: 15_000,
   },
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
+  reporter: process.env.CI
+    ? [replay, ['line'], ['github'], ['html', { open: 'never' }]]
+    : [replay, ['line'], ['html', { open: 'never' }]],
   use: {
     baseURL,
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
@@ -32,6 +40,10 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'replay-chromium',
+      use: { ...replayDevices['Replay Chromium'] },
     },
   ],
   webServer: usePreviewUrl
