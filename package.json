@@ -138,7 +138,7 @@
   },
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",
-    "@playwright/test": "^1.51.0",
+    "@playwright/test": "^1.59.1",
     "@remix-run/dev": "^2.15.3",
     "@remix-run/serve": "^2.16.0",
     "@replayio/playwright": "^5.0.2",
@@ -161,6 +161,7 @@
     "pnpm": "^9.14.4",
     "postcss": "^8.5.6",
     "prettier": "^3.4.1",
+    "replayio": "1.8.2",
     "sass-embedded": "^1.81.0",
     "tailwindcss": "^3.4.0",
     "typescript": "5.8.0-beta",

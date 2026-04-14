@@ -40,17 +40,21 @@ jobs:
         run: pnpm install -g vercel@latest
 
       - name: Install Playwright browsers
-        run: pnpm playwright install chromium
-      
+        run: pnpm exec playwright install chromium
+
+      - name: Install Replay Chromium
+        run: pnpm exec replayio install
+
       - name: Get Vercel Preview URL
         if: ${{ github.event_name == 'deployment_status' }}
         run: |
           echo "PLAYWRIGHT_TEST_BASE_URL=${{ github.event.deployment_status.target_url }}" >> $GITHUB_ENV
           echo "Testing against Vercel Preview URL: ${{ github.event.deployment_status.target_url }}"
 
-      - name: Run Playwright tests 
+      - name: Run Playwright tests
         run: pnpm test:e2e
         env:
+          CI: true
           REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
@@ -104,9 +108,11 @@ jobs:
           sleep 10
 
       # Run Playwright tests against the newly deployed URL
+      # Do not pass `--reporter=html` alone — it replaces config reporters and drops Replay uploads.
       - name: Run Playwright tests against Supabase deployment
-        run: pnpm run test:e2e --reporter=html 
+        run: pnpm run test:e2e
         env:
+          CI: true
           REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}

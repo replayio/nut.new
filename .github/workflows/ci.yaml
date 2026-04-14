@@ -217,7 +217,7 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Install Replay Chromium
-        run: pnpm dlx replayio@latest install
+        run: pnpm exec replayio install
 
       - name: Prepare .env for dev server
         run: cp .env.example .env

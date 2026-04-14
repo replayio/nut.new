@@ -1,5 +1,5 @@
-import { defineConfig, devices } from '@playwright/test';
-import { devices as replayDevices, replayReporter } from '@replayio/playwright';
+import { defineConfig, devices, type Project } from '@playwright/test';
+import { devices as replayDevices, replayReporter, getExecutablePath } from '@replayio/playwright';
 import dotenv from 'dotenv';
 
 // Load env for tests that hit real backends (e.g. feedback → Supabase)
@@ -22,18 +22,39 @@ const replayReporters = replayApiKey
   : [];
 
 /**
- * Stock `chromium` does not write Replay recordings. If CI runs both projects, the
- * dashboard still lists failures from `chromium` with no recording ("No Replay found").
- * When uploading to Replay in CI, run only `replay-chromium` so each result has a replay.
+ * The Replay reporter only treats a project as "Replay browser" when
+ * `project.use.launchOptions.executablePath === getRuntimePath()` (see
+ * `@replayio/playwright` reporter). Playwright workers receive a serialized
+ * config where the stock getter-based `executablePath` can be lost, so
+ * `usesReplayBrowser` stays false → no tests or recordings are uploaded (empty
+ * dashboard). Force a plain string path + copy `env` so workers match.
  */
-const projects =
+function createReplayChromiumProject(): Project {
+  const template = replayDevices['Replay Chromium'];
+  const launchOptions = template.launchOptions;
+  const executablePath = getExecutablePath();
+  if (!executablePath) {
+    throw new Error('Replay Chromium is not installed. Run: pnpm exec replayio install');
+  }
+  return {
+    name: 'replay-chromium',
+    use: {
+      ...template,
+      launchOptions: {
+        env: { ...launchOptions.env },
+        executablePath,
+      },
+    },
+  };
+}
+
+/**
+ * Stock `chromium` does not write Replay recordings. In CI with a key, run only
+ * `replay-chromium` so each dashboard row has a recording (after fix above).
+ */
+const projects: Project[] =
   process.env.CI && replayApiKey
-    ? [
-        {
-          name: 'replay-chromium',
-          use: { ...replayDevices['Replay Chromium'] },
-        },
-      ]
+    ? [createReplayChromiumProject()]
     : process.env.CI
       ? [
           {
@@ -46,14 +67,7 @@ const projects =
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
           },
-          ...(replayApiKey
-            ? [
-                {
-                  name: 'replay-chromium',
-                  use: { ...replayDevices['Replay Chromium'] },
-                },
-              ]
-            : []),
+          ...(replayApiKey ? [createReplayChromiumProject()] : []),
         ];
 
 export default defineConfig({
@@ -61,7 +75,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // Single worker in CI with Replay avoids flaky metadata / upload races.
+  workers: process.env.CI && replayApiKey ? 1 : process.env.CI ? 2 : undefined,
   timeout: 60_000,
   expect: {
     timeout: 15_000,
