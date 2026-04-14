@@ -21,6 +21,41 @@ const replayReporters = replayApiKey
     ]
   : [];
 
+/**
+ * Stock `chromium` does not write Replay recordings. If CI runs both projects, the
+ * dashboard still lists failures from `chromium` with no recording ("No Replay found").
+ * When uploading to Replay in CI, run only `replay-chromium` so each result has a replay.
+ */
+const projects =
+  process.env.CI && replayApiKey
+    ? [
+        {
+          name: 'replay-chromium',
+          use: { ...replayDevices['Replay Chromium'] },
+        },
+      ]
+    : process.env.CI
+      ? [
+          {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+          },
+        ]
+      : [
+          {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+          },
+          ...(replayApiKey
+            ? [
+                {
+                  name: 'replay-chromium',
+                  use: { ...replayDevices['Replay Chromium'] },
+                },
+              ]
+            : []),
+        ];
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -42,20 +77,7 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    ...(replayApiKey
-      ? [
-          {
-            name: 'replay-chromium',
-            use: { ...replayDevices['Replay Chromium'] },
-          },
-        ]
-      : []),
-  ],
+  projects,
   webServer: usePreviewUrl
     ? undefined
     : {
