@@ -3,6 +3,14 @@ import type { VisitData } from '~/lib/replay/SendChatMessage';
 
 type ResponseCallback = (response: any) => void;
 
+function nutAppHeaders(userId: string | null, accessToken: string | null): Record<string, string> {
+  return {
+    'X-Client-Info': 'nut-app/1.0',
+    'x-user-id': userId ?? '',
+    Authorization: accessToken ? `Bearer ${accessToken}` : '',
+  };
+}
+
 // Call the Replay Builder API with the specified method and params.
 //
 // If a response callback is provided, responses are expected to be newline-delimited JSON
@@ -44,8 +52,7 @@ export async function callNutAPI(
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    'x-user-id': userId ?? '',
-    Authorization: accessToken ? `Bearer ${accessToken}` : '',
+    ...nutAppHeaders(userId, accessToken),
   };
 
   const fetchOptions: RequestInit = {
@@ -105,8 +112,7 @@ async function callAPIStreamBuffer(method: string, buffer: ArrayBuffer, extraHea
   const accessToken = await getCurrentAccessToken();
 
   const headers: HeadersInit = {
-    'x-user-id': userId ?? '',
-    Authorization: accessToken ? `Bearer ${accessToken}` : '',
+    ...nutAppHeaders(userId, accessToken),
     'Content-Type': 'application/octet-stream',
     'Content-Length': buffer.byteLength.toString(),
     ...extraHeaders,
@@ -167,8 +173,7 @@ export async function downloadAttachment(attachmentId: string): Promise<ArrayBuf
   const accessToken = await getCurrentAccessToken();
 
   const headers: HeadersInit = {
-    'x-user-id': userId ?? '',
-    Authorization: accessToken ? `Bearer ${accessToken}` : '',
+    ...nutAppHeaders(userId, accessToken),
     'Content-Type': 'application/json',
   };
 
