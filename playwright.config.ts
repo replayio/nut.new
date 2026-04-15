@@ -53,4 +53,12 @@ export default defineConfig({
         stdout: 'pipe',
         stderr: 'pipe',
       },
+  projects: [
+    {
+      name: 'replay-chromium',
+      use: {
+        ...replayDevices['Replay Chromium'],
+      },
+    },
+  ],
 });
