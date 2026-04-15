@@ -1,4 +1,4 @@
-import { defineConfig, devices, type Project } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import { devices as replayDevices, replayReporter, getExecutablePath } from '@replayio/playwright';
 import dotenv from 'dotenv';
 
@@ -20,61 +20,6 @@ const replayReporters = replayApiKey
       }),
     ]
   : [];
-
-/**
- * The Replay reporter only treats a project as "Replay browser" when
- * `project.use.launchOptions.executablePath === getRuntimePath()` (see
- * `@replayio/playwright` reporter). Playwright workers receive a serialized
- * config where the stock getter-based `executablePath` can be lost, so
- * `usesReplayBrowser` stays false → no tests or recordings are uploaded (empty
- * dashboard). Force a plain string path + copy `env` so workers match.
- */
-function createReplayChromiumProject(): Project {
-  const template = replayDevices['Replay Chromium'];
-  const launchOptions = template.launchOptions;
-  /** Must match `getRuntimePath()` in the Replay reporter (same source: env override or ~/.replay/...). */
-  const executablePath =
-    process.env.REPLAY_CHROMIUM_EXECUTABLE_PATH?.trim() || getExecutablePath();
-  if (!executablePath) {
-    throw new Error('Replay Chromium is not installed. Run: pnpm exec replayio install');
-  }
-  return {
-    name: 'replay-chromium',
-    use: {
-      ...template,
-      launchOptions: {
-        env: { ...launchOptions.env },
-        executablePath,
-        // Linux CI: Replay Chromium can exit before recording without these (then dashboard shows tests but "No Replay found").
-        ...(process.env.CI
-          ? { args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'] }
-          : {}),
-      },
-    },
-  };
-}
-
-/**
- * Stock `chromium` does not write Replay recordings. In CI with a key, run only
- * `replay-chromium` so each dashboard row has a recording (after fix above).
- */
-const projects: Project[] =
-  process.env.CI && replayApiKey
-    ? [createReplayChromiumProject()]
-    : process.env.CI
-      ? [
-          {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
-          },
-        ]
-      : [
-          {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
-          },
-          ...(replayApiKey ? [createReplayChromiumProject()] : []),
-        ];
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -98,7 +43,6 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
-  projects,
   webServer: usePreviewUrl
     ? undefined
     : {
