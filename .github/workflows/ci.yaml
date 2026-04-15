@@ -221,7 +221,7 @@ jobs:
         env:
           CI: true
           REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
-          DEBUG: replayio:*,replay:*
+          DEBUG: replayio:*,replay:*,replay
 
       - name: Upload Playwright report
         if: always()
