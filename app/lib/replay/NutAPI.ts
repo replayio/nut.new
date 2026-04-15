@@ -3,9 +3,9 @@ import type { VisitData } from '~/lib/replay/SendChatMessage';
 
 type ResponseCallback = (response: any) => void;
 
-function nutAppHeaders(userId: string | null, accessToken: string | null): Record<string, string> {
+function legacyBuilderHeaders(userId: string | null, accessToken: string | null): Record<string, string> {
   return {
-    'X-Client-Info': 'nut-app/1.0',
+    'X-Client-Info': 'legacy-builder/1.0',
     'x-user-id': userId ?? '',
     Authorization: accessToken ? `Bearer ${accessToken}` : '',
   };
@@ -52,7 +52,7 @@ export async function callNutAPI(
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...nutAppHeaders(userId, accessToken),
+    ...legacyBuilderHeaders(userId, accessToken),
   };
 
   const fetchOptions: RequestInit = {
@@ -112,7 +112,7 @@ async function callAPIStreamBuffer(method: string, buffer: ArrayBuffer, extraHea
   const accessToken = await getCurrentAccessToken();
 
   const headers: HeadersInit = {
-    ...nutAppHeaders(userId, accessToken),
+    ...legacyBuilderHeaders(userId, accessToken),
     'Content-Type': 'application/octet-stream',
     'Content-Length': buffer.byteLength.toString(),
     ...extraHeaders,
@@ -173,7 +173,7 @@ export async function downloadAttachment(attachmentId: string): Promise<ArrayBuf
   const accessToken = await getCurrentAccessToken();
 
   const headers: HeadersInit = {
-    ...nutAppHeaders(userId, accessToken),
+    ...legacyBuilderHeaders(userId, accessToken),
     'Content-Type': 'application/json',
   };
 
