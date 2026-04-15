@@ -207,6 +207,9 @@ jobs:
           pnpm install --frozen-lockfile || \
           (echo "Frozen install failed, updating lockfile..." && pnpm install)
 
+      - name: Install Playwright deps
+        run: pnpm exec playwright install-deps
+
       - name: Install Replay Chromium
         run: pnpm exec replayio install
 
