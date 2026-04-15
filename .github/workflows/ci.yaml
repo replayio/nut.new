@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-   branches:
-     - main
+    branches:
+      - main
   pull_request:
 
 # Cancel in-progress runs when a new commit is pushed
@@ -16,7 +16,7 @@ concurrency:
 
 # Define Node.js version in one place
 env:
-  NODE_VERSION: "22.x"
+  NODE_VERSION: '22.x'
   PNPM_VERSION: 8
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -87,7 +87,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -136,7 +136,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -218,7 +218,7 @@ jobs:
         env:
           CI: true
           REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
-          DEBUG="replayio:*,replay:*"
+          DEBUG: replayio:*,replay:*
 
       - name: Upload Playwright report
         if: always()
