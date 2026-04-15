@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
           
       - name: Set up pnpm
         uses: pnpm/action-setup@v2
@@ -44,6 +44,13 @@ jobs:
 
       - name: Install Replay Chromium
         run: pnpm exec replayio install
+
+      - name: Export Replay Chromium executable path
+        run: |
+          P="$(node -e "const { getExecutablePath } = require('@replayio/playwright'); const p = getExecutablePath(); process.stdout.write(p || '');")"
+          if [ -z "$P" ]; then echo "No Replay Chromium path; skipping export"; exit 0; fi
+          echo "REPLAY_CHROMIUM_EXECUTABLE_PATH=$P" >> "$GITHUB_ENV"
+          test -e "$P" || { echo "Replay binary not found at $P"; exit 1; }
 
       - name: Get Vercel Preview URL
         if: ${{ github.event_name == 'deployment_status' }}

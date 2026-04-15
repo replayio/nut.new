@@ -32,7 +32,9 @@ const replayReporters = replayApiKey
 function createReplayChromiumProject(): Project {
   const template = replayDevices['Replay Chromium'];
   const launchOptions = template.launchOptions;
-  const executablePath = getExecutablePath();
+  /** Must match `getRuntimePath()` in the Replay reporter (same source: env override or ~/.replay/...). */
+  const executablePath =
+    process.env.REPLAY_CHROMIUM_EXECUTABLE_PATH?.trim() || getExecutablePath();
   if (!executablePath) {
     throw new Error('Replay Chromium is not installed. Run: pnpm exec replayio install');
   }
@@ -43,6 +45,10 @@ function createReplayChromiumProject(): Project {
       launchOptions: {
         env: { ...launchOptions.env },
         executablePath,
+        // Linux CI: Replay Chromium can exit before recording without these (then dashboard shows tests but "No Replay found").
+        ...(process.env.CI
+          ? { args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'] }
+          : {}),
       },
     },
   };

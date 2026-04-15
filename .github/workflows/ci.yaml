@@ -219,6 +219,14 @@ jobs:
       - name: Install Replay Chromium
         run: pnpm exec replayio install
 
+      # Reporter matches `executablePath === getRuntimePath()`; getRuntimePath() prefers this env var.
+      - name: Export Replay Chromium executable path
+        run: |
+          P="$(node -e "const { getExecutablePath } = require('@replayio/playwright'); const p = getExecutablePath(); process.stdout.write(p || '');")"
+          if [ -z "$P" ]; then echo "No Replay Chromium path; skipping export"; exit 0; fi
+          echo "REPLAY_CHROMIUM_EXECUTABLE_PATH=$P" >> "$GITHUB_ENV"
+          test -e "$P" || { echo "Replay binary not found at $P"; exit 1; }
+
       - name: Prepare .env for dev server
         run: cp .env.example .env
 
