@@ -38,8 +38,8 @@ export default defineConfig({
   use: {
     baseURL,
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: process.env.CI ? 'retain-on-failure' : 'off',
+    // screenshot: 'only-on-failure',
+    // video: process.env.CI ? 'retain-on-failure' : 'off',
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
