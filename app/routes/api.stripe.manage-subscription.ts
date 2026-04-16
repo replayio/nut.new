@@ -1,10 +1,6 @@
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-
-// Initialize Stripe with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-});
+import { getStripeClient } from '~/lib/.server/stripeClient';
 
 // Helper function to get valid price IDs
 function getValidPriceIds(): Set<string> {
@@ -30,7 +26,7 @@ async function findCustomerWithValidSubscription(
 
   // Check customers in parallel batches to improve performance
   const checkCustomer = async (cust: Stripe.Customer) => {
-    const subscriptions = await stripe.subscriptions.list({
+    const subscriptions = await getStripeClient()!.subscriptions.list({
       customer: cust.id,
       status: 'active',
       limit: 10,
@@ -91,6 +87,13 @@ export async function action({ request }: { request: Request }) {
     });
   }
 
+  if (!getStripeClient()) {
+    return new Response(JSON.stringify({ error: 'Subscription management is not configured.' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // 🔒 SECURITY: Authenticate the user
   const user = await getAuthenticatedUser(request);
   if (!user || !user.email) {
@@ -137,7 +140,7 @@ export async function action({ request }: { request: Request }) {
 async function handleCancelSubscription(userEmail: string, userId: string, immediate: boolean = false) {
   try {
     // Find ALL customers by email (handle edge case of duplicate emails)
-    const customers = await stripe.customers.list({
+    const customers = await getStripeClient()!.customers.list({
       email: userEmail,
       limit: 100,
     });
@@ -165,12 +168,12 @@ async function handleCancelSubscription(userEmail: string, userId: string, immed
 
     if (immediate) {
       // Cancel immediately (this will trigger webhook events)
-      await stripe.subscriptions.cancel(subscription.id);
+      await getStripeClient()!.subscriptions.cancel(subscription.id);
 
       message = 'Subscription canceled immediately';
     } else {
       // Cancel at period end (this will trigger webhook events)
-      await stripe.subscriptions.update(subscription.id, {
+      await getStripeClient()!.subscriptions.update(subscription.id, {
         cancel_at_period_end: true,
       });
       message = 'Subscription will cancel at the end of current billing period';
@@ -199,7 +202,7 @@ async function handleCancelSubscription(userEmail: string, userId: string, immed
 async function handleGetSubscriptionStatus(userEmail: string) {
   try {
     // Find ALL customers by email (handle edge case of duplicate emails)
-    const customers = await stripe.customers.list({
+    const customers = await getStripeClient()!.customers.list({
       email: userEmail,
       limit: 100, // Get all customers with this email
     });
@@ -285,7 +288,7 @@ async function handleGetSubscriptionStatus(userEmail: string) {
 
 async function handleManageBilling(userEmail: string, targetUrl: string) {
   // Find ALL customers by email (handle edge case of duplicate emails)
-  const customers = await stripe.customers.list({
+  const customers = await getStripeClient()!.customers.list({
     email: userEmail,
     limit: 100,
   });
@@ -301,7 +304,7 @@ async function handleManageBilling(userEmail: string, targetUrl: string) {
   const result = await findCustomerWithValidSubscription(customers.data);
   const customer = result?.customer || customers.data[0];
 
-  const portalSession = await stripe.billingPortal.sessions.create({
+  const portalSession = await getStripeClient()!.billingPortal.sessions.create({
     customer: customer.id,
     return_url: targetUrl,
   });
@@ -314,7 +317,7 @@ async function handleManageBilling(userEmail: string, targetUrl: string) {
 
 async function handleManageSubscription(userEmail: string, targetUrl: string) {
   // Find ALL customers by email (handle edge case of duplicate emails)
-  const customers = await stripe.customers.list({
+  const customers = await getStripeClient()!.customers.list({
     email: userEmail,
     limit: 100,
   });
@@ -338,7 +341,7 @@ async function handleManageSubscription(userEmail: string, targetUrl: string) {
 
   const { customer, subscription } = result;
 
-  const portalSession = await stripe.billingPortal.sessions.create({
+  const portalSession = await getStripeClient()!.billingPortal.sessions.create({
     customer: customer.id,
     return_url: targetUrl,
     flow_data: {
