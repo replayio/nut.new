@@ -169,7 +169,7 @@ jobs:
 
   e2e:
     name: E2E (Playwright)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Checkout
@@ -212,6 +212,11 @@ jobs:
 
       - name: Install Replay Chromium
         run: pnpm exec replayio install
+        env: 
+          RECORD_REPLAY_CHROMIUM_DOWNLOAD_FILE: linux-chromium-20260416-95c6685a0f12-6839a25e2468-dev.tar.xz
+
+      - name: Replay Chromium Info
+        run: pnpm exec replayio info
 
       - name: Prepare .env for dev server
         run: cp .env.example .env
