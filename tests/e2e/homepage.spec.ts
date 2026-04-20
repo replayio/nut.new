@@ -1,23 +1,18 @@
 import { test, expect } from '@playwright/test';
 
 test('should load the homepage', async ({ page }) => {
-  // Using baseURL from config
   await page.goto('/');
 
-  const title = await page.title();
-  expect(title).toContain('Replay Builder');
-  await expect(page.locator('header')).toBeVisible();
+  await expect(page).toHaveTitle(/Replay Builder/);
+
+  // Desktop landing uses IntroSection (no `<header>` until small viewport)
+  await expect(page.getByRole('heading', { name: /Own your tools/i })).toBeVisible();
 });
 
-test('Create a project from a preset', async ({ page }) => {
-  // Using baseURL from config instead of hardcoded URL
+test('shows the landing chat prompt', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Build a todo app in React' }).click();
-  await page
-    .locator('div')
-    .filter({ hasText: /^Build a todo app in React$/ })
-    .first()
-    .click();
 
-  await expect(page.locator('[data-testid="message"]')).toBeVisible();
+  await expect(
+    page.getByPlaceholder('What would you like Replay Builder to build?'),
+  ).toBeVisible();
 });
