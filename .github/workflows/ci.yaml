@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-   branches:
-     - main
+    branches:
+      - main
   pull_request:
 
 # Cancel in-progress runs when a new commit is pushed
@@ -16,7 +16,7 @@ concurrency:
 
 # Define Node.js version in one place
 env:
-  NODE_VERSION: "22.x"
+  NODE_VERSION: '22.x'
   PNPM_VERSION: 8
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -87,7 +87,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -136,7 +136,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       # Use PNPM store cache to improve performance
       - name: PNPM store cache
         uses: actions/cache@v4
@@ -166,3 +166,80 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: PNPM store cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile || \
+          (echo "Frozen install failed, updating lockfile..." && pnpm install)
+
+      - name: Install Playwright deps
+        run: pnpm exec playwright install-deps
+
+      - name: Install Replay Chromium
+        run: pnpm exec replayio install
+        env: 
+          RECORD_REPLAY_CHROMIUM_DOWNLOAD_FILE: linux-chromium-20260416-95c6685a0f12-6839a25e2468-dev.tar.xz
+
+      - name: Replay Chromium Info
+        run: pnpm exec replayio info
+
+      - name: Prepare .env for dev server
+        run: cp .env.example .env
+
+      - name: Run Playwright tests
+        run: pnpm test:e2e
+        env:
+          CI: true
+          REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
+          DEBUG: replayio:*,replay:*,replay,pw:browser
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Playwright traces (failures)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7
