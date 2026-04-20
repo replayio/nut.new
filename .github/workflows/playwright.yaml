@@ -1,62 +1,70 @@
 name: Playwright Tests
 
+# Run Playwright + Replay against Vercel preview deployments.
+# See https://docs.replay.io/reference/test-runners/playwright/github-actions
 on:
   deployment_status:
-
 
 # Cancel in-progress runs when a new deployment status event is received
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.deployment.environment || github.ref }}
   cancel-in-progress: true
 
-# Define Node.js version in one place
 env:
   NODE_VERSION: "22.x"
-  PNPM_VERSION: 8
+  # Aligned with package.json "packageManager": "pnpm@9.4.0"
+  PNPM_VERSION: "9.4.0"
 
 jobs:
   test:
     name: 'Playwright Tests'
     runs-on: ubuntu-latest
+    # Only run on successful Vercel preview deployments
     if: ${{ github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' }}
-    
+
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Set up pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.4.0
-          
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Install dependencies
-        run: pnpm install 
-      
+        run: pnpm install --frozen-lockfile
+
       - name: Install Vercel CLI
         run: pnpm install -g vercel@latest
 
-      - name: Install Playwright browsers
-        run: pnpm playwright install chromium
-      
+      # Replay Chromium is what the replay-chromium project launches.
+      # https://docs.replay.io/reference/test-runners/playwright/github-actions
+      - name: Install Replay Chromium
+        run: pnpm exec replayio install
+
       - name: Get Vercel Preview URL
-        if: ${{ github.event_name == 'deployment_status' }}
         run: |
           echo "PLAYWRIGHT_TEST_BASE_URL=${{ github.event.deployment_status.target_url }}" >> $GITHUB_ENV
           echo "Testing against Vercel Preview URL: ${{ github.event.deployment_status.target_url }}"
 
-      - name: Run Playwright tests 
-        run: pnpm test:e2e
+      # Reporter (+ upload) comes from playwright.config.ts via replayReporter(),
+      # so no separate upload step is needed here.
+      - name: Run Playwright tests
+        run: pnpm exec playwright test --project=replay-chromium
         env:
+          CI: "true"
+          REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
           NUT_LOGIN_KEY: ${{ secrets.NUT_LOGIN_KEY }}
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
-      - name: Upload test results
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -64,13 +72,15 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Deploy playwright report to Vercel
+      - name: Deploy Playwright report to Vercel
         if: always()
         run: |
           cd playwright-report
           vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }}
 
+      # --- Second run against a Supabase-targeted deployment ---
+      # Some tests need the Supabase-enabled target; deploy it and re-run.
 
       - name: Deploy to Vercel with Supabase Target
         id: deploy
@@ -83,11 +93,9 @@ jobs:
       - name: Wait for deployment to be ready
         run: |
           echo "Waiting for deployment to be fully available..."
-          # Simple check to see if the URL is accessible
-          timeout=300  # 5 minutes timeout
-          interval=10  # Check every 10 seconds
+          timeout=300
+          interval=10
           elapsed=0
-          
           until curl -s --head --fail "${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}" > /dev/null; do
             if [ $elapsed -ge $timeout ]; then
               echo "Timeout waiting for deployment to be available"
@@ -97,22 +105,23 @@ jobs:
             sleep $interval
             elapsed=$((elapsed + interval))
           done
-          
           echo "Deployment is now available!"
-          # Additional wait to ensure everything is fully loaded
           sleep 10
 
-      # Run Playwright tests against the newly deployed URL
+      # Do NOT pass `--reporter=html` alone: that replaces the config's
+      # reporters (including replayReporter) and would skip uploads.
       - name: Run Playwright tests against Supabase deployment
-        run: pnpm run test:e2e --reporter=html 
+        run: pnpm exec playwright test --project=replay-chromium
         env:
+          CI: "true"
+          REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.WITH_SUPABASE_PREVIEW_URL }}
           SUPABASE_TEST_USER_EMAIL: ${{ secrets.SUPABASE_TEST_USER_EMAIL }}
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
           NUT_LOGIN_KEY: ${{ secrets.NUT_LOGIN_KEY }}
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
 
-      - name: Upload test results
+      - name: Upload Playwright HTML report (Supabase run)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -120,10 +129,9 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Deploy Supabase playwright report to Vercel
+      - name: Deploy Supabase Playwright report to Vercel
         if: always()
         run: |
           cd playwright-report
           vercel link --project playwright-reports --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }}
-

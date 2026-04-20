@@ -14,10 +14,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Define Node.js version in one place
+# Define Node.js / pnpm versions in one place
+# Aligned with package.json "packageManager": "pnpm@9.4.0"
 env:
   NODE_VERSION: "22.x"
-  PNPM_VERSION: 8
+  PNPM_VERSION: "9.4.0"
 
 jobs:
   typecheck:
