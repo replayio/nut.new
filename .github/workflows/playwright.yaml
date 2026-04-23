@@ -39,8 +39,8 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm install -g vercel@latest
 
-      - name: Install Playwright browsers
-        run: pnpm playwright install chromium
+      - name: Install Replay Chromium
+        run: npx replayio install
       
       - name: Get Vercel Preview URL
         if: ${{ github.event_name == 'deployment_status' }}
@@ -55,6 +55,7 @@ jobs:
           SUPABASE_TEST_USER_PASSWORD: ${{ secrets.SUPABASE_TEST_USER_PASSWORD }}
           NUT_LOGIN_KEY: ${{ secrets.NUT_LOGIN_KEY }}
           NUT_PASSWORD: ${{ secrets.NUT_PASSWORD }}
+          REPLAY_API_KEY: ${{ secrets.REPLAY_API_KEY }}
 
       - name: Upload test results
         if: always()
