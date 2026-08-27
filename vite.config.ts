@@ -1,10 +1,11 @@
 import { vitePlugin as remixVitePlugin } from '@remix-run/dev';
 import { vercelPreset } from '@vercel/remix/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { optimizeCssModules } from 'vite-plugin-optimize-css-modules';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import * as dotenv from 'dotenv';
 import { execSync } from 'child_process';
+import { isRetiredResourcePath } from './app/lib/shutdown';
 
 dotenv.config();
 
@@ -16,6 +17,31 @@ const getGitHash = () => {
     return 'no-git-info';
   }
 };
+
+function shutdownGatePlugin(): Plugin {
+  return {
+    name: 'shutdown-gate',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const pathname = (req.url ?? '/').split('?')[0] ?? '/';
+        if (!isRetiredResourcePath(pathname)) {
+          next();
+          return;
+        }
+
+        res.statusCode = 410;
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(
+          JSON.stringify({
+            error: 'gone',
+            message: 'Replay Builder has shut down. Visit https://www.replay.io/',
+          }),
+        );
+      });
+    },
+  };
+}
 
 export default defineConfig((config) => {
   return {
@@ -33,6 +59,7 @@ export default defineConfig((config) => {
       noExternal: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
     },
     plugins: [
+      shutdownGatePlugin(),
       remixVitePlugin({
         future: {
           v3_fetcherPersist: true,

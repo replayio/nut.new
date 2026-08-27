@@ -1,23 +1,19 @@
 import { test, expect } from '@playwright/test';
 
-test('should load the homepage', async ({ page }) => {
-  // Using baseURL from config
+test('should show Builder shutdown announcement', async ({ page }) => {
   await page.goto('/');
 
-  const title = await page.title();
-  expect(title).toContain('Replay Builder');
-  await expect(page.locator('header')).toBeVisible();
+  await expect(page).toHaveTitle(/shut down/i);
+  await expect(page.getByTestId('shutdown-announcement')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Replay QA' })).toHaveAttribute('href', 'https://www.replay.io/');
+  await expect(page.getByRole('link', { name: 'let us know' })).toHaveAttribute(
+    'href',
+    'https://www.replay.io/contact',
+  );
 });
 
-test('Create a project from a preset', async ({ page }) => {
-  // Using baseURL from config instead of hardcoded URL
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Build a todo app in React' }).click();
-  await page
-    .locator('div')
-    .filter({ hasText: /^Build a todo app in React$/ })
-    .first()
-    .click();
+test('app deep links also show shutdown announcement', async ({ page }) => {
+  await page.goto('/app/33a33c71-c5b4-4fa1-9286-333fefc49803');
 
-  await expect(page.locator('[data-testid="message"]')).toBeVisible();
+  await expect(page.getByTestId('shutdown-announcement')).toBeVisible();
 });
