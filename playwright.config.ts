@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { devices as replayDevices, replayReporter } from "@replayio/playwright";
 import dotenv from 'dotenv';
 
 if (!process.env.CI) {
@@ -15,16 +16,22 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: 'html',
   timeout: 60000, // Increase global timeout to 60 seconds
   use: {
     baseURL,
     trace: 'on',
   },
+  reporter: [
+    replayReporter({
+      apiKey: process.env.REPLAY_API_KEY,
+      upload: true,
+    }),
+    ["line", "html"],
+  ],
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "replay-chromium",
+      use: { ...replayDevices["Replay Chromium"] },
     },
   ],
   webServer: usePreviewUrl
